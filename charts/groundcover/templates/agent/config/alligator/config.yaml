@@ -98,6 +98,15 @@ data:
 
     obfuscateData: {{ .Values.agent.alligator.obfuscateData }}
     dataRetention: {{ .Values.agent.alligator.dataRetention }}
+    
+    runningNamespace: ""
+    shouldDropRunningNamespaces: {{ .Values.agent.alligator.shouldDropRunningNamespaces }}
+    filteredNamespaces: {{ toYaml .Values.agent.alligator.filteredNamespaces | nindent 6 }}
+
+    promscalestorage:
+      host: groundcover-promscale-connector
+      port: 9202
+
 kind: ConfigMap
 metadata:
   labels:

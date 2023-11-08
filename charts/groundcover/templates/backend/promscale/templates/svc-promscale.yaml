@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "promscale.fullname" . | trunc 53 }}-connector
+  namespace: {{ template "promscale.namespace" . }}
+  labels:
+    app: {{ template "promscale.fullname" . }}
+    chart: {{ template "promscale.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    app.kubernetes.io/name: "promscale-connector"
+    app.kubernetes.io/part-of: "promscale-connector"
+    app.kubernetes.io/component: "connector"
+  {{- if .Values.promscale.service.annotations }}
+  annotations:
+    {{- .Values.promscale.service.annotations | toYaml | nindent 4 }}
+  {{- end }}
+spec:
+  selector:
+    app: {{ template "promscale.fullname" . }}
+  type: {{ .Values.promscale.service.type }}
+  ports:
+  - name: metrics-port
+    port: {{ .Values.promscale.prometheus.port }}
+    targetPort: metrics-port
+    protocol: TCP
+  {{- if .Values.promscale.openTelemetry.enabled }}
+  - name: otel-port
+    port: {{ .Values.promscale.openTelemetry.port }}
+    targetPort: otel-port
+    protocol: TCP
+  {{- end }}

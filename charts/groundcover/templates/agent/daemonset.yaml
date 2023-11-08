@@ -71,6 +71,9 @@ spec:
                 secretKeyRef:
                   key: {{ template "groundcover.apikeySecretKey" . }}
                   name: {{ template "groundcover.apikeySecretName" . }}
+          envFrom:
+            - secretRef:
+                name: groundcover-config
           ports:
             - containerPort: 2020
               name: flb-metrics
@@ -109,7 +112,11 @@ spec:
             - name: NODE_NAME
               valueFrom:
                 fieldRef:
-                  fieldPath: spec.nodeName
+                  fieldPath: spec.nodeName              
+            - name: GC_RUNNINGNAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
           image: {{ .Values.origin.registry }}/{{ .Values.agent.alligator.repository }}:{{ .Values.origin.tag }}
           resources:
 {{- toYaml .Values.agent.alligator.resources | nindent 12 }}
@@ -221,6 +228,7 @@ spec:
       hostNetwork: false
       hostPID: true
       initContainers:
+{{ if .Values.agent.fetchLinuxHeaders.enabled }}
         - image:  {{ .Values.origin.registry }}/{{ .Values.agent.fetchLinuxHeaders.repository }}:{{ .Values.origin.tag }}
           name: fetch-linux-headers
           volumeMounts:
@@ -229,6 +237,7 @@ spec:
               readOnly: true
             - mountPath: /linux-headers
               name: linux-headers
+{{- end }}
         - command:
             - bash
             - -c
@@ -248,7 +257,7 @@ spec:
           image: postgres:9.6.5
           name: check-ts-ready
         - args:
-            - while [ $(curl -sw '%{http_code}' http://groundcover-victoria-metrics:8428/health -o /dev/null) -ne 200 ]; do echo 'Waiting for VictoriaMetrics...'; sleep 2; done; echo VictoriaMetrics is up
+              - while [ $(curl -sw '%{http_code}' http://groundcover-victoria-metrics:8428/health -o /dev/null) -ne 200 ]; do echo 'Waiting for VictoriaMetrics...'; sleep 2; done; echo VictoriaMetrics is up
           command:
             - /bin/sh
             - -c

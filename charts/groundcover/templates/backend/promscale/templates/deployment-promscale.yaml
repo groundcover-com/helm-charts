@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "promscale.fullname" . }}
+  namespace: {{ template "promscale.namespace" . }}
+  labels:
+    app: {{ template "promscale.fullname" . }}
+    chart: {{ template "promscale.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    app.kubernetes.io/name: "promscale-connector"
+    app.kubernetes.io/part-of: "promscale-connector"
+    app.kubernetes.io/component: "connector"
+spec:
+  replicas: {{ .Values.promscale.replicaCount }}
+  strategy:
+    type: {{ .Values.promscale.upgradeStrategy }}
+  selector:
+    matchLabels:
+      app: {{ template "promscale.fullname" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "promscale.fullname" . }}
+        chart: {{ template "promscale.chart" . }}
+        release: {{ .Release.Name }}
+        app.kubernetes.io/name: "promscale-connector"
+        app.kubernetes.io/part-of: "promscale-connector"
+        app.kubernetes.io/component: "connector"
+      annotations: 
+        checksum/config: {{ printf "%s" .Values.promscale.connection | sha256sum -}}
+        {{- if .Values.promscale.prometheus.annotations }}
+        {{- .Values.promscale.prometheus.annotations | toYaml | nindent 8 }}
+        {{- end }}
+    spec:
+      initContainers:
+        {{- toYaml .Values.promscale.initContainers | nindent 8 }}
+      containers:
+        - image: {{ .Values.origin.registry }}/{{ .Values.promscale.repository }}:{{ .Values.origin.tag }}
+          imagePullPolicy: {{ .Values.promscale.imagePullPolicy }}
+          name: promscale-connector
+          {{- if or (.Values.promscale.openTelemetry.enabled) (.Values.promscale.extraArgs) }}
+          args:
+          {{- if .Values.promscale.openTelemetry.enabled }}
+          - --enable-feature=tracing
+          - --otlp-grpc-server-listen-address=:9202
+          {{- end }}
+          {{- with .Values.promscale.extraArgs }}
+          {{ toYaml . | nindent 10 }}
+          {{- end }}
+          {{- end }}
+          env:
+            - name: PROMSCALE_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: PATRONI_SUPERUSER_PASSWORD
+                  name: {{ index .Values "timescaledb-single" "secrets" "credentialsSecretName" | default "groundcover-tsdb-credentials" }}
+          {{- if .Values.promscale.extraEnv }}
+            {{- range $.Values.promscale.extraEnv }}
+            - name: {{ .name }}
+              value: {{ tpl (.value | quote) $ }}
+            {{- end }}
+          {{- end }}
+          envFrom:
+          - secretRef:
+              {{- $secretName := ternary (include "promscale.fullname" .) .Values.promscale.connectionSecretName (eq .Values.promscale.connectionSecretName "") }}
+              name: {{ tpl $secretName . }}
+          {{- if .Values.promscale.resources }}
+          resources:
+            {{- toYaml .Values.promscale.resources | nindent 12 }}
+          {{- end }}
+          ports:
+            - containerPort: 9201
+              name: metrics-port
+          {{- if .Values.promscale.openTelemetry.enabled }}
+            - containerPort: 9202
+              name: otel-port
+          {{- end }}
+      serviceAccountName: {{ template "promscale.fullname" . }}
+      {{- with .Values.promscale.nodeSelector }}
+      nodeSelector:
+      {{ toYaml . | indent 2 }}
+      {{- end }}
+      {{- with .Values.promscale.tolerations }}
+      tolerations: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.promscale.affinity }}
+      affinity: {{ toYaml . | nindent 8 }}
+      {{- end }}

@@ -32,7 +32,7 @@ data:
         insecure_skip_verify {{ .Values.saas.tls_skip_verify }}
         BatchWait 1
         BatchSize 1048576
-        Labels {job="fluent-bit", version="{{ .Values.origin.tag }}", cluster_id="{{ template "groundcover.clusterId" . }}", region="{{ .Values.region }}" }
+        Labels {job="fluent-bit", version="{{ .Values.origin.tag }}", cluster_id="${GC_CLUSTER_ID}", region="${GC_REGION}" }
         RemoveKeys kubernetes,stream
         AutoKubernetesLabels false
         LabelMapPath /fluent-bit/etc/labelmap.json

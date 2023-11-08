@@ -56,7 +56,9 @@ spec:
           args:
             - -promscrape.config=/config/scrape.yml
             - -remoteWrite.tmpDataPath=/tmpData
-            - -remoteWrite.label=clusterId={{ include "groundcover.clusterId" . }}
+            - -remoteWrite.label=clusterId=$(GC_CLUSTER_ID)
+            - -remoteWrite.label=region=$(GC_REGION)
+            - -remoteWrite.label=groudcover_version=$(GC_VERSION)
           {{- range .Values.remoteWriteUrls }}
             - -remoteWrite.url={{ . }}
           {{- end }}

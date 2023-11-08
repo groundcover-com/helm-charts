@@ -65,7 +65,7 @@ Create the name of the service account to use
 Get cluster_id from values or generate random one
 */}}
 {{- define "groundcover.clusterId" -}}
-{{- .Values.clusterId | default (randAlphaNum 7) }}
+{{- .Values.clusterId | default (printf "%s-%s" "Cluster" (randAlphaNum 7)) }}
 {{- end }}
 
 {{- define "grafana.name" -}}
@@ -78,4 +78,42 @@ Get cluster_id from values or generate random one
 
 {{- define "groundcover.apikeySecretKey" -}}
 {{- default "API_KEY" .Values.global.groundcoverPredefinedTokenSecret.secretKey -}}
+{{- end -}}
+
+
+{{/*
+Create a default fully qualified app name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+If release name contains chart name it will be used as a full name.
+*/}}
+{{- define "promscale.fullname" -}}
+{{- if .Values.promscale.fullnameOverride -}}
+{{- .Values.promscale.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- $name := default .Chart.Name .Values.promscale.nameOverride -}}
+{{- if contains $name .Release.Name -}}
+{{- .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Create chart name and version as used by the chart label.
+*/}}
+{{- define "promscale.chart" -}}
+{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+
+{{/*
+Allow the release namespace to be overridden
+*/}}
+{{- define "promscale.namespace" -}}
+  {{- if .Values.promscale.namespaceOverride -}}
+    {{- .Values.promscale.namespaceOverride -}}
+  {{- else -}}
+    {{- .Release.Namespace -}}
+  {{- end -}}
 {{- end -}}

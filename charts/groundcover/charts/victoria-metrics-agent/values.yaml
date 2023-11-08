@@ -81,12 +81,21 @@ extraArgs:
 
 # -- Additional environment variables (ex.: secret tokens, flags) https://github.com/VictoriaMetrics/VictoriaMetrics#environment-variables
 env:
-  []
-  # - name: VM_remoteWrite_basicAuth_password
-  #   valueFrom:
-  #     secretKeyRef:
-  #       name: auth_secret
-  #       key: password
+  - name: GC_CLUSTER_ID
+    valueFrom:
+      secretKeyRef:
+        name: groundcover-config
+        key: GC_CLUSTER_ID
+  - name: GC_REGION
+    valueFrom:
+      secretKeyRef:
+        name: groundcover-config
+        key: GC_REGION
+  - name: GC_VERSION
+    valueFrom:
+      secretKeyRef:
+        name: groundcover-config
+        key: GC_VERSION
 
 # extra Labels for Pods, Deployment and Statefulset
 extraLabels: {}
@@ -279,8 +288,6 @@ config:
           target_label: kubernetes_pod_name
         - source_labels: [__meta_kubernetes_pod_name]
           target_label: instance
-        - source_labels: [__meta_kubernetes_pod_annotation_groundcover_version]
-          target_label: groundcover_version
       ## End of COPY
 
 # -- Extra scrape configs that will be appended to `config`

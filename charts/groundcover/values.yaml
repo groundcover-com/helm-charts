@@ -37,7 +37,7 @@ region:
 
 origin:
   registry: public.ecr.aws/k8g4n2c4
-  tag: 0.28.2
+  tag: 0.28.3
 
 pullSecrets: []
 
@@ -61,6 +61,8 @@ agent:
         cpu: 500m
     obfuscateData: false
     dataRetention: 2h
+    shouldDropRunningNamespaces: true
+    filteredNamespaces: []
   tracy:
     repository: tracy
     resources:
@@ -89,6 +91,7 @@ agent:
         memory: 64Mi
         
   fetchLinuxHeaders:
+    enabled: false
     repository: fetch-linux-headers
 
 migrator:
@@ -187,7 +190,7 @@ router:
   repository: router
   origin:
     registry: public.ecr.aws/k8g4n2c4
-    tag: 0.28.2
+    tag: 0.28.3
   versionDb:
     host: 
     port: 
@@ -310,11 +313,129 @@ victoria-metrics-single:
     # -- Pod affinity
     affinity: {}
 
+promscale:
+  repository: promscale
+  nameOverride: groundcover-promscale
+  fullnameOverride: groundcover-promscale
+
+  imagePullPolicy: IfNotPresent
+  # number of connector pods to spawn
+  replicaCount: 1
+
+  # Override the deployment namespace
+  namespaceOverride: ""
+
+  # Promscale deployment upgrade strategy
+  # as Promscale upgrade requires no existing Promscale
+  # connected with TimescaleDB. Recreate strategy helps
+  # scale down to 0 and recreate the new version.
+  upgradeStrategy: Recreate
+
+
+  # Arguments that will be passed onto deployment pods
+  # The list of available cli flags is available at
+  # https://github.com/timescale/promscale/blob/master/docs/cli.md
+
+  # For example, to activate HA, bump the replicaCount and set those arguments (also, make sure that external labels are configured on the Prometheus side):
+  # - --high-availabiliity=1
+  # More info about HA: https://github.com/timescale/promscale/blob/master/docs/high-avaliability/prometheus-HA.md
+  extraArgs: []
+
+  # Environment variables that will be passed onto deployment pods
+  extraEnv: [
+    
+  ]
+
+  # Currently OpenTelemetry tracing support is in beta
+  # so tracing features needs to be explicitly enabled.
+  openTelemetry:
+    # OpenTelemetry tracing is only enabled if below field is configured true
+    enabled: true
+    port: 9202
+
+  # selector used to provision your own Secret containing connection details
+  # Use this option with caution
+  connectionSecretName: ""
+
+  # connection options to connect to a target db
+  connection:
+    # Database connection settings. If `uri` is not
+    # set then the specific user, pass, host, port and
+    # sslMode properties are used.
+    uri: ""
+    # user used to connect to TimescaleDB
+    user: postgres
+    password: ""
+    host: "groundcover-tsdb"
+    port: 5432
+    sslMode: require
+    # database name in which to store the metrics
+    # must be created before start
+    dbName: postgres
+
+  # Enable ServiceMonitor used by prometheus-operator to configure prometheus for metrics scraping
+  serviceMonitor:
+    enabled: false
+
+  # Prometheus annotations to configure scraping metrics from the connector
+  prometheus:
+    port: 9201
+    # Using the predefined annotations from the Prometheus helm chart:
+    # https://hub.helm.sh/charts/stable/prometheus
+    annotations:
+      prometheus.io/scrape: 'true'
+      prometheus.io/port: '9201'
+      prometheus.io/path: '/metrics'
+
+  # settings for the service to be created that will expose
+  # the promscale deployment
+  service:
+    type: "ClusterIP"
+    # Read more about the AWS annotations here:
+    # https://kubernetes.io/docs/concepts/cluster-administration/cloud-providers/#aws
+    # https://docs.aws.amazon.com/eks/latest/userguide/load-balancing.html
+    annotations: {}
+      # Setting idle-timeout to the maximum allowed value
+      # service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "4000"
+      # service.beta.kubernetes.io/aws-load-balancer-type: nlb            # Use an NLB instead of ELB
+      # service.beta.kubernetes.io/aws-load-balancer-internal: 0.0.0.0/0  # Internal Load Balancer
+
+  # set your own limits
+  resources:
+    requests:
+      cpu: 250m
+      memory: 200Mi
+    limits:
+      cpu: 500m
+      memory: 250Mi
+
+  # https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+  nodeSelector: {}
+
+  # https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  tolerations: []
+
+  # https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
+  affinity: {}
+
+  initContainers: 
+    - name: check-ts-ready
+      image: postgres:9.6.5
+      command:
+        - sh
+        - -c
+        - until pg_isready -h groundcover-tsdb -p 5432; do echo Waiting for
+          TimescaleDB...; sleep 2; done; echo TimescaleDB is up
+
 rbac:
   labels:
   annotations:
 
 apikey:
+  labels:
+  annotations:
+
+config:
   labels:
   annotations:
 
