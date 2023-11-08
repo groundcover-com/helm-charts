@@ -1,0 +1,34 @@
+{{- if .Values.onprem.enabled -}}
+---
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: key-auth
+  labels:
+    {{- include "router.labels" . | nindent 4 }}
+config:
+  key_names:
+    - apikey
+    - X-ClickHouse-Key
+  key_in_body: false
+  key_in_header: true
+  key_in_query: true
+  hide_credentials: false
+  run_on_preflight: true
+plugin: key-auth
+---
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: clickhouse-ds-rewrite
+  labels:
+    {{- include "router.labels" . | nindent 4 }}
+config:
+  replace:
+    uri: /datasources/clickhouse
+  remove:
+    headers:
+      - "X-ClickHouse-Key"
+      - "X-ClickHouse-User"
+plugin: request-transformer
+{{- end -}}

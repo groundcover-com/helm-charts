@@ -7,3 +7,7 @@
     {{- printf "%s:5432" (include "postgresql.primary.fullname" .) -}}
 {{- end -}}
 {{- end -}}
+
+{{- define "postgresql.image" -}}
+{{- printf "%s/%s:%s" .Values.global.postgresql.image.registry .Values.global.postgresql.image.repository .Values.global.postgresql.image.tag -}}
+{{- end -}}

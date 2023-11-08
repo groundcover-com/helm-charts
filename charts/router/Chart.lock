@@ -5,5 +5,8 @@ dependencies:
 - name: grafana
   repository: https://grafana.github.io/helm-charts
   version: 6.58.6
-digest: sha256:398a21a00bd891092bcbece8a68c92727f6596d41c89072a08b4899cb32cf77c
-generated: "2023-08-08T12:57:49.249079964Z"
+- name: kong
+  repository: https://charts.konghq.com
+  version: 2.20.0
+digest: sha256:488b57d23e594ab68050130d913928d855b1f8bcca8d3dc205e88b739e6e1f48
+generated: "2023-10-22T10:02:50.233797639Z"

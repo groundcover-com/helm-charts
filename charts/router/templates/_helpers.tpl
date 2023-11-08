@@ -40,6 +40,13 @@ helm.sh/chart: {{ include "router.chart" . }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+app.kubernetes.io/part-of: groundcover
+{{ with .Values.additionalLabels }} 
+{{- toYaml . -}}
+{{- end }}
+{{ with .Values.global.groundcoverLabels }} 
+{{- toYaml . -}}
+{{- end }}
 {{- end }}
 
 {{/*
@@ -63,4 +70,20 @@ Create the name of the service account to use
 
 {{- define "router.imagePullSecrets" -}}
 {{- .Values.imagePullSecrets | toJson -}}
+{{- end -}}
+
+{{- define "router.service.name" -}}
+{{ print "router" }}
+{{- end -}}
+
+{{- define "router.proxy.service.name" -}}
+{{ print "router-proxy" }}
+{{- end -}}
+
+{{- define "router.ws.url" -}}
+{{ printf "ws://%s.%s.svc.cluster.local" (include "router.proxy.service.name" .) .Release.Namespace }}
+{{- end -}}
+
+{{- define "router.ds.url" -}}
+{{ printf "https://%s.%s.svc.cluster.local" (include "router.proxy.service.name" .) .Release.Namespace }}
 {{- end -}}
