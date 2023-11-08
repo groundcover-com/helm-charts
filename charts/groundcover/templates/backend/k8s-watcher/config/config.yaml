@@ -4,6 +4,8 @@ data:
   config.yaml: |
     LogLevel: 4
     resourceconntimeout: 1m0s
+    concurrency: 10
+    productchansize: 20480
 
     VictoriaMetrics:
       URL: "{{ template "vmagent.url" . }}"

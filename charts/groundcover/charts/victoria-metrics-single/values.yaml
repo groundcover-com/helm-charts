@@ -56,9 +56,9 @@ server:
     envflag.prefix: VM_
     loggerFormat: json
     search.maxUniqueTimeseries: "2000000"
-    search.maxSeries: "100000"
+    search.maxSeries: "500000"
     search.maxTagKeys: "200000"
-    search.maxTagValues: "200000"
+    search.maxTagValues: "500000"
     maxLabelsPerTimeseries: "50"
 
   # Additional hostPath mounts

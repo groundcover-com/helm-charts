@@ -18,8 +18,18 @@
       },
       {
         "datasource": "groundcover",
+        "enable": false,
+        "expr": "changes(groundcover_resource_total_counter{type=\"deployment_event\",deployment_event_type=~\"ScaleUp|ScaleDown\",namespace='$namespace'} > 0)",
+        "iconColor": "semi-dark-green",
+        "name": "Deployment Scale Events",
+        "rawQuery": "SELECT\n  extract(epoch from time_column) AS time,\n  text_column as text,\n  tags_column as tags\nFROM\n  metric_table\nWHERE\n  $__timeFilter(time_column)\n",
+        "step": "10s",
+        "tagKeys": "workload_name,namespace,deployment_name,deployment_event_type"
+      },
+      {
+        "datasource": "groundcover",
         "enable": true,
-        "expr": "changes(groundcover_resource_total_counter{type=\"deployment_event\",namespace='$namespace', workload_name='$workload'} > 0)",
+        "expr": "changes(groundcover_resource_total_counter{type=\"deployment_event\",deployment_event_type!~\"ScaleUp|ScaleDown\",namespace='$namespace'} > 0)",
         "iconColor": "semi-dark-green",
         "name": "Deployments",
         "rawQuery": "SELECT\n  extract(epoch from time_column) AS time,\n  text_column as text,\n  tags_column as tags\nFROM\n  metric_table\nWHERE\n  $__timeFilter(time_column)\n",
