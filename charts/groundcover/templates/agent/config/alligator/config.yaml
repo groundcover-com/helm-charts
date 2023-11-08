@@ -19,6 +19,7 @@ data:
       container_info: 1
       pvc_info: 2
       container_state: 1
+      grpc: 2
     tracyEnabled: {{ template "agent.tracy.enabled" . }}
     tracy:
       address: "ipc:///comm/tracy.data"

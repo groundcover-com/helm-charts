@@ -212,6 +212,8 @@ clickhouse:
           name: '{{ include "clickhouse.secretName" . }}'
   extraOverrides: |
     <clickhouse>
+      <max_table_size_to_drop>0</max_table_size_to_drop>
+      <max_partition_size_to_drop>0</max_partition_size_to_drop>
       <profiles>
         <default>
           <async_insert>true</async_insert>
@@ -308,7 +310,7 @@ opentelemetry-collector:
       secretName: opentelemetry-collector-certificate
   image:
     repository: public.ecr.aws/groundcovercom/otel/opentelemetry-collector-contrib
-    tag: "1.4.21"
+    tag: "1.4.22"
   podLabels:
     app.kubernetes.io/part-of: groundcover
   podAnnotations:
