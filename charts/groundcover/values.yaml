@@ -307,7 +307,7 @@ opentelemetry-collector:
       secretName: opentelemetry-collector-certificate
   image:
     repository: public.ecr.aws/groundcovercom/otel/opentelemetry-collector-contrib
-    tag: "1.4.17"
+    tag: "1.4.18"
   podLabels:
     app.kubernetes.io/part-of: groundcover
   podAnnotations:
@@ -316,6 +316,12 @@ opentelemetry-collector:
   ports:
     metrics:
       enabled: true
+    pprof:
+      enabled: true
+      containerPort: 1777
+      servicePort: 1777
+      hostPort: 1777
+      protocol: TCP
     loki-http:
       enabled: true
       containerPort: 3100
@@ -340,6 +346,8 @@ opentelemetry-collector:
         path: /health
         tls: ${env:TLS_CONFIG}
         endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "health" "containerPort" | int ) }}'
+      pprof:
+        endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "pprof" "containerPort" | int ) }}'
     receivers:
       loki:
         protocols:
@@ -396,6 +404,7 @@ opentelemetry-collector:
       telemetry:
         metrics:
           address: '{{ printf "0.0.0.0:%d" (index .Values "ports" "metrics" "containerPort" | int ) }}'
+      extensions: [health_check, pprof]
       pipelines:
         metrics:
           receivers:
