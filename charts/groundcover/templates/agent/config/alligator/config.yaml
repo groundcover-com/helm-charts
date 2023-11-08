@@ -14,6 +14,12 @@ data:
       shouldSample: true
       interval: 30s
 
+    redishandler:
+      samplesthreshold: 10
+      issuesthreshold: 10
+      shouldSample: true
+      interval: 30s  
+
     sqlhandler:
       samplesthreshold: 10
       issuesthreshold: 10

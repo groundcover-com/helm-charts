@@ -39,7 +39,7 @@ shouldDropRunningNamespaces: true
 
 origin:
   registry: public.ecr.aws/groundcovercom
-  tag: 0.33.6
+  tag: 0.33.7
 
 pullSecrets: []
 
@@ -64,7 +64,7 @@ agent:
     obfuscateData: false
     dataRetention: 12h
     nodelabels: []
-    contentTypesToDrop: ["text/html", "text/javascript", "text/css", "image", "font"]
+    contentTypesToDrop: ["text/html", "text/javascript", "text/css", "image", "font", "video", "audio"]
   tracy:
     repository: tracy
     resources:
@@ -224,7 +224,7 @@ router:
   repository: router
   origin:
     registry: public.ecr.aws/groundcovercom
-    tag: 0.33.6
+    tag: 0.33.7
   versionDb:
     host: 
     port: 
