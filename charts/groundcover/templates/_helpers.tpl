@@ -175,6 +175,17 @@ disable redis tracing in tracy if experimental is enabled
   {{- end -}}
 {{- end -}}
 
+{{/*
+disable dns tracing in tracy if experimental is enabled
+*/}}
+{{- define "tracy.enable_dns" -}}
+  {{- if .Values.agent.experimental -}}
+    {{- false -}}
+  {{- else -}}
+    {{- true -}}
+  {{- end -}}
+{{- end -}}
+
 {{- define "imagePullSecrets" }}
 {{- default .Values.global.imagePullSecrets .Values.imagePullSecrets | toJson -}}
 {{- end -}}}}

@@ -155,7 +155,9 @@ data:
     clusterId: {{ .Values.clusterId }}
     region: {{ .Values.region }}
 
-    flora: 
+    flora:
+      debugMode:
+        enabled: false
       networkTracer:
         enabled: true
         processingInterval: 100ms
@@ -174,6 +176,9 @@ data:
             commandsUntilCalibrated: 3
             stringParseLimit: 10240 # 10k
             payloadStoreLimit: 1048576 # 1mb
+            idleTimeout: 10ms
+          dns:
+            enabled: true
         bpfLoading:
           verboseBpfErrors: false
           bpfErrorsBufferSize: 104857600 # 100mb
@@ -182,7 +187,8 @@ data:
           statusCheckIntervalTicks: 20
           connection:
             closeGracePeriod: 1s
-            timeoutPeriod: 600s
+            streamTimeoutPeriod: 600s
+            datagramTimeoutPeriod: 30s
             matchingTimeLimit: 5s
             matchingTrafficLimit: 51200 # 50k
             continuousProcessingErrorsLimit: 5
