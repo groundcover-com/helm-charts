@@ -153,6 +153,9 @@ portal:
   nodeSelector:
   tolerations: []
   priorityClassName:
+  extraHeaders:
+  # - Key: "Header Key"
+  #   Value: "Header Value"
   image:
     repository: "{{ .Values.global.origin.registry }}/portal"
   resources:
@@ -268,7 +271,7 @@ opentelemetry-collector:
       secretName: opentelemetry-collector-certificate
   image:
     repository: public.ecr.aws/groundcovercom/otel/opentelemetry-collector-contrib
-    tag: "1.2.2"
+    tag: "1.2.3"
   podAnnotations:
     prometheus.io/scrape: "true"
     prometheus.io/port: '{{ index .Values "ports" "metrics" "containerPort" | int }}'
