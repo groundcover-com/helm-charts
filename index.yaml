@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  loki-proxy:
+  - apiVersion: v2
+    appVersion: 0.1.0
+    created: "2023-11-08T23:35:05.774903+02:00"
+    description: A Helm chart for Kubernetes
+    digest: ab9d0bf9e45137b909ef4d808884fad6d953aa2f2d0ec54b7d4ed468ede8d4f3
+    name: loki-proxy
+    type: application
+    urls:
+    - https://github.com/groundcover-com/helm-charts/releases/download/loki-proxy-0.1.0/loki-proxy-0.1.0.tgz
+    version: 0.1.0
+generated: "2023-11-08T23:35:05.774913+02:00"
