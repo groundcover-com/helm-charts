@@ -32,10 +32,6 @@ data:
         target_label: pod
       - action: replace
         source_labels:
-        - __meta_kubernetes_pod_ip
-        target_label: pod_ip
-      - action: replace
-        source_labels:
         - __meta_kubernetes_pod_uid
         target_label: pod_uid
       - action: replace
