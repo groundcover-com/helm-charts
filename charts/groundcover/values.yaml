@@ -28,6 +28,7 @@ logging:
   enabled: true
   host: logs.groundcover.com
   scheme: https
+  storeAllLogs: false
 
 # SAAS parameters, token is mendatory, others only if in cloud mode
 saas:
@@ -82,6 +83,7 @@ agent:
     watchOnlyLocalNode: true
     env:
   tracy:
+    enabled: true
     image:
       repository: "{{ .Values.global.origin.registry }}/tracy"
     resources:
@@ -700,3 +702,6 @@ vmagent-backend:
 
 #     # -- Pod affinity
 #     affinity: {}
+
+shepherd:
+  enabled: false

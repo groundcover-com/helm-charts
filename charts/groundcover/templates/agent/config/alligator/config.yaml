@@ -6,6 +6,7 @@ data:
     concurrency: 20
     productchansize: 1000
     pushsummaries: true
+    tracyEnabled: {{ .Values.agent.tracy.enabled }}
     tracy:
       address: "ipc:///comm/tracy.data"
       timeout: 120s
@@ -199,7 +200,7 @@ data:
             cluster_id: {{ .Values.clusterId }}
             job: alligator
         timeout: 10s
-        useRingBuffer: true
+        useRingBuffer: {{ not .Values.logging.storeAllLogs }}
         filterRunningNamespace: false
         groundcoverTimeTravel: -20s
       - name: "monitoring_client"

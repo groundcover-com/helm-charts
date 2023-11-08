@@ -135,6 +135,7 @@ spec:
             - mountPath: /var/log/pods
               name: pods
               readOnly: true
+{{ if .Values.agent.tracy.enabled }}
         - env:
             - name: PL_HOST_PATH
               value: /host
@@ -174,6 +175,7 @@ spec:
             - mountPath: /linux-headers
               name: linux-headers
               readOnly: true
+{{- end }}
       dnsPolicy: ClusterFirstWithHostNet
       hostNetwork: false
       hostPID: true
