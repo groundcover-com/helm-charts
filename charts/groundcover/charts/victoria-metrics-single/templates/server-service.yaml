@@ -8,7 +8,6 @@ metadata:
 {{ toYaml .Values.server.service.annotations | indent 4}}
 {{- end }}
   labels:
-    {{- include "groundcover.labels" . | nindent 4 }}
     {{- include "victoria-metrics.server.labels" . | nindent 4 }}
 {{- if .Values.server.service.labels }}
 {{ toYaml .Values.server.service.labels | indent 4}}
@@ -36,6 +35,9 @@ spec:
       port: {{ .Values.server.service.servicePort }}
       protocol: TCP
       targetPort: http
+      {{- with .Values.server.service.nodePort }}
+      nodePort: {{ . }}
+      {{- end }}
 {{- if .Values.server.extraArgs.graphiteListenAddr }}
     - name: graphite-tcp
       protocol: TCP

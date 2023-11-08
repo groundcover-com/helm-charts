@@ -12,7 +12,6 @@ metadata:
 {{ toYaml .Values.server.ingress.annotations | indent 4 }}
 {{- end }}
   labels:
-  {{- include "groundcover.labels" . | nindent 4 }}
   {{- include "victoria-metrics.server.labels" . | nindent 4 }}
   {{ if .Values.server.ingress.extraLabels }}
 {{ toYaml .Values.server.ingress.extraLabels | indent 4 }}
@@ -26,7 +25,7 @@ spec:
   rules:
   {{- $serviceName := include "victoria-metrics.server.fullname" . }}
   {{- range .Values.server.ingress.hosts }}
-  - host: {{ .name | quote }}
+  - host: {{ .name }}
     http:
       paths:
         - path: {{ .path }}

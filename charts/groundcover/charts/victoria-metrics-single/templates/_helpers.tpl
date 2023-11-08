@@ -6,10 +6,6 @@ Expand the name of the chart.
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{- define "victoria-metrics.pvcName" -}}
-{{- default "server-volume" .Values.server.persistentVolume.pvcNameOverride -}}
-{{- end -}}
-
 {{/*
 Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
@@ -97,7 +93,7 @@ Defines the name of scrape configuration map
 */}}
 {{- define "victoria-metrics.server.scrape.configname" -}}
 {{- if .Values.server.scrape.configMap -}}
-{{- .Values.configMap -}}
+{{- .Values.server.scrape.configMap -}}
 {{- else -}}
 {{- include "victoria-metrics.server.fullname" . -}}-scrapeconfig
 {{- end -}}
@@ -135,4 +131,49 @@ Return if ingress supports pathType.
 */}}
 {{- define "victoria-metrics.ingress.supportsPathType" -}}
   {{- or (eq (include "victoria-metrics.ingress.isStable" .) "true") (and (eq (include "victoria-metrics.ingress.apiVersion" .) "networking.k8s.io/v1beta1")) -}}
+{{- end -}}
+
+{{- define "victoria-metrics.hasInitContainer" -}}
+    {{- or (gt (len .Values.server.initContainers) 0)  .Values.server.vmbackupmanager.restore.onStart.enabled -}}
+{{- end -}}
+
+{{- define "victoria-metrics.initContiners" -}}
+{{- if eq (include "victoria-metrics.hasInitContainer" . ) "true" -}}
+{{- with .Values.server.initContainers -}}
+{{ toYaml . }}
+{{- end -}}
+{{- if .Values.server.vmbackupmanager.restore.onStart.enabled }}
+- name: {{ template "victoria-metrics.name" . }}-vmbackupmanager-restore
+  image: "{{ .Values.server.vmbackupmanager.image.repository }}:{{ .Values.server.vmbackupmanager.image.tag }}"
+  imagePullPolicy: "{{ .Values.server.image.pullPolicy }}"
+  args:
+    - restore
+    - {{ printf "%s=%t" "--eula" .Values.server.vmbackupmanager.eula | quote}}
+    - {{ printf "%s=%s" "--storageDataPath" .Values.server.persistentVolume.mountPath | quote}}
+    {{- range $key, $value := .Values.server.vmbackupmanager.extraArgs }}
+    - --{{ $key }}={{ $value }}
+    {{- end }}
+  {{- with  .Values.server.podSecurityContext }}
+  securityContext: {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.server.vmbackupmanager.resources }}
+  resources: {{ toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.server.vmbackupmanager.env }}
+  env: {{ toYaml . | nindent 4 }}
+  {{- end }}
+  ports:
+    - name: manager-http
+      containerPort: 8300
+  volumeMounts:
+    - name: server-volume
+      mountPath: {{ .Values.server.persistentVolume.mountPath }}
+      subPath: {{ .Values.server.persistentVolume.subPath }}
+  {{- with .Values.server.vmbackupmanager.extraVolumeMounts }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end -}}
+{{- else -}}
+[]
+{{- end -}}
 {{- end -}}

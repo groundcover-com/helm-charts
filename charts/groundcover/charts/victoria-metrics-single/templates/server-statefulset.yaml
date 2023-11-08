@@ -8,7 +8,6 @@ metadata:
 {{ toYaml .Values.server.annotations | indent 4 }}
 {{- end }}
   labels:
-    {{- include "groundcover.labels" . | nindent 4 }}
     {{- include "victoria-metrics.server.labels" . | nindent 4 }}
     {{- with .Values.server.extraLabels }}
     {{ toYaml .}}
@@ -23,15 +22,11 @@ spec:
   podManagementPolicy: {{ .Values.server.podManagementPolicy }}
   template:
     metadata:
-      annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "8428"
-        checksum/config: {{ printf "%s" .Values.server.scrape | sha256sum -}}
     {{- if .Values.server.podAnnotations }}
+      annotations:
 {{ toYaml .Values.server.podAnnotations | indent 8 }}
     {{- end }}
       labels:
-        {{- include "groundcover.labels" . | nindent 8 }}
         {{- include "victoria-metrics.server.labels" . | nindent 8 }}
         {{- range $key, $value := .Values.server.podLabels }}
         {{ $key }}: {{ $value | quote }}
@@ -44,14 +39,16 @@ spec:
       schedulerName: "{{ .Values.server.schedulerName }}"
 {{- end }}
       automountServiceAccountToken: {{ .Values.serviceAccount.automountToken }}
-      {{- with .Values.server.initContainers }}
+      {{- if eq (include "victoria-metrics.hasInitContainer" . ) "true" }}
       initContainers:
-        {{- toYaml . | nindent 8 }}
+        {{- include "victoria-metrics.initContiners" . | nindent 8 }}
       {{- end }}
-      imagePullSecrets: {{ include "imagePullSecrets" . }}
       containers:
         - name: {{ template "victoria-metrics.name" . }}-{{ .Values.server.name }}
-          image: "{{ tpl .Values.server.image.repository . }}:{{ default .Chart.AppVersion .Values.server.image.tag }}"
+          {{- with  .Values.server.podSecurityContext }}
+          securityContext: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.server.image.repository }}:{{ .Values.server.image.tag }}"
           imagePullPolicy: "{{ .Values.server.image.pullPolicy }}"
           {{- if .Values.server.containerWorkingDir }}
           workingDir: {{ .Values.server.containerWorkingDir }}
@@ -121,7 +118,7 @@ spec:
           resources:
             {{- toYaml .Values.server.resources | nindent 12 }}
           volumeMounts:
-            - name: {{ template "victoria-metrics.pvcName" . }}
+            - name: server-volume
               mountPath: {{ .Values.server.persistentVolume.mountPath }}
               subPath: {{ .Values.server.persistentVolume.subPath }}
           {{- if .Values.server.scrape.enabled }}
@@ -173,6 +170,9 @@ spec:
           {{- with .Values.server.vmbackupmanager.resources }}
           resources: {{ toYaml . | nindent 12  }}
           {{- end }}
+          {{- with  .Values.server.podSecurityContext }}
+          securityContext: {{- toYaml . | nindent 12 }}
+          {{- end }}
           {{- with $.Values.server.vmbackupmanager.livenessProbe }}
           livenessProbe: {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -186,13 +186,20 @@ spec:
             - name: manager-http
               containerPort: 8300
           volumeMounts:
-            - name: {{ template "victoria-metrics.pvcName" . }}
+            - name: server-volume
               mountPath: {{ .Values.server.persistentVolume.mountPath }}
               subPath: {{ .Values.server.persistentVolume.subPath }}
+          {{- with .Values.server.vmbackupmanager.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
         {{- end }}
       {{- with .Values.server.extraContainers }}
       {{- toYaml . | nindent 8 }}
       {{- end }}
+    {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+       {{ toYaml .Values.imagePullSecrets | indent 2 }}
+    {{- end }}
     {{- if .Values.server.nodeSelector }}
       nodeSelector:
 {{ toYaml .Values.server.nodeSelector | indent 8 }}
@@ -217,17 +224,11 @@ spec:
             name: {{ include "victoria-metrics.server.scrape.configname" . }}
         {{- end }}
         {{- if not .Values.server.persistentVolume.enabled }}
-        - name: {{ template "victoria-metrics.pvcName" . }}
-        {{- if .Values.server.nfs.enabled }}
-          nfs: 
-            server: {{ .Values.server.nfs.server }}
-            path: {{ .Values.server.nfs.path }}
-        {{- else }}
+        - name: server-volume
           emptyDir: {}
-        {{- end }}
         {{- else }}
         {{- if .Values.server.persistentVolume.existingClaim }}
-        - name: {{ template "victoria-metrics.pvcName" . }}
+        - name: server-volume
           persistentVolumeClaim:
             claimName: {{ .Values.server.persistentVolume.existingClaim }}
         {{- end }}
@@ -238,7 +239,7 @@ spec:
   {{- if and .Values.server.persistentVolume.enabled (not .Values.server.persistentVolume.existingClaim) }}
   volumeClaimTemplates:
     - metadata:
-        name: {{ template "victoria-metrics.pvcName" . }}
+        name: server-volume
         {{- if .Values.server.persistentVolume.annotations }}
         annotations:
 {{ toYaml .Values.server.persistentVolume.annotations | indent 10 }}

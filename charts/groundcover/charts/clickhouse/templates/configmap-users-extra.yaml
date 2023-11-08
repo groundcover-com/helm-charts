@@ -3,11 +3,11 @@ Copyright VMware, Inc.
 SPDX-License-Identifier: APACHE-2.0
 */}}
 
-{{- if and .Values.initdbScripts (not .Values.initdbScriptsSecret) }}
+{{- if and .Values.usersExtraOverrides (not .Values.usersExtraOverridesConfigmap) }}
 apiVersion: v1
-kind: Secret
+kind: ConfigMap
 metadata:
-  name: {{ printf "%s-init-scripts" (include "common.names.fullname" .) }}
+  name: {{ printf "%s-users-extra" (include "common.names.fullname" .) }}
   namespace: {{ include "common.names.namespace" . | quote }}
   labels: {{- include "common.labels.standard" . | nindent 4 }}
     app.kubernetes.io/component: clickhouse
@@ -17,6 +17,7 @@ metadata:
   {{- if .Values.commonAnnotations }}
   annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
-stringData:
-{{- include "common.tplvalues.render" (dict "value" .Values.initdbScripts "context" .) | nindent 2 }}
+data:
+  01_users_extra_overrides.xml: |
+    {{- include "common.tplvalues.render" (dict "value" .Values.usersExtraOverrides "context" $) | nindent 4 }}
 {{- end }}

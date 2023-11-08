@@ -1,5 +1,5 @@
 apiVersion: v2
-appVersion: 1.4.22
+appVersion: 1.4.23
 dependencies:
 - name: router
   repository: ""
@@ -9,8 +9,8 @@ dependencies:
   - child: server.service
     parent: global.victoria-metrics.service
   name: victoria-metrics-single
-  repository: ""
-  version: 0.8.19
+  repository: https://victoriametrics.github.io/helm-charts
+  version: 0.9.0
 - condition: global.telemetry.enabled
   name: victoria-metrics-agent
   repository: ""
@@ -38,14 +38,14 @@ dependencies:
     parent: global.clickhouse.serviceAccount
   name: clickhouse
   repository: https://charts.bitnami.com/bitnami
-  version: 3.3.5
+  version: 3.5.5
 - condition: backend.enabled
   import-values:
   - child: ports
     parent: global.opentelemetry-collector.ports
   name: opentelemetry-collector
   repository: https://open-telemetry.github.io/opentelemetry-helm-charts
-  version: 0.60.0
+  version: 0.62.2
 - condition: kube-state-metrics.enabled
   name: kube-state-metrics
   repository: https://prometheus-community.github.io/helm-charts
@@ -59,4 +59,4 @@ dependencies:
 description: Cloud Native Observability
 name: groundcover
 type: application
-version: 1.4.22
+version: 1.4.23

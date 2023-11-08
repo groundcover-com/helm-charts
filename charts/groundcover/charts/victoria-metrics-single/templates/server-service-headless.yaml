@@ -8,16 +8,13 @@ metadata:
 {{ toYaml .Values.server.statefulSet.service.annotations | indent 4}}
 {{- end }}
   labels:
-  {{- include "groundcover.labels" . | nindent 4 }}
   {{- include "victoria-metrics.server.labels" . | nindent 4 }}
 {{- if .Values.server.statefulSet.service.labels }}
 {{ toYaml .Values.server.statefulSet.service.labels | indent 4}}
 {{- end }}
   name: {{ template "victoria-metrics.server.fullname" . }}
 spec:
-{{- if .Values.server.service.clusterIP }}
-  clusterIP: {{ .Values.server.service.clusterIP }}
-{{- end }}
+  clusterIP: None
   {{- with .Values.server.statefulSet.service.healthCheckNodePort }}
   healthCheckNodePort: {{ . }}
   {{- end }}

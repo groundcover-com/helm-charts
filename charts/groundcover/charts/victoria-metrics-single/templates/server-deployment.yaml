@@ -7,14 +7,12 @@ metadata:
 {{ toYaml .Values.server.annotations | indent 4 }}
 {{- end }}
   labels:
-    {{- include "groundcover.labels" . | nindent 4 }}
     {{- include "victoria-metrics.server.labels" . | nindent 4 }}
     {{- with .Values.server.extraLabels }}
     {{ toYaml .}}
     {{- end }}
   name: {{ template "victoria-metrics.server.fullname" . }}
   namespace: {{ .Release.Namespace }}
-  app.kubernetes.io/component: victoria-metrics
 spec:
   selector:
     matchLabels:
@@ -32,12 +30,10 @@ spec:
 {{ toYaml .Values.server.podAnnotations | indent 8 }}
     {{- end }}
       labels:
-        {{- include "groundcover.labels" . | nindent 8 }}
         {{- include "victoria-metrics.server.labels" . | nindent 8 }}
         {{- range $key, $value := .Values.server.podLabels }}
         {{ $key }}: {{ $value | quote }}
         {{- end }}
-        app.kubernetes.io/component: victoria-metrics
     spec:
 {{- if .Values.server.priorityClassName }}
       priorityClassName: "{{ .Values.server.priorityClassName }}"
@@ -46,21 +42,21 @@ spec:
       schedulerName: "{{ .Values.server.schedulerName }}"
 {{- end }}
       automountServiceAccountToken: {{ .Values.serviceAccount.automountToken }}
-      {{- with .Values.server.initContainers }}
+      {{- if eq (include "victoria-metrics.hasInitContainer" . ) "true" -}}
       initContainers:
-        {{- toYaml . | nindent 8 }}
+        {{- include "victoria-metrics.initContiners" . | nindent 8 }}
       {{- end }}
       containers:
         - name: {{ template "victoria-metrics.name" . }}-{{ .Values.server.name }}
           securityContext:
             {{- toYaml .Values.server.podSecurityContext | nindent 12 }}
-          image: "{{ tpl .Values.server.image.repository . }}:{{ default .Chart.AppVersion .Values.server.image.tag }}"
+          image: "{{ .Values.server.image.repository }}:{{ .Values.server.image.tag }}"
           imagePullPolicy: "{{ .Values.server.image.pullPolicy }}"
           {{- if .Values.server.containerWorkingDir }}
           workingDir: {{ .Values.server.containerWorkingDir }}
           {{- end }}
           args:
-            - {{ printf "%s=%d" "--retentionPeriod" (int .Values.server.retentionPeriod) | quote}}
+            - {{ printf "%s=%s" "--retentionPeriod" (toString .Values.server.retentionPeriod) | quote}}
             - {{ printf "%s=%s" "--storageDataPath" .Values.server.persistentVolume.mountPath | quote}}
           {{- if .Values.server.scrape.enabled }}
             - -promscrape.config=/scrapeconfig/scrape.yml
@@ -124,7 +120,7 @@ spec:
           resources:
 {{ toYaml .Values.server.resources | indent 12 }}
           volumeMounts:
-            - name: {{ template "victoria-metrics.pvcName" . }}
+            - name: server-volume
               mountPath: {{ .Values.server.persistentVolume.mountPath }}
               subPath: {{ .Values.server.persistentVolume.subPath }}
           {{- if .Values.server.scrape.enabled }}
@@ -189,14 +185,20 @@ spec:
             - name: manager-http
               containerPort: 8300
           volumeMounts:
-            - name: {{ template "victoria-metrics.pvcName" . }}
+            - name: server-volume
               mountPath: {{ .Values.server.persistentVolume.mountPath }}
               subPath: {{ .Values.server.persistentVolume.subPath }}
+          {{- with .Values.server.vmbackupmanager.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
         {{- end }}
         {{- with .Values.server.extraContainers }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-      imagePullSecrets: {{ include "imagePullSecrets" . }}
+    {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+       {{ toYaml .Values.imagePullSecrets | indent 2 }}
+    {{- end }}
     {{- if .Values.server.nodeSelector }}
       nodeSelector:
 {{ toYaml .Values.server.nodeSelector | indent 8 }}
@@ -223,7 +225,7 @@ spec:
       {{- with .Values.server.extraVolumes }}
        {{- toYaml . | nindent 6 }}
       {{- end }}
-      - name: {{ template "victoria-metrics.pvcName" . }}
+      - name: server-volume
 {{- if .Values.server.persistentVolume.enabled }}
         persistentVolumeClaim:
           claimName: {{ if .Values.server.persistentVolume.existingClaim }}{{ .Values.server.persistentVolume.existingClaim }}{{- else }}{{ template "victoria-metrics.server.fullname" . }}{{- end }}

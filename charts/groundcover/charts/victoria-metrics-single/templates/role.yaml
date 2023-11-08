@@ -1,3 +1,4 @@
+{{- if and .Values.rbac.pspEnabled (.Capabilities.APIVersions.Has "policy/v1beta1/PodSecurityPolicy") }}
 {{- if .Values.rbac.create -}}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -5,7 +6,6 @@ metadata:
   name: {{ template "victoria-metrics.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-  {{- include "groundcover.labels" . | nindent 4 }}
   {{- include "victoria-metrics.common.metaLabels" . | nindent 4 }}
   {{- if .Values.rbac.extraLabels }}
 {{ toYaml .Values.rbac.extraLabels | indent 4}}
@@ -15,18 +15,6 @@ metadata:
 {{ toYaml . | indent 4 }}
 {{- end }}
 rules:
-- apiGroups: [""]
-  resources:
-  - services
-  - endpoints
-  - pods
-  verbs: ["get", "list", "watch"]
-- apiGroups:
-  - networking.k8s.io
-  resources:
-  - ingresses
-  verbs: ["get", "list", "watch"]
-{{- if and .Values.rbac.pspEnabled (.Capabilities.APIVersions.Has "policy/v1beta1") }}
 - apiGroups:      ['extensions']
   resources:      ['podsecuritypolicies']
   verbs:          ['use']

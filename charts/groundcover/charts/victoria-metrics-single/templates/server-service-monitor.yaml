@@ -7,7 +7,6 @@ metadata:
 {{ toYaml .Values.server.serviceMonitor.annotations | indent 4 }}
   {{- end }}
   labels:
-  {{- include "groundcover.labels" . | nindent 4 }}
   {{- include "victoria-metrics.server.labels" . | nindent 4 }}
   {{- if .Values.server.serviceMonitor.extraLabels }}
 {{ toYaml .Values.server.serviceMonitor.extraLabels | indent 4 }}
@@ -36,6 +35,10 @@ spec:
       {{- end }}
       {{- with .Values.server.serviceMonitor.tlsConfig }}
       tlsConfig:
+          {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.server.serviceMonitor.relabelings }}
+      relabelings:
           {{- toYaml . | nindent 8 }}
       {{- end }}
   {{- end }}
