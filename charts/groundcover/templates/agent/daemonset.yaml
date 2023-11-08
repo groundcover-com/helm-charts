@@ -182,16 +182,6 @@ spec:
       hostNetwork: false
       hostPID: true
       initContainers:
-{{ if .Values.agent.fetchLinuxHeaders.enabled }}
-        - image:  {{tpl .Values.agent.fetchLinuxHeaders.image.repository }}:{{ default .Chart.AppVersion .Values.global.origin.tag }}
-          name: fetch-linux-headers
-          volumeMounts:
-            - mountPath: /host
-              name: host-root
-              readOnly: true
-            - mountPath: /linux-headers
-              name: linux-headers
-{{- end }}
         - name: check-promscale-ready
           image: {{ .Values.global.origin.registry }}/curl:latest
           command:

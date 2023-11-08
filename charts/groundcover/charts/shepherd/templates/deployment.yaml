@@ -3,6 +3,9 @@ kind: Deployment
 metadata:
   name: {{ include "shepherd.name" . }}
   labels:
+    {{ with .Values.global.groundcoverLabels }} 
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
     app: shepherd
     {{- include "shepherd.labels" . | nindent 4 }}
 spec:
@@ -27,6 +30,9 @@ spec:
         {{- toYaml . | nindent 8 }}
     {{- end }}
       labels:
+        {{ with .Values.global.groundcoverLabels }} 
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
         app: shepherd
         {{- include "shepherd.selectorLabels" . | nindent 8 }}
     spec:

@@ -3,6 +3,9 @@ kind: Service
 metadata:
   name: shepherd
   labels:
+    {{ with .Values.global.groundcoverLabels }} 
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
     app: shepherd
     {{- include "shepherd.labels" . | nindent 4 }}
   {{- if .Values.service.annotations }}

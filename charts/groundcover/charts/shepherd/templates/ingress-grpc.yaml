@@ -12,8 +12,11 @@ metadata:
 {{ toYaml .Values.grpcIngress.annotations | indent 4 }}
 {{- end }}
   labels:
-  {{- include "chart.labels" . | nindent 4 }}
-  {{ with .Values.grpcIngress.extraLabels }}
+    {{ with .Values.global.groundcoverLabels }} 
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+    {{- include "chart.labels" . | nindent 4 }}
+    {{ with .Values.grpcIngress.extraLabels }}
 {{ toYaml . | indent 4 }}
   {{ end }}
   name: {{ template "chart.name" . }}-grpc

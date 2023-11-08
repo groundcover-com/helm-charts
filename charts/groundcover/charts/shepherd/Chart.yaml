@@ -1,6 +1,6 @@
 apiVersion: v2
-appVersion: 0.50.5
+appVersion: 0.50.6
 description: A Helm chart for Kubernetes
 name: shepherd
 type: application
-version: 0.50.5
+version: 0.50.6

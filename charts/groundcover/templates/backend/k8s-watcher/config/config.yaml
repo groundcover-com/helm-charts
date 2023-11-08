@@ -16,7 +16,7 @@ data:
     Promscale:
       url: "{{ template "promscale.otelURL" . }}"
       tls: "true"
-      tableWriterBatchMaxSize: 500
+      tableWriterBatchMaxSize: 350
       tableWriterBatchInterval: 1s
       tableWriterBatchWriteTimeout: 1m
 

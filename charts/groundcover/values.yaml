@@ -106,10 +106,6 @@ agent:
         memory: 2048Mi
         cpu: 750m
 
-  fetchLinuxHeaders:
-    enabled: false
-    repository: fetch-linux-headers
-
 migrator:
   additionalLabels:
   podLabels:

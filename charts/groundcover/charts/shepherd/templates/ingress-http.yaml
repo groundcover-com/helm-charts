@@ -12,8 +12,11 @@ metadata:
 {{ toYaml .Values.httpIngress.annotations | indent 4 }}
 {{- end }}
   labels:
-  {{- include "chart.labels" . | nindent 4 }}
-  {{ with .Values.httpIngress.extraLabels }}
+    {{ with .Values.global.groundcoverLabels }} 
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+    {{- include "chart.labels" . | nindent 4 }}
+    {{ with .Values.httpIngress.extraLabels }}
 {{ toYaml . | indent 4 }}
   {{ end }}
   name: {{ template "chart.name" . }}-http
