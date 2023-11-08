@@ -21,7 +21,7 @@ onprem:
 origin:
   registry: quay.io/groundcover
   repository: router
-  tag: 1.5.41
+  tag: 1.5.42
 serviceAccount:
   annotations:
 ingress:
@@ -164,11 +164,10 @@ postgresql:
 grafana:
   extraLabels:
     app.kubernetes.io/part-of: groundcover
-  plugins:
-    - grafana-clickhouse-datasource
+  plugins: []
   image:
     repository: public.ecr.aws/groundcovercom/grafana-groundcover
-    tag: "v0.0.7-grafana10.1.2"
+    tag: "v0.0.10-grafana10.1.2"
   testFramework:
     enabled: false
   envValueFrom:
@@ -189,7 +188,7 @@ grafana:
     paths:
       data: /var/lib/grafana/
       logs: /var/log/grafana
-      plugins: /var/lib/grafana/plugins
+      plugins: /usr/share/grafana/plugins
       provisioning: /etc/grafana/provisioning
     log:
       mode: console
