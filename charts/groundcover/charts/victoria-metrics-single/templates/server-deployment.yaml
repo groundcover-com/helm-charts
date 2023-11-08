@@ -16,6 +16,7 @@ metadata:
     {{- end }}
   name: {{ template "victoria-metrics.server.fullname" . }}
   namespace: {{ .Release.Namespace }}
+  app.kubernetes.io/component: victoria-metrics
 spec:
   selector:
     matchLabels:
@@ -40,6 +41,7 @@ spec:
         {{- range $key, $value := .Values.server.podLabels }}
         {{ $key }}: {{ $value | quote }}
         {{- end }}
+        app.kubernetes.io/component: victoria-metrics
     spec:
 {{- if .Values.server.priorityClassName }}
       priorityClassName: "{{ .Values.server.priorityClassName }}"

@@ -8,6 +8,7 @@ metadata:
     chart: {{ template "loki.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
+    app.kubernetes.io/component: loki
     {{ with .Values.global.groundcoverLabels }} 
     {{- toYaml . | nindent 4 }}
     {{- end }}
@@ -29,6 +30,7 @@ spec:
         app: {{ template "loki.name" . }}
         name: {{ template "loki.name" . }}
         release: {{ .Release.Name }}
+        app.kubernetes.io/component: loki
         {{ with .Values.global.groundcoverLabels }} 
         {{- toYaml . | nindent 8 }}
         {{- end }}

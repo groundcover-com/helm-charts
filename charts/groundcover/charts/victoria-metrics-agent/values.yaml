@@ -70,6 +70,7 @@ extraArgs:
   envflag.enable: "true"
   envflag.prefix: VM_
   loggerFormat: json
+  remoteWrite.maxDiskUsagePerURL: 1GB
   # promscrape.maxScrapeSize: "167772160"
 
   # Uncomment and specify the port if you want to support any of the protocols:
