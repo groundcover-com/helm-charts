@@ -27,7 +27,7 @@ data:
         - Key: X-Portal-InstallationId
           Value: {{ .Values.installationId }}
     {{- end }}
-    {{- with .Values.multipleClusterIds }}
+    {{- if .Values.tags.incloud }}
         - Key: X-Portal-InCloud
           Value: "True"
     {{- end }} 
