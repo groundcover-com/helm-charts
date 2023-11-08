@@ -26,3 +26,6 @@ subjects:
 - kind: ServiceAccount
   name: portal
   namespace: {{ .Release.Namespace }}
+- kind: ServiceAccount
+  name: migrator
+  namespace: {{ .Release.Namespace }}

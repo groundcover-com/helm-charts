@@ -47,6 +47,7 @@ spec:
     {{- if .Values.migrator.priorityClassName }}
       priorityClassName: {{ .Values.migrator.priorityClassName }}
     {{- end }}
+      serviceAccountName: migrator
       containers:
       - env:
         - name: GROUNDCOVER_FORCE_MIGRATE

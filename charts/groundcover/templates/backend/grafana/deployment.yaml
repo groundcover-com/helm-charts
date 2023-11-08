@@ -61,18 +61,12 @@ spec:
           value: waitforit
         - name: GF_USERS_DEFAULT_THEME
           value: light
-        - name: GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS
-          value: prodstack-my-plugin,groundcover-logs-panel,groundcover-kafka-panel,groundcover-workload-info,groundcover-match-issues
-        - name: GF_PATHS_PLUGINS
-          value: /var/groundcover/plugins
-        - name: GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH
-          value: /var/groundcover/dashboards/cluster_status.json
         - name: GC_DB_PASS
           valueFrom:
             secretKeyRef:
               key: PATRONI_SUPERUSER_PASSWORD
               name: {{ index .Values "timescaledb-single" "secrets" "credentialsSecretName" | default "groundcover-tsdb-credentials" }}
-        image: {{ .Values.origin.registry }}/{{ .Values.grafana.repository }}:{{ .Values.origin.tag }}
+        image: grafana/grafana:8.3.6
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 10
