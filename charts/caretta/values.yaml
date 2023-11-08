@@ -3,6 +3,9 @@ prometheusPort: 7117
 prometheusEndpoint: "/metrics"
 pollIntervalSeconds: 5
 
+rbac:
+  pspEnabled: true
+  sccEnabled: true
 image:
   repository: quay.io/groundcover/caretta
   pullPolicy: Always
@@ -121,4 +124,4 @@ grafana:
     dashboards:
       default_home_dashboard_path: /var/lib/grafana/dashboards/default/dashboard.json 
   adminUser: "admin"
-  adminPassword: "admin"
+  adminPassword: "caretta"
