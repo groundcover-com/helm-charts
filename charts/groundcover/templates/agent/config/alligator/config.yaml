@@ -65,7 +65,7 @@ data:
     containerrestarthandler:
       samplesthreshold: 20
       issuesthreshold: 20
-      shouldsample: false
+      shouldsample: true
       interval: 30s
 
     pidcache:
