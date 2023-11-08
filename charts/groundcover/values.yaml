@@ -157,6 +157,8 @@ clickhouse:
     registry: public.ecr.aws/groundcovercom
   zookeeper:
     enabled: false
+  metrics:
+    enabled: true
   auth:
     existingSecret: true
     existingSecretKey: admin-password
@@ -237,8 +239,13 @@ opentelemetry-collector:
           name: '{{ include "clickhouse.secretName" . }}'
   image:
     repository: public.ecr.aws/groundcovercom/otel/opentelemetry-collector-contrib
-    tag: "1.1.1"
+    tag: "1.1.2"
+  podAnnotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: '{{ index .Values "ports" "metrics" "containerPort" | int }}'
   ports:
+    metrics:
+      enabled: true
     loki-http:
       enabled: true
       containerPort: 3100
@@ -265,7 +272,9 @@ opentelemetry-collector:
         database: '{{ include "clickhouse.database" . }}'
         endpoint: '{{ include "clickhouse.nativeEndpoint" . }}'
     service:
-      telemetry: {}
+      telemetry:
+        metrics:
+          address: '{{ printf "0.0.0.0:%d" (index .Values "ports" "metrics" "containerPort" | int )  }}'
       pipelines:
         metrics:
           receivers:

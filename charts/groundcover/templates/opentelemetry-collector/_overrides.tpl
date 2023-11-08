@@ -10,6 +10,13 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 {{- end }}
 
+# fix tpl usage
+{{- define "opentelemetry-collector.podAnnotations" -}}
+{{- if .Values.podAnnotations }}
+{{- tpl (toYaml .Values.podAnnotations) . }}
+{{- end }}
+{{- end }}
+
 # add tpl to extraEnvs
 {{- define "opentelemetry-collector.pod" -}}
 {{- with .Values.imagePullSecrets }}
