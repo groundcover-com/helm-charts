@@ -33,7 +33,5 @@ rules:
   resources:      ['podsecuritypolicies']
   verbs:          ['use']
   resourceNames:  [{{ template "victoria-metrics.fullname" . }}]
-{{- else }}
-rules: []
 {{- end }}
 {{- end }}
