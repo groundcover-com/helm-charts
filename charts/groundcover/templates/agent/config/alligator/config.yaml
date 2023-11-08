@@ -238,13 +238,13 @@ data:
       flushInterval: 1s
     
     mySqlConfig:
-      Cache: true
+      Cache: false
       KeepSQLAlias: true
       ReplaceDigits: true
     
     postgreSqlConfig:
       DBMS: "postgresql"
-      Cache: true
+      Cache: false
       KeepSQLAlias: true
       ReplaceDigits: true
 kind: ConfigMap
