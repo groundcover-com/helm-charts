@@ -37,7 +37,7 @@ region:
 
 origin:
   registry: public.ecr.aws/k8g4n2c4
-  tag: 0.28.5
+  tag: 0.28.6
 
 pullSecrets: []
 
@@ -63,6 +63,7 @@ agent:
     dataRetention: 2h
     shouldDropRunningNamespaces: true
     filteredNamespaces: []
+    nodelabels: []
   tracy:
     repository: tracy
     resources:
@@ -198,7 +199,7 @@ router:
   repository: router
   origin:
     registry: public.ecr.aws/k8g4n2c4
-    tag: 0.28.5
+    tag: 0.28.6
   versionDb:
     host: 
     port: 

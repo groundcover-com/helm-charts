@@ -46,6 +46,20 @@ spec:
           env:
             - name: GIN_MODE
               value: "release"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: frontend
+            initialDelaySeconds: 5
+            periodSeconds: 15
+          livenessProbe:
+            httpGet:
+              scheme: HTTP
+              path: /health
+              port: frontend
+            initialDelaySeconds: 5
+            periodSeconds: 15
+            timeoutSeconds: 5          
       volumes:
         - name: config-volume
           configMap:

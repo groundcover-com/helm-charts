@@ -82,7 +82,23 @@ spec:
           protocol: TCP
         - containerPort: 9102
           name: portal-metrics
+        - containerPort: 9999
+          name: portal-health
           protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: portal-health
+          initialDelaySeconds: 5
+          periodSeconds: 15
+        livenessProbe:
+          httpGet:
+            scheme: HTTP
+            path: /health
+            port: portal-health
+          initialDelaySeconds: 5
+          periodSeconds: 15
+          timeoutSeconds: 5  
         resources:
           limits:
             cpu: 100m
