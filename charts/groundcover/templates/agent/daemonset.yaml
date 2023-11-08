@@ -33,6 +33,8 @@ spec:
         vm.io/path: "vmetrics"
         vm.io/port: "9102"
         groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+        checksum/tracy_config: {{ include (print $.Template.BasePath "/agent/config/tracy/config.yaml") . | sha256sum }}
+        checksum/alligator_config: {{ include (print $.Template.BasePath "/agent/config/alligator/config.yaml") . | sha256sum }}
         {{- if .Values.agent.additionalAnnotations }}
 {{ toYaml .Values.agent.additionalAnnotations | indent 8 }}
         {{- end }}

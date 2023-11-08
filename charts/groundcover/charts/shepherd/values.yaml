@@ -63,6 +63,6 @@ config:
   ingestor:
     resourceLabels: []
     entityLabels: []
-    windowSize: 1m
+    activeDuration: 1m
     maxTopResources: []
     defaultMaxTopResources: 

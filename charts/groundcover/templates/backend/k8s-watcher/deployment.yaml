@@ -27,6 +27,7 @@ spec:
         prometheus.io/scrape: "true"
         prometheus.io/port: "9102"
         groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+        checksum/config: {{ include (print $.Template.BasePath "/backend/k8s-watcher/config/config.yaml") . | sha256sum }}
         {{- if .Values.k8sWatcher.additionalAnnotations }}
 {{ toYaml .Values.k8sWatcher.additionalAnnotations | indent 8 }}
         {{- end }}

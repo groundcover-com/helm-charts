@@ -21,12 +21,15 @@ spec:
   selector:
     matchLabels:
       app: portal
+  strategy:
+    type: Recreate
   template:
     metadata:
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "9102"
         groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+        checksum/config: {{ include (print $.Template.BasePath "/backend/portal/config/configMap.yaml") . | sha256sum }}
         {{- if .Values.portal.additionalAnnotations }}
 {{ toYaml .Values.portal.additionalAnnotations | indent 8 }}
         {{- end }}
