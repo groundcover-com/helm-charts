@@ -530,7 +530,7 @@ prometheus:
   enabled: true
   image:
     repository: "{{ .Values.global.origin.registry }}/postgres_exporter"
-    tag: v0.7.0
+    tag: v0.11.1
     pullPolicy: Always
   # Extra custom environment variables for prometheus.
   # These should be an EnvVar, as this allows you to inject secrets into the environment

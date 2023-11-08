@@ -64,19 +64,17 @@ spec:
         env:
         - name: TSTUNE_FILE
           value: {{ template "tstune_config" . }}
-        - name: RESOURCES_WAL_VOLUME
+        - name: WAL_VOLUME_SIZE
           value: {{ if .Values.persistentVolumes.wal.enabled }}{{ .Values.persistentVolumes.wal.size }}{{ else }}"0"{{ end }}
-        - name: RESOURCES_DATA_VOLUME
+        - name: DATA_VOLUME_SIZE
           value: {{ .Values.persistentVolumes.data.size }}
-        - name: INCLUDE_DIRECTIVE
-          value: include_if_exists = '{{ template "tstune_config" . }}'
-        - name: CPUS
+        - name: RESOURCES_CPU_REQUESTS
           valueFrom:
             resourceFieldRef:
               containerName: timescaledb
               resource: requests.cpu
               divisor: "1"
-        - name: MEMORY
+        - name: RESOURCES_MEMORY_REQUESTS
           valueFrom:
             resourceFieldRef:
               containerName: timescaledb
@@ -98,43 +96,81 @@ spec:
           - sh
           - "-c"
           - |
-              set -e
-              [ $CPUS -eq 0 ]   && CPUS="${RESOURCES_CPU_LIMIT}"
-              [ $MEMORY -eq 0 ] && MEMORY="${RESOURCES_MEMORY_LIMIT}"
+              #!/bin/sh
+              set -eu
 
-              if [ -f "${PGDATA}/postgresql.base.conf" ] && ! grep "${INCLUDE_DIRECTIVE}" postgresql.base.conf -qxF; then
-                echo "${INCLUDE_DIRECTIVE}" >> "${PGDATA}/postgresql.base.conf"
+              # Exit if required variable is not set externally
+              : "$TSTUNE_FILE"
+              : "$WAL_VOLUME_SIZE"
+              : "$DATA_VOLUME_SIZE"
+              : "$RESOURCES_CPU_REQUESTS"
+              : "$RESOURCES_MEMORY_REQUESTS"
+              : "$RESOURCES_CPU_LIMIT"
+              : "$RESOURCES_MEMORY_LIMIT"
+
+              # Figure out how many cores are available
+              CPUS="$RESOURCES_CPU_REQUESTS"
+              if [ "$RESOURCES_CPU_REQUESTS" -eq 0 ]; then
+                  CPUS="${RESOURCES_CPU_LIMIT}"
+              fi
+              # Figure out how much memory is available
+              MEMORY="$RESOURCES_MEMORY_REQUESTS"
+              if [ "$RESOURCES_MEMORY_REQUESTS" -eq 0 ]; then
+                  MEMORY="${RESOURCES_MEMORY_LIMIT}"
               fi
 
+              # Ensure tstune config file exists
               touch "${TSTUNE_FILE}"
-              timescaledb-tune -quiet -pg-version 11 -conf-path "${TSTUNE_FILE}" -cpus "${CPUS}" -memory "${MEMORY}MB" \
-                {{ range $key, $value := .Values.timescaledbTune.args | default dict }}{{ printf "--%s %s " $key (quote $value)}}{{ end }} -yes
+
+              # Ensure tstune-generated config is included in postgresql.conf
+              if [ -f "${PGDATA}/postgresql.base.conf" ] && ! grep "include_if_exists = '${TSTUNE_FILE}'" postgresql.base.conf -qxF; then
+                  echo "include_if_exists = '${TSTUNE_FILE}'" >> "${PGDATA}/postgresql.base.conf"
+              fi
 
               # If there is a dedicated WAL Volume, we want to set max_wal_size to 60% of that volume
               # If there isn't a dedicated WAL Volume, we set it to 20% of the data volume
-              if [ "${RESOURCES_WAL_VOLUME}" = "0" ]; then
-                WALMAX="${RESOURCES_DATA_VOLUME}"
-                WALPERCENT=20
+              if [ "${WAL_VOLUME_SIZE}" = "0" ]; then
+                  WALMAX="${DATA_VOLUME_SIZE}"
+                  WALPERCENT=20
               else
-                WALMAX="${RESOURCES_WAL_VOLUME}"
-                WALPERCENT=60
+                  WALMAX="${WAL_VOLUME_SIZE}"
+                  WALPERCENT=60
               fi
 
-              WALMAX=$(numfmt --from=auto ${WALMAX})
+              WALMAX=$(numfmt --from=auto "${WALMAX}")
 
               # Wal segments are 16MB in size, in this way we get a "nice" number of the nearest
               # 16MB
-              WALMAX=$(( $WALMAX / 100 * $WALPERCENT / 16777216 * 16 ))
-              WALMIN=$(( $WALMAX / 2 ))
+              # walmax / 100 * walpercent / 16MB # below is a refactored with increased precision
+              WALMAX=$(( WALMAX * WALPERCENT * 16 / 16777216 / 100  ))
+              WALMIN=$(( WALMAX / 2 ))
 
               echo "max_wal_size=${WALMAX}MB" >> "${TSTUNE_FILE}"
               echo "min_wal_size=${WALMIN}MB" >> "${TSTUNE_FILE}"
+
+              # Run tstune
+              timescaledb-tune -quiet -conf-path "${TSTUNE_FILE}" -cpus "${CPUS}" -memory "${MEMORY}MB" -yes "$@"
         volumeMounts:
         - name: socket-directory
           mountPath: {{ template "socket_directory" . }}
         resources:
 {{ toYaml .Values.resources | indent 10 }}
 {{- end }}
+      - name: patronicleanup
+        securityContext:
+          allowPrivilegeEscalation: false
+        image: "{{ tpl .Values.image.repository . }}:{{ default .Chart.AppVersion .Values.image.tag }}"
+        command:
+          - sh
+          - "-c"
+          - |
+              #!/bin/sh
+              export SERVICEACCOUNT=/var/run/secrets/kubernetes.io/serviceaccount
+              export NAMESPACE=$(cat ${SERVICEACCOUNT}/namespace)
+              export TOKEN=$(cat ${SERVICEACCOUNT}/token)
+              export CACERT=${SERVICEACCOUNT}/ca.crt
+              curl --cacert ${CACERT} --header "Authorization: Bearer ${TOKEN}" https://${KUBERNETES_SERVICE_HOST}/api/v1/namespaces/${NAMESPACE}/endpoints/{{ template "clusterName" . }}-config -X DELETE
+              exit 0
       # Issuing the final checkpoints on a busy database may take considerable time.
       # Unfinished checkpoints will require more time during startup, so the tradeoff
       # here is time spent in shutdown/time spent in startup.
@@ -194,7 +230,7 @@ spec:
             export -p > "{{ template "pod_environment_file" }}"
             export -p | grep PGBACKREST > "{{ template "pgbackrest_environment_file" }}"
 
-            for UNKNOWNVAR in $(env | awk -F '=' '!/^(PATRONI_.*|HOME|PGDATA|PGHOST|LC_.*|LANG|PATH|KUBERNETES_SERVICE_.*)=/ {print $1}')
+            for UNKNOWNVAR in $(env | awk -F '=' '!/^(PATRONI_.*|HOME|PGDATA|PGHOST|LC_.*|LANG|PATH|KUBERNETES_SERVICE_.*|AWS_ROLE_ARN|AWS_WEB_IDENTITY_TOKEN_FILE)=/ {print $1}')
             do
                 unset "${UNKNOWNVAR}"
             done
@@ -214,6 +250,8 @@ spec:
         # Where possible, we want to have lowercase usernames in PostgreSQL as more complex postgres usernames
         # requiring quoting to be done in certain contexts, which many tools do not do correctly, or even at all.
         # https://patroni.readthedocs.io/en/latest/ENVIRONMENT.html#bootstrap-configuration
+        - name: PATRONICTL_CONFIG_FILE
+          value: "/etc/timescaledb/patroni.yaml"
         - name: PATRONI_admin_OPTIONS
           value: createrole,createdb
         - name: PATRONI_REPLICATION_USERNAME
@@ -255,6 +293,11 @@ spec:
           value: "$(PATRONI_POSTGRESQL_DATA_DIR)"
         - name: PGHOST
           value: "{{ template "socket_directory" . }}"
+        - name: WALDIR
+          value: {{ include "wal_directory" . | quote }}
+        - name: PGBACKREST_BACKUP_ENABLED
+          value: {{ .Values.backup.enabled | quote }}
+
         - name: BOOTSTRAP_FROM_BACKUP
           value: {{ .Values.bootstrapFromBackup.enabled | int | quote }}
         {{- if .Values.env }}{{ .Values.env | default list | toYaml | nindent 8 }}{{- end }}
