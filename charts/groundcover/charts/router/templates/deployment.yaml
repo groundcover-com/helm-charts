@@ -30,6 +30,30 @@ spec:
         prometheus.io/port: "9102"
     spec:
       serviceAccountName: router
+      {{- if .Values.onprem.enabled }}
+      initContainers:
+        - name: check-grafana-is-up   
+          args:
+          - while [ $(curl -skw '%{http_code}' http://{{ include "grafana.fullname" . }}/grafana/healthz
+            -o /dev/null) -ne 200 ]; do echo 'Waiting for grafana...'; sleep 2; done; echo grafana is up
+          command:
+            - /bin/sh
+            - -c
+          image: '{{ printf "%s/curl:latest" .Values.origin.registry }}'
+        - name: check-psql-is-up   
+          args:
+          - pg_isready -U "postgres" -d "dbname=postgres" -h {{ include "postgresql.primary.fullname" . }} -p 5432
+          command:
+            - /bin/sh
+            - -c
+          image: '{{ printf "%s/bitnami/postgresql:15.3.0-debian-11-r75" .Values.postgresql.image.registry }}'
+          env:
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "postgresql.primary.fullname" . }}
+                key: "postgres-password"
+      {{- end }}
       imagePullSecrets: {{ include "router.imagePullSecrets" . }}
       containers:
         - name: router
@@ -48,6 +72,26 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
+            {{- if and .Values.global .Values.global.clickhouse }}
+            - name: GC_ONPREM_CLICKHOUSEPASS
+              value: {{ include "clickhouse.password" . | quote }}
+            - name: GC_ONPREM_CLICKHOUSEPORT
+              value: {{ .Values.global.clickhouse.containerPorts.http | quote }}
+            - name: GC_ONPREM_CLICKHOUSEHOST
+              value: {{ include "clickhouse.fullname" . | quote }}
+            {{- end }}
+            {{- if and .Values.onprem.enabled }}
+            - name: GC_GRAFANA_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "grafana.fullname" . }}
+                  key: "admin-password"
+            - name: GC_RBAC_DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "postgresql.primary.fullname" . }}
+                  key: "postgres-password"
+            {{- end }}
             - name: GIN_MODE
               value: "release"
             - name: GC_GROUNDCOVERVERSION

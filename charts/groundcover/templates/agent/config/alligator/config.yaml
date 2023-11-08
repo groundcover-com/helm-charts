@@ -154,7 +154,7 @@ data:
     kubeletmetricsfetchinterval: 15s
 
     globallimiter:
-      maxqueue: 10
+      maxqueue: 20
       ageout: 100ms
       sampleeverything: false
 
@@ -231,6 +231,17 @@ data:
       writeTimeout: 10s
       batchSize: 350
       flushInterval: 1s
+    
+    mySqlConfig:
+      Cache: true
+      KeepSQLAlias: true
+      ReplaceDigits: true
+    
+    postgreSqlConfig:
+      DBMS: "postgresql"
+      Cache: true
+      KeepSQLAlias: true
+      ReplaceDigits: true
 kind: ConfigMap
 metadata:
   labels:

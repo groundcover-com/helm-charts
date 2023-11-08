@@ -310,7 +310,7 @@ opentelemetry-collector:
       secretName: opentelemetry-collector-certificate
   image:
     repository: public.ecr.aws/groundcovercom/otel/opentelemetry-collector-contrib
-    tag: "1.4.40"
+    tag: "1.4.41"
   podLabels:
     app.kubernetes.io/part-of: groundcover
   podAnnotations:
@@ -492,9 +492,6 @@ router:
   enabled: false
   additionalLabels:
   additionalAnnotations:
-  repository: router
-  origin:
-    registry: public.ecr.aws/groundcovercom
 metrics-ingester:
   nodeSelector:
   rbac:

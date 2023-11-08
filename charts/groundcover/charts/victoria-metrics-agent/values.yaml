@@ -3,7 +3,7 @@
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
-groundcover_version: 1.4.40
+groundcover_version: 1.4.41
 # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
 deployment:
   enabled: true

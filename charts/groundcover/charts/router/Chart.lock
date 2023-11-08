@@ -1,0 +1,9 @@
+dependencies:
+- name: postgresql
+  repository: https://charts.bitnami.com/bitnami
+  version: 12.7.2
+- name: grafana
+  repository: https://grafana.github.io/helm-charts
+  version: 6.58.6
+digest: sha256:398a21a00bd891092bcbece8a68c92727f6596d41c89072a08b4899cb32cf77c
+generated: "2023-08-08T12:57:49.249079964Z"
