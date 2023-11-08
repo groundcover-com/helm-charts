@@ -44,7 +44,7 @@ shouldDropRunningNamespaces: true
 
 origin:
   registry: public.ecr.aws/groundcovercom
-  tag: 0.40.0
+  tag: 0.40.1
 
 pullSecrets: []
 
@@ -237,11 +237,11 @@ grafana:
   priorityClassName:
   resources:
     requests:
-      cpu: 250m
-      memory: 750Mi
+      cpu: 40m
+      memory: 64Mi
     limits:
-      memory: 1000Mi
-      cpu: 1000m
+      memory: 64Mi
+      cpu: 80m
   clusterIP:
 
 router:
@@ -253,7 +253,7 @@ router:
   repository: router
   origin:
     registry: public.ecr.aws/groundcovercom
-    tag: 0.40.0
+    tag: 0.40.1
 
 # These are the recomendded presets
 # if you are after an uninstallation, prior to re-installation make sure
