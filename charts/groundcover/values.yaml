@@ -91,6 +91,17 @@ agent:
   hostNetwork: false
   monitoring:
     port: 9102
+  flb:
+    image:
+      tag: 2.1.4
+      repository: "{{ .Values.global.origin.registry }}/fluent/fluent-bit"
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 100m
+        memory: 64Mi
   alligator:
     image:
       repository: "{{ .Values.global.origin.registry }}/alligator"
@@ -183,7 +194,15 @@ clickhouse:
         secretKeyRef:
           key: '{{ include "clickhouse.secretKey" . }}'
           name: '{{ include "clickhouse.secretName" . }}'
-  extraOverrides: "<clickhouse>\n  <profiles>\n    <default>\n      <async_insert>true</async_insert>\n      <wait_for_async_insert>true</wait_for_async_insert>\n    </default>\n  </profiles>\n</clickhouse>          \n"
+  extraOverrides: |
+    <clickhouse>
+      <profiles>
+        <default>
+          <async_insert>true</async_insert>
+          <wait_for_async_insert>true</wait_for_async_insert>
+        </default>
+      </profiles>
+    </clickhouse>
   startdbScripts:
     init-db.sh: |
       #!/bin/bash
@@ -272,7 +291,7 @@ opentelemetry-collector:
       secretName: opentelemetry-collector-certificate
   image:
     repository: public.ecr.aws/groundcovercom/otel/opentelemetry-collector-contrib
-    tag: "1.3.6"
+    tag: "1.3.7"
   podAnnotations:
     prometheus.io/scrape: "true"
     prometheus.io/port: '{{ index .Values "ports" "metrics" "containerPort" | int }}'

@@ -12,6 +12,7 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
     app: portal
+    app.kubernetes.io/name: portal
     {{- if .Values.portal.additionalLabels }}
 {{ toYaml .Values.portal.additionalLabels | indent 4 }}
     {{- end }}

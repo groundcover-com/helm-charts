@@ -8,6 +8,7 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
     app: clickhouse
+    app.kubernetes.io/name: clickhouse
 data:
   config.xml: |-
     <config>

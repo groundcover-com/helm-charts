@@ -14,6 +14,7 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
     app: alligator
+    app.kubernetes.io/name: alligator
     {{- if .Values.agent.additionalLabels }}
 {{ toYaml .Values.agent.additionalLabels | indent 4 }}
     {{- end }}
@@ -43,6 +44,7 @@ spec:
         {{- end }}
       labels:
         app: alligator
+        app.kubernetes.io/name: alligator
         {{ with .Values.global.groundcoverLabels }} 
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -67,6 +69,66 @@ spec:
 {{ toYaml .Values.agent.nodeSelector | indent 8 }}
 {{- end }}
       containers:
+{{- if .Values.metrics.enabled }}
+        - name: fluent-bit
+          image: {{ tpl .Values.agent.flb.image.repository . }}:{{ .Values.agent.flb.image.tag }}
+          ports:
+            - name: http
+              containerPort: 2020
+              protocol: TCP
+          volumeMounts:
+            - name: varlog
+              mountPath: /var/log
+              readOnly: true
+            - name: fluent-bit-config
+              mountPath: /fluent-bit/etc/fluent-bit.conf
+              subPath: fluent-bit.conf
+            - name: fluent-bit-config
+              mountPath: /fluent-bit/etc/custom_parsers.conf
+              subPath: custom_parsers.conf
+            - name: docker
+              readOnly: true
+              mountPath: /var/lib/docker/containers
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+              scheme: HTTP
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: http
+              scheme: HTTP
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          env:
+            - name: GC_GROUNDCOVERVERSION
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.annotations['groundcover_version']   
+            - name: GC_RUNNINGNAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: GC_CLUSTERID
+              valueFrom:
+                secretKeyRef:
+                    name: groundcover-config
+                    key: GC_CLUSTER_ID
+            - name: API_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: {{ template "groundcover.apikeySecretKey" . }}
+                  name: {{ template "groundcover.apikeySecretName" . }}
+          resources:
+            {{- toYaml .Values.agent.flb.resources | nindent 12 }}
+{{- end }}
         - env:
             - name: PROMETHEUS_PORT
               value: {{ (include "agent.monitoring.port" .) | quote }}
@@ -151,9 +213,6 @@ spec:
               name: alligator-position
             - mountPath: /var/lib/docker/containers
               name: docker
-              readOnly: true
-            - mountPath: /var/log/pods
-              name: pods
               readOnly: true
 {{- if eq (include "agent.tracy.enabled" .) "true" }}
         - env:
@@ -242,6 +301,13 @@ spec:
 {{- end }}
       terminationGracePeriodSeconds: 10
       volumes:
+        - name: fluent-bit-config
+          configMap:
+            name: fluent-bit-config
+            defaultMode: 420
+        - name: varlibdockercontainers
+          hostPath:
+            path: /var/lib/docker/containers
         - hostPath:
             path: /
             type: Directory
@@ -266,9 +332,6 @@ spec:
         - hostPath:
             path: /var/lib/docker/containers
           name: docker
-        - hostPath:
-            path: /var/log/pods
-          name: pods
         - emptyDir: {}
           name: linux-headers
         - hostPath:

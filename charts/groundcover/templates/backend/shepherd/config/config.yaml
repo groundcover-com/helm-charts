@@ -12,4 +12,5 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
     app: shepherd
+    app.kubernetes.io/name: shepherd
 {{- end }}

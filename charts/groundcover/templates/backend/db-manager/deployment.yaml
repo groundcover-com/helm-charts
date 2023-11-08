@@ -12,6 +12,7 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
     app: db-manager
+    app.kubernetes.io/name: db-manager
     {{- if .Values.dbManager.additionalLabels }}
 {{ toYaml .Values.dbManager.additionalLabels | indent 4 }}
     {{- end }}
@@ -35,6 +36,7 @@ spec:
         {{- end }}
       labels:
         app: db-manager
+        app.kubernetes.io/name: db-manager
         {{ with .Values.global.groundcoverLabels }} 
         {{- toYaml . | nindent 8 }}
         {{- end }}

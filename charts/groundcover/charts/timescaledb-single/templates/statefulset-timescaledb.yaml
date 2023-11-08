@@ -30,6 +30,7 @@ spec:
       name: {{ template "timescaledb.fullname" . }}
       labels:
         app: {{ template "timescaledb.fullname" . }}
+        app.kubernetes.io/name: timescaledb
         release: {{ .Release.Name }}
         cluster-name: {{ template "clusterName" . }}
         app.kubernetes.io/component: timescaledb
@@ -624,6 +625,7 @@ spec:
 {{ toYaml .Values.persistentVolumes.wal.annotations | indent 10 }}
         {{- end }}
         labels:
+
           app: {{ template "timescaledb.fullname" . }}
           release: {{ .Release.Name }}
           heritage: {{ .Release.Service }}

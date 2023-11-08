@@ -12,6 +12,7 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
     app: k8s-watcher
+    app.kubernetes.io/name: k8s-watcher
     {{- if .Values.k8sWatcher.additionalLabels }}
 {{ toYaml .Values.k8sWatcher.additionalLabels | indent 4 }}
     {{- end }}
@@ -36,6 +37,7 @@ spec:
         {{- end }}
       labels:
         app: k8s-watcher
+        app.kubernetes.io/name: k8s-watcher
         {{ with .Values.global.groundcoverLabels }} 
         {{- toYaml . | nindent 8 }}
         {{- end }}
