@@ -76,7 +76,7 @@ agent:
         memory: 700Mi
         cpu: 800m
     obfuscateData: false
-    dataRetention: 12h
+    dataRetention: 24h
     nodelabels: []
     contentTypesToDrop: ["text/html", "text/javascript", "text/css", "image", "font", "video", "audio"]
     watchOnlyLocalNode: true
