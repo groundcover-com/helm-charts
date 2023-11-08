@@ -43,4 +43,11 @@ spec:
                 name: router
                 port:
                   number: 8080
-  {{ end }}
+          - path: /datasources
+            pathType: Prefix
+            backend:
+              service:
+                name: router
+                port:
+                  number: 8080
+{{ end }}
