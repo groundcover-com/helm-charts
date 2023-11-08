@@ -11,7 +11,7 @@ data:
     groundcoverVersion: ""
     podsResyncDuration: 15m
     unavailableDeploymentPollInterval: 10s
-    summarizerActiveTtl: 180s
+    summarizerActiveTtl: 45s
     pushsummaries: true
     productmetricsflushmintotalcounter:
       deployment_event: 1

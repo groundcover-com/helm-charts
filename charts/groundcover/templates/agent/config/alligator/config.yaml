@@ -7,19 +7,19 @@ data:
     productchansize: 4096
     pushsummaries: true
     productmetricsflushmintotalcounter:
-      http: 2
-      redis: 2
-      sql: 2
-      kafka: 2
-      dns: 2
+      http: 5
+      redis: 5
+      sql: 5
+      kafka: 5
+      dns: 5
       conn_stats: 2
       tcp_stats: 2
       node_info: 2
       container_crash: 1
       container_info: 1
-      pvc_info: 2
       container_state: 1
-      grpc: 2
+      pvc_info: 1
+      grpc: 5
     tracyEnabled: {{ template "agent.tracy.enabled" . }}
     tracy:
       address: "ipc:///comm/tracy.data"
@@ -31,7 +31,7 @@ data:
       issuesthreshold: 10
       samplingmode: 1 # DefaultSample
       interval: 30s
-      summarizerActiveTtl: 180s
+      summarizerActiveTtl: 45s
       aggregationCacheSize: 4096
 
     grpchandler:
@@ -39,7 +39,7 @@ data:
       issuesthreshold: 10
       samplingmode: 1 # DefaultSample
       interval: 30s
-      summarizerActiveTtl: 180s
+      summarizerActiveTtl: 45s
       aggregationCacheSize: 4096
 
     redishandler:
@@ -47,7 +47,7 @@ data:
       issuesthreshold: 10
       samplingmode: 1 # DefaultSample
       interval: 30s
-      summarizerActiveTtl: 180s
+      summarizerActiveTtl: 45s
       aggregationCacheSize: 4096
 
     sqlhandler:
@@ -55,7 +55,7 @@ data:
       issuesthreshold: 10
       samplingmode: 1 # DefaultSample
       interval: 30s
-      summarizerActiveTtl: 180s
+      summarizerActiveTtl: 45s
       aggregationCacheSize: 4096
 
     kafkahandler:
@@ -63,7 +63,7 @@ data:
       issuesthreshold: 10
       samplingmode: 1 # DefaultSample
       interval: 30s
-      summarizerActiveTtl: 180s
+      summarizerActiveTtl: 45s
       aggregationCacheSize: 4096
 
     dnshandler:
@@ -71,7 +71,7 @@ data:
       issuesthreshold: 10
       samplingmode: 1 # DefaultSample
       interval: 30s
-      summarizerActiveTtl: 180s
+      summarizerActiveTtl: 45s
       aggregationCacheSize: 300
 
     connStatsHandler:
@@ -79,7 +79,7 @@ data:
       issuesthreshold: 10
       samplingmode: 0 # DontSample
       interval: 30s
-      summarizerActiveTtl: 180s
+      summarizerActiveTtl: 45s
       aggregationCacheSize: 100
 
     tcpStatsHandler:
@@ -87,7 +87,7 @@ data:
       issuesthreshold: 10
       samplingmode: 0 # DontSample
       interval: 30s
-      summarizerActiveTtl: 180s
+      summarizerActiveTtl: 45s
       aggregationCacheSize: 100
 
     containerInfoHandler:
@@ -95,7 +95,7 @@ data:
       issuesthreshold: 10
       samplingmode: 1 # DefaultSample
       interval: 30s
-      summarizerActiveTtl: 180s
+      summarizerActiveTtl: 45s
       aggregationCacheSize: 4096
 
     containerStateHandler:
@@ -103,7 +103,7 @@ data:
       issuesthreshold: 10
       samplingmode: 0 # DontSample
       interval: 30s
-      summarizerActiveTtl: 180s
+      summarizerActiveTtl: 45s
       aggregationCacheSize: 4096
     
     nodeinfohandler:
@@ -111,7 +111,7 @@ data:
       issuesthreshold: 20
       samplingmode: 0 # DontSample
       interval: 1m0s
-      summarizerActiveTtl: 180s
+      summarizerActiveTtl: 45s
       aggregationCacheSize: 1024
 
     containercrashhandler:
@@ -119,7 +119,7 @@ data:
       issuesthreshold: 20
       samplingmode: 1 # DefaultSample
       interval: 30s
-      summarizerActiveTtl: 180s
+      summarizerActiveTtl: 45s
       aggregationCacheSize: 1024
 
     pvcinfohandler:
@@ -127,7 +127,7 @@ data:
       issuesthreshold: 20
       samplingmode: 0 # DontSample
       interval: 1m0s
-      summarizerActiveTtl: 180s
+      summarizerActiveTtl: 45s
       aggregationCacheSize: 1024
 
     timeseriesstorage:

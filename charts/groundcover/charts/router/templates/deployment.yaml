@@ -30,6 +30,7 @@ spec:
         prometheus.io/port: "9102"
     spec:
       serviceAccountName: router
+      imagePullSecrets: {{ include "router.imagePullSecrets" . }}
       containers:
         - name: router
           image: {{ .Values.origin.registry }}/{{ .Values.repository }}:{{ .Values.origin.tag }}

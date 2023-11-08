@@ -2,11 +2,12 @@ enabled: true
 additionalLabels:
 mode: cloud
 origin:
-  registry: public.ecr.aws/groundcovercom
-  tag: 1.4.39
+  registry: quay.io/groundcover
+  tag: 1.4.40
 serviceAccount:
   annotations:
 repository: router
+imagePullSecrets: []
 configuration:
   requestTimeout: 20s
   slowRequestThreshold: 3s
