@@ -18,7 +18,7 @@ onprem:
   enabled: true
 origin:
   registry: quay.io/groundcover
-  tag: 1.5.18
+  tag: 1.5.19
 serviceAccount:
   annotations:
 repository: router
@@ -62,6 +62,7 @@ configuration:
       Pass: ""
       Timeout: 150s
       Interval: 5s
+      SSLMode: "require"
     Cache:
       ttl: 10m
       PurgeInterval: 20m
