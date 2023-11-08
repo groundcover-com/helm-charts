@@ -1,33 +1,32 @@
-{{- if .Values.grpcIngress.enabled }}
+{{- if and .Values.backend.enabled .Values.shepherd.grpcIngress.enabled }}
 {{- $ingressApiIsStable := eq (include "shepherd.ingress.isStable" .) "true" -}}
 {{- $ingressSupportsIngressClassName := eq (include "shepherd.ingress.supportsIngressClassName" .) "true" -}}
 {{- $ingressSupportsPathType := eq (include "shepherd.ingress.supportsPathType" .) "true" -}}
-{{- $servicePort := .Values.service.grpcPort -}}
-{{- $ingressPathType := .Values.grpcIngress.pathType -}}
+{{- $servicePort := .Values.shepherd.service.grpcPort -}}
+{{- $ingressPathType := .Values.shepherd.grpcIngress.pathType -}}
 apiVersion: {{ include "shepherd.ingress.apiVersion" . }}
 kind: Ingress
 metadata:
-{{- if .Values.grpcIngress.annotations }}
+{{- if .Values.shepherd.grpcIngress.annotations }}
   annotations:
-{{ toYaml .Values.grpcIngress.annotations | indent 4 }}
+{{ toYaml .Values.shepherd.grpcIngress.annotations | indent 4 }}
 {{- end }}
   labels:
     {{ with .Values.global.groundcoverLabels }} 
     {{- toYaml . | nindent 4 }}
     {{- end }}
-    {{- include "chart.labels" . | nindent 4 }}
-    {{ with .Values.grpcIngress.extraLabels }}
+    {{ with .Values.shepherd.grpcIngress.extraLabels }}
 {{ toYaml . | indent 4 }}
   {{ end }}
-  name: {{ template "chart.name" . }}-grpc
+  name: {{ include "shepherd.name" . }}-grpc
   namespace: {{ .Release.Namespace }}
 spec:
-  {{- if and $ingressSupportsIngressClassName .Values.grpcIngress.ingressClassName }}
-  ingressClassName: {{ .Values.grpcIngress.ingressClassName }}
+  {{- if and $ingressSupportsIngressClassName .Values.shepherd.grpcIngress.ingressClassName }}
+  ingressClassName: {{ .Values.shepherd.grpcIngress.ingressClassName }}
   {{- end }}
   rules:
-  {{- $serviceName := include "chart.name" . }}
-  {{- range .Values.grpcIngress.hosts }}
+  {{- $serviceName := (include "shepherd.name" .) }}
+  {{- range .Values.shepherd.grpcIngress.hosts }}
   - host: {{ .host }}
     http:
       paths:
@@ -46,8 +45,8 @@ spec:
             servicePort: {{ $servicePort }}
             {{- end }}
   {{- end -}}
-{{- if .Values.grpcIngress.tls }}
+{{- if .Values.shepherd.grpcIngress.tls }}
   tls:
-{{ toYaml .Values.grpcIngress.tls | indent 4 }}
+{{ toYaml .Values.shepherd.grpcIngress.tls | indent 4 }}
 {{- end -}}
 {{- end -}}

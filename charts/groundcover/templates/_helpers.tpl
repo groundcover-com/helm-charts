@@ -96,22 +96,6 @@ Get cluster_id from values or generate random one
 {{- default ( printf "http://groundcover-loki:%d"  ( .Values.loki.service.port | int ) ) .Values.loki.overrideURL  -}}
 {{- end -}}
 
-{{- define "shepherd.http_scheme"}}
-{{- if and .Values.shepherd.config.ingestor.TLSCertFile .Values.shepherd.config.ingestor.TLSKeyFile }}
-{{- printf "%s" "https" -}}
-{{- else}}
-{{- printf "%s" "http" -}}
-{{- end }}
-{{- end -}}
-
-{{- define "shepherd.grpc" -}}
-{{- index .Values "shepherd" "overrideGrpcURL" | default ( printf "shepherd:%d"  ( .Values.shepherd.service.grpcPort | int ) ) -}}
-{{- end -}}
-
-{{- define "shepherd.http" -}}
-{{- index .Values "shepherd" "overrideHttpURL" | default ( printf "%s://shepherd:%d"  ( include "shepherd.http_scheme" . ) ( .Values.shepherd.service.httpPort | int ) ) -}}
-{{- end -}}
-
 {{/*
 Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
@@ -160,11 +144,3 @@ Allow the release namespace to be overridden
 {{- define "imagePullSecrets" }}
 {{- default .Values.global.imagePullSecrets .Values.imagePullSecrets | toJson -}}
 {{- end -}}}}
-
-{{- define "shepherd.tls_enabled"}}
-{{- if and .Values.shepherd.config.ingestor.TLSCertFile .Values.shepherd.config.ingestor.TLSKeyFile }}
-{{- true -}}
-{{- else}}
-{{- false -}}
-{{- end }}
-{{- end -}}

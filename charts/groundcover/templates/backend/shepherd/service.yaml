@@ -1,29 +1,28 @@
+{{ if .Values.backend.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: shepherd
+  name: {{ include "shepherd.name" . }}
   labels:
     {{ with .Values.global.groundcoverLabels }} 
     {{- toYaml . | nindent 4 }}
     {{- end }}
     app: shepherd
-    {{- include "shepherd.labels" . | nindent 4 }}
-  {{- if .Values.service.annotations }}
+  {{- if .Values.shepherd.service.annotations }}
   annotations:
-    {{- .Values.service.annotations | toYaml | nindent 4 }}
+    {{- .Values.shepherd.service.annotations | toYaml | nindent 4 }}
   {{- end }}
 spec:
-  type: {{ .Values.service.type }}
+  type: {{ .Values.shepherd.service.type }}
   ports:
-    - port: {{ .Values.service.grpcPort }}
+    - port: {{ .Values.shepherd.service.grpcPort }}
       targetPort: grpc-shepherd
       protocol: TCP
       name: grpc-shepherd
-    - port: {{ .Values.service.httpPort }}
+    - port: {{ .Values.shepherd.service.httpPort }}
       targetPort: http-metrics
       protocol: TCP
       name: http-metrics
-  
   selector:
     app: shepherd
-    {{- include "shepherd.selectorLabels" . | nindent 4 }}
+{{- end }}

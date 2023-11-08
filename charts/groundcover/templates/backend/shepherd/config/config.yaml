@@ -1,0 +1,15 @@
+{{ if .Values.backend.enabled }}
+apiVersion: v1
+data:
+  config.yaml: |
+{{ toYaml .Values.shepherd.config | nindent 6 }}
+kind: ConfigMap
+metadata:
+  name: {{ include "shepherd.name" . }}-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{ with .Values.global.groundcoverLabels }} 
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+    app: shepherd
+{{- end }}

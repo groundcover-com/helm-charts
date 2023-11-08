@@ -1,5 +1,5 @@
 apiVersion: v2
-appVersion: 0.63.1
+appVersion: 0.64.0
 dependencies:
 - name: router
   repository: ""
@@ -14,10 +14,10 @@ dependencies:
 - condition: backend.enabled
   name: loki
   repository: ""
-- condition: backend.enabled
+- condition: shepherd.chart
   name: shepherd
   repository: ""
 description: A Helm chart for Kubernetes
 name: groundcover
 type: application
-version: 0.63.1
+version: 0.64.0

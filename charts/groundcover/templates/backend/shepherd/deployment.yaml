@@ -1,0 +1,124 @@
+{{ if .Values.backend.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "shepherd.name" . }}
+  labels:
+    {{ with .Values.global.groundcoverLabels }} 
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+    app: shepherd
+spec:
+  replicas: {{ .Values.shepherd.replicaCount }}
+  selector:
+    matchLabels:
+      app: shepherd
+  template:
+    metadata:
+      annotations:
+        groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+        groundcover.com/scrape: "true"
+        groundcover.com/port: "{{ .Values.shepherd.config.httpPort }}"
+        groundcover.com/path: "/data"
+        groundcover.com/scheme: {{ template "shepherd.http_scheme" . }}
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "{{ .Values.shepherd.config.httpPort }}"
+        prometheus.io/path: "/metrics"
+        prometheus.io/scheme: {{ template "shepherd.http_scheme" . }}
+        checksum/config: {{ printf "%s" .Values.shepherd.config | sha256sum -}}
+    {{- with .Values.shepherd.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      labels:
+        {{ with .Values.global.groundcoverLabels }} 
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        app: shepherd
+    spec:
+      {{- with .Values.shepherd.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "shepherd.name" . }}
+      {{- if .Values.shepherd.priorityClassName }}
+      priorityClassName: {{ .Values.shepherd.priorityClassName }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.shepherd.podSecurityContext | nindent 8 }}
+      initContainers:
+      - name: check-ts-ready
+        image: {{ .Values.global.origin.registry }}/postgres:9.6.5
+        command:
+          - bash
+          - -c
+          - |
+            [ -z "$GROUNDCOVER_VERSION" ] && echo "\$GROUNDCOVER_VERSION is missing" && exit 1
+            for i in {1..1800}; do sleep 2; DB_VERSION=`psql -X -A -t -h groundcover-tsdb -U postgres -c "SELECT value FROM version ORDER BY time desc limit 1"`; echo "running_version = '$GROUNDCOVER_VERSION', db_version='$DB_VERSION'"; [[ "$GROUNDCOVER_VERSION" == "$DB_VERSION" ]] && echo "DONE" && exit 0; done; echo "TIMEOUT"; exit 1;
+        env:
+          - name: PGPASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: PATRONI_SUPERUSER_PASSWORD
+                name: {{ index .Values "timescaledb-single" "secrets" "credentialsSecretName" | default "groundcover-tsdb-credentials" }}
+          - name: GROUNDCOVER_VERSION
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.annotations['groundcover_version']  
+      containers:
+        - name: {{ include "shepherd.name" . }}
+          securityContext:
+            {{- toYaml .Values.shepherd.securityContext | nindent 12 }}
+          image: "{{ tpl .Values.shepherd.image.repository . }}:{{ .Values.shepherd.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.shepherd.image.pullPolicy }}
+          env:
+            - name: GC_TIMESCALEDB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: PATRONI_SUPERUSER_PASSWORD
+                  name: {{ index .Values "timescaledb-single" "secrets" "credentialsSecretName" | default "groundcover-tsdb-credentials" }}
+          volumeMounts: 
+            - name: config
+              mountPath: /config
+            - name: certificate
+              mountPath: /var/groundcover/server
+              readOnly: true
+          ports:
+            - name: http-metrics
+              containerPort: {{ .Values.shepherd.config.httpPort }}
+              protocol: TCP
+            - name: grpc-shepherd
+              containerPort: {{ .Values.shepherd.config.grpcPort }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http-metrics
+              scheme: {{ include "shepherd.http_scheme" . | upper }}
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http-metrics
+              scheme: {{ include "shepherd.http_scheme" . | upper }}
+          resources:
+            {{- toYaml .Values.shepherd.resources | nindent 12 }}
+      {{- with .Values.shepherd.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.shepherd.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.shepherd.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "shepherd.name" . }}-config
+        - name: certificate
+          secret:
+            secretName: {{ include "shepherd.name" . }}-certificate
+            defaultMode: 416 # 0640 permissions
+{{- end }}

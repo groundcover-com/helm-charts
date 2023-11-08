@@ -49,6 +49,9 @@ data:
       url: "{{ template "shepherd.grpc" . }}"
       enableTLS: {{ template "shepherd.tls_enabled" . }}
       handlerFlushInterval: {{ .Values.agent.alligator.shepherd.handlerFlushInterval }}
+      tableWriterBatchMaxSize: 350
+      tableWriterBatchInterval: 1s
+      tableWriterBatchWriteTimeout: 1m
 kind: ConfigMap
 metadata:
   labels:
