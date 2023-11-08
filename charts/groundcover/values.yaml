@@ -21,6 +21,9 @@ global:
   imagePullSecrets: []
   groundcoverLabels:
 
+# optional parameters: stable, legacy, experimental
+mode: legacy
+
 metrics:
   enabled: true
 
@@ -71,8 +74,6 @@ backend:
 
 agent:
   enabled: true
-  # Enable groundcover's new ebpf agent, currently experimental
-  experimental: false
   additionalLabels:
   podLabels:
   additionalAnnotations:
@@ -112,7 +113,6 @@ agent:
       handlerFlushInterval: 1m0s
     env:
   tracy:
-    enabled: true
     image:
       repository: "{{ .Values.global.origin.registry }}/tracy"
     resources:
@@ -188,7 +188,6 @@ loki:
       configMap:
         name: pvcleanup-scripts
         defaultMode: 0755
-
 
   image:
     repository: "{{ .Values.global.origin.registry }}/loki"
@@ -423,7 +422,7 @@ victoria-metrics-agent:
             target_label: instance
 
 kube-state-metrics:
-  fullnameOverride: kube-state-metrics
+  nameOverride: kube-state-metrics
   enabled: false
   service:
     port: 8080
@@ -550,14 +549,9 @@ custom-metrics:
       kubernetes_sd_configs:
         - role: endpointslices
       relabel_configs:
-        - source_labels:
-            [
-              __meta_kubernetes_namespace,
-              __meta_kubernetes_service_label_app_kubernetes_io_name,
-            ]
+        - source_labels: [__meta_kubernetes_namespace]
           action: drop
-          separator: "@"
-          regex: "groundcover.*@[^k]*[^u]*[^b]*[^e]*"
+          regex: groundcover.*
         - action: drop
           source_labels: [__meta_kubernetes_pod_container_init]
           regex: true
@@ -766,6 +760,42 @@ custom-metrics:
       - job_name: custom-metrics-vmagent
         static_configs:
           - targets: ["localhost:8429"]
+      - job_name: 'kube-state-metrics'
+        kubernetes_sd_configs:
+          - role: endpoints
+            namespaces:
+              own_namespace: true
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_service_label_app_kubernetes_io_name]
+            action: keep
+            regex: kube-state-metrics
+          - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+            action: keep
+            regex: true
+          - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+            action: replace
+            target_label: __scheme__
+            regex: (https?)
+          - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+            action: replace
+            target_label: __metrics_path__
+            regex: (.+)
+          - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+            action: replace
+            target_label: __address__
+            regex: ([^:]+)(?::\d+)?;(\d+)
+            replacement: $1:$2
+          - action: labelmap
+            regex: __meta_kubernetes_service_label_(.+)
+          - source_labels: [__meta_kubernetes_namespace]
+            action: replace
+            target_label: kubernetes_namespace
+          - source_labels: [__meta_kubernetes_service_name]
+            action: replace
+            target_label: kubernetes_name
+          - source_labels: [__meta_kubernetes_pod_node_name]
+            action: replace
+            target_label: kubernetes_node
 
 victoria-metrics-single:
   # imagePullSecrets: []

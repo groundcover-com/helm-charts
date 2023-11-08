@@ -135,7 +135,7 @@ data:
     obfuscateData: {{ .Values.agent.alligator.obfuscateData }}
     dataRetention: {{ .Values.agent.alligator.dataRetention }}
     watchOnlyLocalNode: {{ .Values.agent.alligator.watchOnlyLocalNode }}
-    floraEnabled: {{ .Values.agent.experimental }}
+    floraEnabled: {{ ne .Values.mode "legacy" }}
     runningNamespace: ""
     shouldDropRunningNamespaces: {{ .Values.shouldDropRunningNamespaces }}
     tracesNamespaceFilters: {{ toYaml .Values.tracesNamespaceFilters | nindent 6 }}

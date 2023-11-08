@@ -98,7 +98,7 @@ Allow the release namespace to be overridden
 */}}
 
 {{- define "agent.tracy.enabled" }}
-{{- and .Values.agent.tracy.enabled (not .Values.agent.experimental) -}}
+{{- eq .Values.mode "legacy" -}}
 {{- end -}}
 
 {{- define "imagePullSecrets" }}
