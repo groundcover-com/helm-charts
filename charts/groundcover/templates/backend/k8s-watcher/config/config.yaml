@@ -48,6 +48,7 @@ data:
     shepherd:
       url: "{{ template "shepherd.grpc" . }}"
       enableTLS: {{ template "shepherd.tls_enabled" . }}
+      handlerFlushInterval: {{ .Values.agent.alligator.shepherd.handlerFlushInterval }}
 kind: ConfigMap
 metadata:
   labels:

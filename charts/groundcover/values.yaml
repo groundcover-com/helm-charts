@@ -97,6 +97,8 @@ agent:
     nodelabels: []
     contentTypesToDrop: ["text/html", "text/javascript", "text/css", "image", "font", "video", "audio"]
     watchOnlyLocalNode: false
+    shepherd:
+      handlerFlushInterval: 1m0s
     env:
   tracy:
     enabled: true

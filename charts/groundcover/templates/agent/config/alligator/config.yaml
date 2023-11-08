@@ -145,6 +145,7 @@ data:
     shepherd:
       url: "{{ template "shepherd.grpc" . }}"
       enableTLS: {{ template "shepherd.tls_enabled" . }}
+      handlerFlushInterval: {{ .Values.agent.alligator.shepherd.handlerFlushInterval }}
     promscalestorage:
       url: "{{ template "promscale.otelURL" . }}"
       tls: true
@@ -227,6 +228,7 @@ data:
         filterRunningNamespace: true
         groundcoverTimeTravel: -20s
         logDropFilters: {{ toYaml .Values.logsDropFilters | nindent 10}}
+        metricateLabels: true
       - name: "monitoring_client"
         enabled: {{ .Values.logging.enabled }}
         urlText: https://{{ .Values.logging.host }}/loki/api/v1/push
@@ -249,6 +251,7 @@ data:
         timeout: 10s   
         useRingBuffer: false
         filterRunningNamespace: false
+        metricateLabels: false
 kind: ConfigMap
 metadata:
   labels:
