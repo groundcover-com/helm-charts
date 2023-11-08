@@ -245,7 +245,7 @@ opentelemetry-collector:
           name: '{{ include "clickhouse.secretName" . }}'
   image:
     repository: public.ecr.aws/groundcovercom/otel/opentelemetry-collector-contrib
-    tag: "1.1.5"
+    tag: "1.1.6"
   podAnnotations:
     prometheus.io/scrape: "true"
     prometheus.io/port: '{{ index .Values "ports" "metrics" "containerPort" | int }}'
@@ -492,6 +492,13 @@ custom-metrics:
     remoteWrite.maxDailySeries: "1000000"
     remoteWrite.maxHourlySeries: "100000"
     remoteWrite.maxDiskUsagePerURL: 1GB
+    remoteWrite.label: clusterId=$(GC_CLUSTER_ID)
+  env:
+    - name: GC_CLUSTER_ID
+      valueFrom:
+        secretKeyRef:
+          name: groundcover-config
+          key: GC_CLUSTER_ID
   remoteWriteUrls:
     - http://groundcover-victoria-metrics:8428/api/v1/write
   extraScrapeConfigs:
