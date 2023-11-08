@@ -1,13 +1,9 @@
 apiVersion: v2
-appVersion: 1.3.27
+appVersion: 1.4.0
 dependencies:
 - name: router
   repository: ""
   version: 0.1.0
-- condition: backend.enabled
-  name: timescaledb-single
-  repository: ""
-  version: 0.11.0
 - condition: backend.enabled
   name: victoria-metrics-single
   repository: ""
@@ -56,4 +52,4 @@ dependencies:
 description: Cloud Native Observability
 name: groundcover
 type: application
-version: 1.3.27
+version: 1.4.0

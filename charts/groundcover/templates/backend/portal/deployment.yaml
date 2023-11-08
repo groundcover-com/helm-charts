@@ -71,11 +71,6 @@ spec:
             secretKeyRef:
               key: GC_CLUSTER_ID
               name: groundcover-config
-        - name: GC_DB_PASS
-          valueFrom:
-            secretKeyRef:
-              key: PATRONI_SUPERUSER_PASSWORD
-              name: {{ index .Values "timescaledb-single" "secrets" "credentialsSecretName" | default "groundcover-tsdb-credentials" }}
 {{ if eq .Values.router.mode "cloud" }}
         - name: GC_ROUTER_TOKEN
           valueFrom:

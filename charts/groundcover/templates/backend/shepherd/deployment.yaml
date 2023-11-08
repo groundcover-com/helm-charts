@@ -43,25 +43,6 @@ spec:
       {{- end }}
       securityContext:
         {{- toYaml .Values.shepherd.podSecurityContext | nindent 8 }}
-      initContainers:
-      - name: check-ts-ready
-        image: {{ .Values.global.origin.registry }}/postgres:15.3-alpine3.18
-        command:
-          - bash
-          - -c
-          - |
-            [ -z "$GROUNDCOVER_VERSION" ] && echo "\$GROUNDCOVER_VERSION is missing" && exit 1
-            for i in {1..1800}; do sleep 2; DB_VERSION=`psql -X -A -t -h groundcover-tsdb -U postgres -c "SELECT value FROM version ORDER BY time desc limit 1"`; echo "running_version = '$GROUNDCOVER_VERSION', db_version='$DB_VERSION'"; [[ "$GROUNDCOVER_VERSION" == "$DB_VERSION" ]] && echo "DONE" && exit 0; done; echo "TIMEOUT"; exit 1;
-        env:
-          - name: PGPASSWORD
-            valueFrom:
-              secretKeyRef:
-                key: PATRONI_SUPERUSER_PASSWORD
-                name: {{ index .Values "timescaledb-single" "secrets" "credentialsSecretName" | default "groundcover-tsdb-credentials" }}
-          - name: GROUNDCOVER_VERSION
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.annotations['groundcover_version']  
       containers:
         - name: {{ include "shepherd.name" . }}
           securityContext:
@@ -69,11 +50,6 @@ spec:
           image: "{{ tpl .Values.shepherd.image.repository . }}:{{ .Values.shepherd.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.shepherd.image.pullPolicy }}
           env:
-            - name: GC_TIMESCALEDB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  key: PATRONI_SUPERUSER_PASSWORD
-                  name: {{ index .Values "timescaledb-single" "secrets" "credentialsSecretName" | default "groundcover-tsdb-credentials" }}
             - name: GC_GROUNDCOVERVERSION
               valueFrom:
                 fieldRef:

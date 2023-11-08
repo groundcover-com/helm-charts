@@ -188,6 +188,12 @@ data:
         groundcoverTimeTravel: -20s
         logDropFilters: {{ toYaml .Values.logsDropFilters | nindent 10}}
         metricateLabels: false
+    otlp:
+      endpoint: {{ include "opentelemetry-collector.otlp.grpc.url" . }}
+      enableTLS: {{ .Values.global.otlp.tls.enabled }}
+      writeTimeout: 10s
+      batchSize: 350
+      flushInterval: 1s
 kind: ConfigMap
 metadata:
   labels:

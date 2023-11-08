@@ -2,9 +2,6 @@ dependencies:
 - name: router
   repository: ""
   version: 0.1.0
-- name: timescaledb-single
-  repository: ""
-  version: 0.11.0
 - name: victoria-metrics-single
   repository: ""
   version: 0.8.19
@@ -29,5 +26,5 @@ dependencies:
 - name: incloud-ingress
   repository: ""
   version: 0.1.0
-digest: sha256:afcb56d69adab3b1280212133c20a40947276eacfa8e8eefe5b51cc5e7b536a0
-generated: "2023-06-07T15:09:58.553623545Z"
+digest: sha256:dc6065c131b2cf0a94b297e97b401782de9913dae225132fa2e5411ec93791bf
+generated: "2023-07-04T06:49:50.589835766Z"
