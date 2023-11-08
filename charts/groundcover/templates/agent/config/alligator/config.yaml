@@ -149,6 +149,16 @@ data:
         processingInterval: 100ms
         eBPFStatsReadingInterval: 5s
         tsConverterSyncInterval: 10s
+        protocols:
+          http:
+            enabled: true
+            bodyStoreSizeLimit: 1048576 # 1mb
+            headersParseLimit: 4096 # 4kb
+            chunkedTransferSizeDigitLimit: 10
+        bpfLoading:
+          verboseBpfErrors: false
+          bpfErrorsBufferSize: 104857600 # 100mb
+          bpfVerifierErrorFile: "/tmp/flora-verifier-error"
         connectionManager:
           statusCheckIntervalTicks: 20
           connection:
@@ -158,11 +168,6 @@ data:
             matchingTrafficLimit: 51200 # 50k
             continuousProcessingErrorsLimit: 5
             totalProcessingErrorsLimit: 10
-            protocols:
-              http:
-                bodyStoreSizeLimit: 1048576 # 1mb
-                headersParseLimit: 4096 # 4kb
-                chunkedTransferSizeDigitLimit: 10
         ringBuffer:
           pollingBufferSize: 10485760 # 10mb
       metrics:
