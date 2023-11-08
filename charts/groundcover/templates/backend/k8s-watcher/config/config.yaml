@@ -6,6 +6,7 @@ data:
     resourceconntimeout: 1m0s
     concurrency: 10
     productchansize: 20480
+    k8sloadtimeout: 2m0s
 
     VictoriaMetrics:
       URL: "{{ template "vmagent.url" . }}"
