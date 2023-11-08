@@ -143,6 +143,14 @@ Get cluster_id from values or generate random one
 {{- end -}}
 {{- end -}}
 
+{{- define "telemetry.traces.otlpUrl" }}
+    {{- .Values.global.telemetry.traces.otlpUrl -}}
+{{- end -}}
+
+{{- define "telemetry.traces.zipkinUrl" }}
+    {{- .Values.global.telemetry.traces.zipkinUrl -}}
+{{- end -}}
+
 {{- define "db-manager.ready.http.url" -}}
 {{- print "http://db-manager:8888/writer-ready" -}}
 {{- end -}}

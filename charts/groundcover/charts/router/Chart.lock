@@ -1,12 +1,12 @@
 dependencies:
 - name: postgresql
   repository: https://charts.bitnami.com/bitnami
-  version: 12.7.2
+  version: 12.6.9
 - name: grafana
   repository: https://grafana.github.io/helm-charts
   version: 6.58.6
 - name: kong
   repository: https://charts.konghq.com
   version: 2.20.0
-digest: sha256:488b57d23e594ab68050130d913928d855b1f8bcca8d3dc205e88b739e6e1f48
-generated: "2023-10-22T10:02:50.233797639Z"
+digest: sha256:7d530da239d84c80e0074291b1497d1af294b250ac8f47d32e2c755af293f59c
+generated: "2023-10-30T16:01:29.945205955Z"

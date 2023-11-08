@@ -77,6 +77,13 @@ spec:
             secretKeyRef:
               key: {{ template "groundcover.apikeySecretKey" . }}
               name: {{ template "groundcover.apikeySecretName" . }}
+        {{- if eq (include "telemetry.enabled" .) "true" }}
+        - name: GC_TRACING_HEADERS_APIKEY
+          valueFrom:
+            secretKeyRef:
+              key: {{ template "groundcover.apikeySecretKey" . }}
+              name: {{ template "groundcover.apikeySecretName" . }}
+        {{- end }}
         - name: GC_CLICKHOUSE_PASS
           valueFrom:
             secretKeyRef:

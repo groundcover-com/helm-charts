@@ -48,6 +48,17 @@ data:
       Database: {{ include "clickhouse.database" . }}
       HTTPPort: {{ .Values.global.clickhouse.containerPorts.http | int }}
       NativePort: {{ .Values.global.clickhouse.containerPorts.tcp | int }}
+    {{- if eq (include "telemetry.enabled" .) "true" }}
+    Tracing:
+      Enabled: true
+      Endpoint: '{{ include "telemetry.traces.otlpUrl" . }}'
+      WriteTimeout: 5s
+      FlushInterval: 5s
+      BatchSize: 50
+      Headers:
+        apikey: "OVERRIDEN"
+    {{- end }}
+
 
 kind: ConfigMap
 metadata:

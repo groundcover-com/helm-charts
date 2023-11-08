@@ -68,6 +68,9 @@ global:
       url: https://logs.groundcover.com/v1/logs
     metrics:
       url: https://metrics.groundcover.com/api/v1/write
+    traces:
+      otlpUrl: https://traces.groundcover.com/v1/traces
+      zipkinUrl: https://traces.groundcover.com/api/v2/spans
 
 tags:
   # InCloud - Enterprise Setup. groundcover's control-plane reconciled observability infrastructure deployment.

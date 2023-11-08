@@ -3,6 +3,17 @@
 {{- end -}}
 
 {{/*
+ Create the name of the service account to use
+ */}}
+{{- define "postgresql.serviceAccountName" -}}
+{{- if .Values.global.postgresql.serviceAccount.create -}}
+    {{ default (include "postgresql.primary.fullname" .) .Values.global.postgresql.serviceAccount.name }}
+{{- else -}}
+    {{ default "default" .Values.global.postgresql.serviceAccount.name }}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Get the password secret.
 */}}
 {{- define "postgresql.secretName" -}}
