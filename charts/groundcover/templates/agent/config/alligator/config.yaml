@@ -62,6 +62,12 @@ data:
       shouldsample: false
       interval: 1m0s
 
+    containerrestarthandler:
+      samplesthreshold: 20
+      issuesthreshold: 20
+      shouldsample: false
+      interval: 30s
+
     pidcache:
       expiration: 5m
       purge: 20s
