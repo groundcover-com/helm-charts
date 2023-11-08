@@ -6,7 +6,7 @@ mode: cloud
 
 origin:
   registry: public.ecr.aws/groundcovercom
-  tag: 0.33.7
+  tag: 0.33.8
 
 repository: router
 
@@ -26,6 +26,10 @@ ingress:
   enabled: false
   host: domain.groundcover.com
   externalName:
+
+apiIngress:
+  enabled: false
+  host: domain.groundcover.com
 
 resources:
   requests:
