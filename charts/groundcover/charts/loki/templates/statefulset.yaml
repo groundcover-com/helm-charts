@@ -127,7 +127,13 @@ spec:
 {{- end }}
   {{- if not .Values.persistence.enabled }}
         - name: storage
+    {{- if .Values.nfs.enabled }}
+          nfs: 
+            server: {{ .Values.nfs.server }}
+            path: {{ .Values.nfs.path }}
+    {{- else }}
           emptyDir: {}
+    {{- end }}
   {{- else if .Values.persistence.existingClaim }}
         - name: storage
           persistentVolumeClaim:

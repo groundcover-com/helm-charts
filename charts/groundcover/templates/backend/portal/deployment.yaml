@@ -115,13 +115,13 @@ spec:
         - mountPath: /config
           name: portal-config-volume
       initContainers:
-      - command:
-        - sh
-        - -c
-        - until pg_isready -h groundcover-tsdb -p 5432; do echo Waiting for
-          TimescaleDB...; sleep 2; done; echo TimescaleDB is up
-        image: postgres:9.6.5
-        name: check-ts-ready
+      - name: check-promscale-ready
+        image: curlimages/curl:latest
+        command:
+          - /bin/sh
+          - -c
+        args:
+            - while [ $(curl -sw '%{http_code}' -k https://groundcover-promscale-connector:9201/healthz -o /dev/null) -ne 200 ]; do echo 'Waiting for promscale...'; sleep 2; done; echo promscale is up
       - args:
         - while [ $(curl -sw '%{http_code}' http://groundcover-victoria-metrics:8428/health
           -o /dev/null) -ne 200 ]; do echo 'Waiting for VictoriaMetrics...'; sleep

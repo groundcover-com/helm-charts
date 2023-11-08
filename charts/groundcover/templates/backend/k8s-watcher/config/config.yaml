@@ -16,7 +16,7 @@ data:
       samplesthreshold: 100
       issuesthreshold: 100
       interval: 60s
-      shouldsample: true
+      shouldsample: false
 
     dataRetention: {{ .Values.agent.alligator.dataRetention }}
 

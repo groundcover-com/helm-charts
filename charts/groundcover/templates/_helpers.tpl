@@ -121,3 +121,7 @@ Allow the release namespace to be overridden
     {{- .Release.Namespace -}}
   {{- end -}}
 {{- end -}}
+
+{{- define "promscale_secrets_certificate" -}}
+{{ printf "%s-certificate" (include "promscale.fullname" .) }}
+{{- end -}}

@@ -54,6 +54,9 @@ server:
     envflag.prefix: VM_
     loggerFormat: json
     search.maxUniqueTimeseries: "2000000"
+    search.maxSeries: "100000"
+    search.maxTagKeys: "200000"
+    search.maxTagValues: "200000"
 
   # Additional hostPath mounts
   extraHostPathMounts:
@@ -122,6 +125,12 @@ server:
   ##
   # schedulerName:
 
+  # NFS alternative to persistentVolume, mutual exclusive
+  nfs:
+      enabled: false
+      # server:
+      # path: /
+      
   persistentVolume:
     # -- Create/use Persistent Volume Claim for server component. Empty dir if false
     enabled: true

@@ -29,7 +29,7 @@ data:
           selector: '{container=~".+"}'
           stages:
           - regex:
-              expression: '.*(?P<level>(?i)PANIC|ERROR|WARNING|WARN|INFO|DEBUG|TRACE).*' 
+              expression: '.*(?P<level>(?i)FATAL|PANIC|ERROR|WARNING|WARN|INFO|DEBUG|TRACE).*' 
           - labels:
               level:
       - labeldrop:

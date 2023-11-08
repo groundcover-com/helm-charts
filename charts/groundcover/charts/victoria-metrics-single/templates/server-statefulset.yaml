@@ -218,7 +218,13 @@ spec:
         {{- end }}
         {{- if not .Values.server.persistentVolume.enabled }}
         - name: {{ template "victoria-metrics.pvcName" . }}
+        {{- if .Values.server.nfs.enabled }}
+          nfs: 
+            server: {{ .Values.server.nfs.server }}
+            path: {{ .Values.server.nfs.path }}
+        {{- else }}
           emptyDir: {}
+        {{- end }}
         {{- else }}
         {{- if .Values.server.persistentVolume.existingClaim }}
         - name: {{ template "victoria-metrics.pvcName" . }}

@@ -525,7 +525,13 @@ spec:
           optional: True
       {{- if not .Values.persistentVolumes.data.enabled }}
       - name: {{ template "timescaledb.pvcDataName" . }}
+      {{- if .Values.nfs.enabled }}
+        nfs: 
+          server: {{ .Values.nfs.server }}
+          path: {{ .Values.nfs.path }}
+      {{- else }}
         emptyDir: {}
+      {{- end }}
       {{- end }}
       {{- if .Values.prometheus.volumes }}
 {{ .Values.prometheus.volumes | toYaml | indent 6 }}

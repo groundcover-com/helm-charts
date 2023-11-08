@@ -248,24 +248,13 @@ spec:
             - mountPath: /linux-headers
               name: linux-headers
 {{- end }}
-        - command:
-            - bash
+        - name: check-promscale-ready
+          image: curlimages/curl:latest
+          command:
+            - /bin/sh
             - -c
-            - |
-              [ -z "$GROUNDCOVER_VERSION" ] && echo "\$GROUNDCOVER_VERSION is missing" && exit 1
-              for i in {1..1800}; do sleep 2; DB_VERSION=`psql -X -A -t -h groundcover-tsdb -U postgres -c "SELECT value FROM version ORDER BY time desc limit 1"`; echo "running_version = '$GROUNDCOVER_VERSION', db_version='$DB_VERSION'"; [[ "$GROUNDCOVER_VERSION" == "$DB_VERSION" ]] && echo "DONE" && exit 0; done; echo "TIMEOUT"; exit 1;
-          env:
-            - name: PGPASSWORD
-              valueFrom:
-                secretKeyRef:
-                  key: PATRONI_SUPERUSER_PASSWORD
-                  name: {{ index .Values "timescaledb-single" "secrets" "credentialsSecretName" | default "groundcover-tsdb-credentials" }}
-            - name: GROUNDCOVER_VERSION
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.annotations['groundcover_version']
-          image: postgres:9.6.5
-          name: check-ts-ready
+          args:
+              - while [ $(curl -sw '%{http_code}' -k https://groundcover-promscale-connector:9201/healthz -o /dev/null) -ne 200 ]; do echo 'Waiting for promscale...'; sleep 2; done; echo promscale is up
         - args:
               - while [ $(curl -sw '%{http_code}' http://groundcover-victoria-metrics:8428/health -o /dev/null) -ne 200 ]; do echo 'Waiting for VictoriaMetrics...'; sleep 2; done; echo VictoriaMetrics is up
           command:

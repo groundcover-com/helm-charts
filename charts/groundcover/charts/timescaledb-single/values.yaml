@@ -364,7 +364,14 @@ readinessProbe:
   failureThreshold: 6
   successThreshold: 1
 
+# use a predefined NFS storage instead of creating pvc, mutual exclusive with data.enabled and wal.enabled
+nfs:
+  enabled: false
+  server:
+  path:
+
 persistentVolumes:
+
   # For sanity reasons, the actual PGDATA and wal directory will be subdirectories of the Volume mounts,
   # this allows Patroni/a human/an automated operator to move directories during bootstrap, which cannot
   # be done if we did not use subdirectories
@@ -385,6 +392,7 @@ persistentVolumes:
     annotations: {}
     accessModes:
       - ReadWriteOnce
+
   # WAL will be a subdirectory of the data volume, which means enabling a separate
   # volume for the WAL files should just work for new pods.
   wal:
