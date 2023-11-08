@@ -10,6 +10,8 @@ data:
     startuptimeout: 1m0s
 
     ClusterId: {{ template "groundcover.clusterId" . }}
+    MultipleClusterIds: 
+    {{- with .Values.multipleClusterIds }}{{ toYaml . | nindent 6 }}{{- end }}  
     VERSION: "OVERRIDEN"
 
     Router:
@@ -43,6 +45,9 @@ data:
     startuptimeout: 1m0s
 
     ClusterId: {{ template "groundcover.clusterId" . }}
+    {{- with .Values.multipleClusterIds }}
+      {{ toYaml . | nindent 6 }}
+    {{- end }}  
     VERSION: "OVERRIDEN"
 
     Router:

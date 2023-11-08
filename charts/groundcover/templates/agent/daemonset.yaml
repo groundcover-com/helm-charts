@@ -194,12 +194,18 @@ spec:
         - args:
             - -config.file=/etc/promtail/promtail.yaml
             - -client.url={{ template "loki.url" . }}/loki/api/v1/push
+            - -config.expand-env=true
           env:
             - name: HOSTNAME
               valueFrom:
                 fieldRef:
                   apiVersion: v1
                   fieldPath: spec.nodeName
+            - name: GC_CLUSTERID
+              valueFrom:
+                secretKeyRef:
+                    name: groundcover-config
+                    key: GC_CLUSTER_ID
           image: {{ .Values.origin.registry }}/{{ .Values.agent.promtail.repository }}:{{ .Values.origin.tag }}
           resources:
 {{- toYaml .Values.agent.promtail.resources | nindent 12 }}

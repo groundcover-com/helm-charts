@@ -11,7 +11,8 @@ data:
         min_period: 500ms
       batchsize: 1048576
       batchwait: 5s
-      external_labels: {}
+      external_labels:
+        clusterId: ${GC_CLUSTERID}
       timeout: 10s
       groundcover_pager_host: 127.0.0.1
       groundcover_pager_port: 9119
