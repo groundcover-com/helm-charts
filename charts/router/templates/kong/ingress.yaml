@@ -72,4 +72,27 @@ spec:
                 name: {{ include "router.service.name" . }}
                 port:
                   name: frontend
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ printf "%s-grafana" (include "router.fullname" .) }}
+  annotations:
+    konghq.com/protocols: http,https
+    konghq.com/plugins: grafana-rewrite
+    konghq.com/headers.Grafana-Terraform-Provider: "true"
+  labels:
+    {{- include "router.labels" . | nindent 4 }}
+spec:
+  ingressClassName: {{ .Values.kong.ingressController.ingressClass }}
+  rules:
+    - http:
+        paths:
+          - path: /api/(.*)$
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "router.service.name" . }}
+                port:
+                  name: frontend
 {{- end -}}
