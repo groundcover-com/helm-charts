@@ -36,6 +36,10 @@ data:
         target_label: pod_ip
       - action: replace
         source_labels:
+        - __meta_kubernetes_pod_uid
+        target_label: pod_uid
+      - action: replace
+        source_labels:
         - __meta_kubernetes_pod_container_name
         target_label: container
       - replacement: /var/log/pods/*$1/*.log
