@@ -43,14 +43,14 @@ clusterId:
 #  - clusterB
 region:
 storeIssuesLogsOnly: false
-filteredNamespaces: []
-filteredWorkloads: []
-logsNamespaceFilters: []
+tracesNamespaceFilters: []
   # - matchType: "allow"
   #   regex: "my-namespace"
-logsWorkloadFilters: []
+tracesWorkloadFilters: []
   # - matchType: "block"
   #   regex: "do-not-show-me"
+logsDropFilters: []
+# - '{namespace="demo-ng",workload="loadgenerator"} |~ ".*GET.*"'
 shouldDropRunningNamespaces: true
 commitHashKeyName:
 repositoryUrlKeyName:

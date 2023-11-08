@@ -138,8 +138,8 @@ data:
     floraEnabled: {{ .Values.agent.experimental }}
     runningNamespace: ""
     shouldDropRunningNamespaces: {{ .Values.shouldDropRunningNamespaces }}
-    filteredNamespaces: {{ toYaml .Values.filteredNamespaces | nindent 6 }}
-    filteredWorkloads: {{ toYaml .Values.filteredWorkloads | nindent 6 }}
+    tracesNamespaceFilters: {{ toYaml .Values.tracesNamespaceFilters | nindent 6 }}
+    tracesWorkloadFilters: {{ toYaml .Values.tracesWorkloadFilters | nindent 6 }}
     nodelabels: {{ toYaml .Values.agent.alligator.nodelabels | nindent 6 }}
     contentTypesToDrop: {{ toYaml .Values.agent.alligator.contentTypesToDrop | nindent 6 }}
     shepherd:
@@ -221,8 +221,7 @@ data:
         useRingBuffer: {{ .Values.storeIssuesLogsOnly }}
         filterRunningNamespace: true
         groundcoverTimeTravel: -20s
-        namespaceFilters: {{ toYaml .Values.logsNamespaceFilters | nindent 10}}
-        workloadFilters: {{ toYaml .Values.logsWorkloadFilters | nindent 10}}
+        logDropFilters: {{ toYaml .Values.logsDropFilters | nindent 10}}
       - name: "monitoring_client"
         enabled: {{ .Values.logging.enabled }}
         urlText: https://{{ .Values.logging.host }}/loki/api/v1/push

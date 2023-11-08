@@ -32,8 +32,8 @@ data:
     clusterId: {{ .Values.clusterId }}
     region: {{ .Values.region }}
     shouldDropRunningNamespaces: {{ .Values.shouldDropRunningNamespaces }}
-    filteredNamespaces: {{ toYaml .Values.filteredNamespaces | nindent 6 }}
-    filteredWorkloads: {{ toYaml .Values.filteredWorkloads | nindent 6 }}
+    tracesNamespaceFilters: {{ toYaml .Values.tracesNamespaceFilters | nindent 6 }}
+    tracesWorkloadFilters: {{ toYaml .Values.tracesWorkloadFilters | nindent 6 }}
     commitHashKeyName: {{ .Values.commitHashKeyName }}
     repositoryUrlKeyName: {{ .Values.repositoryUrlKeyName }}
     shepherd:
