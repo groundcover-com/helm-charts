@@ -44,7 +44,7 @@ shouldDropRunningNamespaces: true
 
 origin:
   registry: public.ecr.aws/groundcovercom
-  tag: 0.36.6
+  tag: 0.37.0
 
 pullSecrets: []
 
@@ -253,17 +253,7 @@ router:
   repository: router
   origin:
     registry: public.ecr.aws/groundcovercom
-    tag: 0.36.6
-  versionDb:
-    host: 
-    port: 
-    name: 
-    user: 
-    password:
-  versionBucket:
-    name:
-    path:
-    region:
+    tag: 0.37.0
 
 # These are the recomendded presets
 # if you are after an uninstallation, prior to re-installation make sure
