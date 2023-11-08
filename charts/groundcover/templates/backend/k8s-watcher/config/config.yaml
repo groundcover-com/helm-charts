@@ -8,6 +8,7 @@ data:
     productchansize: 20480
     k8sloadtimeout: 2m0s
     resyncDuration: 1h
+    podsResyncDuration: 15m
     unavailableDeploymentPollInterval: 10s
     summarizerActiveTtl: 180s
     pushsummaries: true
