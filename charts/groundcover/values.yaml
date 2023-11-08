@@ -44,10 +44,12 @@ installationId:
 #  - clusterB
 region:
 storeIssuesLogsOnly: false
-tracesNamespaceFilters: []
+tracesNamespaceFilters:
+  []
   # - matchType: "allow"
   #   regex: "my-namespace"
-tracesWorkloadFilters: []
+tracesWorkloadFilters:
+  []
   # - matchType: "block"
   #   regex: "do-not-show-me"
 logsDropFilters: []
@@ -95,7 +97,16 @@ agent:
     obfuscateData: false
     dataRetention: 24h
     nodelabels: []
-    contentTypesToDrop: ["text/html", "text/javascript", "text/css", "image", "font", "video", "audio"]
+    contentTypesToDrop:
+      [
+        "text/html",
+        "text/javascript",
+        "text/css",
+        "image",
+        "font",
+        "video",
+        "audio",
+      ]
     watchOnlyLocalNode: false
     shepherd:
       handlerFlushInterval: 1m0s
@@ -152,7 +163,7 @@ portal:
       memory: 100Mi
 
 loki:
-  # imagePullSecrets: [] 
+  # imagePullSecrets: []
   image:
     repository: "{{ .Values.global.origin.registry }}/loki"
   affinity:
@@ -256,7 +267,6 @@ timescaledb-single:
   #   path:
 
   persistentVolumes:
-
     data:
       # enabled: true
       storageClass:
@@ -295,9 +305,428 @@ timescaledb-single:
     credentialsSecretName: ""
 
 victoria-metrics-agent:
+  rbac:
+    namespaced: true
+  resources:
+    limits:
+      cpu: 500m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
   # imagePullSecrets:
   image:
     repository: "{{ .Values.global.origin.registry }}/vmagent"
+  remoteWriteUrls:
+    - https://metrics.groundcover.com/insert/prometheus?apikey=$(API_KEY)
+  extraArgs:
+    remoteWrite.label: clusterId=$(GC_CLUSTER_ID),region=$(GC_REGION),groundcover_version=$(GC_VERSION)
+    remoteWrite.maxDiskUsagePerURL: 1GB
+  env:
+    - name: GC_CLUSTER_ID
+      valueFrom:
+        secretKeyRef:
+          name: groundcover-config
+          key: GC_CLUSTER_ID
+    - name: GC_REGION
+      valueFrom:
+        secretKeyRef:
+          name: groundcover-config
+          key: GC_REGION
+    - name: GC_VERSION
+      valueFrom:
+        secretKeyRef:
+          name: groundcover-config
+          key: GC_VERSION
+    - name: API_KEY
+      valueFrom:
+        secretKeyRef:
+          key: '{{ include "groundcover.apikeySecretKey" . }}'
+          name: '{{ include "groundcover.apikeySecretName" . }}'
+  config:
+    scrape_configs:
+      - job_name: "vmagent"
+        stream_parse: true
+        static_configs:
+          - targets: ["localhost:8429"]
+      - job_name: "groundcover"
+        stream_parse: true
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces:
+              own_namespace: true
+        tls_config:
+          insecure_skip_verify: true
+        relabel_configs:
+          - action: drop
+            source_labels: [__meta_kubernetes_pod_container_init]
+            regex: true
+          - action: keep_if_equal
+            source_labels:
+              [
+                __meta_kubernetes_pod_annotation_prometheus_io_port,
+                __meta_kubernetes_pod_container_port_number,
+              ]
+          - source_labels:
+              [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+            action: keep
+            regex: true
+          - source_labels:
+              [__meta_kubernetes_pod_annotation_prometheus_io_scheme]
+            action: replace
+            target_label: __scheme__
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+            action: replace
+            target_label: __metrics_path__
+            regex: (.+)
+          - source_labels:
+              [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+            action: replace
+            regex: ([^:]+)(?::\d+)?;(\d+)
+            replacement: $1:$2
+            target_label: __address__
+          - action: labelmap
+            regex: __meta_kubernetes_pod_label_(.+)
+          - source_labels: [__meta_kubernetes_namespace]
+            action: replace
+            target_label: kubernetes_namespace
+          - source_labels: [__meta_kubernetes_pod_name]
+            action: replace
+            target_label: kubernetes_pod_name
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: instance
+
+custom-metrics:
+  podAnnotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8429"
+  enabled: false
+  rbac:
+    namespaced: false
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  image:
+    repository: "{{ .Values.global.origin.registry }}/vmagent"
+  service:
+    enabled: true
+  extraArgs:
+    remoteWrite.maxDailySeries: "1000000"
+    remoteWrite.maxHourlySeries: "100000"
+    remoteWrite.maxDiskUsagePerURL: 1GB
+  remoteWriteUrls:
+    - http://groundcover-victoria-metrics:8428/api/v1/write
+  extraScrapeConfigs:
+    ## COPY from Prometheus helm chart https://github.com/helm/charts/blob/master/stable/prometheus/values.yaml
+
+    # Scrape config for API servers.
+    #
+    # Kubernetes exposes API servers as endpoints to the default/kubernetes
+    # service so this uses `endpoints` role and uses relabelling to only keep
+    # the endpoints associated with the default/kubernetes service using the
+    # default named port `https`. This works for single API server deployments as
+    # well as HA API server deployments.
+    - job_name: "kubernetes-apiservers"
+      kubernetes_sd_configs:
+        - role: endpointslices
+      # Default to scraping over https. If required, just disable this or change to
+      # `http`.
+      scheme: https
+      # This TLS & bearer token file config is used to connect to the actual scrape
+      # endpoints for cluster components. This is separate to discovery auth
+      # configuration because discovery & scraping are two separate concerns in
+      # Prometheus. The discovery auth config is automatic if Prometheus runs inside
+      # the cluster. Otherwise, more config options have to be provided within the
+      # <kubernetes_sd_config>.
+      tls_config:
+        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        # If your node certificates are self-signed or use a different CA to the
+        # master CA, then disable certificate verification below. Note that
+        # certificate verification is an integral part of a secure infrastructure
+        # so this should only be disabled in a controlled environment. You can
+        # disable certificate verification by uncommenting the line below.
+        #
+        insecure_skip_verify: true
+      bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+      # Keep only the default/kubernetes service endpoints for the https port. This
+      # will add targets for each API server which Kubernetes adds an endpoint to
+      # the default/kubernetes service.
+      relabel_configs:
+        - source_labels: [__meta_kubernetes_namespace]
+          action: drop
+          regex: groundcover.*
+        - source_labels:
+            [
+              __meta_kubernetes_namespace,
+              __meta_kubernetes_service_name,
+              __meta_kubernetes_endpoint_port_name,
+            ]
+          action: keep
+          regex: default;kubernetes;https
+    - job_name: "kubernetes-nodes"
+      # Default to scraping over https. If required, just disable this or change to
+      # `http`.
+      scheme: https
+      # This TLS & bearer token file config is used to connect to the actual scrape
+      # endpoints for cluster components. This is separate to discovery auth
+      # configuration because discovery & scraping are two separate concerns in
+      # Prometheus. The discovery auth config is automatic if Prometheus runs inside
+      # the cluster. Otherwise, more config options have to be provided within the
+      # <kubernetes_sd_config>.
+      tls_config:
+        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        # If your node certificates are self-signed or use a different CA to the
+        # master CA, then disable certificate verification below. Note that
+        # certificate verification is an integral part of a secure infrastructure
+        # so this should only be disabled in a controlled environment. You can
+        # disable certificate verification by uncommenting the line below.
+        #
+        insecure_skip_verify: true
+      bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+      kubernetes_sd_configs:
+        - role: node
+      relabel_configs:
+        - source_labels: [__meta_kubernetes_namespace]
+          action: drop
+          regex: groundcover.*
+        - action: labelmap
+          regex: __meta_kubernetes_node_label_(.+)
+        - target_label: __address__
+          replacement: kubernetes.default.svc:443
+        - source_labels: [__meta_kubernetes_node_name]
+          regex: (.+)
+          target_label: __metrics_path__
+          replacement: /api/v1/nodes/$1/proxy/metrics
+    # Scrape config for service endpoints.
+    #
+    # The relabeling allows the actual service scrape endpoint to be configured
+    # via the following annotations:
+    #
+    # * `prometheus.io/scrape`: Only scrape services that have a value of `true`
+    # * `prometheus.io/scheme`: If the metrics endpoint is secured then you will need
+    # to set this to `https` & most likely set the `tls_config` of the scrape config.
+    # * `prometheus.io/path`: If the metrics path is not `/metrics` override this.
+    # * `prometheus.io/port`: If the metrics are exposed on a different port to the
+    # service then set this appropriately.
+    - job_name: "kubernetes-service-endpoints"
+      kubernetes_sd_configs:
+        - role: endpointslices
+      relabel_configs:
+        - source_labels: [__meta_kubernetes_namespace]
+          action: drop
+          regex: groundcover.*
+        - action: drop
+          source_labels: [__meta_kubernetes_pod_container_init]
+          regex: true
+        - action: keep_if_equal
+          source_labels:
+            [
+              __meta_kubernetes_service_annotation_prometheus_io_port,
+              __meta_kubernetes_pod_container_port_number,
+            ]
+        - source_labels:
+            [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+          action: keep
+          regex: true
+        - source_labels:
+            [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+          action: replace
+          target_label: __scheme__
+          regex: (https?)
+        - source_labels:
+            [__meta_kubernetes_service_annotation_prometheus_io_path]
+          action: replace
+          target_label: __metrics_path__
+          regex: (.+)
+        - source_labels:
+            [
+              __address__,
+              __meta_kubernetes_service_annotation_prometheus_io_port,
+            ]
+          action: replace
+          target_label: __address__
+          regex: ([^:]+)(?::\d+)?;(\d+)
+          replacement: $1:$2
+        - action: labelmap
+          regex: __meta_kubernetes_service_label_(.+)
+        - source_labels: [__meta_kubernetes_pod_name]
+          target_label: pod
+        - source_labels: [__meta_kubernetes_pod_container_name]
+          target_label: container
+        - source_labels: [__meta_kubernetes_namespace]
+          target_label: namespace
+        - source_labels: [__meta_kubernetes_service_name]
+          target_label: service
+        - source_labels: [__meta_kubernetes_service_name]
+          target_label: job
+          replacement: ${1}
+        - source_labels: [__meta_kubernetes_pod_node_name]
+          action: replace
+          target_label: node
+    # Scrape config for slow service endpoints; same as above, but with a larger
+    # timeout and a larger interval
+    #
+    # The relabeling allows the actual service scrape endpoint to be configured
+    # via the following annotations:
+    #
+    # * `prometheus.io/scrape-slow`: Only scrape services that have a value of `true`
+    # * `prometheus.io/scheme`: If the metrics endpoint is secured then you will need
+    # to set this to `https` & most likely set the `tls_config` of the scrape config.
+    # * `prometheus.io/path`: If the metrics path is not `/metrics` override this.
+    # * `prometheus.io/port`: If the metrics are exposed on a different port to the
+    # service then set this appropriately.
+    - job_name: "kubernetes-service-endpoints-slow"
+      scrape_interval: 5m
+      scrape_timeout: 30s
+      kubernetes_sd_configs:
+        - role: endpointslices
+      relabel_configs:
+        - source_labels: [__meta_kubernetes_namespace]
+          action: drop
+          regex: groundcover.*
+        - action: drop
+          source_labels: [__meta_kubernetes_pod_container_init]
+          regex: true
+        - action: keep_if_equal
+          source_labels:
+            [
+              __meta_kubernetes_service_annotation_prometheus_io_port,
+              __meta_kubernetes_pod_container_port_number,
+            ]
+        - source_labels:
+            [__meta_kubernetes_service_annotation_prometheus_io_scrape_slow]
+          action: keep
+          regex: true
+        - source_labels:
+            [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+          action: replace
+          target_label: __scheme__
+          regex: (https?)
+        - source_labels:
+            [__meta_kubernetes_service_annotation_prometheus_io_path]
+          action: replace
+          target_label: __metrics_path__
+          regex: (.+)
+        - source_labels:
+            [
+              __address__,
+              __meta_kubernetes_service_annotation_prometheus_io_port,
+            ]
+          action: replace
+          target_label: __address__
+          regex: ([^:]+)(?::\d+)?;(\d+)
+          replacement: $1:$2
+        - action: labelmap
+          regex: __meta_kubernetes_service_label_(.+)
+        - source_labels: [__meta_kubernetes_pod_name]
+          target_label: pod
+        - source_labels: [__meta_kubernetes_pod_container_name]
+          target_label: container
+        - source_labels: [__meta_kubernetes_namespace]
+          target_label: namespace
+        - source_labels: [__meta_kubernetes_service_name]
+          target_label: service
+        - source_labels: [__meta_kubernetes_service_name]
+          target_label: job
+          replacement: ${1}
+        - source_labels: [__meta_kubernetes_pod_node_name]
+          action: replace
+          target_label: node
+    # Example scrape config for probing services via the Blackbox Exporter.
+    #
+    # The relabeling allows the actual service scrape endpoint to be configured
+    # via the following annotations:
+    #
+    # * `prometheus.io/probe`: Only probe services that have a value of `true`
+    - job_name: "kubernetes-services"
+      metrics_path: /probe
+      params:
+        module: [http_2xx]
+      kubernetes_sd_configs:
+        - role: service
+      relabel_configs:
+        - source_labels: [__meta_kubernetes_namespace]
+          action: drop
+          regex: groundcover.*
+        - source_labels:
+            [__meta_kubernetes_service_annotation_prometheus_io_probe]
+          action: keep
+          regex: true
+        - source_labels: [__address__]
+          target_label: __param_target
+        - target_label: __address__
+          replacement: blackbox
+        - source_labels: [__param_target]
+          target_label: instance
+        - action: labelmap
+          regex: __meta_kubernetes_service_label_(.+)
+        - source_labels: [__meta_kubernetes_namespace]
+          target_label: namespace
+        - source_labels: [__meta_kubernetes_service_name]
+          target_label: service
+    # Example scrape config for pods
+    #
+    # The relabeling allows the actual pod scrape endpoint to be configured via the
+    # following annotations:
+    #
+    # * `prometheus.io/scrape`: Only scrape pods that have a value of `true`
+    # * `prometheus.io/path`: If the metrics path is not `/metrics` override this.
+    # * `prometheus.io/port`: Scrape the pod on the indicated port instead of the default of `9102`.
+    - job_name: "kubernetes-pods"
+      kubernetes_sd_configs:
+        - role: pod
+      relabel_configs:
+        - source_labels: [__meta_kubernetes_namespace]
+          action: drop
+          regex: groundcover.*
+        - action: drop
+          source_labels: [__meta_kubernetes_pod_container_init]
+          regex: true
+        - action: keep_if_equal
+          source_labels:
+            [
+              __meta_kubernetes_pod_annotation_prometheus_io_port,
+              __meta_kubernetes_pod_container_port_number,
+            ]
+        - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+          action: keep
+          regex: true
+        - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+          action: replace
+          target_label: __metrics_path__
+          regex: (.+)
+        - source_labels:
+            [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+          action: replace
+          regex: ([^:]+)(?::\d+)?;(\d+)
+          replacement: $1:$2
+          target_label: __address__
+        - action: labelmap
+          regex: __meta_kubernetes_pod_label_(.+)
+        - source_labels: [__meta_kubernetes_pod_name]
+          target_label: pod
+        - source_labels: [__meta_kubernetes_pod_container_name]
+          target_label: container
+        - source_labels: [__meta_kubernetes_namespace]
+          target_label: namespace
+        - source_labels: [__meta_kubernetes_service_name]
+          target_label: service
+        - source_labels: [__meta_kubernetes_service_name]
+          target_label: job
+          replacement: ${1}
+        - source_labels: [__meta_kubernetes_pod_node_name]
+          action: replace
+          target_label: node
+
+  config:
+    scrape_configs:
+      - job_name: custom-metrics-vmagent
+        static_configs:
+          - targets: ["localhost:8429"]
 
 victoria-metrics-single:
   # imagePullSecrets: []
@@ -367,171 +796,8 @@ victoria-metrics-single:
     # -- Pod affinity
     affinity: {}
 
-promscale:
-  image:
-    repository: "{{ .Values.global.origin.registry }}/promscale"
-  nameOverride: groundcover-promscale
-  fullnameOverride: groundcover-promscale
-
-  imagePullPolicy: IfNotPresent
-  # number of connector pods to spawn
-  replicaCount: 1
-
-  # Override the deployment namespace
-  namespaceOverride: ""
-
-  # Promscale deployment upgrade strategy
-  # as Promscale upgrade requires no existing Promscale
-  # connected with TimescaleDB. Recreate strategy helps
-  # scale down to 0 and recreate the new version.
-  upgradeStrategy: Recreate
-
-  # overridePromURL:
-  promIngress:
-    enabled: false
-    # For Kubernetes >= 1.18 you should specify the ingress-controller via the field ingressClassName
-    # See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress
-    # ingressClassName: nginx
-    annotations: {}
-      # kubernetes.io/ingress.class: nginx
-      # kubernetes.io/tls-acme: "true"
-    hosts:
-      - host: chart-example.local
-        paths: []
-    tls: []
-    #  - secretName: chart-example-tls
-    #    hosts:
-    #      - chart-example.local
-
-  # overrideOtelURL:
-  otelIngress:
-    enabled: false
-    # For Kubernetes >= 1.18 you should specify the ingress-controller via the field ingressClassName
-    # See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress
-    # ingressClassName: nginx
-    annotations: {}
-      # kubernetes.io/ingress.class: nginx
-      # kubernetes.io/tls-acme: "true"
-    hosts:
-      - host: chart-example.local
-        paths: []
-    tls: []
-    #  - secretName: chart-example-tls
-    #    hosts:
-    #      - chart-example.local
-
-
-  # Arguments that will be passed onto deployment pods
-  # The list of available cli flags is available at
-  # https://github.com/timescale/promscale/blob/master/docs/cli.md
-
-  # For example, to activate HA, bump the replicaCount and set those arguments (also, make sure that external labels are configured on the Prometheus side):
-  # - --high-availabiliity=1
-  # More info about HA: https://github.com/timescale/promscale/blob/master/docs/high-avaliability/prometheus-HA.md
-  extraArgs: []
-
-  # Environment variables that will be passed onto deployment pods
-  extraEnv:
-    - name: PROMSCALE_AUTH_TLS_CERT_FILE
-      value: "/var/groundcover/server/tls.crt"
-    - name: PROMSCALE_AUTH_TLS_KEY_FILE
-      value: "/var/groundcover/server/tls.key"
-
-  # Currently OpenTelemetry tracing support is in beta
-  # so tracing features needs to be explicitly enabled.
-  openTelemetry:
-    # OpenTelemetry tracing is only enabled if below field is configured true
-    enabled: true
-    port: 9202
-
-  # selector used to provision your own Secret containing connection details
-  # Use this option with caution
-  connectionSecretName: ""
-
-  # connection options to connect to a target db
-  connection:
-    # Database connection settings. If `uri` is not
-    # set then the specific user, pass, host, port and
-    # sslMode properties are used.
-    uri: ""
-    # user used to connect to TimescaleDB
-    user: postgres
-    password: ""
-    host: "groundcover-tsdb"
-    port: 5432
-    sslMode: require
-    # database name in which to store the metrics
-    # must be created before start
-    dbName: groundcover
-
-  # Enable ServiceMonitor used by prometheus-operator to configure prometheus for metrics scraping
-  serviceMonitor:
-    enabled: false
-
-  # Prometheus annotations to configure scraping metrics from the connector
-  prometheus:
-    port: 9201
-    # Using the predefined annotations from the Prometheus helm chart:
-    # https://hub.helm.sh/charts/stable/prometheus
-    annotations:
-      prometheus.io/scrape: 'true'
-      prometheus.io/port: '9201'
-      prometheus.io/path: '/metrics'
-      prometheus.io/scheme: https
-
-  # settings for the service to be created that will expose
-  # the promscale deployment
-  service:
-    type: "ClusterIP"
-    # Read more about the AWS annotations here:
-    # https://kubernetes.io/docs/concepts/cluster-administration/cloud-providers/#aws
-    # https://docs.aws.amazon.com/eks/latest/userguide/load-balancing.html
-    annotations: {}
-      # Setting idle-timeout to the maximum allowed value
-      # service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "4000"
-      # service.beta.kubernetes.io/aws-load-balancer-type: nlb            # Use an NLB instead of ELB
-      # service.beta.kubernetes.io/aws-load-balancer-internal: 0.0.0.0/0  # Internal Load Balancer
-
-  # set your own limits
-  resources:
-    requests:
-      cpu: 250m
-      memory: 200Mi
-    limits:
-      cpu: 500m
-      memory: 250Mi
-
-  # https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
-  nodeSelector: {}
-
-  # https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-  tolerations: []
-
-  # https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
-  affinity:
-    podAffinity:
-      preferredDuringSchedulingIgnoredDuringExecution:
-        - weight: 100
-          podAffinityTerm:
-            topologyKey: kubernetes.io/hostname
-            labelSelector:
-              matchExpressions:
-              - key: app.kubernetes.io/component
-                operator: In
-                values:
-                - timescaledb
-        - weight: 50
-          podAffinityTerm:
-            topologyKey: kubernetes.io/zone
-            labelSelector:
-              matchExpressions:
-              - key: app.kubernetes.io/component
-                operator: In
-                values:
-                - timescaledb
-
 rbac:
-  pspEnabled: true
+  pspEnabled: false
   sccEnabled: true
   labels:
   annotations:
@@ -543,82 +809,6 @@ apikey:
 config:
   labels:
   annotations:
-
-# These are presets for low resource enviroments
-# timescaledb-single:
-#   tolerations: []
-#   podAnnotations: {}
-#   nodeSelector: {}
-#   service:
-#     primary:
-#       lables: {}
-#       annotations: {}
-#       clusterIP:
-#   persistentVolumes:
-#     data:
-#       storageClass:
-#       size: 10Gi
-#       annotations: {}
-#     wal: 
-#       storageClass:
-#       size: 50Gi
-#       annotations: {}
-#   resources:
-#     requests:
-#       cpu: 500m
-#       memory: 1000Mi
-#     limits:
-#       cpu: 500m
-#       memory: 1000Mi
-
-# victoria-metrics-single:
-
-#   server:
-#     # -- Sts/Deploy additional labels
-#     extraLabels: {}
-#     # -- Pod's additional labels
-#     podLabels: {}
-#     # -- Pod's annotations
-#     podAnnotations: {}
-
-#     service:
-#       # -- Service annotations
-#       annotations: {}
-#       # -- Service labels
-#       labels: {}
-#       # -- Service ClusterIP
-#       clusterIP: ""
-    
-#     statefulSet:
-#       annotations: {}
-#       # -- Headless service labels
-#       labels: {}
-
-#     persistentVolume:    
-#       # -- Persistant volume annotations
-#       annotations: {}
-
-#       # -- StorageClass to use for persistent volume. Requires server.persistentVolume.enabled: true. If defined, PVC created automatically
-#       storageClass:
-
-#       size: 50Gi
-
-#     resources:            
-#       requests:
-#         cpu: 500m
-#         memory: 1000Mi
-#       limits:
-#         cpu: 500m
-#         memory: 1000Mi
-
-#     # -- Node tolerations for server scheduling to nodes with taints. Ref: [https://kubernetes.io/docs/concepts/configuration/assign-pod-node/](https://kubernetes.io/docs/concepts/configuration/assign-pod-node/)
-#     tolerations: []
-
-#     # -- Pod's node selector. Ref: [https://kubernetes.io/docs/user-guide/node-selection/](https://kubernetes.io/docs/user-guide/node-selection/)
-#     nodeSelector: {}
-
-#     # -- Pod affinity
-#     affinity: {}
 
 shepherd:
   # Default values for shepherd.
@@ -646,10 +836,12 @@ shepherd:
 
   podAnnotations: {}
 
-  podSecurityContext: {}
+  podSecurityContext:
+    {}
     # fsGroup: 2000
 
-  securityContext: {}
+  securityContext:
+    {}
     # capabilities:
     #   drop:
     #   - ALL
@@ -711,10 +903,10 @@ shepherd:
     # resources, such as Minikube. If you do want to specify resources, uncomment the following
     # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
     requests:
-      cpu: 200m
-      memory: 256Mi
+      cpu: 300m
+      memory: 512Mi
     limits:
-      cpu: 900m
+      cpu: 1000m
       memory: 1Gi
 
   nodeSelector: {}
@@ -724,6 +916,8 @@ shepherd:
   config:
     grpcPort: 9991
     httpPort: 8080
+    groundcoverVersion: ""
+    requestMaxSizeBytes: 52428800 # 50MB
     timescaledb:
       host: groundcover-tsdb
       port: 5432
@@ -733,7 +927,7 @@ shepherd:
       sslMode: disable
     ingestor:
       resourceLabels: ["resource_id"]
-      entityLabels: ["entity_id","type"]
+      entityLabels: ["entity_id", "type"]
       defaultMaxTopResources: 40
       maxTopResources:
         - labels:
@@ -770,7 +964,7 @@ shepherd:
             type: "unavailable_deployment"
           value: -1
       activeDuration: 1m
-      metricTTL : 5m
+      metricTTL: 5m
       TLSCertFile: "/var/groundcover/server/tls.crt"
       TLSKeyFile: "/var/groundcover/server/tls.key"
 
@@ -782,19 +976,19 @@ shepherd:
             topologyKey: kubernetes.io/hostname
             labelSelector:
               matchExpressions:
-              - key: app.kubernetes.io/component
-                operator: In
-                values:
-                - victoria-metrics
+                - key: app.kubernetes.io/component
+                  operator: In
+                  values:
+                    - victoria-metrics
         - weight: 50
           podAffinityTerm:
             topologyKey: kubernetes.io/zone
             labelSelector:
               matchExpressions:
-              - key: app.kubernetes.io/component
-                operator: In
-                values:
-                - victoria-metrics
+                - key: app.kubernetes.io/component
+                  operator: In
+                  values:
+                    - victoria-metrics
 
 dbManager:
   additionalLabels:
@@ -809,19 +1003,19 @@ dbManager:
             topologyKey: kubernetes.io/hostname
             labelSelector:
               matchExpressions:
-              - key: app.kubernetes.io/component
-                operator: In
-                values:
-                - timescaledb
+                - key: app.kubernetes.io/component
+                  operator: In
+                  values:
+                    - timescaledb
         - weight: 50
           podAffinityTerm:
             topologyKey: kubernetes.io/zone
             labelSelector:
               matchExpressions:
-              - key: app.kubernetes.io/component
-                operator: In
-                values:
-                - timescaledb
+                - key: app.kubernetes.io/component
+                  operator: In
+                  values:
+                    - timescaledb
   nodeSelector:
   tolerations: []
   priorityClassName:

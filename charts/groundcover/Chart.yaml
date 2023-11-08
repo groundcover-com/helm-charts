@@ -1,23 +1,34 @@
 apiVersion: v2
-appVersion: 0.65.2
+appVersion: 0.65.3
 dependencies:
 - name: router
   repository: ""
+  version: 0.1.0
 - condition: backend.enabled
   name: timescaledb-single
   repository: ""
+  version: 0.11.0
 - condition: backend.enabled
   name: victoria-metrics-single
   repository: ""
+  version: 0.8.19
 - name: victoria-metrics-agent
-  repository: ""
+  repository: https://victoriametrics.github.io/helm-charts/
+  version: 0.8.35
+- alias: custom-metrics
+  condition: custom-metrics.enabled
+  name: victoria-metrics-agent
+  repository: https://victoriametrics.github.io/helm-charts/
+  version: 0.8.35
 - condition: backend.enabled
   name: loki
   repository: ""
+  version: 2.10.1
 - condition: shepherd.chart
   name: shepherd
   repository: ""
+  version: 0.1.0
 description: A Helm chart for Kubernetes
 name: groundcover
 type: application
-version: 0.65.2
+version: 0.65.3

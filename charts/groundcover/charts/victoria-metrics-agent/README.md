@@ -1,6 +1,6 @@
 # Helm Chart For Victoria Metrics Agent.
 
- ![Version: 0.7.41](https://img.shields.io/badge/Version-0.7.41-informational?style=flat-square)
+ ![Version: 0.8.35](https://img.shields.io/badge/Version-0.8.35-informational?style=flat-square)
 
 Victoria Metrics Agent - collects metrics from various sources and stores them to VictoriaMetrics
 
@@ -105,7 +105,7 @@ Change the values according to the need of the environment in ``victoria-metrics
 | config.scrape_configs[0].static_configs[0].targets[0] | string | `"localhost:8429"` |  |
 | config.scrape_configs[1].bearer_token_file | string | `"/var/run/secrets/kubernetes.io/serviceaccount/token"` |  |
 | config.scrape_configs[1].job_name | string | `"kubernetes-apiservers"` |  |
-| config.scrape_configs[1].kubernetes_sd_configs[0].role | string | `"endpoints"` |  |
+| config.scrape_configs[1].kubernetes_sd_configs[0].role | string | `"endpointslices"` |  |
 | config.scrape_configs[1].relabel_configs[0].action | string | `"keep"` |  |
 | config.scrape_configs[1].relabel_configs[0].regex | string | `"default;kubernetes;https"` |  |
 | config.scrape_configs[1].relabel_configs[0].source_labels[0] | string | `"__meta_kubernetes_namespace"` |  |
@@ -143,10 +143,18 @@ Change the values according to the need of the environment in ``victoria-metrics
 | config.scrape_configs[3].tls_config.ca_file | string | `"/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"` |  |
 | config.scrape_configs[3].tls_config.insecure_skip_verify | bool | `true` |  |
 | config.scrape_configs[4].job_name | string | `"kubernetes-service-endpoints"` |  |
-| config.scrape_configs[4].kubernetes_sd_configs[0].role | string | `"endpoints"` |  |
+| config.scrape_configs[4].kubernetes_sd_configs[0].role | string | `"endpointslices"` |  |
 | config.scrape_configs[4].relabel_configs[0].action | string | `"drop"` |  |
 | config.scrape_configs[4].relabel_configs[0].regex | bool | `true` |  |
 | config.scrape_configs[4].relabel_configs[0].source_labels[0] | string | `"__meta_kubernetes_pod_container_init"` |  |
+| config.scrape_configs[4].relabel_configs[10].source_labels[0] | string | `"__meta_kubernetes_service_name"` |  |
+| config.scrape_configs[4].relabel_configs[10].target_label | string | `"service"` |  |
+| config.scrape_configs[4].relabel_configs[11].replacement | string | `"${1}"` |  |
+| config.scrape_configs[4].relabel_configs[11].source_labels[0] | string | `"__meta_kubernetes_service_name"` |  |
+| config.scrape_configs[4].relabel_configs[11].target_label | string | `"job"` |  |
+| config.scrape_configs[4].relabel_configs[12].action | string | `"replace"` |  |
+| config.scrape_configs[4].relabel_configs[12].source_labels[0] | string | `"__meta_kubernetes_pod_node_name"` |  |
+| config.scrape_configs[4].relabel_configs[12].target_label | string | `"node"` |  |
 | config.scrape_configs[4].relabel_configs[1].action | string | `"keep_if_equal"` |  |
 | config.scrape_configs[4].relabel_configs[1].source_labels[0] | string | `"__meta_kubernetes_service_annotation_prometheus_io_port"` |  |
 | config.scrape_configs[4].relabel_configs[1].source_labels[1] | string | `"__meta_kubernetes_pod_container_port_number"` |  |
@@ -169,20 +177,25 @@ Change the values according to the need of the environment in ``victoria-metrics
 | config.scrape_configs[4].relabel_configs[5].target_label | string | `"__address__"` |  |
 | config.scrape_configs[4].relabel_configs[6].action | string | `"labelmap"` |  |
 | config.scrape_configs[4].relabel_configs[6].regex | string | `"__meta_kubernetes_service_label_(.+)"` |  |
-| config.scrape_configs[4].relabel_configs[7].action | string | `"replace"` |  |
-| config.scrape_configs[4].relabel_configs[7].source_labels[0] | string | `"__meta_kubernetes_namespace"` |  |
-| config.scrape_configs[4].relabel_configs[7].target_label | string | `"kubernetes_namespace"` |  |
-| config.scrape_configs[4].relabel_configs[8].action | string | `"replace"` |  |
-| config.scrape_configs[4].relabel_configs[8].source_labels[0] | string | `"__meta_kubernetes_service_name"` |  |
-| config.scrape_configs[4].relabel_configs[8].target_label | string | `"kubernetes_name"` |  |
-| config.scrape_configs[4].relabel_configs[9].action | string | `"replace"` |  |
-| config.scrape_configs[4].relabel_configs[9].source_labels[0] | string | `"__meta_kubernetes_pod_node_name"` |  |
-| config.scrape_configs[4].relabel_configs[9].target_label | string | `"kubernetes_node"` |  |
+| config.scrape_configs[4].relabel_configs[7].source_labels[0] | string | `"__meta_kubernetes_pod_name"` |  |
+| config.scrape_configs[4].relabel_configs[7].target_label | string | `"pod"` |  |
+| config.scrape_configs[4].relabel_configs[8].source_labels[0] | string | `"__meta_kubernetes_pod_container_name"` |  |
+| config.scrape_configs[4].relabel_configs[8].target_label | string | `"container"` |  |
+| config.scrape_configs[4].relabel_configs[9].source_labels[0] | string | `"__meta_kubernetes_namespace"` |  |
+| config.scrape_configs[4].relabel_configs[9].target_label | string | `"namespace"` |  |
 | config.scrape_configs[5].job_name | string | `"kubernetes-service-endpoints-slow"` |  |
-| config.scrape_configs[5].kubernetes_sd_configs[0].role | string | `"endpoints"` |  |
+| config.scrape_configs[5].kubernetes_sd_configs[0].role | string | `"endpointslices"` |  |
 | config.scrape_configs[5].relabel_configs[0].action | string | `"drop"` |  |
 | config.scrape_configs[5].relabel_configs[0].regex | bool | `true` |  |
 | config.scrape_configs[5].relabel_configs[0].source_labels[0] | string | `"__meta_kubernetes_pod_container_init"` |  |
+| config.scrape_configs[5].relabel_configs[10].source_labels[0] | string | `"__meta_kubernetes_service_name"` |  |
+| config.scrape_configs[5].relabel_configs[10].target_label | string | `"service"` |  |
+| config.scrape_configs[5].relabel_configs[11].replacement | string | `"${1}"` |  |
+| config.scrape_configs[5].relabel_configs[11].source_labels[0] | string | `"__meta_kubernetes_service_name"` |  |
+| config.scrape_configs[5].relabel_configs[11].target_label | string | `"job"` |  |
+| config.scrape_configs[5].relabel_configs[12].action | string | `"replace"` |  |
+| config.scrape_configs[5].relabel_configs[12].source_labels[0] | string | `"__meta_kubernetes_pod_node_name"` |  |
+| config.scrape_configs[5].relabel_configs[12].target_label | string | `"node"` |  |
 | config.scrape_configs[5].relabel_configs[1].action | string | `"keep_if_equal"` |  |
 | config.scrape_configs[5].relabel_configs[1].source_labels[0] | string | `"__meta_kubernetes_service_annotation_prometheus_io_port"` |  |
 | config.scrape_configs[5].relabel_configs[1].source_labels[1] | string | `"__meta_kubernetes_pod_container_port_number"` |  |
@@ -205,15 +218,12 @@ Change the values according to the need of the environment in ``victoria-metrics
 | config.scrape_configs[5].relabel_configs[5].target_label | string | `"__address__"` |  |
 | config.scrape_configs[5].relabel_configs[6].action | string | `"labelmap"` |  |
 | config.scrape_configs[5].relabel_configs[6].regex | string | `"__meta_kubernetes_service_label_(.+)"` |  |
-| config.scrape_configs[5].relabel_configs[7].action | string | `"replace"` |  |
-| config.scrape_configs[5].relabel_configs[7].source_labels[0] | string | `"__meta_kubernetes_namespace"` |  |
-| config.scrape_configs[5].relabel_configs[7].target_label | string | `"kubernetes_namespace"` |  |
-| config.scrape_configs[5].relabel_configs[8].action | string | `"replace"` |  |
-| config.scrape_configs[5].relabel_configs[8].source_labels[0] | string | `"__meta_kubernetes_service_name"` |  |
-| config.scrape_configs[5].relabel_configs[8].target_label | string | `"kubernetes_name"` |  |
-| config.scrape_configs[5].relabel_configs[9].action | string | `"replace"` |  |
-| config.scrape_configs[5].relabel_configs[9].source_labels[0] | string | `"__meta_kubernetes_pod_node_name"` |  |
-| config.scrape_configs[5].relabel_configs[9].target_label | string | `"kubernetes_node"` |  |
+| config.scrape_configs[5].relabel_configs[7].source_labels[0] | string | `"__meta_kubernetes_pod_name"` |  |
+| config.scrape_configs[5].relabel_configs[7].target_label | string | `"pod"` |  |
+| config.scrape_configs[5].relabel_configs[8].source_labels[0] | string | `"__meta_kubernetes_pod_container_name"` |  |
+| config.scrape_configs[5].relabel_configs[8].target_label | string | `"container"` |  |
+| config.scrape_configs[5].relabel_configs[9].source_labels[0] | string | `"__meta_kubernetes_namespace"` |  |
+| config.scrape_configs[5].relabel_configs[9].target_label | string | `"namespace"` |  |
 | config.scrape_configs[5].scrape_interval | string | `"5m"` |  |
 | config.scrape_configs[5].scrape_timeout | string | `"30s"` |  |
 | config.scrape_configs[6].job_name | string | `"kubernetes-services"` |  |
@@ -232,14 +242,20 @@ Change the values according to the need of the environment in ``victoria-metrics
 | config.scrape_configs[6].relabel_configs[4].action | string | `"labelmap"` |  |
 | config.scrape_configs[6].relabel_configs[4].regex | string | `"__meta_kubernetes_service_label_(.+)"` |  |
 | config.scrape_configs[6].relabel_configs[5].source_labels[0] | string | `"__meta_kubernetes_namespace"` |  |
-| config.scrape_configs[6].relabel_configs[5].target_label | string | `"kubernetes_namespace"` |  |
+| config.scrape_configs[6].relabel_configs[5].target_label | string | `"namespace"` |  |
 | config.scrape_configs[6].relabel_configs[6].source_labels[0] | string | `"__meta_kubernetes_service_name"` |  |
-| config.scrape_configs[6].relabel_configs[6].target_label | string | `"kubernetes_name"` |  |
+| config.scrape_configs[6].relabel_configs[6].target_label | string | `"service"` |  |
 | config.scrape_configs[7].job_name | string | `"kubernetes-pods"` |  |
 | config.scrape_configs[7].kubernetes_sd_configs[0].role | string | `"pod"` |  |
 | config.scrape_configs[7].relabel_configs[0].action | string | `"drop"` |  |
 | config.scrape_configs[7].relabel_configs[0].regex | bool | `true` |  |
 | config.scrape_configs[7].relabel_configs[0].source_labels[0] | string | `"__meta_kubernetes_pod_container_init"` |  |
+| config.scrape_configs[7].relabel_configs[10].replacement | string | `"${1}"` |  |
+| config.scrape_configs[7].relabel_configs[10].source_labels[0] | string | `"__meta_kubernetes_service_name"` |  |
+| config.scrape_configs[7].relabel_configs[10].target_label | string | `"job"` |  |
+| config.scrape_configs[7].relabel_configs[11].action | string | `"replace"` |  |
+| config.scrape_configs[7].relabel_configs[11].source_labels[0] | string | `"__meta_kubernetes_pod_node_name"` |  |
+| config.scrape_configs[7].relabel_configs[11].target_label | string | `"node"` |  |
 | config.scrape_configs[7].relabel_configs[1].action | string | `"keep_if_equal"` |  |
 | config.scrape_configs[7].relabel_configs[1].source_labels[0] | string | `"__meta_kubernetes_pod_annotation_prometheus_io_port"` |  |
 | config.scrape_configs[7].relabel_configs[1].source_labels[1] | string | `"__meta_kubernetes_pod_container_port_number"` |  |
@@ -258,12 +274,14 @@ Change the values according to the need of the environment in ``victoria-metrics
 | config.scrape_configs[7].relabel_configs[4].target_label | string | `"__address__"` |  |
 | config.scrape_configs[7].relabel_configs[5].action | string | `"labelmap"` |  |
 | config.scrape_configs[7].relabel_configs[5].regex | string | `"__meta_kubernetes_pod_label_(.+)"` |  |
-| config.scrape_configs[7].relabel_configs[6].action | string | `"replace"` |  |
-| config.scrape_configs[7].relabel_configs[6].source_labels[0] | string | `"__meta_kubernetes_namespace"` |  |
-| config.scrape_configs[7].relabel_configs[6].target_label | string | `"kubernetes_namespace"` |  |
-| config.scrape_configs[7].relabel_configs[7].action | string | `"replace"` |  |
-| config.scrape_configs[7].relabel_configs[7].source_labels[0] | string | `"__meta_kubernetes_pod_name"` |  |
-| config.scrape_configs[7].relabel_configs[7].target_label | string | `"kubernetes_pod_name"` |  |
+| config.scrape_configs[7].relabel_configs[6].source_labels[0] | string | `"__meta_kubernetes_pod_name"` |  |
+| config.scrape_configs[7].relabel_configs[6].target_label | string | `"pod"` |  |
+| config.scrape_configs[7].relabel_configs[7].source_labels[0] | string | `"__meta_kubernetes_pod_container_name"` |  |
+| config.scrape_configs[7].relabel_configs[7].target_label | string | `"container"` |  |
+| config.scrape_configs[7].relabel_configs[8].source_labels[0] | string | `"__meta_kubernetes_namespace"` |  |
+| config.scrape_configs[7].relabel_configs[8].target_label | string | `"namespace"` |  |
+| config.scrape_configs[7].relabel_configs[9].source_labels[0] | string | `"__meta_kubernetes_service_name"` |  |
+| config.scrape_configs[7].relabel_configs[9].target_label | string | `"service"` |  |
 | configMap | string | `""` |  |
 | containerWorkingDir | string | `"/"` |  |
 | deployment.enabled | bool | `true` |  |
@@ -287,7 +305,7 @@ Change the values according to the need of the environment in ``victoria-metrics
 | ingress.enabled | bool | `false` |  |
 | ingress.extraLabels | object | `{}` |  |
 | ingress.hosts | list | `[]` |  |
-| ingress.pathType | string | `"Prefix"` |  |
+| ingress.pathType | string | `"Prefix"` | pathType is only for k8s >= 1.1= |
 | ingress.tls | list | `[]` |  |
 | multiTenantUrls | list | `[]` |  |
 | nameOverride | string | `""` |  |
@@ -308,6 +326,7 @@ Change the values according to the need of the environment in ``victoria-metrics
 | rbac.annotations | object | `{}` |  |
 | rbac.create | bool | `true` |  |
 | rbac.extraLabels | object | `{}` |  |
+| rbac.namespaced | bool | `false` | if true and `rbac.enabled`, will deploy a Role/Rolebinding instead of a ClusterRole/ClusterRoleBinding |
 | rbac.pspEnabled | bool | `true` |  |
 | remoteWriteUrls | list | `[]` |  |
 | replicaCount | int | `1` |  |
@@ -328,6 +347,9 @@ Change the values according to the need of the environment in ``victoria-metrics
 | serviceMonitor.annotations | object | `{}` |  |
 | serviceMonitor.enabled | bool | `false` |  |
 | serviceMonitor.extraLabels | object | `{}` |  |
+| serviceMonitor.relabelings | list | `[]` |  |
+| statefulset.clusterMode | bool | `false` | create cluster of vmagents. See https://docs.victoriametrics.com/vmagent.html#scraping-big-number-of-targets available since 1.77.2 version https://github.com/VictoriaMetrics/VictoriaMetrics/releases/tag/v1.77.2 |
 | statefulset.enabled | bool | `false` |  |
+| statefulset.replicationFactor | int | `1` | replication factor for vmagent in cluster mode |
 | statefulset.updateStrategy | object | `{}` |  |
 | tolerations | list | `[]` |  |

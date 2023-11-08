@@ -42,7 +42,10 @@ spec:
         {{ $key }}: {{ $value | quote }}
         {{- end }}
     spec:
-      imagePullSecrets: {{ include "imagePullSecrets" . }}
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
       serviceAccountName: {{ include "chart.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
@@ -55,6 +58,11 @@ spec:
           args:
             - -promscrape.config=/config/scrape.yml
             - -remoteWrite.tmpDataPath=/tmpData
+          {{- if .Values.statefulset.clusterMode }}
+            - -promscrape.cluster.membersCount={{ .Values.replicaCount }}
+            - -promscrape.cluster.replicationFactor={{ .Values.statefulset.replicationFactor }}
+            - -promscrape.cluster.memberNum=$(POD_NAME)
+          {{- end }}
           {{- range .Values.remoteWriteUrls }}
             - -remoteWrite.url={{ . }}
           {{- end }}
@@ -103,8 +111,17 @@ spec:
               protocol: UDP
               containerPort: {{ include "split-host-port" .Values.extraArgs.opentsdbListenAddr }}
           {{- end }}
-          {{- with .Values.env }}
-          env: {{ toYaml . | nindent 10 }}
+          {{- if or .Values.env .Values.statefulset.clusterMode}}
+          env:
+            {{- if .Values.statefulset.clusterMode}}
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            {{- end -}}
+            {{- if or .Values.env }}
+            {{- tpl ( toYaml .Values.env ) . | nindent 12 }}
+            {{- end -}}
           {{- end }}
           readinessProbe:
             httpGet:

@@ -4,7 +4,7 @@
 
 rbac:
   create: true
-  pspEnabled: true
+  pspEnabled: false
   namespaced: true
   extraLabels: {}
   # annotations: {}
@@ -67,11 +67,11 @@ server:
   # Additional hostPath mounts
   extraHostPathMounts:
     []
-     #- name: certs-dir
-     #  mountPath: /etc/kubernetes/certs
-     #  subPath: ""
-     #  hostPath: /etc/kubernetes/certs
-     #  readOnly: true
+    #- name: certs-dir
+    #  mountPath: /etc/kubernetes/certs
+    #  subPath: ""
+    #  hostPath: /etc/kubernetes/certs
+    #  readOnly: true
 
   # Extra Volumes for the pod
   extraVolumes:
@@ -121,13 +121,13 @@ server:
   affinity:
     nodeAffinity:
       preferredDuringSchedulingIgnoredDuringExecution:
-      - weight: 1
-        preference:
-          matchExpressions:
-          - key: eks.amazonaws.com/capacityType
-            operator: NotIn
-            values:
-            - SPOT
+        - weight: 1
+          preference:
+            matchExpressions:
+              - key: eks.amazonaws.com/capacityType
+                operator: NotIn
+                values:
+                  - SPOT
 
   # -- Env variables
   # -- Additional environment variables (ex.: secret tokens, flags) https://github.com/VictoriaMetrics/VictoriaMetrics#environment-variables
@@ -142,10 +142,10 @@ server:
 
   # NFS alternative to persistentVolume, mutual exclusive
   nfs:
-      enabled: false
-      # server:
-      # path: /
-      
+    enabled: false
+    # server:
+    # path: /
+
   persistentVolume:
     # -- Create/use Persistent Volume Claim for server component. Empty dir if false
     enabled: true
@@ -178,7 +178,7 @@ server:
   podLabels: {}
   # -- Pod's annotations
   podAnnotations: {}
-  # -- Pod's management policy 
+  # -- Pod's management policy
   podManagementPolicy: OrderedReady
 
   # -- Resource object. Ref: [http://kubernetes.io/docs/user-guide/compute-resources/](http://kubernetes.io/docs/user-guide/compute-resources/
@@ -213,7 +213,8 @@ server:
     failureThreshold: 10
 
   # Indicates whether the Container is done with potentially costly initialization. If set it is executed first. If it fails Container is restarted. If it succeeds liveness and readiness probes takes over.
-  startupProbe: {}
+  startupProbe:
+    {}
     #tcpSocket:
     #  port: http
     #failureThreshold: 30
@@ -353,14 +354,14 @@ server:
     # -- Service Monitor annotations
     annotations: {}
     # -- Commented. Prometheus scrape interval for server component
-#    interval: 15s
-    # -- Commented. Prometheus pre-scrape timeout for server component
-#    scrapeTimeout: 5s
-    # -- Commented. HTTP scheme to use for scraping.
-#    scheme: https
-    # -- Commented. TLS configuration to use when scraping the endpoint
-#    tlsConfig:
-#      insecureSkipVerify: true
+  #    interval: 15s
+  # -- Commented. Prometheus pre-scrape timeout for server component
+  #    scrapeTimeout: 5s
+  # -- Commented. HTTP scheme to use for scraping.
+  #    scheme: https
+  # -- Commented. TLS configuration to use when scraping the endpoint
+  #    tlsConfig:
+  #      insecureSkipVerify: true
 
   # -- Scrape configuration for victoriametrics
   scrape:
@@ -674,58 +675,68 @@ server:
         #       action: replace
         #       target_label: kubernetes_pod_name
         #   ## End of COPY
-      - job_name: "kubernetes-pods-data"
-        stream_parse: true
-        kubernetes_sd_configs:
-          - role: pod
-            namespaces:
-              own_namespace: true
-        tls_config:
-          insecure_skip_verify: true
-        relabel_configs:
-          - action: drop
-            source_labels: [__meta_kubernetes_pod_container_init]
-            regex: true
-          - action: keep_if_equal
-            source_labels: [__meta_kubernetes_pod_annotation_groundcover_com_port, __meta_kubernetes_pod_container_port_number]
-          - source_labels: [__meta_kubernetes_pod_annotation_groundcover_com_scrape]
-            action: keep
-            regex: true
-          - source_labels: [__meta_kubernetes_pod_annotation_groundcover_com_scheme]
-            action: replace
-            target_label: __scheme__
-          - source_labels: [__meta_kubernetes_pod_annotation_groundcover_com_path]
-            action: replace
-            target_label: __metrics_path__
-            regex: (.+)
-          - source_labels:
-              [__address__, __meta_kubernetes_pod_annotation_groundcover_com_port]
-            action: replace
-            regex: ([^:]+)(?::\d+)?;(\d+)
-            replacement: $1:$2
-            target_label: __address__
-          - action: labelmap
-            regex: __meta_kubernetes_pod_label_(.+)
-          - source_labels: [__meta_kubernetes_namespace]
-            action: replace
-            target_label: kubernetes_namespace
-          - action: labeldrop
-            regex: "pod_template_hash"
-          - action: labeldrop
-            regex: "kubernetes_pod_name"
-          - action: labeldrop
-            regex: "app"
-          - action: labeldrop
-            regex: "app_kubernetes_io_instance"
-          - action: labeldrop
-            regex: "app_kubernetes_io_name"
-          - action: labeldrop
-            regex: "job"
-          - action: labeldrop
-            regex: "kubernetes_namespace"
-        metric_relabel_configs:
-          - action: labeldrop
-            regex: "instance"
+        - job_name: "kubernetes-pods-data"
+          stream_parse: true
+          kubernetes_sd_configs:
+            - role: pod
+              namespaces:
+                own_namespace: true
+          tls_config:
+            insecure_skip_verify: true
+          relabel_configs:
+            - action: drop
+              source_labels: [__meta_kubernetes_pod_container_init]
+              regex: true
+            - action: keep_if_equal
+              source_labels:
+                [
+                  __meta_kubernetes_pod_annotation_groundcover_com_port,
+                  __meta_kubernetes_pod_container_port_number,
+                ]
+            - source_labels:
+                [__meta_kubernetes_pod_annotation_groundcover_com_scrape]
+              action: keep
+              regex: true
+            - source_labels:
+                [__meta_kubernetes_pod_annotation_groundcover_com_scheme]
+              action: replace
+              target_label: __scheme__
+            - source_labels:
+                [__meta_kubernetes_pod_annotation_groundcover_com_path]
+              action: replace
+              target_label: __metrics_path__
+              regex: (.+)
+            - source_labels:
+                [
+                  __address__,
+                  __meta_kubernetes_pod_annotation_groundcover_com_port,
+                ]
+              action: replace
+              regex: ([^:]+)(?::\d+)?;(\d+)
+              replacement: $1:$2
+              target_label: __address__
+            - action: labelmap
+              regex: __meta_kubernetes_pod_label_(.+)
+            - source_labels: [__meta_kubernetes_namespace]
+              action: replace
+              target_label: kubernetes_namespace
+            - action: labeldrop
+              regex: "pod_template_hash"
+            - action: labeldrop
+              regex: "kubernetes_pod_name"
+            - action: labeldrop
+              regex: "app"
+            - action: labeldrop
+              regex: "app_kubernetes_io_instance"
+            - action: labeldrop
+              regex: "app_kubernetes_io_name"
+            - action: labeldrop
+              regex: "job"
+            - action: labeldrop
+              regex: "kubernetes_namespace"
+          metric_relabel_configs:
+            - action: labeldrop
+              regex: "instance"
 
     # -- Extra scrape configs that will be appended to `server.scrape.config`
     extraScrapeConfigs: []

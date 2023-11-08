@@ -17,7 +17,8 @@ ingress:
   # For Kubernetes >= 1.18 you should specify the ingress-controller via the field ingressClassName
   # See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress
   # ingressClassName: nginx
-  annotations: {}
+  annotations:
+    {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   hosts:
@@ -33,13 +34,13 @@ ingress:
 affinity:
   nodeAffinity:
     preferredDuringSchedulingIgnoredDuringExecution:
-    - weight: 1
-      preference:
-        matchExpressions:
-        - key: eks.amazonaws.com/capacityType
-          operator: NotIn
-          values:
-          - SPOT
+      - weight: 1
+        preference:
+          matchExpressions:
+            - key: eks.amazonaws.com/capacityType
+              operator: NotIn
+              values:
+                - SPOT
 # podAntiAffinity:
 #   requiredDuringSchedulingIgnoredDuringExecution:
 #   - labelSelector:
@@ -92,13 +93,13 @@ config:
     max_query_series: 10240 # Default was 500
   schema_config:
     configs:
-    - from: 2020-10-24
-      store: boltdb-shipper
-      object_store: filesystem
-      schema: v11
-      index:
-        prefix: index_
-        period: 24h
+      - from: 2020-10-24
+        store: boltdb-shipper
+        object_store: filesystem
+        schema: v11
+        index:
+          prefix: index_
+          period: 24h
   server:
     http_listen_port: 3100
     grpc_server_max_recv_msg_size: 16777216 # default was 4194304
@@ -106,7 +107,7 @@ config:
     boltdb_shipper:
       active_index_directory: /data/loki/boltdb-shipper-active
       cache_location: /data/loki/boltdb-shipper-cache
-      cache_ttl: 24h         # Can be increased for faster performance over longer query periods, uses more disk space
+      cache_ttl: 24h # Can be increased for faster performance over longer query periods, uses more disk space
       shared_store: filesystem
     filesystem:
       directory: /data/loki/chunks
@@ -133,7 +134,8 @@ config:
 #    enable_api: true
 
 ## Additional Loki container arguments, e.g. log level (debug, info, warn, error)
-extraArgs: {}
+extraArgs:
+  {}
   # log.level: debug
 
 livenessProbe:
@@ -147,7 +149,8 @@ networkPolicy:
   enabled: false
 
 ## The app name of loki clients
-client: {}
+client:
+  {}
   # name:
 
 ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
@@ -166,7 +169,7 @@ nfs:
 persistence:
   enabled: true
   accessModes:
-  - ReadWriteOnce
+    - ReadWriteOnce
   size: 10Gi
   annotations: {}
   # selector:
@@ -189,7 +192,7 @@ podManagementPolicy: OrderedReady
 
 rbac:
   create: true
-  pspEnabled: true
+  pspEnabled: false
   sccEnabled: true
 
 readinessProbe:
@@ -253,7 +256,7 @@ serviceMonitor:
   prometheusRule:
     enabled: false
     additionalLabels: {}
-  #  namespace:
+    #  namespace:
     rules: []
     #  Some examples from https://awesome-prometheus-alerts.grep.to/rules.html#loki
     #  - alert: LokiProcessTooManyRestarts
@@ -289,7 +292,6 @@ serviceMonitor:
     #      summary: Loki request latency (instance {{ $labels.instance }})
     #      description: "The {{ $labels.job }} {{ $labels.route }} is experiencing {{ printf \"%.2f\" $value }}s 99th percentile latency\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
 
-
 initContainers: []
 ## Init containers to be added to the loki pod.
 # - name: my-init-container
@@ -319,7 +321,6 @@ extraContainers:
 #   volumeMounts:
 #     - name: reverse-proxy-auth-config
 #       mountPath: /etc/reverse-proxy-conf
-
 
 extraVolumes: []
 ## Additional volumes to the loki pod.

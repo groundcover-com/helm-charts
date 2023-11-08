@@ -38,7 +38,7 @@ secrets:
 
   # Selector used to provision your own Secret containing patroni configuration details
   # This is mutually exclusive with `credentials` option and takes precedence over it.
-  # WARNING: Use this option with caution  
+  # WARNING: Use this option with caution
   credentialsSecretName: ""
 
   # This map should contain tls key and certifiacte. When empty,
@@ -59,7 +59,7 @@ secrets:
     PGBACKREST_REPO1_S3_KEY_SECRET: ""
     PGBACKREST_REPO1_S3_BUCKET: ""
     PGBACKREST_REPO1_S3_ENDPOINT: "s3.amazonaws.com"
-  
+
   # Selector used to provision your own Secret containing pgbackrest configuration details
   # This is mutually exclusive with `pgbackrest` option and takes precedence over it.
   # WARNING: Use this option with caution
@@ -86,9 +86,9 @@ backup:
   pgBackRest:archive-push: {}
   pgBackRest:archive-get: {}
   jobs:
-      # name: needs to adhere to the kubernetes restrictions
-      # type: can be full, incr or diff, see https://pgbackrest.org/user-guide.html
-      # schedule: https://en.wikipedia.org/wiki/Cron#CRON_expression
+    # name: needs to adhere to the kubernetes restrictions
+    # type: can be full, incr or diff, see https://pgbackrest.org/user-guide.html
+    # schedule: https://en.wikipedia.org/wiki/Cron#CRON_expression
     - name: full-weekly
       type: full
       schedule: "12 02 * * 0"
@@ -129,7 +129,6 @@ bootstrapFromBackup:
   # PGBACKREST_REPO1_S3_BUCKET: <base64 encoded value of the bucket> in these secrets
   secretName: pgbackrest-bootstrap
 
-
 # Extra custom environment variables.
 # These should be an EnvVar, as this allows you to inject secrets into the environment
 # https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.16/#envvar-v1-core
@@ -148,7 +147,6 @@ envFrom:
 #  - configMapRef:
 #      name: my-deployment-settings
 #      optional: true
-
 
 # This configuration will be passed on to Patroni directly, there are a few things that are
 # injected/changed, these are:
@@ -174,7 +172,7 @@ patroni:
       postgresql:
         parameters:
           archive_command: "/etc/timescaledb/scripts/pgbackrest_archive.sh %p"
-          archive_mode: 'on'
+          archive_mode: "on"
           archive_timeout: 1800s
           #
           # Autovacuuming is very important to PostgreSQL. For TimescaleDB, in
@@ -195,28 +193,28 @@ patroni:
           autovacuum_vacuum_cost_limit: 500
           autovacuum_vacuum_scale_factor: 0.05
           log_autovacuum_min_duration: 1min
-          hot_standby: 'on'
-          log_checkpoints: 'on'
-          log_connections: 'on'
-          log_disconnections: 'on'
+          hot_standby: "on"
+          log_checkpoints: "on"
+          log_connections: "on"
+          log_disconnections: "on"
           log_line_prefix: "%t [%p]: [%c-%l] %u@%d,app=%a [%e] "
-          log_lock_waits: 'on'
-          log_min_duration_statement: '1s'
+          log_lock_waits: "on"
+          log_min_duration_statement: "1s"
           log_statement: ddl
           max_connections: 500
           max_prepared_transactions: 150
           shared_preload_libraries: timescaledb,pg_stat_statements
-          ssl: 'on'
-          ssl_cert_file: '/etc/certificate/tls.crt'
-          ssl_key_file: '/etc/certificate/tls.key'
+          ssl: "on"
+          ssl_cert_file: "/etc/certificate/tls.crt"
+          ssl_key_file: "/etc/certificate/tls.key"
           tcp_keepalives_idle: 900
           tcp_keepalives_interval: 100
           temp_file_limit: 1GB
-          timescaledb.passfile: '../.pgpass'
+          timescaledb.passfile: "../.pgpass"
           unix_socket_directories: "/var/run/postgresql"
-          unix_socket_permissions: '0750'
+          unix_socket_permissions: "0750"
           wal_level: hot_standby
-          wal_log_hints: 'on'
+          wal_log_hints: "on"
         use_pg_rewind: true
         use_slots: true
       retry_timeout: 10
@@ -227,15 +225,15 @@ patroni:
     use_endpoints: true
   postgresql:
     create_replica_methods:
-    - pgbackrest
-    - basebackup
+      - pgbackrest
+      - basebackup
     pgbackrest:
       command: /etc/timescaledb/scripts/pgbackrest_restore.sh
       keep_data: true
       no_params: true
       no_master: true
     basebackup:
-    - waldir: "/var/lib/postgresql/wal/pg_wal"
+      - waldir: "/var/lib/postgresql/wal/pg_wal"
     recovery_conf:
       restore_command: /etc/timescaledb/scripts/pgbackrest_archive_get.sh %f "%p"
     callbacks:
@@ -251,20 +249,20 @@ patroni:
         username: postgres
     listen: 0.0.0.0:5432
     pg_hba:
-    - local     all             postgres                              peer
-    - local     all             all                                   md5
-    - hostnossl all,replication all                all                md5
-    - hostssl   all             all                127.0.0.1/32       md5
-    - hostssl   all             all                ::1/128            md5
-    - hostssl   replication     standby            all                md5
-    - hostssl   all             all                all                md5
+      - local     all             postgres                              peer
+      - local     all             all                                   md5
+      - hostnossl all,replication all                all                md5
+      - hostssl   all             all                127.0.0.1/32       md5
+      - hostssl   all             all                ::1/128            md5
+      - hostssl   replication     standby            all                md5
+      - hostssl   all             all                all                md5
     use_unix_socket: true
   restapi:
     listen: 0.0.0.0:8008
 
 callbacks:
   # If set, this configMap will be used for the Patroni callbacks.
-  configMap:  # example-patroni-callbacks
+  configMap: # example-patroni-callbacks
 
 postInit:
   # A list of sources, that contain post init scripts.
@@ -372,7 +370,6 @@ nfs:
   path:
 
 persistentVolumes:
-
   # For sanity reasons, the actual PGDATA and wal directory will be subdirectories of the Volume mounts,
   # this allows Patroni/a human/an automated operator to move directories during bootstrap, which cannot
   # be done if we did not use subdirectories
@@ -409,12 +406,12 @@ persistentVolumes:
       - ReadWriteOnce
   # Any tablespace mentioned here requires a volume that will be associated with it.
   # tablespaces:
-    # example1:
-    #   size: 5Gi
-    #   storageClass: gp2
-    # example2:
-    #   size: 5Gi
-    #   storageClass: gp2
+  # example1:
+  #   size: 5Gi
+  #   storageClass: gp2
+  # example2:
+  #   size: 5Gi
+  #   storageClass: gp2
 
 # EXPERIMENTAL, please do *not* enable on production environments
 # if enabled, fullWalPrevention will switch the default transaction mode from read write
@@ -430,7 +427,8 @@ fullWalPrevention:
     readWriteFreePercent: 8
     readWriteFreeMB: 128
 
-resources: {}
+resources:
+  {}
   # If you do want to specify resources, uncomment the following
   # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
   # limits:
@@ -467,7 +465,8 @@ timescaledbTune:
   # Therefore you probably want to set explicit overrides in patroni.bootstrap.dcs.postgresql.parameters,
   # as those will take effect as soon as possible.
   # https://github.com/timescale/timescaledb-tune
-  args: {}
+  args:
+    {}
     # max-conns: 120
     # cpus: 5
     # memory: 4GB
@@ -480,25 +479,25 @@ pgBouncer:
   enabled: false
   port: 6432
   config:
-  # DANGER: The below settings are considered to be safe to set, and we recommend
-  # you do set these to appropriate values for you.
-  # However, for flexibility, we do allow the override of any pg_bouncer setting
-  # many of which are vital to the operation of this helm chart.
-  # The values we do not suggest altering are set in the template
-  # https://github.com/timescale/timescaledb-kubernetes/blob/master/charts/timescaledb-single/templates/configmap-pgbouncer.yaml#L35-L50
-  # Only override these settings if you are confident of  what you are doing.
+    # DANGER: The below settings are considered to be safe to set, and we recommend
+    # you do set these to appropriate values for you.
+    # However, for flexibility, we do allow the override of any pg_bouncer setting
+    # many of which are vital to the operation of this helm chart.
+    # The values we do not suggest altering are set in the template
+    # https://github.com/timescale/timescaledb-kubernetes/blob/master/charts/timescaledb-single/templates/configmap-pgbouncer.yaml#L35-L50
+    # Only override these settings if you are confident of  what you are doing.
     server_reset_query: DISCARD ALL
     max_client_conn: 500
     default_pool_size: 12
     pool_mode: transaction
   pg_hba:
-  - local     all postgres                   peer
-  - host      all postgres,standby 0.0.0.0/0 reject
-  - host      all postgres,standby ::0/0     reject
-  - hostssl   all all              0.0.0.0/0 md5
-  - hostssl   all all              ::0/0     md5
-  - hostnossl all all              0.0.0.0/0 reject
-  - hostnossl all all              ::0/0     reject
+    - local     all postgres                   peer
+    - host      all postgres,standby 0.0.0.0/0 reject
+    - host      all postgres,standby ::0/0     reject
+    - hostssl   all all              0.0.0.0/0 md5
+    - hostssl   all all              ::0/0     md5
+    - hostnossl all all              0.0.0.0/0 reject
+    - hostnossl all all              ::0/0     reject
   # Secret should contain user/password pairs in the format expected by pgbouncer
   # https://www.pgbouncer.org/config.html#authentication-file-format
   # example:
@@ -611,7 +610,6 @@ affinityTemplate: |
             release: {{ .Release.Name | quote }}
             cluster-name: {{ template "clusterName" . }}
 affinity: {}
-
 ## Use an alternate scheduler, e.g. "stork".
 ## ref: https://kubernetes.io/docs/tasks/administer-cluster/configure-multiple-schedulers/
 ##
@@ -620,7 +618,7 @@ affinity: {}
 rbac:
   # Specifies whether RBAC resources should be created
   create: true
-  pspEnabled: true
+  pspEnabled: false
   sccEnabled: true
   # annotations:
   # labels:
@@ -636,4 +634,4 @@ debug:
   # This setting is mainly for during development, debugging or troubleshooting.
   # This command will be executed *before* the main container starts. In the
   # example below, we can mimick a slow restore by sleeping for 5 minutes before starting
-  execStartPre:  # sleep 300
+  execStartPre: # sleep 300

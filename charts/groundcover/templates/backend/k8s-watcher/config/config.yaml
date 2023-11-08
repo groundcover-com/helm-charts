@@ -8,6 +8,7 @@ data:
     productchansize: 20480
     k8sloadtimeout: 2m0s
     resyncDuration: 1h
+    groundcoverVersion: ""
     podsResyncDuration: 15m
     unavailableDeploymentPollInterval: 10s
     summarizerActiveTtl: 180s
@@ -15,13 +16,6 @@ data:
     productmetricsflushmintotalcounter:
       deployment_event: 1
       unavailable_deployment: 1
-
-    Promscale:
-      url: "{{ template "promscale.otelURL" . }}"
-      tls: "true"
-      tableWriterBatchMaxSize: 350
-      tableWriterBatchInterval: 1s
-      tableWriterBatchWriteTimeout: 1m
 
     deploymenteventhandler:
       samplesthreshold: 100

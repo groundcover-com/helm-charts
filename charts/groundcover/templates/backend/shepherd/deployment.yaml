@@ -76,6 +76,10 @@ spec:
                 secretKeyRef:
                   key: PATRONI_SUPERUSER_PASSWORD
                   name: {{ index .Values "timescaledb-single" "secrets" "credentialsSecretName" | default "groundcover-tsdb-credentials" }}
+            - name: GC_GROUNDCOVERVERSION
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.annotations['groundcover_version']  
           volumeMounts: 
             - name: config
               mountPath: /config

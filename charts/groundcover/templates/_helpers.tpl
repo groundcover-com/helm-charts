@@ -84,58 +84,18 @@ Get cluster_id from values or generate random one
 {{- default "API_KEY" .Values.global.groundcoverPredefinedTokenSecret.secretKey -}}
 {{- end -}}
 
-{{- define "promscale.promURL" -}}
-{{- default ( printf "https://groundcover-promscale-connector:%d"  ( .Values.promscale.prometheus.port | int ) ) .Values.promscale.overridePromURL  -}}
-{{- end -}}
-
-{{- define "promscale.otelURL" -}}
-{{- default ( printf "groundcover-promscale-connector:%d"  ( .Values.promscale.openTelemetry.port | int ) ) .Values.promscale.overrideOtelURL  -}}
-{{- end -}}
-
 {{- define "loki.url" -}}
 {{- default ( printf "http://groundcover-loki:%d"  ( .Values.loki.service.port | int ) ) .Values.loki.overrideURL  -}}
 {{- end -}}
 
-{{/*
-Create a default fully qualified app name.
-We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
-If release name contains chart name it will be used as a full name.
-*/}}
-{{- define "promscale.fullname" -}}
-{{- if .Values.promscale.fullnameOverride -}}
-{{- .Values.promscale.fullnameOverride | trunc 63 | trimSuffix "-" -}}
-{{- else -}}
-{{- $name := default .Chart.Name .Values.promscale.nameOverride -}}
-{{- if contains $name .Release.Name -}}
-{{- .Release.Name | trunc 63 | trimSuffix "-" -}}
-{{- else -}}
-{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-{{- end -}}
-{{- end -}}
 
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "promscale.chart" -}}
-{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
 
 {{/*
 Allow the release namespace to be overridden
 */}}
-{{- define "promscale.namespace" -}}
-  {{- if .Values.promscale.namespaceOverride -}}
-    {{- .Values.promscale.namespaceOverride -}}
-  {{- else -}}
-    {{- .Release.Namespace -}}
-  {{- end -}}
-{{- end -}}
-
-{{- define "promscale_secrets_certificate" -}}
-{{ printf "%s-certificate" (include "promscale.fullname" .) }}
-{{- end -}}
 
 {{- define "agent.tracy.enabled" }}
 {{- and .Values.agent.tracy.enabled (not .Values.agent.experimental) -}}

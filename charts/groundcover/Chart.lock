@@ -1,0 +1,24 @@
+dependencies:
+- name: router
+  repository: ""
+  version: 0.1.0
+- name: timescaledb-single
+  repository: ""
+  version: 0.11.0
+- name: victoria-metrics-single
+  repository: ""
+  version: 0.8.19
+- name: victoria-metrics-agent
+  repository: https://victoriametrics.github.io/helm-charts/
+  version: 0.8.35
+- name: victoria-metrics-agent
+  repository: https://victoriametrics.github.io/helm-charts/
+  version: 0.8.35
+- name: loki
+  repository: ""
+  version: 2.10.1
+- name: shepherd
+  repository: ""
+  version: 0.1.0
+digest: sha256:be8b89e4d63aa0d29e8f17b17fc7a8e03d47583cdeef016b809402b8f1a7eaf1
+generated: "2023-03-22T11:38:57.099921087Z"

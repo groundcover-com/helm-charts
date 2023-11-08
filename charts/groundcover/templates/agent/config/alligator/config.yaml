@@ -149,12 +149,6 @@ data:
       tableWriterBatchMaxSize: 350
       tableWriterBatchInterval: 1s
       tableWriterBatchWriteTimeout: 5s
-    promscalestorage:
-      url: "{{ template "promscale.otelURL" . }}"
-      tls: true
-      tableWriterBatchMaxSize: 350
-      tableWriterBatchInterval: 1s
-      tableWriterBatchWriteTimeout: 5s
 
     clusterId: {{ .Values.clusterId }}
     region: {{ .Values.region }}

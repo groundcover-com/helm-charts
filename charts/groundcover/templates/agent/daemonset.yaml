@@ -96,6 +96,10 @@ spec:
                 secretKeyRef:
                     name: groundcover-config
                     key: GC_REGION
+            - name: GC_GROUNDCOVERVERSION
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.annotations['groundcover_version']
             - name: API_KEY
               valueFrom:
                 secretKeyRef:
@@ -188,20 +192,18 @@ spec:
       hostNetwork: {{ default false .Values.agent.hostNetwork }}
       hostPID: true
       initContainers:
-        - name: check-promscale-ready
-          image: {{ .Values.global.origin.registry }}/curl:latest
-          command:
-            - /bin/sh
-            - -c
-          args:
-              - while [ $(curl -sw '%{http_code}' -k {{ template "promscale.promURL" . }}/healthz -o /dev/null) -ne 200 ]; do echo 'Waiting for promscale...'; sleep 2; done; echo promscale is up
         - name: check-shepherd-ready
           args:
-              - while [ $(curl -sw '%{http_code}' -k {{ template "shepherd.http" . }}/health -o /dev/null) -ne 200 ]; do echo 'Waiting for shepherd...'; sleep 2; done; echo shepherd is up
+          - while [ ! $(curl -sk {{ template "shepherd.http" . }}/version | grep $GROUNDCOVER_VERSION ) ]; do echo -n 'Current version '; curl -sk {{ template "shepherd.http" . }}/version; echo ' Wanted version' $GROUNDCOVER_VERSION; echo 'Waiting for shepherd...'; sleep 2; done; echo shepherd is up
           command:
             - /bin/sh
             - -c
           image: {{ .Values.global.origin.registry }}/curl:latest
+          env:
+            - name: GROUNDCOVER_VERSION
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.annotations['groundcover_version']            
       serviceAccountName: alligator
 {{- if .Values.agent.priorityClassName }}
       priorityClassName: {{ .Values.agent.priorityClassName }}

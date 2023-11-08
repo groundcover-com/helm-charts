@@ -64,7 +64,7 @@ spec:
       serviceAccountName: portal
       containers:
       - env:
-        - name: GC_VERSION
+        - name: GC_GROUNDCOVERVERSION
           valueFrom:
             fieldRef:
               fieldPath: metadata.annotations['groundcover_version']

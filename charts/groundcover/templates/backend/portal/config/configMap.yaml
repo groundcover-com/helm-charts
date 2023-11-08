@@ -12,7 +12,7 @@ data:
     ClusterId: {{ template "groundcover.clusterId" . }}
     MultipleClusterIds: 
     {{- with .Values.multipleClusterIds }}{{ toYaml . | nindent 6 }}{{- end }}  
-    VERSION: "OVERRIDEN"
+    GroundcoverVersion: "OVERRIDEN"
 
     Incluster: true
     Namespace: {{ .Release.Namespace }}
@@ -56,7 +56,7 @@ data:
     {{- with .Values.multipleClusterIds }}
       {{ toYaml . | nindent 6 }}
     {{- end }}  
-    VERSION: "OVERRIDEN"
+    GroundcoverVersion: "OVERRIDEN"
 
     Incluster: true
     Namespace: {{ .Release.Namespace }}

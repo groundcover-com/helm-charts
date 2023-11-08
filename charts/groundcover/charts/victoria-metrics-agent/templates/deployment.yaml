@@ -15,9 +15,9 @@ metadata:
   {{- end }}
 spec:
   replicas: {{ .Values.replicaCount }}
-  {{- if .Values.deployment.strategy }}
+  {{- with .Values.deployment.strategy }}
   strategy:
-    {{- toYaml .Values.deployment.strategy | nindent 4 }}
+    {{- toYaml . | nindent 4 }}
   {{- end }}
   selector:
     matchLabels:
@@ -37,14 +37,14 @@ spec:
 {{- end }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
-        forcerecreate: {{ randAlphaNum 5 | quote }}
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "8429"
         {{- range $key, $value := .Values.podAnnotations }}
         {{ $key }}: {{ $value | quote }}
         {{- end }}
     spec:
-      imagePullSecrets: {{ include "imagePullSecrets" . }}
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
       serviceAccountName: {{ include "chart.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
@@ -57,9 +57,6 @@ spec:
           args:
             - -promscrape.config=/config/scrape.yml
             - -remoteWrite.tmpDataPath=/tmpData
-            - -remoteWrite.label=clusterId=$(GC_CLUSTER_ID)
-            - -remoteWrite.label=region=$(GC_REGION)
-            - -remoteWrite.label=groundcover_version=$(GC_VERSION)
           {{- range .Values.remoteWriteUrls }}
             - -remoteWrite.url={{ . }}
           {{- end }}
@@ -109,14 +106,7 @@ spec:
               containerPort: {{ include "split-host-port" .Values.extraArgs.opentsdbListenAddr }}
           {{- end }}
           env:
-            - name: API_KEY
-              valueFrom:
-                secretKeyRef:
-                  key: {{ include "groundcover.apikeySecretKey" . }}
-                  name: {{ include "groundcover.apikeySecretName" . }}
-            {{- with .Values.env -}}
-              {{ toYaml . | nindent 12 }}
-            {{- end }}
+            {{- tpl ( toYaml .Values.env ) . | nindent 12 }}
           readinessProbe:
             httpGet:
               path: /health
