@@ -106,28 +106,6 @@ data:
       summarizerActiveTtl: 45s
       aggregationCacheSize: 4096
 
-    connStatsHandler:
-      samplesthreshold: 10
-      issuesthreshold: 10
-      sampling:
-        samplingmode: 0 # DontSample
-        samplingLimitMaxQueue: 0
-        samplingLimitAgeOut: 0s
-      interval: 30s
-      summarizerActiveTtl: 45s
-      aggregationCacheSize: 100
-
-    tcpStatsHandler:
-      samplesthreshold: 10
-      issuesthreshold: 10
-      sampling:
-        samplingmode: 0 # DontSample
-        samplingLimitMaxQueue: 0
-        samplingLimitAgeOut: 0s
-      interval: 30s
-      summarizerActiveTtl: 45s
-      aggregationCacheSize: 100
-
     containerInfoHandler:
       samplesthreshold: 10
       issuesthreshold: 10
