@@ -6,32 +6,32 @@ mode: cloud
 
 origin:
   registry: public.ecr.aws/groundcovercom
-  tag: 0.65.8
+  tag: 0.65.9
 
 repository: router
 
 configuration:
-    Activity:
-      CheckInterval: 5m 
-      StaleAfter: 30m
-    LogLevel: 4
-    Reverse: true
-    groundcoverVersion: ""
-    Portal:
-      Host: "portal"
-      Port: "5555"
-    ListenPort: "8080"
-    Auth0:
-      RequiredScope: "access:router"
-      OrgClaimKey: "https://client.info/org"
-      Audience: "https://groundcover"
-      Tenant: "auth.groundcover.com"
-    RBAC:
-      Migrations:
-        Path: migrations    
-    Reporter:
-      ttl: 10m
-      PurgeInterval: 10m 
+  Activity:
+    CheckInterval: 5m
+    StaleAfter: 30m
+  LogLevel: 4
+  Reverse: true
+  groundcoverVersion: ""
+  Portal:
+    Host: "portal"
+    Port: "5555"
+  ListenPort: "8080"
+  Auth0:
+    RequiredScope: "access:router"
+    OrgClaimKey: "https://client.info/org"
+    Audience: "https://groundcover"
+    Tenant: "auth.groundcover.com"
+  RBAC:
+    Migrations:
+      Path: migrations
+  Reporter:
+    ttl: 10m
+    PurgeInterval: 10m
 
 ingress:
   enabled: false
@@ -49,3 +49,6 @@ resources:
   limits:
     memory: 2048Mi
     cpu: 1500m
+
+nodeSelector: {}
+tolerations: []
