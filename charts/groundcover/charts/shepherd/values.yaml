@@ -107,7 +107,8 @@ config:
   ingestor:
     resourceLabels: []
     entityLabels: []
-    activeDuration: 30m
+    activeDuration: 1m
+    metricTTL : 5m
     maxTopResources: []
     defaultMaxTopResources: 
     TLSCertFile: "/var/groundcover/server/tls.crt"

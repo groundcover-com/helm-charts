@@ -244,6 +244,7 @@ config:
   # scrape self by default
   scrape_configs:
     - job_name: vmagent
+      stream_parse: true
       static_configs:
         - targets: ["localhost:8429"]
 
@@ -256,6 +257,7 @@ config:
     # * `prometheus.io/path`: If the metrics path is not `/metrics` override this.
     # * `prometheus.io/port`: Scrape the pod on the indicated port instead of the default of `9102`.
     - job_name: "kubernetes-pods"
+      stream_parse: true
       kubernetes_sd_configs:
         - role: pod
           namespaces:
