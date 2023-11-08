@@ -10,6 +10,9 @@ metadata:
     chart: {{ template "loki.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
+    {{ with .Values.global.groundcoverLabels }} 
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 data:
   {{ template "loki.fullname" . }}-alerting-rules.yaml: |-
     groups:

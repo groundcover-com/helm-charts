@@ -15,7 +15,9 @@ global:
     secretName:
     # the key in the secret containing the token value
     secretKey:
-
+  
+  groundcoverLabels:
+  
 metrics:
   enabled: true
 
@@ -42,7 +44,7 @@ shouldDropRunningNamespaces: true
 
 origin:
   registry: public.ecr.aws/groundcovercom
-  tag: 0.36.3
+  tag: 0.36.4
 
 pullSecrets: []
 
@@ -251,7 +253,7 @@ router:
   repository: router
   origin:
     registry: public.ecr.aws/groundcovercom
-    tag: 0.36.3
+    tag: 0.36.4
   versionDb:
     host: 
     port: 

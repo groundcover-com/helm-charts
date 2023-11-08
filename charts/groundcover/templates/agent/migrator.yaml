@@ -3,6 +3,9 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   labels:
+    {{ with .Values.global.groundcoverLabels }} 
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
     {{- if .Values.migrator.additionalLabels }}
 {{ toYaml .Values.migrator.additionalLabels | indent 4 }}
     {{- end }}
@@ -19,6 +22,9 @@ spec:
   template:
     metadata:
       labels:
+      {{ with .Values.global.groundcoverLabels }} 
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- if .Values.migrator.additionalLabels }}
 {{ toYaml .Values.migrator.additionalLabels | indent 8 }}
       {{- end }}

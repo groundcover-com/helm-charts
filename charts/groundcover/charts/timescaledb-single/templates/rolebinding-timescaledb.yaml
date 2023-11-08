@@ -11,6 +11,9 @@ metadata:
     chart: {{ template "timescaledb.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
+    {{ with .Values.global.groundcoverLabels }} 
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 subjects:
   - kind: ServiceAccount
     name: {{ template "timescaledb.serviceAccountName" . }}

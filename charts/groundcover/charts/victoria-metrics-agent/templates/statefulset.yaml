@@ -33,6 +33,9 @@ spec:
 {{- with .Values.podLabels }}
 {{ toYaml . | indent 8 }}
 {{- end }}
+{{ with .Values.global.groundcoverLabels }} 
+{{- toYaml . | nindent 8 }}
+{{- end }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
         {{- range $key, $value := .Values.podAnnotations }}

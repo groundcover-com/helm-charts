@@ -31,6 +31,9 @@ data:
 kind: ConfigMap
 metadata:
   labels:
+    {{ with .Values.global.groundcoverLabels }} 
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
     {{- if .Values.portal.additionalLabels }}
 {{ toYaml .Values.portal.additionalLabels | indent 4 }}
     {{- end }}

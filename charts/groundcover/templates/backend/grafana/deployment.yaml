@@ -9,6 +9,9 @@ metadata:
 {{ toYaml .Values.grafana.additionalAnnotations | indent 4 }}
     {{- end }}
   labels:
+    {{ with .Values.global.groundcoverLabels }} 
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
     app: grafana
     {{- if .Values.grafana.additionalLabels }}
 {{ toYaml .Values.grafana.additionalLabels | indent 4 }}
@@ -33,6 +36,9 @@ spec:
         {{- end }}
       labels:
         app: grafana
+        {{ with .Values.global.groundcoverLabels }} 
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
         {{- if .Values.grafana.additionalLabels }}
 {{ toYaml .Values.grafana.additionalLabels | indent 8 }}
         {{- end }}

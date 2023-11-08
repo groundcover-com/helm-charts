@@ -14,6 +14,9 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
     component: postgres-exporter
+    {{ with .Values.global.groundcoverLabels }} 
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
   annotations:
     prometheus.io/scrape: "true"
     prometheus.io/port: "9187"

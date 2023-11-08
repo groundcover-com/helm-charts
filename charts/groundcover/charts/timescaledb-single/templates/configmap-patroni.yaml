@@ -15,6 +15,9 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
     cluster-name: {{ template "clusterName" . }}
+    {{ with .Values.global.groundcoverLabels }} 
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 data:
   patroni.yaml: |
 {{ .Values.patroni | toYaml | indent 4 }}

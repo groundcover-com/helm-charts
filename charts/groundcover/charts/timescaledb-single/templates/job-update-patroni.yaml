@@ -23,6 +23,9 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
     cluster-name: {{ template "clusterName" . }}
+    {{ with .Values.global.groundcoverLabels }} 
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
   annotations:
     "helm.sh/hook": post-upgrade
     "helm.sh/hook-delete-policy": hook-succeeded

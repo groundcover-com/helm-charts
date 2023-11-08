@@ -9,6 +9,9 @@ metadata:
 {{ toYaml .Values.rbac.annotations | indent 4 }}
     {{- end }}
   labels:
+    {{ with .Values.global.groundcoverLabels }} 
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
     {{- if .Values.rbac.labels }}
 {{ toYaml .Values.rbac.labels | indent 4 }}
     {{- end }}

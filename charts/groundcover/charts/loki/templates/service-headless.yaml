@@ -9,6 +9,9 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
     variant: headless
+    {{ with .Values.global.groundcoverLabels }} 
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   clusterIP: None
   ports:

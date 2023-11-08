@@ -9,6 +9,9 @@ metadata:
   name: {{ $fullName }}-otel
   namespace: {{ .Release.Namespace }}
   labels:
+    {{ with .Values.global.groundcoverLabels }} 
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
     app: {{ template "promscale.fullname" . }}
     chart: {{ template "promscale.chart" . }}
     release: {{ .Release.Name }}

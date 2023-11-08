@@ -11,6 +11,9 @@ metadata:
     chart: {{ template "loki.chart" . }}
     heritage: {{ .Release.Service }}
     release: {{ .Release.Name }}
+    {{ with .Values.global.groundcoverLabels }} 
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
   {{- if .Values.serviceMonitor.prometheusRule.additionalLabels }}
     {{- toYaml .Values.serviceMonitor.prometheusRule.additionalLabels | nindent 4 }}
   {{- end }}

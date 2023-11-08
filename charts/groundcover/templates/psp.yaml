@@ -5,6 +5,9 @@ metadata:
   name: {{ template "groundcover.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
+    {{ with .Values.global.groundcoverLabels }} 
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
     {{- if .Values.rbac.labels }}
 {{ toYaml .Values.rbac.labels | indent 4 }}
     {{- end }}

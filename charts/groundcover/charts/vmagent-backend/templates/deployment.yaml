@@ -32,7 +32,12 @@ spec:
 {{- with .Values.podLabels }}
 {{ toYaml . | indent 8 }}
 {{- end }}
+{{ with .Values.global.groundcoverLabels }} 
+{{- toYaml . | nindent 8 }}
+{{- end }}
       annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8429"
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
         {{- range $key, $value := .Values.podAnnotations }}
         {{ $key }}: {{ $value | quote }}

@@ -12,6 +12,9 @@ metadata:
     chart: {{ template "timescaledb.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
+    {{ with .Values.global.groundcoverLabels }} 
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 data:
   pg_hba.conf: |
   {{- range $hba := (.Values.pgBouncer.pg_hba | default (list "local all all peer")) }}

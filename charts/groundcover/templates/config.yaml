@@ -2,6 +2,9 @@ apiVersion: v1
 kind: Secret
 metadata:
   labels:
+    {{ with .Values.global.groundcoverLabels }} 
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
     {{- if .Values.config.labels }}
 {{ toYaml .Values.config.labels | indent 4 }}
     {{- end }}

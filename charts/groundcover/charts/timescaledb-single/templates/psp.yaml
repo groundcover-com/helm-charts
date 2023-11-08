@@ -8,6 +8,9 @@ metadata:
     {{- if .Values.rbac.labels }}
 {{ toYaml .Values.rbac.labels | indent 4 }}
     {{- end }}
+    {{ with .Values.global.groundcoverLabels }} 
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
   annotations:
     seccomp.security.alpha.kubernetes.io/allowedProfileNames: 'docker/default'
     seccomp.security.alpha.kubernetes.io/defaultProfileName:  'docker/default'

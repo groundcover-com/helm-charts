@@ -11,6 +11,9 @@ metadata:
     chart: {{ template "timescaledb.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
+    {{ with .Values.global.groundcoverLabels }} 
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 {{- $globalDefaults := dict "spool-path" (include "socket_directory" .) "compress-level" "3" "repo1-path" (printf "/%s/%s/" .Release.Namespace (include "clusterName" .)) }}
 {{- $globals := merge .Values.backup.pgBackRest $globalDefaults }}
 {{- $push := index .Values.backup "pgBackRest:archive-push" | default dict }}

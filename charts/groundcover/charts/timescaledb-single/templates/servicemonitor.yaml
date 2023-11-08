@@ -13,6 +13,9 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
     cluster-name: {{ template "clusterName" . }}
+    {{ with .Values.global.groundcoverLabels }} 
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
     {{- if .Values.serviceMonitor.labels -}}
     {{ toYaml .Values.serviceMonitor.labels | nindent 4 }}
     {{- end }}

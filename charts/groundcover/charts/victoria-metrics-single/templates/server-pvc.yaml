@@ -11,6 +11,9 @@ metadata:
 {{ toYaml . | indent 4 }}
 {{- end }}
   labels:
+  {{ with .Values.global.groundcoverLabels }} 
+  {{- toYaml . | nindent 4 }}
+  {{- end }}
 {{- include "victoria-metrics.server.labels" . | nindent 4 }}
 spec:
 {{- with .Values.server.persistentVolume.accessModes }}

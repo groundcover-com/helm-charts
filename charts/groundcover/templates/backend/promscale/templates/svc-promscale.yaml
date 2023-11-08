@@ -5,6 +5,9 @@ metadata:
   name: {{ include "promscale.fullname" . | trunc 53 }}-connector
   namespace: {{ template "promscale.namespace" . }}
   labels:
+    {{ with .Values.global.groundcoverLabels }} 
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
     app: {{ template "promscale.fullname" . }}
     chart: {{ template "promscale.chart" . }}
     release: {{ .Release.Name }}

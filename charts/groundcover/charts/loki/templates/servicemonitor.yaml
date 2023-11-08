@@ -8,6 +8,9 @@ metadata:
     chart: {{ template "loki.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
+    {{ with .Values.global.groundcoverLabels }} 
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
     {{- if .Values.serviceMonitor.additionalLabels }}
 {{ toYaml .Values.serviceMonitor.additionalLabels | indent 4 }}
     {{- end }}

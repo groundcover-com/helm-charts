@@ -10,6 +10,9 @@ metadata:
   name: alligator
   namespace: {{ .Release.Namespace }}
   labels:
+    {{ with .Values.global.groundcoverLabels }} 
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
     app: alligator
     {{- if .Values.agent.additionalLabels }}
 {{ toYaml .Values.agent.additionalLabels | indent 4 }}
@@ -36,6 +39,9 @@ spec:
         {{- end }}
       labels:
         app: alligator
+        {{ with .Values.global.groundcoverLabels }} 
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
         {{- if .Values.agent.additionalLabels }}
 {{ toYaml .Values.agent.additionalLabels | indent 8 }}
         {{- end }}
