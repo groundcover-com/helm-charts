@@ -37,15 +37,6 @@ data:
 
     DirectModeGRPCPort: "5555"
 
-    DB:
-      Host: "groundcover-tsdb"
-      Port: "5432"
-      Name: "groundcover"
-      User: "postgres"
-      Pass: "password"
-      Timeout: 150s
-      Interval: 5s
-
     VictoriaMetrics:
       URL: {{ include "victoria-metrics.base.http.url" . }}
 

@@ -37,6 +37,8 @@ global:
       enabled: true
     overrideGrpcURL: ""
     overrideHttpURL: ""
+  datadogapm:
+    overrideUrl: ""
   traces:
     retention: 24h # {amount}[h(ours), d(ays), w(eeks), y(ears)]
   telemetry:
@@ -122,6 +124,8 @@ agent:
     nodelabels: []
     contentTypesToDrop: ["text/html", "text/javascript", "text/css", "image", "font", "video", "audio"]
     watchOnlyLocalNode: false
+    apmForwarder:
+      dataDogEnabled: true
     pprofAlligator:
       enabled: true
       interval: 10s
@@ -302,7 +306,7 @@ opentelemetry-collector:
       secretName: opentelemetry-collector-certificate
   image:
     repository: public.ecr.aws/groundcovercom/otel/opentelemetry-collector-contrib
-    tag: "1.4.14"
+    tag: "1.4.15"
   podLabels:
     app.kubernetes.io/part-of: groundcover
   podAnnotations:
@@ -323,6 +327,12 @@ opentelemetry-collector:
       servicePort: 13133
       hostPort: 13133
       protocol: TCP
+    datadogapm:
+      enabled: true
+      containerPort: 8126
+      servicePort: 8126
+      hostPort: 8126
+      protocol: TCP
   config:
     extensions:
       health_check:
@@ -339,8 +349,11 @@ opentelemetry-collector:
       otlp:
         protocols:
           grpc:
+            max_recv_msg_size_mib: 50
             tls: ${env:TLS_CONFIG}
             endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "otlp" "containerPort" | int ) }}'
+      datadog:
+        endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "datadogapm" "containerPort" | int ) }}'
     processors:
       batch/logs:
         timeout: 5s
@@ -389,6 +402,7 @@ opentelemetry-collector:
         traces:
           receivers:
             - otlp
+            - datadog
           processors:
             - batch/traces
           exporters:
@@ -631,7 +645,6 @@ custom-metrics:
   config:
     scrape_configs:
       ## COPY from Prometheus helm chart https://github.com/helm/charts/blob/master/stable/prometheus/values.yaml
-
       # Scrape config for API servers.
       #
       # Kubernetes exposes API servers as endpoints to the default/kubernetes
@@ -640,6 +653,7 @@ custom-metrics:
       # default named port `https`. This works for single API server deployments as
       # well as HA API server deployments.
       - job_name: "kubernetes-apiservers"
+        honor_labels: true
         kubernetes_sd_configs:
           - role: endpointslices
         # Default to scraping over https. If required, just disable this or change to
@@ -673,6 +687,7 @@ custom-metrics:
             action: keep
             regex: default;kubernetes;https
       - job_name: "kubernetes-nodes"
+        honor_labels: true
         # Default to scraping over https. If required, just disable this or change to
         # `http`.
         scheme: https
@@ -719,6 +734,7 @@ custom-metrics:
       # * `prometheus.io/port`: If the metrics are exposed on a different port to the
       # service then set this appropriately.
       - job_name: "kubernetes-service-endpoints"
+        honor_labels: true
         kubernetes_sd_configs:
           - role: endpointslices
         relabel_configs:
@@ -776,6 +792,7 @@ custom-metrics:
       # * `prometheus.io/port`: If the metrics are exposed on a different port to the
       # service then set this appropriately.
       - job_name: "kubernetes-service-endpoints-slow"
+        honor_labels: true
         scrape_interval: 5m
         scrape_timeout: 30s
         kubernetes_sd_configs:
@@ -829,6 +846,7 @@ custom-metrics:
       #
       # * `prometheus.io/probe`: Only probe services that have a value of `true`
       - job_name: "kubernetes-services"
+        honor_labels: true
         metrics_path: /probe
         params:
           module: [http_2xx]
@@ -863,6 +881,7 @@ custom-metrics:
       # * `prometheus.io/path`: If the metrics path is not `/metrics` override this.
       # * `prometheus.io/port`: Scrape the pod on the indicated port instead of the default of `9102`.
       - job_name: "kubernetes-pods"
+        honor_labels: true
         kubernetes_sd_configs:
           - role: pod
         relabel_configs:

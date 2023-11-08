@@ -57,3 +57,11 @@
 {{- end -}}
 {{- printf "%s/health" $baseUrl -}}
 {{- end -}}
+
+{{- define "opentelemetry-collector.datadogapm.http.url" -}}
+{{- if not .Values.backend.enabled -}}
+    {{- required "A valid global.datadogapm.overrideUrl is required!" .Values.global.datadogapm.overrideUrl -}}
+{{- else -}}
+    {{- printf "http://%s:%d" (include "opentelemetry-collector.fullname" .) (index .Values.global "opentelemetry-collector" "ports" "datadogapm" "servicePort" | int ) -}}
+{{- end -}}
+{{- end -}}

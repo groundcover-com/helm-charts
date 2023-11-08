@@ -22,7 +22,4 @@ subjects:
 - kind: ServiceAccount
   name: portal
   namespace: {{ .Release.Namespace }}
-- kind: ServiceAccount
-  name: db-manager
-  namespace: {{ .Release.Namespace }}
 {{- end }}

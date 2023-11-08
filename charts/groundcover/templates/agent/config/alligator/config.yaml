@@ -146,6 +146,11 @@ data:
     tracesWorkloadFilters: {{ toYaml .Values.tracesWorkloadFilters | nindent 6 }}
     nodelabels: {{ toYaml .Values.agent.alligator.nodelabels | nindent 6 }}
     contentTypesToDrop: {{ toYaml .Values.agent.alligator.contentTypesToDrop | nindent 6 }}
+    apmForwarder: 
+      dataDogEnabled: {{ .Values.agent.alligator.apmForwarder.dataDogEnabled }}
+      dataDogEndpoint: {{ include "opentelemetry-collector.datadogapm.http.url" . }}
+      enableTLS: {{ eq (get (urlParse (include "opentelemetry-collector.datadogapm.http.url" .)) "scheme") "https" }}
+      writeTimeout: 10s
     pprofAlligator:
       enabled: {{ include "telemetry.enabled" . }}
       interval: {{ .Values.agent.alligator.pprofAlligator.interval }}
