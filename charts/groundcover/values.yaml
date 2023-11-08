@@ -98,7 +98,8 @@ tracesWorkloadFilters:
   #   regex: "do-not-show-me"
 logsDropFilters: []
 # - '{namespace="demo-ng",workload="loadgenerator"} |~ ".*GET.*"'
-logsMultiLines: []
+logsMultiLines:
+  []
   # - namespace: demo-ng             # mandatory
   #   workload: ".*"                 # mandatory
   #   container: "test"              # optional
@@ -199,8 +200,8 @@ dbManager:
     repository: "{{ .Values.global.origin.registry }}/db-manager"
   resources:
     limits:
-      cpu: 45m
-      memory: 45Mi
+      cpu: 100m
+      memory: 1Gi
     requests:
       cpu: 15m
       memory: 15Mi
@@ -209,8 +210,7 @@ dbManager:
       valueFrom:
         secretKeyRef:
           key: '{{ include "clickhouse.secretKey" . }}'
-          name: '{{ include "clickhouse.secretName" . }}'  
-
+          name: '{{ include "clickhouse.secretName" . }}'
 
 k8sWatcher:
   image:
@@ -877,7 +877,7 @@ custom-metrics:
           - action: drop
             source_labels:
               - __meta_kubernetes_pod_label_app_kubernetes_io_name
-            regex: kube-state-metrics            
+            regex: kube-state-metrics
           - action: labelmap
             regex: __meta_kubernetes_node_label_(.+)
           - target_label: __address__
@@ -909,7 +909,7 @@ custom-metrics:
           - action: drop
             source_labels:
               - __meta_kubernetes_pod_label_app_kubernetes_io_name
-            regex: kube-state-metrics            
+            regex: kube-state-metrics
           - action: drop
             source_labels: [__meta_kubernetes_pod_container_init]
             regex: true
@@ -984,7 +984,7 @@ custom-metrics:
           - action: drop
             source_labels:
               - __meta_kubernetes_pod_label_app_kubernetes_io_name
-            regex: kube-state-metrics            
+            regex: kube-state-metrics
           - action: drop
             source_labels: [__meta_kubernetes_pod_container_init]
             regex: true
@@ -1054,7 +1054,7 @@ custom-metrics:
           - action: drop
             source_labels:
               - __meta_kubernetes_pod_label_app_kubernetes_io_name
-            regex: kube-state-metrics            
+            regex: kube-state-metrics
           - source_labels:
               [__meta_kubernetes_service_annotation_prometheus_io_probe]
             action: keep
@@ -1091,7 +1091,7 @@ custom-metrics:
           - action: drop
             source_labels:
               - __meta_kubernetes_pod_label_app_kubernetes_io_name
-            regex: kube-state-metrics            
+            regex: kube-state-metrics
           - action: drop
             source_labels: [__meta_kubernetes_pod_container_init]
             regex: true
