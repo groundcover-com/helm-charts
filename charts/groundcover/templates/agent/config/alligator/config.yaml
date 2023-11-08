@@ -156,6 +156,13 @@ data:
             bodyStoreSizeLimit: 1048576 # 1mb
             headersParseLimit: 4096 # 4kb
             chunkedTransferSizeDigitLimit: 10
+          redis:
+            enabled: true
+            arrayNestingLimit: 8
+            commandsUntilCalibrated: 3
+            stringParseLimit: 1024
+            requestBytesStoreLimit: 1024
+            responseBytesStoreLimit: 1024
         bpfLoading:
           verboseBpfErrors: false
           bpfErrorsBufferSize: 104857600 # 100mb

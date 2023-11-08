@@ -107,6 +107,9 @@ spec:
           - mountPath: /var/groundcover/server
             name: certificate
             readOnly: true
+      {{- if .Values.promscale.priorityClassName }}
+      priorityClassName: {{ .Values.promscale.priorityClassName }}
+      {{- end }}
       volumes:
       - name: certificate
         secret:

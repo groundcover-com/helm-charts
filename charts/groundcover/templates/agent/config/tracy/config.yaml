@@ -4,6 +4,7 @@ data:
   ENABLE_NODE_STACK_TRACE: "false"
   ENABLE_GRPC_C_TRACE: "true"
   GC_ENABLE_HTTP: "{{ template "tracy.enable_http" . }}"
+  GC_ENABLE_REDIS: "{{ template "tracy.enable_redis" . }}"
 kind: ConfigMap
 metadata:
   labels:

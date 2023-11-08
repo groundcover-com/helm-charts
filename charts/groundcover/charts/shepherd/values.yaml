@@ -54,6 +54,7 @@ resources:
 nodeSelector: {}
 tolerations: []
 affinity: {}
+priorityClassName:
 
 config:
   grpcPort: 8081

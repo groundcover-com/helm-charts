@@ -49,6 +49,12 @@ shouldDropRunningNamespaces: false
 commitHashKeyName:
 repositoryUrlKeyName:
 
+priorityClass:
+  create: false
+  name:
+  value:
+  preemptionPolicy:
+
 #imagePullSecrets: []
 
 backend:
