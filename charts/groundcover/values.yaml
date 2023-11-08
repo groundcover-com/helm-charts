@@ -303,7 +303,7 @@ opentelemetry-collector:
       secretName: opentelemetry-collector-certificate
   image:
     repository: public.ecr.aws/groundcovercom/otel/opentelemetry-collector-contrib
-    tag: "1.4.33"
+    tag: "1.4.34"
   podLabels:
     app.kubernetes.io/part-of: groundcover
   podAnnotations:
