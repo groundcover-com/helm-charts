@@ -3,7 +3,7 @@ additionalLabels:
 mode: cloud
 origin:
   registry: public.ecr.aws/groundcovercom
-  tag: 1.1.5
+  tag: 1.1.6
 repository: router
 configuration:
   Activity:
