@@ -8,7 +8,7 @@
 
 {{- define "metrics-ingester.base.http.url" -}}
 {{- if not .Values.backend.enabled -}}
-    {{- required "A valid global.metrics.overrideURL is required!" .Values.global.metrics.overrideUrl -}}
+    {{- required "A valid global.metrics.overrideUrl is required!" .Values.global.metrics.overrideUrl -}}
 {{- else -}}
     {{- printf "%s://%s:%d" (include "metrics-ingester.http.scheme" .) (include "metrics-ingester.fullname" .) (index .Values.global "metrics-ingester" "service" "servicePort" | int ) -}}
 {{- end -}}
