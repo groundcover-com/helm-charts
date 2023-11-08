@@ -59,6 +59,7 @@ server:
     search.maxSeries: "500000"
     search.maxTagKeys: "200000"
     search.maxTagValues: "500000"
+    search.maxQueryLen: "100000"
     maxLabelsPerTimeseries: "50"
 
   # Additional hostPath mounts
