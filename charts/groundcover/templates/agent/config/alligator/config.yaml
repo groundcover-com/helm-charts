@@ -3,8 +3,8 @@ apiVersion: v1
 data:
   config.yaml: |-
     startuptimeout: 120s
-    concurrency: 1000
-    productchansize: 4096
+    concurrency: 200
+    productchansize: 512
     pushsummaries: true
     productmetricsflushmintotalcounter:
       http: 5
