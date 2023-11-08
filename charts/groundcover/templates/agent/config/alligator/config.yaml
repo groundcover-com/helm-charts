@@ -74,7 +74,7 @@ data:
 
     cluster:
       maxhosts: 10000
-      maxchildrens: 30
+      maxchildrens: 40
 
     storage:
       timeout: 5s
