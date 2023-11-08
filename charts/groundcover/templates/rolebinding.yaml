@@ -28,6 +28,6 @@ subjects:
   name: portal
   namespace: {{ .Release.Namespace }}
 - kind: ServiceAccount
-  name: migrator
+  name: db-manager
   namespace: {{ .Release.Namespace }}
 {{- end }}

@@ -106,19 +106,6 @@ agent:
         memory: 2048Mi
         cpu: 750m
 
-migrator:
-  additionalLabels:
-  podLabels:
-  additionalAnnotations:
-  podAnnotations:
-  affinity:
-  nodeSelector:
-  tolerations:
-  priorityClassName:
-  resetDB: "false" # must be string
-  image:
-    repository: "{{ .Values.global.origin.registry }}/migrator"
-
 k8sWatcher:
   image:
     repository: "{{ .Values.global.origin.registry }}/k8s-watcher"
@@ -691,3 +678,43 @@ shepherd:
         - labels:
             type: "container_restart"
           value: -1
+
+dbManager:
+  additionalLabels:
+  podLabels:
+  additionalAnnotations:
+  podAnnotations:
+  affinity:
+    podAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            topologyKey: kubernetes.io/hostname
+            labelSelector:
+              matchExpressions:
+              - key: app.kubernetes.io/component
+                operator: In
+                values:
+                - timescaledb
+        - weight: 50
+          podAffinityTerm:
+            topologyKey: kubernetes.io/zone
+            labelSelector:
+              matchExpressions:
+              - key: app.kubernetes.io/component
+                operator: In
+                values:
+                - timescaledb
+  nodeSelector:
+  tolerations: []
+  priorityClassName:
+  image:
+    repository: "{{ .Values.global.origin.registry }}/db-manager"
+  resources:
+    limits:
+      cpu: 45m
+      memory: 45Mi
+    requests:
+      cpu: 15m
+      memory: 15Mi
+  dataRetention: "{{ .Values.agent.alligator.dataRetention }}"
