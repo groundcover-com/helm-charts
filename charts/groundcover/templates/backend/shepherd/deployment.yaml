@@ -47,7 +47,7 @@ spec:
         {{- toYaml .Values.shepherd.podSecurityContext | nindent 8 }}
       initContainers:
       - name: check-ts-ready
-        image: {{ .Values.global.origin.registry }}/postgres:15.2
+        image: {{ .Values.global.origin.registry }}/postgres:15.3-alpine3.18
         command:
           - bash
           - -c

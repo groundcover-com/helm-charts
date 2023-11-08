@@ -1,0 +1,17 @@
+{{ if .Values.backend.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: clickhouse-client-config-map
+  labels:
+    {{ with .Values.global.groundcoverLabels }} 
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+    app: clickhouse
+data:
+  config.xml: |-
+    <config>
+        <vertical>true</vertical>
+        <database>{{ include "clickhouse.database" . }}</database>
+    </config>
+{{ end }}

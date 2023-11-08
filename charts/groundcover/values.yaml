@@ -28,6 +28,11 @@ global:
   logs:
     overrideUrl: ""
     retentionDays: 3
+  otlp:
+    tls:
+      enabled: true
+    overrideGrpcURL: ""
+    overrideHttpURL: ""
 # optional parameters: stable, legacy, experimental
 mode: stable
 metrics:
@@ -179,6 +184,7 @@ clickhouse:
       clickhouse client \
         --user "${CLICKHOUSE_ADMIN_USER}" \
         --password "${CLICKHOUSE_ADMIN_PASSWORD}" \
+        --database default \
         --query "CREATE DATABASE IF NOT EXISTS {{ include "clickhouse.database" . }};"
   persistence:
     ## @param persistence.enabled Enable persistence using Persistent Volume Claims
@@ -232,6 +238,14 @@ clickhouse:
   ## @param updateStrategy.type ClickHouse statefulset strategy type
   ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#update-strategies
   ##
+
+  extraVolumes:
+    - name: clickhouse-client-config
+      configMap:
+        name: clickhouse-client-config-map
+  extraVolumeMounts:
+    - name: clickhouse-client-config
+      mountPath: /etc/clickhouse-client/
 opentelemetry-collector:
   enabled: true
   mode: statefulset
@@ -243,9 +257,15 @@ opentelemetry-collector:
         secretKeyRef:
           key: '{{ include "clickhouse.secretKey" . }}'
           name: '{{ include "clickhouse.secretName" . }}'
+    - name: TLS_CONFIG
+      value: '{{ include "opentelemetry-collector.tlsConfig" . }}'
+  secretMounts:
+    - name: certificate
+      mountPath: /etc/ssl/certs
+      secretName: opentelemetry-collector-certificate
   image:
     repository: public.ecr.aws/groundcovercom/otel/opentelemetry-collector-contrib
-    tag: "1.1.13"
+    tag: "1.2.0"
   podAnnotations:
     prometheus.io/scrape: "true"
     prometheus.io/port: '{{ index .Values "ports" "metrics" "containerPort" | int }}'
@@ -258,29 +278,59 @@ opentelemetry-collector:
       servicePort: 3100
       hostPort: 3100
       protocol: TCP
+    health:
+      enabled: true
+      containerPort: 13133
+      servicePort: 13133
+      hostPort: 13133
+      protocol: TCP
   config:
+    extensions:
+      health_check:
+        path: /health
+        tls: ${env:TLS_CONFIG}
+        endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "health" "containerPort" | int ) }}'
     receivers:
       loki:
         protocols:
           http:
+            tls: ${env:TLS_CONFIG}
             endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "loki-http" "containerPort" | int ) }}'
         use_incoming_timestamp: true
+      otlp:
+        protocols:
+          grpc:
+            tls: ${env:TLS_CONFIG}
+            endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "otlp" "containerPort" | int ) }}'
     processors:
-      batch:
+      batch/logs:
         timeout: 5s
         send_batch_size: 20000
+      batch/k8s:
+        timeout: 5s
+        send_batch_size: 1000
     exporters:
-      groundcover:
+      groundcover/logs:
+        type: logs
         timeout: 5s
         password: ${env:CLICKHOUSE_PASSWORD}
+        username: '{{ include "clickhouse.username" . }}'
+        database: '{{ include "clickhouse.database" . }}'
+        endpoint: '{{ include "clickhouse.nativeEndpoint" . }}'
         ttl_days: '{{ include "logs.retentionDays" . }}'
+      groundcover/k8s:
+        type: k8s
+        timeout: 5s
+        ttl_days: 5
+        logs_table_name: k8s_objects
+        password: ${env:CLICKHOUSE_PASSWORD}
         username: '{{ include "clickhouse.username" . }}'
         database: '{{ include "clickhouse.database" . }}'
         endpoint: '{{ include "clickhouse.nativeEndpoint" . }}'
     service:
       telemetry:
         metrics:
-          address: '{{ printf "0.0.0.0:%d" (index .Values "ports" "metrics" "containerPort" | int )  }}'
+          address: '{{ printf "0.0.0.0:%d" (index .Values "ports" "metrics" "containerPort" | int ) }}'
       pipelines:
         metrics:
           receivers:
@@ -289,9 +339,16 @@ opentelemetry-collector:
           receivers:
             - loki
           processors:
-            - batch
+            - batch/logs
           exporters:
-            - groundcover
+            - groundcover/logs
+        logs/k8s:
+          receivers:
+            - otlp
+          processors:
+            - batch/k8s
+          exporters:
+            - groundcover/k8s
   initContainers:
     - args:
         - while [ $(curl -sw '%{http_code}' {{ printf "%s/ping" (include "clickhouse.httpEndpoint" .) }} -o /dev/null) -ne 200 ]; do echo 'Waiting for Clickhouse...'; sleep 2; done; echo Clickhouse is up

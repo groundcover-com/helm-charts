@@ -100,6 +100,14 @@ spec:
           name: k8s-watcher-config-volume
       initContainers:
       - args:
+        - while [ $(curl -skw '%{http_code}' {{ include "opentelemetry-collector.health.http.url" . }}
+          -o /dev/null) -ne 200 ]; do echo 'Waiting for opentelemetry-collector...'; sleep 2; done; echo opentelemetry-collector is up
+        command:
+          - /bin/sh
+          - -c
+        image: '{{ printf "%s/curl:latest" .Values.global.origin.registry }}'
+        name: check-opentelemetry-collector-ready
+      - args:
         - while [ ! $(curl -sk {{ template "shepherd.http" . }}/version | grep $GROUNDCOVER_VERSION ) ]; do echo -n 'Current version '; curl -sk {{ template "shepherd.http" . }}/version; echo ' Wanted version' $GROUNDCOVER_VERSION; echo 'Waiting for shepherd...'; sleep 2; done; echo shepherd is up
         command:
         - /bin/sh

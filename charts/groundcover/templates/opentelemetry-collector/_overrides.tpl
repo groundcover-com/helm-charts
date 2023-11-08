@@ -18,6 +18,7 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
 # add tpl to extraEnvs
+# use https probes
 {{- define "opentelemetry-collector.pod" -}}
 {{- with .Values.imagePullSecrets }}
 imagePullSecrets:
@@ -81,12 +82,14 @@ containers:
     {{- end }}
     livenessProbe:
       httpGet:
-        path: /
+        path: /health
         port: 13133
+        scheme: '{{ include "opentelemetry-collector.otlp.scheme" . | upper }}'
     readinessProbe:
       httpGet:
-        path: /
+        path: /health
         port: 13133
+        scheme: '{{ include "opentelemetry-collector.otlp.scheme" . | upper }}'
     {{- with .Values.resources }}
     resources:
       {{- toYaml . | nindent 6 }}
