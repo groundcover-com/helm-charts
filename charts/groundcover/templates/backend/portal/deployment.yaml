@@ -105,12 +105,7 @@ spec:
           periodSeconds: 15
           timeoutSeconds: 5  
         resources:
-          limits:
-            cpu: 100m
-            memory: 200Mi
-          requests:
-            cpu: 50m
-            memory: 100Mi
+{{- toYaml .Values.portal.resources | nindent 10 }}
         volumeMounts:
         - mountPath: /config
           name: portal-config-volume

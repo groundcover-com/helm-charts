@@ -34,10 +34,12 @@ saas:
 #GENERAL
 clusterId:
 region:
+filteredNamespaces: []
+shouldDropRunningNamespaces: true
 
 origin:
   registry: public.ecr.aws/k8g4n2c4
-  tag: 0.32.5
+  tag: 0.32.6
 
 pullSecrets: []
 
@@ -60,9 +62,7 @@ agent:
         memory: 350Mi
         cpu: 500m
     obfuscateData: false
-    dataRetention: 2h
-    shouldDropRunningNamespaces: true
-    filteredNamespaces: []
+    dataRetention: 12h
     nodelabels: []
     contentTypesToDrop: ["text/html", "text/javascript", "text/css", "image", "font"]
   tracy:
@@ -118,6 +118,13 @@ k8sWatcher:
   nodeSelector:
   tolerations: []
   priorityClassName:
+  resources:
+    limits:
+      cpu: 100m
+      memory: 200Mi
+    requests:
+      cpu: 50m
+      memory: 100Mi
 
 portal:
   additionalLabels:
@@ -129,6 +136,13 @@ portal:
   tolerations: []
   priorityClassName:
   repository: portal
+  resources:
+    limits:
+      cpu: 100m
+      memory: 200Mi
+    requests:
+      cpu: 50m
+      memory: 100Mi
 
 loki:
   affinity:
@@ -206,7 +220,7 @@ router:
   repository: router
   origin:
     registry: public.ecr.aws/k8g4n2c4
-    tag: 0.32.5
+    tag: 0.32.6
   versionDb:
     host: 
     port: 

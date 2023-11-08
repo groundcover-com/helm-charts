@@ -55,6 +55,12 @@ data:
       issuesthreshold: 10
       shouldSample: false
       interval: 30s
+    
+    nodeinfohandler:
+      samplesthreshold: 20
+      issuesthreshold: 20
+      shouldsample: false
+      interval: 1m0s
 
     pidcache:
       expiration: 5m
@@ -91,8 +97,8 @@ data:
     dataRetention: {{ .Values.agent.alligator.dataRetention }}
     
     runningNamespace: ""
-    shouldDropRunningNamespaces: {{ .Values.agent.alligator.shouldDropRunningNamespaces }}
-    filteredNamespaces: {{ toYaml .Values.agent.alligator.filteredNamespaces | nindent 6 }}
+    shouldDropRunningNamespaces: {{ .Values.shouldDropRunningNamespaces }}
+    filteredNamespaces: {{ toYaml .Values.filteredNamespaces | nindent 6 }}
     nodelabels: {{ toYaml .Values.agent.alligator.nodelabels | nindent 6 }}
     contentTypesToDrop: {{ toYaml .Values.agent.alligator.contentTypesToDrop | nindent 6 }}
 
@@ -102,6 +108,7 @@ data:
 
     clusterId: {{ .Values.clusterId }}
     region: {{ .Values.region }}
+    nodeInfoDispatchInterval: 15s
 kind: ConfigMap
 metadata:
   labels:

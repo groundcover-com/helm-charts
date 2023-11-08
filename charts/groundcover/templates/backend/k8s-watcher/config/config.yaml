@@ -19,9 +19,12 @@ data:
       shouldsample: false
 
     dataRetention: {{ .Values.agent.alligator.dataRetention }}
-
-    clusterId: ""
-    region: ""
+    
+    runningNamespace: ""
+    clusterId: {{ .Values.clusterId }}
+    region: {{ .Values.region }}
+    shouldDropRunningNamespaces: {{ .Values.shouldDropRunningNamespaces }}
+    filteredNamespaces: {{ toYaml .Values.filteredNamespaces | nindent 6 }}
 kind: ConfigMap
 metadata:
   labels:
