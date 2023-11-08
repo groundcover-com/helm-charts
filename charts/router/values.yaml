@@ -5,6 +5,8 @@
 #     --docker-email=<email>
 
 global:
+  auth:
+    type: auth0
   postgresql:
     enabled: true
     overrideUrl: ""
@@ -18,10 +20,10 @@ onprem:
   enabled: true
 origin:
   registry: quay.io/groundcover
-  tag: 1.5.39
+  repository: router
+  tag: 1.5.40
 serviceAccount:
   annotations:
-repository: router
 ingress:
   enabled: false
 ingresses:
@@ -210,9 +212,16 @@ grafana:
       username_claim: "https://client.info/email"
       email_claim: "https://client.info/email"
       org_claim: "https://client.info/org"
-      jwk_set_url: https://auth.groundcover.com/.well-known/jwks.json
+      key_file: '{{ ternary "/certs/public_key.pem" "" (eq .Values.global.auth.type "no-auth") }}'
+      jwk_set_url: '{{ ternary "https://auth.groundcover.com/.well-known/jwks.json" "" (eq .Values.global.auth.type "auth0") }}'
       cache_ttl: 60m
       auto_sign_up: false
+  extraSecretMounts:
+    - name: certs
+      mountPath: /certs
+      secretName: groundcover-jwt
+      readOnly: true
+      subPath: ""
   extraInitContainers:
     - name: wait-for-db
       image: '{{ include "postgresql.image" . }}'
