@@ -13,6 +13,7 @@ data:
 
     Promscale:
       url: "{{ template "promscale.otelURL" . }}"
+      tls: "true"
 
     deploymenteventhandler:
       samplesthreshold: 100

@@ -119,6 +119,7 @@ data:
 
     promscalestorage:
       url: "{{ template "promscale.otelURL" . }}"
+      tls: true
 
     clusterId: {{ .Values.clusterId }}
     region: {{ .Values.region }}
