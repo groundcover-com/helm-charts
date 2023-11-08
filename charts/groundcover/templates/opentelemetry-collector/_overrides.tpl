@@ -5,9 +5,7 @@ helm.sh/chart: {{ include "opentelemetry-collector.chart" . }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
-{{ with .Values.global.groundcoverLabels }} 
-{{- toYaml . }}
-{{- end }}
+{{ include "groundcover.labels" . -}}
 {{- end }}
 
 # fix tpl usage

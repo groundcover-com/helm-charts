@@ -5,9 +5,7 @@ type: kubernetes.io/tls
 metadata:
   name: opentelemetry-collector-certificate
   labels:
-    {{ with .Values.global.groundcoverLabels }} 
-      {{- toYaml . | nindent 4 }}
-    {{- end }}
+    {{- include "groundcover.labels" . | nindent 4 }}
 {{ $ca := genCA (include "opentelemetry-collector.fullname" .) 1826 -}}
 stringData:
   tls.key: {{ $ca.Key  | quote }}

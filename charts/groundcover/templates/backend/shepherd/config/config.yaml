@@ -8,9 +8,7 @@ metadata:
   name: {{ include "shepherd.name" . }}-config
   namespace: {{ .Release.Namespace }}
   labels:
-    {{ with .Values.global.groundcoverLabels }} 
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
+    {{- include "groundcover.labels" . | nindent 4 }}
     app: shepherd
     app.kubernetes.io/name: shepherd
 {{- end }}

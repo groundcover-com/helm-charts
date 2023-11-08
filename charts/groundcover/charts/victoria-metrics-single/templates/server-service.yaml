@@ -8,9 +8,7 @@ metadata:
 {{ toYaml .Values.server.service.annotations | indent 4}}
 {{- end }}
   labels:
-    {{ with .Values.global.groundcoverLabels }} 
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
+    {{- include "groundcover.labels" . | nindent 4 }}
     {{- include "victoria-metrics.server.labels" . | nindent 4 }}
 {{- if .Values.server.service.labels }}
 {{ toYaml .Values.server.service.labels | indent 4}}

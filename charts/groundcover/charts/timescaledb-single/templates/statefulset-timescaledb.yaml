@@ -12,9 +12,7 @@ metadata:
     heritage: {{ .Release.Service }}
     cluster-name: {{ template "clusterName" . }}
     app.kubernetes.io/component: timescaledb
-    {{ with .Values.global.groundcoverLabels }} 
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
+    {{- include "groundcover.labels" . | nindent 4 }}
 spec:
   serviceName: {{ template "timescaledb.fullname" . }}
   replicas: {{ .Values.replicaCount }}
@@ -34,9 +32,7 @@ spec:
         release: {{ .Release.Name }}
         cluster-name: {{ template "clusterName" . }}
         app.kubernetes.io/component: timescaledb
-        {{ with .Values.global.groundcoverLabels }} 
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
+        {{- include "groundcover.labels" . | nindent 8 }}
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "9187"

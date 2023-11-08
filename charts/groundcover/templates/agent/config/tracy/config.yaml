@@ -6,9 +6,7 @@ data:
 kind: ConfigMap
 metadata:
   labels:
-    {{ with .Values.global.groundcoverLabels }} 
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
+    {{- include "groundcover.labels" . | nindent 4 }}
     {{- if .Values.agent.additionalLabels }}
 {{ toYaml .Values.agent.additionalLabels | indent 4 }}
     {{- end }}

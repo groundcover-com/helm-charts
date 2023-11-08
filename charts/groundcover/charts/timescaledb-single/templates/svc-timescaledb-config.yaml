@@ -26,9 +26,7 @@ metadata:
     heritage: {{ .Release.Service }}
     cluster-name: {{ template "clusterName" . }}
     component: patroni
-    {{ with .Values.global.groundcoverLabels }} 
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
+    {{- include "groundcover.labels" . | nindent 4 }}
 spec:
   selector:
     app: {{ template "timescaledb.fullname" . }}

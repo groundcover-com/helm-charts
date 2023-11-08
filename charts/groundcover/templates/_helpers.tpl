@@ -34,12 +34,10 @@ Create chart name and version as used by the chart label.
 Common labels
 */}}
 {{- define "groundcover.labels" -}}
-helm.sh/chart: {{ include "groundcover.chart" . }}
-{{ include "groundcover.selectorLabels" . }}
-{{- if .Chart.AppVersion }}
-app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+app.kubernetes.io/part-of: groundcover
+{{ with .Values.global.groundcoverLabels }} 
+{{- toYaml . }}
 {{- end }}
-app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
 {{/*

@@ -12,9 +12,7 @@ metadata:
     heritage: {{ .Release.Service }}
     cluster-name: {{ template "clusterName" . }}
     role: master
-    {{ with .Values.global.groundcoverLabels }} 
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
+    {{- include "groundcover.labels" . | nindent 4 }}
 {{- if .Values.service.primary.labels }}
 {{ .Values.service.primary.labels | toYaml | indent 4 }}
 {{- end }}

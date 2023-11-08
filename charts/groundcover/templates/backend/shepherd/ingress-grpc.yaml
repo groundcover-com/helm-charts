@@ -12,9 +12,7 @@ metadata:
 {{ toYaml .Values.shepherd.grpcIngress.annotations | indent 4 }}
 {{- end }}
   labels:
-    {{ with .Values.global.groundcoverLabels }} 
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
+    {{- include "groundcover.labels" . | nindent 4 }}
     {{ with .Values.shepherd.grpcIngress.extraLabels }}
 {{ toYaml . | indent 4 }}
   {{ end }}

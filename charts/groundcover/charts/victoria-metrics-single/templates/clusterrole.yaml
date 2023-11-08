@@ -5,9 +5,7 @@ metadata:
   name: {{ template "victoria-metrics.fullname" . }}-clusterrole
   namespace: {{ .Release.Namespace }}
   labels:
-    {{ with .Values.global.groundcoverLabels }} 
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
+    {{- include "groundcover.labels" . | nindent 4 }}
     {{- include "victoria-metrics.common.metaLabels" . | nindent 4 }}
   {{- if .Values.rbac.extraLabels }}
 {{ toYaml .Values.rbac.extraLabels | indent 4}}

@@ -5,9 +5,7 @@ metadata:
   name: {{ template "victoria-metrics.server.fullname" . }}-scrapeconfig
   namespace: {{ .Release.Namespace }}
   labels: 
-  {{ with .Values.global.groundcoverLabels }} 
-  {{- toYaml . | nindent 4 }}
-  {{- end }}
+  {{- include "groundcover.labels" . | nindent 4 }}
   {{- include "victoria-metrics.server.labels" . | nindent 4 }}
 data:
   scrape.yml: |

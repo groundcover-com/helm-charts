@@ -10,9 +10,7 @@ metadata:
   name: alligator
   namespace: {{ .Release.Namespace }}
   labels:
-    {{ with .Values.global.groundcoverLabels }} 
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
+    {{- include "groundcover.labels" . | nindent 4 }}
     app: alligator
     app.kubernetes.io/name: alligator
     {{- if .Values.agent.additionalLabels }}
@@ -45,9 +43,7 @@ spec:
       labels:
         app: alligator
         app.kubernetes.io/name: alligator
-        {{ with .Values.global.groundcoverLabels }} 
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
+        {{- include "groundcover.labels" . | nindent 8 }}
         {{- if .Values.agent.additionalLabels }}
 {{ toYaml .Values.agent.additionalLabels | indent 8 }}
         {{- end }}

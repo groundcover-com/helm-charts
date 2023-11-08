@@ -3,7 +3,7 @@ apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
   labels:
-    {{ with .Values.global.groundcoverLabels }}
+    {{ with (include "groundcover.labels" .) }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
     {{- if .Values.agent.additionalLabels }}

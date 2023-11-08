@@ -12,9 +12,7 @@ metadata:
 {{ toYaml .Values.server.ingress.annotations | indent 4 }}
 {{- end }}
   labels:
-  {{ with .Values.global.groundcoverLabels }} 
-  {{- toYaml . | nindent 4 }}
-  {{- end }}
+  {{- include "groundcover.labels" . | nindent 4 }}
   {{- include "victoria-metrics.server.labels" . | nindent 4 }}
   {{ if .Values.server.ingress.extraLabels }}
 {{ toYaml .Values.server.ingress.extraLabels | indent 4 }}

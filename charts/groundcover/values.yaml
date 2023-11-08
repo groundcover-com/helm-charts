@@ -186,6 +186,8 @@ clickhouse:
     registry: public.ecr.aws/groundcovercom
   containerSecurityContext:
     enabled: false
+  podLabels:
+    app.kubernetes.io/part-of: groundcover
   podSecurityContext:
     enabled: false
   volumePermissions:
@@ -299,7 +301,7 @@ opentelemetry-collector:
       secretName: opentelemetry-collector-certificate
   image:
     repository: public.ecr.aws/groundcovercom/otel/opentelemetry-collector-contrib
-    tag: "1.3.25"
+    tag: "1.3.26"
   podAnnotations:
     prometheus.io/scrape: "true"
     prometheus.io/port: '{{ index .Values "ports" "metrics" "containerPort" | int }}'

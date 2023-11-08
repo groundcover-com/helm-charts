@@ -8,9 +8,7 @@ metadata:
 {{ toYaml .Values.dbManager.additionalAnnotations | indent 4 }}
     {{- end }}    
   labels:
-    {{ with .Values.global.groundcoverLabels }} 
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
+    {{- include "groundcover.labels" . | nindent 4 }}
     app: db-manager
     app.kubernetes.io/name: db-manager
     {{- if .Values.dbManager.additionalLabels }}
@@ -37,9 +35,7 @@ spec:
       labels:
         app: db-manager
         app.kubernetes.io/name: db-manager
-        {{ with .Values.global.groundcoverLabels }} 
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
+        {{- include "groundcover.labels" . | nindent 8 }}
         {{- if .Values.dbManager.additionalLabels }}
 {{ toYaml .Values.dbManager.additionalLabels | indent 8 }}
         {{- end }}

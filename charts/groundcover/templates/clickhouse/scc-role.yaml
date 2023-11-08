@@ -8,9 +8,7 @@ metadata:
   labels:
     app: clickhouse
     app.kubernetes.io/name: clickhouse
-  {{ with .Values.global.groundcoverLabels }} 
-  {{- toYaml . | nindent 4 }}
-  {{- end }}
+  {{- include "groundcover.labels" . | nindent 4 }}
   annotations: {}
 rules:
   - apiGroups:
@@ -30,9 +28,7 @@ metadata:
   labels:
     app: clickhouse
     app.kubernetes.io/name: clickhouse
-  {{ with .Values.global.groundcoverLabels }} 
-  {{- toYaml . | nindent 4 }}
-  {{- end }}
+  {{- include "groundcover.labels" . | nindent 4 }}
   annotations: {}
 roleRef:
   kind: Role

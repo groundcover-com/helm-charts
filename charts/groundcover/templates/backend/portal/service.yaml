@@ -8,9 +8,7 @@ metadata:
 {{ toYaml .Values.portal.additionalAnnotations | indent 4 }}
     {{- end }}
   labels:
-    {{ with .Values.global.groundcoverLabels }} 
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
+    {{- include "groundcover.labels" . | nindent 4 }}
     app: portal
     app.kubernetes.io/name: portal
     {{- if .Values.portal.additionalLabels }}

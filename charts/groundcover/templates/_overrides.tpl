@@ -7,7 +7,4 @@ helm.sh/chart: {{ include "common.names.chart" . }}
 {{- end }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
-{{ with .Values.global.groundcoverLabels }} 
-{{- toYaml . }}
-{{- end }}
 {{- end -}}
