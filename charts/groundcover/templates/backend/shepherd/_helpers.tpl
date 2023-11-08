@@ -1,5 +1,9 @@
-{{- define "shepherd.name" -}}
+{{- define "shepherd.name" }}
+{{- if .Values.shepherd }}
 {{- default "shepherd-collector" .Values.shepherd.nameOverride | trunc 63 | trimSuffix "-" -}}
+{{- else }}
+{{- printf "shepherd-collector" -}}
+{{- end }}
 {{- end -}}
 
 {{- define "shepherd.http_scheme"}}

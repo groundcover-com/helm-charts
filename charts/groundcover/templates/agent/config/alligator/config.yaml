@@ -168,7 +168,7 @@ data:
       - name: "logs_client"
         enabled: true
         urlText: {{ include "opentelemetry-collector.loki.http.url" . }}
-        useApiKey: false
+        useApiKey: true
         batchwait: 2500ms
         batchsize: 10485760
         client:

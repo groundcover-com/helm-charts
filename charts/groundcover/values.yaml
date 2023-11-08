@@ -33,6 +33,9 @@ global:
       enabled: true
     overrideGrpcURL: ""
     overrideHttpURL: ""
+tags:
+  # InCloud - Enterprise Setup. groundcover's control-plane reconciled observability infrastructure deployment.
+  incloud: false
 # optional parameters: stable, legacy, experimental
 mode: stable
 metrics:
@@ -265,7 +268,7 @@ opentelemetry-collector:
       secretName: opentelemetry-collector-certificate
   image:
     repository: public.ecr.aws/groundcovercom/otel/opentelemetry-collector-contrib
-    tag: "1.2.1"
+    tag: "1.2.2"
   podAnnotations:
     prometheus.io/scrape: "true"
     prometheus.io/port: '{{ index .Values "ports" "metrics" "containerPort" | int }}'
@@ -556,8 +559,13 @@ custom-metrics:
         secretKeyRef:
           name: groundcover-config
           key: GC_CLUSTER_ID
+    - name: API_KEY
+      valueFrom:
+        secretKeyRef:
+          key: '{{ include "groundcover.apikeySecretKey" . }}'
+          name: '{{ include "groundcover.apikeySecretName" . }}'
   remoteWriteUrls:
-    - http://groundcover-victoria-metrics:8428/api/v1/write
+    - http://groundcover-victoria-metrics:8428/api/v1/write?apikey=$(API_KEY)
   extraScrapeConfigs:
     ## COPY from Prometheus helm chart https://github.com/helm/charts/blob/master/stable/prometheus/values.yaml
 

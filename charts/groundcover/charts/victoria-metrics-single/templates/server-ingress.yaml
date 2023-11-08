@@ -28,7 +28,7 @@ spec:
   rules:
   {{- $serviceName := include "victoria-metrics.server.fullname" . }}
   {{- range .Values.server.ingress.hosts }}
-  - host: {{ .name }}
+  - host: {{ .name | quote }}
     http:
       paths:
         - path: {{ .path }}

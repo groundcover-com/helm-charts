@@ -27,7 +27,7 @@ spec:
   rules:
   {{- $serviceName := (include "shepherd.name" .) }}
   {{- range .Values.shepherd.grpcIngress.hosts }}
-  - host: {{ .host }}
+  - host: {{ .host | quote }}
     http:
       paths:
         - path: {{ .path }}
@@ -39,7 +39,7 @@ spec:
             service:
               name: {{ $serviceName }}
               port:
-                number: {{ $servicePort }}
+                number: {{ $servicePort | int }}
             {{- else }}
             serviceName: {{ $serviceName }}
             servicePort: {{ $servicePort }}
