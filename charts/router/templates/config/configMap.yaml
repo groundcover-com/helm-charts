@@ -2,69 +2,7 @@
 apiVersion: v1
 data:
   config.yaml: |
-{{ if eq .Values.mode "cloud" }}
-
-    LogLevel: 4
-
-    Reverse: true
-
-    Portal:
-      Host: "portal"
-      Port: "5555"
-
-    ListenPort: "8080"
-
-    Auth0:
-      RequiredScope: "access:router"
-      OrgClaimKey: "https://client.info/org"
-      Audience: "https://groundcover"
-      Tenant: "auth.groundcover.com"
-
-    DB:
-      Host: {{ .Values.versionDb.host }}
-      Port: {{ .Values.versionDb.port }}
-      Name: {{ .Values.versionDb.name }}
-      User: {{ .Values.versionDb.user }}
-      Pass: {{ .Values.versionDb.password }}
-      Timeout: 150s
-      Interval: 5s
-
-    Bucket:
-      Bucket: {{ .Values.versionBucket.name }}
-      AssetPath: {{ .Values.versionBucket.path }}
-      Region: {{ .Values.versionBucket.region }}
-
-{{ else }}
-    LogLevel: 4
-
-    Reverse: false
-
-    Portal:
-      Host: "portal"
-      Port: "5555"
-
-    ListenPort: "8080"
-
-    Auth0:
-      RequiredScope: "access:router"
-      OrgClaimKey: "https://client.info/org"
-      Audience: "https://groundcover"
-      Tenant: "auth.groundcover.com"
-
-    DB:
-      Host: {{ .Values.versionDb.host }}
-      Port: {{ .Values.versionDb.port }}
-      Name: {{ .Values.versionDb.name }}
-      User: {{ .Values.versionDb.user }}
-      Pass: {{ .Values.versionDb.password }}
-      Timeout: 150s
-      Interval: 5s
-
-    Bucket:
-      Bucket: {{ .Values.versionBucket.name }}
-      AssetPath: {{ .Values.versionBucket.path }}
-      Region: {{ .Values.versionBucket.region }}
-{{ end }}
+{{ toYaml .Values.configuration | nindent 6 }}
 kind: ConfigMap
 metadata:
   name: router-config
