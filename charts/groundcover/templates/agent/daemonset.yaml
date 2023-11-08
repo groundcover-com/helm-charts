@@ -70,6 +70,10 @@ spec:
         - env:
             - name: PROMETHEUS_PORT
               value: {{ (include "agent.monitoring.port" .) | quote }}
+            - name: FLORA_METRICS_PROMETHEUSSERVER_ENABLED
+              value: "false"
+            - name: FLORA_NETWORKTRACER_PROCMOUNTPATH
+              value: "/host/proc"
             - name: NODE_NAME
               valueFrom:
                 fieldRef:
@@ -96,7 +100,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   key: {{ template "groundcover.apikeySecretKey" . }}
-                  name: {{ template "groundcover.apikeySecretName" . }}                        
+                  name: {{ template "groundcover.apikeySecretName" . }}        
             {{- with .Values.agent.alligator.env }}
               {{ toYaml . | nindent 12 }}
             {{- end }}                                
@@ -139,7 +143,7 @@ spec:
             - mountPath: /var/log/pods
               name: pods
               readOnly: true
-{{ if .Values.agent.tracy.enabled }}
+{{- if eq (include "agent.tracy.enabled" .) "true" }}
         - env:
             - name: PL_HOST_PATH
               value: /host

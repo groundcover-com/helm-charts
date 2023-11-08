@@ -19,7 +19,7 @@ data:
       container_info: 1
       pvc_info: 2
       container_state: 1
-    tracyEnabled: {{ .Values.agent.tracy.enabled }}
+    tracyEnabled: {{ template "agent.tracy.enabled" . }}
     tracy:
       address: "ipc:///comm/tracy.data"
       timeout: 120s
@@ -156,50 +156,6 @@ data:
     clusterId: {{ .Values.clusterId }}
     region: {{ .Values.region }}
 
-    flora:
-      debugMode:
-        enabled: false
-      networkTracer:
-        enabled: true
-        processingInterval: 50ms
-        eBPFStatsReadingInterval: 5s
-        tsConverterSyncInterval: 10s
-        procMountPath: "/host/proc"
-        protocols:
-          http:
-            enabled: true
-            bodyStoreSizeLimit: 1048576 # 1mb
-            headersParseLimit: 4096 # 4kb
-            chunkedTransferSizeDigitLimit: 10
-            maxURISize: 1024 # 1kb
-          redis:
-            enabled: true
-            commandsUntilCalibrated: 3
-            stringParseLimit: 10240 # 10k
-            payloadStoreLimit: 1048576 # 1mb
-          dns:
-            enabled: true
-        bpfLoading:
-          verboseBpfErrors: false
-          bpfErrorsBufferSize: 104857600 # 100mb
-          bpfVerifierErrorFile: "/tmp/flora-verifier-error"
-        connectionManager:
-          statusCheckIntervalTicks: 20
-          connection:
-            closeGracePeriod: 1s
-            streamTimeoutPeriod: 600s
-            datagramTimeoutPeriod: 30s
-            matchingTimeLimit: 5s
-            matchingTrafficLimit: 51200 # 50k
-            continuousProcessingErrorsLimit: 5
-            totalProcessingErrorsLimit: 10
-        ringBuffer:
-          pollingBufferSize: 20971520 # 20mb
-      metrics:
-        prometheusServer: 
-          enabled: false
-          port: ":5555"
-          endpoint: "/metrics"
     k8sLogs:
       scraper:
         positionsFile: "/var/run/positions/positions.yaml"

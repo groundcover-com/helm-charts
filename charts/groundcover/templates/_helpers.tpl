@@ -153,37 +153,8 @@ Allow the release namespace to be overridden
 {{ printf "%s-certificate" (include "promscale.fullname" .) }}
 {{- end -}}
 
-{{/*
-disable http tracing in tracy if experimental is enabled
-*/}}
-{{- define "tracy.enable_http" -}}
-  {{- if .Values.agent.experimental -}}
-    {{- false -}}
-  {{- else -}}
-    {{- true -}}
-  {{- end -}}
-{{- end -}}
-
-{{/*
-disable redis tracing in tracy if experimental is enabled
-*/}}
-{{- define "tracy.enable_redis" -}}
-  {{- if .Values.agent.experimental -}}
-    {{- false -}}
-  {{- else -}}
-    {{- true -}}
-  {{- end -}}
-{{- end -}}
-
-{{/*
-disable dns tracing in tracy if experimental is enabled
-*/}}
-{{- define "tracy.enable_dns" -}}
-  {{- if .Values.agent.experimental -}}
-    {{- false -}}
-  {{- else -}}
-    {{- true -}}
-  {{- end -}}
+{{- define "agent.tracy.enabled" }}
+{{- and .Values.agent.tracy.enabled (not .Values.agent.experimental) -}}
 {{- end -}}
 
 {{- define "imagePullSecrets" }}
