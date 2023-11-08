@@ -21,13 +21,13 @@ data:
       samplesthreshold: 100
       issuesthreshold: 100
       interval: 60s
-      shouldsample: false
+      samplingmode: 0 # DontSample
 
     unavailabledeploymenthandler:
       samplesthreshold: 100
       issuesthreshold: 100
       interval: 60s
-      shouldsample: true         
+      samplingmode: 1 # DefaultSample
     
     VictoriaMetrics:
       url: {{ include "metrics-ingester.base.http.url" . }}

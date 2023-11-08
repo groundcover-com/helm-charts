@@ -3,7 +3,7 @@ apiVersion: v1
 data:
   config.yaml: |-
     startuptimeout: 120s
-    concurrency: 20
+    concurrency: 1000
     productchansize: 1000
     pushsummaries: true
     productmetricsflushmintotalcounter:
@@ -28,70 +28,70 @@ data:
     httphandler:
       samplesthreshold: 10
       issuesthreshold: 10
-      shouldSample: true
+      samplingmode: 1 # DefaultSample
       interval: 30s
       summarizerActiveTtl: 180s
 
     redishandler:
       samplesthreshold: 10
       issuesthreshold: 10
-      shouldSample: true
+      samplingmode: 1 # DefaultSample
       interval: 30s
       summarizerActiveTtl: 180s  
 
     sqlhandler:
       samplesthreshold: 10
       issuesthreshold: 10
-      shouldSample: true
+      samplingmode: 1 # DefaultSample
       interval: 30s
       summarizerActiveTtl: 180s
 
     kafkahandler:
       samplesthreshold: 10
       issuesthreshold: 10
-      shouldSample: true
+      samplingmode: 1 # DefaultSample
       interval: 30s
       summarizerActiveTtl: 180s
 
     dnshandler:
       samplesthreshold: 10
       issuesthreshold: 10
-      shouldSample: true
+      samplingmode: 1 # DefaultSample
       interval: 30s
       summarizerActiveTtl: 180s
 
     connStatsHandler:
       samplesthreshold: 10
       issuesthreshold: 10
-      shouldSample: false
+      samplingmode: 0 # DontSample
       interval: 30s
       summarizerActiveTtl: 180s
 
     tcpStatsHandler:
       samplesthreshold: 10
       issuesthreshold: 10
-      shouldSample: false
+      samplingmode: 0 # DontSample
       interval: 30s
       summarizerActiveTtl: 180s
 
     containerInfoHandler:
       samplesthreshold: 10
       issuesthreshold: 10
-      shouldSample: true
+      samplingmode: 1 # DefaultSample
       interval: 30s
       summarizerActiveTtl: 180s
 
     containerStateHandler:
       samplesthreshold: 10
       issuesthreshold: 10
-      shouldSample: false
+      samplingmode: 0 # DontSample
       interval: 30s
       summarizerActiveTtl: 180s
     
     nodeinfohandler:
       samplesthreshold: 20
       issuesthreshold: 20
-      shouldsample: false
+      samplingmode: 0 # DontSample
       interval: 1m0s
       summarizerActiveTtl: 180s
     
@@ -102,14 +102,14 @@ data:
     containercrashhandler:
       samplesthreshold: 20
       issuesthreshold: 20
-      shouldsample: true
+      samplingmode: 1 # DefaultSample
       interval: 30s
       summarizerActiveTtl: 180s
 
     pvcinfohandler:
       samplesthreshold: 20
       issuesthreshold: 20
-      shouldsample: false
+      samplingmode: 0 # DontSample
       interval: 1m0s
       summarizerActiveTtl: 180s
 
@@ -135,6 +135,7 @@ data:
     globallimiter:
       maxqueue: 10
       ageout: 100ms
+      sampleeverything: false
 
     obfuscateData: {{ .Values.agent.alligator.obfuscateData }}
     dataRetention: {{ .Values.agent.alligator.dataRetention }}

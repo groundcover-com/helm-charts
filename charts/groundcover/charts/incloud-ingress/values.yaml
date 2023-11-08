@@ -3,3 +3,25 @@ auth:
 
 api:
   host: "*.amazonaws.com"
+
+kong:
+  replicaCount: 2
+  env:
+    anonymous_reports: "off"
+    dump_config: "true"
+    headers: "off"
+    mem_cache_size: "256m"
+    upstream_keepalive_max_requests: "0"
+    nginx_http_client_body_buffer_size: "10m"
+    nginx_mem_cache_size: "256m"
+  proxy:
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+      service.beta.kubernetes.io/aws-load-balancer-type: nlb
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: ScheduleAnyway
+    - maxSkew: 1
+      topologyKey: topology.kubernetes.io/zone
+      whenUnsatisfiable: ScheduleAnyway
