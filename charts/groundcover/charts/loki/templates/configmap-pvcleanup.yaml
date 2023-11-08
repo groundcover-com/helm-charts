@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pvcleanup-scripts
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "loki.name" . }}
+    chart: {{ template "loki.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    {{ with .Values.global.groundcoverLabels }} 
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+data:
+  delete_files_if_low_memory.sh: |-
+    {{- .Files.Get "scripts/delete_files_if_low_memory.sh" | nindent 4 }}
+  entrypoint.sh: |-
+    {{- .Files.Get "scripts/entrypoint.sh" | nindent 4 }}

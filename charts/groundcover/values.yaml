@@ -164,6 +164,32 @@ portal:
 
 loki:
   # imagePullSecrets: []
+  extraContainers:
+    - name: pvcleanup
+      workingDir: "/code"
+      command: ["/bin/sh"]
+      args: ["./entrypoint.sh"]
+      image: "{{ .Values.global.origin.registry }}/debian:bullseye-slim"
+      env:
+        - name: SPACEMONITORING_FOLDER
+          value: "/data/loki/chunks"
+        - name: SPACEMONITORING_MAXUSEDPERCENTE
+          value: "90"
+        - name: SPACEMONITORING_DELETINGITERATION
+          value: "10"
+      volumeMounts:
+        - name: storage
+          mountPath: "/data"
+        - name: cleanup-scripts-volume
+          mountPath: /code
+
+  extraVolumes:
+    - name: cleanup-scripts-volume
+      configMap:
+        name: pvcleanup-scripts
+        defaultMode: 0755
+
+
   image:
     repository: "{{ .Values.global.origin.registry }}/loki"
   affinity:

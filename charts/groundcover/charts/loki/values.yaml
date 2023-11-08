@@ -298,15 +298,7 @@ initContainers: []
 #   image: busybox:latest
 #   command: ['sh', '-c', 'echo hello']
 
-extraContainers:
-  - name: pvcleanup
-    image: "{{ .Values.global.origin.registry }}/pvccleanup:latest"
-    env:
-      - name: SPACEMONITORING_FOLDER
-        value: "/data/loki/chunks"
-    volumeMounts:
-      - name: storage
-        mountPath: "/data"
+extraContainers: []
 ## Additional containers to be added to the loki pod.
 # - name: reverse-proxy
 #   image: angelbarrera92/basic-auth-reverse-proxy:dev
