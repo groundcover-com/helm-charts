@@ -24,7 +24,7 @@ onprem:
 origin:
   registry: quay.io/groundcover
   repository: router
-  tag: 1.5.43
+  tag: 1.6.0
 serviceAccount:
   annotations:
 ingress:
@@ -123,6 +123,8 @@ kong:
     annotations: {}
   ingressController:
     enabled: true
+    admissionWebhook:
+      enabled: false
     image:
       tag: 2.9.4
       repository: public.ecr.aws/groundcovercom/kong/kubernetes-ingress-controller
