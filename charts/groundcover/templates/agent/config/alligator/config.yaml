@@ -6,6 +6,19 @@ data:
     concurrency: 20
     productchansize: 1000
     pushsummaries: true
+    productmetricsflushmintotalcounter:
+      http: 2
+      redis: 2
+      sql: 2
+      kafka: 2
+      dns: 2
+      conn_stats: 2
+      tcp_stats: 2
+      node_info: 2
+      container_restart: 1
+      container_info: 1
+      pvc_info: 2
+      container_state: 1
     tracyEnabled: {{ .Values.agent.tracy.enabled }}
     tracy:
       address: "ipc:///comm/tracy.data"
@@ -158,9 +171,9 @@ data:
             enabled: true
             arrayNestingLimit: 8
             commandsUntilCalibrated: 3
-            stringParseLimit: 1024
-            requestBytesStoreLimit: 1024
-            responseBytesStoreLimit: 1024
+            stringParseLimit: 10240 # 10k
+            requestBytesStoreLimit: 1048576 # 1mb
+            responseBytesStoreLimit: 1048576 # 1mb
         bpfLoading:
           verboseBpfErrors: false
           bpfErrorsBufferSize: 104857600 # 100mb
@@ -205,9 +218,11 @@ data:
             cluster_id: {{ .Values.clusterId }}
             job: alligator
         timeout: 10s
-        useRingBuffer: {{ not .Values.logging.storeAllLogs }}
-        filterRunningNamespace: false
+        useRingBuffer: {{ not .Values.storeAllLogs }}
+        filterRunningNamespace: true
         groundcoverTimeTravel: -20s
+        namespaceFilters: {{ toYaml .Values.logsNamespaceFilters | nindent 10}}
+        workloadFilters: {{ toYaml .Values.logsWorkloadFilters | nindent 10}}
       - name: "monitoring_client"
         enabled: {{ .Values.logging.enabled }}
         urlText: https://{{ .Values.logging.host }}/loki/api/v1/push
@@ -229,7 +244,7 @@ data:
             version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
         timeout: 10s   
         useRingBuffer: false
-        filterRunningNamespace: true
+        filterRunningNamespace: false
 kind: ConfigMap
 metadata:
   labels:

@@ -9,6 +9,8 @@ data:
     k8sloadtimeout: 2m0s
     summarizerActiveTtl: 180s
     pushsummaries: true
+    productmetricsflushmintotalcounter:
+      deployment_event: 1
 
     Promscale:
       url: "{{ template "promscale.otelURL" . }}"

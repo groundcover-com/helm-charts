@@ -28,7 +28,6 @@ logging:
   enabled: true
   host: logs.groundcover.com
   scheme: https
-  storeAllLogs: false
 
 # SAAS parameters, token is mendatory, others only if in cloud mode
 saas:
@@ -43,9 +42,16 @@ clusterId:
 #  - clusterA
 #  - clusterB
 region:
+storeAllLogs: false
 filteredNamespaces: []
 filteredWorkloads: []
-shouldDropRunningNamespaces: false
+logsNamespaceFilters: []
+  # - matchType: "allow"
+  #   regex: "my-namespace"
+logsWorkloadFilters: []
+  # - matchType: "block"
+  #   regex: "do-not-show-me"
+shouldDropRunningNamespaces: true
 commitHashKeyName:
 repositoryUrlKeyName:
 
