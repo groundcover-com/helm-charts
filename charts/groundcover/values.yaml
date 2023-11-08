@@ -98,11 +98,13 @@ tracesWorkloadFilters:
   #   regex: "do-not-show-me"
 logsDropFilters: []
 # - '{namespace="demo-ng",workload="loadgenerator"} |~ ".*GET.*"'
-logsMultiLines:
-  []
-  # - namespace: demo-ng
-  #   workload: ".*"
-  #   firstLineRegex: "PlaceOrder"
+logsMultiLines: []
+  # - namespace: demo-ng             # mandatory
+  #   workload: ".*"                 # mandatory
+  #   container: "test"              # optional
+  #   firstLineRegex: "PlaceOrder"   # mandatory
+  #   maxLines: 100                  # optional, default = 1024
+  #   maxWaitTime: 10s               # optional, default = 3s
 shouldDropRunningNamespaces: true
 commitHashKeyName:
 repositoryUrlKeyName:
