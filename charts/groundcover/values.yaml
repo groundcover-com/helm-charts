@@ -134,10 +134,10 @@ k8sWatcher:
   resources:
     limits:
       cpu: 100m
-      memory: 200Mi
+      memory: 300Mi
     requests:
       cpu: 50m
-      memory: 100Mi
+      memory: 200Mi
   env:
 
 portal:

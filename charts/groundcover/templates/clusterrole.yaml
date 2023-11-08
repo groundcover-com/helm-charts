@@ -32,6 +32,7 @@ rules:
   - statefulsets
   - events
   - nodes/metrics
+  - nodes/proxy
   - nodes/stats
   verbs:
   - list
