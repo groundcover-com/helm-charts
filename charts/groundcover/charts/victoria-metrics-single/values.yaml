@@ -727,9 +727,7 @@ server:
             - action: labeldrop
               regex: "app"
             - action: labeldrop
-              regex: "app_kubernetes_io_instance"
-            - action: labeldrop
-              regex: "app_kubernetes_io_name"
+              regex: "app_kubernetes_io.*"
             - action: labeldrop
               regex: "job"
             - action: labeldrop
