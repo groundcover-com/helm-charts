@@ -14,7 +14,7 @@ metadata:
 {{- end }}
 spec:
   rules:
-    - host: {{ .Values.ingress.host }}
+    - host: {{ default .Values.ingress.host .Values.ingress.frontend.host }}
       http:
         paths:
           - path: /
@@ -36,7 +36,7 @@ metadata:
 {{- end }}
 spec:
   rules:
-    - host: {{ .Values.ingress.host }}
+    - host: {{ default .Values.ingress.host .Values.ingress.portal.host }}
       http:
         paths:
           - path: /client
@@ -46,6 +46,50 @@ spec:
                 name: router
                 port:
                   number: 8080
+          - path: /datasources
+            pathType: Prefix
+            backend:
+              service:
+                name: router
+                port:
+                  number: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: router-clickhouse-ingress
+  namespace: {{ .Release.Namespace }}
+{{- if .Values.ingress.clickhouse.annotations }}
+  annotations:
+{{ toYaml .Values.ingress.clickhouse.annotations | indent 4 }}
+{{- end }}
+spec:
+  rules:
+    - host: {{ default .Values.ingress.host .Values.ingress.clickhouse.host }}
+      http:
+        paths:
+          - path: /
+            pathType: Exact
+            backend:
+              service:
+                name: router
+                port:
+                  number: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: router-ds-ingress
+  namespace: {{ .Release.Namespace }}
+{{- if .Values.ingress.ds.annotations }}
+  annotations:
+{{ toYaml .Values.ingress.ds.annotations | indent 4 }}
+{{- end }}
+spec:
+  rules:
+    - host: {{ default .Values.ingress.host .Values.ingress.ds.host }}
+      http:
+        paths:
           - path: /datasources
             pathType: Prefix
             backend:

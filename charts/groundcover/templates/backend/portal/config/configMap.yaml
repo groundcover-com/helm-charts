@@ -43,9 +43,13 @@ data:
     VictoriaMetrics:
       URL: "http://groundcover-victoria-metrics:8428"
 
-    Loki:
-      Host: "groundcover-loki"
-      Port: 3100
+    ClickHouse:
+      Pass: "OVERRIDEN"
+      User: {{ include "clickhouse.username" . }}
+      Host: {{ include "clickhouse.fullname" . }}
+      Database: {{ include "clickhouse.database" . }}
+      HTTPPort: {{ .Values.global.clickhouse.containerPorts.http | int }}
+      NativePort: {{ .Values.global.clickhouse.containerPorts.tcp | int }}
 {{ else }}
     LogLevel: 4
 
@@ -87,9 +91,13 @@ data:
     VictoriaMetrics:
       URL: "http://groundcover-victoria-metrics:8428"
 
-    Loki:
-      Host: "groundcover-loki"
-      Port: 3100
+    ClickHouse:
+      Host: {{ include "clickhouse.fullname" . }}
+      NativePort: {{ .Values.global.clickhouse.containerPorts.tcp | int }}
+      HTTPPort: {{ .Values.global.clickhouse.containerPorts.http | int }}
+      Database: {{ include "clickhouse.database" . }}
+      User: {{ include "clickhouse.username" . }}
+      Pass: "OVERRIDEN"
 {{ end }}
 kind: ConfigMap
 metadata:

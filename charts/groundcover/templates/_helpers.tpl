@@ -84,19 +84,6 @@ Get cluster_id from values or generate random one
 {{- default "API_KEY" .Values.global.groundcoverPredefinedTokenSecret.secretKey -}}
 {{- end -}}
 
-{{- define "loki.url" -}}
-{{- default ( printf "http://groundcover-loki:%d"  ( .Values.loki.service.port | int ) ) .Values.loki.overrideURL  -}}
-{{- end -}}
-
-
-{{/*
-Create chart name and version as used by the chart label.
-*/}}
-
-{{/*
-Allow the release namespace to be overridden
-*/}}
-
 {{- define "agent.tracy.enabled" }}
 {{- eq .Values.mode "legacy" -}}
 {{- end -}}

@@ -84,6 +84,11 @@ spec:
             secretKeyRef:
               key: {{ template "groundcover.apikeySecretKey" . }}
               name: {{ template "groundcover.apikeySecretName" . }}
+        - name: GC_CLICKHOUSE_PASS
+          valueFrom:
+            secretKeyRef:
+              key: '{{ include "clickhouse.secretKey" . }}'
+              name: '{{ include "clickhouse.secretName" . }}'
 {{ end }}
         image: {{ tpl .Values.portal.image.repository . }}:{{ default .Chart.AppVersion .Values.global.origin.tag }}
         imagePullPolicy: Always

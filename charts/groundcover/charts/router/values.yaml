@@ -1,15 +1,10 @@
 enabled: true
-
 additionalLabels:
-
 mode: cloud
-
 origin:
   registry: public.ecr.aws/groundcovercom
-  tag: 1.0.13
-
+  tag: 1.1.0
 repository: router
-
 configuration:
   Activity:
     CheckInterval: 5m
@@ -32,7 +27,6 @@ configuration:
   Reporter:
     ttl: 10m
     PurgeInterval: 10m
-
 ingress:
   enabled: false
   host: domain.groundcover.com
@@ -41,11 +35,9 @@ ingress:
     annotations: {}
   portal:
     annotations: {}
-
 apiIngress:
   enabled: false
   host: domain.groundcover.com
-
 resources:
   requests:
     cpu: 1000m
@@ -53,6 +45,5 @@ resources:
   limits:
     memory: 2048Mi
     cpu: 1500m
-
 nodeSelector: {}
 tolerations: []

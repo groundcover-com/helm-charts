@@ -14,14 +14,17 @@ dependencies:
 - name: victoria-metrics-agent
   repository: ""
   version: 0.8.35
-- name: loki
-  repository: ""
-  version: 2.10.1
+- name: clickhouse
+  repository: https://charts.bitnami.com/bitnami
+  version: 3.2.1
+- name: opentelemetry-collector
+  repository: https://open-telemetry.github.io/opentelemetry-helm-charts
+  version: 0.54.1
 - name: shepherd
   repository: ""
   version: 0.1.0
 - name: kube-state-metrics
   repository: https://prometheus-community.github.io/helm-charts
   version: 5.2.0
-digest: sha256:8f7d0443a820da191459ee0f2e3de07bc72a7e5375761d936285f8be8991e49a
-generated: "2023-03-29T12:19:35.617803067Z"
+digest: sha256:7511f48ccc620315652101d6b875a532a3af49c93ef5824277087e9aa4031596
+generated: "2023-05-06T19:28:50.896318812Z"
