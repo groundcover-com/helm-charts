@@ -28,13 +28,31 @@ spec:
         app.kubernetes.io/part-of: "promscale-connector"
         app.kubernetes.io/component: "connector"
       annotations: 
+        groundcover_version: {{ .Values.origin.tag }}
         checksum/config: {{ printf "%s" .Values.promscale.connection | sha256sum -}}
         {{- if .Values.promscale.prometheus.annotations }}
         {{- .Values.promscale.prometheus.annotations | toYaml | nindent 8 }}
         {{- end }}
     spec:
       initContainers:
-        {{- toYaml .Values.promscale.initContainers | nindent 8 }}
+        - name: check-ts-ready
+          image: postgres:9.6.5
+          command:
+            - bash
+            - -c
+            - |
+              [ -z "$GROUNDCOVER_VERSION" ] && echo "\$GROUNDCOVER_VERSION is missing" && exit 1
+              for i in {1..1800}; do sleep 2; DB_VERSION=`psql -X -A -t -h groundcover-tsdb -U postgres -d groundcover -c "SELECT value FROM version ORDER BY time desc limit 1"`; echo "running_version = '$GROUNDCOVER_VERSION', db_version='$DB_VERSION'"; [[ "$GROUNDCOVER_VERSION" == "$DB_VERSION" ]] && echo "DONE" && exit 0; done; echo "TIMEOUT"; exit 1;
+          env:
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: PATRONI_SUPERUSER_PASSWORD
+                  name: {{ index .Values "timescaledb-single" "secrets" "credentialsSecretName" | default "groundcover-tsdb-credentials" }}
+            - name: GROUNDCOVER_VERSION
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.annotations['groundcover_version']
       containers:
         - image: {{ .Values.origin.registry }}/{{ .Values.promscale.repository }}:{{ .Values.origin.tag }}
           imagePullPolicy: {{ .Values.promscale.imagePullPolicy }}

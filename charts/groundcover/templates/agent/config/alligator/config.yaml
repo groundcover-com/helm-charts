@@ -3,15 +3,6 @@ data:
   config.yaml: |-
     startuptimeout: 120s
 
-    db:
-      host: "groundcover-tsdb"
-      port: "5432"
-      name: "postgres"
-      user: "postgres"
-      pass: "password"
-      timeout: 150s
-      interval: 5s
-
     tracy:
       address: "ipc:///comm/tracy.data"
       timeout: 120s

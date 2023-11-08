@@ -23,7 +23,7 @@ data:
     DB:
       Host: "groundcover-tsdb"
       Port: "5432"
-      Name: "postgres"
+      Name: "groundcover"
       User: "postgres"
       Pass: "password"
       Timeout: 150s
@@ -57,7 +57,7 @@ data:
     DB:
       Host: "groundcover-tsdb"
       Port: "5432"
-      Name: "postgres"
+      Name: "groundcover"
       User: "postgres"
       Pass: "password"
       Timeout: 150s

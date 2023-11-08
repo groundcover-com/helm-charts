@@ -4,18 +4,13 @@ data:
     LogLevel: 4
     resourceconntimeout: 1m0s
 
-    DB:
-      Host: "groundcover-tsdb"
-      Port: "5432"
-      Name: "postgres"
-      User: "postgres"
-      Pass: "password"
-      Timeout: 150s
-      Interval: 5s
-
     VictoriaMetrics:
       Host: "groundcover-victoria-metrics"
       Port: 8428
+
+    Promscale:
+      host: groundcover-promscale-connector
+      port: 9202
 
     deploymenteventhandler:
       samplesthreshold: 100

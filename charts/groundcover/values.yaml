@@ -37,7 +37,7 @@ region:
 
 origin:
   registry: public.ecr.aws/k8g4n2c4
-  tag: 0.31.0
+  tag: 0.32.0
 
 pullSecrets: []
 
@@ -200,7 +200,7 @@ router:
   repository: router
   origin:
     registry: public.ecr.aws/k8g4n2c4
-    tag: 0.31.0
+    tag: 0.32.0
   versionDb:
     host: 
     port: 
@@ -381,7 +381,7 @@ promscale:
     sslMode: require
     # database name in which to store the metrics
     # must be created before start
-    dbName: postgres
+    dbName: groundcover
 
   # Enable ServiceMonitor used by prometheus-operator to configure prometheus for metrics scraping
   serviceMonitor:
@@ -427,15 +427,6 @@ promscale:
 
   # https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
   affinity: {}
-
-  initContainers: 
-    - name: check-ts-ready
-      image: postgres:9.6.5
-      command:
-        - sh
-        - -c
-        - until pg_isready -h groundcover-tsdb -p 5432; do echo Waiting for
-          TimescaleDB...; sleep 2; done; echo TimescaleDB is up
 
 rbac:
   labels:

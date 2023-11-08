@@ -53,7 +53,7 @@ server:
     envflag.enable: "true"
     envflag.prefix: VM_
     loggerFormat: json
-    search.maxUniqueTimeseries: "1000000"
+    search.maxUniqueTimeseries: "2000000"
 
   # Additional hostPath mounts
   extraHostPathMounts:

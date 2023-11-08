@@ -30,7 +30,7 @@ data:
             # <string> database user, if used
             user: postgres
             # <string> database name, if used
-            database: postgres
+            database: groundcover
             # <bool> enable/disable basic auth
             basicAuth: false
             # <bool> mark as default datasource. Max one per org
