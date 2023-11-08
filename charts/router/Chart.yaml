@@ -1,6 +1,6 @@
 apiVersion: v2
-appVersion: 0.64.2
+appVersion: 0.64.3
 description: groundcover's router helm chart
 name: router
 type: application
-version: 0.64.2
+version: 0.64.3
