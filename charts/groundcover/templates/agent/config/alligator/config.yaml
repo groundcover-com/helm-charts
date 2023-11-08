@@ -76,6 +76,12 @@ data:
       shouldsample: true
       interval: 30s
 
+    pvcinfohandler:
+      samplesthreshold: 20
+      issuesthreshold: 20
+      shouldsample: false
+      interval: 1m0s
+
     pidcache:
       expiration: 5m
       purge: 20s
