@@ -4,7 +4,6 @@ kind: Service
 metadata:
   labels:
     app: router
-    app.kubernetes.io/name: router
     {{- include "router.labels" . | nindent 4 }}
   annotations:
     groundcover_version: {{ .Values.origin.tag }}
