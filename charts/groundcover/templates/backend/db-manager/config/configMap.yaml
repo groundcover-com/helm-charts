@@ -1,0 +1,42 @@
+{{ if .Values.global.backend.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+  name: db-manager-config
+  namespace: {{ .Release.Namespace }}
+
+data:
+  config.yaml: |-
+
+    LogLevel: 4
+
+    startuptimeout: 1m0s
+
+    GroundcoverVersion: "OVERRIDEN"
+
+    Incluster: true
+    Namespace: {{ .Release.Namespace }}
+    httpPort: 8888
+    tableDataRetention: 
+      Traces: '{{ include "traces.retention" . }}'   
+      Logs: '{{ include "logs.retention" . }}'   
+      Entities: 5d
+      Events: 5d
+    DataMigration:
+      BackfillBatchRows:
+        Traces: 100000
+        Logs: 100000
+        Entities: 100000
+        Events: 100000
+      BackfillBatchMaxExecutionTime: 5m
+      
+    ClickHouse:
+      Pass: "OVERRIDEN"
+      User: {{ include "clickhouse.username" . }}
+      Host: {{ include "clickhouse.fullname" . }}
+      Database: {{ include "clickhouse.database" . }}
+      HTTPPort: {{ .Values.global.clickhouse.containerPorts.http | int }}
+      NativePort: {{ .Values.global.clickhouse.containerPorts.tcp | int }}
+{{- end -}}

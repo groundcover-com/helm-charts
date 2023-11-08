@@ -62,7 +62,7 @@ containers:
     {{- if .Values.image.digest }}
     image: "{{ .Values.image.repository }}@{{ .Values.image.digest }}"
     {{- else }}
-    image: "{{ .Values.image.repository }}:{{  .Values.global.origin.tag | default .Values.image.tag }}"
+    image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
     {{- end }}
     imagePullPolicy: {{ .Values.image.pullPolicy }}
     ports:

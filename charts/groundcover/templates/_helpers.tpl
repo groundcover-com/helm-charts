@@ -142,3 +142,7 @@ Get cluster_id from values or generate random one
     {{- .Values.global.telemetry.logs.url -}}
 {{- end -}}
 {{- end -}}
+
+{{- define "db-manager.ready.http.url" -}}
+{{- print "http://db-manager:8888/writer-ready" -}}
+{{- end -}}

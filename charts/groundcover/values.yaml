@@ -3,9 +3,11 @@ global:
     enabled: true
   backend:
     enabled: true
+
   ingress:
     # set ingress site for inCloud / on-prem sensor only deployments
     site:
+
   groundcover_token:
   # groundcover_token is preceding groundcoverPredefinedTokenSecret, make sure its empty if using existing secret
   # if the secret is preloaded in the namespace, you can refer it here instead
@@ -22,49 +24,62 @@ global:
     secretName:
     # the key in the secret containing the token value
     secretKey:
+
   origin:
     registry: public.ecr.aws/groundcovercom
     tag: "" # rewrites Chart.AppVersion
   imagePullSecrets: []
+
   groundcoverLabels:
+
   clickhouse:
     auth:
       # override to use exisiting secret
       existingSecret: ""
       existingSecretKey: admin-password
+
   logs:
     overrideUrl: ""
     retention: 3d # {amount}[h(ours), d(ays), w(eeks), y(ears)]
+
   metrics:
     tls:
       enabled: false
     overrideUrl: ""
+
   otlp:
     tls:
       enabled: false
     overrideGrpcURL: ""
     overrideHttpURL: ""
+
   datadogapm:
     overrideUrl: ""
+
   traces:
     retention: 24h # {amount}[h(ours), d(ays), w(eeks), y(ears)]
+
   telemetry:
     enabled: true
     logs:
       url: https://logs.groundcover.com/v1/logs
     metrics:
       url: https://metrics.groundcover.com/api/v1/write
+
 tags:
   # InCloud - Enterprise Setup. groundcover's control-plane reconciled observability infrastructure deployment.
   incloud: false
+
 # optional parameters: stable, legacy, experimental
 mode: stable
+
 # SAAS parameters, token is mendatory, others only if in cloud mode
 saas:
   tls_skip_verify: false
   scheme: wss
   host: app.groundcover.com
   port: 443
+
 #GENERAL
 clusterId:
 installationId:
@@ -73,27 +88,33 @@ installationId:
 #  - clusterB
 region:
 storeIssuesLogsOnly: false
-tracesNamespaceFilters: []
-# - matchType: "allow"
-#   regex: "my-namespace"
-tracesWorkloadFilters: []
-# - matchType: "block"
-#   regex: "do-not-show-me"
+tracesNamespaceFilters:
+  []
+  # - matchType: "allow"
+  #   regex: "my-namespace"
+tracesWorkloadFilters:
+  []
+  # - matchType: "block"
+  #   regex: "do-not-show-me"
 logsDropFilters: []
 # - '{namespace="demo-ng",workload="loadgenerator"} |~ ".*GET.*"'
-logsMultiLines: []
-# - namespace: demo-ng
-#   workload: ".*"
-#   firstLineRegex: "PlaceOrder"
+logsMultiLines:
+  []
+  # - namespace: demo-ng
+  #   workload: ".*"
+  #   firstLineRegex: "PlaceOrder"
 shouldDropRunningNamespaces: true
 commitHashKeyName:
 repositoryUrlKeyName:
+
 priorityClass:
   create: false
   name:
   value:
   preemptionPolicy:
+
 #imagePullSecrets: []
+
 agent:
   additionalLabels:
   podLabels:
@@ -130,7 +151,16 @@ agent:
     obfuscateData: false
     dataRetention: 24h
     nodelabels: []
-    contentTypesToDrop: ["text/html", "text/javascript", "text/css", "image", "font", "video", "audio"]
+    contentTypesToDrop:
+      [
+        "text/html",
+        "text/javascript",
+        "text/css",
+        "image",
+        "font",
+        "video",
+        "audio",
+      ]
     watchOnlyLocalNode: false
     apmIngestor:
       dataDog:
@@ -154,6 +184,32 @@ agent:
       limits:
         memory: 2048Mi
         cpu: 750m
+dbManager:
+  additionalLabels:
+  podLabels:
+  additionalAnnotations:
+  podAnnotations:
+  affinity:
+  nodeSelector:
+  tolerations: []
+  priorityClassName:
+  image:
+    repository: "{{ .Values.global.origin.registry }}/db-manager"
+  resources:
+    limits:
+      cpu: 45m
+      memory: 45Mi
+    requests:
+      cpu: 15m
+      memory: 15Mi
+  extraEnvVars:
+    - name: CLICKHOUSE_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          key: '{{ include "clickhouse.secretKey" . }}'
+          name: '{{ include "clickhouse.secretName" . }}'  
+
+
 k8sWatcher:
   image:
     repository: "{{ .Values.global.origin.registry }}/k8s-watcher"
@@ -173,6 +229,7 @@ k8sWatcher:
       cpu: 50m
       memory: 200Mi
   env:
+
 portal:
   additionalLabels:
   podLabels:
@@ -195,6 +252,7 @@ portal:
     requests:
       cpu: 50m
       memory: 100Mi
+
 clickhouse:
   enabled: true
   shards: 1
@@ -260,6 +318,7 @@ clickhouse:
     ## @param persistence.size Size of data volume
     ##
     size: 128Gi
+
   ## ClickHouse resource requests and limits
   ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
   ## @param resources.limits The resources limits for the ClickHouse containers
@@ -271,6 +330,7 @@ clickhouse:
       memory: 2048Mi
     limits:
       memory: 4096Mi
+
   ## @param affinity Affinity for ClickHouse pods assignment
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
   ## NOTE: `podAffinityPreset`, `podAntiAffinityPreset`, and `nodeAffinityPreset` will be ignored when it's set
@@ -292,9 +352,11 @@ clickhouse:
     - name: clickhouse-client-config
       configMap:
         name: clickhouse-client-config-map
+
   extraVolumeMounts:
     - name: clickhouse-client-config
       mountPath: /etc/clickhouse-client/
+
 opentelemetry-collector:
   enabled: true
   mode: statefulset
@@ -314,7 +376,7 @@ opentelemetry-collector:
       secretName: opentelemetry-collector-certificate
   image:
     repository: public.ecr.aws/groundcovercom/otel/opentelemetry-collector-contrib
-    tag: "1.4.51"
+    tag: ""
   podLabels:
     app.kubernetes.io/part-of: groundcover
   podAnnotations:
@@ -474,12 +536,13 @@ opentelemetry-collector:
             - groundcover/custom
   initContainers:
     - args:
-        - while [ $(curl -sw '%{http_code}' {{ printf "%s/ping" (include "clickhouse.httpEndpoint" .) }} -o /dev/null) -ne 200 ]; do echo 'Waiting for Clickhouse...'; sleep 2; done; echo Clickhouse is up
+        - while [ $(curl -sw '%{http_code}' {{ printf "%s?gc-version=%s " (include "db-manager.ready.http.url" .) (default .Chart.AppVersion .Values.image.tag) }}
+          -o /dev/null) -ne 200 ]; do echo 'Waiting for Db Manager...'; sleep 2; done; echo Db Manager is ready
       command:
         - /bin/sh
         - -c
       image: '{{ printf "%s/curl:latest" .Values.global.origin.registry }}'
-      name: check-ch-ready
+      name: check-db-ready
   resources:
     requests:
       cpu: 100m
@@ -490,12 +553,14 @@ opentelemetry-collector:
   affinity: {}
   nodeSelector: {}
   tolerations: []
+
 router:
   # onprem or cloud
   mode: cloud
   enabled: false
   additionalLabels:
   additionalAnnotations:
+
 metrics-ingester:
   nodeSelector:
   rbac:
@@ -549,6 +614,7 @@ metrics-ingester:
       memory: 256Mi
   config:
     scrape_configs: []
+
 victoria-metrics-agent:
   nodeSelector:
   rbac:
@@ -645,6 +711,7 @@ victoria-metrics-agent:
             target_label: instance
         tls_config:
           insecure_skip_verify: true
+
 kube-state-metrics:
   nodeSelector:
   nameOverride: kube-state-metrics
@@ -653,6 +720,7 @@ kube-state-metrics:
     port: 8080
     annotations:
       prometheus.io/port: "8080"
+
 custom-metrics:
   enabled: false
   nodeSelector:
@@ -734,7 +802,12 @@ custom-metrics:
             source_labels:
               - __meta_kubernetes_pod_label_app_kubernetes_io_part_of
             regex: groundcover
-          - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+          - source_labels:
+              [
+                __meta_kubernetes_namespace,
+                __meta_kubernetes_service_name,
+                __meta_kubernetes_endpoint_port_name,
+              ]
             action: keep
             regex: default;kubernetes;https
       - job_name: "kubernetes-nodes"
@@ -797,19 +870,30 @@ custom-metrics:
             source_labels: [__meta_kubernetes_pod_container_init]
             regex: true
           - action: keep_if_equal
-            source_labels: [__meta_kubernetes_service_annotation_prometheus_io_port, __meta_kubernetes_pod_container_port_number]
-          - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+            source_labels:
+              [
+                __meta_kubernetes_service_annotation_prometheus_io_port,
+                __meta_kubernetes_pod_container_port_number,
+              ]
+          - source_labels:
+              [__meta_kubernetes_service_annotation_prometheus_io_scrape]
             action: keep
             regex: true
-          - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+          - source_labels:
+              [__meta_kubernetes_service_annotation_prometheus_io_scheme]
             action: replace
             target_label: __scheme__
             regex: (https?)
-          - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+          - source_labels:
+              [__meta_kubernetes_service_annotation_prometheus_io_path]
             action: replace
             target_label: __metrics_path__
             regex: (.+)
-          - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+          - source_labels:
+              [
+                __address__,
+                __meta_kubernetes_service_annotation_prometheus_io_port,
+              ]
             action: replace
             target_label: __address__
             regex: ([^:]+)(?::\d+)?;(\d+)
@@ -857,19 +941,30 @@ custom-metrics:
             source_labels: [__meta_kubernetes_pod_container_init]
             regex: true
           - action: keep_if_equal
-            source_labels: [__meta_kubernetes_service_annotation_prometheus_io_port, __meta_kubernetes_pod_container_port_number]
-          - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape_slow]
+            source_labels:
+              [
+                __meta_kubernetes_service_annotation_prometheus_io_port,
+                __meta_kubernetes_pod_container_port_number,
+              ]
+          - source_labels:
+              [__meta_kubernetes_service_annotation_prometheus_io_scrape_slow]
             action: keep
             regex: true
-          - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+          - source_labels:
+              [__meta_kubernetes_service_annotation_prometheus_io_scheme]
             action: replace
             target_label: __scheme__
             regex: (https?)
-          - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+          - source_labels:
+              [__meta_kubernetes_service_annotation_prometheus_io_path]
             action: replace
             target_label: __metrics_path__
             regex: (.+)
-          - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+          - source_labels:
+              [
+                __address__,
+                __meta_kubernetes_service_annotation_prometheus_io_port,
+              ]
             action: replace
             target_label: __address__
             regex: ([^:]+)(?::\d+)?;(\d+)
@@ -908,7 +1003,8 @@ custom-metrics:
             source_labels:
               - __meta_kubernetes_pod_label_app_kubernetes_io_part_of
             regex: groundcover
-          - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_probe]
+          - source_labels:
+              [__meta_kubernetes_service_annotation_prometheus_io_probe]
             action: keep
             regex: true
           - source_labels: [__address__]
@@ -944,15 +1040,21 @@ custom-metrics:
             source_labels: [__meta_kubernetes_pod_container_init]
             regex: true
           - action: keep_if_equal
-            source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_port, __meta_kubernetes_pod_container_port_number]
-          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+            source_labels:
+              [
+                __meta_kubernetes_pod_annotation_prometheus_io_port,
+                __meta_kubernetes_pod_container_port_number,
+              ]
+          - source_labels:
+              [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
             action: keep
             regex: true
           - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
             action: replace
             target_label: __metrics_path__
             regex: (.+)
-          - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+          - source_labels:
+              [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
             action: replace
             regex: ([^:]+)(?::\d+)?;(\d+)
             replacement: $1:$2
@@ -973,11 +1075,13 @@ custom-metrics:
           - source_labels: [__meta_kubernetes_pod_node_name]
             action: replace
             target_label: node
+
 victoria-metrics-single:
   # imagePullSecrets: []
   server:
     image:
       repository: public.ecr.aws/groundcovercom/victoria-metrics
+
     extraArgs:
       search.maxUniqueTimeseries: "2000000"
       search.maxSeries: "500000"
@@ -987,6 +1091,7 @@ victoria-metrics-single:
       search.maxConcurrentRequests: "8"
       maxLabelsPerTimeseries: "50"
       promscrape.maxScrapeSize: "100MB"
+
     # -- Data retention period, {amount}[h(ours), d(ays), w(eeks), y(ears)], default is 1 month
     retentionPeriod: 7d
     # -- Sts/Deploy additional labels
@@ -999,6 +1104,7 @@ victoria-metrics-single:
       prometheus.io/scrape: "true"
     # -- Name of Priority Class
     priorityClassName:
+
     service:
       # -- Service annotations
       annotations: {}
@@ -1006,20 +1112,27 @@ victoria-metrics-single:
       labels: {}
       # -- Service ClusterIP
       clusterIP: None
+
     matchLabels: {}
+
     statefulSet:
       annotations: {}
       # -- Headless service labels
       labels: {}
+
     persistentVolume:
       # enabled: true
       # -- Persistant volume annotations
       annotations: {}
+
       # -- StorageClass to use for persistent volume. Requires server.persistentVolume.enabled: true. If defined, PVC created automatically
       storageClass:
+
       # -- Use this to override the prefix for the pvc, the suffix is auto-generated by k8s according to the pod name
       #pvcNameOverride:
+
       size: 100Gi
+
     resources:
       requests:
         cpu: 1000m
@@ -1027,10 +1140,13 @@ victoria-metrics-single:
       limits:
         cpu: 1000m
         memory: 3000Mi
+
     # -- Node tolerations for server scheduling to nodes with taints. Ref: [https://kubernetes.io/docs/concepts/configuration/assign-pod-node/](https://kubernetes.io/docs/concepts/configuration/assign-pod-node/)
     tolerations: []
+
     # -- Pod's node selector. Ref: [https://kubernetes.io/docs/user-guide/node-selection/](https://kubernetes.io/docs/user-guide/node-selection/)
     nodeSelector: {}
+
     # -- Pod affinity
     affinity:
       nodeAffinity:
@@ -1042,14 +1158,17 @@ victoria-metrics-single:
                   operator: NotIn
                   values:
                     - SPOT
+
 rbac:
   pspEnabled: false
   sccEnabled: true
   labels:
   annotations:
+
 apikey:
   labels:
   annotations:
+
 config:
   labels:
   annotations:

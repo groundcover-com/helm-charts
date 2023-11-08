@@ -3,9 +3,8 @@ kind: Ingress
 metadata:
   name: {{ printf "%s-http" (include "incloud-ingress.name" .) }}
   annotations:
-    konghq.com/plugins: {{ printf "%s-auth" .Release.Name }}
-    konghq.com/protocols: {{ ternary "https" "http" .Values.kong.proxy.tls.enabled }}
-    konghq.com/https-redirect-status-code: {{ ternary "301" "" .Values.kong.proxy.tls.enabled }}
+    konghq.com/plugins: {{ printf "%s-auth" .Release.Name | quote }}
+    konghq.com/protocols: {{ ternary "https" "http" .Values.kong.proxy.tls.enabled | quote }}
 spec:
   ingressClassName: kong
   rules:
