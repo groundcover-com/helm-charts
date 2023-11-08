@@ -303,7 +303,7 @@ opentelemetry-collector:
       secretName: opentelemetry-collector-certificate
   image:
     repository: public.ecr.aws/groundcovercom/otel/opentelemetry-collector-contrib
-    tag: "1.4.30"
+    tag: "1.4.31"
   podLabels:
     app.kubernetes.io/part-of: groundcover
   podAnnotations:
@@ -366,6 +366,12 @@ opentelemetry-collector:
       batch/k8s:
         timeout: 5s
         send_batch_size: 1000
+      batch/events:
+        timeout: 5s
+        send_batch_size: 1000
+      batch/entities:
+        timeout: 5s
+        send_batch_size: 1000
       batch/traces:
         timeout: 5s
         send_batch_size: 5000
@@ -384,8 +390,8 @@ opentelemetry-collector:
           initial_interval: 5s
           max_interval: 5s
           max_elapsed_time: 15s
-      groundcover/k8s:
-        type: k8s
+      groundcover/custom:
+        type: custom
         timeout: 5s
         ttl_interval: 5d
         logs_table_name: k8s_objects
@@ -408,6 +414,22 @@ opentelemetry-collector:
           initial_interval: 5s
           max_interval: 5s
           max_elapsed_time: 15s
+      groundcover/events:
+        type: events
+        timeout: 5s
+        password: ${env:CLICKHOUSE_PASSWORD}
+        username: '{{ include "clickhouse.username" . }}'
+        database: '{{ include "clickhouse.database" . }}'
+        endpoint: '{{ include "clickhouse.nativeEndpoint" . }}'
+        ttl_interval: 5d
+      groundcover/entities:
+        type: entities
+        timeout: 5s
+        password: ${env:CLICKHOUSE_PASSWORD}
+        username: '{{ include "clickhouse.username" . }}'
+        database: '{{ include "clickhouse.database" . }}'
+        endpoint: '{{ include "clickhouse.nativeEndpoint" . }}'
+        ttl_interval: 5d
     service:
       telemetry:
         metrics:
@@ -432,13 +454,13 @@ opentelemetry-collector:
             - batch/logs
           exporters:
             - groundcover/logs
-        logs/k8s:
+        logs/custom:
           receivers:
             - otlp
           processors:
             - batch/k8s
           exporters:
-            - groundcover/k8s
+            - groundcover/custom
   initContainers:
     - args:
         - while [ $(curl -sw '%{http_code}' {{ printf "%s/ping" (include "clickhouse.httpEndpoint" .) }} -o /dev/null) -ne 200 ]; do echo 'Waiting for Clickhouse...'; sleep 2; done; echo Clickhouse is up
