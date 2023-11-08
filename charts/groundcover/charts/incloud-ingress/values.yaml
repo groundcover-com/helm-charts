@@ -1,5 +1,7 @@
 kong:
   replicaCount: 2
+  image:
+    tag: 3.2.2-alpine
   env:
     anonymous_reports: "off"
     dump_config: "true"
