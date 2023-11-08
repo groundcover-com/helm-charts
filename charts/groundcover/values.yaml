@@ -39,7 +39,7 @@ shouldDropRunningNamespaces: true
 
 origin:
   registry: public.ecr.aws/groundcovercom
-  tag: 0.33.5
+  tag: 0.33.6
 
 pullSecrets: []
 
@@ -224,7 +224,7 @@ router:
   repository: router
   origin:
     registry: public.ecr.aws/groundcovercom
-    tag: 0.33.5
+    tag: 0.33.6
   versionDb:
     host: 
     port: 
