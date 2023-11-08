@@ -42,7 +42,7 @@ region:
 filteredNamespaces: []
 shouldDropRunningNamespaces: true
 commitHashKeyName: 
-repositoryUrlKeyName: 
+repositoryUrlKeyName:
 
 origin:
   registry: public.ecr.aws/groundcovercom
@@ -55,6 +55,8 @@ backend:
 
 agent:
   enabled: true
+  # Enable groundcover's new ebpf agent, currently experimental
+  experimental: false
   additionalLabels:
   podLabels:
   additionalAnnotations:

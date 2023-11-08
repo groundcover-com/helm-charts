@@ -116,7 +116,7 @@ data:
     obfuscateData: {{ .Values.agent.alligator.obfuscateData }}
     dataRetention: {{ .Values.agent.alligator.dataRetention }}
     watchOnlyLocalNode: {{ .Values.agent.alligator.watchOnlyLocalNode }}
-
+    floraEnabled: {{ .Values.agent.experimental }}
     runningNamespace: ""
     shouldDropRunningNamespaces: {{ .Values.shouldDropRunningNamespaces }}
     filteredNamespaces: {{ toYaml .Values.filteredNamespaces | nindent 6 }}
@@ -132,6 +132,34 @@ data:
 
     clusterId: {{ .Values.clusterId }}
     region: {{ .Values.region }}
+
+    flora: 
+      networkTracer:
+        enabled: true
+        processingInterval: 100ms
+        eBPFStatsReadingInterval: 5s
+        tsConverterSyncInterval: 10s
+        connectionManager:
+          connection:
+            closeGracePeriod: 1s
+            timeoutPeriod: 10s
+            matchingTimeLimit: 5s
+            matchingTrafficLimit: 51200 # 50k
+            continuousProcessingErrorsLimit: 5
+            totalProcessingErrorsLimit: 10
+            protocols:
+              http:
+                bodyStoreSizeLimit: 1048576 # 1mb
+                headersParseLimit: 4096 # 4kb
+                chunkedTransferDigitLimit: 10
+        ringBuffer:
+          size: 10485760 # 10mb
+          pollingTimeLimit: 5ms
+      metrics:
+        prometheusServer: 
+          enabled: false
+          port: ":5555"
+          endpoint: "/metrics"
 kind: ConfigMap
 metadata:
   labels:

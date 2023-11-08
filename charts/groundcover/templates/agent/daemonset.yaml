@@ -30,6 +30,8 @@ spec:
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "9102"
+        vm.io/path: "vmetrics"
+        vm.io/port: "9102"
         groundcover_version: {{ default .Chart.AppVersion .Values.origin.tag }}
         {{- if .Values.agent.additionalAnnotations }}
 {{ toYaml .Values.agent.additionalAnnotations | indent 8 }}

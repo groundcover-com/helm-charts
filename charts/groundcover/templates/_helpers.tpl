@@ -140,3 +140,14 @@ Allow the release namespace to be overridden
 {{- define "promscale_secrets_certificate" -}}
 {{ printf "%s-certificate" (include "promscale.fullname" .) }}
 {{- end -}}
+
+{{/*
+disable http tracing in tracy if experimental is enabled
+*/}}
+{{- define "tracy.enable_http" -}}
+  {{- if .Values.agent.experimental -}}
+    {{- false -}}
+  {{- else -}}
+    {{- true -}}
+  {{- end -}}
+{{- end -}}
