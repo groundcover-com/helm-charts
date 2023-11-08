@@ -142,7 +142,7 @@ data:
         connectionManager:
           connection:
             closeGracePeriod: 1s
-            timeoutPeriod: 10s
+            timeoutPeriod: 600s
             matchingTimeLimit: 5s
             matchingTrafficLimit: 51200 # 50k
             continuousProcessingErrorsLimit: 5
