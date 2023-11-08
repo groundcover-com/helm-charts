@@ -245,7 +245,7 @@ opentelemetry-collector:
           name: '{{ include "clickhouse.secretName" . }}'
   image:
     repository: public.ecr.aws/groundcovercom/otel/opentelemetry-collector-contrib
-    tag: "1.1.10"
+    tag: "1.1.11"
   podAnnotations:
     prometheus.io/scrape: "true"
     prometheus.io/port: '{{ index .Values "ports" "metrics" "containerPort" | int }}'
