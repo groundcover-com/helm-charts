@@ -254,7 +254,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum(groundcover_cpu_usage_m_cpu{namespace='$namespace', workload_name='$workload'})",
+          "expr": "sum(1000 * rate(groundcover_cpu_usage_seconds_total{namespace='$namespace', workload_name='$workload'}))",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -314,7 +314,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum(groundcover_resident_set_size_bytes{namespace='$namespace', workload_name='$workload'})",
+          "expr": "sum(groundcover_mem_working_set_bytes{namespace='$namespace', workload_name='$workload'})",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -847,7 +847,7 @@
             {
               "datasource": "groundcover",
               "exemplar": true,
-              "expr": "sum(groundcover_cpu_usage_m_cpu{namespace='$namespace', workload_name='$workload'})",
+              "expr": "sum(1000 * rate(groundcover_cpu_usage_seconds_total{namespace='$namespace', workload_name='$workload'}))",
               "hide": false,
               "interval": "",
               "legendFormat": "utilisation",
@@ -925,7 +925,7 @@
             {
               "datasource": "groundcover",
               "exemplar": false,
-              "expr": "topk(10, (avg (groundcover_cpu_usage_m_cpu{namespace='$namespace', workload_name='$workload'}) by (container_name)))",
+              "expr": "topk(10, (avg by (container_name) (1000 * rate(groundcover_cpu_usage_seconds_total{namespace='$namespace', workload_name='$workload'}))))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -1061,7 +1061,7 @@
             {
               "datasource": "groundcover",
               "exemplar": true,
-              "expr": "sum(groundcover_resident_set_size_bytes{namespace='$namespace', workload_name='$workload'})",
+              "expr": "sum(groundcover_mem_working_set_bytes{namespace='$namespace', workload_name='$workload'})",
               "interval": "",
               "legendFormat": "utilisation",
               "refId": "A"
@@ -1138,7 +1138,7 @@
             {
               "datasource": "groundcover",
               "exemplar": false,
-              "expr": "topk(10, avg(groundcover_resident_set_size_bytes{namespace='$namespace', workload_name='$workload'}) by (container_name))",
+              "expr": "topk(10, avg(groundcover_mem_working_set_bytes{namespace='$namespace', workload_name='$workload'}) by (container_name))",
               "instant": true,
               "interval": "",
               "legendFormat": "",

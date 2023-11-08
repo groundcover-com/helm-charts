@@ -412,7 +412,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum(groundcover_cpu_usage_m_cpu{namespace='$namespace'})",
+          "expr": "1000 * sum(rate(groundcover_cpu_usage_seconds_total{namespace='$namespace'}))",
           "instant": false,
           "interval": "",
           "legendFormat": "",
@@ -470,7 +470,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum(groundcover_resident_set_size_bytes{namespace='$namespace'})",
+          "expr": "sum(groundcover_mem_working_set_bytes{namespace='$namespace'})",
           "instant": false,
           "interval": "",
           "legendFormat": "",
@@ -585,7 +585,7 @@
             {
               "datasource": "groundcover",
               "exemplar": true,
-              "expr": "topk(50, avg by (workload_name) (groundcover_cpu_usage_m_cpu{namespace='$namespace'}))",
+              "expr": "topk(50, avg by (workload_name) (1000 * rate(groundcover_cpu_usage_seconds_total{namespace='$namespace'})))",
               "interval": "",
               "legendFormat": "{{workload_name}}",
               "refId": "A"
@@ -653,7 +653,7 @@
             {
               "datasource": "groundcover",
               "exemplar": false,
-              "expr": "topk(10, (avg (groundcover_cpu_usage_m_cpu{namespace='$namespace'}) by (workload_name)))",
+              "expr": "topk(10, avg by (workload_name) (1000 * rate(groundcover_cpu_usage_seconds_total{namespace='$namespace'})))",
               "instant": true,
               "interval": "",
               "legendFormat": "{{workload_name}}",
@@ -758,7 +758,7 @@
             {
               "datasource": "groundcover",
               "exemplar": true,
-              "expr": "topk(50, avg by (workload_name) (groundcover_resident_set_size_bytes{namespace='$namespace'}))",
+              "expr": "topk(50, avg by (workload_name) (groundcover_mem_working_set_bytes{namespace='$namespace'}))",
               "interval": "",
               "legendFormat": "{{workload_name}}",
               "refId": "A"
@@ -826,7 +826,7 @@
             {
               "datasource": "groundcover",
               "exemplar": false,
-              "expr": "topk(10, (sum (groundcover_resident_set_size_bytes{namespace='$namespace'}) by (workload_name)))",
+              "expr": "topk(10, (sum (groundcover_mem_working_set_bytes{namespace='$namespace'}) by (workload_name)))",
               "instant": true,
               "interval": "",
               "legendFormat": "{{workload_name}}",
@@ -896,7 +896,7 @@
             {
               "datasource": "groundcover",
               "exemplar": true,
-              "expr": "topk(7, clamp_max(avg by (workload_name) (groundcover_memory_utilization{namespace='$namespace'}), 1))",
+              "expr": "topk(7, clamp_max(avg by (workload_name) (groundcover_mem_working_set_bytes{namespace='$namespace'}) / avg by (workload_name) (groundcover_memory_limit_bytes{namespace='$namespace'}), 1))",
               "interval": "",
               "legendFormat": "{{workload_name}}",
               "refId": "A"

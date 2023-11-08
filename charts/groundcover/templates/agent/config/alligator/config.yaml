@@ -101,7 +101,7 @@ data:
     hostmodeconfigpath: "/config/instance_metadata.yaml"
 
     allowedportspercontainer: 20
-    processinfofetchinterval: 15s
+    containermetricsfetchinterval: 15s
 
     globallimiter:
       maxqueue: 10
@@ -122,6 +122,7 @@ data:
       tls: true
       tableWriterBatchMaxSize: 1000
       tableWriterBatchInterval: 1s
+      tableWriterBatchWriteTimeout: 1s
 
     clusterId: {{ .Values.clusterId }}
     region: {{ .Values.region }}
