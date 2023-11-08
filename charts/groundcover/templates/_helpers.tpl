@@ -74,7 +74,7 @@ Get cluster_id from values or generate random one
 {{- else if $secret -}}
     {{- index $secret "data" "GC_CLUSTER_ID" | b64dec -}}
 {{- else -}}
-    {{- printf "Cluster-%s" (randAlphaNum 7) -}}
+    {{- fail "A valid .Values.clusterId is required!" -}}
 {{- end -}}
 {{- end -}}
 

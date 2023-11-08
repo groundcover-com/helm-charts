@@ -38,7 +38,7 @@ data:
     dataRetention: {{ .Values.agent.alligator.dataRetention }}
     
     runningNamespace: ""
-    clusterId: {{ .Values.clusterId }}
+    clusterId: {{ include "groundcover.clusterId" . }}
     region: {{ .Values.region }}
     shouldDropRunningNamespaces: {{ .Values.shouldDropRunningNamespaces }}
     tracesNamespaceFilters: {{ toYaml .Values.tracesNamespaceFilters | nindent 6 }}

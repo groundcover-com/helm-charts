@@ -248,7 +248,7 @@ data:
         enabled: {{ eq .Values.agent.alligator.pprofAlligator.uploaderType "pyroscope" }}
         pushURL: {{ include "telemetry.metrics.base.url" . }}
 
-    clusterId: {{ .Values.clusterId }}
+    clusterId: {{ include "groundcover.clusterId" . }}
     region: {{ .Values.region }}
 
     k8sLogs:
@@ -272,7 +272,7 @@ data:
           maxRetries: 10
         externalLabels:
           labelSet:
-            cluster_id: {{ .Values.clusterId }}
+            cluster_id: {{ include "groundcover.clusterId" . }}
             job: alligator
         timeout: 10s
         useRingBuffer: {{ .Values.storeIssuesLogsOnly }}
