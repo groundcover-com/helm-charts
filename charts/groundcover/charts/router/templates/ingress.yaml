@@ -8,8 +8,10 @@ metadata:
     {{- if .Values.additionalLabels }}
   {{ toYaml .Values.additionalLabels | indent 4 }}
   {{- end }}
+{{- if .Values.ingress.frontend.annotations }}
   annotations:
-    kubernetes.io/ingress.class: kong
+{{ toYaml .Values.ingress.frontend.annotations | indent 4 }}
+{{- end }}
 spec:
   rules:
     - host: {{ .Values.ingress.host }}
@@ -28,9 +30,10 @@ kind: Ingress
 metadata:
   name: router-portal-ingress
   namespace: {{ .Release.Namespace }}
+{{- if .Values.ingress.portal.annotations }}
   annotations:
-    kubernetes.io/ingress.class: kong
-    konghq.com/plugins: key-auth-plugin
+{{ toYaml .Values.ingress.portal.annotations | indent 4 }}
+{{- end }}
 spec:
   rules:
     - host: {{ .Values.ingress.host }}

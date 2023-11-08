@@ -9,10 +9,10 @@ dependencies:
   repository: ""
   version: 0.8.19
 - name: victoria-metrics-agent
-  repository: https://victoriametrics.github.io/helm-charts/
+  repository: ""
   version: 0.8.35
 - name: victoria-metrics-agent
-  repository: https://victoriametrics.github.io/helm-charts/
+  repository: ""
   version: 0.8.35
 - name: loki
   repository: ""
@@ -20,5 +20,8 @@ dependencies:
 - name: shepherd
   repository: ""
   version: 0.1.0
-digest: sha256:be8b89e4d63aa0d29e8f17b17fc7a8e03d47583cdeef016b809402b8f1a7eaf1
-generated: "2023-03-22T11:38:57.099921087Z"
+- name: kube-state-metrics
+  repository: https://prometheus-community.github.io/helm-charts
+  version: 5.2.0
+digest: sha256:8f7d0443a820da191459ee0f2e3de07bc72a7e5375761d936285f8be8991e49a
+generated: "2023-03-29T12:19:35.617803067Z"

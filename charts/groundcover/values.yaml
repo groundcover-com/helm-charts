@@ -422,6 +422,14 @@ victoria-metrics-agent:
           - source_labels: [__meta_kubernetes_pod_name]
             target_label: instance
 
+kube-state-metrics:
+  fullnameOverride: kube-state-metrics
+  enabled: false
+  service:
+    port: 8080
+    annotations:
+      prometheus.io/port: "8080"
+
 custom-metrics:
   podAnnotations:
     prometheus.io/scrape: "true"
@@ -542,9 +550,14 @@ custom-metrics:
       kubernetes_sd_configs:
         - role: endpointslices
       relabel_configs:
-        - source_labels: [__meta_kubernetes_namespace]
+        - source_labels:
+            [
+              __meta_kubernetes_namespace,
+              __meta_kubernetes_service_label_app_kubernetes_io_name,
+            ]
           action: drop
-          regex: groundcover.*
+          separator: "@"
+          regex: "groundcover.*@[^k]*[^u]*[^b]*[^e]*"
         - action: drop
           source_labels: [__meta_kubernetes_pod_container_init]
           regex: true
