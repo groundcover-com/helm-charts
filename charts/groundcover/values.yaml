@@ -301,7 +301,7 @@ opentelemetry-collector:
       secretName: opentelemetry-collector-certificate
   image:
     repository: public.ecr.aws/groundcovercom/otel/opentelemetry-collector-contrib
-    tag: "1.4.24"
+    tag: "1.4.25"
   podLabels:
     app.kubernetes.io/part-of: groundcover
   podAnnotations:
@@ -465,6 +465,7 @@ router:
   origin:
     registry: public.ecr.aws/groundcovercom
 metrics-ingester:
+  nodeSelector:
   rbac:
     enabled: false
   service:
@@ -518,6 +519,7 @@ metrics-ingester:
   config:
     scrape_configs: []
 victoria-metrics-agent:
+  nodeSelector:
   rbac:
     namespaced: true
   resources:
@@ -613,6 +615,7 @@ victoria-metrics-agent:
         tls_config:
           insecure_skip_verify: true
 kube-state-metrics:
+  nodeSelector:
   nameOverride: kube-state-metrics
   enabled: false
   service:
@@ -621,6 +624,7 @@ kube-state-metrics:
       prometheus.io/port: "8080"
 custom-metrics:
   enabled: false
+  nodeSelector:
   podAnnotations:
     prometheus.io/scrape: "true"
     prometheus.io/port: "8429"
