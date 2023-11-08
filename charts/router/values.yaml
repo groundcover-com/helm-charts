@@ -6,11 +6,14 @@ mode: cloud
 
 origin:
   registry: public.ecr.aws/groundcovercom
-  tag: 0.54.1
+  tag: 0.54.2
 
 repository: router
 
 configuration:
+    Activity:
+      CheckInterval: 5m 
+      StaleAfter: 30m
     LogLevel: 4
     Reverse: true
     Portal:
