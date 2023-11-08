@@ -123,7 +123,7 @@ spec:
         command:
           - /bin/sh
           - -c
-        image: curlimages/curl:latest
+        image: {{ printf "%s/curl:latest" .Values.global.origin.registry }}
       serviceAccountName: k8s-watcher
 {{- if .Values.k8sWatcher.priorityClassName }}
       priorityClassName: {{ .Values.k8sWatcher.priorityClassName }}

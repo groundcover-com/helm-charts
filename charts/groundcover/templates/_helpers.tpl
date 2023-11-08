@@ -59,12 +59,24 @@ Create the name of the service account to use
 {{- end }}
 {{- end }}
 
+
+{{- define "groundcover.config.secretName" -}}
+{{- print "groundcover-config" -}}
+{{- end -}}
+
 {{/*
 Get cluster_id from values or generate random one
 */}}
 {{- define "groundcover.clusterId" -}}
-{{- .Values.clusterId | default (printf "%s-%s" "Cluster" (randAlphaNum 7)) }}
-{{- end }}
+{{- $secret := (lookup "v1" "Secret" .Release.Namespace (include "groundcover.config.secretName" .) | default dict) -}}
+{{- if .Values.clusterId -}}
+    {{- .Values.clusterId -}}
+{{- else if $secret -}}
+    {{- index $secret "data" "GC_CLUSTER_ID" | b64dec -}}
+{{- else -}}
+    {{- printf "Cluster-%s" (randAlphaNum 7) -}}
+{{- end -}}
+{{- end -}}
 
 {{- define "groundcover.region" -}}
 {{- .Values.region | default "undefined" }}

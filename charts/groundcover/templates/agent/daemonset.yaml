@@ -286,7 +286,7 @@ spec:
           command:
             - /bin/sh
             - -c
-          image: curlimages/curl:latest
+          image: {{ printf "%s/curl:latest" .Values.global.origin.registry }}
       serviceAccountName: alligator
 {{- if .Values.agent.priorityClassName }}
       priorityClassName: {{ .Values.agent.priorityClassName }}

@@ -14,8 +14,7 @@ metadata:
   name: groundcover-config
   namespace: {{ .Release.Namespace }}
 stringData:
-  GC_CLUSTER_ID: {{ template "groundcover.clusterId" . }}
-  GC_REGION: {{ template "groundcover.region" . }}
+  GC_CLUSTER_ID: {{ include "groundcover.clusterId" . }}
+  GC_REGION: {{ include "groundcover.region" . }}
   GC_VERSION: {{ default .Chart.AppVersion .Values.global.origin.tag }}
-
 type: Opaque

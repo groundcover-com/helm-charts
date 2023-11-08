@@ -198,6 +198,8 @@ clickhouse:
     enabled: false
   volumePermissions:
     enabled: true
+    image:
+      registry: public.ecr.aws/groundcovercom
   zookeeper:
     enabled: false
   metrics:
@@ -301,7 +303,7 @@ opentelemetry-collector:
       secretName: opentelemetry-collector-certificate
   image:
     repository: public.ecr.aws/groundcovercom/otel/opentelemetry-collector-contrib
-    tag: "1.4.29"
+    tag: "1.4.30"
   podLabels:
     app.kubernetes.io/part-of: groundcover
   podAnnotations:
