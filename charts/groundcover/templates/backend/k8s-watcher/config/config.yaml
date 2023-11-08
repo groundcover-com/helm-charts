@@ -7,9 +7,9 @@ data:
     concurrency: 10
     productchansize: 20480
     k8sloadtimeout: 2m0s
-    resyncDuration: 1h
+    resyncDuration: 5m
     groundcoverVersion: ""
-    podsResyncDuration: 15m
+    podsResyncDuration: 5m
     unavailableDeploymentPollInterval: 10s
     summarizerActiveTtl: 45s
     pushsummaries: true

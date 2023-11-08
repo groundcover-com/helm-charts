@@ -474,6 +474,12 @@ opentelemetry-collector:
         username: '{{ include "clickhouse.username" . }}'
         database: '{{ include "clickhouse.database" . }}'
         endpoint: '{{ include "clickhouse.nativeEndpoint" . }}'
+        sending_queue:
+          queue_size: 10
+        retry_on_failure:
+          initial_interval: 5s
+          max_interval: 5s
+          max_elapsed_time: 15s
       groundcover/traces:
         type: traces
         timeout: 5s
@@ -497,6 +503,12 @@ opentelemetry-collector:
         database: '{{ include "clickhouse.database" . }}'
         endpoint: '{{ include "clickhouse.nativeEndpoint" . }}'
         ttl_interval: 5d
+        sending_queue:
+          queue_size: 10
+        retry_on_failure:
+          initial_interval: 5s
+          max_interval: 5s
+          max_elapsed_time: 15s
       groundcover/entities:
         type: entities
         timeout: 5s
@@ -505,6 +517,12 @@ opentelemetry-collector:
         database: '{{ include "clickhouse.database" . }}'
         endpoint: '{{ include "clickhouse.nativeEndpoint" . }}'
         ttl_interval: 5d
+        sending_queue:
+          queue_size: 10
+        retry_on_failure:
+          initial_interval: 5s
+          max_interval: 5s
+          max_elapsed_time: 15s
     service:
       telemetry:
         metrics:
