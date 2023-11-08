@@ -36,6 +36,7 @@ spec:
         {{- end }}
       annotations: 
         groundcover_version: {{ .Values.origin.tag }}
+        recreatepod: {{ randAlphaNum 5 | quote }}
         checksum/config: {{ printf "%s" .Values.promscale.connection | sha256sum -}}
         {{- if .Values.promscale.prometheus.annotations }}
         {{- .Values.promscale.prometheus.annotations | toYaml | nindent 8 }}
