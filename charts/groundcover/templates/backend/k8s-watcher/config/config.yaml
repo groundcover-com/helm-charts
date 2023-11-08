@@ -22,12 +22,14 @@ data:
       issuesthreshold: 100
       interval: 60s
       samplingmode: 0 # DontSample
+      aggregationCacheSize: 1024
 
     unavailabledeploymenthandler:
       samplesthreshold: 100
       issuesthreshold: 100
       interval: 60s
       samplingmode: 1 # DefaultSample
+      aggregationCacheSize: 1024
     
     VictoriaMetrics:
       url: {{ include "metrics-ingester.base.http.url" . }}
