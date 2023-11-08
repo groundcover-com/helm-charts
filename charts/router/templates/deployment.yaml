@@ -42,7 +42,7 @@ spec:
           image: '{{ printf "%s/curl:latest" .Values.origin.registry }}'
         - name: check-psql-is-up   
           args:
-          - pg_isready -U "postgres" -d "dbname=postgres" -h {{ include "postgresql.primary.fullname" . }} -p 5432
+          - pg_isready -U "postgres" -d "dbname=postgres" -h {{ splitList ":" (include "postgresql.base.url" .) | first }} -p {{ splitList ":" (include "postgresql.base.url" .) | last }}
           command:
             - /bin/sh
             - -c
@@ -51,8 +51,8 @@ spec:
           - name: POSTGRES_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: {{ include "postgresql.primary.fullname" . }}
-                key: "postgres-password"
+                name: '{{ include "postgresql.secretName" . }}'
+                key: '{{ include "postgresql.adminPasswordKey" . }}'
       {{- end }}
       imagePullSecrets: {{ include "router.imagePullSecrets" . }}
       containers:
@@ -89,8 +89,8 @@ spec:
             - name: GC_RBAC_DB_PASS
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "postgresql.primary.fullname" . }}
-                  key: "postgres-password"
+                  name: {{ include "postgresql.secretName" . }}
+                  key: {{ include "postgresql.adminPasswordKey" . }}
             {{- end }}
             - name: GIN_MODE
               value: "release"
