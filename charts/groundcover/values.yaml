@@ -382,6 +382,11 @@ opentelemetry-collector:
           name: '{{ include "clickhouse.secretName" . }}'
     - name: TLS_CONFIG
       value: '{{ include "opentelemetry-collector.tlsConfig" . }}'
+    - name: CLUSTER_ID
+      valueFrom:
+        secretKeyRef:
+          name: groundcover-config
+          key: GC_CLUSTER_ID
   secretMounts:
     - name: certificate
       mountPath: /etc/ssl/certs
@@ -460,6 +465,19 @@ opentelemetry-collector:
       batch/traces:
         timeout: 5s
         send_batch_size: 5000
+      filter/dropNoneCustom:
+        error_mode: ignore
+        logs:
+          log_record:
+            # custom logs have explicit log_type or type so log is excluded
+            - attributes["log_type"] == "log" 
+            - attributes["type"] == nil
+      filter/dropNoneLogs: 
+        logs:
+          log_record:
+            # logs can have either explicit 'log' log_type or no log_type at all and no type (reserved for custom logs)
+            - attributes["log_type"] != nil and attributes["log_type"] != "log"
+            - attributes["type"] != nil   
     exporters:
       groundcover/logs:
         type: logs
@@ -553,7 +571,9 @@ opentelemetry-collector:
         logs:
           receivers:
             - loki
+            - otlp
           processors:
+            - filter/dropNoneLogs
             - batch/logs
           exporters:
             - groundcover/logs
@@ -561,6 +581,7 @@ opentelemetry-collector:
           receivers:
             - otlp
           processors:
+            - filter/dropNoneCustom
             - batch/k8s
           exporters:
             - groundcover/custom
@@ -806,7 +827,7 @@ custom-metrics:
       - job_name: "kubernetes-apiservers"
         honor_labels: true
         kubernetes_sd_configs:
-          - role: endpointslices
+          - role: endpoints
         # Default to scraping over https. If required, just disable this or change to
         # `http`.
         scheme: https
