@@ -29,7 +29,10 @@ data:
     httphandler:
       samplesthreshold: 10
       issuesthreshold: 10
-      samplingmode: 1 # DefaultSample
+      sampling:
+        samplingmode: 1 # DefaultSample
+        samplingLimitMaxQueue: 0
+        samplingLimitAgeOut: 0s
       interval: 30s
       summarizerActiveTtl: 45s
       aggregationCacheSize: 4096
@@ -38,7 +41,10 @@ data:
     grpchandler:
       samplesthreshold: 10
       issuesthreshold: 10
-      samplingmode: 1 # DefaultSample
+      sampling:
+        samplingmode: 1 # DefaultSample
+        samplingLimitMaxQueue: 0
+        samplingLimitAgeOut: 0s
       interval: 30s
       summarizerActiveTtl: 45s
       aggregationCacheSize: 4096
@@ -47,7 +53,10 @@ data:
     redishandler:
       samplesthreshold: 10
       issuesthreshold: 10
-      samplingmode: 1 # DefaultSample
+      sampling:
+        samplingmode: 1 # DefaultSample
+        samplingLimitMaxQueue: 0
+        samplingLimitAgeOut: 0s
       interval: 30s
       summarizerActiveTtl: 45s
       aggregationCacheSize: 4096
@@ -56,7 +65,10 @@ data:
     sqlhandler:
       samplesthreshold: 10
       issuesthreshold: 10
-      samplingmode: 1 # DefaultSample
+      sampling:
+        samplingmode: 1 # DefaultSample
+        samplingLimitMaxQueue: 0
+        samplingLimitAgeOut: 0s
       interval: 30s
       summarizerActiveTtl: 45s
       aggregationCacheSize: 4096
@@ -65,7 +77,10 @@ data:
     kafkahandler:
       samplesthreshold: 10
       issuesthreshold: 10
-      samplingmode: 1 # DefaultSample
+      sampling:
+        samplingmode: 1 # DefaultSample
+        samplingLimitMaxQueue: 10
+        samplingLimitAgeOut: 1s
       interval: 30s
       summarizerActiveTtl: 45s
       aggregationCacheSize: 4096
@@ -74,7 +89,10 @@ data:
     dnshandler:
       samplesthreshold: 10
       issuesthreshold: 10
-      samplingmode: 1 # DefaultSample
+      sampling:
+        samplingmode: 1 # DefaultSample
+        samplingLimitMaxQueue: 10
+        samplingLimitAgeOut: 1s
       interval: 30s
       summarizerActiveTtl: 45s
       aggregationCacheSize: 300
@@ -82,7 +100,10 @@ data:
     mongodbhandler:
       samplesthreshold: 10
       issuesthreshold: 10
-      samplingmode: 1 # DefaultSample
+      sampling:
+        samplingmode: 1 # DefaultSample
+        samplingLimitMaxQueue: 0
+        samplingLimitAgeOut: 0s
       interval: 30s
       summarizerActiveTtl: 45s
       aggregationCacheSize: 4096
@@ -90,7 +111,10 @@ data:
     connStatsHandler:
       samplesthreshold: 10
       issuesthreshold: 10
-      samplingmode: 0 # DontSample
+      sampling:
+        samplingmode: 0 # DontSample
+        samplingLimitMaxQueue: 0
+        samplingLimitAgeOut: 0s
       interval: 30s
       summarizerActiveTtl: 45s
       aggregationCacheSize: 100
@@ -98,7 +122,10 @@ data:
     tcpStatsHandler:
       samplesthreshold: 10
       issuesthreshold: 10
-      samplingmode: 0 # DontSample
+      sampling:
+        samplingmode: 0 # DontSample
+        samplingLimitMaxQueue: 0
+        samplingLimitAgeOut: 0s
       interval: 30s
       summarizerActiveTtl: 45s
       aggregationCacheSize: 100
@@ -106,7 +133,10 @@ data:
     containerInfoHandler:
       samplesthreshold: 10
       issuesthreshold: 10
-      samplingmode: 1 # DefaultSample
+      sampling:
+        samplingmode: 1 # DefaultSample
+        samplingLimitMaxQueue: 0
+        samplingLimitAgeOut: 0s
       interval: 30s
       summarizerActiveTtl: 45s
       aggregationCacheSize: 4096
@@ -114,7 +144,10 @@ data:
     containerStateHandler:
       samplesthreshold: 10
       issuesthreshold: 10
-      samplingmode: 0 # DontSample
+      sampling:
+        samplingmode: 0 # DontSample
+        samplingLimitMaxQueue: 0
+        samplingLimitAgeOut: 0s
       interval: 30s
       summarizerActiveTtl: 45s
       aggregationCacheSize: 4096
@@ -122,7 +155,10 @@ data:
     nodeinfohandler:
       samplesthreshold: 20
       issuesthreshold: 20
-      samplingmode: 0 # DontSample
+      sampling:
+        samplingmode: 0 # DontSample
+        samplingLimitMaxQueue: 0
+        samplingLimitAgeOut: 0s
       interval: 1m0s
       summarizerActiveTtl: 45s
       aggregationCacheSize: 1024
@@ -130,7 +166,10 @@ data:
     containercrashhandler:
       samplesthreshold: 20
       issuesthreshold: 20
-      samplingmode: 1 # DefaultSample
+      sampling:
+        samplingmode: 1 # DefaultSample
+        samplingLimitMaxQueue: 0
+        samplingLimitAgeOut: 0s
       interval: 30s
       summarizerActiveTtl: 45s
       aggregationCacheSize: 1024
@@ -138,7 +177,10 @@ data:
     pvcinfohandler:
       samplesthreshold: 20
       issuesthreshold: 20
-      samplingmode: 0 # DontSample
+      sampling:
+        samplingmode: 0 # DontSample
+        samplingLimitMaxQueue: 0
+        samplingLimitAgeOut: 0s
       interval: 1m0s
       summarizerActiveTtl: 45s
       aggregationCacheSize: 1024
@@ -191,6 +233,7 @@ data:
       dataDog:
         enabled: {{ .Values.agent.alligator.apmIngestor.dataDog.enabled }}
         endpoint: {{ include "opentelemetry-collector.datadogapm.base.http.url" . }}
+        tracesPort: {{ .Values.agent.alligator.apmIngestor.dataDog.tracesPort }}
       otel:
         enabled: {{ .Values.agent.alligator.apmIngestor.otel.enabled }}
     pprofAlligator:

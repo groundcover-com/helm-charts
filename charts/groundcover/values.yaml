@@ -168,6 +168,7 @@ agent:
     apmIngestor:
       dataDog:
         enabled: true
+        tracesPort: 6218
       otel:
         enabled: false
     pprofAlligator:
