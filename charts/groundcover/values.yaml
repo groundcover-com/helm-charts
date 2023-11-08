@@ -39,7 +39,7 @@ shouldDropRunningNamespaces: true
 
 origin:
   registry: public.ecr.aws/groundcovercom
-  tag: 0.34.0
+  tag: 0.34.1
 
 pullSecrets: []
 
@@ -225,7 +225,7 @@ router:
   repository: router
   origin:
     registry: public.ecr.aws/groundcovercom
-    tag: 0.34.0
+    tag: 0.34.1
   versionDb:
     host: 
     port: 
@@ -498,7 +498,7 @@ vmagent-backend:
   resources:
     limits:
       cpu: 150m
-      memory: 128Mi
+      memory: 256Mi
     requests:
       cpu: 50m
       memory: 128Mi
