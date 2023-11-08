@@ -79,6 +79,11 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.annotations['groundcover_version']              
+        - name: API_KEY
+          valueFrom:
+            secretKeyRef:
+              key: {{ template "groundcover.apikeySecretKey" . }}
+              name: {{ template "groundcover.apikeySecretName" . }}        
         {{- with .Values.k8sWatcher.env }}
           {{ toYaml . | nindent 8 }}
         {{- end }}
