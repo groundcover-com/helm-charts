@@ -227,28 +227,6 @@ loki:
 
   priorityClassName:
 
-grafana:
-  additionalLabels:
-  podLabels:
-  additionalAnnotations:
-  podAnnotations:
-  enabled: true
-  nameOverride:
-  repository: grafana
-  storageClassName:
-  affinity:
-  nodeSelector:
-  tolerations: []
-  priorityClassName:
-  resources:
-    requests:
-      cpu: 40m
-      memory: 64Mi
-    limits:
-      memory: 64Mi
-      cpu: 80m
-  clusterIP:
-
 router:
   # onprem or cloud
   mode: cloud

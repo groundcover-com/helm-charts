@@ -72,10 +72,6 @@ Get cluster_id from values or generate random one
 {{- .Values.region | default "undefined" }}
 {{- end }}
 
-{{- define "grafana.name" -}}
-{{- default "grafana" .Values.grafana.nameOverride | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
 {{- define "groundcover.apikeySecretName" -}}
 {{- default "api-key" .Values.global.groundcoverPredefinedTokenSecret.secretName -}}
 {{- end -}}

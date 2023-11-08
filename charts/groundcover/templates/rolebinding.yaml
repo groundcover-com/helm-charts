@@ -25,9 +25,6 @@ subjects:
   name: {{ include "promscale.fullname" . }}
   namespace: {{ .Release.Namespace }}
 - kind: ServiceAccount
-  name: grafana
-  namespace: {{ .Release.Namespace }}
-- kind: ServiceAccount
   name: portal
   namespace: {{ .Release.Namespace }}
 - kind: ServiceAccount
