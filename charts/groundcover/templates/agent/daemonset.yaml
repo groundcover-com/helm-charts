@@ -70,7 +70,7 @@ spec:
         - env:
             - name: PROMETHEUS_PORT
               value: {{ (include "agent.monitoring.port" .) | quote }}
-            - name: FLORA_METRICS_PROMETHEUSSERVER_ENABLED
+            - name: FLORA_PROMETHEUSSERVER_ENABLED
               value: "false"
             - name: FLORA_NATTRACKER_PROCMOUNTPATH
               value: "/host/proc"
