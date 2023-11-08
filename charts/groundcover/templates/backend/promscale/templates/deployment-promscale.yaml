@@ -78,10 +78,6 @@ spec:
                 secretKeyRef:
                   key: PATRONI_SUPERUSER_PASSWORD
                   name: {{ index .Values "timescaledb-single" "secrets" "credentialsSecretName" | default "groundcover-tsdb-credentials" }}
-            - name: PROMSCALE_AUTH_TLS_CERT_FILE
-              value: "/var/groundcover/server/tls.crt"
-            - name: PROMSCALE_AUTH_TLS_KEY_FILE
-              value: "/var/groundcover/server/tls.key"
           {{- if .Values.promscale.extraEnv }}
             {{- range $.Values.promscale.extraEnv }}
             - name: {{ .name }}

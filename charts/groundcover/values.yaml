@@ -42,7 +42,7 @@ shouldDropRunningNamespaces: true
 
 origin:
   registry: public.ecr.aws/groundcovercom
-  tag: 0.36.0
+  tag: 0.36.1
 
 pullSecrets: []
 
@@ -251,7 +251,7 @@ router:
   repository: router
   origin:
     registry: public.ecr.aws/groundcovercom
-    tag: 0.36.0
+    tag: 0.36.1
   versionDb:
     host: 
     port: 
@@ -461,9 +461,11 @@ promscale:
   extraArgs: []
 
   # Environment variables that will be passed onto deployment pods
-  extraEnv: [
-    
-  ]
+  extraEnv:
+    - name: PROMSCALE_AUTH_TLS_CERT_FILE
+      value: "/var/groundcover/server/tls.crt"
+    - name: PROMSCALE_AUTH_TLS_KEY_FILE
+      value: "/var/groundcover/server/tls.key"
 
   # Currently OpenTelemetry tracing support is in beta
   # so tracing features needs to be explicitly enabled.
