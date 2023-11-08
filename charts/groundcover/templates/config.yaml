@@ -14,6 +14,6 @@ metadata:
   namespace: {{ .Release.Namespace }}
 stringData:
   GC_CLUSTER_ID: {{ template "groundcover.clusterId" . }}
-  GC_REGION: {{ .Values.region }}
+  GC_REGION: {{ template "groundcover.region" . }}
   GC_VERSION: {{ .Values.origin.tag }}
 type: Opaque

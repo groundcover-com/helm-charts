@@ -37,7 +37,7 @@ region:
 
 origin:
   registry: public.ecr.aws/k8g4n2c4
-  tag: 0.28.6
+  tag: 0.28.7
 
 pullSecrets: []
 
@@ -199,7 +199,7 @@ router:
   repository: router
   origin:
     registry: public.ecr.aws/k8g4n2c4
-    tag: 0.28.6
+    tag: 0.28.7
   versionDb:
     host: 
     port: 
