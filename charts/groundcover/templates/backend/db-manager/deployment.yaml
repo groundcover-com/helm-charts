@@ -91,7 +91,7 @@ spec:
         - -c
         - until pg_isready -h groundcover-tsdb -p 5432; do echo Waiting for
           TimescaleDB...; sleep 2; done; echo TimescaleDB is up
-        image: {{ .Values.global.origin.registry }}/postgres:9.6.5
+        image: {{ .Values.global.origin.registry }}/postgres:15.2
       serviceAccountName: db-manager
 {{- if .Values.dbManager.priorityClassName }}
       priorityClassName: {{ .Values.dbManager.priorityClassName }}
