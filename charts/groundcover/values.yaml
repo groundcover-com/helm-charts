@@ -454,6 +454,9 @@ opentelemetry-collector:
             max_recv_msg_size_mib: 50
             tls: ${env:TLS_CONFIG}
             endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "otlp" "containerPort" | int ) }}'
+          http:
+            tls: ${env:TLS_CONFIG}
+            endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "otlp-http" "containerPort" | int ) }}'
       datadog:
         endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "datadogapm" "containerPort" | int ) }}'
     processors:

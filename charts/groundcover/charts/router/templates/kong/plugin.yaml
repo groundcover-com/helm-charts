@@ -31,4 +31,15 @@ config:
       - "X-ClickHouse-Key"
       - "X-ClickHouse-User"
 plugin: request-transformer
+---
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: grafana-rewrite
+  labels:
+    {{- include "router.labels" . | nindent 4 }}
+config:
+  replace:
+    uri: '/grafana/api/$(uri_captures[1])'
+plugin: request-transformer
 {{- end -}}
