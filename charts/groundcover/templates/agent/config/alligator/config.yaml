@@ -217,6 +217,7 @@ data:
         groundcoverTimeTravel: -20s
         logDropFilters: {{ toYaml .Values.logsDropFilters | nindent 10}}
         metricateLabels: false
+        multiLineConfigs: {{ toYaml .Values.logsMultiLines | nindent 10}}
     otlp:
       endpoint: {{ include "opentelemetry-collector.otlp.grpc.url" . }}
       enableTLS: {{ .Values.global.otlp.tls.enabled }}

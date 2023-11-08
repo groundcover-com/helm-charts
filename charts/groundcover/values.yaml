@@ -74,6 +74,10 @@ tracesWorkloadFilters: []
 #   regex: "do-not-show-me"
 logsDropFilters: []
 # - '{namespace="demo-ng",workload="loadgenerator"} |~ ".*GET.*"'
+logsMultiLines: []
+# - namespace: demo-ng
+#   workload: ".*"
+#   firstLineRegex: "PlaceOrder"
 shouldDropRunningNamespaces: true
 commitHashKeyName:
 repositoryUrlKeyName:
@@ -303,7 +307,7 @@ opentelemetry-collector:
       secretName: opentelemetry-collector-certificate
   image:
     repository: public.ecr.aws/groundcovercom/otel/opentelemetry-collector-contrib
-    tag: "1.4.35"
+    tag: "1.4.36"
   podLabels:
     app.kubernetes.io/part-of: groundcover
   podAnnotations:
