@@ -59,11 +59,13 @@ spec:
       imagePullSecrets: {{ include "router.imagePullSecrets" . }}
       containers:
         - name: router
-          image: {{ .Values.origin.registry }}/{{ .Values.repository }}:{{ .Values.origin.tag }}
+          image: {{ include "router.image" . }}
           imagePullPolicy: Always
           volumeMounts:
             - name: config-volume
               mountPath: /config
+            - name: certs
+              mountPath: /certs
           ports:
             - containerPort: 8080
               name: frontend
@@ -74,7 +76,7 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
-            {{- if and .Values.onprem.enabled }}
+            {{- if .Values.onprem.enabled }}
             - name: GC_KONG_API_ENDPOINT
               value: {{ include "kong.admin.url" . }}
             - name: GC_GRAFANA_PASSWORD
@@ -128,4 +130,7 @@ spec:
         - name: config-volume
           configMap:
             name: router-config
+        - name: certs
+          secret:
+            secretName: {{ include "router.jwt.secretName" . }}
 {{ end -}}

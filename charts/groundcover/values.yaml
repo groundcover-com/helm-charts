@@ -106,6 +106,7 @@ logsMultiLines:
   #   firstLineRegex: "PlaceOrder"   # mandatory
   #   maxLines: 100                  # optional, default = 1024
   #   maxWaitTime: 10s               # optional, default = 3s
+decolorizeLogs: false
 shouldDropRunningNamespaces: true
 commitHashKeyName:
 repositoryUrlKeyName:

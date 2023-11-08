@@ -281,6 +281,7 @@ data:
         logDropFilters: {{ toYaml .Values.logsDropFilters | nindent 10}}
         metricateLabels: false
         multiLineConfigs: {{ toYaml .Values.logsMultiLines | nindent 10}}
+        decolorize: {{ .Values.decolorizeLogs }}
     otlp:
       endpoint: {{ include "opentelemetry-collector.otlp.grpc.url" . }}
       enableTLS: {{ include "opentelemetry-collector.otlp.tls.enabled" . }}

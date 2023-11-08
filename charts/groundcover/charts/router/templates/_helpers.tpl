@@ -87,3 +87,28 @@ Create the name of the service account to use
 {{- define "router.ds.url" -}}
 {{ printf "https://%s.%s.svc.cluster.local" (include "router.proxy.service.name" .) .Release.Namespace }}
 {{- end -}}
+
+{{- define "router.image" -}}
+{{ $repository := .Values.origin.repository }}
+{{- if eq .Values.global.auth.type "no-auth" }}
+{{- $repository = (printf "%s-no-auth" $repository) -}}
+{{- end -}}
+{{ printf "%s/%s:%s" .Values.origin.registry $repository .Values.origin.tag }}
+{{- end -}}
+
+{{- define "router.jwt.secretName" -}}
+{{ print "groundcover-jwt" }}
+{{- end -}}
+
+{{- define "router.jwt.secretKey" -}}
+{{ print "private_key.pem" }}
+{{- end -}}
+
+{{- define "router.jwt.privateKey" -}}
+{{- $secret := (lookup "v1" "Secret" .Release.Namespace (include "router.jwt.secretName" .) | default dict) -}}
+{{- if $secret -}}
+    {{- index $secret "data" (include "router.jwt.secretKey" .) -}}
+{{- else -}}
+    {{- genPrivateKey "rsa" | b64enc -}}
+{{- end -}}
+{{- end -}}
