@@ -3,7 +3,9 @@ additionalLabels:
 mode: cloud
 origin:
   registry: public.ecr.aws/groundcovercom
-  tag: 1.1.8
+  tag: 1.1.9
+serviceAccount:
+  annotations:
 repository: router
 configuration:
   Activity:
@@ -27,6 +29,9 @@ configuration:
   Reporter:
     ttl: 10m
     PurgeInterval: 10m
+    Bucket: "metrics.groundcover.com"
+    ReportInterval: 10m
+    StoreStatus: true
 ingress:
   enabled: false
   host: domain.groundcover.com

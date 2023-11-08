@@ -27,6 +27,7 @@ spec:
         prometheus.io/scrape: "true"
         prometheus.io/port: "9102"
     spec:
+      serviceAccountName: router
       containers:
         - name: router
           image: {{ .Values.origin.registry }}/{{ .Values.repository }}:{{ .Values.origin.tag }}
