@@ -93,25 +93,6 @@ spec:
         volumeMounts:
         - mountPath: /config
           name: portal-config-volume
-      - env:
-        - name: GC_DB_PASS
-          valueFrom:
-            secretKeyRef:
-              key: PATRONI_SUPERUSER_PASSWORD
-              name: {{ index .Values "timescaledb-single" "secrets" "credentialsSecretName" | default "groundcover-tsdb-credentials" }}
-        image: {{ .Values.origin.registry }}/{{ .Values.k8sWatcher.repository }}:{{ .Values.origin.tag }}
-        imagePullPolicy: Always
-        name: k8s-watcher
-        resources:
-          limits:
-            cpu: 100m
-            memory: 200Mi
-          requests:
-            cpu: 50m
-            memory: 100Mi
-        volumeMounts:
-        - mountPath: /config
-          name: k8s-watcher-config-volume
       initContainers:
       - command:
         - sh
@@ -138,7 +119,6 @@ spec:
         - -c
         image: curlimages/curl:latest
         name: check-loki-ready
-      serviceAccountName: k8s-watcher
 {{- if .Values.portal.priorityClassName }}
       priorityClassName: {{ .Values.portal.priorityClassName }}
 {{- end }}
@@ -146,6 +126,3 @@ spec:
       - configMap:
           name: portal-config
         name: portal-config-volume
-      - configMap:
-          name: k8s-watcher-config
-        name: k8s-watcher-config-volume

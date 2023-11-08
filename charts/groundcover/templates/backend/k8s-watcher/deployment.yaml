@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    groundcover_version: {{ .Values.origin.tag }}
+    {{- if .Values.k8sWatcher.additionalAnnotations }}
+{{ toYaml .Values.k8sWatcher.additionalAnnotations | indent 4 }}
+    {{- end }}    
+  labels:
+    app: k8s-watcher
+    {{- if .Values.k8sWatcher.additionalLabels }}
+{{ toYaml .Values.k8sWatcher.additionalLabels | indent 4 }}
+    {{- end }}
+  name: k8s-watcher
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: k8s-watcher
+  template:
+    metadata:
+      annotations:
+        groundcover_version: {{ .Values.origin.tag }}
+        {{- if .Values.k8sWatcher.additionalAnnotations }}
+{{ toYaml .Values.k8sWatcher.additionalAnnotations | indent 8 }}
+        {{- end }}
+        {{- if .Values.k8sWatcher.podAnnotations }}
+{{ toYaml .Values.k8sWatcher.podAnnotations | indent 8 }}
+        {{- end }}
+      labels:
+        app: k8s-watcher
+        {{- if .Values.k8sWatcher.additionalLabels }}
+{{ toYaml .Values.k8sWatcher.additionalLabels | indent 8 }}
+        {{- end }}
+        {{- if .Values.k8sWatcher.podLabels }}
+{{ toYaml .Values.k8sWatcher.podLabels | indent 8 }}
+        {{- end }}
+    spec:
+{{- if .Values.k8sWatcher.tolerations }}
+      tolerations:
+{{ toYaml .Values.k8sWatcher.tolerations | indent 8 }}
+{{- end }}
+{{- if .Values.k8sWatcher.affinity }}
+      affinity:
+{{ toYaml .Values.k8sWatcher.affinity | indent 8 }}
+{{- end }}
+{{- if .Values.k8sWatcher.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.k8sWatcher.nodeSelector | indent 8 }}
+{{- end }}
+{{- if .Values.pullSecrets }}
+      imagePullSecrets:
+{{ toYaml .Values.pullSecrets | indent 8 }}
+{{- end }}
+      containers:
+      - env:
+        - name: GC_DB_PASS
+          valueFrom:
+            secretKeyRef:
+              key: PATRONI_SUPERUSER_PASSWORD
+              name: {{ index .Values "timescaledb-single" "secrets" "credentialsSecretName" | default "groundcover-tsdb-credentials" }}
+        image: {{ .Values.origin.registry }}/{{ .Values.k8sWatcher.repository }}:{{ .Values.origin.tag }}
+        imagePullPolicy: Always
+        name: k8s-watcher
+        resources:
+          limits:
+            cpu: 100m
+            memory: 200Mi
+          requests:
+            cpu: 50m
+            memory: 100Mi
+        volumeMounts:
+        - mountPath: /config
+          name: k8s-watcher-config-volume
+      initContainers:
+      - command:
+        - sh
+        - -c
+        - until pg_isready -h groundcover-tsdb -p 5432; do echo Waiting for
+          TimescaleDB...; sleep 2; done; echo TimescaleDB is up
+        image: postgres:9.6.5
+        name: check-ts-ready
+      - args:
+        - while [ $(curl -sw '%{http_code}' http://groundcover-victoria-metrics:8428/health
+          -o /dev/null) -ne 200 ]; do echo 'Waiting for VictoriaMetrics...'; sleep
+          2; done; echo VictoriaMetrics is up
+        command:
+        - /bin/sh
+        - -c
+        image: curlimages/curl:latest
+        name: check-vm-ready
+      serviceAccountName: k8s-watcher
+{{- if .Values.k8sWatcher.priorityClassName }}
+      priorityClassName: {{ .Values.k8sWatcher.priorityClassName }}
+{{- end }}
+      volumes:
+      - configMap:
+          name: k8s-watcher-config
+        name: k8s-watcher-config-volume

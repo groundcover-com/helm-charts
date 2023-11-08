@@ -107,6 +107,8 @@ data:
       host: groundcover-promscale-connector
       port: 9202
 
+    clusterId: {{ .Values.clusterId }}
+    region: {{ .Values.region }}
 kind: ConfigMap
 metadata:
   labels:

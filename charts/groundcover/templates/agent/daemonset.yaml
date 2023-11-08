@@ -117,6 +117,16 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
+            - name: GC_CLUSTERID
+              valueFrom:
+                secretKeyRef:
+                    name: groundcover-config
+                    key: GC_CLUSTER_ID
+            - name: GC_REGION
+              valueFrom:
+                secretKeyRef:
+                    name: groundcover-config
+                    key: GC_REGION                                    
           image: {{ .Values.origin.registry }}/{{ .Values.agent.alligator.repository }}:{{ .Values.origin.tag }}
           resources:
 {{- toYaml .Values.agent.alligator.resources | nindent 12 }}

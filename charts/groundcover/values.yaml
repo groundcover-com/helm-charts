@@ -37,7 +37,7 @@ region:
 
 origin:
   registry: public.ecr.aws/k8g4n2c4
-  tag: 0.28.3
+  tag: 0.28.4
 
 pullSecrets: []
 
@@ -108,6 +108,14 @@ migrator:
 
 k8sWatcher:
   repository: k8s-watcher
+  additionalLabels:
+  podLabels:
+  additionalAnnotations:
+  podAnnotations:
+  affinity:
+  nodeSelector:
+  tolerations: []
+  priorityClassName:
 
 portal:
   additionalLabels:
@@ -190,7 +198,7 @@ router:
   repository: router
   origin:
     registry: public.ecr.aws/k8g4n2c4
-    tag: 0.28.3
+    tag: 0.28.4
   versionDb:
     host: 
     port: 
