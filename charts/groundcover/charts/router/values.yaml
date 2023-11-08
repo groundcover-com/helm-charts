@@ -3,11 +3,12 @@ additionalLabels:
 mode: cloud
 origin:
   registry: public.ecr.aws/groundcovercom
-  tag: 1.4.20
+  tag: 1.4.21
 serviceAccount:
   annotations:
 repository: router
 configuration:
+  requestTimeout: 20s
   Activity:
     CheckInterval: 5m
     StaleAfter: 30m
