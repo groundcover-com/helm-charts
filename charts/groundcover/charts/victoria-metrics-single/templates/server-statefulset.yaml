@@ -45,6 +45,10 @@ spec:
       initContainers:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
       containers:
         - name: {{ template "victoria-metrics.name" . }}-{{ .Values.server.name }}
           image: "{{ .Values.server.image.repository }}:{{ .Values.server.image.tag }}"

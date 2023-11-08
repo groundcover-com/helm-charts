@@ -30,6 +30,8 @@ podDisruptionBudget:
   #  maxUnavailable: 1
   extraLabels: {}
 
+imagePullSecrets: []
+
 server:
   # -- Enable deployment of server component. Deployed as StatefulSet
   enabled: true

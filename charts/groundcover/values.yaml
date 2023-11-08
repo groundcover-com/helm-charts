@@ -39,7 +39,7 @@ shouldDropRunningNamespaces: true
 
 origin:
   registry: public.ecr.aws/k8g4n2c4
-  tag: 0.32.7
+  tag: 0.32.8
 
 pullSecrets: []
 
@@ -145,6 +145,10 @@ portal:
       memory: 100Mi
 
 loki:
+  # loki pullSecrets expects the secret name only, instead of `- name: {secret}` just `- {secret}`
+  # image:
+  #   pullSecrets: [] 
+
   affinity:
 
   nodeSelector:
@@ -220,7 +224,7 @@ router:
   repository: router
   origin:
     registry: public.ecr.aws/k8g4n2c4
-    tag: 0.32.7
+    tag: 0.32.8
   versionDb:
     host: 
     port: 
@@ -240,6 +244,7 @@ router:
 # kubectl delete endpoints <release_name>
 # if you installed groundcover in its own namespace, deleting the namespace can done instead
 timescaledb-single:
+  # imagePullSecrets: []
   tolerations: []
   podAnnotations: {}
   nodeSelector: {}
@@ -297,8 +302,11 @@ timescaledb-single:
   secrets:
     credentialsSecretName: "" 
 
-victoria-metrics-single:
+# victoria-metrics-agent:
+#   imagePullSecrets:
 
+victoria-metrics-single:
+  # imagePullSecrets: []
   server:
     # -- Data retention period, {amount}[h(ours), d(ays), w(eeks), y(ears)], default is 1 month
     retentionPeriod: 7d

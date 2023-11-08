@@ -48,6 +48,10 @@ spec:
       priorityClassName: {{ .Values.migrator.priorityClassName }}
     {{- end }}
       serviceAccountName: migrator
+{{- if .Values.pullSecrets }}
+      imagePullSecrets:
+{{ toYaml .Values.pullSecrets | indent 8 }}
+{{- end }}
       containers:
       - env:
         - name: GC_FORCE_MIGRATE

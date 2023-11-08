@@ -55,6 +55,10 @@ spec:
 {{ toYaml .Values.grafana.nodeSelector | indent 8 }}
 {{- end }}
       serviceAccountName: grafana
+{{- if .Values.pullSecrets }}
+      imagePullSecrets:
+{{ toYaml .Values.pullSecrets | indent 8 }}
+{{- end }}
       containers:
       - env:
         - name: GF_SECURITY_ADMIN_PASSWORD

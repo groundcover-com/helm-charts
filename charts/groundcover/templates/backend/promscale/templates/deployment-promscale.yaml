@@ -34,6 +34,10 @@ spec:
         {{- .Values.promscale.prometheus.annotations | toYaml | nindent 8 }}
         {{- end }}
     spec:
+{{- if .Values.pullSecrets }}
+      imagePullSecrets:
+{{ toYaml .Values.pullSecrets | indent 8 }}
+{{- end }}
       initContainers:
         - name: check-ts-ready
           image: postgres:9.6.5
