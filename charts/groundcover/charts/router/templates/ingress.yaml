@@ -43,7 +43,7 @@ spec:
             pathType: {{ .pathType }}
             backend:
               service:
-                name: router
+                name: {{ ternary (include "router.proxy.service.name" .) (include "router.service.name" .) $.Values.onprem.enabled }}
                 port:
                   number: {{ .port }}
           {{- end }}

@@ -5,9 +5,7 @@ metadata:
   labels:
     app: router
     app.kubernetes.io/name: router
-    {{- if .Values.additionalLabels }}
-{{ toYaml .Values.additionalLabels | indent 4 }}
-    {{- end }}
+    {{- include "router.labels" . | nindent 4 }}
   annotations:
     groundcover_version: {{ .Values.origin.tag }}
   name: router

@@ -18,10 +18,10 @@ data:
     Namespace: {{ .Release.Namespace }}
     
     Router:
-      Host: "{{ .Values.saas.host }}"
+      Host: "{{ tpl .Values.saas.host . }}"
       Port: "{{ .Values.saas.port }}"
       Token: "OVERRIDEN"
-      WebsocketScheme: "{{ .Values.saas.scheme }}"
+      WebsocketScheme: "{{ tpl .Values.saas.scheme . }}"
       TLSSkipVerify: "{{ .Values.saas.tls_skip_verify }}"
       ExtraHeaders:
     {{- if .Values.installationId }}

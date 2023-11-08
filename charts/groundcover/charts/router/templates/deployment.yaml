@@ -5,9 +5,7 @@ metadata:
   labels:
     app: router
     app.kubernetes.io/name: router
-    {{- if .Values.additionalLabels }}
-{{ toYaml .Values.additionalLabels | indent 4 }}
-    {{- end }}
+    {{- include "router.labels" . | nindent 4 }}
   annotations:
     groundcover_version: {{ .Values.origin.tag }}
   name: router
@@ -32,6 +30,24 @@ spec:
       serviceAccountName: router
       {{- if .Values.onprem.enabled }}
       initContainers:
+        - name: wait-for-db
+          image: '{{ include "postgresql.image" . }}'
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: '{{ include "postgresql.secretName" . }}'
+                  key: '{{ include "postgresql.adminPasswordKey" . }}'
+          command:
+            - /bin/sh
+            - -c
+          args:
+            - |
+              pg_isready \
+                -U "postgres" \
+                -d "dbname=postgres" \
+                -h {{ splitList ":" (include "postgresql.base.url" .) | first }} \
+                -p {{ splitList ":" (include "postgresql.base.url" .) | last }}
         - name: check-grafana-is-up   
           args:
           - while [ $(curl -skw '%{http_code}' http://{{ include "grafana.fullname" . }}/grafana/healthz
@@ -40,19 +56,6 @@ spec:
             - /bin/sh
             - -c
           image: '{{ printf "%s/curl:latest" .Values.origin.registry }}'
-        - name: check-psql-is-up   
-          args:
-          - pg_isready -U "postgres" -d "dbname=postgres" -h {{ splitList ":" (include "postgresql.base.url" .) | first }} -p {{ splitList ":" (include "postgresql.base.url" .) | last }}
-          command:
-            - /bin/sh
-            - -c
-          image: '{{ printf "%s/bitnami/postgresql:15.3.0-debian-11-r75" .Values.postgresql.image.registry }}'
-          env:
-          - name: POSTGRES_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: '{{ include "postgresql.secretName" . }}'
-                key: '{{ include "postgresql.adminPasswordKey" . }}'
       {{- end }}
       imagePullSecrets: {{ include "router.imagePullSecrets" . }}
       containers:
@@ -72,15 +75,9 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
-            {{- if and .Values.global .Values.global.clickhouse }}
-            - name: GC_ONPREM_CLICKHOUSEPASS
-              value: {{ include "clickhouse.password" . | quote }}
-            - name: GC_ONPREM_CLICKHOUSEPORT
-              value: {{ .Values.global.clickhouse.containerPorts.http | quote }}
-            - name: GC_ONPREM_CLICKHOUSEHOST
-              value: {{ include "clickhouse.fullname" . | quote }}
-            {{- end }}
             {{- if and .Values.onprem.enabled }}
+            - name: GC_KONG_API_ENDPOINT
+              value: {{ include "kong.admin.url" . }}
             - name: GC_GRAFANA_PASSWORD
               valueFrom:
                 secretKeyRef:
