@@ -9,8 +9,8 @@ metadata:
     {{- end }}    
   labels:
     {{- include "groundcover.labels" . | nindent 4 }}
-    app: {{ include "portal.fullname" . }}
-    app.kubernetes.io/name: {{ include "portal.fullname" . }}
+    app: portal
+    app.kubernetes.io/name: portal
     {{- if .Values.portal.additionalLabels }}
 {{ toYaml .Values.portal.additionalLabels | indent 4 }}
     {{- end }}
@@ -19,7 +19,7 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: {{ include "portal.fullname" . }}
+      app: portal
   strategy:
     type: Recreate
   template:
@@ -36,8 +36,8 @@ spec:
 {{ toYaml .Values.portal.podAnnotations | indent 8 }}
         {{- end }}
       labels:
-        app: {{ include "portal.fullname" . }}
-        app.kubernetes.io/name: {{ include "portal.fullname" . }}
+        app: portal
+        app.kubernetes.io/name: portal
         {{- include "groundcover.labels" . | nindent 8 }}
         {{- if .Values.portal.additionalLabels }}
 {{ toYaml .Values.portal.additionalLabels | indent 8 }}
