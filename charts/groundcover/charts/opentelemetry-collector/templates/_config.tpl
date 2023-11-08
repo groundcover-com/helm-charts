@@ -274,6 +274,10 @@ receivers:
 {{- define "opentelemetry-collector.kubernetesAttributesConfig" -}}
 processors:
   k8sattributes:
+  {{- if eq .Values.mode "daemonset" }}
+    filter:
+      node_from_env_var: K8S_NODE_NAME
+  {{- end }}
     passthrough: false
     pod_association:
     - sources:
@@ -292,6 +296,10 @@ processors:
         - "k8s.daemonset.name"
         - "k8s.cronjob.name"
         - "k8s.job.name"
+        - "k8s.node.name"
+        - "k8s.pod.name"
+        - "k8s.pod.uid"
+        - "k8s.pod.start_time"
 {{- end }}
 
 {{/* Build the list of port for deployment service */}}

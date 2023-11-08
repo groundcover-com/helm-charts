@@ -83,17 +83,17 @@ config:
     jaeger:
       protocols:
         grpc:
-          endpoint: ${MY_POD_IP}:14250
+          endpoint: ${env:MY_POD_IP}:14250
         thrift_http:
-          endpoint: ${MY_POD_IP}:14268
+          endpoint: ${env:MY_POD_IP}:14268
         thrift_compact:
-          endpoint: ${MY_POD_IP}:6831
+          endpoint: ${env:MY_POD_IP}:6831
     otlp:
       protocols:
         grpc:
-          endpoint: ${MY_POD_IP}:4317
+          endpoint: ${env:MY_POD_IP}:4317
         http:
-          endpoint: ${MY_POD_IP}:4318
+          endpoint: ${env:MY_POD_IP}:4318
     prometheus:
       config:
         scrape_configs:
@@ -101,13 +101,13 @@ config:
             scrape_interval: 10s
             static_configs:
               - targets:
-                  - ${MY_POD_IP}:8888
+                  - ${env:MY_POD_IP}:8888
     zipkin:
-      endpoint: ${MY_POD_IP}:9411
+      endpoint: ${env:MY_POD_IP}:9411
   service:
     telemetry:
       metrics:
-        address: ${MY_POD_IP}:8888
+        address: ${env:MY_POD_IP}:8888
     extensions:
       - health_check
       - memory_ballast
@@ -279,6 +279,9 @@ hostNetwork: false
 # Pod DNS policy ClusterFirst, ClusterFirstWithHostNet, None, Default, None
 dnsPolicy: ""
 
+# Custom DNS config. Required when DNS policy is None.
+dnsConfig: {}
+
 # only used with deployment mode
 replicaCount: 1
 
@@ -334,12 +337,58 @@ lifecycleHooks: {}
 #       - /test/sleep
 #       - "5"
 
+# liveness probe configuration
+# Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+##
+livenessProbe:
+  # Number of seconds after the container has started before startup, liveness or readiness probes are initiated.
+  # initialDelaySeconds: 1
+  # How often in seconds to perform the probe.
+  # periodSeconds: 10
+  # Number of seconds after which the probe times out.
+  # timeoutSeconds: 1
+  # Minimum consecutive failures for the probe to be considered failed after having succeeded.
+  # failureThreshold: 1
+  # Duration in seconds the pod needs to terminate gracefully upon probe failure.
+  # terminationGracePeriodSeconds: 10
+  httpGet:
+    port: 13133
+    path: /
+
+# readiness probe configuration
+# Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+##
+readinessProbe:
+  # Number of seconds after the container has started before startup, liveness or readiness probes are initiated.
+  # initialDelaySeconds: 1
+  # How often (in seconds) to perform the probe.
+  # periodSeconds: 10
+  # Number of seconds after which the probe times out.
+  # timeoutSeconds: 1
+  # Minimum consecutive successes for the probe to be considered successful after having failed.
+  # successThreshold: 1
+  # Minimum consecutive failures for the probe to be considered failed after having succeeded.
+  # failureThreshold: 1
+  httpGet:
+    port: 13133
+    path: /
+
 service:
+  # Enable the creation of a Service.
+  # By default, it's enabled on mode != daemonset.
+  # However, to enable it on mode = daemonset, its creation must be explicitly enabled
+  # enabled: true
+
   type: ClusterIP
   # type: LoadBalancer
   # loadBalancerIP: 1.2.3.4
   # loadBalancerSourceRanges: []
   annotations: {}
+
+  # By default, Service will be created setting 'internalTrafficPolicy: Local' on mode = daemonset
+  # unless other value is explicitly set.
+  # Setting 'internalTrafficPolicy: Cluster' on a daemonset is not recommended
+  # internalTrafficPolicy: Cluster
 
 ingress:
   enabled: false
@@ -409,6 +458,7 @@ autoscaling:
   enabled: false
   minReplicas: 1
   maxReplicas: 10
+  behavior: {}
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
 
