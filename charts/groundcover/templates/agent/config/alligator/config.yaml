@@ -15,7 +15,7 @@ data:
       conn_stats: 2
       tcp_stats: 2
       node_info: 2
-      container_restart: 1
+      container_crash: 1
       container_info: 1
       pvc_info: 2
       container_state: 1
@@ -95,7 +95,7 @@ data:
       interval: 1m0s
       summarizerActiveTtl: 180s
 
-    containerrestarthandler:
+    containercrashhandler:
       samplesthreshold: 20
       issuesthreshold: 20
       shouldsample: true
