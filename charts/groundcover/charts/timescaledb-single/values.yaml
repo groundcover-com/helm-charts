@@ -620,6 +620,7 @@ rbac:
   # Specifies whether RBAC resources should be created
   create: true
   pspEnabled: true
+  sccEnabled: true
   # annotations:
   # labels:
 

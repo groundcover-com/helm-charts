@@ -136,6 +136,7 @@ data:
         eBPFStatsReadingInterval: 5s
         tsConverterSyncInterval: 10s
         connectionManager:
+          statusCheckIntervalTicks: 20
           connection:
             closeGracePeriod: 1s
             timeoutPeriod: 600s

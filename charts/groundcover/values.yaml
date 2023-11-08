@@ -40,7 +40,7 @@ clusterId:
 #  - clusterB
 region:
 filteredNamespaces: []
-shouldDropRunningNamespaces: true
+shouldDropRunningNamespaces: false
 commitHashKeyName: 
 repositoryUrlKeyName:
 
@@ -520,6 +520,7 @@ promscale:
 
 rbac:
   pspEnabled: true
+  sccEnabled: true
   labels:
   annotations:
 

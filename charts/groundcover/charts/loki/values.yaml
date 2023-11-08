@@ -176,6 +176,7 @@ podManagementPolicy: OrderedReady
 rbac:
   create: true
   pspEnabled: true
+  sccEnabled: true
 
 readinessProbe:
   httpGet:

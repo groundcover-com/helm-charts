@@ -99,7 +99,7 @@ spec:
             {{- with .Values.agent.alligator.env }}
               {{ toYaml . | nindent 12 }}
             {{- end }}                                
-          image: {{ .Values.origin.registry }}/{{ .Values.agent.alligator.repository }}:{{ .Chart.AppVersion }}
+          image: {{ .Values.origin.registry }}/{{ .Values.agent.alligator.repository }}:{{ default .Chart.AppVersion .Values.origin.tag }}
           resources:
 {{- toYaml .Values.agent.alligator.resources | nindent 12 }}
           imagePullPolicy: Always
