@@ -43,6 +43,7 @@ clusterId:
 #  - clusterB
 region:
 filteredNamespaces: []
+filteredWorkloads: []
 shouldDropRunningNamespaces: false
 commitHashKeyName:
 repositoryUrlKeyName:

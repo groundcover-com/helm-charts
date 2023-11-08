@@ -5,6 +5,7 @@ data:
     startuptimeout: 120s
     concurrency: 20
     productchansize: 1000
+    pushsummaries: true
     tracy:
       address: "ipc:///comm/tracy.data"
       timeout: 120s
@@ -15,72 +16,84 @@ data:
       issuesthreshold: 10
       shouldSample: true
       interval: 30s
+      summarizerActiveTtl: 180s
 
     redishandler:
       samplesthreshold: 10
       issuesthreshold: 10
       shouldSample: true
-      interval: 30s  
+      interval: 30s
+      summarizerActiveTtl: 180s  
 
     sqlhandler:
       samplesthreshold: 10
       issuesthreshold: 10
       shouldSample: true
       interval: 30s
+      summarizerActiveTtl: 180s
 
     kafkahandler:
       samplesthreshold: 10
       issuesthreshold: 10
       shouldSample: true
       interval: 30s
+      summarizerActiveTtl: 180s
 
     dnshandler:
       samplesthreshold: 10
       issuesthreshold: 10
       shouldSample: true
       interval: 30s
+      summarizerActiveTtl: 180s
 
     connStatsHandler:
       samplesthreshold: 10
       issuesthreshold: 10
       shouldSample: false
       interval: 30s
+      summarizerActiveTtl: 180s
 
     tcpStatsHandler:
       samplesthreshold: 10
       issuesthreshold: 10
       shouldSample: false
       interval: 30s
+      summarizerActiveTtl: 180s
 
     containerInfoHandler:
       samplesthreshold: 10
       issuesthreshold: 10
       shouldSample: true
       interval: 30s
+      summarizerActiveTtl: 180s
 
     containerStateHandler:
       samplesthreshold: 10
       issuesthreshold: 10
       shouldSample: false
       interval: 30s
+      summarizerActiveTtl: 180s
     
     nodeinfohandler:
       samplesthreshold: 20
       issuesthreshold: 20
       shouldsample: false
       interval: 1m0s
+      summarizerActiveTtl: 180s
 
     containerrestarthandler:
       samplesthreshold: 20
       issuesthreshold: 20
       shouldsample: true
       interval: 30s
+      summarizerActiveTtl: 180s
 
     pvcinfohandler:
       samplesthreshold: 20
       issuesthreshold: 20
       shouldsample: false
       interval: 1m0s
+      summarizerActiveTtl: 180s
 
     pidcache:
       expiration: 5m
@@ -116,6 +129,7 @@ data:
     runningNamespace: ""
     shouldDropRunningNamespaces: {{ .Values.shouldDropRunningNamespaces }}
     filteredNamespaces: {{ toYaml .Values.filteredNamespaces | nindent 6 }}
+    filteredWorkloads: {{ toYaml .Values.filteredWorkloads | nindent 6 }}
     nodelabels: {{ toYaml .Values.agent.alligator.nodelabels | nindent 6 }}
     contentTypesToDrop: {{ toYaml .Values.agent.alligator.contentTypesToDrop | nindent 6 }}
 
@@ -167,7 +181,7 @@ data:
         urlText: {{ template "loki.url" . }}/loki/api/v1/push
         useApiKey: false
         batchwait: 5s
-        batchsize: 1048576
+        batchsize: 10485760
         client:
           tlsconfig:
             insecureSkipVerify: true
@@ -182,7 +196,7 @@ data:
         timeout: 10s
         useRingBuffer: true
         filterRunningNamespace: false
-        groundcoverTimeTarvel: -20s
+        groundcoverTimeTravel: -20s
       - name: "monitoring_client"
         enabled: {{ .Values.logging.enabled }}
         urlText: https://{{ .Values.logging.host }}/loki/api/v1/push

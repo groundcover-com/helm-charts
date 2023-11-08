@@ -60,6 +60,7 @@ server:
     search.maxTagKeys: "200000"
     search.maxTagValues: "500000"
     search.maxQueryLen: "100000"
+    search.maxConcurrentRequests: "8"
     maxLabelsPerTimeseries: "50"
 
   # Additional hostPath mounts
@@ -116,7 +117,16 @@ server:
   nodeSelector: {}
 
   # -- Pod affinity
-  affinity: {}
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        preference:
+          matchExpressions:
+          - key: eks.amazonaws.com/capacityType
+            operator: NotIn
+            values:
+            - SPOT
 
   # -- Env variables
   # -- Additional environment variables (ex.: secret tokens, flags) https://github.com/VictoriaMetrics/VictoriaMetrics#environment-variables

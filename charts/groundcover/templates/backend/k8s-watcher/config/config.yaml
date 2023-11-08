@@ -7,6 +7,8 @@ data:
     concurrency: 10
     productchansize: 20480
     k8sloadtimeout: 2m0s
+    summarizerActiveTtl: 180s
+    pushsummaries: true
 
     VictoriaMetrics:
       URL: "{{ template "vmagent.url" . }}"
@@ -32,6 +34,7 @@ data:
     region: {{ .Values.region }}
     shouldDropRunningNamespaces: {{ .Values.shouldDropRunningNamespaces }}
     filteredNamespaces: {{ toYaml .Values.filteredNamespaces | nindent 6 }}
+    filteredWorkloads: {{ toYaml .Values.filteredWorkloads | nindent 6 }}
     commitHashKeyName: {{ .Values.commitHashKeyName }}
     repositoryUrlKeyName: {{ .Values.repositoryUrlKeyName }}
 kind: ConfigMap

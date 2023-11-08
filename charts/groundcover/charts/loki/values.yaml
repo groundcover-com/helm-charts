@@ -30,7 +30,16 @@ ingress:
 
 ## Affinity for pod assignment
 ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
-affinity: {}
+affinity:
+  nodeAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+    - weight: 1
+      preference:
+        matchExpressions:
+        - key: eks.amazonaws.com/capacityType
+          operator: NotIn
+          values:
+          - SPOT
 # podAntiAffinity:
 #   requiredDuringSchedulingIgnoredDuringExecution:
 #   - labelSelector:
