@@ -132,7 +132,7 @@ data:
     flora: 
       networkTracer:
         enabled: true
-        processingInterval: 20ms
+        processingInterval: 100ms
         eBPFStatsReadingInterval: 5s
         tsConverterSyncInterval: 10s
         connectionManager:
@@ -150,8 +150,7 @@ data:
                 headersParseLimit: 4096 # 4kb
                 chunkedTransferSizeDigitLimit: 10
         ringBuffer:
-          size: 10485760 # 10mb
-          pollingTimeLimit: 5ms
+          pollingBufferSize: 10485760 # 10mb
       metrics:
         prometheusServer: 
           enabled: false
