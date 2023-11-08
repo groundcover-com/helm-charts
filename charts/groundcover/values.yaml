@@ -38,8 +38,8 @@ filteredNamespaces: []
 shouldDropRunningNamespaces: true
 
 origin:
-  registry: public.ecr.aws/k8g4n2c4
-  tag: 0.33.3
+  registry: public.ecr.aws/groundcovercom
+  tag: 0.33.4
 
 pullSecrets: []
 
@@ -223,8 +223,8 @@ router:
   additionalAnnotations:
   repository: router
   origin:
-    registry: public.ecr.aws/k8g4n2c4
-    tag: 0.33.3
+    registry: public.ecr.aws/groundcovercom
+    tag: 0.33.4
   versionDb:
     host: 
     port: 

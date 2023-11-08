@@ -24,7 +24,7 @@ statefulset:
 
 
 image:
-  repository: victoriametrics/vmagent
+  repository: public.ecr.aws/groundcovercom/vmagent
   tag: "" # rewrites Chart.AppVersion
   pullPolicy: IfNotPresent
 

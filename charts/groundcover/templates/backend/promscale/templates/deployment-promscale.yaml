@@ -40,7 +40,7 @@ spec:
 {{- end }}
       initContainers:
         - name: check-ts-ready
-          image: postgres:9.6.5
+          image: public.ecr.aws/groundcovercom/postgres:9.6.5
           command:
             - bash
             - -c

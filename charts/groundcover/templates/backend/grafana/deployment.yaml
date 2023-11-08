@@ -70,7 +70,7 @@ spec:
             secretKeyRef:
               key: PATRONI_SUPERUSER_PASSWORD
               name: {{ index .Values "timescaledb-single" "secrets" "credentialsSecretName" | default "groundcover-tsdb-credentials" }}
-        image: grafana/grafana:8.3.6
+        image: public.ecr.aws/groundcovercom/grafana:8.3.6
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 10

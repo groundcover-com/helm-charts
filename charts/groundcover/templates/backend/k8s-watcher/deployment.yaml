@@ -88,7 +88,7 @@ spec:
           name: k8s-watcher-config-volume
       initContainers:
       - name: check-promscale-ready
-        image: curlimages/curl:latest
+        image: public.ecr.aws/groundcovercom/curl:latest
         command:
           - /bin/sh
           - -c
@@ -101,7 +101,7 @@ spec:
         command:
         - /bin/sh
         - -c
-        image: curlimages/curl:latest
+        image: public.ecr.aws/groundcovercom/curl:latest
         name: check-vm-ready
       serviceAccountName: k8s-watcher
 {{- if .Values.k8sWatcher.priorityClassName }}

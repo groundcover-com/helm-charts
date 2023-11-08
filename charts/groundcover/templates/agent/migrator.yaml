@@ -77,6 +77,6 @@ spec:
         - -c
         - until pg_isready -h groundcover-tsdb -p 5432; do echo Waiting for
           TimescaleDB...; sleep 2; done; echo TimescaleDB is up
-        image: postgres:9.6.5
+        image: public.ecr.aws/groundcovercom/postgres:9.6.5
         name: check-ts-ready
       restartPolicy: Never

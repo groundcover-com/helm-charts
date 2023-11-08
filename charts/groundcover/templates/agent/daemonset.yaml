@@ -60,7 +60,7 @@ spec:
 {{- end }}
       containers:
 {{- if .Values.logging.enabled }}
-        - image: grafana/fluent-bit-plugin-loki:2.1.0-amd64
+        - image: public.ecr.aws/groundcovercom/fluent-bit-plugin-loki:2.1.0-amd64
           resources:
 {{- toYaml .Values.agent.flb.resources | nindent 12 }}
           imagePullPolicy: IfNotPresent
@@ -249,7 +249,7 @@ spec:
               name: linux-headers
 {{- end }}
         - name: check-promscale-ready
-          image: curlimages/curl:latest
+          image: public.ecr.aws/groundcovercom/curl:latest
           command:
             - /bin/sh
             - -c
@@ -260,7 +260,7 @@ spec:
           command:
             - /bin/sh
             - -c
-          image: curlimages/curl:latest
+          image: public.ecr.aws/groundcovercom/curl:latest
           name: check-vm-ready
       serviceAccountName: alligator
 {{- if .Values.agent.priorityClassName }}

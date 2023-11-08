@@ -5,8 +5,8 @@ additionalLabels:
 mode: cloud
 
 origin:
-  registry: public.ecr.aws/k8g4n2c4
-  tag: version
+  registry: public.ecr.aws/groundcovercom
+  tag: 0.33.4
 
 repository: router
 
