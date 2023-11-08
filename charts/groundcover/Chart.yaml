@@ -1,5 +1,5 @@
 apiVersion: v2
-appVersion: 0.65.9
+appVersion: 0.65.10
 dependencies:
 - name: router
   repository: ""
@@ -31,4 +31,4 @@ dependencies:
 description: A Helm chart for Kubernetes
 name: groundcover
 type: application
-version: 0.65.9
+version: 0.65.10

@@ -74,6 +74,10 @@ spec:
               value: "false"
             - name: FLORA_NATTRACKER_PROCMOUNTPATH
               value: "/host/proc"
+            - name: FLORA_SYSTEMWATCHER_PROCMOUNTPATH
+              value: "/host/proc"
+            - name: FLORA_SYSTEMWATCHER_HOSTMOUNTPATH
+              value: "/host"
             - name: NODE_NAME
               valueFrom:
                 fieldRef:
