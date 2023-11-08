@@ -218,7 +218,7 @@ data:
             cluster_id: {{ .Values.clusterId }}
             job: alligator
         timeout: 10s
-        useRingBuffer: {{ not .Values.storeAllLogs }}
+        useRingBuffer: {{ .Values.storeIssuesLogsOnly }}
         filterRunningNamespace: true
         groundcoverTimeTravel: -20s
         namespaceFilters: {{ toYaml .Values.logsNamespaceFilters | nindent 10}}

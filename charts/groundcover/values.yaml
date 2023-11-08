@@ -42,7 +42,7 @@ clusterId:
 #  - clusterA
 #  - clusterB
 region:
-storeAllLogs: false
+storeIssuesLogsOnly: true
 filteredNamespaces: []
 filteredWorkloads: []
 logsNamespaceFilters: []
@@ -92,7 +92,7 @@ agent:
     dataRetention: 24h
     nodelabels: []
     contentTypesToDrop: ["text/html", "text/javascript", "text/css", "image", "font", "video", "audio"]
-    watchOnlyLocalNode: true
+    watchOnlyLocalNode: false
     env:
   tracy:
     enabled: true
