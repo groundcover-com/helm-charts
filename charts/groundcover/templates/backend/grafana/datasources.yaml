@@ -1,3 +1,4 @@
+{{ if .Values.backend.enabled }}
 {{- if .Values.grafana.enabled -}}
 apiVersion: v1
 data:
@@ -79,4 +80,5 @@ metadata:
     {{- end }}
   name: grafana-datasources
   namespace: {{ .Release.Namespace }}
+{{ end -}}
 {{ end -}}

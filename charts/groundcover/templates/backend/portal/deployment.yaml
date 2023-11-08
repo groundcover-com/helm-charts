@@ -1,3 +1,4 @@
+{{ if .Values.backend.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -142,3 +143,4 @@ spec:
       - configMap:
           name: portal-config
         name: portal-config-volume
+{{ end -}}

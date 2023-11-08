@@ -1,3 +1,4 @@
+{{ if .Values.agent.enabled }}
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
@@ -33,3 +34,4 @@ spec:
     rule: RunAsAny
   volumes:
   - '*'
+{{ end -}}

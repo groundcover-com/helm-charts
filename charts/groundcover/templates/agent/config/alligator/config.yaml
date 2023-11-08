@@ -1,3 +1,4 @@
+{{ if .Values.agent.enabled }}
 apiVersion: v1
 data:
   config.yaml: |-
@@ -53,7 +54,7 @@ data:
     containerInfoHandler:
       samplesthreshold: 10
       issuesthreshold: 10
-      shouldSample: false
+      shouldSample: true
       interval: 30s
 
     containerStateHandler:
@@ -90,8 +91,8 @@ data:
       port: "9119"
 
     timeseriesstorage:
-      host: "groundcover-vmagent"
-      port: 8429
+      url: "{{ template "vmagent.url" . }}"
+      tlsskipverify: false
 
     loglevel: 4 # INFO
 
@@ -116,8 +117,7 @@ data:
     contentTypesToDrop: {{ toYaml .Values.agent.alligator.contentTypesToDrop | nindent 6 }}
 
     promscalestorage:
-      host: groundcover-promscale-connector
-      port: 9202
+      url: "{{ template "promscale.otelURL" . }}"
 
     clusterId: {{ .Values.clusterId }}
     region: {{ .Values.region }}
@@ -135,3 +135,4 @@ metadata:
     {{- end }}
   name: alligator-configuration
   namespace: {{ .Release.Namespace }}
+{{ end }}

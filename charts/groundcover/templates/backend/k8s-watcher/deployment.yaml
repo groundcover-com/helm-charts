@@ -1,3 +1,4 @@
+{{ if .Values.agent.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -56,11 +57,6 @@ spec:
 {{- end }}
       containers:
       - env:
-        - name: GC_DB_PASS
-          valueFrom:
-            secretKeyRef:
-              key: PATRONI_SUPERUSER_PASSWORD
-              name: {{ index .Values "timescaledb-single" "secrets" "credentialsSecretName" | default "groundcover-tsdb-credentials" }}
         - name: GC_CLUSTERID
           valueFrom:
             secretKeyRef:
@@ -75,6 +71,9 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
+        {{- with .Values.k8sWatcher.env }}
+          {{ toYaml . | nindent 8 }}
+        {{- end }}
         image: {{ .Values.origin.registry }}/{{ .Values.k8sWatcher.repository }}:{{ .Values.origin.tag }}
         imagePullPolicy: Always
         name: k8s-watcher
@@ -93,9 +92,9 @@ spec:
           - /bin/sh
           - -c
         args:
-            - while [ $(curl -sw '%{http_code}' -k https://groundcover-promscale-connector:9201/healthz -o /dev/null) -ne 200 ]; do echo 'Waiting for promscale...'; sleep 2; done; echo promscale is up
+            - while [ $(curl -sw '%{http_code}' -k {{ template "promscale.promURL" . }}/healthz -o /dev/null) -ne 200 ]; do echo 'Waiting for promscale...'; sleep 2; done; echo promscale is up
       - args:
-        - while [ $(curl -sw '%{http_code}' http://groundcover-vmagent:8429/health
+        - while [ $(curl -sw '%{http_code}' -k {{ template "vmagent.url" . }}/health
           -o /dev/null) -ne 200 ]; do echo 'Waiting for VictoriaMetrics...'; sleep
           2; done; echo VictoriaMetrics is up
         command:
@@ -111,3 +110,4 @@ spec:
       - configMap:
           name: k8s-watcher-config
         name: k8s-watcher-config-volume
+{{ end }}

@@ -1,3 +1,4 @@
+{{ if .Values.backend.enabled }}
 apiVersion: v1
 data:
   config.yaml: |-
@@ -30,8 +31,7 @@ data:
       Interval: 5s
 
     VictoriaMetrics:
-      Host: "groundcover-victoria-metrics"
-      Port: 8428
+      URL: "http://groundcover-victoria-metrics:8428"
 
     Loki:
       Host: "groundcover-loki"
@@ -64,8 +64,7 @@ data:
       Interval: 5s
 
     VictoriaMetrics:
-      Host: "groundcover-victoria-metrics"
-      Port: 8428
+      URL: "http://groundcover-victoria-metrics:8428"
 
     Loki:
       Host: "groundcover-loki"
@@ -84,3 +83,4 @@ metadata:
     {{- end }}
   name: portal-config
   namespace: {{ .Release.Namespace }}
+{{ end -}}

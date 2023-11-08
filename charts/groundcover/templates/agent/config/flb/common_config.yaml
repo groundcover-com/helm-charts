@@ -1,4 +1,5 @@
 {{- if .Values.logging.enabled -}}
+{{ if .Values.agent.enabled }}
 apiVersion: v1
 data:
   labelmap.json: |-
@@ -34,4 +35,5 @@ metadata:
     {{- end }}
   name: fluent-bit-common-config
   namespace: {{ .Release.Namespace }}
+{{ end -}}
 {{ end -}}

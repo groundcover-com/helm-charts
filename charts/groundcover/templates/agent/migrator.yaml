@@ -1,3 +1,4 @@
+{{ if .Values.backend.enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -80,3 +81,4 @@ spec:
         image: public.ecr.aws/groundcovercom/postgres:9.6.5
         name: check-ts-ready
       restartPolicy: Never
+{{ end -}}

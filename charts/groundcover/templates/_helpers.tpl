@@ -84,6 +84,21 @@ Get cluster_id from values or generate random one
 {{- default "API_KEY" .Values.global.groundcoverPredefinedTokenSecret.secretKey -}}
 {{- end -}}
 
+{{- define "promscale.promURL" -}}
+{{- default ( printf "https://groundcover-promscale-connector:%d"  ( .Values.promscale.prometheus.port | int ) ) .Values.promscale.overridePromURL  -}}
+{{- end -}}
+
+{{- define "promscale.otelURL" -}}
+{{- default ( printf "groundcover-promscale-connector:%d"  ( .Values.promscale.openTelemetry.port | int ) ) .Values.promscale.overrideOtelURL  -}}
+{{- end -}}
+
+{{- define "loki.url" -}}
+{{- default ( printf "http://groundcover-loki:%d"  ( .Values.loki.service.port | int ) ) .Values.loki.overrideURL  -}}
+{{- end -}}
+
+{{- define "vmagent.url" -}}
+{{- index .Values "vmagent-backend" "overrideURL" | default ( printf "http://groundcover-vmagent:%d" ( index .Values "vmagent-backend" "service" "servicePort" | int ) )  -}}
+{{- end -}}
 
 {{/*
 Create a default fully qualified app name.

@@ -1,28 +1,29 @@
-{{- if .Values.ingress.enabled -}}
-{{- $fullName := include "loki.name" . -}}
-{{- $svcPort := .Values.service.port -}}
+{{ if .Values.backend.enabled }}
+{{- if .Values.promscale.otelIngress.enabled -}}
+{{- $fullName := printf "%s-connector" (include "promscale.fullname" . | trunc 53) -}}
+{{- $svcPort := .Values.promscale.openTelemetry.port -}}
 {{- $apiVersion := include "ingress.apiVersion" . -}}
 apiVersion: {{ $apiVersion }}
 kind: Ingress
 metadata:
-  name: {{ $fullName }}
+  name: {{ $fullName }}-otel
   namespace: {{ .Release.Namespace }}
   labels:
-    app: {{ template "loki.name" . }}
-    chart: {{ template "loki.chart" . }}
+    app: {{ template "promscale.fullname" . }}
+    chart: {{ template "promscale.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
-  {{- with .Values.ingress.annotations }}
+  {{- with .Values.promscale.otelIngress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-{{- if .Values.ingress.ingressClassName }}
-  ingressClassName: {{ .Values.ingress.ingressClassName }}
+{{- if .Values.promscale.otelIngress.ingressClassName }}
+  ingressClassName: {{ .Values.promscale.otelIngress.ingressClassName }}
 {{- end }}
-{{- if .Values.ingress.tls }}
+{{- if .Values.promscale.otelIngress.tls }}
   tls:
-  {{- range .Values.ingress.tls }}
+  {{- range .Values.promscale.otelIngress.tls }}
     - hosts:
       {{- range .hosts }}
         - {{ . | quote }}
@@ -31,7 +32,7 @@ spec:
   {{- end }}
 {{- end }}
   rules:
-  {{- range .Values.ingress.hosts }}
+  {{- range .Values.promscale.otelIngress.hosts }}
     - host: {{ .host | quote }}
       http:
         paths:
@@ -52,4 +53,5 @@ spec:
               {{- end }}
         {{- end }}
   {{- end }}
+{{- end }}
 {{- end }}

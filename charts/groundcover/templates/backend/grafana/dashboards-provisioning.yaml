@@ -1,3 +1,4 @@
+{{ if .Values.backend.enabled }}
 {{- if .Values.grafana.enabled -}}
 apiVersion: v1
 data:
@@ -21,4 +22,5 @@ metadata:
     {{- end }}
   name: grafana-dashboards-provisioning
   namespace: {{ .Release.Namespace }}
+{{ end -}}
 {{ end -}}

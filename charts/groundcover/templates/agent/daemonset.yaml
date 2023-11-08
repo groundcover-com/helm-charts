@@ -1,3 +1,4 @@
+{{ if .Values.agent.enabled }}
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -102,13 +103,6 @@ spec:
               readOnly: true
 {{- end }}
         - env:
-            - name: GC_DB_PASS
-              valueFrom:
-                secretKeyRef:
-                  key: PATRONI_SUPERUSER_PASSWORD
-                  name: {{ index .Values "timescaledb-single" "secrets" "credentialsSecretName" | default "groundcover-tsdb-credentials" }}
-            - name: GC_DB_HOST
-              value: groundcover-tsdb
             - name: NODE_NAME
               valueFrom:
                 fieldRef:
@@ -126,7 +120,10 @@ spec:
               valueFrom:
                 secretKeyRef:
                     name: groundcover-config
-                    key: GC_REGION                                    
+                    key: GC_REGION    
+            {{- with .Values.agent.alligator.env }}
+              {{ toYaml . | nindent 12 }}
+            {{- end }}                                
           image: {{ .Values.origin.registry }}/{{ .Values.agent.alligator.repository }}:{{ .Values.origin.tag }}
           resources:
 {{- toYaml .Values.agent.alligator.resources | nindent 12 }}
@@ -164,6 +161,9 @@ spec:
               value: "104857600"
             - name: KTARGET_CONTROL_BYTES_PER_SEC
               value: "5242880"
+        {{- with .Values.agent.tracy.env }}
+          {{ toYaml . | nindent 12 }}
+        {{- end }}
           envFrom:
             - configMapRef:
                 name: tracy-conf-fg9h4chctk
@@ -193,7 +193,7 @@ spec:
               readOnly: true
         - args:
             - -config.file=/etc/promtail/promtail.yaml
-            - -client.url=http://groundcover-loki:3100/loki/api/v1/push
+            - -client.url={{ template "loki.url" . }}/loki/api/v1/push
           env:
             - name: HOSTNAME
               valueFrom:
@@ -254,9 +254,9 @@ spec:
             - /bin/sh
             - -c
           args:
-              - while [ $(curl -sw '%{http_code}' -k https://groundcover-promscale-connector:9201/healthz -o /dev/null) -ne 200 ]; do echo 'Waiting for promscale...'; sleep 2; done; echo promscale is up
+              - while [ $(curl -sw '%{http_code}' -k {{ template "promscale.promURL" . }}/healthz -o /dev/null) -ne 200 ]; do echo 'Waiting for promscale...'; sleep 2; done; echo promscale is up
         - args:
-              - while [ $(curl -sw '%{http_code}' http://groundcover-vmagent:8429/health -o /dev/null) -ne 200 ]; do echo 'Waiting for VictoriaMetrics...'; sleep 2; done; echo VictoriaMetrics is up
+              - while [ $(curl -sw '%{http_code}' -k {{ template "vmagent.url" . }}/health -o /dev/null) -ne 200 ]; do echo 'Waiting for VictoriaMetrics...'; sleep 2; done; echo VictoriaMetrics is up
           command:
             - /bin/sh
             - -c
@@ -310,3 +310,4 @@ spec:
         - hostPath:
             path: /var/log
           name: varlog
+{{- end }}

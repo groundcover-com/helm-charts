@@ -1,7 +1,10 @@
+{{ if .Values.agent.enabled }}
 apiVersion: v1
 data:
   promtail.yaml: |-
     client:
+      tls_config:
+        insecure_skip_verify: true
       backoff_config:
         max_period: 5m
         max_retries: 10
@@ -82,3 +85,4 @@ metadata:
     {{- end }}
   name: promtail-config
   namespace: {{ .Release.Namespace }}
+{{ end -}}

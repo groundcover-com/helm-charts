@@ -1,3 +1,4 @@
+{{ if .Values.backend.enabled }}
 {{ if .Values.promscale.serviceMonitor.enabled }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -23,4 +24,5 @@ spec:
       chart: {{ template "promscale.chart" . }}
       release: {{ .Release.Name }}
       heritage: {{ .Release.Service }}
+{{- end }}
 {{- end }}

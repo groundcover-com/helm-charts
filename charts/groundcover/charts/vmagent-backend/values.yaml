@@ -44,7 +44,7 @@ initContainers:
     name: check-vm-ready
 
 imagePullSecrets: []
-nameOverride: ""
+nameOverride: "groundcover-vmagent"
 fullnameOverride: ""
 
 containerWorkingDir: "/"

@@ -16,14 +16,14 @@ metadata:
   {{ with .Values.ingress.extraLabels }}
 {{ toYaml . | indent 4 }}
   {{ end }}
-  name: {{ template "chart.fullname" . }}
+  name: {{ template "chart.name" . }}
   namespace: {{ .Release.Namespace }}
 spec:
   {{- if and $ingressSupportsIngressClassName .Values.ingress.ingressClassName }}
   ingressClassName: {{ .Values.ingress.ingressClassName }}
   {{- end }}
   rules:
-  {{- $serviceName := include "chart.fullname" . }}
+  {{- $serviceName := include "chart.name" . }}
   {{- range .Values.ingress.hosts }}
   - host: {{ .name }}
     http:

@@ -39,11 +39,15 @@ shouldDropRunningNamespaces: true
 
 origin:
   registry: public.ecr.aws/groundcovercom
-  tag: 0.34.2
+  tag: 0.34.3
 
 pullSecrets: []
 
+backend:
+  enabled: true
+
 agent:
+  enabled: true
   additionalLabels:
   podLabels:
   additionalAnnotations:
@@ -66,6 +70,7 @@ agent:
     nodelabels: []
     contentTypesToDrop: ["text/html", "text/javascript", "text/css", "image", "font", "video", "audio"]
     watchOnlyLocalNode: true
+    env:
   tracy:
     repository: tracy
     resources:
@@ -126,6 +131,7 @@ k8sWatcher:
     requests:
       cpu: 50m
       memory: 100Mi
+  env:
 
 portal:
   additionalLabels:
@@ -182,6 +188,23 @@ loki:
   #   enabled: false
   #   server:
   #   path:
+
+  # overrideURL:
+  # ingress:
+  #   enabled: false
+  #   # For Kubernetes >= 1.18 you should specify the ingress-controller via the field ingressClassName
+  #   # See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress
+  #   # ingressClassName: nginx
+  #   annotations: {}
+  #     # kubernetes.io/ingress.class: nginx
+  #     # kubernetes.io/tls-acme: "true"
+  #   hosts:
+  #     - host: chart-example.local
+  #       paths: []
+  #   tls: []
+  #   #  - secretName: chart-example-tls
+  #   #    hosts:
+  #   #      - chart-example.local
   
   config:
     table_manager:
@@ -225,7 +248,7 @@ router:
   repository: router
   origin:
     registry: public.ecr.aws/groundcovercom
-    tag: 0.34.2
+    tag: 0.34.3
   versionDb:
     host: 
     port: 
@@ -390,6 +413,40 @@ promscale:
   # scale down to 0 and recreate the new version.
   upgradeStrategy: Recreate
 
+  # overridePromURL:
+  promIngress:
+    enabled: false
+    # For Kubernetes >= 1.18 you should specify the ingress-controller via the field ingressClassName
+    # See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress
+    # ingressClassName: nginx
+    annotations: {}
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+    hosts:
+      - host: chart-example.local
+        paths: []
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+    
+  # overrideOtelURL:
+  otelIngress:
+    enabled: false
+    # For Kubernetes >= 1.18 you should specify the ingress-controller via the field ingressClassName
+    # See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress
+    # ingressClassName: nginx
+    annotations: {}
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+    hosts:
+      - host: chart-example.local
+        paths: []
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
 
   # Arguments that will be passed onto deployment pods
   # The list of available cli flags is available at
@@ -492,7 +549,6 @@ config:
   annotations:
 
 vmagent-backend:
-  nameOverride: "groundcover-vmagent"
   remoteWriteUrls:
     - http://groundcover-victoria-metrics:8428/api/v1/write
   resources:
@@ -504,6 +560,31 @@ vmagent-backend:
       memory: 128Mi
   extraArgs:
     remoteWrite.maxRowsPerBlock: 15000
+
+  # overrideURL:
+  ingress:
+    enabled: false
+    annotations: {}
+    #   kubernetes.io/ingress.class: nginx
+    #   kubernetes.io/tls-acme: 'true'
+
+    extraLabels: {}
+    hosts: []
+    #   - name: vmagent.local
+    #     path: /
+    #     port: http
+    tls: []
+    #   - secretName: vmagent-ingress-tls
+    #     hosts:
+    #       - vmagent.local
+    # For Kubernetes >= 1.18 you should specify the ingress-controller via the field ingressClassName
+    # See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress
+    # ingressClassName: nginx
+    # -- pathType is only for k8s >= 1.1=
+    pathType: Prefix
+  
+  service:
+    servicePort: 8429
     
 # These are presets for low resource enviroments
 # timescaledb-single:

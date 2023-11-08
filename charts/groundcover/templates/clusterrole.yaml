@@ -1,4 +1,4 @@
----
+{{ if .Values.agent.enabled }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -36,4 +36,5 @@ rules:
   resources:      ['podsecuritypolicies']
   verbs:          ['use']
   resourceNames:  [{{ template "groundcover.fullname" . }}]
+{{- end }}
 {{- end }}

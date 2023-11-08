@@ -1,3 +1,4 @@
+{{ if .Values.agent.enabled }}
 apiVersion: v1
 data:
   ENABLE_NODE_STACK_TRACE: "false"
@@ -15,3 +16,4 @@ metadata:
     {{- end }}
   name: tracy-conf-fg9h4chctk
   namespace: {{ .Release.Namespace }}
+{{ end -}}
