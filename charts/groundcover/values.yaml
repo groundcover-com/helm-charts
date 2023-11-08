@@ -22,7 +22,7 @@ global:
   groundcoverLabels:
 
 # optional parameters: stable, legacy, experimental
-mode: legacy
+mode: stable
 
 metrics:
   enabled: true
@@ -760,27 +760,35 @@ custom-metrics:
       - job_name: custom-metrics-vmagent
         static_configs:
           - targets: ["localhost:8429"]
-      - job_name: 'kube-state-metrics'
+      - job_name: "kube-state-metrics"
         kubernetes_sd_configs:
           - role: endpoints
             namespaces:
               own_namespace: true
         relabel_configs:
-          - source_labels: [__meta_kubernetes_service_label_app_kubernetes_io_name]
+          - source_labels:
+              [__meta_kubernetes_service_label_app_kubernetes_io_name]
             action: keep
             regex: kube-state-metrics
-          - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+          - source_labels:
+              [__meta_kubernetes_service_annotation_prometheus_io_scrape]
             action: keep
             regex: true
-          - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+          - source_labels:
+              [__meta_kubernetes_service_annotation_prometheus_io_scheme]
             action: replace
             target_label: __scheme__
             regex: (https?)
-          - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+          - source_labels:
+              [__meta_kubernetes_service_annotation_prometheus_io_path]
             action: replace
             target_label: __metrics_path__
             regex: (.+)
-          - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+          - source_labels:
+              [
+                __address__,
+                __meta_kubernetes_service_annotation_prometheus_io_port,
+              ]
             action: replace
             target_label: __address__
             regex: ([^:]+)(?::\d+)?;(\d+)

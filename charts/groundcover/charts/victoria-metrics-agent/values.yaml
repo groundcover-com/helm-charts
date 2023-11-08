@@ -4,6 +4,8 @@
 
 replicaCount: 1
 
+groundcover_version: 1.0.1
+
 # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
 deployment:
   enabled: true
@@ -379,7 +381,11 @@ config:
           source_labels: [__meta_kubernetes_pod_container_init]
           regex: true
         - action: keep_if_equal
-          source_labels: [__meta_kubernetes_service_annotation_prometheus_io_port, __meta_kubernetes_pod_container_port_number]
+          source_labels:
+            [
+              __meta_kubernetes_service_annotation_prometheus_io_port,
+              __meta_kubernetes_pod_container_port_number,
+            ]
         - source_labels:
             [__meta_kubernetes_service_annotation_prometheus_io_scrape]
           action: keep
@@ -441,7 +447,11 @@ config:
           source_labels: [__meta_kubernetes_pod_container_init]
           regex: true
         - action: keep_if_equal
-          source_labels: [__meta_kubernetes_service_annotation_prometheus_io_port, __meta_kubernetes_pod_container_port_number]
+          source_labels:
+            [
+              __meta_kubernetes_service_annotation_prometheus_io_port,
+              __meta_kubernetes_pod_container_port_number,
+            ]
         - source_labels:
             [__meta_kubernetes_service_annotation_prometheus_io_scrape_slow]
           action: keep

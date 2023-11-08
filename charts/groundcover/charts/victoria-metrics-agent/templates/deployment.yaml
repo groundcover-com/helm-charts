@@ -36,6 +36,7 @@ spec:
 {{- toYaml . | nindent 8 }}
 {{- end }}
       annotations:
+        groundcover_version: {{ .Values.groundcover_version }}
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
         {{- range $key, $value := .Values.podAnnotations }}
         {{ $key }}: {{ $value | quote }}

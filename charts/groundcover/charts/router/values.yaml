@@ -6,7 +6,7 @@ mode: cloud
 
 origin:
   registry: public.ecr.aws/groundcovercom
-  tag: 1.0.0
+  tag: 1.0.1
 
 repository: router
 
