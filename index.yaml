@@ -1,5 +1,23 @@
 apiVersion: v1
 entries:
+  caretta:
+  - apiVersion: v2
+    appVersion: v0.0.2
+    created: "2023-11-08T23:39:51.326553+02:00"
+    dependencies:
+    - name: victoria-metrics-single
+      repository: https://victoriametrics.github.io/helm-charts
+      version: 0.8.48
+    - name: grafana
+      repository: https://grafana.github.io/helm-charts
+      version: 6.48.0
+    description: A helm chart for Caretta service map.
+    digest: 67a3cfc440290e1423cd34a1aaabb7d3be25c705abd3f0ade54f11d6d2ccf2b7
+    name: caretta
+    type: application
+    urls:
+    - https://github.com/groundcover-com/helm-charts/releases/download/caretta-0.0.2/caretta-0.0.2.tgz
+    version: 0.0.2
   loki-proxy:
   - apiVersion: v2
     appVersion: 0.1.1
@@ -21,4 +39,4 @@ entries:
     urls:
     - https://github.com/groundcover-com/helm-charts/releases/download/loki-proxy-0.1.0/loki-proxy-0.1.0.tgz
     version: 0.1.0
-generated: "2023-11-08T23:38:35.581744+02:00"
+generated: "2023-11-08T23:39:51.326563+02:00"
