@@ -301,7 +301,7 @@ opentelemetry-collector:
       secretName: opentelemetry-collector-certificate
   image:
     repository: public.ecr.aws/groundcovercom/otel/opentelemetry-collector-contrib
-    tag: "1.4.4"
+    tag: "1.4.5"
   podAnnotations:
     prometheus.io/scrape: "true"
     prometheus.io/port: '{{ index .Values "ports" "metrics" "containerPort" | int }}'
@@ -404,13 +404,6 @@ opentelemetry-collector:
             - batch/k8s
           exporters:
             - groundcover/k8s
-        traces:
-          receivers:
-            - otlp
-          processors:
-            - batch/traces
-          exporters:
-            - groundcover/traces
   initContainers:
     - args:
         - while [ $(curl -sw '%{http_code}' {{ printf "%s/ping" (include "clickhouse.httpEndpoint" .) }} -o /dev/null) -ne 200 ]; do echo 'Waiting for Clickhouse...'; sleep 2; done; echo Clickhouse is up
