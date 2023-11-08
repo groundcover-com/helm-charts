@@ -107,7 +107,8 @@ data:
 
     obfuscateData: {{ .Values.agent.alligator.obfuscateData }}
     dataRetention: {{ .Values.agent.alligator.dataRetention }}
-    
+    watchOnlyLocalNode: {{ .Values.agent.alligator.watchOnlyLocalNode }}
+
     runningNamespace: ""
     shouldDropRunningNamespaces: {{ .Values.shouldDropRunningNamespaces }}
     filteredNamespaces: {{ toYaml .Values.filteredNamespaces | nindent 6 }}
