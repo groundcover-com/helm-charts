@@ -1,0 +1,67 @@
+{{- if .Values.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: router
+    {{- if .Values.additionalLabels }}
+{{ toYaml .Values.additionalLabels | indent 4 }}
+    {{- end }}
+  annotations:
+    groundcover_version: {{ .Values.origin.tag }}
+  name: router
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: router
+  template:
+    metadata:
+      labels:
+        app: router
+      {{- if .Values.additionalLabels }}
+{{ toYaml .Values.additionalLabels | indent 8 }}
+      {{- end }}
+      annotations:
+        groundcover_version: {{ .Values.origin.tag }}
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9102"
+    spec:
+      containers:
+        - name: router
+          image: {{ .Values.origin.registry }}/{{ .Values.repository }}:{{ .Values.origin.tag }}
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: config-volume
+              mountPath: /config
+          ports:
+            - containerPort: 8080
+              name: frontend
+              protocol: TCP
+            - containerPort: 9102
+              name: prom-metrics
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            - name: GIN_MODE
+              value: "release"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: frontend
+            initialDelaySeconds: 5
+            periodSeconds: 15
+          livenessProbe:
+            httpGet:
+              scheme: HTTP
+              path: /health
+              port: frontend
+            initialDelaySeconds: 5
+            periodSeconds: 15
+            timeoutSeconds: 5          
+      volumes:
+        - name: config-volume
+          configMap:
+            name: router-config
+{{ end -}}

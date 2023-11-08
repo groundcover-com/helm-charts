@@ -1,0 +1,36 @@
+enabled: true
+
+additionalLabels:
+
+mode: cloud
+
+origin:
+  registry: public.ecr.aws/groundcovercom
+  tag: 0.33.4
+
+repository: router
+
+versionDb:
+  host:
+  port:
+  name:
+  user:
+  password:
+
+versionBucket:
+  name:
+  path:
+  region:
+
+ingress:
+  enabled: false
+  host: domain.groundcover.com
+  externalName:
+
+resources:
+  requests:
+    cpu: 1000m
+    memory: 1024Mi
+  limits:
+    memory: 2048Mi
+    cpu: 1500m
