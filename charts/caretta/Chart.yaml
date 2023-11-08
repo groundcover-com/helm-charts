@@ -1,5 +1,5 @@
 apiVersion: v2
-appVersion: v0.0.10
+appVersion: v0.0.11
 dependencies:
 - condition: victoria-metrics-single.enabled
   name: victoria-metrics-single
@@ -12,4 +12,4 @@ dependencies:
 description: A helm chart for Caretta service map.
 name: caretta
 type: application
-version: 0.0.10
+version: 0.0.11
