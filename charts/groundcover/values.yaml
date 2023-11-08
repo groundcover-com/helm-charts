@@ -27,12 +27,14 @@ global:
       existingSecretKey: admin-password
   logs:
     overrideUrl: ""
-    retentionDays: 3
+    retention: 3d # {amount}[h(ours), d(ays), w(eeks), y(ears)]
   otlp:
     tls:
       enabled: true
     overrideGrpcURL: ""
     overrideHttpURL: ""
+  traces:
+    retention: 24h # {amount}[h(ours), d(ays), w(eeks), y(ears)]
 tags:
   # InCloud - Enterprise Setup. groundcover's control-plane reconciled observability infrastructure deployment.
   incloud: false
@@ -297,7 +299,7 @@ opentelemetry-collector:
       secretName: opentelemetry-collector-certificate
   image:
     repository: public.ecr.aws/groundcovercom/otel/opentelemetry-collector-contrib
-    tag: "1.3.22"
+    tag: "1.3.23"
   podAnnotations:
     prometheus.io/scrape: "true"
     prometheus.io/port: '{{ index .Values "ports" "metrics" "containerPort" | int }}'
@@ -341,6 +343,9 @@ opentelemetry-collector:
       batch/k8s:
         timeout: 5s
         send_batch_size: 1000
+      batch/traces:
+        timeout: 5s
+        send_batch_size: 5000
     exporters:
       groundcover/logs:
         type: logs
@@ -349,12 +354,21 @@ opentelemetry-collector:
         username: '{{ include "clickhouse.username" . }}'
         database: '{{ include "clickhouse.database" . }}'
         endpoint: '{{ include "clickhouse.nativeEndpoint" . }}'
-        ttl_days: '{{ include "logs.retentionDays" . }}'
+        ttl_interval: '{{ include "logs.retention" . }}'
       groundcover/k8s:
         type: k8s
         timeout: 5s
-        ttl_days: 5
+        ttl_interval: 5d
         logs_table_name: k8s_objects
+        password: ${env:CLICKHOUSE_PASSWORD}
+        username: '{{ include "clickhouse.username" . }}'
+        database: '{{ include "clickhouse.database" . }}'
+        endpoint: '{{ include "clickhouse.nativeEndpoint" . }}'
+      groundcover/traces:
+        type: traces
+        timeout: 5s
+        ttl_interval: '{{ include "traces.retention" . }}'
+        traces_table_name: traces
         password: ${env:CLICKHOUSE_PASSWORD}
         username: '{{ include "clickhouse.username" . }}'
         database: '{{ include "clickhouse.database" . }}'
@@ -381,6 +395,13 @@ opentelemetry-collector:
             - batch/k8s
           exporters:
             - groundcover/k8s
+        traces:
+          receivers:
+            - otlp
+          processors:
+            - batch/traces
+          exporters:
+            - groundcover/traces
   initContainers:
     - args:
         - while [ $(curl -sw '%{http_code}' {{ printf "%s/ping" (include "clickhouse.httpEndpoint" .) }} -o /dev/null) -ne 200 ]; do echo 'Waiting for Clickhouse...'; sleep 2; done; echo Clickhouse is up

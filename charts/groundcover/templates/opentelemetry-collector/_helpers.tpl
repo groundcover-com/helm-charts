@@ -1,10 +1,18 @@
 {{- define "opentelemetry-collector.fullname" -}}
 {{- printf "%s-opentelemetry-collector" .Release.Name | trunc 63 | trimSuffix "-" }}
-{{- end }}
+{{- end -}}
 
-{{- define "logs.retentionDays" -}}
-{{- .Values.global.logs.retentionDays | int }}
-{{- end }}
+{{- define "logs.retention" -}}
+{{- if .Values.global.logs.retentionDays -}}
+{{- printf "%dd" (.Values.global.logs.retentionDays | int)}}
+{{- else -}}
+{{ .Values.global.logs.retention }}
+{{- end -}}
+{{- end -}}
+
+{{- define "traces.retention" -}}
+{{ .Values.global.traces.retention }}
+{{- end -}}
 
 {{- define "opentelemetry-collector.otlp.scheme" -}}
 {{- ternary "https" "http" .Values.global.otlp.tls.enabled -}}
