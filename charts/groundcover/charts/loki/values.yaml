@@ -99,6 +99,7 @@ config:
         period: 24h
   server:
     http_listen_port: 3100
+    grpc_server_max_recv_msg_size: 16777216 # default was 4194304
   storage_config:
     boltdb_shipper:
       active_index_directory: /data/loki/boltdb-shipper-active

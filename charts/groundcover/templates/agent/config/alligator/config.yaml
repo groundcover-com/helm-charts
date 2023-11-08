@@ -193,7 +193,7 @@ data:
         enabled: true
         urlText: {{ template "loki.url" . }}/loki/api/v1/push
         useApiKey: false
-        batchwait: 5s
+        batchwait: 2500ms
         batchsize: 10485760
         client:
           tlsconfig:
