@@ -50,10 +50,10 @@ spec:
       securityContext:
         # The postgres user inside the TimescaleDB image has uid=1000.
         # This configuration ensures the permissions of the mounts are suitable
-        fsGroup: {{ template "postgres.uid" }}
-        runAsGroup: {{ template "postgres.uid" }}
+        fsGroup: {{ template "postgres.uid" . }}
+        runAsGroup: {{ template "postgres.uid" . }}
         runAsNonRoot: true
-        runAsUser: {{ template "postgres.uid" }}
+        runAsUser: {{ template "postgres.uid" . }}
       imagePullSecrets: {{ include "imagePullSecrets" . }}
       initContainers:
 {{- if .Values.timescaledbTune.enabled }}
