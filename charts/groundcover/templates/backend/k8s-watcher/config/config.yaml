@@ -28,6 +28,10 @@ data:
       issuesthreshold: 100
       interval: 60s
       shouldsample: true         
+    
+    VictoriaMetrics:
+      url: {{ include "metrics-ingester.base.http.url" . }}
+      TLSSkipVerify: true
 
     dataRetention: {{ .Values.agent.alligator.dataRetention }}
     
@@ -39,13 +43,6 @@ data:
     tracesWorkloadFilters: {{ toYaml .Values.tracesWorkloadFilters | nindent 6 }}
     commitHashKeyName: {{ .Values.commitHashKeyName }}
     repositoryUrlKeyName: {{ .Values.repositoryUrlKeyName }}
-    shepherd:
-      url: "{{ template "shepherd.grpc" . }}"
-      enableTLS: {{ template "shepherd.tls_enabled" . }}
-      handlerFlushInterval: {{ .Values.agent.alligator.shepherd.handlerFlushInterval }}
-      tableWriterBatchMaxSize: 350
-      tableWriterBatchInterval: 1s
-      tableWriterBatchWriteTimeout: 1m
     otlp:
       endpoint: {{ include "opentelemetry-collector.otlp.grpc.url" . }}
       enableTLS: {{ .Values.global.otlp.tls.enabled }}

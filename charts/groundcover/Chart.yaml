@@ -1,22 +1,33 @@
 apiVersion: v2
-appVersion: 1.4.8
+appVersion: 1.4.10
 dependencies:
 - name: router
   repository: ""
   version: 0.1.0
 - condition: backend.enabled
+  import-values:
+  - child: server.service
+    parent: global.victoria-metrics.service
   name: victoria-metrics-single
   repository: ""
   version: 0.8.19
-- condition: metrics.enabled
+- condition: global.telemetry.enabled
   name: victoria-metrics-agent
   repository: ""
-  version: 0.8.35
+  version: 0.8.41
 - alias: custom-metrics
   condition: custom-metrics.enabled
   name: victoria-metrics-agent
   repository: ""
-  version: 0.8.35
+  version: 0.8.41
+- alias: metrics-ingester
+  condition: backend.enabled
+  import-values:
+  - child: service
+    parent: global.metrics-ingester.service
+  name: victoria-metrics-agent
+  repository: ""
+  version: 0.8.41
 - condition: backend.enabled
   import-values:
   - child: auth
@@ -35,10 +46,6 @@ dependencies:
   name: opentelemetry-collector
   repository: https://open-telemetry.github.io/opentelemetry-helm-charts
   version: 0.60.0
-- condition: shepherd.chart
-  name: shepherd
-  repository: ""
-  version: 0.1.0
 - condition: kube-state-metrics.enabled
   name: kube-state-metrics
   repository: https://prometheus-community.github.io/helm-charts
@@ -52,4 +59,4 @@ dependencies:
 description: Cloud Native Observability
 name: groundcover
 type: application
-version: 1.4.8
+version: 1.4.10

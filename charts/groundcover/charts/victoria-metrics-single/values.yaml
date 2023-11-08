@@ -39,7 +39,8 @@ server:
   name: server
   image:
     # -- Image repository
-    repository: public.ecr.aws/groundcovercom/victoria-metrics
+    # TODO::MAXL change to private repo after updated 
+    repository: docker.io/victoriametrics/victoria-metrics
     # -- Image tag
     tag: "" # rewrites Chart.AppVersion
     # -- Image pull policy
@@ -63,6 +64,7 @@ server:
     search.maxConcurrentRequests: "8"
     maxLabelsPerTimeseries: "50"
     promscrape.maxScrapeSize: "100MB"
+    relabelConfig: /scrapeconfig/relabel_config.yaml
 
   # Additional hostPath mounts
   extraHostPathMounts:

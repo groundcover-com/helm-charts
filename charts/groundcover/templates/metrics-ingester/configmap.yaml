@@ -1,0 +1,32 @@
+{{ if .Values.backend.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: metrics-ingester-aggregation-config
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+data:
+  # This is a workaround for aggregating metrics from multiple instances of the same resource.
+  # We add a "aggregated_" prefix to the metric name, and drop the node_name label.
+  # We push it to a vm server which renames the metric back to the original name, and drops the origial metric.
+  # all others metrics which are not metched, will be pushed to the vm server as is.
+  aggregation_config.yaml: |
+    - match: '{__name__=~"^groundcover_.+_.+_counter$"}'
+      without: [node_name]
+      interval: 30s
+      outputs: [total]
+      output_relabel_configs:
+      - source_labels: [__name__]
+        target_label: __name__
+        regex: "(.+):.*"
+        replacement: "aggregated_$1"
+    - match: '{__name__=~"^groundcover_.+_total_counter$"}'
+      without: [node_name]
+      interval: 30s
+      outputs: [total]
+      output_relabel_configs:
+      - source_labels: [__name__]
+        target_label: __name__
+        regex: "(.+):.*"
+        replacement: "aggregated_$1"
+{{- end }}

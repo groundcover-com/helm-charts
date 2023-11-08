@@ -68,7 +68,7 @@ spec:
             - -remoteWrite.multitenantURL={{ . }}
           {{- end }}
           {{- range $key, $value := .Values.extraArgs }}
-            - -{{ $key }}={{ $value }}
+            - -{{ $key }}={{ tpl $value $ }}
           {{- end }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
@@ -123,7 +123,14 @@ spec:
           {{- end }}
           readinessProbe:
             httpGet:
+            {{- if and .Values.extraArgs.tls (eq (tpl .Values.extraArgs.tls .) "true") }}
+              scheme: HTTPS
+            {{- end }}
+            {{- if index  .Values.extraArgs "http.pathPrefix" }}
+              path: {{ trimSuffix "/" (index .Values.extraArgs "http.pathPrefix") }}/health
+            {{- else }}
               path: /health
+            {{- end }}
               port: http
             initialDelaySeconds: 5
             periodSeconds: 15

@@ -94,6 +94,10 @@ data:
       shouldsample: false
       interval: 1m0s
       summarizerActiveTtl: 180s
+    
+    timeseriesstorage:
+      url: {{ include "metrics-ingester.base.http.url" . }}
+      tlsskipverify: true
 
     containercrashhandler:
       samplesthreshold: 20
@@ -142,19 +146,12 @@ data:
     tracesWorkloadFilters: {{ toYaml .Values.tracesWorkloadFilters | nindent 6 }}
     nodelabels: {{ toYaml .Values.agent.alligator.nodelabels | nindent 6 }}
     contentTypesToDrop: {{ toYaml .Values.agent.alligator.contentTypesToDrop | nindent 6 }}
-    shepherd:
-      url: "{{ template "shepherd.grpc" . }}"
-      enableTLS: {{ template "shepherd.tls_enabled" . }}
-      handlerFlushInterval: {{ .Values.agent.alligator.shepherd.handlerFlushInterval }}
-      tableWriterBatchMaxSize: 350
-      tableWriterBatchInterval: 1s
-      tableWriterBatchWriteTimeout: 5s
     pprofAlligator:
-      enabled: {{ .Values.metrics.enabled }}
+      enabled: {{ include "telemetry.enabled" . }}
       interval: {{ .Values.agent.alligator.pprofAlligator.interval }}
       exponent: {{ .Values.agent.alligator.pprofAlligator.exponent }}
       cpuSamplingDuration: {{ .Values.agent.alligator.pprofAlligator.cpuSamplingDuration }}
-      pushURL: https://{{ .Values.metrics.host }}/upload/pprof
+      pushURL: {{ printf "%s/upload/pprof" (include "telemetry.metrics.url" .) }}
 
     clusterId: {{ .Values.clusterId }}
     region: {{ .Values.region }}

@@ -65,7 +65,7 @@ spec:
 {{ toYaml .Values.agent.nodeSelector | indent 8 }}
 {{- end }}
       containers:
-{{- if .Values.metrics.enabled }}
+{{- if eq (include "telemetry.enabled" .) "true" }}
         - name: fluent-bit
           image: {{ tpl .Values.agent.flb.image.repository . }}:{{ .Values.agent.flb.image.tag }}
           ports:
@@ -272,38 +272,31 @@ spec:
             - /bin/sh
             - -c
           image: '{{ printf "%s/curl:latest" .Values.global.origin.registry }}'
-        - name: check-shepherd-ready
-          args:
-          {{- if .Values.backend.enabled }}
-          - while [ ! $(curl -sk {{ template "shepherd.http" . }}/version | grep $GROUNDCOVER_VERSION ) ]; do echo -n 'Current version '; curl -sk {{ template "shepherd.http" . }}/version; echo ' Wanted version' $GROUNDCOVER_VERSION; echo 'Waiting for shepherd...'; sleep 2; done; echo shepherd is up
-          {{- else }}
-          - while [ $(curl -H "apikey:$API_KEY" -skw '%{http_code}' {{ template "shepherd.http" . }}/version -o /dev/null) -ne 200 ]; do echo 'Waiting...'; sleep 2; done; echo up
-          {{- end }}
-          command:
-            - /bin/sh
-            - -c
-          image: {{ .Values.global.origin.registry }}/curl:latest
+        - name: check-metrics-ingestor-ready
           env:
-            - name: GROUNDCOVER_VERSION
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.annotations['groundcover_version']
             - name: API_KEY
               valueFrom:
                 secretKeyRef:
                   key: {{ template "groundcover.apikeySecretKey" . }}
-                  name: {{ template "groundcover.apikeySecretName" . }}        
-
+                  name: {{ template "groundcover.apikeySecretName" . }}   
+          args:
+          - while [ $(curl -H "apikey:$API_KEY" -ksw '%{http_code}' {{ include "metrics-ingester.health.http.url" . }} -o /dev/null) -ne 200 ]; do echo 'Waiting for VictoriaMetrics Agent...'; sleep 2; done; echo VictoriaMetrics Agent is up
+          command:
+            - /bin/sh
+            - -c
+          image: curlimages/curl:latest
       serviceAccountName: alligator
 {{- if .Values.agent.priorityClassName }}
       priorityClassName: {{ .Values.agent.priorityClassName }}
 {{- end }}
       terminationGracePeriodSeconds: 10
       volumes:
+{{- if eq (include "telemetry.enabled" .) "true" }}
         - name: fluent-bit-config
           configMap:
             name: fluent-bit-config
             defaultMode: 420
+{{- end }}
         - name: varlibdockercontainers
           hostPath:
             path: /var/lib/docker/containers

@@ -89,3 +89,35 @@ Get cluster_id from values or generate random one
 {{- define "imagePullSecrets" }}
 {{- default .Values.global.imagePullSecrets .Values.imagePullSecrets | toJson -}}
 {{- end -}}}}
+
+{{- define "telemetry.enabled" }}
+{{- if .Values.metrics -}}
+    {{- .Values.metrics.enabled -}}
+{{- else -}}
+    {{- .Values.global.telemetry.enabled -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "telemetry.metrics.url" }}
+{{- if .Values.metrics -}}
+    {{- printf "https://%s/api/v1/write" .Values.metrics.host -}}
+{{- else -}}
+    {{- .Values.global.telemetry.metrics.url -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "telemetry.logs.url" }}
+{{- if .Values.logging -}}
+    {{- printf "https://%s/v1/logs" .Values.logging.host -}}
+{{- else -}}
+    {{- .Values.global.telemetry.logs.url -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "customMetrics.name" }}
+{{- printf "%s-%s" .Release.Name "custom-metrics"  -}}
+{{- end -}}}}
+
+{{- define "customMetrics.port" }}
+{{- default "8429" .Values.global.customMetricsServicePort  -}}
+{{- end -}}}}

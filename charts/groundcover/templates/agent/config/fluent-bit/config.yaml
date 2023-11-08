@@ -1,4 +1,4 @@
-{{ if and .Values.agent.enabled .Values.metrics.enabled }}
+{{ if and .Values.agent.enabled (eq (include "telemetry.enabled" .) "true") }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -68,11 +68,11 @@ data:
     [OUTPUT]
         Name opentelemetry
         Match *
-        Tls On
-        Port 443
+        Host {{ get (urlParse (include "telemetry.logs.url" .)) "host" }}
+        Logs_uri {{ get (urlParse (include "telemetry.logs.url" .)) "path" }}
+        Port {{ default 443 (get (urlParse (include "telemetry.logs.url" .)) "port") }}
+        Tls {{ eq (get (urlParse (include "telemetry.logs.url" .)) "scheme") "https" | ternary "On" "Off" }}
         Tls.verify Off
-        Logs_uri /v1/logs
         Header apikey ${API_KEY}
         Log_response_payload Off
-        Host {{ .Values.logging.host }}
 {{ end }}
