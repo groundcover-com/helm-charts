@@ -5,8 +5,8 @@ data:
     resourceconntimeout: 1m0s
 
     VictoriaMetrics:
-      Host: "groundcover-victoria-metrics"
-      Port: 8428
+      Host: "groundcover-vmagent"
+      Port: 8429
 
     Promscale:
       host: groundcover-promscale-connector

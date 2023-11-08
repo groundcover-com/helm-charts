@@ -90,8 +90,8 @@ data:
       port: "9119"
 
     timeseriesstorage:
-      host: "groundcover-victoria-metrics"
-      port: 8428
+      host: "groundcover-vmagent"
+      port: 8429
 
     loglevel: 4 # INFO
 

@@ -39,7 +39,7 @@ shouldDropRunningNamespaces: true
 
 origin:
   registry: public.ecr.aws/groundcovercom
-  tag: 0.33.8
+  tag: 0.34.0
 
 pullSecrets: []
 
@@ -225,7 +225,7 @@ router:
   repository: router
   origin:
     registry: public.ecr.aws/groundcovercom
-    tag: 0.33.8
+    tag: 0.34.0
   versionDb:
     host: 
     port: 
@@ -491,6 +491,20 @@ config:
   labels:
   annotations:
 
+vmagent-backend:
+  nameOverride: "groundcover-vmagent"
+  remoteWriteUrls:
+    - http://groundcover-victoria-metrics:8428/api/v1/write
+  resources:
+    limits:
+      cpu: 150m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 128Mi
+  extraArgs:
+    remoteWrite.maxRowsPerBlock: 15000
+    
 # These are presets for low resource enviroments
 # timescaledb-single:
 #   tolerations: []
