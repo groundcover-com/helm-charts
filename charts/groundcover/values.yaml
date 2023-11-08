@@ -26,6 +26,7 @@ mode: stable
 
 metrics:
   enabled: true
+  host: metrics.groundcover.com
 
 logging:
   enabled: true
@@ -111,6 +112,12 @@ agent:
     watchOnlyLocalNode: false
     shepherd:
       handlerFlushInterval: 1m0s
+    pprofAlligator:
+      enabled: true
+      interval: 10s
+      exponent: 40
+      cpuSamplingDuration: 60s
+      pushURL: ""
     env:
   tracy:
     image:

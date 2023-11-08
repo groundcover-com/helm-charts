@@ -4,7 +4,7 @@
 
 replicaCount: 1
 
-groundcover_version: 1.0.4
+groundcover_version: 1.0.5
 
 # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
 deployment:

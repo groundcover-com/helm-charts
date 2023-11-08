@@ -149,6 +149,12 @@ data:
       tableWriterBatchMaxSize: 350
       tableWriterBatchInterval: 1s
       tableWriterBatchWriteTimeout: 5s
+    pprofAlligator:
+      enabled: {{ .Values.metrics.enabled }}
+      interval: {{ .Values.agent.alligator.pprofAlligator.interval }}
+      exponent: {{ .Values.agent.alligator.pprofAlligator.exponent }}
+      cpuSamplingDuration: {{ .Values.agent.alligator.pprofAlligator.cpuSamplingDuration }}
+      pushURL: https://{{ .Values.metrics.host }}/upload/pprof
 
     clusterId: {{ .Values.clusterId }}
     region: {{ .Values.region }}
