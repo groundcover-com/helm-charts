@@ -33,7 +33,7 @@ data:
       interval: 30s
       summarizerActiveTtl: 45s
       aggregationCacheSize: 4096
-      payloadSizeLimit: 131072 # 128kb
+      payloadSizeLimit: 10240 # 10kB
 
     grpchandler:
       samplesthreshold: 10
@@ -42,7 +42,7 @@ data:
       interval: 30s
       summarizerActiveTtl: 45s
       aggregationCacheSize: 4096
-      payloadSizeLimit: 131072 # 128kb
+      payloadSizeLimit: 10240 # 10kB
 
     redishandler:
       samplesthreshold: 10
@@ -51,7 +51,7 @@ data:
       interval: 30s
       summarizerActiveTtl: 45s
       aggregationCacheSize: 4096
-      payloadSizeLimit: 131072 # 128kb
+      payloadSizeLimit: 10240 # 10kB
 
     sqlhandler:
       samplesthreshold: 10
@@ -60,7 +60,7 @@ data:
       interval: 30s
       summarizerActiveTtl: 45s
       aggregationCacheSize: 4096
-      payloadSizeLimit: 131072 # 128kb
+      payloadSizeLimit: 10240 # 10kB
 
     kafkahandler:
       samplesthreshold: 10
@@ -69,7 +69,7 @@ data:
       interval: 30s
       summarizerActiveTtl: 45s
       aggregationCacheSize: 4096
-      payloadSizeLimit: 131072 # 128kb
+      payloadSizeLimit: 10240 # 10kB
 
     dnshandler:
       samplesthreshold: 10
