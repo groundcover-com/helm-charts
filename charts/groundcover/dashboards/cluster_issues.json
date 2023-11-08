@@ -1,0 +1,754 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      },
+      {
+        "datasource": "groundcover",
+        "enable": true,
+        "expr": "changes(groundcover_resource_total_counter{type=\"deployment_event\",namespace='$namespace'} > 0)",
+        "iconColor": "semi-dark-green",
+        "name": "Deployments",
+        "rawQuery": "SELECT\n  extract(epoch from time_column) AS time,\n  text_column as text,\n  tags_column as tags\nFROM\n  metric_table\nWHERE\n  $__timeFilter(time_column)\n",
+        "step": "10s",
+        "tagKeys": "workload_name,namespace,deployment_name,deployment_event_type"
+      },
+      {
+        "datasource": "groundcover",
+        "enable": true,
+        "expr": "changes(groundcover_resource_error_counter{type=\"container_state\",namespace='$namespace'})",
+        "iconColor": "red",
+        "name": "Container Errors",
+        "rawQuery": "SELECT\n  extract(epoch from time_column) AS time,\n  text_column as text,\n  tags_column as tags\nFROM\n  metric_table\nWHERE\n  $__timeFilter(time_column)\n",
+        "step": "10s",
+        "tagKeys": "workload_name,namespace,container_name,state,state_reason"
+      }
+    ]
+  },
+  "description": "Cluster Issues by groundcover",
+  "editable": true,
+  "gnetId": 15819,
+  "graphTooltip": 0,
+  "id": 23,
+  "iteration": 1653234993907,
+  "links": [],
+  "panels": [
+    {
+      "datasource": "groundcover",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "links": [
+            {
+              "targetBlank": true,
+              "title": "go to workload",
+              "url": "d/lTP9tuo7Z/workload-overview-dashboard?var-namespace=${namespace}&var-workload=${__field.labels.workload_name}&var-ds_prom=${ds_prom}&var-ds_sql=${ds_sql}&var-ds_logs=${ds_logs}"
+            }
+          ],
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "super-light-green",
+                "value": null
+              },
+              {
+                "color": "#d94354",
+                "value": 0.1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 73,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "8.1.8",
+      "targets": [
+        {
+          "datasource": "groundcover",
+          "exemplar": false,
+          "expr": "topk(16, count by(workload_name) (\n    (\n    groundcover_resource_error_counter{type=~\"http|grpc\", namespace='$namespace', role='server'}\n    or groundcover_resource_error_counter{type=~\"postgresql|mysql\", namespace='$namespace', role='client'}\n    or groundcover_resource_error_counter{type=\"dns\", namespace='$namespace', role='client'}\n    )[$__range]\n   )\n   or \n   (group by(workload_name) (groundcover_resource_total_counter{type=\"container_info\", namespace='$namespace'}[$__range]) - 1)\n )",
+          "hide": false,
+          "instant": true,
+          "interval": "",
+          "legendFormat": "{{workload_name}}",
+          "refId": "B"
+        }
+      ],
+      "title": "Workload Status",
+      "type": "stat"
+    },
+    {
+      "datasource": "groundcover",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 5
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 5,
+        "x": 0,
+        "y": 7
+      },
+      "id": 77,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "8.1.8",
+      "targets": [
+        {
+          "datasource": "groundcover",
+          "exemplar": true,
+          "expr": "count(\n    (groundcover_resource_error_counter{type=~\"http|grpc\",namespace='$namespace', role='server'}\n    or groundcover_resource_error_counter{type=~\"postgresql|mysql\", namespace='$namespace', role='client'}\n    or groundcover_resource_error_counter{type=\"dns\", namespace='$namespace', role='client'})[$__range]\n)",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "title": "Number of Issues",
+      "type": "stat"
+    },
+    {
+      "datasource": "groundcover",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "semi-dark-red",
+            "mode": "continuous-BlPu"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 5,
+        "x": 5,
+        "y": 7
+      },
+      "id": 79,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "8.1.8",
+      "targets": [
+        {
+          "datasource": "groundcover",
+          "exemplar": true,
+          "expr": "count(count(groundcover_resource_total_counter{type=\"container_info\",namespace='$namespace'}[$__range]) by (workload_name))",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "title": "Number of Workloads",
+      "type": "stat"
+    },
+    {
+      "datasource": "groundcover",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "semi-dark-red",
+            "mode": "continuous-BlPu"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 5,
+        "x": 10,
+        "y": 7
+      },
+      "id": 78,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "8.1.8",
+      "targets": [
+        {
+          "datasource": "groundcover",
+          "exemplar": true,
+          "expr": "count(count(groundcover_resource_total_counter{type=\"container_info\",namespace='$namespace'}[$__range]) by (pod_name))",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "title": "Number of Pods",
+      "type": "stat"
+    },
+    {
+      "datasource": "groundcover-timescaledb",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "left",
+            "displayMode": "auto"
+          },
+          "mappings": [
+            {
+              "options": {
+                "dns": {
+                  "index": 2,
+                  "text": "DNS"
+                },
+                "grpc": {
+                  "index": 1,
+                  "text": "gRPC"
+                },
+                "http": {
+                  "index": 0,
+                  "text": "HTTP"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Workload"
+            },
+            "properties": [
+              {
+                "id": "custom.width"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Type"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 96
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Status Code"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 115
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Resource"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 365
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Incidents"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 77
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Workload"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "targetBlank": true,
+                    "title": "go to workload",
+                    "url": "d/lTP9tuo7Z/workload-overview-dashboard?var-namespace=${namespace}&var-workload=${__data.fields.Workload}&var-ds_prom=${ds_prom}&var-ds_sql=${ds_sql}&var-ds_logs=${ds_logs}"
+                  }
+                ]
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#4b72ad",
+                  "mode": "fixed"
+                }
+              },
+              {
+                "id": "custom.displayMode",
+                "value": "color-text"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 14,
+        "w": 9,
+        "x": 15,
+        "y": 7
+      },
+      "id": 81,
+      "options": {
+        "footer": {
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "8.1.8",
+      "targets": [
+        {
+          "datasource": "groundcover-timescaledb",
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "(select \ni.hash_id  as issueId,\nlast(r.product_type, se.start_time) as issueType,\nlast(i.attributes->>'http.status_code'::text, se.start_time) as issueCode,\nlast(se.role, se.start_time) as role,\nlast(r.attributes->>'http.route', se.start_time) as resourceName,\nlast(se.namespace, se.start_time) as namespace,\nlast(se.name, se.start_time) as workloadName,\nlast(sere.remote_service_name, se.start_time) as remoteServiceName,\nlast(sere.remote_namespace, se.start_time) as remoteNamespace,\nlast(i.reason, se.start_time) as reason,\nlast(r.attributes->>'http.method', se.start_time) as subType,\nto_char(min(se.start_time), 'YYYY-MM-DD\"T\"HH24:MI:SS.US\"Z\"') as firstSeen,\nto_char(max(se.start_time), 'YYYY-MM-DD\"T\"HH24:MI:SS.US\"Z\"') as lastSeen,\ncount(*) as incidents\nfrom _ps_trace.issue i \njoin _ps_trace.resource r on r.hash_id=i.resource_hash \njoin _ps_trace.span_entities se on i.hash_id=se.issue_hash\njoin _ps_trace.span_entity_with_remote_entity sere on sere.span_id=se.span_id\nwhere (r.product_type = 'http' or r.product_type = 'grpc') and $__timeFilter(se.start_time) and se.namespace = '$namespace'\ngroup by issueId, se.perspective_entity_hash\norder by lastSeen desc \nlimit 20)\n\nunion\n\n(select \ni.hash_id  as issueId,\nlast(r.product_type, se.start_time) as issueType,\nlast(r.attributes->>'state'::text, se.start_time) as issueCode,\n'' as role, \nlast(r.attributes->>'container_name', se.start_time) as resourceName,\nlast(se.namespace, se.start_time) as namespace,\nlast(se.name, se.start_time) as workloadName,\n'' as remoteServiceName , \n'' as remoteNamespace, \nlast(i.attributes->>'exit_code'::text, se.start_time) as reason,\n'Container Error' as subType,\nto_char(min(se.start_time), 'YYYY-MM-DD\"T\"HH24:MI:SS.US\"Z\"') as firstSeen,\nto_char(max(se.start_time), 'YYYY-MM-DD\"T\"HH24:MI:SS.US\"Z\"') as lastSeen,\ncount(*) as incidents\nfrom _ps_trace.issue i \njoin _ps_trace.resource r on r.hash_id=i.resource_hash \njoin _ps_trace.span_entities se on i.hash_id=se.issue_hash\njoin _ps_trace.span_entity_with_remote_entity sere on sere.span_id=se.span_id\nwhere r.product_type = 'container_state' and $__timeFilter(se.start_time) and se.namespace = '$namespace'\ngroup by issueId, se.perspective_entity_hash\norder by lastSeen desc \nlimit 20)\n\nunion\n\n(select \ni.hash_id  as issueId,\nlast(r.product_type, se.start_time) as issueType,\nlast(i.attributes->>'response_status'::text, se.start_time) as issueCode,\nlast(se.role, se.start_time) as role, \nlast(r.attributes->>'query_fingerprint', se.start_time) as resourceName,\nlast(se.namespace, se.start_time) as namespace,\nlast(se.name, se.start_time) as workloadName,\nlast(sere.remote_service_name, se.start_time) as remoteServiceName,\nlast(sere.remote_namespace, se.start_time) as remoteNamespace,\nlast(i.reason, se.start_time) as reason,\nlast(r.attributes->>'db.system', se.start_time) as subType,\nto_char(min(se.start_time), 'YYYY-MM-DD\"T\"HH24:MI:SS.US\"Z\"') as firstSeen,\nto_char(max(se.start_time), 'YYYY-MM-DD\"T\"HH24:MI:SS.US\"Z\"') as lastSeen,\ncount(*) as incidents\nfrom _ps_trace.issue i \njoin _ps_trace.resource r on r.hash_id=i.resource_hash \njoin _ps_trace.span_entities se on i.hash_id=se.issue_hash\njoin _ps_trace.span_entity_with_remote_entity sere on sere.span_id=se.span_id\nwhere (r.product_type = 'postgresql' or r.product_type = 'mysql') and $__timeFilter(se.start_time) and se.namespace = '$namespace'\ngroup by issueId, se.perspective_entity_hash\norder by lastSeen desc \nlimit 20)\n\nunion\n\n(select \ni.hash_id  as issueId,\nlast(r.product_type, se.start_time) as issueType,\nlast(i.attributes->>'error_code'::text, se.start_time) as issueCode,\nlast(se.role, se.start_time) as role, \nCONCAT(last(r.attributes->>'messaging.destination', se.start_time), ',', last(r.attributes->>'partition'::text, se.start_time)) as resourceName,\nlast(se.namespace, se.start_time) as namespace,\nlast(se.name, se.start_time) as workloadName,\nlast(sere.remote_service_name, se.start_time) as remoteServiceName,\nlast(sere.remote_namespace, se.start_time) as remoteNamespace,\nlast(i.reason, se.start_time) as reason,\nlast(r.attributes->>'client_type', se.start_time) as subType,\nto_char(min(se.start_time), 'YYYY-MM-DD\"T\"HH24:MI:SS.US\"Z\"') as firstSeen,\nto_char(max(se.start_time), 'YYYY-MM-DD\"T\"HH24:MI:SS.US\"Z\"') as lastSeen,\ncount(*) as incidents\nfrom _ps_trace.issue i \njoin _ps_trace.resource r on r.hash_id=i.resource_hash \njoin _ps_trace.span_entities se on i.hash_id=se.issue_hash\njoin _ps_trace.span_entity_with_remote_entity sere on sere.span_id=se.span_id\nwhere r.product_type = 'kafka' and $__timeFilter(se.start_time) and se.namespace = '$namespace'\ngroup by issueId, se.perspective_entity_hash\norder by lastSeen desc \nlimit 20)\n\n",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "percentile"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "conn_stats_samples",
+          "timeColumn": "\"time\"",
+          "timeColumnType": "timestamp",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Open Issues",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "description": true,
+              "firstseen": true,
+              "issueid": true,
+              "lastseen": true,
+              "namespace": true,
+              "remotenamespace": true,
+              "remoteservicename": true,
+              "role": true,
+              "subtype": true
+            },
+            "indexByName": {
+              "incidents": 6,
+              "issuecode": 3,
+              "issueid": 0,
+              "issuetype": 2,
+              "lastseen": 5,
+              "resourcename": 4,
+              "workloadname": 1
+            },
+            "renameByName": {
+              "incidents": "Incidents",
+              "issuecode": "Status Code",
+              "issueid": "",
+              "issuetype": "Type",
+              "lastseen": "",
+              "resourcename": "Resource",
+              "workloadname": "Workload"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": "groundcover",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 14,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "reqps"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "HTTP"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "semi-dark-red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "DNS"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "super-light-orange",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 15,
+        "x": 0,
+        "y": 12
+      },
+      "id": 75,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "exemplar": true,
+          "expr": "alias(sum(rate(groundcover_resource_error_counter{type=~\"http|grpc\", namespace='$namespace'}[$__rate_interval])), 'HTTP/GRPC')",
+          "interval": "",
+          "legendFormat": "",
+          "refId": "A"
+        },
+        {
+          "exemplar": true,
+          "expr": "alias(sum(rate(groundcover_resource_error_counter{type=\"dns\", namespace='$namespace'}[$__rate_interval])), 'DNS')",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "",
+          "refId": "B"
+        },
+        {
+          "exemplar": true,
+          "expr": "alias(sum(rate(groundcover_resource_error_counter{type=~\"postgresql|sql\", namespace='$namespace'}[$__rate_interval])), 'SQL')",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "",
+          "refId": "C"
+        }
+      ],
+      "title": "Issue Velocity",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": false,
+  "schemaVersion": 30,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "groundcover",
+          "value": "groundcover"
+        },
+        "description": null,
+        "error": null,
+        "hide": 0,
+        "includeAll": false,
+        "label": "cluster",
+        "multi": false,
+        "name": "ds_prom",
+        "options": [],
+        "query": "prometheus",
+        "queryValue": "",
+        "refresh": 1,
+        "regex": "(.*GC.*|.*gc.*|.*groundcover.*|.*Groundcover.*|.*GroundCover.*)",
+        "skipUrlSync": false,
+        "type": "datasource"
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": false,
+          "text": "bossga",
+          "value": "bossga"
+        },
+        "datasource": "groundcover",
+        "definition": "label_values(groundcover_resource_total_counter{type=\"container_info\"}, namespace)",
+        "description": null,
+        "error": null,
+        "hide": 0,
+        "includeAll": false,
+        "label": null,
+        "multi": false,
+        "name": "namespace",
+        "options": [],
+        "query": {
+          "query": "label_values(groundcover_resource_total_counter{type=\"container_info\"}, namespace)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "^(?!.*gc.*$|.*groundcover.*$).*",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "groundcover-timescaledb",
+          "value": "groundcover-timescaledb"
+        },
+        "description": null,
+        "error": null,
+        "hide": 2,
+        "includeAll": false,
+        "label": "SQL Data Source",
+        "multi": false,
+        "name": "ds_sql",
+        "options": [],
+        "query": "postgres",
+        "queryValue": "",
+        "refresh": 1,
+        "regex": ".*$ds_prom.*",
+        "skipUrlSync": false,
+        "type": "datasource"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "groundcover-loki",
+          "value": "groundcover-loki"
+        },
+        "description": null,
+        "error": null,
+        "hide": 2,
+        "includeAll": false,
+        "label": "Logs Data Source",
+        "multi": false,
+        "name": "ds_logs",
+        "options": [],
+        "query": "loki",
+        "queryValue": "",
+        "refresh": 1,
+        "regex": ".*$ds_prom.*",
+        "skipUrlSync": false,
+        "type": "datasource"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Cluster Issues Dashboard",
+  "uid": "lTP9tuo65",
+  "version": 4
+}

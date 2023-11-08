@@ -103,6 +103,9 @@ spec:
         - mountPath: /var/groundcover/tls
           name: certificate
           readOnly: true
+        - mountPath: /var/groundcover/dashboards
+          name: grafana-dashboards
+          readOnly: false
       securityContext:
         fsGroup: 472
         supplementalGroups:
@@ -112,6 +115,10 @@ spec:
           defaultMode: 420
           name: grafana-datasources
         name: grafana-datasources
+      - configMap:
+          defaultMode: 420
+          name: grafana-dashboards
+        name: grafana-dashboards
       - configMap:
           defaultMode: 420
           name: grafana-dashboards-provisioning

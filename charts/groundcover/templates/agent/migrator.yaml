@@ -50,7 +50,7 @@ spec:
       serviceAccountName: migrator
       containers:
       - env:
-        - name: GROUNDCOVER_FORCE_MIGRATE
+        - name: GC_FORCE_MIGRATE
           value: "{{ upper .Values.migrator.resetDB }}"
         - name: GC_DATARETENTION
           value: "{{ .Values.agent.alligator.dataRetention }}"
@@ -61,7 +61,7 @@ spec:
             secretKeyRef:
               key: PATRONI_SUPERUSER_PASSWORD
               name: {{ index .Values "timescaledb-single" "secrets" "credentialsSecretName" | default "groundcover-tsdb-credentials" }}
-        - name: GROUNDCOVER_VERSION
+        - name: GC_RUNNING_VERSION
           valueFrom:
             fieldRef:
               fieldPath: metadata.annotations['groundcover_version']

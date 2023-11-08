@@ -253,7 +253,7 @@ spec:
             - -c
             - |
               [ -z "$GROUNDCOVER_VERSION" ] && echo "\$GROUNDCOVER_VERSION is missing" && exit 1
-              for i in {1..1800}; do sleep 2; DB_VERSION=`psql -X -A -t -h groundcover-tsdb -U postgres -d groundcover -c "SELECT value FROM version ORDER BY time desc limit 1"`; echo "running_version = '$GROUNDCOVER_VERSION', db_version='$DB_VERSION'"; [[ "$GROUNDCOVER_VERSION" == "$DB_VERSION" ]] && echo "DONE" && exit 0; done; echo "TIMEOUT"; exit 1;
+              for i in {1..1800}; do sleep 2; DB_VERSION=`psql -X -A -t -h groundcover-tsdb -U postgres -c "SELECT value FROM version ORDER BY time desc limit 1"`; echo "running_version = '$GROUNDCOVER_VERSION', db_version='$DB_VERSION'"; [[ "$GROUNDCOVER_VERSION" == "$DB_VERSION" ]] && echo "DONE" && exit 0; done; echo "TIMEOUT"; exit 1;
           env:
             - name: PGPASSWORD
               valueFrom:
