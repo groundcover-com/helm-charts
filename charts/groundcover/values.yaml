@@ -128,8 +128,11 @@ agent:
     nodelabels: []
     contentTypesToDrop: ["text/html", "text/javascript", "text/css", "image", "font", "video", "audio"]
     watchOnlyLocalNode: false
-    apmForwarder:
-      dataDogEnabled: true
+    apmIngestor:
+      dataDog:
+        enabled: true
+      otel:
+        enabled: false
     pprofAlligator:
       enabled: true
       interval: 10s
@@ -307,7 +310,7 @@ opentelemetry-collector:
       secretName: opentelemetry-collector-certificate
   image:
     repository: public.ecr.aws/groundcovercom/otel/opentelemetry-collector-contrib
-    tag: "1.4.36"
+    tag: "1.4.37"
   podLabels:
     app.kubernetes.io/part-of: groundcover
   podAnnotations:
