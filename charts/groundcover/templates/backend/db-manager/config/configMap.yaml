@@ -25,12 +25,13 @@ data:
       Entities: 5d
       Events: 5d
     DataMigration:
-      BackfillBatchRows:
-        Traces: 50000
-        Logs: 50000
-        Entities: 50000
-        Events: 50000
+      BackfillBatchDuration:
+        Traces: 1m
+        Logs: 1m
+        Entities: 1h
+        Events: 1h
       BackfillBatchMaxExecutionTime: 5m
+      BackfillBatchDeleteInterval: 60
       
     ClickHouse:
       Pass: "OVERRIDEN"

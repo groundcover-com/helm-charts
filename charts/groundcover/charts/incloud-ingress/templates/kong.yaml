@@ -21,6 +21,6 @@ metadata:
   annotations:
     checksum/config: {{ .Values.global.groundcover_token | sha256sum }}
     kubernetes.io/ingress.class: {{ .Values.kong.ingressController.ingressClass }}
-username: incloud-api
+username: api
 credentials:
   - {{ printf "%s-api-key" .Release.Name }}
