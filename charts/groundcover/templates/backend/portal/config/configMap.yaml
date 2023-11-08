@@ -9,6 +9,7 @@ data:
     startuptimeout: 1m0s
 
     ClusterId: {{ template "groundcover.clusterId" . }}
+    VERSION: "OVERRIDEN"
 
     Router:
       Host: "{{ .Values.saas.host }}"
@@ -42,6 +43,7 @@ data:
     startuptimeout: 1m0s
 
     ClusterId: {{ template "groundcover.clusterId" . }}
+    VERSION: "OVERRIDEN"
 
     Router:
       Host: "router"

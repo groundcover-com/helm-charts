@@ -59,6 +59,16 @@ spec:
             secretKeyRef:
               key: PATRONI_SUPERUSER_PASSWORD
               name: {{ index .Values "timescaledb-single" "secrets" "credentialsSecretName" | default "groundcover-tsdb-credentials" }}
+        - name: GC_CLUSTERID
+          valueFrom:
+            secretKeyRef:
+              key: GC_CLUSTER_ID
+              name: groundcover-config
+        - name: GC_REGION
+          valueFrom:
+            secretKeyRef:
+              name: groundcover-config
+              key: GC_REGION   
         image: {{ .Values.origin.registry }}/{{ .Values.k8sWatcher.repository }}:{{ .Values.origin.tag }}
         imagePullPolicy: Always
         name: k8s-watcher

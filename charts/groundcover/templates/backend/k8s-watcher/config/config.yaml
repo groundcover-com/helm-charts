@@ -24,6 +24,9 @@ data:
       shouldsample: true
 
     dataRetention: {{ .Values.agent.alligator.dataRetention }}
+
+    clusterId: ""
+    region: ""
 kind: ConfigMap
 metadata:
   labels:
