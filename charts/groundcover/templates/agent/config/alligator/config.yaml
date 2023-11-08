@@ -1,7 +1,7 @@
 apiVersion: v1
 data:
   config.yaml: |-
-    startuptimeout: 60s
+    startuptimeout: 120s
 
     db:
       host: "groundcover-tsdb"
@@ -14,8 +14,8 @@ data:
 
     tracy:
       address: "ipc:///comm/tracy.data"
-      timeout: 60s
-      interval: 2s
+      timeout: 120s
+      interval: 5s
 
     httphandler:
       samplesthreshold: 10
@@ -103,6 +103,7 @@ data:
     shouldDropRunningNamespaces: {{ .Values.agent.alligator.shouldDropRunningNamespaces }}
     filteredNamespaces: {{ toYaml .Values.agent.alligator.filteredNamespaces | nindent 6 }}
     nodelabels: {{ toYaml .Values.agent.alligator.nodelabels | nindent 6 }}
+    contentTypesToDrop: {{ toYaml .Values.agent.alligator.contentTypesToDrop | nindent 6 }}
 
     promscalestorage:
       host: groundcover-promscale-connector
