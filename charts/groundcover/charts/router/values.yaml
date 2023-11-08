@@ -1,15 +1,24 @@
-enabled: true
 # kubectl create secret docker-registry <pull_secret_name> \
 #     --docker-server=<registry_server> \
 #     --docker-username=<user_name> \
 #     --docker-password=<password> \
 #     --docker-email=<email>
+
+global:
+  postgresql:
+    enabled: true
+    overrideUrl: ""
+    auth:
+      existingSecret: ""
+      secretKeys:
+        adminPasswordKey: ""
+enabled: true
 additionalLabels:
 onprem:
   enabled: true
 origin:
   registry: quay.io/groundcover
-  tag: 1.4.60
+  tag: 1.5.0
 serviceAccount:
   annotations:
 repository: router
@@ -46,8 +55,8 @@ configuration:
     Tenant: "auth.groundcover.com"
   RBAC:
     DB:
-      Host: '{{ include "postgresql.primary.fullname" . }}'
-      Port: "5432"
+      Host: '{{ splitList ":" (include "postgresql.base.url" .) | first }}'
+      Port: '{{ splitList ":" (include "postgresql.base.url" .) | last }}'
       Name: "rbac"
       User: "postgres"
       Pass: ""
@@ -105,14 +114,14 @@ grafana:
   envValueFrom:
     GF_DATABASE_PASSWORD:
       secretKeyRef:
-        name: '{{ include "postgresql.primary.fullname" . }}'
-        key: "postgres-password"
+        name: '{{ include "postgresql.secretName" . }}'
+        key: '{{ include "postgresql.adminPasswordKey" . }}'
   grafana.ini:
     live:
       allowed_origins: "*"
     database:
       type: postgres
-      host: '{{ printf "%s:5432" (include "postgresql.primary.fullname" .) }}'
+      host: '{{ (include "postgresql.base.url" .) }}'
       name: grafana
       user: postgres
       password: ""

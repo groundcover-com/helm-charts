@@ -18,6 +18,8 @@ metadata:
   name: db-manager
   namespace: {{ .Release.Namespace }}
 spec:
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: db-manager
@@ -58,6 +60,7 @@ spec:
 {{ toYaml .Values.dbManager.nodeSelector | indent 8 }}
 {{- end }}
       imagePullSecrets: {{ include "imagePullSecrets" . }}
+      serviceAccountName: db-manager
       containers:
       - env:
         - name: GC_GROUNDCOVERVERSION
