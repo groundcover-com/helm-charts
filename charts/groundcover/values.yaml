@@ -39,7 +39,7 @@ shouldDropRunningNamespaces: true
 
 origin:
   registry: public.ecr.aws/groundcovercom
-  tag: 0.34.1
+  tag: 0.34.2
 
 pullSecrets: []
 
@@ -65,7 +65,7 @@ agent:
     dataRetention: 12h
     nodelabels: []
     contentTypesToDrop: ["text/html", "text/javascript", "text/css", "image", "font", "video", "audio"]
-    watchOnlyLocalNode: false
+    watchOnlyLocalNode: true
   tracy:
     repository: tracy
     resources:
@@ -225,7 +225,7 @@ router:
   repository: router
   origin:
     registry: public.ecr.aws/groundcovercom
-    tag: 0.34.1
+    tag: 0.34.2
   versionDb:
     host: 
     port: 
