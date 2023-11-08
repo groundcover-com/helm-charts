@@ -682,6 +682,9 @@ shepherd:
         - labels:
             type: "container_restart"
           value: -1
+        - labels:
+            type: "unavailable_deployment"
+          value: -1
 
 dbManager:
   additionalLabels:

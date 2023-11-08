@@ -13,6 +13,7 @@ data:
     pushsummaries: true
     productmetricsflushmintotalcounter:
       deployment_event: 1
+      unavailable_deployment: 1
 
     Promscale:
       url: "{{ template "promscale.otelURL" . }}"

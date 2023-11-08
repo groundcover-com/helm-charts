@@ -60,10 +60,19 @@ tracing:
 config:
   # existingSecret:
   auth_enabled: false
+  query_range:
+    parallelise_shardable_queries: true
+    cache_results: true
+    results_cache:
+      cache:
+        embedded_cache:
+          enabled: true
+
   ingester:
     chunk_idle_period: 3m
     chunk_block_size: 262144
     chunk_retain_period: 1m
+    chunk_encoding: snappy
     max_transfer_retries: 0
     wal:
       dir: /data/loki/wal
@@ -102,6 +111,9 @@ config:
     http_listen_port: 3100
     grpc_server_max_recv_msg_size: 16777216 # default was 4194304
   storage_config:
+    index_queries_cache_config:
+      embedded_cache:
+        enabled: true
     boltdb_shipper:
       active_index_directory: /data/loki/boltdb-shipper-active
       cache_location: /data/loki/boltdb-shipper-cache
@@ -110,7 +122,9 @@ config:
     filesystem:
       directory: /data/loki/chunks
   chunk_store_config:
-    max_look_back_period: 0s
+    chunk_cache_config:
+      embedded_cache:
+        enabled: true  
   table_manager:
     retention_deletes_enabled: true
     retention_period: 24h
