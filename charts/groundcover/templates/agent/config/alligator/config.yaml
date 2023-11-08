@@ -101,7 +101,7 @@ data:
     hostmodeconfigpath: "/config/instance_metadata.yaml"
 
     allowedportspercontainer: 20
-    containermetricsfetchinterval: 15s
+    kubeletmetricsfetchinterval: 15s
 
     globallimiter:
       maxqueue: 10
@@ -126,7 +126,6 @@ data:
 
     clusterId: {{ .Values.clusterId }}
     region: {{ .Values.region }}
-    nodeInfoDispatchInterval: 15s
 kind: ConfigMap
 metadata:
   labels:

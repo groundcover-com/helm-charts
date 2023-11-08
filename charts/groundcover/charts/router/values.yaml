@@ -6,7 +6,7 @@ mode: cloud
 
 origin:
   registry: public.ecr.aws/groundcovercom
-  tag: 0.39.1
+  tag: 0.40.0
 
 repository: router
 
@@ -22,6 +22,9 @@ configuration:
       OrgClaimKey: "https://client.info/org"
       Audience: "https://groundcover"
       Tenant: "auth.groundcover.com"
+    RBAC:
+      Migrations:
+        Path: migrations
 
 ingress:
   enabled: false

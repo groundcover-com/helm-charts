@@ -77,7 +77,7 @@
         {
           "datasource": "groundcover",
           "exemplar": true,
-          "expr": "1000 * sum by (node_name) (rate(groundcover_cpu_usage_seconds_total{})) / sum by (node_name) (groundcover_allocatable_cpum_cpu{})",
+          "expr": "sum by (node_name) (rate(groundcover_node_m_cpu_usage_seconds_total{})) / sum by (node_name) (groundcover_node_allocatable_cpum_cpu{})",
           "interval": "",
           "legendFormat": "{{ node_name }}",
           "refId": "A"
@@ -135,7 +135,7 @@
         {
           "datasource": "groundcover",
           "exemplar": true,
-          "expr": "sum by (node_name) (groundcover_mem_working_set_bytes{}) / sum by (node_name) (groundcover_allocatable_mem_bytes{})",
+          "expr": "sum by (node_name) (groundcover_node_mem_working_set_bytes{}) / sum by (node_name) (groundcover_node_allocatable_mem_bytes{})",
           "interval": "",
           "legendFormat": "{{ node_name }}",
           "refId": "A"
@@ -204,7 +204,7 @@
             {
               "datasource": "groundcover",
               "exemplar": true,
-              "expr": "sort_desc(sum by (node_name) (1000 * rate(groundcover_cpu_usage_seconds_total{})))",
+              "expr": "sort_desc(sum by (node_name) (rate(groundcover_node_m_cpu_usage_seconds_total{})))",
               "instant": false,
               "interval": "",
               "legendFormat": "{{node_name}}",
@@ -263,7 +263,7 @@
             {
               "datasource": "groundcover",
               "exemplar": true,
-              "expr": "sort_desc(sum by (node_name) (groundcover_mem_working_set_bytes{}))",
+              "expr": "sort_desc(sum by (node_name) (groundcover_node_mem_working_set_bytes{}))",
               "instant": false,
               "interval": "",
               "legendFormat": "{{node_name}}",
@@ -347,7 +347,7 @@
             {
               "datasource": "groundcover",
               "exemplar": true,
-              "expr": "sum(groundcover_mem_working_set_bytes{node_name=~'$node'})",
+              "expr": "sum(groundcover_node_mem_working_set_bytes{node_name=~'$node'})",
               "format": "time_series",
               "instant": false,
               "interval": "",
@@ -357,7 +357,7 @@
             {
               "datasource": "groundcover",
               "exemplar": true,
-              "expr": "sum(groundcover_memory_limit_bytes{node_name=~'$node'})",
+              "expr": "sum(groundcover_container_memory_limit_bytes{node_name=~'$node'})",
               "format": "time_series",
               "hide": false,
               "instant": false,
@@ -368,7 +368,7 @@
             {
               "datasource": "groundcover",
               "exemplar": true,
-              "expr": "sum(groundcover_memory_request_bytes{node_name=~'$node'})",
+              "expr": "sum(groundcover_container_memory_request_bytes{node_name=~'$node'})",
               "format": "time_series",
               "hide": false,
               "instant": false,
@@ -379,7 +379,7 @@
             {
               "datasource": "groundcover",
               "exemplar": true,
-              "expr": "sum(groundcover_allocatable_mem_bytes{node_name=~'$node'})",
+              "expr": "sum(groundcover_node_allocatable_mem_bytes{node_name=~'$node'})",
               "hide": false,
               "interval": "",
               "legendFormat": "Limit",
@@ -464,7 +464,7 @@
             {
               "datasource": "groundcover",
               "exemplar": true,
-              "expr": "sum(1000 * rate(groundcover_cpu_usage_seconds_total{node_name=~'$node'}))",
+              "expr": "rate(groundcover_node_m_cpu_usage_seconds_total{node_name=~'$node'})",
               "format": "time_series",
               "instant": false,
               "interval": "",
@@ -474,7 +474,7 @@
             {
               "datasource": "groundcover",
               "exemplar": true,
-              "expr": "sum(groundcover_cpu_limit_m_cpu{node_name=~'$node'})",
+              "expr": "sum(groundcover_container_cpu_limit_m_cpu{node_name=~'$node'})",
               "format": "time_series",
               "hide": false,
               "instant": false,
@@ -485,7 +485,7 @@
             {
               "datasource": "groundcover",
               "exemplar": true,
-              "expr": "sum(groundcover_cpu_request_m_cpu{node_name=~'$node'})",
+              "expr": "sum(groundcover_container_cpu_request_m_cpu{node_name=~'$node'})",
               "format": "time_series",
               "hide": false,
               "instant": false,
@@ -496,7 +496,7 @@
             {
               "datasource": "groundcover",
               "exemplar": true,
-              "expr": "sum(groundcover_allocatable_cpum_cpu{node_name=~'$node'})",
+              "expr": "sum(groundcover_node_allocatable_cpum_cpu{node_name=~'$node'})",
               "hide": false,
               "interval": "",
               "legendFormat": "Limit",
@@ -559,7 +559,7 @@
             {
               "datasource": "groundcover",
               "exemplar": false,
-              "expr": "bottomk(10, (avg by (workload_name, namespace) (1000 * rate(groundcover_cpu_usage_seconds_total{node_name=~'$node', namespace=~'$namespace'}))))",
+              "expr": "bottomk(10, (avg by (workload_name, namespace) (rate(groundcover_container_m_cpu_usage_seconds_total{node_name=~'$node', namespace=~'$namespace'})) / avg by (workload_name, namespace) (groundcover_container_cpu_limit_m_cpu{node_name=~'$node', namespace=~'$namespace'})))",
               "instant": true,
               "interval": "",
               "legendFormat": "{{workload_name}}@{{namespace}}",
@@ -621,7 +621,7 @@
             {
               "datasource": "groundcover",
               "exemplar": false,
-              "expr": "topk(10, (avg by (workload_name, namespace) (1000 * rate(groundcover_cpu_usage_seconds_total{node_name=~'$node', namespace=~'$namespace'}))))",
+              "expr": "topk(10, (avg by (workload_name, namespace) (rate(groundcover_container_m_cpu_usage_seconds_total{node_name=~'$node', namespace=~'$namespace'})) / avg by (workload_name, namespace) (groundcover_container_cpu_limit_m_cpu{node_name=~'$node', namespace=~'$namespace'})))",
               "instant": true,
               "interval": "",
               "legendFormat": "{{workload_name}}@{{namespace}}",
@@ -680,7 +680,7 @@
             {
               "datasource": "groundcover",
               "exemplar": false,
-              "expr": "bottomk(10, (avg by (workload_name, namespace) (groundcover_mem_working_set_bytes{node_name=~'$node', namespace=~'$namespace'}) / avg by (workload_name, namespace) (groundcover_memory_limit_bytes{node_name=~'$node', namespace=~'$namespace'})))",
+              "expr": "bottomk(10, (avg by (workload_name, namespace) (groundcover_container_mem_working_set_bytes{node_name=~'$node', namespace=~'$namespace'}) / avg by (workload_name, namespace) (groundcover_container_memory_limit_bytes{node_name=~'$node', namespace=~'$namespace'})))",
               "instant": true,
               "interval": "",
               "legendFormat": "{{workload_name}}@{{namespace}}",
@@ -738,7 +738,7 @@
             {
               "datasource": "groundcover",
               "exemplar": false,
-              "expr": "topk(10, (avg by (workload_name, namespace) (groundcover_mem_working_set_bytes{node_name=~'$node', namespace=~'$namespace'}) / avg by (workload_name, namespace) (groundcover_memory_limit_bytes{node_name=~'$node', namespace=~'$namespace'})))",
+              "expr": "topk(10, (avg by (workload_name, namespace) (groundcover_container_mem_working_set_bytes{node_name=~'$node', namespace=~'$namespace'}) / avg by (workload_name, namespace) (groundcover_container_memory_limit_bytes{node_name=~'$node', namespace=~'$namespace'})))",
               "instant": true,
               "interval": "",
               "legendFormat": "{{workload_name}}@{{namespace}}",
@@ -815,7 +815,7 @@
             {
               "datasource": "groundcover",
               "exemplar": true,
-              "expr": "avg (groundcover_mem_working_set_bytes{node_name=~'$node'}) / avg (groundcover_memory_limit_bytes{node_name=~'$node'})",
+              "expr": "avg (groundcover_container_mem_working_set_bytes{node_name=~'$node'}) / avg (groundcover_container_memory_limit_bytes{node_name=~'$node'})",
               "interval": "",
               "legendFormat": "",
               "refId": "A"
@@ -876,7 +876,7 @@
             {
               "datasource": "groundcover",
               "exemplar": true,
-              "expr": "avg(1000 * rate(groundcover_cpu_usage_seconds_total{node_name=~'$node'}))",
+              "expr": "avg(rate(groundcover_container_m_cpu_usage_seconds_total{node_name=~'$node'}) / groundcover_container_cpu_limit_m_cpu{node_name=~'$node'})",
               "interval": "",
               "legendFormat": "",
               "refId": "A"
@@ -933,7 +933,7 @@
             {
               "datasource": "groundcover",
               "exemplar": true,
-              "expr": "sum(groundcover_cpu_limit_m_cpu{node_name=~'$node'})",
+              "expr": "sum(groundcover_container_cpu_limit_m_cpu{node_name=~'$node'})",
               "interval": "",
               "legendFormat": "",
               "refId": "A"
@@ -990,7 +990,7 @@
             {
               "datasource": "groundcover",
               "exemplar": true,
-              "expr": "sum(groundcover_memory_limit_bytes{node_name=~'$node'})",
+              "expr": "sum(groundcover_container_memory_limit_bytes{node_name=~'$node'})",
               "interval": "",
               "legendFormat": "",
               "refId": "A"
@@ -1063,7 +1063,7 @@
             {
               "datasource": "groundcover",
               "exemplar": false,
-              "expr": "topk(10, (stddev(1000 * rate(groundcover_cpu_usage_seconds_total{node_name=~'$node', namespace=~'$namespace'})) by (workload_name, namespace) / avg(1000 * rate(groundcover_cpu_usage_seconds_total{node_name=~'$node', namespace=~'$namespace'})) by (workload_name, namespace)))",
+              "expr": "topk(10, (stddev(rate(groundcover_container_m_cpu_usage_seconds_total{node_name=~'$node', namespace=~'$namespace'})) by (workload_name, namespace) / avg(rate(groundcover_container_m_cpu_usage_seconds_total{node_name=~'$node', namespace=~'$namespace'})) by (workload_name, namespace)))",
               "instant": true,
               "interval": "",
               "legendFormat": "{{workload_name}}@{{namespace}}",
@@ -1122,7 +1122,7 @@
             {
               "datasource": "groundcover",
               "exemplar": false,
-              "expr": "topk(10,(stddev(groundcover_mem_working_set_bytes{node_name=~'$node', namespace=~'$namespace'}) by (workload_name,namespace) / avg(groundcover_mem_working_set_bytes{node_name=~'$node', namespace=~'$namespace'}) by (workload_name,namespace)))",
+              "expr": "topk(10,(stddev(groundcover_container_mem_working_set_bytes{node_name=~'$node', namespace=~'$namespace'}) by (workload_name,namespace) / avg(groundcover_container_mem_working_set_bytes{node_name=~'$node', namespace=~'$namespace'}) by (workload_name,namespace)))",
               "instant": true,
               "interval": "",
               "legendFormat": "{{workload_name}}@{{namespace}}",
