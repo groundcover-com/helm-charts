@@ -8,6 +8,7 @@ data:
     productchansize: 20480
     k8sloadtimeout: 2m0s
     resyncDuration: 1h
+    unavailableDeploymentPollInterval: 10s
     summarizerActiveTtl: 180s
     pushsummaries: true
     productmetricsflushmintotalcounter:
@@ -25,6 +26,12 @@ data:
       issuesthreshold: 100
       interval: 60s
       shouldsample: false
+
+    unavailabledeploymenthandler:
+      samplesthreshold: 100
+      issuesthreshold: 100
+      interval: 60s
+      shouldsample: true         
 
     dataRetention: {{ .Values.agent.alligator.dataRetention }}
     
