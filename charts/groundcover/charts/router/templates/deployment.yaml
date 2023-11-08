@@ -48,6 +48,8 @@ spec:
               value: "release"
             - name: ROUTER_VERSION
               value: "{{ .Values.origin.tag }}"
+            - name: ROUTER_SENTRY_DSN
+              value: "{{ .Values.sentryDsn }}"
           readinessProbe:
             httpGet:
               path: /health
