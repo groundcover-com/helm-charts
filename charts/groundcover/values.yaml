@@ -42,7 +42,7 @@ clusterId:
 #  - clusterA
 #  - clusterB
 region:
-storeIssuesLogsOnly: true
+storeIssuesLogsOnly: false
 filteredNamespaces: []
 filteredWorkloads: []
 logsNamespaceFilters: []
