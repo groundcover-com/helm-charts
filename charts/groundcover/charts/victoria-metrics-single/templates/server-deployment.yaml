@@ -58,7 +58,7 @@ spec:
         - name: {{ template "victoria-metrics.name" . }}-{{ .Values.server.name }}
           securityContext:
             {{- toYaml .Values.server.podSecurityContext | nindent 12 }}
-          image: "{{ .Values.server.image.repository }}:{{ default .Chart.AppVersion .Values.server.image.tag }}"
+          image: "{{ tpl .Values.server.image.repository . }}:{{ default .Chart.AppVersion .Values.server.image.tag }}"
           imagePullPolicy: "{{ .Values.server.image.pullPolicy }}"
           {{- if .Values.server.containerWorkingDir }}
           workingDir: {{ .Values.server.containerWorkingDir }}
@@ -200,10 +200,7 @@ spec:
         {{- with .Values.server.extraContainers }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-    {{- if .Values.imagePullSecrets }}
-      imagePullSecrets:
-       {{ toYaml .Values.imagePullSecrets | indent 2 }}
-    {{- end }}
+      imagePullSecrets: {{ include "imagePullSecrets" . }}
     {{- if .Values.server.nodeSelector }}
       nodeSelector:
 {{ toYaml .Values.server.nodeSelector | indent 8 }}

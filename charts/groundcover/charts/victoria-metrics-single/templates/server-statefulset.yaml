@@ -51,13 +51,10 @@ spec:
       initContainers:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-    {{- with .Values.imagePullSecrets }}
-      imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-    {{- end }}
+      imagePullSecrets: {{ include "imagePullSecrets" . }}
       containers:
         - name: {{ template "victoria-metrics.name" . }}-{{ .Values.server.name }}
-          image: "{{ .Values.server.image.repository }}:{{ default .Chart.AppVersion .Values.server.image.tag }}"
+          image: "{{ tpl .Values.server.image.repository . }}:{{ default .Chart.AppVersion .Values.server.image.tag }}"
           imagePullPolicy: "{{ .Values.server.image.pullPolicy }}"
           {{- if .Values.server.containerWorkingDir }}
           workingDir: {{ .Values.server.containerWorkingDir }}
@@ -199,10 +196,6 @@ spec:
       {{- with .Values.server.extraContainers }}
       {{- toYaml . | nindent 8 }}
       {{- end }}
-    {{- if .Values.imagePullSecrets }}
-      imagePullSecrets:
-       {{ toYaml .Values.imagePullSecrets | indent 2 }}
-    {{- end }}
     {{- if .Values.server.nodeSelector }}
       nodeSelector:
 {{ toYaml .Values.server.nodeSelector | indent 8 }}

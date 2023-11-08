@@ -151,3 +151,7 @@ disable http tracing in tracy if experimental is enabled
     {{- true -}}
   {{- end -}}
 {{- end -}}
+
+{{- define "imagePullSecrets" }}
+{{- default .Values.global.imagePullSecrets .Values.imagePullSecrets | toJson -}}
+{{- end -}}}}

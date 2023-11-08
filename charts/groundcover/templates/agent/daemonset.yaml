@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   annotations:
-    groundcover_version: {{ default .Chart.AppVersion .Values.origin.tag }}
+    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
     {{- if .Values.agent.additionalAnnotations }}
 {{ toYaml .Values.agent.additionalAnnotations | indent 4 }}
     {{- end }}
@@ -32,7 +32,7 @@ spec:
         prometheus.io/port: "9102"
         vm.io/path: "vmetrics"
         vm.io/port: "9102"
-        groundcover_version: {{ default .Chart.AppVersion .Values.origin.tag }}
+        groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
         {{- if .Values.agent.additionalAnnotations }}
 {{ toYaml .Values.agent.additionalAnnotations | indent 8 }}
         {{- end }}
@@ -51,10 +51,7 @@ spec:
 {{ toYaml .Values.agent.podLabels | indent 8 }}
         {{- end }}
     spec:
-{{- if .Values.pullSecrets }}
-      imagePullSecrets:
-{{ toYaml .Values.pullSecrets | indent 8 }}
-{{- end }}
+      imagePullSecrets: {{ include "imagePullSecrets" . }}
 {{- if .Values.agent.tolerations }}
       tolerations:
 {{ toYaml .Values.agent.tolerations | indent 8 }}
@@ -99,7 +96,7 @@ spec:
             {{- with .Values.agent.alligator.env }}
               {{ toYaml . | nindent 12 }}
             {{- end }}                                
-          image: {{ .Values.origin.registry }}/{{ .Values.agent.alligator.repository }}:{{ default .Chart.AppVersion .Values.origin.tag }}
+          image: {{ tpl .Values.agent.alligator.image.repository . }}:{{ default .Chart.AppVersion .Values.global.origin.tag }}
           resources:
 {{- toYaml .Values.agent.alligator.resources | nindent 12 }}
           imagePullPolicy: Always
@@ -153,7 +150,7 @@ spec:
           envFrom:
             - configMapRef:
                 name: tracy-conf-fg9h4chctk
-          image: {{ .Values.origin.registry }}/{{ .Values.agent.tracy.repository }}:{{ default .Chart.AppVersion .Values.origin.tag }}
+          image: {{ tpl .Values.agent.tracy.image.repository . }}:{{ default .Chart.AppVersion .Values.global.origin.tag }}
           resources:
 {{- toYaml .Values.agent.tracy.resources | nindent 12 }}
           imagePullPolicy: Always
@@ -182,7 +179,7 @@ spec:
       hostPID: true
       initContainers:
 {{ if .Values.agent.fetchLinuxHeaders.enabled }}
-        - image:  {{ .Values.origin.registry }}/{{ .Values.agent.fetchLinuxHeaders.repository }}:{{ default .Chart.AppVersion .Values.origin.tag }}
+        - image:  {{tpl .Values.agent.fetchLinuxHeaders.image.repository }}:{{ default .Chart.AppVersion .Values.global.origin.tag }}
           name: fetch-linux-headers
           volumeMounts:
             - mountPath: /host
@@ -192,7 +189,7 @@ spec:
               name: linux-headers
 {{- end }}
         - name: check-promscale-ready
-          image: public.ecr.aws/groundcovercom/curl:latest
+          image: {{ .Values.global.origin.registry }}/curl:latest
           command:
             - /bin/sh
             - -c
@@ -203,7 +200,7 @@ spec:
           command:
             - /bin/sh
             - -c
-          image: public.ecr.aws/groundcovercom/curl:latest
+          image: {{ .Values.global.origin.registry }}/curl:latest
           name: check-vm-ready
       serviceAccountName: alligator
 {{- if .Values.agent.priorityClassName }}

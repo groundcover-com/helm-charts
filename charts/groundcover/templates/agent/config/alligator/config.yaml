@@ -201,7 +201,7 @@ data:
             cluster_id: {{ .Values.clusterId }}
             job: alligator
             region: {{ .Values.region }}
-            version: {{ default .Chart.AppVersion .Values.origin.tag }}
+            version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
         timeout: 10s   
         useRingBuffer: false
         filterRunningNamespace: true
@@ -215,7 +215,7 @@ metadata:
 {{ toYaml .Values.agent.additionalLabels | indent 4 }}
     {{- end }}
   annotations:
-    groundcover_version: {{ default .Chart.AppVersion .Values.origin.tag }}
+    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
     {{- if .Values.agent.additionalAnnotations }}
 {{ toYaml .Values.agent.additionalAnnotations | indent 4 }}
     {{- end }}

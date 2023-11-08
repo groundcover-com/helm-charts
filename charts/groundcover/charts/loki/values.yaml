@@ -284,7 +284,7 @@ initContainers: []
 
 extraContainers:
   - name: pvcleanup
-    image: "public.ecr.aws/groundcovercom/pvccleanup:latest"
+    image: "{{ .Values.global.origin.registry }}/pvccleanup:latest"
     env:
       - name: SPACEMONITORING_FOLDER
         value: "/data/loki/chunks"

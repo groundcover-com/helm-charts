@@ -529,7 +529,7 @@ nodeSelector: {}
 prometheus:
   enabled: true
   image:
-    repository: public.ecr.aws/groundcovercom/postgres_exporter
+    repository: "{{ .Values.global.origin.registry }}/postgres_exporter"
     tag: v0.7.0
     pullPolicy: Always
   # Extra custom environment variables for prometheus.

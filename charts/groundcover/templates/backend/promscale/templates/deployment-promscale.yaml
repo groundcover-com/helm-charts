@@ -35,20 +35,17 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
       annotations: 
-        groundcover_version: {{ default .Chart.AppVersion .Values.origin.tag }}
+        groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
         recreatepod: {{ randAlphaNum 5 | quote }}
         checksum/config: {{ printf "%s" .Values.promscale.connection | sha256sum -}}
         {{- if .Values.promscale.prometheus.annotations }}
         {{- .Values.promscale.prometheus.annotations | toYaml | nindent 8 }}
         {{- end }}
     spec:
-{{- if .Values.pullSecrets }}
-      imagePullSecrets:
-{{ toYaml .Values.pullSecrets | indent 8 }}
-{{- end }}
+      imagePullSecrets: {{ include "imagePullSecrets" . }}
       initContainers:
         - name: check-ts-ready
-          image: public.ecr.aws/groundcovercom/postgres:9.6.5
+          image: {{ .Values.global.origin.registry }}/postgres:9.6.5
           command:
             - bash
             - -c
@@ -66,7 +63,7 @@ spec:
                 fieldRef:
                   fieldPath: metadata.annotations['groundcover_version']
       containers:
-        - image: {{ .Values.origin.registry }}/{{ .Values.promscale.repository }}:{{ default .Chart.AppVersion .Values.origin.tag }}
+        - image: {{ tpl .Values.promscale.image.repository . }}:{{ default .Chart.AppVersion .Values.global.origin.tag }}
           imagePullPolicy: {{ .Values.promscale.imagePullPolicy }}
           name: promscale-connector
           {{- if or (.Values.promscale.openTelemetry.enabled) (.Values.promscale.extraArgs) }}

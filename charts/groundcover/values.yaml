@@ -15,7 +15,10 @@ global:
     secretName:
     # the key in the secret containing the token value
     secretKey:
-
+  origin:
+    registry: public.ecr.aws/groundcovercom
+    tag: "" # rewrites Chart.AppVersion
+  imagePullSecrets: []
   groundcoverLabels:
 
 metrics:
@@ -44,11 +47,7 @@ shouldDropRunningNamespaces: false
 commitHashKeyName:
 repositoryUrlKeyName:
 
-origin:
-  registry: public.ecr.aws/groundcovercom
-  tag: "" # rewrites Chart.AppVersion
-
-pullSecrets: []
+#imagePullSecrets: []
 
 backend:
   enabled: true
@@ -66,7 +65,8 @@ agent:
   nodeSelector:
   priorityClassName:
   alligator:
-    repository: alligator
+    image:
+      repository: "{{ .Values.global.origin.registry }}/alligator"
     resources:
       requests:
         memory: 300Mi
@@ -81,7 +81,8 @@ agent:
     watchOnlyLocalNode: true
     env:
   tracy:
-    repository: tracy
+    image:
+      repository: "{{ .Values.global.origin.registry }}/tracy"
     resources:
       requests:
         memory: 512Mi
@@ -104,10 +105,12 @@ migrator:
   tolerations:
   priorityClassName:
   resetDB: "false" # must be string
-  repository: migrator
+  image:
+    repository: "{{ .Values.global.origin.registry }}/migrator"
 
 k8sWatcher:
-  repository: k8s-watcher
+  image:
+    repository: "{{ .Values.global.origin.registry }}/k8s-watcher"
   additionalLabels:
   podLabels:
   additionalAnnotations:
@@ -134,7 +137,8 @@ portal:
   nodeSelector:
   tolerations: []
   priorityClassName:
-  repository: portal
+  image:
+    repository: "{{ .Values.global.origin.registry }}/portal"
   resources:
     limits:
       cpu: 100m
@@ -144,10 +148,9 @@ portal:
       memory: 100Mi
 
 loki:
-  # loki pullSecrets expects the secret name only, instead of `- name: {secret}` just `- {secret}`
-  # image:
-  #   pullSecrets: []
-
+  # imagePullSecrets: [] 
+  image:
+    repository: "{{ .Values.global.origin.registry }}/loki"
   affinity:
 
   nodeSelector:
@@ -250,6 +253,8 @@ router:
 # if you installed groundcover in its own namespace, deleting the namespace can done instead
 timescaledb-single:
   # imagePullSecrets: []
+  image:
+    repository: "{{ .Values.global.origin.registry }}/timescaledb-ha"
   tolerations: []
   podAnnotations: {}
   nodeSelector: {}
@@ -307,12 +312,16 @@ timescaledb-single:
   secrets:
     credentialsSecretName: ""
 
-# victoria-metrics-agent:
-#   imagePullSecrets:
+victoria-metrics-agent:
+  # imagePullSecrets:
+  image:
+    repository: "{{ .Values.global.origin.registry }}/vmagent"
 
 victoria-metrics-single:
   # imagePullSecrets: []
   server:
+    image:
+      repository: "{{ .Values.global.origin.registry }}/victoria-metrics"
     # -- Data retention period, {amount}[h(ours), d(ays), w(eeks), y(ears)], default is 1 month
     retentionPeriod: 7d
     # -- Sts/Deploy additional labels
@@ -377,7 +386,8 @@ victoria-metrics-single:
     affinity: {}
 
 promscale:
-  repository: promscale
+  image:
+    repository: "{{ .Values.global.origin.registry }}/promscale"
   nameOverride: groundcover-promscale
   fullnameOverride: groundcover-promscale
 
@@ -553,6 +563,8 @@ config:
   annotations:
 
 vmagent-backend:
+  image:
+    repository: "{{ .Values.global.origin.registry }}/vmagent"
   remoteWriteUrls:
     - http://groundcover-victoria-metrics:8428/api/v1/write
   resources:

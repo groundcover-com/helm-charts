@@ -55,15 +55,10 @@ spec:
         {{- toYaml .Values.securityContext | nindent 8 }}
       initContainers:
         {{- toYaml .Values.initContainers | nindent 8 }}
-      {{- if .Values.image.pullSecrets }}
-      imagePullSecrets:
-      {{- range .Values.image.pullSecrets }}
-        - name: {{ . }}
-      {{- end}}
-      {{- end }}
+      imagePullSecrets: {{ include "imagePullSecrets" . }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
+          image: "{{ tpl .Values.image.repository . }}:{{ default .Chart.AppVersion .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
             - "-config.file=/etc/loki/loki.yaml"
@@ -106,7 +101,7 @@ spec:
               value: "{{ .Values.tracing.jaegerAgentHost }}"
             {{- end }}
 {{- if .Values.extraContainers }}
-{{ toYaml .Values.extraContainers | indent 8}}
+{{ tpl (toYaml .Values.extraContainers) . | indent 8}}
 {{- end }}
       nodeSelector:
         {{- toYaml .Values.nodeSelector | nindent 8 }}

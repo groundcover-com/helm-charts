@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
-    groundcover_version: {{ default .Chart.AppVersion .Values.origin.tag }}
+    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
     {{- if .Values.k8sWatcher.additionalAnnotations }}
 {{ toYaml .Values.k8sWatcher.additionalAnnotations | indent 4 }}
     {{- end }}    
@@ -26,7 +26,7 @@ spec:
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "9102"
-        groundcover_version: {{ default .Chart.AppVersion .Values.origin.tag }}
+        groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
         {{- if .Values.k8sWatcher.additionalAnnotations }}
 {{ toYaml .Values.k8sWatcher.additionalAnnotations | indent 8 }}
         {{- end }}
@@ -57,10 +57,7 @@ spec:
       nodeSelector:
 {{ toYaml .Values.k8sWatcher.nodeSelector | indent 8 }}
 {{- end }}
-{{- if .Values.pullSecrets }}
-      imagePullSecrets:
-{{ toYaml .Values.pullSecrets | indent 8 }}
-{{- end }}
+      imagePullSecrets: {{ include "imagePullSecrets" . }}
       containers:
       - env:
         - name: GC_CLUSTERID
@@ -80,7 +77,7 @@ spec:
         {{- with .Values.k8sWatcher.env }}
           {{ toYaml . | nindent 8 }}
         {{- end }}
-        image: {{ .Values.origin.registry }}/{{ .Values.k8sWatcher.repository }}:{{ default .Chart.AppVersion .Values.origin.tag }}
+        image: {{ tpl .Values.k8sWatcher.image.repository . }}:{{ default .Chart.AppVersion .Values.global.origin.tag }}
         imagePullPolicy: Always
         name: k8s-watcher
         ports:
@@ -93,7 +90,7 @@ spec:
           name: k8s-watcher-config-volume
       initContainers:
       - name: check-promscale-ready
-        image: public.ecr.aws/groundcovercom/curl:latest
+        image: {{ .Values.global.origin.registry }}/curl:latest
         command:
           - /bin/sh
           - -c
@@ -106,7 +103,7 @@ spec:
         command:
         - /bin/sh
         - -c
-        image: public.ecr.aws/groundcovercom/curl:latest
+        image: {{ .Values.global.origin.registry }}/curl:latest
         name: check-vm-ready
       serviceAccountName: k8s-watcher
 {{- if .Values.k8sWatcher.priorityClassName }}

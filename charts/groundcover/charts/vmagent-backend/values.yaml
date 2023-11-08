@@ -40,7 +40,7 @@ initContainers:
     command:
     - /bin/sh
     - -c
-    image: public.ecr.aws/groundcovercom/curl:latest
+    image: "{{ .Values.global.origin.registry }}/curl:latest"
     name: check-vm-ready
 
 imagePullSecrets: []

@@ -10,7 +10,7 @@ metadata:
 {{ toYaml .Values.migrator.additionalLabels | indent 4 }}
     {{- end }}
   annotations:
-    groundcover_version: {{ default .Chart.AppVersion .Values.origin.tag }}
+    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
     {{- if .Values.migrator.additionalAnnotations }}
 {{ toYaml .Values.migrator.additionalAnnotations | indent 4 }}
     {{- end }}
@@ -32,7 +32,7 @@ spec:
 {{ toYaml .Values.migrator.podLabels | indent 8 }}
     {{- end }}
       annotations:
-        groundcover_version: {{ default .Chart.AppVersion .Values.origin.tag }}
+        groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
         {{- if .Values.migrator.additionalAnnotations }}
 {{ toYaml .Values.migrator.additionalAnnotations | indent 8 }}
         {{- end }}
@@ -55,10 +55,7 @@ spec:
       priorityClassName: {{ .Values.migrator.priorityClassName }}
     {{- end }}
       serviceAccountName: migrator
-{{- if .Values.pullSecrets }}
-      imagePullSecrets:
-{{ toYaml .Values.pullSecrets | indent 8 }}
-{{- end }}
+      imagePullSecrets: {{ include "imagePullSecrets" . }}
       containers:
       - env:
         - name: GC_FORCE_MIGRATE
@@ -76,7 +73,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.annotations['groundcover_version']
-        image: {{ .Values.origin.registry }}/{{ .Values.migrator.repository }}:{{ default .Chart.AppVersion .Values.origin.tag }}
+        image: {{ tpl .Values.migrator.image.repository . }}:{{ default .Chart.AppVersion .Values.global.origin.tag }}
         name: migrator-{{ randAlphaNum 5 | lower }}
       initContainers:
       - command:
@@ -84,7 +81,7 @@ spec:
         - -c
         - until pg_isready -h groundcover-tsdb -p 5432; do echo Waiting for
           TimescaleDB...; sleep 2; done; echo TimescaleDB is up
-        image: public.ecr.aws/groundcovercom/postgres:9.6.5
+        image: {{ .Values.global.origin.registry }}/postgres:9.6.5
         name: check-ts-ready
       restartPolicy: Never
 {{ end -}}
