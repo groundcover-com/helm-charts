@@ -20,6 +20,7 @@ data:
       Token: "OVERRIDEN"
       WebsocketScheme: "{{ .Values.saas.scheme }}"
       TLSSkipVerify: "{{ .Values.saas.tls_skip_verify }}"
+      ExtraHeaders:
 
     DirectModeGRPCPort: "5555"
 
