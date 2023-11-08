@@ -9,12 +9,12 @@ metadata:
     {{- end }}
   labels:
     {{- include "groundcover.labels" . | nindent 4 }}
-    app: portal
-    app.kubernetes.io/name: portal
+    app: {{ include "portal.fullname" . }}
+    app.kubernetes.io/name: {{ include "portal.fullname" . }}
     {{- if .Values.portal.additionalLabels }}
 {{ toYaml .Values.portal.additionalLabels | indent 4 }}
     {{- end }}
-  name: portal
+  name: {{ include "portal.fullname" . }}
   namespace: {{ .Release.Namespace }}
 spec:
   ports:
@@ -22,7 +22,12 @@ spec:
     port: 5555
     protocol: TCP
     targetPort: grpc-portal
+  - name: http
+    port: 9999
+    protocol: TCP
+    targetPort: portal-http
+
   selector:
-    app: portal
+    app: {{ include "portal.fullname" . }}
   type: ClusterIP
 {{ end -}}

@@ -25,7 +25,7 @@
 {{- else if .Values.global.ingress.site -}}
     {{- $baseUrl = (printf "https://api-otel-http.%s" .Values.global.ingress.site) -}}
 {{- else if not .Values.global.backend.enabled -}}
-    {{- fail "A valid global.domain or global.logs.overrideUrl is required!" -}}
+    {{- fail "A valid global.ingress.site or global.logs.overrideUrl is required!" -}}
 {{- else -}}
     {{- $baseUrl = (printf "%s://%s:%d" (include "opentelemetry-collector.otlp.scheme" .) (include "opentelemetry-collector.fullname" .) (index .Values.global "opentelemetry-collector" "ports" "loki-http" "servicePort" | int )) -}}
 {{- end -}}
@@ -42,7 +42,7 @@
 {{- else if .Values.global.ingress.site -}}
     {{- include "incloud.otel.http.url" . -}}
 {{- else if not .Values.global.backend.enabled -}}
-    {{- fail "A valid global.domain or global.otlp.overrideHttpURL is required!" -}}
+    {{- fail "A valid global.ingress.site or global.otlp.overrideHttpURL is required!" -}}
 {{- else -}}
     {{- printf "%s://%s:%d" (include "opentelemetry-collector.otlp.scheme" .) (include "opentelemetry-collector.fullname" .) (index .Values.global "opentelemetry-collector" "ports" "otlp-http" "servicePort" | int ) -}}
 {{- end -}}
@@ -54,7 +54,7 @@
 {{- else if .Values.global.ingress.site -}}
     {{- include "incloud.otel.grpc.url" . -}}
 {{- else if not .Values.global.backend.enabled -}}
-    {{- fail "A valid global.domain or global.otlp.overrideGrpcURL is required!" -}}
+    {{- fail "A valid global.ingress.site or global.otlp.overrideGrpcURL is required!" -}}
 {{- else -}}
     {{- printf "%s:%d" (include "opentelemetry-collector.fullname" .) (index .Values.global "opentelemetry-collector" "ports" "otlp" "servicePort" | int ) -}}
 {{- end -}}
@@ -67,7 +67,7 @@
 {{- else if .Values.global.ingress.site -}}
     {{- $baseUrl = (printf "https://api-otel-http.%s" .Values.global.ingress.site) -}}
 {{- else if not .Values.global.backend.enabled -}}
-    {{- fail "A valid global.domain or global.otlp.overrideHttpURL is required!" -}}
+    {{- fail "A valid global.ingress.site or global.otlp.overrideHttpURL is required!" -}}
 {{- else -}}
     {{- $baseUrl = (printf "%s://%s:%d" (include "opentelemetry-collector.otlp.scheme" .) (include "opentelemetry-collector.fullname" .) (index .Values.global "opentelemetry-collector" "ports" "health" "servicePort" | int )) -}}
 {{- end -}}
@@ -80,7 +80,7 @@
 {{- else if .Values.global.ingress.site -}}
     {{- include "incloud.otel.http.url" . -}}
 {{- else if not .Values.global.backend.enabled -}}
-    {{- fail "A valid global.domain or global.datadogapm.overrideUrl is required!" -}}
+    {{- fail "A valid global.ingress.site or global.datadogapm.overrideUrl is required!" -}}
 {{- else -}}
     {{- printf "http://%s:%d" (include "opentelemetry-collector.fullname" .) (index .Values.global "opentelemetry-collector" "ports" "datadogapm" "servicePort" | int ) -}}
 {{- end -}}

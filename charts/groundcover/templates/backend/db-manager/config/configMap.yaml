@@ -26,10 +26,10 @@ data:
       Events: 5d
     DataMigration:
       BackfillBatchRows:
-        Traces: 100000
-        Logs: 100000
-        Entities: 100000
-        Events: 100000
+        Traces: 50000
+        Logs: 50000
+        Entities: 50000
+        Events: 50000
       BackfillBatchMaxExecutionTime: 5m
       
     ClickHouse:

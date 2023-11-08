@@ -12,14 +12,14 @@ metadata:
     {{- if .Values.portal.additionalAnnotations }}
 {{ toYaml .Values.portal.additionalAnnotations | indent 4 }}
     {{- end }}
-  name: portal
+  name: {{ include "portal.fullname" . }}
   namespace: {{ .Release.Namespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: portal
+  name: {{ include "portal.fullname" . }}
 subjects:
 - kind: ServiceAccount
-  name: portal
+  name: {{ include "portal.fullname" . }}
   namespace: {{ .Release.Namespace }}
 {{ end -}}

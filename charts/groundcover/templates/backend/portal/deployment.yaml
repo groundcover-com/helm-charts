@@ -9,17 +9,17 @@ metadata:
     {{- end }}    
   labels:
     {{- include "groundcover.labels" . | nindent 4 }}
-    app: portal
-    app.kubernetes.io/name: portal
+    app: {{ include "portal.fullname" . }}
+    app.kubernetes.io/name: {{ include "portal.fullname" . }}
     {{- if .Values.portal.additionalLabels }}
 {{ toYaml .Values.portal.additionalLabels | indent 4 }}
     {{- end }}
-  name: portal
+  name: {{ include "portal.fullname" . }}
   namespace: {{ .Release.Namespace }}
 spec:
   selector:
     matchLabels:
-      app: portal
+      app: {{ include "portal.fullname" . }}
   strategy:
     type: Recreate
   template:
@@ -36,8 +36,8 @@ spec:
 {{ toYaml .Values.portal.podAnnotations | indent 8 }}
         {{- end }}
       labels:
-        app: portal
-        app.kubernetes.io/name: portal
+        app: {{ include "portal.fullname" . }}
+        app.kubernetes.io/name: {{ include "portal.fullname" . }}
         {{- include "groundcover.labels" . | nindent 8 }}
         {{- if .Values.portal.additionalLabels }}
 {{ toYaml .Values.portal.additionalLabels | indent 8 }}
@@ -59,7 +59,7 @@ spec:
 {{ toYaml .Values.portal.nodeSelector | indent 8 }}
 {{- end }}
       imagePullSecrets: {{ include "imagePullSecrets" . }}
-      serviceAccountName: portal
+      serviceAccountName: {{ include "portal.fullname" . }}
       containers:
       - env:
         - name: GC_GROUNDCOVERVERSION
@@ -88,7 +88,7 @@ spec:
 {{ end }}
         image: {{ tpl .Values.portal.image.repository . }}:{{ default .Chart.AppVersion .Values.global.origin.tag }}
         imagePullPolicy: Always
-        name: portal
+        name: {{ include "portal.fullname" . }}
         ports:
         - containerPort: 5555
           name: grpc-portal
@@ -96,19 +96,19 @@ spec:
         - containerPort: 9102
           name: portal-metrics
         - containerPort: 9999
-          name: portal-health
+          name: portal-http
           protocol: TCP
         readinessProbe:
           httpGet:
             path: /health
-            port: portal-health
+            port: portal-http
           initialDelaySeconds: 5
           periodSeconds: 15
         livenessProbe:
           httpGet:
             scheme: HTTP
             path: /health
-            port: portal-health
+            port: portal-http
           initialDelaySeconds: 5
           periodSeconds: 15
           timeoutSeconds: 5  
@@ -122,6 +122,6 @@ spec:
 {{- end }}
       volumes:
       - configMap:
-          name: portal-config
+          name: {{ include "portal.fullname" . }}-config
         name: portal-config-volume
 {{ end -}}

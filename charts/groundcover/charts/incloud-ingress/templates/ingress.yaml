@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ printf "%s-http" (include "incloud-ingress.name" .) }}
+  name: {{ printf "%s-http" (include "incloud-ingress.name" .) | trunc 63 | trimSuffix "-" }}
   annotations:
     konghq.com/plugins: {{ printf "%s-auth" .Release.Name | quote }}
     konghq.com/protocols: {{ ternary "https" "http" .Values.kong.proxy.tls.enabled | quote }}
@@ -55,3 +55,37 @@ spec:
                 name: {{ include "metrics-ingester.fullname" . }}
                 port:
                   name: http
+    - host: {{ get (urlParse (include "portal.live.http.url" .)) "host" }}
+      http:
+        paths:
+          - path: {{ get (urlParse (include "portal.live.http.url" .)) "path" }} 
+            pathType: Exact
+            backend:
+              service:
+                name: {{ include "portal.fullname" . }}
+                port:
+                  name: http
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ printf "%s-grpc" (include "incloud-ingress.name" .) | trunc 63 | trimSuffix "-" }}
+  annotations:
+    konghq.com/headers.content-type: application/grpc
+    konghq.com/plugins: {{ printf "%s-auth" .Release.Name | quote }}
+    konghq.com/protocols: {{ ternary "grpcs" "grpc" .Values.kong.proxy.tls.enabled | quote }}
+spec:
+  ingressClassName: kong
+  rules:
+    - host: {{ splitList ":" (include "opentelemetry-collector.otlp.grpc.url" .) | first }} 
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ printf "%s-grpc" (include "opentelemetry-collector.fullname" .) }}
+                port:
+                  number: {{ index .Values.global "opentelemetry-collector" "ports" "otlp" "servicePort" | int }}

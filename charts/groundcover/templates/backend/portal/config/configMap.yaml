@@ -61,6 +61,6 @@ metadata:
     {{- if .Values.portal.additionalAnnotations }}
 {{ toYaml .Values.portal.additionalAnnotations | indent 4 }}
     {{- end }}
-  name: portal-config
+  name: {{ include "portal.fullname" . }}-config
   namespace: {{ .Release.Namespace }}
 {{ end -}}
