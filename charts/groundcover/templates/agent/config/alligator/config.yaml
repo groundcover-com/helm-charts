@@ -161,19 +161,19 @@ data:
         processingInterval: 100ms
         eBPFStatsReadingInterval: 5s
         tsConverterSyncInterval: 10s
+        procMountPath: "/host/proc"
         protocols:
           http:
             enabled: true
             bodyStoreSizeLimit: 1048576 # 1mb
             headersParseLimit: 4096 # 4kb
             chunkedTransferSizeDigitLimit: 10
+            maxURISize: 1024 # 1kb
           redis:
             enabled: true
-            arrayNestingLimit: 8
             commandsUntilCalibrated: 3
             stringParseLimit: 10240 # 10k
-            requestBytesStoreLimit: 1048576 # 1mb
-            responseBytesStoreLimit: 1048576 # 1mb
+            payloadStoreLimit: 1048576 # 1mb
         bpfLoading:
           verboseBpfErrors: false
           bpfErrorsBufferSize: 104857600 # 100mb
