@@ -78,6 +78,9 @@ agent:
   affinity:
   nodeSelector:
   priorityClassName:
+  hostNetwork: false
+  monitoring:
+    port: 9102
   alligator:
     image:
       repository: "{{ .Values.global.origin.registry }}/alligator"

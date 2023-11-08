@@ -29,9 +29,9 @@ spec:
     metadata:
       annotations:
         prometheus.io/scrape: "true"
-        prometheus.io/port: "9102"
+        prometheus.io/port: {{ (include "agent.monitoring.port" .) | quote }}
         vm.io/path: "vmetrics"
-        vm.io/port: "9102"
+        vm.io/port: {{ (include "agent.monitoring.port" .) | quote  }}
         groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
         checksum/tracy_config: {{ include (print $.Template.BasePath "/agent/config/tracy/config.yaml") . | sha256sum }}
         checksum/alligator_config: {{ include (print $.Template.BasePath "/agent/config/alligator/config.yaml") . | sha256sum }}
@@ -68,6 +68,8 @@ spec:
 {{- end }}
       containers:
         - env:
+            - name: PROMETHEUS_PORT
+              value: {{ (include "agent.monitoring.port" .) | quote }}
             - name: NODE_NAME
               valueFrom:
                 fieldRef:
@@ -104,7 +106,7 @@ spec:
           imagePullPolicy: Always
           name: alligator
           ports:
-            - containerPort: 9102
+            - containerPort: {{ (include "agent.monitoring.port" .) | int }}
               name: prom-metrics
               protocol: TCP
           securityContext:
@@ -179,7 +181,7 @@ spec:
               readOnly: true
 {{- end }}
       dnsPolicy: ClusterFirstWithHostNet
-      hostNetwork: false
+      hostNetwork: {{ default false .Values.agent.hostNetwork }}
       hostPID: true
       initContainers:
         - name: check-promscale-ready

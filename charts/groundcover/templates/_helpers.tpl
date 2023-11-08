@@ -72,6 +72,10 @@ Get cluster_id from values or generate random one
 {{- .Values.region | default "undefined" }}
 {{- end }}
 
+{{- define "agent.monitoring.port" -}}
+{{- default 9102 (.Values.agent.monitoring).port -}}
+{{- end -}}
+
 {{- define "groundcover.apikeySecretName" -}}
 {{- default "api-key" .Values.global.groundcoverPredefinedTokenSecret.secretName -}}
 {{- end -}}
