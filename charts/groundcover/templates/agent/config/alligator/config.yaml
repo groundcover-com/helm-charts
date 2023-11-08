@@ -136,7 +136,7 @@ data:
     flora: 
       networkTracer:
         enabled: true
-        processingInterval: 100ms
+        processingInterval: 20ms
         eBPFStatsReadingInterval: 5s
         tsConverterSyncInterval: 10s
         connectionManager:
@@ -151,7 +151,7 @@ data:
               http:
                 bodyStoreSizeLimit: 1048576 # 1mb
                 headersParseLimit: 4096 # 4kb
-                chunkedTransferDigitLimit: 10
+                chunkedTransferSizeDigitLimit: 10
         ringBuffer:
           size: 10485760 # 10mb
           pollingTimeLimit: 5ms
