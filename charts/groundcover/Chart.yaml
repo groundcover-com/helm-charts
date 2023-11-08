@@ -1,5 +1,5 @@
 apiVersion: v2
-appVersion: 1.3.16
+appVersion: 1.3.17
 dependencies:
 - name: router
   repository: ""
@@ -27,6 +27,8 @@ dependencies:
     parent: global.clickhouse.auth
   - child: containerPorts
     parent: global.clickhouse.containerPorts
+  - child: serviceAccount
+    parent: global.clickhouse.serviceAccount
   name: clickhouse
   repository: https://charts.bitnami.com/bitnami
   version: 3.3.5
@@ -54,4 +56,4 @@ dependencies:
 description: Cloud Native Observability
 name: groundcover
 type: application
-version: 1.3.16
+version: 1.3.17
