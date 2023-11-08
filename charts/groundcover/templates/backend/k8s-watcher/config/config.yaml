@@ -32,7 +32,7 @@ data:
       aggregationCacheSize: 1024
     
     VictoriaMetrics:
-      url: {{ include "metrics-ingester.base.http.url" . }}
+      url: {{ include "metrics-ingester.base.http.internalUrl" . }}
       TLSSkipVerify: true
 
     dataRetention: {{ .Values.agent.alligator.dataRetention }}

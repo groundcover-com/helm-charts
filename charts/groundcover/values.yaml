@@ -314,7 +314,7 @@ opentelemetry-collector:
       secretName: opentelemetry-collector-certificate
   image:
     repository: public.ecr.aws/groundcovercom/otel/opentelemetry-collector-contrib
-    tag: "1.4.47"
+    tag: "1.4.48"
   podLabels:
     app.kubernetes.io/part-of: groundcover
   podAnnotations:
@@ -514,7 +514,6 @@ metrics-ingester:
     remoteWrite.maxDiskUsagePerURL: 1GB
     remoteWrite.headers: "apikey:%{API_KEY}"
     remoteWrite.tlsInsecureSkipVerify: "true"
-    remoteWrite.streamAggr.keepInput: "true"
     remoteWrite.streamAggr.config: "/extra-config/aggregation_config.yaml"
     remoteWrite.url: '{{ include "victoria-metrics.write.http.url" . }}'
     tlsKeyFile: /etc/ssl/certs/tls.key
@@ -979,13 +978,6 @@ victoria-metrics-single:
   server:
     image:
       repository: public.ecr.aws/groundcovercom/victoria-metrics
-    extraVolumes:
-      - name: config
-        configMap:
-          name: victoria-metrics-single-config
-    extraVolumeMounts:
-      - name: config
-        mountPath: /config
     extraArgs:
       search.maxUniqueTimeseries: "2000000"
       search.maxSeries: "500000"
@@ -995,7 +987,6 @@ victoria-metrics-single:
       search.maxConcurrentRequests: "8"
       maxLabelsPerTimeseries: "50"
       promscrape.maxScrapeSize: "100MB"
-      relabelConfig: /config/relabel_config.yaml
     # -- Data retention period, {amount}[h(ours), d(ays), w(eeks), y(ears)], default is 1 month
     retentionPeriod: 7d
     # -- Sts/Deploy additional labels

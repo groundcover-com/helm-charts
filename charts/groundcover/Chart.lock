@@ -4,7 +4,7 @@ dependencies:
   version: 0.1.0
 - name: victoria-metrics-single
   repository: https://victoriametrics.github.io/helm-charts
-  version: 0.9.0
+  version: 0.9.4
 - name: victoria-metrics-agent
   repository: ""
   version: 0.8.41
@@ -26,5 +26,5 @@ dependencies:
 - name: incloud-ingress
   repository: ""
   version: 0.1.0
-digest: sha256:e2dec2bb5f479118c7b73820ca703052d51ef0abd7ca7ee78a2a5fe3e9bfe719
-generated: "2023-07-24T12:02:59.936312645Z"
+digest: sha256:dd650a3e163704563488f8ab0c339a31c9f4432f9c24ade572d211d9821a63dc
+generated: "2023-08-24T11:05:17.845385428Z"

@@ -3,10 +3,10 @@ kind: Ingress
 metadata:
   name: {{ printf "%s-grpc" (include "incloud-ingress.name" .) }}
   annotations:
-    konghq.com/protocols: grpcs
-    konghq.com/plugins: incloud-auth
-    konghq.com/https-redirect-status-code: "301"
     konghq.com/headers.content-type: application/grpc
+    konghq.com/plugins: {{ printf "%s-auth" .Release.Name }}
+    konghq.com/protocols: {{ ternary "grpcs" "grpc" .Values.kong.proxy.tls.enabled }}
+    konghq.com/https-redirect-status-code: {{ ternary "301" "" .Values.kong.proxy.tls.enabled }}
 spec:
   ingressClassName: kong
   rules:

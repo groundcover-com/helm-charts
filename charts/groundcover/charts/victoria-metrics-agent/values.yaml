@@ -3,7 +3,7 @@
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
-groundcover_version: 1.4.47
+groundcover_version: 1.4.48
 # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
 deployment:
   enabled: true
@@ -178,6 +178,11 @@ annotations: {}
 podAnnotations: {}
 nodeSelector: {}
 tolerations: []
+topologySpreadConstraints: []
+# - maxSkew: 1
+#   topologyKey: topology.kubernetes.io/zone
+#   whenUnsatisfiable: DoNotSchedule
+
 affinity: {}
 # vmagent scraping configuration:
 # https://github.com/VictoriaMetrics/VictoriaMetrics/blob/master/docs/vmagent.md#how-to-collect-metrics-in-prometheus-format
@@ -507,3 +512,5 @@ config:
       ## End of COPY
 # -- Extra scrape configs that will be appended to `config`
 extraScrapeConfigs: []
+# Add extra specs dynamically to this chart
+extraObjects: []

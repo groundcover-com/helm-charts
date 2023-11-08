@@ -2,13 +2,13 @@
 apiVersion: configuration.konghq.com/v1
 kind: KongPlugin
 metadata:
-  name: {{ printf "%s-auth" .Values.auth.namePrefix }}
+  name: {{ printf "%s-auth" .Release.Name }}
 plugin: key-auth
 ---
 apiVersion: v1
 kind: Secret
 metadata:
-  name: {{ printf "%s-api-key" .Values.auth.namePrefix }}
+  name: {{ printf "%s-api-key" .Release.Name }}
 type: Opaque
 stringData:
   kongCredType: "key-auth"
@@ -17,10 +17,10 @@ stringData:
 apiVersion: configuration.konghq.com/v1
 kind: KongConsumer
 metadata:
-  name: {{ .Values.auth.namePrefix }}-api
+  name: {{ printf "%s-api" .Release.Name }}
   annotations:
-    kubernetes.io/ingress.class: {{ .Values.kong.ingressController.ingressClass }}
     checksum/config: {{ .Values.global.groundcover_token | sha256sum }}
+    kubernetes.io/ingress.class: {{ .Values.kong.ingressController.ingressClass }}
 username: incloud-api
 credentials:
-- {{ printf "%s-api-key" .Values.auth.namePrefix }}
+  - {{ printf "%s-api-key" .Release.Name }}

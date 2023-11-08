@@ -6,6 +6,10 @@
 {{- ternary "https" "http" .Values.global.metrics.tls.enabled -}}
 {{- end -}}
 
+{{- define "metrics-ingester.base.http.internalUrl" -}}
+    {{- printf "%s://%s:%d" (include "metrics-ingester.http.scheme" .) (include "metrics-ingester.fullname" .) (index .Values.global "metrics-ingester" "service" "servicePort" | int ) -}}
+{{- end -}}
+
 {{- define "metrics-ingester.base.http.url" -}}
 {{- if .Values.global.metrics.overrideUrl -}}
     {{- .Values.global.metrics.overrideUrl -}}
@@ -14,7 +18,7 @@
 {{- else if not .Values.global.backend.enabled -}}
     {{- fail "A valid global.domain or .Values.global.metrics.overrideUrl is required!" -}}
 {{- else -}}
-    {{- printf "%s://%s:%d" (include "metrics-ingester.http.scheme" .) (include "metrics-ingester.fullname" .) (index .Values.global "metrics-ingester" "service" "servicePort" | int ) -}}
+    {{- include "metrics-ingester.base.http.internalUrl" . -}}
 {{- end -}}
 {{- end -}}
 

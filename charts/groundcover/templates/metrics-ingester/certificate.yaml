@@ -1,4 +1,3 @@
-{{ if .Values.global.backend.enabled }}
 apiVersion: v1
 kind: Secret
 type: kubernetes.io/tls
@@ -10,4 +9,3 @@ metadata:
 stringData:
   tls.key: {{ $ca.Key  | quote }}
   tls.crt: {{ $ca.Cert | quote }}
-{{- end }}
