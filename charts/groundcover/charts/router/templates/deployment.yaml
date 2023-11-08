@@ -46,6 +46,8 @@ spec:
           env:
             - name: GIN_MODE
               value: "release"
+            - name: ROUTER_VERSION
+              value: "{{ .Values.origin.tag }}"
           readinessProbe:
             httpGet:
               path: /health
