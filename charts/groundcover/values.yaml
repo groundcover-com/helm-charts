@@ -633,7 +633,18 @@ metrics-ingester:
       cpu: 100m
       memory: 256Mi
   config:
-    scrape_configs: []
+    scrape_configs:
+      - job_name: kube-state-metrics
+        kubernetes_sd_configs:
+          - namespaces:
+              own_namespace: true
+            role: pod
+        relabel_configs:
+          - action: keep
+            source_labels:
+              - __meta_kubernetes_pod_label_app_kubernetes_io_name
+              - __meta_kubernetes_pod_label_app_groundcover_com_owner
+            regex: kube-state-metrics;groundcover
 
 victoria-metrics-agent:
   nodeSelector:
@@ -735,7 +746,8 @@ victoria-metrics-agent:
 kube-state-metrics:
   nodeSelector:
   nameOverride: kube-state-metrics
-  enabled: false
+  customLabels:
+    app.groundcover.com/owner: groundcover
   service:
     port: 8080
     annotations:
@@ -822,6 +834,10 @@ custom-metrics:
             source_labels:
               - __meta_kubernetes_pod_label_app_kubernetes_io_part_of
             regex: groundcover
+          - action: drop
+            source_labels:
+              - __meta_kubernetes_pod_label_app_kubernetes_io_name
+            regex: kube-state-metrics
           - source_labels:
               [
                 __meta_kubernetes_namespace,
@@ -858,6 +874,10 @@ custom-metrics:
             source_labels:
               - __meta_kubernetes_pod_label_app_kubernetes_io_part_of
             regex: groundcover
+          - action: drop
+            source_labels:
+              - __meta_kubernetes_pod_label_app_kubernetes_io_name
+            regex: kube-state-metrics            
           - action: labelmap
             regex: __meta_kubernetes_node_label_(.+)
           - target_label: __address__
@@ -886,6 +906,10 @@ custom-metrics:
             source_labels:
               - __meta_kubernetes_pod_label_app_kubernetes_io_part_of
             regex: groundcover
+          - action: drop
+            source_labels:
+              - __meta_kubernetes_pod_label_app_kubernetes_io_name
+            regex: kube-state-metrics            
           - action: drop
             source_labels: [__meta_kubernetes_pod_container_init]
             regex: true
@@ -958,6 +982,10 @@ custom-metrics:
               - __meta_kubernetes_pod_label_app_kubernetes_io_part_of
             regex: groundcover
           - action: drop
+            source_labels:
+              - __meta_kubernetes_pod_label_app_kubernetes_io_name
+            regex: kube-state-metrics            
+          - action: drop
             source_labels: [__meta_kubernetes_pod_container_init]
             regex: true
           - action: keep_if_equal
@@ -1023,6 +1051,10 @@ custom-metrics:
             source_labels:
               - __meta_kubernetes_pod_label_app_kubernetes_io_part_of
             regex: groundcover
+          - action: drop
+            source_labels:
+              - __meta_kubernetes_pod_label_app_kubernetes_io_name
+            regex: kube-state-metrics            
           - source_labels:
               [__meta_kubernetes_service_annotation_prometheus_io_probe]
             action: keep
@@ -1056,6 +1088,10 @@ custom-metrics:
             source_labels:
               - __meta_kubernetes_pod_label_app_kubernetes_io_part_of
             regex: groundcover
+          - action: drop
+            source_labels:
+              - __meta_kubernetes_pod_label_app_kubernetes_io_name
+            regex: kube-state-metrics            
           - action: drop
             source_labels: [__meta_kubernetes_pod_container_init]
             regex: true
