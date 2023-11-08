@@ -4,6 +4,7 @@ kind: Deployment
 metadata:
   labels:
     app: router
+    app.kubernetes.io/name: router
     {{- if .Values.additionalLabels }}
 {{ toYaml .Values.additionalLabels | indent 4 }}
     {{- end }}
@@ -19,6 +20,7 @@ spec:
     metadata:
       labels:
         app: router
+        app.kubernetes.io/name: router
       {{- if .Values.additionalLabels }}
 {{ toYaml .Values.additionalLabels | indent 8 }}
       {{- end }}
