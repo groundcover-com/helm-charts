@@ -120,6 +120,8 @@ data:
     promscalestorage:
       url: "{{ template "promscale.otelURL" . }}"
       tls: true
+      tableWriterBatchMaxSize: 1000
+      tableWriterBatchInterval: 1s
 
     clusterId: {{ .Values.clusterId }}
     region: {{ .Values.region }}
