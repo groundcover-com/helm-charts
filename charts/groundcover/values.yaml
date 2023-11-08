@@ -183,6 +183,7 @@ clickhouse:
         secretKeyRef:
           key: '{{ include "clickhouse.secretKey" . }}'
           name: '{{ include "clickhouse.secretName" . }}'
+  extraOverrides: "<clickhouse>\n  <profiles>\n    <default>\n      <async_insert>true</async_insert>\n      <wait_for_async_insert>true</wait_for_async_insert>\n    </default>\n  </profiles>\n</clickhouse>          \n"
   startdbScripts:
     init-db.sh: |
       #!/bin/bash
@@ -271,7 +272,7 @@ opentelemetry-collector:
       secretName: opentelemetry-collector-certificate
   image:
     repository: public.ecr.aws/groundcovercom/otel/opentelemetry-collector-contrib
-    tag: "1.2.9"
+    tag: "1.2.10"
   podAnnotations:
     prometheus.io/scrape: "true"
     prometheus.io/port: '{{ index .Values "ports" "metrics" "containerPort" | int }}'
