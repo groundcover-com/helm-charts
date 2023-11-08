@@ -712,6 +712,16 @@ server:
             regex: "pod_template_hash"
           - action: labeldrop
             regex: "kubernetes_pod_name"
+          - action: labeldrop
+            regex: "app"
+          - action: labeldrop
+            regex: "app_kubernetes_io_instance"
+          - action: labeldrop
+            regex: "app_kubernetes_io_name"
+          - action: labeldrop
+            regex: "job"
+          - action: labeldrop
+            regex: "kubernetes_namespace"
         metric_relabel_configs:
           - action: labeldrop
             regex: "instance"

@@ -7,6 +7,7 @@ data:
     concurrency: 10
     productchansize: 20480
     k8sloadtimeout: 2m0s
+    resyncDuration: 1h
     summarizerActiveTtl: 180s
     pushsummaries: true
     productmetricsflushmintotalcounter:
