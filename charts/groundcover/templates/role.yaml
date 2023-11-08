@@ -1,0 +1,22 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ template "groundcover.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+  {{- if .Values.rbac.labels }}
+{{ toYaml .Values.rbac.labels | indent 4}}
+  {{- end }}
+{{- with .Values.rbac.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
+rules:
+{{- if .Values.rbac.pspEnabled }}
+- apiGroups:      ['extensions']
+  resources:      ['podsecuritypolicies']
+  verbs:          ['use']
+  resourceNames:  [{{ template "groundcover.fullname" . }}]
+{{- else }}
+rules: []
+{{- end }}

@@ -59,9 +59,9 @@ spec:
           name: promscale-connector
           {{- if or (.Values.promscale.openTelemetry.enabled) (.Values.promscale.extraArgs) }}
           args:
+          - "--startup.dataset.config=traces:\n  default_retention_period: {{ .Values.agent.alligator.dataRetention }}"
           {{- if .Values.promscale.openTelemetry.enabled }}
-          - --enable-feature=tracing
-          - --otlp-grpc-server-listen-address=:9202
+          - --tracing.otlp.server-address=:9202
           {{- end }}
           {{- with .Values.promscale.extraArgs }}
           {{ toYaml . | nindent 10 }}

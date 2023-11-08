@@ -610,6 +610,9 @@ affinity: {}
 rbac:
   # Specifies whether RBAC resources should be created
   create: true
+  pspEnabled: true
+  # annotations:
+  # labels:
 
 serviceAccount:
   # Specifies whether a ServiceAccount should be created

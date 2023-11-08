@@ -31,3 +31,9 @@ rules:
   - list
   - watch
   - get
+{{- if .Values.rbac.pspEnabled }}
+- apiGroups:      ['extensions']
+  resources:      ['podsecuritypolicies']
+  verbs:          ['use']
+  resourceNames:  [{{ template "groundcover.fullname" . }}]
+{{- end }}

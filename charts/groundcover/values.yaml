@@ -37,7 +37,7 @@ region:
 
 origin:
   registry: public.ecr.aws/k8g4n2c4
-  tag: 0.32.1
+  tag: 0.32.2
 
 pullSecrets: []
 
@@ -200,7 +200,7 @@ router:
   repository: router
   origin:
     registry: public.ecr.aws/k8g4n2c4
-    tag: 0.32.1
+    tag: 0.32.2
   versionDb:
     host: 
     port: 
@@ -429,6 +429,7 @@ promscale:
   affinity: {}
 
 rbac:
+  pspEnabled: true
   labels:
   annotations:
 

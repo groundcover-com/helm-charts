@@ -54,6 +54,7 @@ spec:
       nodeSelector:
 {{ toYaml .Values.grafana.nodeSelector | indent 8 }}
 {{- end }}
+      serviceAccountName: grafana
       containers:
       - env:
         - name: GF_SECURITY_ADMIN_PASSWORD

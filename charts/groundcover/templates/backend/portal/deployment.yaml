@@ -54,6 +54,7 @@ spec:
       imagePullSecrets:
 {{ toYaml .Values.pullSecrets | indent 8 }}
 {{- end }}
+      serviceAccountName: portal
       containers:
       - env:
         - name: GC_VERSION

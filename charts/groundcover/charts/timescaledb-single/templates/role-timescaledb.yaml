@@ -49,4 +49,10 @@ rules:
   - patch
   - update
   - watch
+{{- if .Values.rbac.pspEnabled }}
+- apiGroups:      ['extensions']
+  resources:      ['podsecuritypolicies']
+  verbs:          ['use']
+  resourceNames:  [{{ template "timescaledb.fullname" . }}]
+{{- end }}
 {{- end }}

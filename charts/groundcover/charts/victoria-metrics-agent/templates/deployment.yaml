@@ -34,6 +34,7 @@ spec:
 {{- end }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        forcerecreate: {{ randAlphaNum 5 | quote }}
         prometheus.io/scrape: "true"
         prometheus.io/port: "8429"
         {{- range $key, $value := .Values.podAnnotations }}
