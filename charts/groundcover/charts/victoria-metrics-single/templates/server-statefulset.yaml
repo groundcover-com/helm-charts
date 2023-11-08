@@ -28,6 +28,7 @@ spec:
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "8428"
+        checksum/config: {{ printf "%s" .Values.server.scrape | sha256sum -}}
     {{- if .Values.server.podAnnotations }}
 {{ toYaml .Values.server.podAnnotations | indent 8 }}
     {{- end }}

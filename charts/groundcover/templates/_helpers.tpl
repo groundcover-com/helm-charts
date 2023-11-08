@@ -96,8 +96,20 @@ Get cluster_id from values or generate random one
 {{- default ( printf "http://groundcover-loki:%d"  ( .Values.loki.service.port | int ) ) .Values.loki.overrideURL  -}}
 {{- end -}}
 
-{{- define "vmagent.url" -}}
-{{- index .Values "vmagent-backend" "overrideURL" | default ( printf "http://groundcover-vmagent:%d" ( index .Values "vmagent-backend" "service" "servicePort" | int ) )  -}}
+{{- define "shepherd.http_scheme"}}
+{{- if and .Values.shepherd.config.ingestor.TLSCertFile .Values.shepherd.config.ingestor.TLSKeyFile }}
+{{- printf "%s" "https" -}}
+{{- else}}
+{{- printf "%s" "http" -}}
+{{- end }}
+{{- end -}}
+
+{{- define "shepherd.grpc" -}}
+{{- index .Values "shepherd" "overrideGrpcURL" | default ( printf "shepherd:%d"  ( .Values.shepherd.service.grpcPort | int ) ) -}}
+{{- end -}}
+
+{{- define "shepherd.http" -}}
+{{- index .Values "shepherd" "overrideHttpURL" | default ( printf "%s://shepherd:%d"  ( include "shepherd.http_scheme" . ) ( .Values.shepherd.service.httpPort | int ) ) -}}
 {{- end -}}
 
 {{/*
@@ -166,3 +178,11 @@ disable redis tracing in tracy if experimental is enabled
 {{- define "imagePullSecrets" }}
 {{- default .Values.global.imagePullSecrets .Values.imagePullSecrets | toJson -}}
 {{- end -}}}}
+
+{{- define "shepherd.tls_enabled"}}
+{{- if and .Values.shepherd.config.ingestor.TLSCertFile .Values.shepherd.config.ingestor.TLSKeyFile }}
+{{- true -}}
+{{- else}}
+{{- false -}}
+{{- end }}
+{{- end -}}

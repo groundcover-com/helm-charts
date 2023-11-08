@@ -98,8 +98,8 @@ spec:
         args:
             - while [ $(curl -sw '%{http_code}' -k {{ template "promscale.promURL" . }}/healthz -o /dev/null) -ne 200 ]; do echo 'Waiting for promscale...'; sleep 2; done; echo promscale is up
       - args:
-        - while [ $(curl -sw '%{http_code}' -k {{ template "vmagent.url" . }}/health
-          -o /dev/null) -ne 200 ]; do echo 'Waiting for VictoriaMetrics...'; sleep
+        - while [ $(curl -sw '%{http_code}' -k {{ template "shepherd.http" . }}/health
+          -o /dev/null) -ne 200 ]; do echo 'Waiting for shepherd...'; sleep
           2; done; echo VictoriaMetrics is up
         command:
         - /bin/sh

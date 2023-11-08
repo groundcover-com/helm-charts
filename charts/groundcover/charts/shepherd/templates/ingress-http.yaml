@@ -1,0 +1,50 @@
+{{- if .Values.httpIngress.enabled }}
+{{- $ingressApiIsStable := eq (include "shepherd.ingress.isStable" .) "true" -}}
+{{- $ingressSupportsIngressClassName := eq (include "shepherd.ingress.supportsIngressClassName" .) "true" -}}
+{{- $ingressSupportsPathType := eq (include "shepherd.ingress.supportsPathType" .) "true" -}}
+{{- $servicePort := .Values.service.httpPort -}}
+{{- $ingressPathType := .Values.httpIngress.pathType -}}
+apiVersion: {{ include "shepherd.ingress.apiVersion" . }}
+kind: Ingress
+metadata:
+{{- if .Values.httpIngress.annotations }}
+  annotations:
+{{ toYaml .Values.httpIngress.annotations | indent 4 }}
+{{- end }}
+  labels:
+  {{- include "chart.labels" . | nindent 4 }}
+  {{ with .Values.httpIngress.extraLabels }}
+{{ toYaml . | indent 4 }}
+  {{ end }}
+  name: {{ template "chart.name" . }}-http
+  namespace: {{ .Release.Namespace }}
+spec:
+  {{- if and $ingressSupportsIngressClassName .Values.httpIngress.ingressClassName }}
+  ingressClassName: {{ .Values.httpIngress.ingressClassName }}
+  {{- end }}
+  rules:
+  {{- $serviceName := include "chart.name" . }}
+  {{- range .Values.httpIngress.hosts }}
+  - host: {{ .host }}
+    http:
+      paths:
+        - path: {{ .path }}
+          {{- if $ingressSupportsPathType }}
+          pathType: {{ $ingressPathType }}
+          {{- end }}
+          backend:
+            {{- if $ingressApiIsStable }}
+            service:
+              name: {{ $serviceName }}
+              port:
+                number: {{ $servicePort }}
+            {{- else }}
+            serviceName: {{ $serviceName }}
+            servicePort: {{ $servicePort }}
+            {{- end }}
+  {{- end -}}
+{{- if .Values.httpIngress.tls }}
+  tls:
+{{ toYaml .Values.httpIngress.tls | indent 4 }}
+{{- end -}}
+{{- end -}}

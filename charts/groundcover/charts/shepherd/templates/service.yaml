@@ -5,13 +5,22 @@ metadata:
   labels:
     app: shepherd
     {{- include "shepherd.labels" . | nindent 4 }}
+  {{- if .Values.service.annotations }}
+  annotations:
+    {{- .Values.service.annotations | toYaml | nindent 4 }}
+  {{- end }}
 spec:
   type: {{ .Values.service.type }}
   ports:
-    - port: {{ .Values.service.port }}
+    - port: {{ .Values.service.grpcPort }}
       targetPort: grpc-shepherd
       protocol: TCP
       name: grpc-shepherd
+    - port: {{ .Values.service.httpPort }}
+      targetPort: http-metrics
+      protocol: TCP
+      name: http-metrics
+  
   selector:
     app: shepherd
     {{- include "shepherd.selectorLabels" . | nindent 4 }}

@@ -107,10 +107,6 @@ data:
     storage:
       timeout: 5s
 
-    timeseriesstorage:
-      url: "{{ template "vmagent.url" . }}"
-      tlsskipverify: false
-
     loglevel: 4 # INFO
 
     isk8s: true
@@ -133,7 +129,9 @@ data:
     filteredWorkloads: {{ toYaml .Values.filteredWorkloads | nindent 6 }}
     nodelabels: {{ toYaml .Values.agent.alligator.nodelabels | nindent 6 }}
     contentTypesToDrop: {{ toYaml .Values.agent.alligator.contentTypesToDrop | nindent 6 }}
-
+    shepherd:
+      url: "{{ template "shepherd.grpc" . }}"
+      enableTLS: {{ template "shepherd.tls_enabled" . }}
     promscalestorage:
       url: "{{ template "promscale.otelURL" . }}"
       tls: true

@@ -199,13 +199,13 @@ spec:
             - -c
           args:
               - while [ $(curl -sw '%{http_code}' -k {{ template "promscale.promURL" . }}/healthz -o /dev/null) -ne 200 ]; do echo 'Waiting for promscale...'; sleep 2; done; echo promscale is up
-        - args:
-              - while [ $(curl -sw '%{http_code}' -k {{ template "vmagent.url" . }}/health -o /dev/null) -ne 200 ]; do echo 'Waiting for VictoriaMetrics...'; sleep 2; done; echo VictoriaMetrics is up
+        - name: check-shepherd-ready
+          args:
+              - while [ $(curl -sw '%{http_code}' -k {{ template "shepherd.http" . }}/health -o /dev/null) -ne 200 ]; do echo 'Waiting for shepherd...'; sleep 2; done; echo shepherd is up
           command:
             - /bin/sh
             - -c
           image: {{ .Values.global.origin.registry }}/curl:latest
-          name: check-vm-ready
       serviceAccountName: alligator
 {{- if .Values.agent.priorityClassName }}
       priorityClassName: {{ .Values.agent.priorityClassName }}

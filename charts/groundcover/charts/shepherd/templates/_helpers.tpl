@@ -60,3 +60,51 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+
+{{- define "shepherd_secrets_certificate" -}}
+{{ printf "%s-certificate" (include "shepherd.fullname" .) }}
+{{- end -}}
+
+
+{{- define "shepherd_scheme" -}}
+{{- if and .Values.config.ingestor.TLSCertFile .Values.config.ingestor.TLSKeyFile }}
+{{- printf "https" }}
+{{- else}}
+{{- printf "http" }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Return the appropriate apiVersion for ingress.
+*/}}
+{{- define "shepherd.ingress.apiVersion" -}}
+  {{- if and (.Capabilities.APIVersions.Has "networking.k8s.io/v1") -}}
+      {{- print "networking.k8s.io/v1" -}}
+  {{- else if .Capabilities.APIVersions.Has "networking.k8s.io/v1beta1" -}}
+    {{- print "networking.k8s.io/v1beta1" -}}
+  {{- else -}}
+    {{- print "extensions/v1beta1" -}}
+  {{- end -}}
+{{- end -}}
+
+{{/*
+Return if ingress is stable.
+*/}}
+{{- define "shepherd.ingress.isStable" -}}
+  {{- eq (include "shepherd.ingress.apiVersion" .) "networking.k8s.io/v1" -}}
+{{- end -}}
+
+{{/*
+Return if ingress supports ingressClassName.
+*/}}
+{{- define "shepherd.ingress.supportsIngressClassName" -}}
+  {{- or (eq (include "shepherd.ingress.isStable" .) "true") (and (eq (include "shepherd.ingress.apiVersion" .) "networking.k8s.io/v1beta1")) -}}
+{{- end -}}
+
+{{/*
+Return if ingress supports pathType.
+*/}}
+{{- define "shepherd.ingress.supportsPathType" -}}
+  {{- or (eq (include "shepherd.ingress.isStable" .) "true") (and (eq (include "shepherd.ingress.apiVersion" .) "networking.k8s.io/v1beta1")) -}}
+{{- end -}}

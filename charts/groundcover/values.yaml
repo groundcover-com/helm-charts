@@ -571,68 +571,6 @@ config:
   labels:
   annotations:
 
-vmagent-backend:
-  image:
-    repository: "{{ .Values.global.origin.registry }}/vmagent"
-  remoteWriteUrls:
-    - http://groundcover-victoria-metrics:8428/api/v1/write
-  resources:
-    limits:
-      cpu: 150m
-      memory: 256Mi
-    requests:
-      cpu: 50m
-      memory: 128Mi
-  extraArgs:
-    remoteWrite.maxRowsPerBlock: 15000
-    remoteWrite.maxDiskUsagePerURL: 1GB
-
-  # overrideURL:
-  ingress:
-    enabled: false
-    annotations: {}
-    #   kubernetes.io/ingress.class: nginx
-    #   kubernetes.io/tls-acme: 'true'
-
-    extraLabels: {}
-    hosts: []
-    #   - name: vmagent.local
-    #     path: /
-    #     port: http
-    tls: []
-    #   - secretName: vmagent-ingress-tls
-    #     hosts:
-    #       - vmagent.local
-    # For Kubernetes >= 1.18 you should specify the ingress-controller via the field ingressClassName
-    # See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress
-    # ingressClassName: nginx
-    # -- pathType is only for k8s >= 1.1=
-    pathType: Prefix
-  
-  service:
-    servicePort: 8429
-  affinity:
-    podAffinity:
-      preferredDuringSchedulingIgnoredDuringExecution:
-        - weight: 100
-          podAffinityTerm:
-            topologyKey: kubernetes.io/hostname
-            labelSelector:
-              matchExpressions:
-              - key: app.kubernetes.io/component
-                operator: In
-                values:
-                - victoria-metrics
-        - weight: 50
-          podAffinityTerm:
-            topologyKey: kubernetes.io/zone
-            labelSelector:
-              matchExpressions:
-              - key: app.kubernetes.io/component
-                operator: In
-                values:
-                - victoria-metrics
-
 # These are presets for low resource enviroments
 # timescaledb-single:
 #   tolerations: []
@@ -710,4 +648,66 @@ vmagent-backend:
 #     affinity: {}
 
 shepherd:
-  enabled: false
+  # Default values for shepherd.
+  # This is a YAML-formatted file.
+  # Declare variables to be passed into your templates.
+  image:
+    repository: "{{ .Values.global.origin.registry }}/shepherd"
+
+  affinity:
+    podAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            topologyKey: kubernetes.io/hostname
+            labelSelector:
+              matchExpressions:
+              - key: app.kubernetes.io/component
+                operator: In
+                values:
+                - victoria-metrics
+        - weight: 50
+          podAffinityTerm:
+            topologyKey: kubernetes.io/zone
+            labelSelector:
+              matchExpressions:
+              - key: app.kubernetes.io/component
+                operator: In
+                values:
+                - victoria-metrics
+  config:
+    ingestor:
+      resourceLabels: ["resource_id"]
+      entityLabels: ["entity_id","type"]
+      defaultMaxTopResources: 40
+      maxTopResources:
+        - labels:
+            type: "http"
+          value: 40
+        - labels:
+            type: "grpc"
+          value: 40
+        - labels:
+            type: "postgresql"
+          value: 40
+        - labels:
+            type: "mysql"
+          value: 40
+        - labels:
+            type: "redis"
+          value: 40
+        - labels:
+            type: "kafka"
+          value: 40
+        - labels:
+            type: "container_info"
+          value: 40
+        - labels:
+            type: "container_state"
+          value: 40
+        - labels:
+            type: "dns"
+          value: 40
+        - labels:
+            type: "container_restart"
+          value: -1
