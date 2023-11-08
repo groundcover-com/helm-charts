@@ -6,7 +6,7 @@ mode: cloud
 
 origin:
   registry: public.ecr.aws/groundcovercom
-  tag: 0.63.0
+  tag: 0.63.1
 
 repository: router
 
@@ -27,7 +27,10 @@ configuration:
       Tenant: "auth.groundcover.com"
     RBAC:
       Migrations:
-        Path: migrations
+        Path: migrations    
+    Reporter:
+      ttl: 10m
+      PurgeInterval: 10m 
 
 ingress:
   enabled: false
