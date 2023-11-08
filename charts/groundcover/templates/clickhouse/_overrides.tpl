@@ -2,11 +2,7 @@
 Get the Clickhouse password secret name
 */}}
 {{- define "clickhouse.secretName" -}}
-{{- if typeIs "bool" .Values.global.clickhouse.auth.existingSecret -}}
-    {{- include "clickhouse.fullname" . -}}
-{{- else -}}
-    {{ .Values.global.clickhouse.auth.existingSecret }}
-{{- end -}}
+{{- default (include "clickhouse.fullname" .) .Values.global.clickhouse.auth.existingSecret -}}
 {{- end -}}
 
 {{/*

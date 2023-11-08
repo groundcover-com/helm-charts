@@ -20,6 +20,11 @@ global:
     tag: "" # rewrites Chart.AppVersion
   imagePullSecrets: []
   groundcoverLabels:
+  clickhouse:
+    auth:
+      # override to use exisiting secret
+      existingSecret: ""
+      existingSecretKey: admin-password
   logs:
     overrideUrl: ""
     retentionDays: 3
@@ -160,8 +165,7 @@ clickhouse:
   metrics:
     enabled: true
   auth:
-    existingSecret: true
-    existingSecretKey: admin-password
+    existingSecret: "false" # override global.clickhouse.auth.existingSecret to use exisiting secret
   extraEnvVars:
     - name: CLICKHOUSE_PASSWORD
       valueFrom:
@@ -241,7 +245,7 @@ opentelemetry-collector:
           name: '{{ include "clickhouse.secretName" . }}'
   image:
     repository: public.ecr.aws/groundcovercom/otel/opentelemetry-collector-contrib
-    tag: "1.1.3"
+    tag: "1.1.4"
   podAnnotations:
     prometheus.io/scrape: "true"
     prometheus.io/port: '{{ index .Values "ports" "metrics" "containerPort" | int }}'

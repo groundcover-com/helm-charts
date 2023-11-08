@@ -11,11 +11,19 @@
 {{- end -}}
 
 {{- define "shepherd.grpc" -}}
-{{- index .Values "shepherd" "overrideGrpcURL" | default ( printf "%s:%d"  ( include "shepherd.name" . ) ( .Values.shepherd.service.grpcPort | int ) ) -}}
+{{- if not .Values.backend.enabled -}}
+  {{- required "A valid shepherd.overrideGrpcURL is required!" .Values.shepherd.overrideGrpcURL -}}
+{{- else -}}
+  {{- printf "%s:%d" (include "shepherd.name" .) (.Values.shepherd.service.grpcPort | int) -}}
+{{- end -}}
 {{- end -}}
 
 {{- define "shepherd.http" -}}
-{{- index .Values "shepherd" "overrideHttpURL" | default ( printf "%s://%s:%d" ( include "shepherd.http_scheme" . ) ( include "shepherd.name" . ) ( .Values.shepherd.service.httpPort | int ) ) -}}
+{{- if not .Values.backend.enabled -}}
+  {{- required "A valid shepherd.overrideHttpURL is required!" .Values.shepherd.overrideHttpURL -}}
+{{- else -}}
+  {{- printf "%s://%s:%d" (include "shepherd.http_scheme" .) (include "shepherd.name" .) (.Values.shepherd.service.httpPort | int) -}}
+{{- end -}}
 {{- end -}}
 
 {{/*

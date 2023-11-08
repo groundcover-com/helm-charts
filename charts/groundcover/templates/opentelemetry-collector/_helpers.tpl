@@ -7,9 +7,11 @@
 {{- end }}
 
 {{- define "loki.url" -}}
-{{- if .Values.global.logs.overrideUrl  -}}
-    {{- printf "%s/loki/api/v1/push" .Values.global.logs.overrideUrl -}}
+{{- $lokiBaseUrl := "" -}}
+{{- if not .Values.backend.enabled -}}
+    {{- $lokiBaseUrl = (required "A valid global.logs.overrideUrl is required!" .Values.global.logs.overrideUrl) -}}
 {{- else -}}
-    {{- printf "http://%s:%d/loki/api/v1/push" (include "opentelemetry-collector.fullname" .) (index .Values.global "opentelemetry-collector" "ports" "loki-http" "servicePort" | int ) -}}
+    {{- $lokiBaseUrl = (printf "http://%s:%d" (include "opentelemetry-collector.fullname" .) (index .Values.global "opentelemetry-collector" "ports" "loki-http" "servicePort" | int )) -}}
 {{- end -}}
+{{- printf "%s/loki/api/v1/push" $lokiBaseUrl -}}
 {{- end -}}
