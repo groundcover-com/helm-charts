@@ -168,7 +168,7 @@ agent:
     apmIngestor:
       dataDog:
         enabled: true
-        tracesPort: 6218
+        tracesPort: 8126
       otel:
         enabled: false
     pprofAlligator:
@@ -295,6 +295,15 @@ clickhouse:
           <wait_for_async_insert>true</wait_for_async_insert>
         </default>
       </profiles>
+      <query_log>
+        <ttl>event_date + INTERVAL 3 DAY</ttl>
+      </query_log>
+      <trace_log>
+        <ttl>event_date + INTERVAL 3 DAY</ttl>
+      </trace_log>
+      <metric_log>
+        <ttl>event_date + INTERVAL 3 DAY</ttl>
+      </metric_log>
     </clickhouse>
   persistence:
     ## @param persistence.enabled Enable persistence using Persistent Volume Claims
@@ -569,8 +578,8 @@ opentelemetry-collector:
       cpu: 100m
       memory: 512Mi
     limits:
-      cpu: 500m
-      memory: 1024Mi
+      cpu: 1000m
+      memory: 2048Mi
   affinity: {}
   nodeSelector: {}
   tolerations: []

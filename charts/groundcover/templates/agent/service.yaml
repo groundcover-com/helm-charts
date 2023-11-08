@@ -1,0 +1,28 @@
+{{ if .Values.global.agent.enabled }}
+kind: Service
+apiVersion: v1
+metadata:
+  annotations:
+    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+    {{- if .Values.agent.additionalAnnotations }}
+{{ toYaml .Values.agent.additionalAnnotations | indent 4 }}
+    {{- end }}
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+    app: alligator
+    app.kubernetes.io/name: alligator
+    {{- if .Values.agent.additionalLabels }}
+{{ toYaml .Values.agent.additionalLabels | indent 4 }}
+    {{- end }}
+  name: {{ include "alligator.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    app.kubernetes.io/name: alligator
+    app.kubernetes.io/part-of: groundcover
+  ports:
+  - protocol: TCP
+    port: {{ .Values.agent.alligator.apmIngestor.dataDog.tracesPort }}
+    targetPort: {{ .Values.agent.alligator.apmIngestor.dataDog.tracesPort }}
+  internalTrafficPolicy: Local
+{{- end }}

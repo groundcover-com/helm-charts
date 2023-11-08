@@ -128,7 +128,6 @@ spec:
               name: prom-metrics
               protocol: TCP
             - containerPort: {{ .Values.agent.alligator.apmIngestor.dataDog.tracesPort }}
-              hostPort: {{ .Values.agent.alligator.apmIngestor.dataDog.tracesPort }}
               name: dd-traces
               protocol: TCP
           securityContext:
