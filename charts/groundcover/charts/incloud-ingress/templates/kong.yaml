@@ -1,22 +1,19 @@
+---
 apiVersion: configuration.konghq.com/v1
 kind: KongPlugin
 metadata:
-  name: {{ .Values.auth.namePrefix }}-auth
+  name: {{ printf "%s-auth" .Values.auth.namePrefix }}
 plugin: key-auth
-
 ---
-
 apiVersion: v1
 kind: Secret
 metadata:
-  name: {{ .Values.auth.namePrefix }}-api-key
+  name: {{ printf "%s-api-key" .Values.auth.namePrefix }}
 type: Opaque
 stringData:
   kongCredType: "key-auth"
   key: {{ .Values.global.groundcover_token }}
-
 ---
-
 apiVersion: configuration.konghq.com/v1
 kind: KongConsumer
 metadata:
@@ -26,4 +23,4 @@ metadata:
     checksum/config: {{ .Values.global.groundcover_token | sha256sum }}
 username: incloud-api
 credentials:
-- {{ .Values.auth.namePrefix }}-api-key
+- {{ printf "%s-api-key" .Values.auth.namePrefix }}

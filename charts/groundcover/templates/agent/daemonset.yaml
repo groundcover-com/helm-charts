@@ -1,4 +1,4 @@
-{{ if .Values.agent.enabled }}
+{{ if .Values.global.agent.enabled }}
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:

@@ -102,6 +102,18 @@ Get cluster_id from values or generate random one
 {{- default .Values.global.imagePullSecrets .Values.imagePullSecrets | toJson -}}
 {{- end -}}}}
 
+{{- define "incloud.otel.http.url" -}}
+{{- printf "https://api-otel-http.%s" .Values.global.ingress.site -}}
+{{- end -}}
+
+{{- define "incloud.metrics.http.url" -}}
+{{- printf "https://metrics-http.%s" .Values.global.ingress.site -}}
+{{- end -}}
+
+{{- define "incloud.otel.grpc.url" -}}
+{{- printf "api-otel-grpc.%s:443" .Values.global.ingress.site -}}
+{{- end -}}
+
 {{- define "telemetry.enabled" }}
 {{- if .Values.metrics -}}
     {{- .Values.metrics.enabled -}}

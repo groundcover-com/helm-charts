@@ -1,4 +1,11 @@
 global:
+  agent:
+    enabled: true
+  backend:
+    enabled: true
+  ingress:
+    # set ingress site for inCloud / on-prem sensor only deployments
+    site:
   groundcover_token:
   # groundcover_token is preceding groundcoverPredefinedTokenSecret, make sure its empty if using existing secret
   # if the secret is preloaded in the namespace, you can refer it here instead
@@ -30,11 +37,11 @@ global:
     retention: 3d # {amount}[h(ours), d(ays), w(eeks), y(ears)]
   metrics:
     tls:
-      enabled: true
+      enabled: false
     overrideUrl: ""
   otlp:
     tls:
-      enabled: true
+      enabled: false
     overrideGrpcURL: ""
     overrideHttpURL: ""
   datadogapm:
@@ -87,10 +94,7 @@ priorityClass:
   value:
   preemptionPolicy:
 #imagePullSecrets: []
-backend:
-  enabled: true
 agent:
-  enabled: true
   additionalLabels:
   podLabels:
   additionalAnnotations:
@@ -310,7 +314,7 @@ opentelemetry-collector:
       secretName: opentelemetry-collector-certificate
   image:
     repository: public.ecr.aws/groundcovercom/otel/opentelemetry-collector-contrib
-    tag: "1.4.42"
+    tag: "1.4.43"
   podLabels:
     app.kubernetes.io/part-of: groundcover
   podAnnotations:

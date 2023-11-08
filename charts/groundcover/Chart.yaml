@@ -1,11 +1,11 @@
 apiVersion: v2
-appVersion: 1.4.42
+appVersion: 1.4.43
 dependencies:
 - condition: router.enabled
   name: router
   repository: ""
   version: 0.1.0
-- condition: backend.enabled
+- condition: global.backend.enabled
   import-values:
   - child: server.service
     parent: global.victoria-metrics.service
@@ -22,14 +22,14 @@ dependencies:
   repository: ""
   version: 0.8.41
 - alias: metrics-ingester
-  condition: backend.enabled
+  condition: global.backend.enabled
   import-values:
   - child: service
     parent: global.metrics-ingester.service
   name: victoria-metrics-agent
   repository: ""
   version: 0.8.41
-- condition: backend.enabled
+- condition: global.backend.enabled
   import-values:
   - child: auth
     parent: global.clickhouse.auth
@@ -40,10 +40,12 @@ dependencies:
   name: clickhouse
   repository: https://charts.bitnami.com/bitnami
   version: 3.5.5
-- condition: backend.enabled
+- condition: global.backend.enabled
   import-values:
   - child: ports
     parent: global.opentelemetry-collector.ports
+  - child: service
+    parent: global.opentelemetry-collector.service
   name: opentelemetry-collector
   repository: https://open-telemetry.github.io/opentelemetry-helm-charts
   version: 0.62.2
@@ -60,4 +62,4 @@ dependencies:
 description: Cloud Native Observability
 name: groundcover
 type: application
-version: 1.4.42
+version: 1.4.43

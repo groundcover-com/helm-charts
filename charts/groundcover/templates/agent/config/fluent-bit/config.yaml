@@ -1,4 +1,4 @@
-{{ if and .Values.agent.enabled (eq (include "telemetry.enabled" .) "true") }}
+{{ if and .Values.global.agent.enabled (eq (include "telemetry.enabled" .) "true") }}
 apiVersion: v1
 kind: ConfigMap
 metadata:

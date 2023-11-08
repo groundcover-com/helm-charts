@@ -1,0 +1,58 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ printf "%s-http" (include "incloud-ingress.name" .) }}
+  annotations:
+    konghq.com/protocols: "https"
+    konghq.com/plugins: incloud-auth
+    konghq.com/https-redirect-status-code: "301"
+spec:
+  ingressClassName: kong
+  rules:
+    - host: {{ get (urlParse (include "opentelemetry-collector.loki.http.url" .)) "host" }} 
+      http:
+        paths:
+          - path: {{ get (urlParse (include "opentelemetry-collector.loki.http.url" .)) "path" }} 
+            pathType: Exact
+            backend:
+              service:
+                name: {{ include "opentelemetry-collector.fullname" . }}
+                port:
+                  number: {{ index .Values.global "opentelemetry-collector" "ports" "loki-http" "servicePort" | int }}
+    - host: {{ get (urlParse (include "opentelemetry-collector.health.http.url" .)) "host" }} 
+      http:
+        paths:
+          - path: {{ get (urlParse (include "opentelemetry-collector.health.http.url" .)) "path" }} 
+            pathType: Exact
+            backend:
+              service:
+                name: {{ include "opentelemetry-collector.fullname" . }}
+                port:
+                  number: {{ index .Values.global "opentelemetry-collector" "ports" "health" "servicePort" | int }}
+    - host: {{ get (urlParse (include "opentelemetry-collector.datadogapm.traces.http.url" .)) "host" }} 
+      http:
+        paths:
+          - path: {{ get (urlParse (include "opentelemetry-collector.datadogapm.traces.http.url" .)) "path" }} 
+            pathType: Exact
+            backend:
+              service:
+                name: {{ include "opentelemetry-collector.fullname" . }}
+                port:
+                  number: {{ index .Values.global "opentelemetry-collector" "ports" "datadogapm" "servicePort" | int }}
+    - host: {{ get (urlParse (include "metrics-ingester.base.http.url" .)) "host" }} 
+      http:
+        paths:
+          - path: {{ get (urlParse (include "metrics-ingester.write.http.url" .)) "path" }} 
+            pathType: Exact
+            backend:
+              service:
+                name: {{ include "metrics-ingester.fullname" . }}
+                port:
+                  name: http
+          - path: {{ get (urlParse (include "metrics-ingester.health.http.url" .)) "path" }} 
+            pathType: Exact
+            backend:
+              service:
+                name: {{ include "metrics-ingester.fullname" . }}
+                port:
+                  name: http

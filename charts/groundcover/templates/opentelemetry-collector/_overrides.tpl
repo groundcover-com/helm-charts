@@ -1,3 +1,20 @@
+
+{{/*
+Expand the name of the chart.
+*/}}
+{{- define "opentelemetry-collector.name" -}}
+{{- print "opentelemetry-collector" }}
+{{- end }}
+
+{{/*
+Create a default fully qualified app name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+If release name contains chart name it will be used as a full name.
+*/}}
+{{- define "opentelemetry-collector.fullname" -}}
+{{- printf "%s-%s" .Release.Name (include "opentelemetry-collector.name" .) | trunc 63 | trimSuffix "-" }}
+{{- end -}}
+
 {{- define "opentelemetry-collector.labels" -}}
 helm.sh/chart: {{ include "opentelemetry-collector.chart" . }}
 {{ include "opentelemetry-collector.selectorLabels" . }}

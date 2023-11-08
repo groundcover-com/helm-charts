@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ printf "%s-grpc" (include "incloud-ingress.name" .) }}
+  annotations:
+    konghq.com/protocols: grpcs
+    konghq.com/plugins: incloud-auth
+    konghq.com/https-redirect-status-code: "301"
+    konghq.com/headers.content-type: application/grpc
+spec:
+  ingressClassName: kong
+  rules:
+    - host: {{ splitList ":" (include "opentelemetry-collector.otlp.grpc.url" .) | first }} 
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ printf "%s-grpc" (include "opentelemetry-collector.fullname" .) }}
+                port:
+                  number: {{ index .Values.global "opentelemetry-collector" "ports" "otlp" "servicePort" | int }}

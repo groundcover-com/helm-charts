@@ -7,8 +7,12 @@
 {{- end -}}
 
 {{- define "metrics-ingester.base.http.url" -}}
-{{- if not .Values.backend.enabled -}}
-    {{- required "A valid global.metrics.overrideUrl is required!" .Values.global.metrics.overrideUrl -}}
+{{- if .Values.global.metrics.overrideUrl -}}
+    {{- .Values.global.metrics.overrideUrl -}}
+{{- else if .Values.global.ingress.site -}}
+    {{- include "incloud.metrics.http.url" . -}}
+{{- else if not .Values.global.backend.enabled -}}
+    {{- fail "A valid global.domain or .Values.global.metrics.overrideUrl is required!" -}}
 {{- else -}}
     {{- printf "%s://%s:%d" (include "metrics-ingester.http.scheme" .) (include "metrics-ingester.fullname" .) (index .Values.global "metrics-ingester" "service" "servicePort" | int ) -}}
 {{- end -}}
