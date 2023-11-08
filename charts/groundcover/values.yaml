@@ -39,7 +39,7 @@ shouldDropRunningNamespaces: true
 
 origin:
   registry: public.ecr.aws/k8g4n2c4
-  tag: 0.33.1
+  tag: 0.33.2
 
 pullSecrets: []
 
@@ -224,7 +224,7 @@ router:
   repository: router
   origin:
     registry: public.ecr.aws/k8g4n2c4
-    tag: 0.33.1
+    tag: 0.33.2
   versionDb:
     host: 
     port: 
