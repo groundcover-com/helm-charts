@@ -19,7 +19,7 @@ data:
       tls: "true"
       tableWriterBatchMaxSize: 500
       tableWriterBatchInterval: 1s
-      tableWriterBatchWriteTimeout: 5s
+      tableWriterBatchWriteTimeout: 1m
 
     deploymenteventhandler:
       samplesthreshold: 100
