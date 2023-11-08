@@ -8,7 +8,7 @@ data:
     Reverse: true
     startuptimeout: 1m0s
 
-    ClusterId: {{ .Values.global.clusterId }}
+    ClusterId: {{ template "groundcover.clusterId" . }}
 
     Router:
       Host: "{{ .Values.saas.host }}"
@@ -41,7 +41,7 @@ data:
     Reverse: false
     startuptimeout: 1m0s
 
-    ClusterId: {{ .Values.clusterId }}
+    ClusterId: {{ template "groundcover.clusterId" . }}
 
     Router:
       Host: "router"

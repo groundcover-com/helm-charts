@@ -57,7 +57,7 @@ spec:
       containers:
       - env:
         - name: GC_CLUSTERID
-          value: {{ .Values.clusterId }}
+          value: {{ template "groundcover.clusterId" . }}
         - name: GC_DB_PASS
           valueFrom:
             secretKeyRef:
