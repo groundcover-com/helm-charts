@@ -171,7 +171,7 @@ spec:
           envFrom:
             - configMapRef:
                 name: tracy-conf-fg9h4chctk
-          image: {{ tpl .Values.agent.tracy.image.repository . }}:{{ default .Chart.AppVersion .Values.global.origin.tag }}
+          image: {{ tpl .Values.agent.tracy.image.repository . }}:latest
           resources:
 {{- toYaml .Values.agent.tracy.resources | nindent 12 }}
           imagePullPolicy: Always

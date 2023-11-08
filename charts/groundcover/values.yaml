@@ -237,7 +237,7 @@ opentelemetry-collector:
           name: '{{ include "clickhouse.secretName" . }}'
   image:
     repository: public.ecr.aws/groundcovercom/otel/opentelemetry-collector-contrib
-    tag: "1.1.0"
+    tag: "1.1.1"
   ports:
     loki-http:
       enabled: true
@@ -277,6 +277,14 @@ opentelemetry-collector:
             - batch
           exporters:
             - groundcover
+  initContainers:
+    - args:
+        - while [ $(curl -sw '%{http_code}' {{ printf "%s/ping" (include "clickhouse.httpEndpoint" .) }} -o /dev/null) -ne 200 ]; do echo 'Waiting for Clickhouse...'; sleep 2; done; echo Clickhouse is up
+      command:
+        - /bin/sh
+        - -c
+      image: '{{ printf "%s/curl:latest" .Values.global.origin.registry }}'
+      name: check-ch-ready
   resources:
     requests:
       cpu: 100m
