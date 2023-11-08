@@ -1,0 +1,24 @@
+{{- if .Values.grafana.enabled -}}
+apiVersion: v1
+data:
+  dashboards.yaml: |-
+    - name: 'default'
+      org_id: 1
+      folder: ''
+      type: 'file'
+      options:
+        folder: '/var/groundcover/dashboards'
+kind: ConfigMap
+metadata:
+  labels:
+    {{- if .Values.grafana.additionalLabels }}
+{{ toYaml .Values.grafana.additionalLabels | indent 4 }}
+    {{- end }}
+  annotations:
+    groundcover_version: {{ .Values.origin.tag }}
+    {{- if .Values.grafana.additionalAnnotations }}
+{{ toYaml .Values.grafana.additionalAnnotations | indent 4 }}
+    {{- end }}
+  name: grafana-dashboards-provisioning
+  namespace: {{ .Release.Namespace }}
+{{ end -}}

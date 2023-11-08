@@ -1,0 +1,35 @@
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  labels:
+    {{- if .Values.agent.additionalLabels }}
+{{ toYaml .Values.agent.additionalLabels | indent 4 }}
+    {{- end }}
+  annotations:
+    groundcover_version: {{ .Values.origin.tag }}
+    seccomp.security.alpha.kubernetes.io/allowedProfileNames: '*'
+    {{- if .Values.agent.additionalAnnotations }}
+{{ toYaml .Values.agent.additionalAnnotations | indent 4 }}
+    {{- end }}
+  name: {{ template "groundcover.fullname" . }}-alligator
+spec:
+  allowPrivilegeEscalation: true
+  allowedCapabilities:
+  - '*'
+  fsGroup:
+    rule: RunAsAny
+  hostIPC: true
+  hostNetwork: false
+  hostPID: true
+  hostPorts:
+  - max: 65535
+    min: 0
+  privileged: true
+  runAsUser:
+    rule: RunAsAny
+  seLinux:
+    rule: RunAsAny
+  supplementalGroups:
+    rule: RunAsAny
+  volumes:
+  - '*'

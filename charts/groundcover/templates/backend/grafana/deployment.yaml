@@ -1,0 +1,135 @@
+{{- if .Values.grafana.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    groundcover_version: {{ .Values.origin.tag }}
+    {{- if .Values.grafana.additionalAnnotations }}
+{{ toYaml .Values.grafana.additionalAnnotations | indent 4 }}
+    {{- end }}
+  labels:
+    app: grafana
+    {{- if .Values.grafana.additionalLabels }}
+{{ toYaml .Values.grafana.additionalLabels | indent 4 }}
+    {{- end }}
+  name: grafana
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3000"
+        groundcover_version: {{ .Values.origin.tag }}
+        {{- if .Values.grafana.additionalAnnotations }}
+{{ toYaml .Values.grafana.additionalAnnotations | indent 8 }}
+        {{- end }}
+        {{- if .Values.grafana.podAnnotations }}
+{{ toYaml .Values.grafana.podAnnotations | indent 8 }}
+        {{- end }}
+      labels:
+        app: grafana
+        {{- if .Values.grafana.additionalLabels }}
+{{ toYaml .Values.grafana.additionalLabels | indent 8 }}
+        {{- end }}
+        {{- if .Values.grafana.podLabels }}
+{{ toYaml .Values.grafana.podLabels | indent 8 }}
+        {{- end }}
+    spec:
+{{- if .Values.grafana.tolerations }}
+      tolerations:
+{{ toYaml .Values.grafana.tolerations | indent 8 }}
+{{- end }}
+{{- if .Values.grafana.priorityClassName }}
+      priorityClassName: {{ .Values.grafana.priorityClassName }}
+{{- end }}
+{{- if .Values.grafana.affinity }}
+      affinity:
+{{ toYaml .Values.grafana.affinity | indent 8 }}
+{{- end }}
+{{- if .Values.grafana.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.grafana.nodeSelector | indent 8 }}
+{{- end }}
+      containers:
+      - env:
+        - name: GF_SECURITY_ADMIN_PASSWORD
+          value: waitforit
+        - name: GF_USERS_DEFAULT_THEME
+          value: light
+        - name: GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS
+          value: prodstack-my-plugin,groundcover-logs-panel,groundcover-kafka-panel,groundcover-workload-info,groundcover-match-issues
+        - name: GF_PATHS_PLUGINS
+          value: /var/groundcover/plugins
+        - name: GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH
+          value: /var/groundcover/dashboards/cluster_status.json
+        - name: GC_DB_PASS
+          valueFrom:
+            secretKeyRef:
+              key: PATRONI_SUPERUSER_PASSWORD
+              name: {{ index .Values "timescaledb-single" "secrets" "credentialsSecretName" | default "groundcover-tsdb-credentials" }}
+        image: {{ .Values.origin.registry }}/{{ .Values.grafana.repository }}:{{ .Values.origin.tag }}
+        imagePullPolicy: Always
+        livenessProbe:
+          failureThreshold: 10
+          initialDelaySeconds: 15
+          periodSeconds: 5
+          successThreshold: 1
+          tcpSocket:
+            port: 3000
+          timeoutSeconds: 1
+        name: grafana
+        ports:
+        - containerPort: 3000
+          name: http-grafana
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 6
+          httpGet:
+            path: /robots.txt
+            port: 3000
+            scheme: HTTP
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 2
+        resources:
+{{- toYaml .Values.grafana.resources | nindent 10 }}
+        volumeMounts:
+        - mountPath: /etc/grafana/provisioning/datasources
+          name: grafana-datasources
+          readOnly: false
+        - mountPath: /etc/grafana/provisioning/dashboards
+          name: grafana-dashboards-provisioning
+          readOnly: false
+        - mountPath: /var/groundcover/tls
+          name: certificate
+          readOnly: true
+      securityContext:
+        fsGroup: 472
+        supplementalGroups:
+        - 0
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: grafana-datasources
+        name: grafana-datasources
+      - configMap:
+          defaultMode: 420
+          name: grafana-dashboards-provisioning
+        name: grafana-dashboards-provisioning
+      - configMap:
+          defaultMode: 420
+          name: grafana-admin-pass
+        name: grafana-admin-pass
+      - name: certificate
+        secret:
+          secretName: groundcover-tsdb-certificate
+          items:
+          - key: tls.crt
+            path: server.crt
+          defaultMode: 416 # 0640 permissions
+{{ end -}}

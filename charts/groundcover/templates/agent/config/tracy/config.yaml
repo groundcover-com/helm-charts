@@ -1,0 +1,17 @@
+apiVersion: v1
+data:
+  ENABLE_NODE_STACK_TRACE: "false"
+  ENABLE_GRPC_C_TRACE: "true"
+kind: ConfigMap
+metadata:
+  labels:
+    {{- if .Values.agent.additionalLabels }}
+{{ toYaml .Values.agent.additionalLabels | indent 4 }}
+    {{- end }}
+  annotations:
+    groundcover_version: {{ .Values.origin.tag }}
+    {{- if .Values.agent.additionalAnnotations }}
+{{ toYaml .Values.agent.additionalAnnotations | indent 4 }}
+    {{- end }}
+  name: tracy-conf-fg9h4chctk
+  namespace: {{ .Release.Namespace }}

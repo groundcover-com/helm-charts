@@ -1,0 +1,54 @@
+{{- if .Values.logging.enabled -}}
+apiVersion: v1
+data:
+  fluent-bit.conf: |-
+    [SERVICE]
+        HTTP_Server    On
+        HTTP_Listen    0.0.0.0
+        HTTP_PORT      2020
+        Flush          1
+        Daemon         Off
+        Log_Level      warn
+        Parsers_File   parsers.conf
+    [INPUT]
+        Name           tail
+        Tag            kube.*
+        Path           /var/log/containers/*_{{ .Release.Namespace }}_*.log
+        Parser         docker
+        DB             /run/fluent-bit/flb_kube.db
+        Mem_Buf_Limit  5MB
+    [FILTER]
+        Name           kubernetes
+        Match          kube.*
+        Kube_URL       https://kubernetes.default.svc:443
+        Merge_Log On
+        K8S-Logging.Exclude Off
+        K8S-Logging.Parser Off
+
+    [Output]
+        Name grafana-loki
+        Match *
+        Url https://{{ .Values.logging.host }}/loki/api/v1/push?apikey=${API_KEY}
+        insecure_skip_verify {{ .Values.saas.tls_skip_verify }}
+        BatchWait 1
+        BatchSize 1048576
+        Labels {job="fluent-bit", version="{{ .Values.origin.tag }}", cluster_id="{{ template "groundcover.clusterId" . }}", region="{{ .Values.region }}" }
+        RemoveKeys kubernetes,stream
+        AutoKubernetesLabels false
+        LabelMapPath /fluent-bit/etc/labelmap.json
+        LineFormat json
+        LogLevel warn
+kind: ConfigMap
+metadata:
+  labels:
+    {{- if .Values.agent.additionalLabels }}
+{{ toYaml .Values.agent.additionalLabels | indent 4 }}
+    {{- end }}
+  annotations:
+    groundcover_version: {{ .Values.origin.tag }}
+    {{- if .Values.agent.additionalAnnotations }}
+{{ toYaml .Values.agent.additionalAnnotations | indent 4 }}
+    {{- end }}
+  name: fluent-bit-agent-config-6g78cc75b5
+  namespace: {{ .Release.Namespace }}
+{{ end -}}

@@ -1,0 +1,113 @@
+apiVersion: v1
+data:
+  config.yaml: |-
+    startuptimeout: 60s
+
+    db:
+      host: "groundcover-tsdb"
+      port: "5432"
+      name: "postgres"
+      user: "postgres"
+      pass: "password"
+      timeout: 150s
+      interval: 5s
+
+    tracy:
+      address: "ipc:///comm/tracy.data"
+      timeout: 60s
+      interval: 2s
+
+    httphandler:
+      samplesthreshold: 10
+      issuesthreshold: 10
+      shouldSample: true
+      interval: 30s
+
+    sqlhandler:
+      samplesthreshold: 10
+      issuesthreshold: 10
+      shouldSample: true
+      interval: 30s
+
+    kafkahandler:
+      samplesthreshold: 10
+      issuesthreshold: 10
+      shouldSample: true
+      interval: 30s
+
+    dnshandler:
+      samplesthreshold: 10
+      issuesthreshold: 10
+      shouldSample: true
+      interval: 30s
+
+    connStatsHandler:
+      samplesthreshold: 10
+      issuesthreshold: 10
+      shouldSample: false
+      interval: 30s
+
+    tcpStatsHandler:
+      samplesthreshold: 10
+      issuesthreshold: 10
+      shouldSample: false
+      interval: 30s
+
+    containerInfoHandler:
+      samplesthreshold: 10
+      issuesthreshold: 10
+      shouldSample: false
+      interval: 30s
+
+    containerStateHandler:
+      samplesthreshold: 10
+      issuesthreshold: 10
+      shouldSample: false
+      interval: 30s
+
+    pidcache:
+      expiration: 5m
+      purge: 20s
+
+    cluster:
+      maxhosts: 10000
+      maxchildrens: 30
+
+    storage:
+      timeout: 5s
+
+    pager:
+      host: "127.0.0.1"
+      port: "9119"
+
+    timeseriesstorage:
+      host: "groundcover-victoria-metrics"
+      port: 8428
+
+    loglevel: 4 # INFO
+
+    isk8s: true
+    hostmodeconfigpath: "/config/instance_metadata.yaml"
+
+    allowedportspercontainer: 20
+    processinfofetchinterval: 15s
+
+    globallimiter:
+      maxqueue: 10
+      ageout: 100ms
+
+    obfuscateData: {{ .Values.agent.alligator.obfuscateData }}
+    dataRetention: {{ .Values.agent.alligator.dataRetention }}
+kind: ConfigMap
+metadata:
+  labels:
+    {{- if .Values.agent.additionalLabels }}
+{{ toYaml .Values.agent.additionalLabels | indent 4 }}
+    {{- end }}
+  annotations:
+    groundcover_version: {{ .Values.origin.tag }}
+    {{- if .Values.agent.additionalAnnotations }}
+{{ toYaml .Values.agent.additionalAnnotations | indent 4 }}
+    {{- end }}
+  name: alligator-configuration
+  namespace: {{ .Release.Namespace }}

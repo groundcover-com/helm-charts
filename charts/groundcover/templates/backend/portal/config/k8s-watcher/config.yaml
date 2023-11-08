@@ -1,0 +1,39 @@
+apiVersion: v1
+data:
+  config.yaml: |
+    LogLevel: 4
+    resourceconntimeout: 1m0s
+
+    DB:
+      Host: "groundcover-tsdb"
+      Port: "5432"
+      Name: "postgres"
+      User: "postgres"
+      Pass: "password"
+      Timeout: 150s
+      Interval: 5s
+
+    VictoriaMetrics:
+      Host: "groundcover-victoria-metrics"
+      Port: 8428
+
+    deploymenteventhandler:
+      samplesthreshold: 100
+      issuesthreshold: 100
+      interval: 60s
+      shouldsample: true
+
+    dataRetention: {{ .Values.agent.alligator.dataRetention }}
+kind: ConfigMap
+metadata:
+  labels:
+    {{- if .Values.portal.additionalLabels }}
+{{ toYaml .Values.portal.additionalLabels | indent 4 }}
+    {{- end }}
+  annotations:
+    groundcover_version: {{ .Values.origin.tag }}
+    {{- if .Values.portal.additionalAnnotations }}
+{{ toYaml .Values.portal.additionalAnnotations | indent 4 }}
+    {{- end }}
+  name: k8s-watcher-config
+  namespace: {{ .Release.Namespace }}

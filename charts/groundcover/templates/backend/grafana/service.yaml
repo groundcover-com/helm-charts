@@ -1,0 +1,29 @@
+{{- if .Values.grafana.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    groundcover_version: {{ .Values.origin.tag }}
+    {{- if .Values.grafana.additionalAnnotations }}
+{{ toYaml .Values.grafana.additionalAnnotations | indent 4 }}
+    {{- end }}
+  labels:
+    app: grafana
+    {{- if .Values.grafana.additionalLabels }}
+{{ toYaml .Values.grafana.additionalLabels | indent 4 }}
+    {{- end }}
+  name: {{ template "grafana.name" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  ports:
+  - name: http-grafana
+    port: 3000
+    protocol: TCP
+    targetPort: http-grafana
+  selector:
+    app: grafana
+  type: ClusterIP
+{{- if .Values.grafana.clusterIP }}
+  clusterIP: {{ .Values.grafana.clusterIP }}
+{{- end }}
+{{ end -}}

@@ -1,0 +1,84 @@
+apiVersion: v1
+data:
+  config.yaml: |-
+{{ if eq .Values.router.mode "cloud" }}
+
+    LogLevel: 4
+
+    Reverse: true
+    startuptimeout: 1m0s
+
+    ClusterId: {{ .Values.global.clusterId }}
+
+    Router:
+      Host: "{{ .Values.saas.host }}"
+      Port: "{{ .Values.saas.port }}"
+      Token: "OVERRIDEN"
+      WebsocketScheme: "{{ .Values.saas.scheme }}"
+      TLSSkipVerify: "{{ .Values.saas.tls_skip_verify }}"
+
+    DirectModeGRPCPort: "5555"
+
+    DB:
+      Host: "groundcover-tsdb"
+      Port: "5432"
+      Name: "postgres"
+      User: "postgres"
+      Pass: "password"
+      Timeout: 150s
+      Interval: 5s
+
+    VictoriaMetrics:
+      Host: "groundcover-victoria-metrics"
+      Port: 8428
+
+    Loki:
+      Host: "groundcover-loki"
+      Port: 3100
+{{ else }}
+    LogLevel: 4
+
+    Reverse: false
+    startuptimeout: 1m0s
+
+    ClusterId: {{ .Values.clusterId }}
+
+    Router:
+      Host: "router"
+      Port: "8080"
+      Token: "not-available"
+      WebsocketScheme: "wss"
+      TLSSkipVerify: "false"
+
+    DirectModeGRPCPort: "5555"
+
+    DB:
+      Host: "groundcover-tsdb"
+      Port: "5432"
+      Name: "postgres"
+      User: "postgres"
+      Pass: "password"
+      Timeout: 150s
+      Interval: 5s
+
+    VictoriaMetrics:
+      Host: "groundcover-victoria-metrics"
+      Port: 8428
+
+    Loki:
+      Host: "groundcover-loki"
+      Port: 3100
+{{ end }}
+kind: ConfigMap
+metadata:
+  labels:
+    {{- if .Values.portal.additionalLabels }}
+{{ toYaml .Values.portal.additionalLabels | indent 4 }}
+    {{- end }}
+  annotations:
+    groundcover_version: {{ .Values.origin.tag }}
+    {{- if .Values.portal.additionalAnnotations }}
+{{ toYaml .Values.portal.additionalAnnotations | indent 4 }}
+    {{- end }}
+  name: portal-config
+  namespace: {{ .Release.Namespace }}

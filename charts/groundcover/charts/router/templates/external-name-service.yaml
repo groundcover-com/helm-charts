@@ -1,0 +1,17 @@
+{{- if and .Values.enabled .Values.ingress.externalName -}}
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: router
+    {{- if .Values.additionalLabels }}
+{{ toYaml .Values.additionalLabels | indent 4 }}
+    {{- end }}
+  annotations:
+    groundcover_version: {{ .Values.origin.tag }}
+  name: www
+  namespace: {{ .Release.Namespace }}
+spec:
+  type: ExternalName
+  externalName: "kong-kong-proxy.kong.svc.cluster.local"
+{{ end -}}

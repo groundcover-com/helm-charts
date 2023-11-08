@@ -1,0 +1,33 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ template "groundcover.fullname" . }}-groundcover-metadata-fetcher
+  annotations:
+    groundcover_version: {{ .Values.origin.tag }}
+    {{- if .Values.rbac.annotations }}
+{{ toYaml .Values.rbac.annotations | indent 4 }}
+    {{- end }}
+  labels:
+    {{- if .Values.rbac.labels }}
+{{ toYaml .Values.rbac.labels | indent 4 }}
+    {{- end }}
+rules:
+- apiGroups:
+  - "apps"
+  - ""
+  resources:
+  - pods
+  - services
+  - endpoints
+  - namespaces
+  - daemonsets
+  - replicasets
+  - nodes
+  - deployments
+  - nodes
+  - statefulsets
+  verbs:
+  - list
+  - watch
+  - get

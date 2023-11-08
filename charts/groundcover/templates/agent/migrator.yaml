@@ -1,0 +1,77 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    {{- if .Values.migrator.additionalLabels }}
+{{ toYaml .Values.migrator.additionalLabels | indent 4 }}
+    {{- end }}
+  annotations:
+    groundcover_version: {{ .Values.origin.tag }}
+    {{- if .Values.migrator.additionalAnnotations }}
+{{ toYaml .Values.migrator.additionalAnnotations | indent 4 }}
+    {{- end }}
+  name: migrator-{{ randAlphaNum 5 | lower }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  backoffLimit: 4
+  ttlSecondsAfterFinished: 600
+  template:
+    metadata:
+      labels:
+      {{- if .Values.migrator.additionalLabels }}
+{{ toYaml .Values.migrator.additionalLabels | indent 8 }}
+      {{- end }}
+    {{- if .Values.migrator.podLabels }}
+{{ toYaml .Values.migrator.podLabels | indent 8 }}
+    {{- end }}
+      annotations:
+        groundcover_version: {{ .Values.origin.tag }}
+        {{- if .Values.migrator.additionalAnnotations }}
+{{ toYaml .Values.migrator.additionalAnnotations | indent 8 }}
+        {{- end }}
+        {{- if .Values.migrator.podAnnotations }}
+{{ toYaml .Values.migrator.podAnnotations | indent 8 }}
+        {{- end }}
+    spec:
+    {{- if .Values.migrator.tolerations }}
+      tolerations:
+{{ toYaml .Values.migrator.tolerations | indent 8 }}
+    {{- end }}
+    {{- with .Values.migrator.affinity }}
+      affinity: {{ toYaml . | nindent 8 }}
+    {{- end }}
+    {{- if .Values.migrator.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.migrator.nodeSelector | indent 8 }}
+    {{- end }}
+    {{- if .Values.migrator.priorityClassName }}
+      priorityClassName: {{ .Values.migrator.priorityClassName }}
+    {{- end }}
+      containers:
+      - env:
+        - name: GROUNDCOVER_FORCE_MIGRATE
+          value: "{{ upper .Values.migrator.resetDB }}"
+        - name: GC_DATARETENTION
+          value: "{{ .Values.agent.alligator.dataRetention }}"
+        - name: GC_DB_HOST
+          value: groundcover-tsdb
+        - name: GC_DB_PASS
+          valueFrom:
+            secretKeyRef:
+              key: PATRONI_SUPERUSER_PASSWORD
+              name: {{ index .Values "timescaledb-single" "secrets" "credentialsSecretName" | default "groundcover-tsdb-credentials" }}
+        - name: GROUNDCOVER_VERSION
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['groundcover_version']
+        image: {{ .Values.origin.registry }}/{{ .Values.migrator.repository }}:{{ .Values.origin.tag }}
+        name: migrator-{{ randAlphaNum 5 | lower }}
+      initContainers:
+      - command:
+        - sh
+        - -c
+        - until pg_isready -h groundcover-tsdb -p 5432; do echo Waiting for
+          TimescaleDB...; sleep 2; done; echo TimescaleDB is up
+        image: postgres:9.6.5
+        name: check-ts-ready
+      restartPolicy: Never

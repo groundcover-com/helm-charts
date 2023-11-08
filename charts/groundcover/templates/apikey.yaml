@@ -1,0 +1,19 @@
+{{- if .Values.global.groundcover_token -}}
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    {{- if .Values.apikey.labels }}
+{{ toYaml .Values.apikey.labels | indent 4 }}
+    {{- end }}
+  annotations:
+    groundcover_version: {{ .Values.origin.tag }}
+    {{- if .Values.apikey.annotations }}
+{{ toYaml .Values.apikey.annotations | indent 4 }}
+    {{- end }}
+  name: {{ template "groundcover.apikeySecretName" . }}
+  namespace: {{ .Release.Namespace }}
+stringData:
+  {{ template "groundcover.apikeySecretKey" . }}: {{ .Values.global.groundcover_token }}
+type: Opaque
+{{ end -}}

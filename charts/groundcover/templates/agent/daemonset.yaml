@@ -1,0 +1,304 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  annotations:
+    groundcover_version: {{ .Values.origin.tag }}
+    {{- if .Values.agent.additionalAnnotations }}
+{{ toYaml .Values.agent.additionalAnnotations | indent 4 }}
+    {{- end }}
+  name: alligator
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: alligator
+    {{- if .Values.agent.additionalLabels }}
+{{ toYaml .Values.agent.additionalLabels | indent 4 }}
+    {{- end }}
+spec:
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 100%
+  selector:
+    matchLabels:
+      app: alligator
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9102"
+        groundcover_version: {{ .Values.origin.tag }}
+        {{- if .Values.agent.additionalAnnotations }}
+{{ toYaml .Values.agent.additionalAnnotations | indent 8 }}
+        {{- end }}
+        {{- if .Values.agent.podAnnotations }}
+{{ toYaml .Values.agent.podAnnotations | indent 8 }}
+        {{- end }}
+      labels:
+        app: alligator
+        {{- if .Values.agent.additionalLabels }}
+{{ toYaml .Values.agent.additionalLabels | indent 8 }}
+        {{- end }}
+        {{- if .Values.agent.podLabels }}
+{{ toYaml .Values.agent.podLabels | indent 8 }}
+        {{- end }}
+    spec:
+{{- if .Values.pullSecrets }}
+      imagePullSecrets:
+{{ toYaml .Values.pullSecrets | indent 8 }}
+{{- end }}
+{{- if .Values.agent.tolerations }}
+      tolerations:
+{{ toYaml .Values.agent.tolerations | indent 8 }}
+{{- end }}
+{{- if .Values.agent.affinity }}
+      affinity:
+{{ toYaml .Values.agent.affinity | indent 8 }}
+{{- end }}
+{{- if .Values.agent.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.agent.nodeSelector | indent 8 }}
+{{- end }}
+      containers:
+{{- if .Values.logging.enabled }}
+        - image: grafana/fluent-bit-plugin-loki:2.1.0-amd64
+          resources:
+{{- toYaml .Values.agent.flb.resources | nindent 12 }}
+          imagePullPolicy: IfNotPresent
+          name: fluent-bit
+          env:
+            - name: API_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: {{ template "groundcover.apikeySecretKey" . }}
+                  name: {{ template "groundcover.apikeySecretName" . }}
+          ports:
+            - containerPort: 2020
+              name: flb-metrics
+          readinessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /ready
+              port: flb-metrics
+              scheme: HTTP
+          volumeMounts:
+            - mountPath: /fluent-bit/etc/parsers.conf
+              name: fluent-bit-common-config
+              subPath: parsers.conf
+            - mountPath: /fluent-bit/etc/labelmap.json
+              name: fluent-bit-common-config
+              subPath: labelmap.json
+            - mountPath: /fluent-bit/etc/fluent-bit.conf
+              name: fluent-bit-agent-config
+              subPath: fluent-bit.conf
+            - mountPath: /run/fluent-bit
+              name: fluent-bit-run
+            - mountPath: /var/log
+              name: varlog
+            - mountPath: /var/lib/docker/containers
+              name: docker
+              readOnly: true
+{{- end }}
+        - env:
+            - name: GC_DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  key: PATRONI_SUPERUSER_PASSWORD
+                  name: {{ index .Values "timescaledb-single" "secrets" "credentialsSecretName" | default "groundcover-tsdb-credentials" }}
+            - name: GC_DB_HOST
+              value: groundcover-tsdb
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          image: {{ .Values.origin.registry }}/{{ .Values.agent.alligator.repository }}:{{ .Values.origin.tag }}
+          resources:
+{{- toYaml .Values.agent.alligator.resources | nindent 12 }}
+          imagePullPolicy: Always
+          name: alligator
+          ports:
+            - containerPort: 9102
+              name: prom-metrics
+              protocol: TCP
+          securityContext:
+            capabilities:
+              add:
+                - SYS_PTRACE
+                - SYS_ADMIN
+            privileged: true
+          volumeMounts:
+            - mountPath: /host
+              name: host-root
+              readOnly: true
+            - mountPath: /sys
+              name: sys
+              readOnly: true
+            - mountPath: /config
+              name: alligator-configuration
+              readOnly: false
+            - mountPath: /comm
+              name: comm
+              readOnly: false
+        - env:
+            - name: PL_HOST_PATH
+              value: /host
+            - name: NNMSG_LISTENING_ADDRESS
+              value: ipc:///comm/tracy.data
+            - name: KTARGET_DATA_BYTES_PER_SEC
+              value: "104857600"
+            - name: KTARGET_CONTROL_BYTES_PER_SEC
+              value: "5242880"
+          envFrom:
+            - configMapRef:
+                name: tracy-conf-fg9h4chctk
+          image: {{ .Values.origin.registry }}/{{ .Values.agent.tracy.repository }}:{{ .Values.origin.tag }}
+          resources:
+{{- toYaml .Values.agent.tracy.resources | nindent 12 }}
+          imagePullPolicy: Always
+          name: tracy
+          securityContext:
+            capabilities:
+              add:
+                - SYS_PTRACE
+                - SYS_ADMIN
+            privileged: true
+          volumeMounts:
+            - mountPath: /host
+              name: host-root
+              readOnly: true
+            - mountPath: /sys
+              name: sys
+              readOnly: true
+            - mountPath: /comm
+              name: comm
+              readOnly: false
+            - mountPath: /linux-headers
+              name: linux-headers
+              readOnly: true
+        - args:
+            - -config.file=/etc/promtail/promtail.yaml
+            - -client.url=http://groundcover-loki:3100/loki/api/v1/push
+          env:
+            - name: HOSTNAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: spec.nodeName
+          image: {{ .Values.origin.registry }}/{{ .Values.agent.promtail.repository }}:{{ .Values.origin.tag }}
+          resources:
+{{- toYaml .Values.agent.promtail.resources | nindent 12 }}
+          imagePullPolicy: Always
+          name: promtail
+          ports:
+            - containerPort: 3101
+              name: http-metrics
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 5
+            httpGet:
+              path: /ready
+              port: http-metrics
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          securityContext:
+            readOnlyRootFilesystem: true
+            runAsGroup: 0
+            runAsUser: 0
+          volumeMounts:
+            - mountPath: /etc/promtail
+              name: promtail-config
+            - mountPath: /run/promtail
+              name: promtail-run
+            - mountPath: /var/lib/docker/containers
+              name: docker
+              readOnly: true
+            - mountPath: /var/log/pods
+              name: pods
+              readOnly: true
+      dnsPolicy: ClusterFirstWithHostNet
+      hostNetwork: false
+      hostPID: true
+      initContainers:
+        - image:  {{ .Values.origin.registry }}/{{ .Values.agent.fetchLinuxHeaders.repository }}:{{ .Values.origin.tag }}
+          name: fetch-linux-headers
+          volumeMounts:
+            - mountPath: /host
+              name: host-root
+              readOnly: true
+            - mountPath: /linux-headers
+              name: linux-headers
+        - command:
+            - bash
+            - -c
+            - |
+              [ -z "$GROUNDCOVER_VERSION" ] && echo "\$GROUNDCOVER_VERSION is missing" && exit 1
+              for i in {1..1800}; do sleep 2; DB_VERSION=`psql -X -A -t -h groundcover-tsdb -U postgres -c "SELECT value FROM version ORDER BY time desc limit 1"`; echo "running_version = '$GROUNDCOVER_VERSION', db_version='$DB_VERSION'"; [[ "$GROUNDCOVER_VERSION" == "$DB_VERSION" ]] && echo "DONE" && exit 0; done; echo "TIMEOUT"; exit 1;
+          env:
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: PATRONI_SUPERUSER_PASSWORD
+                  name: {{ index .Values "timescaledb-single" "secrets" "credentialsSecretName" | default "groundcover-tsdb-credentials" }}
+            - name: GROUNDCOVER_VERSION
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.annotations['groundcover_version']
+          image: postgres:9.6.5
+          name: check-ts-ready
+        - args:
+            - while [ $(curl -sw '%{http_code}' http://groundcover-victoria-metrics:8428/health -o /dev/null) -ne 200 ]; do echo 'Waiting for VictoriaMetrics...'; sleep 2; done; echo VictoriaMetrics is up
+          command:
+            - /bin/sh
+            - -c
+          image: curlimages/curl:latest
+          name: check-vm-ready
+      serviceAccountName: alligator
+{{- if .Values.agent.priorityClassName }}
+      priorityClassName: {{ .Values.agent.priorityClassName }}
+{{- end }}
+      terminationGracePeriodSeconds: 10
+      volumes:
+{{- if .Values.logging.enabled }}
+        - configMap:
+            name: fluent-bit-agent-config-6g78cc75b5
+          name: fluent-bit-agent-config
+        - configMap:
+            name: fluent-bit-common-config
+          name: fluent-bit-common-config
+        - hostPath:
+            path: /run/fluent-bit
+          name: fluent-bit-run
+{{- end }}
+        - hostPath:
+            path: /
+            type: Directory
+          name: host-root
+        - hostPath:
+            path: /sys
+            type: Directory
+          name: sys
+        - configMap:
+            defaultMode: 420
+            name: alligator-configuration
+          name: alligator-configuration
+        - emptyDir: {}
+          name: comm
+        - configMap:
+            name: promtail-config
+          name: promtail-config
+        - hostPath:
+            path: /run/promtail
+          name: promtail-run
+        - hostPath:
+            path: /var/lib/docker/containers
+          name: docker
+        - hostPath:
+            path: /var/log/pods
+          name: pods
+        - emptyDir: {}
+          name: linux-headers
+        - hostPath:
+            path: /var/log
+          name: varlog

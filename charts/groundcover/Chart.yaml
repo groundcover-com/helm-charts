@@ -1,0 +1,18 @@
+apiVersion: v2
+appVersion: 0.28.1
+dependencies:
+- name: router
+  repository: ""
+- name: timescaledb-single
+  repository: ""
+- name: victoria-metrics-single
+  repository: ""
+- condition: metrics.enabled
+  name: victoria-metrics-agent
+  repository: ""
+- name: loki
+  repository: ""
+description: A Helm chart for Kubernetes
+name: groundcover
+type: application
+version: 0.28.1

@@ -1,0 +1,148 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    groundcover_version: {{ .Values.origin.tag }}
+    {{- if .Values.portal.additionalAnnotations }}
+{{ toYaml .Values.portal.additionalAnnotations | indent 4 }}
+    {{- end }}    
+  labels:
+    app: portal
+    {{- if .Values.portal.additionalLabels }}
+{{ toYaml .Values.portal.additionalLabels | indent 4 }}
+    {{- end }}
+  name: portal
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: portal
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9102"
+        groundcover_version: {{ .Values.origin.tag }}
+        {{- if .Values.portal.additionalAnnotations }}
+{{ toYaml .Values.portal.additionalAnnotations | indent 8 }}
+        {{- end }}
+        {{- if .Values.portal.podAnnotations }}
+{{ toYaml .Values.portal.podAnnotations | indent 8 }}
+        {{- end }}
+      labels:
+        app: portal
+        {{- if .Values.portal.additionalLabels }}
+{{ toYaml .Values.portal.additionalLabels | indent 8 }}
+        {{- end }}
+        {{- if .Values.portal.podLabels }}
+{{ toYaml .Values.portal.podLabels | indent 8 }}
+        {{- end }}
+    spec:
+{{- if .Values.portal.tolerations }}
+      tolerations:
+{{ toYaml .Values.portal.tolerations | indent 8 }}
+{{- end }}
+{{- if .Values.portal.affinity }}
+      affinity:
+{{ toYaml .Values.portal.affinity | indent 8 }}
+{{- end }}
+{{- if .Values.portal.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.portal.nodeSelector | indent 8 }}
+{{- end }}
+{{- if .Values.pullSecrets }}
+      imagePullSecrets:
+{{ toYaml .Values.pullSecrets | indent 8 }}
+{{- end }}
+      containers:
+      - env:
+        - name: GC_CLUSTERID
+          value: {{ .Values.clusterId }}
+        - name: GC_DB_PASS
+          valueFrom:
+            secretKeyRef:
+              key: PATRONI_SUPERUSER_PASSWORD
+              name: {{ index .Values "timescaledb-single" "secrets" "credentialsSecretName" | default "groundcover-tsdb-credentials" }}
+{{ if eq .Values.router.mode "cloud" }}
+        - name: GC_ROUTER_TOKEN
+          valueFrom:
+            secretKeyRef:
+              key: {{ template "groundcover.apikeySecretKey" . }}
+              name: {{ template "groundcover.apikeySecretName" . }}
+{{ end }}
+        image: {{ .Values.origin.registry }}/{{ .Values.portal.repository }}:{{ .Values.origin.tag }}
+        imagePullPolicy: Always
+        name: portal
+        ports:
+        - containerPort: 5555
+          name: grpc-portal
+          protocol: TCP
+        - containerPort: 9102
+          name: portal-metrics
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 100m
+            memory: 200Mi
+          requests:
+            cpu: 50m
+            memory: 100Mi
+        volumeMounts:
+        - mountPath: /config
+          name: portal-config-volume
+      - env:
+        - name: GC_DB_PASS
+          valueFrom:
+            secretKeyRef:
+              key: PATRONI_SUPERUSER_PASSWORD
+              name: {{ index .Values "timescaledb-single" "secrets" "credentialsSecretName" | default "groundcover-tsdb-credentials" }}
+        image: {{ .Values.origin.registry }}/{{ .Values.k8sWatcher.repository }}:{{ .Values.origin.tag }}
+        imagePullPolicy: Always
+        name: k8s-watcher
+        resources:
+          limits:
+            cpu: 100m
+            memory: 200Mi
+          requests:
+            cpu: 50m
+            memory: 100Mi
+        volumeMounts:
+        - mountPath: /config
+          name: k8s-watcher-config-volume
+      initContainers:
+      - command:
+        - sh
+        - -c
+        - until pg_isready -h groundcover-tsdb -p 5432; do echo Waiting for
+          TimescaleDB...; sleep 2; done; echo TimescaleDB is up
+        image: postgres:9.6.5
+        name: check-ts-ready
+      - args:
+        - while [ $(curl -sw '%{http_code}' http://groundcover-victoria-metrics:8428/health
+          -o /dev/null) -ne 200 ]; do echo 'Waiting for VictoriaMetrics...'; sleep
+          2; done; echo VictoriaMetrics is up
+        command:
+        - /bin/sh
+        - -c
+        image: curlimages/curl:latest
+        name: check-vm-ready
+      - args:
+        - while [ $(curl -sw '%{http_code}' http://groundcover-loki:3100/ready
+          -o /dev/null) -ne 200 ]; do echo 'Waiting for Loki...'; sleep
+          2; done; echo Loki is up
+        command:
+        - /bin/sh
+        - -c
+        image: curlimages/curl:latest
+        name: check-loki-ready
+      serviceAccountName: k8s-watcher
+{{- if .Values.portal.priorityClassName }}
+      priorityClassName: {{ .Values.portal.priorityClassName }}
+{{- end }}
+      volumes:
+      - configMap:
+          name: portal-config
+        name: portal-config-volume
+      - configMap:
+          name: k8s-watcher-config
+        name: k8s-watcher-config-volume
