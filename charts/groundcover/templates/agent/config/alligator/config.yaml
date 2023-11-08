@@ -79,6 +79,14 @@ data:
       summarizerActiveTtl: 45s
       aggregationCacheSize: 300
 
+    mongodbhandler:
+      samplesthreshold: 10
+      issuesthreshold: 10
+      samplingmode: 1 # DefaultSample
+      interval: 30s
+      summarizerActiveTtl: 45s
+      aggregationCacheSize: 4096
+
     connStatsHandler:
       samplesthreshold: 10
       issuesthreshold: 10
