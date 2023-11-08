@@ -68,50 +68,12 @@ spec:
 {{ toYaml .Values.agent.nodeSelector | indent 8 }}
 {{- end }}
       containers:
-{{- if .Values.logging.enabled }}
-        - image: public.ecr.aws/groundcovercom/fluent-bit-plugin-loki:2.1.0-amd64
-          resources:
-{{- toYaml .Values.agent.flb.resources | nindent 12 }}
-          imagePullPolicy: IfNotPresent
-          name: fluent-bit
-          env:
-            - name: API_KEY
-              valueFrom:
-                secretKeyRef:
-                  key: {{ template "groundcover.apikeySecretKey" . }}
-                  name: {{ template "groundcover.apikeySecretName" . }}
-          envFrom:
-            - secretRef:
-                name: groundcover-config
-          ports:
-            - containerPort: 2020
-              name: flb-metrics
-          readinessProbe:
-            failureThreshold: 5
-            httpGet:
-              path: /ready
-              port: flb-metrics
-              scheme: HTTP
-          volumeMounts:
-            - mountPath: /fluent-bit/etc/parsers.conf
-              name: fluent-bit-common-config
-              subPath: parsers.conf
-            - mountPath: /fluent-bit/etc/labelmap.json
-              name: fluent-bit-common-config
-              subPath: labelmap.json
-            - mountPath: /fluent-bit/etc/fluent-bit.conf
-              name: fluent-bit-agent-config
-              subPath: fluent-bit.conf
-            - mountPath: /run/fluent-bit
-              name: fluent-bit-run
-            - mountPath: /var/log
-              name: varlog
-            - mountPath: /var/lib/docker/containers
-              name: docker
-              readOnly: true
-{{- end }}
         - env:
             - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: HOSTNAME
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName              
@@ -128,7 +90,12 @@ spec:
               valueFrom:
                 secretKeyRef:
                     name: groundcover-config
-                    key: GC_REGION    
+                    key: GC_REGION
+            - name: API_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: {{ template "groundcover.apikeySecretKey" . }}
+                  name: {{ template "groundcover.apikeySecretName" . }}                        
             {{- with .Values.agent.alligator.env }}
               {{ toYaml . | nindent 12 }}
             {{- end }}                                
@@ -157,9 +124,20 @@ spec:
             - mountPath: /config
               name: alligator-configuration
               readOnly: false
+            - mountPath: /scrape-config
+              name: alligator-scrape-configuration
+              readOnly: false
             - mountPath: /comm
               name: comm
               readOnly: false
+            - mountPath: /var/run/positions
+              name: alligator-position
+            - mountPath: /var/lib/docker/containers
+              name: docker
+              readOnly: true
+            - mountPath: /var/log/pods
+              name: pods
+              readOnly: true
         - env:
             - name: PL_HOST_PATH
               value: /host
@@ -199,55 +177,6 @@ spec:
             - mountPath: /linux-headers
               name: linux-headers
               readOnly: true
-        - args:
-            - -config.file=/etc/promtail/promtail.yaml
-            - -client.url={{ template "loki.url" . }}/loki/api/v1/push
-            - -config.expand-env=true
-          env:
-            - name: HOSTNAME
-              valueFrom:
-                fieldRef:
-                  apiVersion: v1
-                  fieldPath: spec.nodeName
-            - name: GC_CLUSTERID
-              valueFrom:
-                secretKeyRef:
-                    name: groundcover-config
-                    key: GC_CLUSTER_ID
-          image: {{ .Values.origin.registry }}/{{ .Values.agent.promtail.repository }}:{{ default .Chart.AppVersion .Values.origin.tag }}
-          resources:
-{{- toYaml .Values.agent.promtail.resources | nindent 12 }}
-          imagePullPolicy: Always
-          name: promtail
-          ports:
-            - containerPort: 3101
-              name: http-metrics
-              protocol: TCP
-          readinessProbe:
-            failureThreshold: 10
-            httpGet:
-              path: /ready
-              port: http-metrics
-              scheme: HTTP
-            initialDelaySeconds: 10
-            periodSeconds: 10
-            successThreshold: 1
-            timeoutSeconds: 1
-          securityContext:
-            readOnlyRootFilesystem: true
-            runAsGroup: 0
-            runAsUser: 0
-          volumeMounts:
-            - mountPath: /etc/promtail
-              name: promtail-config
-            - mountPath: /run/promtail
-              name: promtail-run
-            - mountPath: /var/lib/docker/containers
-              name: docker
-              readOnly: true
-            - mountPath: /var/log/pods
-              name: pods
-              readOnly: true
       dnsPolicy: ClusterFirstWithHostNet
       hostNetwork: false
       hostPID: true
@@ -282,17 +211,6 @@ spec:
 {{- end }}
       terminationGracePeriodSeconds: 10
       volumes:
-{{- if .Values.logging.enabled }}
-        - configMap:
-            name: fluent-bit-agent-config-6g78cc75b5
-          name: fluent-bit-agent-config
-        - configMap:
-            name: fluent-bit-common-config
-          name: fluent-bit-common-config
-        - hostPath:
-            path: /run/fluent-bit
-          name: fluent-bit-run
-{{- end }}
         - hostPath:
             path: /
             type: Directory
@@ -305,14 +223,15 @@ spec:
             defaultMode: 420
             name: alligator-configuration
           name: alligator-configuration
+        - configMap:
+            defaultMode: 420
+            name: alligator-scrape-configuration
+          name: alligator-scrape-configuration
         - emptyDir: {}
           name: comm
-        - configMap:
-            name: promtail-config
-          name: promtail-config
         - hostPath:
-            path: /run/promtail
-          name: promtail-run
+            path: /run/alligator-position-{{ .Release.Namespace }}
+          name: alligator-position
         - hostPath:
             path: /var/lib/docker/containers
           name: docker

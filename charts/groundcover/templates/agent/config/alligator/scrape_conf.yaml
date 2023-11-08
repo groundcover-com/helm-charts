@@ -1,41 +1,10 @@
 {{ if .Values.agent.enabled }}
 apiVersion: v1
 data:
-  promtail.yaml: |-
-    client:
-      tls_config:
-        insecure_skip_verify: true
-      backoff_config:
-        max_period: 5m
-        max_retries: 10
-        min_period: 500ms
-      batchsize: 1048576
-      batchwait: 5s
-      external_labels:
-        clusterId: ${GC_CLUSTERID}
-      timeout: 10s
-      groundcover_pager_host: 127.0.0.1
-      groundcover_pager_port: 9119
-      groundcover_pager_timeout: 2m
-      groundcover_time_travel: -20s
-    positions:
-      filename: /run/promtail/positions.yaml
-    server:
-      http_listen_port: 3101
-      log_level: warn
-    target_config:
-      sync_period: 10s
-    scrape_configs:
-    - job_name: kubernetes-pods-name
+  config.yaml: |-
+      job_name: kubernetes-pods-name
       pipeline_stages:  
       - docker: {}
-      - match:
-          selector: '{container=~".+"}'
-          stages:
-          - regex:
-              expression: '.*(?P<level>(?i)FATAL|PANIC|ERROR|WARNING|WARN|INFO|DEBUG|TRACE).*' 
-          - labels:
-              level:
       - labeldrop:
         - filename
       - labeldrop:
@@ -47,9 +16,6 @@ data:
       kubernetes_sd_configs:
       - role: pod
       relabel_configs:
-      - source_labels:
-        - __meta_kubernetes_pod_label_name
-        target_label: workload
       - source_labels:
         - __meta_kubernetes_pod_node_name
         target_label: __host__
@@ -63,6 +29,10 @@ data:
         source_labels:
         - __meta_kubernetes_pod_name
         target_label: pod
+      - action: replace
+        source_labels:
+        - __meta_kubernetes_pod_ip
+        target_label: pod_ip
       - action: replace
         source_labels:
         - __meta_kubernetes_pod_container_name
@@ -87,6 +57,6 @@ metadata:
     {{- if .Values.agent.additionalAnnotations }}
 {{ toYaml .Values.agent.additionalAnnotations | indent 4 }}
     {{- end }}
-  name: promtail-config
+  name: alligator-scrape-configuration
   namespace: {{ .Release.Namespace }}
-{{ end -}}
+{{ end }}

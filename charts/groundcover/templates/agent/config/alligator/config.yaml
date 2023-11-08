@@ -93,10 +93,6 @@ data:
     storage:
       timeout: 5s
 
-    pager:
-      host: "127.0.0.1"
-      port: "9119"
-
     timeseriesstorage:
       url: "{{ template "vmagent.url" . }}"
       tlsskipverify: false
@@ -160,6 +156,55 @@ data:
           enabled: false
           port: ":5555"
           endpoint: "/metrics"
+    k8sLogs:
+      scraper:
+        positionsFile: "/var/run/positions/positions.yaml"
+        positionsSyncInterval: 10s
+        targetSyncInterval: 10s
+      clients:
+      - name: "logs_client"
+        enabled: true
+        urlText: {{ template "loki.url" . }}/loki/api/v1/push
+        useApiKey: false
+        batchwait: 5s
+        batchsize: 1048576
+        client:
+          tlsconfig:
+            insecureSkipVerify: true
+        backoffConfig:
+          minBackoff: 500ms
+          maxBackoff: 5m
+          maxRetries: 10
+        externalLabels:
+          labelSet:
+            cluster_id: {{ .Values.clusterId }}
+            job: alligator
+        timeout: 10s
+        useRingBuffer: true
+        filterRunningNamespace: false
+        groundcoverTimeTarvel: -20s
+      - name: "monitoring_client"
+        enabled: {{ .Values.logging.enabled }}
+        urlText: https://{{ .Values.logging.host }}/loki/api/v1/push
+        useApiKey: true
+        batchwait: 5s
+        batchsize: 1048576
+        client:
+          tlsconfig:
+            insecureSkipVerify: {{ .Values.saas.tls_skip_verify }}
+        backoffConfig:
+          minBackoff: 500ms
+          maxBackoff: 5m
+          maxRetries: 10
+        externalLabels:
+          labelSet:
+            cluster_id: {{ .Values.clusterId }}
+            job: alligator
+            region: {{ .Values.region }}
+            version: {{ default .Chart.AppVersion .Values.origin.tag }}
+        timeout: 10s   
+        useRingBuffer: false
+        filterRunningNamespace: true
 kind: ConfigMap
 metadata:
   labels:

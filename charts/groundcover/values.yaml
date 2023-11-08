@@ -69,11 +69,11 @@ agent:
     repository: alligator
     resources:
       requests:
-        memory: 128Mi
-        cpu: 100m
+        memory: 300Mi
+        cpu: 160m
       limits:
-        memory: 350Mi
-        cpu: 500m
+        memory: 700Mi
+        cpu: 800m
     obfuscateData: false
     dataRetention: 12h
     nodelabels: []
@@ -89,23 +89,6 @@ agent:
       limits:
         memory: 2048Mi
         cpu: 750m
-  promtail:
-    repository: promtail
-    resources:
-      requests:
-        cpu: 40m
-        memory: 128Mi
-      limits:
-        cpu: 200m
-        memory: 256Mi
-  flb:
-    resources:
-      requests:
-        cpu: 20m
-        memory: 32Mi
-      limits:
-        cpu: 100m
-        memory: 64Mi
         
   fetchLinuxHeaders:
     enabled: false
