@@ -14,6 +14,9 @@ data:
     {{- with .Values.multipleClusterIds }}{{ toYaml . | nindent 6 }}{{- end }}  
     VERSION: "OVERRIDEN"
 
+    Incluster: true
+    Namespace: {{ .Release.Namespace }}
+    
     Router:
       Host: "{{ .Values.saas.host }}"
       Port: "{{ .Values.saas.port }}"
@@ -21,6 +24,10 @@ data:
       WebsocketScheme: "{{ .Values.saas.scheme }}"
       TLSSkipVerify: "{{ .Values.saas.tls_skip_verify }}"
       ExtraHeaders:
+    {{- if .Values.installationId }}
+        - Key: X-Portal-InstallationId
+          Value: {{ .Values.installationId }}
+    {{- end }}
 
     DirectModeGRPCPort: "5555"
 
@@ -51,12 +58,20 @@ data:
     {{- end }}  
     VERSION: "OVERRIDEN"
 
+    Incluster: true
+    Namespace: {{ .Release.Namespace }}
+
     Router:
       Host: "router"
       Port: "8080"
       Token: "not-available"
       WebsocketScheme: "wss"
       TLSSkipVerify: "false"
+      ExtraHeaders:
+      {{- if .Values.installationId }}
+        - Key: X-Portal-InstallationId
+          Value: {{ .Values.installationId }}
+      {{- end }}
 
     DirectModeGRPCPort: "5555"
 

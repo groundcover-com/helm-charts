@@ -38,6 +38,7 @@ saas:
 
 #GENERAL
 clusterId:
+installationId:
 # multipleClusterIds:
 #  - clusterA
 #  - clusterB

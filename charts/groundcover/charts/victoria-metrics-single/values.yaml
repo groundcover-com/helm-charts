@@ -62,6 +62,7 @@ server:
     search.maxQueryLen: "100000"
     search.maxConcurrentRequests: "8"
     maxLabelsPerTimeseries: "50"
+    promscrape.maxScrapeSize: "100MB"
 
   # Additional hostPath mounts
   extraHostPathMounts:
