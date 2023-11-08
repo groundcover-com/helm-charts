@@ -46,6 +46,10 @@ spec:
           env:
             - name: GIN_MODE
               value: "release"
+            - name: GC_GROUNDCOVERVERSION
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.annotations['groundcover_version']
             - name: ROUTER_VERSION
               value: "{{ .Values.origin.tag }}"
             - name: ROUTER_SENTRY_DSN
