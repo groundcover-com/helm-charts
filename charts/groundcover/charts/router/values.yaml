@@ -9,7 +9,7 @@ onprem:
   enabled: true
 origin:
   registry: quay.io/groundcover
-  tag: 1.4.55
+  tag: 1.4.56
 serviceAccount:
   annotations:
 repository: router
