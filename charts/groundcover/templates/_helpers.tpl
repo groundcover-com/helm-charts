@@ -99,25 +99,22 @@ Get cluster_id from values or generate random one
 {{- end -}}
 
 {{- define "telemetry.metrics.url" }}
-{{- if .Values.metrics -}}
+{{- if and .Values.metrics .Values.metrics.host -}}
     {{- printf "https://%s/api/v1/write" .Values.metrics.host -}}
 {{- else -}}
     {{- .Values.global.telemetry.metrics.url -}}
 {{- end -}}
 {{- end -}}
 
+{{- define "telemetry.metrics.base.url" }}
+{{- $url := urlParse (include "telemetry.metrics.url" .) -}}
+{{- printf "%s://%s" (get $url "scheme") (get $url "host") -}}
+{{- end -}}
+
 {{- define "telemetry.logs.url" }}
-{{- if .Values.logging -}}
+{{- if and .Values.logging .Values.logging.host -}}
     {{- printf "https://%s/v1/logs" .Values.logging.host -}}
 {{- else -}}
     {{- .Values.global.telemetry.logs.url -}}
 {{- end -}}
 {{- end -}}
-
-{{- define "customMetrics.name" }}
-{{- printf "%s-%s" .Release.Name "custom-metrics"  -}}
-{{- end -}}}}
-
-{{- define "customMetrics.port" }}
-{{- default "8429" .Values.global.customMetricsServicePort  -}}
-{{- end -}}}}

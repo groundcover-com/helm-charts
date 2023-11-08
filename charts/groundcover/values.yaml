@@ -126,8 +126,8 @@ agent:
       enabled: true
       interval: 10s
       exponent: 40
+      uploaderType: pyroscope
       cpuSamplingDuration: 60s
-      pushURL: ""
     env:
   tracy:
     image:
@@ -302,7 +302,7 @@ opentelemetry-collector:
       secretName: opentelemetry-collector-certificate
   image:
     repository: public.ecr.aws/groundcovercom/otel/opentelemetry-collector-contrib
-    tag: "1.4.10"
+    tag: "1.4.11"
   podLabels:
     app.kubernetes.io/part-of: groundcover
   podAnnotations:

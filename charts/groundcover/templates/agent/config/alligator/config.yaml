@@ -151,7 +151,12 @@ data:
       interval: {{ .Values.agent.alligator.pprofAlligator.interval }}
       exponent: {{ .Values.agent.alligator.pprofAlligator.exponent }}
       cpuSamplingDuration: {{ .Values.agent.alligator.pprofAlligator.cpuSamplingDuration }}
-      pushURL: {{ printf "%s/upload/pprof" (include "telemetry.metrics.url" .) }}
+      httpUploader:
+        enabled: {{ eq .Values.agent.alligator.pprofAlligator.uploaderType "http" }}
+        pushURL: {{ printf "%s/upload/pprof" (include "telemetry.metrics.base.url" .) }}
+      pyroscopeUploader:
+        enabled: {{ eq .Values.agent.alligator.pprofAlligator.uploaderType "pyroscope" }}
+        pushURL: {{ include "telemetry.metrics.base.url" . }}
 
     clusterId: {{ .Values.clusterId }}
     region: {{ .Values.region }}
