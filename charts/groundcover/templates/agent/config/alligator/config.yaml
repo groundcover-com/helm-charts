@@ -12,8 +12,6 @@ data:
       sql: 5
       kafka: 5
       dns: 5
-      conn_stats: 2
-      tcp_stats: 2
       node_info: 2
       container_crash: 1
       container_info: 1

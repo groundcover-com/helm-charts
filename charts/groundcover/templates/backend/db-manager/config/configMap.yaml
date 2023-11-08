@@ -23,7 +23,7 @@ data:
       Traces: '{{ include "traces.retention" . }}'   
       Logs: '{{ include "logs.retention" . }}'   
       Entities: 5d
-      Events: 5d
+      Events: '{{ include "events.retention" . }}'
     DataMigration:
       BackfillBatchDuration:
         Traces: 1m

@@ -10,6 +10,10 @@
 {{ .Values.global.traces.retention }}
 {{- end -}}
 
+{{- define "events.retention" -}}
+{{ .Values.global.events.retention }}
+{{- end -}}
+
 {{- define "opentelemetry-collector.otlp.scheme" -}}
 {{- ternary "https" "http" .Values.global.otlp.tls.enabled -}}
 {{- end -}}

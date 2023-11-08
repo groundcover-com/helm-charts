@@ -59,6 +59,9 @@ global:
   traces:
     retention: 24h # {amount}[h(ours), d(ays), w(eeks), y(ears)]
 
+  events:
+    retention: 7d # {amount}[h(ours), d(ays), w(eeks), y(ears)]
+
   telemetry:
     enabled: true
     logs:
