@@ -176,7 +176,6 @@ data:
             commandsUntilCalibrated: 3
             stringParseLimit: 10240 # 10k
             payloadStoreLimit: 1048576 # 1mb
-            idleTimeout: 10ms
           dns:
             enabled: true
         bpfLoading:
