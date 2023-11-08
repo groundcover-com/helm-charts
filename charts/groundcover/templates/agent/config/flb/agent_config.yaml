@@ -33,7 +33,7 @@ data:
         insecure_skip_verify {{ .Values.saas.tls_skip_verify }}
         BatchWait 1
         BatchSize 1048576
-        Labels {job="fluent-bit", version="{{ .Values.origin.tag }}", cluster_id="${GC_CLUSTER_ID}", region="${GC_REGION}" }
+        Labels {job="fluent-bit", version="{{ default .Chart.AppVersion .Values.origin.tag }}", cluster_id="${GC_CLUSTER_ID}", region="${GC_REGION}" }
         RemoveKeys kubernetes,stream
         AutoKubernetesLabels false
         LabelMapPath /fluent-bit/etc/labelmap.json
@@ -49,7 +49,7 @@ metadata:
 {{ toYaml .Values.agent.additionalLabels | indent 4 }}
     {{- end }}
   annotations:
-    groundcover_version: {{ .Values.origin.tag }}
+    groundcover_version: {{ default .Chart.AppVersion .Values.origin.tag }}
     {{- if .Values.agent.additionalAnnotations }}
 {{ toYaml .Values.agent.additionalAnnotations | indent 4 }}
     {{- end }}

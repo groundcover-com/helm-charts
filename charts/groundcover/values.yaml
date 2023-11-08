@@ -41,10 +41,12 @@ clusterId:
 region:
 filteredNamespaces: []
 shouldDropRunningNamespaces: true
+commitHashKeyName: 
+repositoryUrlKeyName: 
 
 origin:
   registry: public.ecr.aws/groundcovercom
-  tag: 0.40.1
+  tag: "" # rewrites Chart.AppVersion
 
 pullSecrets: []
 
@@ -253,7 +255,6 @@ router:
   repository: router
   origin:
     registry: public.ecr.aws/groundcovercom
-    tag: 0.40.1
 
 # These are the recomendded presets
 # if you are after an uninstallation, prior to re-installation make sure

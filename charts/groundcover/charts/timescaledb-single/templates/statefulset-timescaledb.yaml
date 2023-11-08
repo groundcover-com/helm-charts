@@ -61,7 +61,7 @@ spec:
       - name: tstune
         securityContext:
           allowPrivilegeEscalation: false
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        image: "{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
         env:
         - name: TSTUNE_FILE
           value: {{ template "tstune_config" . }}
@@ -146,7 +146,7 @@ spec:
       - name: timescaledb
         securityContext:
           allowPrivilegeEscalation: false
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        image: "{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         lifecycle:
           preStop:
@@ -373,7 +373,7 @@ spec:
             name: pgbouncer-userlist
             readOnly: true
 {{- end }}
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        image: "{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
           - containerPort: 6432
@@ -389,7 +389,7 @@ spec:
       - name: pgbackrest
         securityContext:
           allowPrivilegeEscalation: false
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        image: "{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         command:
           - {{ template "scripts_dir" . }}/pgbackrest_bootstrap.sh

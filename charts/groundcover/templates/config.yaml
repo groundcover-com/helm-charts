@@ -9,7 +9,7 @@ metadata:
 {{ toYaml .Values.config.labels | indent 4 }}
     {{- end }}
   annotations:
-    groundcover_version: {{ .Values.origin.tag }}
+    groundcover_version: {{ default .Chart.AppVersion .Values.origin.tag }}
     {{- if .Values.config.annotations }}
 {{ toYaml .Values.config.annotations | indent 4 }}
     {{- end }}
@@ -18,6 +18,6 @@ metadata:
 stringData:
   GC_CLUSTER_ID: {{ template "groundcover.clusterId" . }}
   GC_REGION: {{ template "groundcover.region" . }}
-  GC_VERSION: {{ .Values.origin.tag }}
+  GC_VERSION: {{ default .Chart.AppVersion .Values.origin.tag }}
 
 type: Opaque

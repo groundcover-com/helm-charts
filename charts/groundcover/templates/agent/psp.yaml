@@ -10,7 +10,7 @@ metadata:
 {{ toYaml .Values.agent.additionalLabels | indent 4 }}
     {{- end }}
   annotations:
-    groundcover_version: {{ .Values.origin.tag }}
+    groundcover_version: {{ default .Chart.AppVersion .Values.origin.tag }}
     seccomp.security.alpha.kubernetes.io/allowedProfileNames: '*'
     {{- if .Values.agent.additionalAnnotations }}
 {{ toYaml .Values.agent.additionalAnnotations | indent 4 }}

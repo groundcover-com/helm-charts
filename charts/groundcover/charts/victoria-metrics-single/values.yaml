@@ -41,7 +41,7 @@ server:
     # -- Image repository
     repository: public.ecr.aws/groundcovercom/victoria-metrics
     # -- Image tag
-    tag: v1.77.1
+    tag: "" # rewrites Chart.AppVersion
     # -- Image pull policy
     pullPolicy: IfNotPresent
   # -- Name of Priority Class

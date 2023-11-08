@@ -3,7 +3,7 @@ apiVersion: v1
 kind: Service
 metadata:
   annotations:
-    groundcover_version: {{ .Values.origin.tag }}
+    groundcover_version: {{ default .Chart.AppVersion .Values.origin.tag }}
     {{- if .Values.portal.additionalAnnotations }}
 {{ toYaml .Values.portal.additionalAnnotations | indent 4 }}
     {{- end }}

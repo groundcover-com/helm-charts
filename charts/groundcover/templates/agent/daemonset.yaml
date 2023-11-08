@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   annotations:
-    groundcover_version: {{ .Values.origin.tag }}
+    groundcover_version: {{ default .Chart.AppVersion .Values.origin.tag }}
     {{- if .Values.agent.additionalAnnotations }}
 {{ toYaml .Values.agent.additionalAnnotations | indent 4 }}
     {{- end }}
@@ -30,7 +30,7 @@ spec:
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "9102"
-        groundcover_version: {{ .Values.origin.tag }}
+        groundcover_version: {{ default .Chart.AppVersion .Values.origin.tag }}
         {{- if .Values.agent.additionalAnnotations }}
 {{ toYaml .Values.agent.additionalAnnotations | indent 8 }}
         {{- end }}
@@ -130,7 +130,7 @@ spec:
             {{- with .Values.agent.alligator.env }}
               {{ toYaml . | nindent 12 }}
             {{- end }}                                
-          image: {{ .Values.origin.registry }}/{{ .Values.agent.alligator.repository }}:{{ .Values.origin.tag }}
+          image: {{ .Values.origin.registry }}/{{ .Values.agent.alligator.repository }}:{{ .Chart.AppVersion }}
           resources:
 {{- toYaml .Values.agent.alligator.resources | nindent 12 }}
           imagePullPolicy: Always
@@ -173,7 +173,7 @@ spec:
           envFrom:
             - configMapRef:
                 name: tracy-conf-fg9h4chctk
-          image: {{ .Values.origin.registry }}/{{ .Values.agent.tracy.repository }}:{{ .Values.origin.tag }}
+          image: {{ .Values.origin.registry }}/{{ .Values.agent.tracy.repository }}:{{ default .Chart.AppVersion .Values.origin.tag }}
           resources:
 {{- toYaml .Values.agent.tracy.resources | nindent 12 }}
           imagePullPolicy: Always
@@ -212,7 +212,7 @@ spec:
                 secretKeyRef:
                     name: groundcover-config
                     key: GC_CLUSTER_ID
-          image: {{ .Values.origin.registry }}/{{ .Values.agent.promtail.repository }}:{{ .Values.origin.tag }}
+          image: {{ .Values.origin.registry }}/{{ .Values.agent.promtail.repository }}:{{ default .Chart.AppVersion .Values.origin.tag }}
           resources:
 {{- toYaml .Values.agent.promtail.resources | nindent 12 }}
           imagePullPolicy: Always
@@ -251,7 +251,7 @@ spec:
       hostPID: true
       initContainers:
 {{ if .Values.agent.fetchLinuxHeaders.enabled }}
-        - image:  {{ .Values.origin.registry }}/{{ .Values.agent.fetchLinuxHeaders.repository }}:{{ .Values.origin.tag }}
+        - image:  {{ .Values.origin.registry }}/{{ .Values.agent.fetchLinuxHeaders.repository }}:{{ default .Chart.AppVersion .Values.origin.tag }}
           name: fetch-linux-headers
           volumeMounts:
             - mountPath: /host

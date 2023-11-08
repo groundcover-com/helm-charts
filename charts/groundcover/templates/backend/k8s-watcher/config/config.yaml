@@ -16,7 +16,7 @@ data:
       tls: "true"
       tableWriterBatchMaxSize: 1000
       tableWriterBatchInterval: 1s
-      tableWriterBatchWriteTimeout: 1s
+      tableWriterBatchWriteTimeout: 5s
 
     deploymenteventhandler:
       samplesthreshold: 100
@@ -31,6 +31,8 @@ data:
     region: {{ .Values.region }}
     shouldDropRunningNamespaces: {{ .Values.shouldDropRunningNamespaces }}
     filteredNamespaces: {{ toYaml .Values.filteredNamespaces | nindent 6 }}
+    commitHashKeyName: {{ .Values.commitHashKeyName }}
+    repositoryUrlKeyName: {{ .Values.repositoryUrlKeyName }}
 kind: ConfigMap
 metadata:
   labels:
@@ -41,7 +43,7 @@ metadata:
 {{ toYaml .Values.portal.additionalLabels | indent 4 }}
     {{- end }}
   annotations:
-    groundcover_version: {{ .Values.origin.tag }}
+    groundcover_version: {{ default .Chart.AppVersion .Values.origin.tag }}
     {{- if .Values.portal.additionalAnnotations }}
 {{ toYaml .Values.portal.additionalAnnotations | indent 4 }}
     {{- end }}

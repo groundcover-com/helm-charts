@@ -29,7 +29,7 @@ statefulset:
 
 image:
   repository: public.ecr.aws/groundcovercom/vmagent
-  tag: "v1.77.2" # rewrites Chart.AppVersion
+  tag: "" # rewrites Chart.AppVersion
   pullPolicy: IfNotPresent
 
 initContainers:

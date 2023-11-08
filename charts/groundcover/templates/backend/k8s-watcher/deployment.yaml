@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
-    groundcover_version: {{ .Values.origin.tag }}
+    groundcover_version: {{ default .Chart.AppVersion .Values.origin.tag }}
     {{- if .Values.k8sWatcher.additionalAnnotations }}
 {{ toYaml .Values.k8sWatcher.additionalAnnotations | indent 4 }}
     {{- end }}    
@@ -26,7 +26,7 @@ spec:
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "9102"
-        groundcover_version: {{ .Values.origin.tag }}
+        groundcover_version: {{ default .Chart.AppVersion .Values.origin.tag }}
         {{- if .Values.k8sWatcher.additionalAnnotations }}
 {{ toYaml .Values.k8sWatcher.additionalAnnotations | indent 8 }}
         {{- end }}
@@ -80,7 +80,7 @@ spec:
         {{- with .Values.k8sWatcher.env }}
           {{ toYaml . | nindent 8 }}
         {{- end }}
-        image: {{ .Values.origin.registry }}/{{ .Values.k8sWatcher.repository }}:{{ .Values.origin.tag }}
+        image: {{ .Values.origin.registry }}/{{ .Values.k8sWatcher.repository }}:{{ default .Chart.AppVersion .Values.origin.tag }}
         imagePullPolicy: Always
         name: k8s-watcher
         ports:
