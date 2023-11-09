@@ -13,3 +13,7 @@
 {{- define "victoria-metrics.write.http.url" -}}
 {{- printf "%s/api/v1/write" (include "victoria-metrics.base.http.url" .) -}}
 {{- end -}}
+
+{{- define "victoria-metrics.service.fullname" -}}
+{{- printf "%s-victoria-metrics" .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}

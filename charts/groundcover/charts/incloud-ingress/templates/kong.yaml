@@ -1,10 +1,19 @@
 ---
+
 apiVersion: configuration.konghq.com/v1
 kind: KongPlugin
 metadata:
   name: {{ printf "%s-auth" .Release.Name }}
+config:
+  key_names:
+    - apikey
+{{- if .Values.datasource.enabled }}
+    - X-ClickHouse-Key
+{{- end }}
 plugin: key-auth
+
 ---
+
 apiVersion: v1
 kind: Secret
 metadata:
@@ -13,7 +22,9 @@ type: Opaque
 stringData:
   kongCredType: "key-auth"
   key: {{ .Values.global.groundcover_token }}
+
 ---
+
 apiVersion: configuration.konghq.com/v1
 kind: KongConsumer
 metadata:
@@ -24,3 +35,18 @@ metadata:
 username: api
 credentials:
   - {{ printf "%s-api-key" .Release.Name }}
+
+---
+
+{{- if .Values.datasource.enabled -}}
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: clickhouse-ds-rewrite
+config:
+  replace:
+    headers:
+      - {{ printf "X-ClickHouse-User: %s" (include "clickhouse.username" .) | quote }}
+      - {{ printf "X-ClickHouse-Key: %s" (include "clickhouse.password" .) | quote }}
+plugin: request-transformer
+{{- end -}}

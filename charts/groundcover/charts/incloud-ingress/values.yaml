@@ -25,3 +25,8 @@ kong:
     - maxSkew: 1
       topologyKey: topology.kubernetes.io/zone
       whenUnsatisfiable: ScheduleAnyway
+
+
+## Kong Plugins for inCloud functionality
+datasource:
+  enabled: false
