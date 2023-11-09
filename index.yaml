@@ -291,6 +291,77 @@ entries:
     version: 0.0.1
   groundcover:
   - apiVersion: v2
+    appVersion: 1.6.4
+    created: "2023-11-09T19:45:23.211554011Z"
+    dependencies:
+    - condition: router.enabled
+      name: router
+      repository: ""
+      version: 0.1.0
+    - condition: global.backend.enabled
+      import-values:
+      - child: server.service
+        parent: global.victoria-metrics.service
+      name: victoria-metrics-single
+      repository: https://victoriametrics.github.io/helm-charts
+      version: 0.9.4
+    - condition: global.telemetry.enabled
+      name: victoria-metrics-agent
+      repository: ""
+      version: 0.9.4
+    - alias: custom-metrics
+      condition: custom-metrics.enabled
+      name: victoria-metrics-agent
+      repository: ""
+      version: 0.9.4
+    - alias: metrics-ingester
+      import-values:
+      - child: service
+        parent: global.metrics-ingester.service
+      name: victoria-metrics-agent
+      repository: ""
+      version: 0.9.4
+    - condition: global.backend.enabled
+      import-values:
+      - child: auth
+        parent: global.clickhouse.auth
+      - child: containerPorts
+        parent: global.clickhouse.containerPorts
+      - child: serviceAccount
+        parent: global.clickhouse.serviceAccount
+      name: clickhouse
+      repository: https://charts.bitnami.com/bitnami
+      version: 3.5.5
+    - condition: global.backend.enabled
+      import-values:
+      - child: ports
+        parent: global.opentelemetry-collector.ports
+      - child: service
+        parent: global.opentelemetry-collector.service
+      name: opentelemetry-collector
+      repository: https://open-telemetry.github.io/opentelemetry-helm-charts
+      version: 0.62.2
+    - condition: kube-state-metrics.enabled
+      import-values:
+      - child: serviceAccount
+        parent: global.kube-state-metrics.serviceAccount
+      name: kube-state-metrics
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 5.12.1
+    - condition: incloud-ingress.enabled
+      name: incloud-ingress
+      repository: ""
+      tags:
+      - incloud
+      version: 0.1.0
+    description: Cloud Native Observability
+    digest: 292209514966c1dada3ac810a4285059165a9ce07aa2896381e0105e854c828e
+    name: groundcover
+    type: application
+    urls:
+    - https://github.com/groundcover-com/helm-charts/releases/download/groundcover-1.6.4/groundcover-1.6.4.tgz
+    version: 1.6.4
+  - apiVersion: v2
     appVersion: 1.6.3
     created: "2023-11-09T18:13:09.977353552Z"
     dependencies:
@@ -15872,6 +15943,37 @@ entries:
     version: 0.1.0
   router:
   - apiVersion: v2
+    appVersion: 1.6.4
+    created: "2023-11-09T19:45:23.443152402Z"
+    dependencies:
+    - condition: global.postgresql.enabled
+      import-values:
+      - child: image
+        parent: global.postgresql.image
+      - child: serviceAccount
+        parent: global.postgresql.serviceAccount
+      name: postgresql
+      repository: https://charts.bitnami.com/bitnami
+      version: 12.6.9
+    - condition: onprem.enabled
+      import-values:
+      - child: serviceAccount
+        parent: global.grafana.serviceAccount
+      name: grafana
+      repository: https://grafana.github.io/helm-charts
+      version: 6.58.6
+    - condition: onprem.enabled
+      name: kong
+      repository: https://charts.konghq.com
+      version: 2.20.0
+    description: groundcover's router helm chart
+    digest: e22c5f543651f018dd7a53e27160b7fbde1f6478f4f5700c08f1f1985449a418
+    name: router
+    type: application
+    urls:
+    - https://github.com/groundcover-com/helm-charts/releases/download/router-1.6.4/router-1.6.4.tgz
+    version: 1.6.4
+  - apiVersion: v2
     appVersion: 1.6.3
     created: "2023-11-09T18:13:10.24761087Z"
     dependencies:
@@ -19828,4 +19930,4 @@ entries:
     urls:
     - https://github.com/groundcover-com/helm-charts/releases/download/router-0.33.4/router-0.33.4.tgz
     version: 0.33.4
-generated: "2023-11-09T18:13:10.269238226Z"
+generated: "2023-11-09T19:45:23.444884604Z"
