@@ -25,6 +25,7 @@ spec:
         groundcover_version: {{ .Values.origin.tag }}
         prometheus.io/scrape: "true"
         prometheus.io/port: "9102"
+        checksum/router_config: {{ include (print $.Template.BasePath "/config/configMap.yaml") . | sha256sum }}
     spec:
       serviceAccountName: router
       {{- if .Values.onprem.enabled }}
