@@ -233,11 +233,11 @@ k8sWatcher:
   priorityClassName:
   resources:
     limits:
-      cpu: 100m
-      memory: 300Mi
+      cpu: 500m
+      memory: 1024Mi
     requests:
       cpu: 50m
-      memory: 200Mi
+      memory: 256Mi
   env:
 
 portal:
