@@ -35,6 +35,10 @@
       "type": "string",
       "enum": ["daemonset", "deployment", "statefulset", ""]
     },
+    "namespaceOverride": {
+      "type": "string",
+      "description": "Name of the namespace to deploy the resources into."
+    },
     "presets": {
       "type": "object",
       "additionalProperties": false,
@@ -87,6 +91,14 @@
           "properties": {
             "enabled": {
               "description": "Specifies whether the collector should add Kubernetes metdata to resource attributes.",
+              "type": "boolean"
+            },
+            "extractAllPodLabels": {
+              "description": "Specifies whether the k8sattributes processor should extract all pod labels.",
+              "type": "boolean"
+            },
+            "extractAllPodAnnotations": {
+              "description": "Specifies whether the k8sattributes processor should extract all pod annotations.",
               "type": "boolean"
             }
           }
@@ -283,24 +295,6 @@
         "type": "object"
       }
     },
-    "extraConfigMapMounts": {
-      "type": "array",
-      "items": {
-        "type": "object"
-      }
-    },
-    "extraHostPathMounts": {
-      "type": "array",
-      "items": {
-        "type": "object"
-      }
-    },
-    "secretMounts": {
-      "type": "array",
-      "items": {
-        "type": "object"
-      }
-    },
     "extraVolumes": {
       "type": "array",
       "items": {
@@ -345,15 +339,6 @@
           "required": ["enabled"]
         }
       }
-    },
-    "containerLogs": {
-      "type": "object",
-      "properties": {
-        "enabled": {
-          "type": "boolean"
-        }
-      },
-      "required": ["enabled"]
     },
     "resources": {
       "type": "object",
@@ -603,6 +588,10 @@
           "type": "object"
         },
         "internalTrafficPolicy": {
+          "type": "string",
+          "enum": ["Cluster", "Local", ""]
+        },
+        "externalTrafficPolicy": {
           "type": "string",
           "enum": ["Cluster", "Local", ""]
         }
@@ -910,6 +899,9 @@
               }
             }
         }
+    },
+    "useGOMEMLIMIT": {
+      "type": "boolean"
     }
   },
   "required": ["mode"]

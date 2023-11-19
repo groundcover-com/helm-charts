@@ -326,7 +326,9 @@ clickhouse:
     storageClass: ""
     ## @param persistence.labels Persistent Volume Claim labels
     ##
-    labels: {}
+    labels:
+      app.kubernetes.io/managed-by: Helm
+      helm.sh/chart: clickhouse-3.2.1
     ## @param persistence.annotations Persistent Volume Claim annotations
     ##
     annotations: {}
@@ -394,10 +396,14 @@ opentelemetry-collector:
         secretKeyRef:
           name: groundcover-config
           key: GC_CLUSTER_ID
-  secretMounts:
+  extraVolumes:
     - name: certificate
+      secret:
+        secretName: opentelemetry-collector-certificate
+  extraVolumeMounts:
+    - name: certificate
+      readOnly: true
       mountPath: /etc/ssl/certs
-      secretName: opentelemetry-collector-certificate
   image:
     repository: public.ecr.aws/groundcovercom/otel/opentelemetry-collector-contrib
     tag: ""
@@ -459,7 +465,7 @@ opentelemetry-collector:
             cors:
               allowed_origins:
                 - "*"
-              allowed_headers: 
+              allowed_headers:
                 - "*"
             endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "otlp-http" "containerPort" | int ) }}'
       datadog:
@@ -485,14 +491,14 @@ opentelemetry-collector:
         logs:
           log_record:
             # custom logs have explicit log_type or type so log is excluded
-            - attributes["log_type"] == "log" 
+            - attributes["log_type"] == "log"
             - attributes["type"] == nil
-      filter/dropNoneLogs: 
+      filter/dropNoneLogs:
         logs:
           log_record:
             # logs can have either explicit 'log' log_type or no log_type at all and no type (reserved for custom logs)
             - attributes["log_type"] != nil and attributes["log_type"] != "log"
-            - attributes["type"] != nil   
+            - attributes["type"] != nil
     exporters:
       groundcover/logs:
         type: logs

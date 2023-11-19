@@ -4,15 +4,17 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: example-opentelemetry-collector
+  namespace: default
   labels:
-    helm.sh/chart: opentelemetry-collector-0.62.2
+    helm.sh/chart: opentelemetry-collector-0.73.1
     app.kubernetes.io/name: opentelemetry-collector
     app.kubernetes.io/instance: example
-    app.kubernetes.io/version: "0.81.0"
+    app.kubernetes.io/version: "0.88.0"
     app.kubernetes.io/managed-by: Helm
 data:
   relay: |
     exporters:
+      debug: {}
       logging: {}
     extensions:
       health_check: {}
@@ -38,7 +40,7 @@ data:
       pipelines:
         traces:
           exporters:
-          - logging
+          - debug
           processors:
           - memory_limiter
           - batch

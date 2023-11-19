@@ -29,17 +29,12 @@ containers:
     image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
     {{- end }}
     imagePullPolicy: {{ .Values.image.pullPolicy }}
+    
+    {{- $ports := include "opentelemetry-collector.podPortsConfig" . }}
+    {{- if $ports }}
     ports:
-      {{- range $key, $port := .Values.ports }}
-      {{- if $port.enabled }}
-      - name: {{ $key }}
-        containerPort: {{ $port.containerPort }}
-        protocol: {{ $port.protocol }}
-        {{- if and $.isAgent $port.hostPort }}
-        hostPort: {{ $port.hostPort }}
-        {{- end }}
-      {{- end }}
-      {{- end }}
+      {{- $ports | nindent 6}}
+    {{- end }}
     env:
       - name: MY_POD_IP
         valueFrom:
@@ -51,6 +46,10 @@ containers:
         valueFrom:
           fieldRef:
             fieldPath: spec.nodeName
+      {{- end }}
+      {{- if and (.Values.useGOMEMLIMIT) ((((.Values.resources).limits).memory))  }}
+      - name: GOMEMLIMIT
+        value: {{ div (mul (include "opentelemetry-collector.convertMemToMib" .Values.resources.limits.memory) 80) 100 }}MiB
       {{- end }}
       {{- with .Values.extraEnvs }}
       {{- . | toYaml | nindent 6 }}
@@ -110,31 +109,7 @@ containers:
       - mountPath: /conf
         name: {{ include "opentelemetry-collector.lowercase_chartname" . }}-configmap
       {{- end }}
-      {{- range .Values.extraConfigMapMounts }}
-      - name: {{ .name }}
-        mountPath: {{ .mountPath }}
-        readOnly: {{ .readOnly }}
-        {{- if .subPath }}
-        subPath: {{ .subPath }}
-        {{- end }}
-      {{- end }}
-      {{- range .Values.extraHostPathMounts }}
-      - name: {{ .name }}
-        mountPath: {{ .mountPath }}
-        readOnly: {{ .readOnly }}
-        {{- if .mountPropagation }}
-        mountPropagation: {{ .mountPropagation }}
-        {{- end }}
-      {{- end }}
-      {{- range .Values.secretMounts }}
-      - name: {{ .name }}
-        mountPath: {{ .mountPath }}
-        readOnly: {{ .readOnly }}
-        {{- if .subPath }}
-        subPath: {{ .subPath }}
-        {{- end }}
-      {{- end }}
-      {{- if eq (include "opentelemetry-collector.logsCollectionEnabled" .) "true" }}
+      {{- if .Values.presets.logsCollection.enabled }}
       - name: varlogpods
         mountPath: /var/log/pods
         readOnly: true
@@ -174,22 +149,7 @@ volumes:
         - key: relay
           path: relay.yaml
   {{- end }}
-  {{- range .Values.extraConfigMapMounts }}
-  - name: {{ .name }}
-    configMap:
-      name: {{ .configMap }}
-  {{- end }}
-  {{- range .Values.extraHostPathMounts }}
-  - name: {{ .name }}
-    hostPath:
-      path: {{ .hostPath }}
-  {{- end }}
-  {{- range .Values.secretMounts }}
-  - name: {{ .name }}
-    secret:
-      secretName: {{ .secretName }}
-  {{- end }}
-  {{- if eq (include "opentelemetry-collector.logsCollectionEnabled" .) "true" }}
+  {{- if .Values.presets.logsCollection.enabled }}
   - name: varlogpods
     hostPath:
       path: /var/log/pods

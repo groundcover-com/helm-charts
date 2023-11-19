@@ -16,15 +16,15 @@ dependencies:
   version: 0.9.11
 - name: clickhouse
   repository: https://charts.bitnami.com/bitnami
-  version: 3.5.5
+  version: 4.1.4
 - name: opentelemetry-collector
   repository: https://open-telemetry.github.io/opentelemetry-helm-charts
-  version: 0.62.2
+  version: 0.73.1
 - name: kube-state-metrics
   repository: https://prometheus-community.github.io/helm-charts
   version: 5.12.1
 - name: incloud-ingress
   repository: ""
   version: 0.1.0
-digest: sha256:91ed00e61066941c82f9c50c714a87f242a3bf5de72d6485a5ebc328014b8a19
-generated: "2023-11-14T08:46:54.068580358Z"
+digest: sha256:85d79734731a815927a73057f41332a8698afd00a965d2ab51ef46e11165f2cd
+generated: "2023-11-15T16:30:48.330573846Z"

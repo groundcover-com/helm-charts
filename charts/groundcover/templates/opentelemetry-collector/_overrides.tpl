@@ -65,17 +65,12 @@ containers:
     image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
     {{- end }}
     imagePullPolicy: {{ .Values.image.pullPolicy }}
+    
+    {{- $ports := include "opentelemetry-collector.podPortsConfig" . }}
+    {{- if $ports }}
     ports:
-      {{- range $key, $port := .Values.ports }}
-      {{- if $port.enabled }}
-      - name: {{ $key }}
-        containerPort: {{ $port.containerPort }}
-        protocol: {{ $port.protocol }}
-        {{- if and $.isAgent $port.hostPort }}
-        hostPort: {{ $port.hostPort }}
-        {{- end }}
-      {{- end }}
-      {{- end }}
+      {{- $ports | nindent 6}}
+    {{- end }}
     env:
       - name: MY_POD_IP
         valueFrom:
@@ -88,19 +83,57 @@ containers:
           fieldRef:
             fieldPath: spec.nodeName
       {{- end }}
+      {{- if and (.Values.useGOMEMLIMIT) ((((.Values.resources).limits).memory))  }}
+      - name: GOMEMLIMIT
+        value: {{ div (mul (include "opentelemetry-collector.convertMemToMib" .Values.resources.limits.memory) 80) 100 }}MiB
+      {{- end }}
       {{- with .Values.extraEnvs }}
       {{- tpl (toYaml .) $ | nindent 6 }}
       {{- end }}
+    {{- with .Values.extraEnvsFrom }}
+    envFrom:
+    {{- . | toYaml | nindent 6 }}
+    {{- end }}
     {{- if .Values.lifecycleHooks }}
     lifecycle:
       {{- toYaml .Values.lifecycleHooks | nindent 6 }}
     {{- end }}
     livenessProbe:
+      {{- if .Values.livenessProbe.initialDelaySeconds | empty | not }}
+      initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+      {{- end }}
+      {{- if .Values.livenessProbe.periodSeconds | empty | not }}
+      periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+      {{- end }}
+      {{- if .Values.livenessProbe.timeoutSeconds | empty | not }}
+      timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+      {{- end }}
+      {{- if .Values.livenessProbe.failureThreshold | empty | not }}
+      failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+      {{- end }}
+      {{- if .Values.livenessProbe.terminationGracePeriodSeconds | empty | not }}
+      terminationGracePeriodSeconds: {{ .Values.livenessProbe.terminationGracePeriodSeconds }}
+      {{- end }}
       httpGet:
         path: /health
         port: 13133
         scheme: '{{ include "opentelemetry-collector.otlp.scheme" . | upper }}'
     readinessProbe:
+      {{- if .Values.readinessProbe.initialDelaySeconds | empty | not }}
+      initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+      {{- end }}
+      {{- if .Values.readinessProbe.periodSeconds | empty | not }}
+      periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+      {{- end }}
+      {{- if .Values.readinessProbe.timeoutSeconds | empty | not }}
+      timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+      {{- end }}
+      {{- if .Values.readinessProbe.successThreshold | empty | not }}
+      successThreshold: {{ .Values.readinessProbe.successThreshold }}
+      {{- end }}
+      {{- if .Values.readinessProbe.failureThreshold | empty | not }}
+      failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+      {{- end }}
       httpGet:
         path: /health
         port: 13133
@@ -114,31 +147,7 @@ containers:
       - mountPath: /conf
         name: {{ include "opentelemetry-collector.lowercase_chartname" . }}-configmap
       {{- end }}
-      {{- range .Values.extraConfigMapMounts }}
-      - name: {{ .name }}
-        mountPath: {{ .mountPath }}
-        readOnly: {{ .readOnly }}
-        {{- if .subPath }}
-        subPath: {{ .subPath }}
-        {{- end }}
-      {{- end }}
-      {{- range .Values.extraHostPathMounts }}
-      - name: {{ .name }}
-        mountPath: {{ .mountPath }}
-        readOnly: {{ .readOnly }}
-        {{- if .mountPropagation }}
-        mountPropagation: {{ .mountPropagation }}
-        {{- end }}
-      {{- end }}
-      {{- range .Values.secretMounts }}
-      - name: {{ .name }}
-        mountPath: {{ .mountPath }}
-        readOnly: {{ .readOnly }}
-        {{- if .subPath }}
-        subPath: {{ .subPath }}
-        {{- end }}
-      {{- end }}
-      {{- if eq (include "opentelemetry-collector.logsCollectionEnabled" .) "true" }}
+      {{- if .Values.presets.logsCollection.enabled }}
       - name: varlogpods
         mountPath: /var/log/pods
         readOnly: true
@@ -178,22 +187,7 @@ volumes:
         - key: relay
           path: relay.yaml
   {{- end }}
-  {{- range .Values.extraConfigMapMounts }}
-  - name: {{ .name }}
-    configMap:
-      name: {{ .configMap }}
-  {{- end }}
-  {{- range .Values.extraHostPathMounts }}
-  - name: {{ .name }}
-    hostPath:
-      path: {{ .hostPath }}
-  {{- end }}
-  {{- range .Values.secretMounts }}
-  - name: {{ .name }}
-    secret:
-      secretName: {{ .secretName }}
-  {{- end }}
-  {{- if eq (include "opentelemetry-collector.logsCollectionEnabled" .) "true" }}
+  {{- if .Values.presets.logsCollection.enabled }}
   - name: varlogpods
     hostPath:
       path: /var/log/pods

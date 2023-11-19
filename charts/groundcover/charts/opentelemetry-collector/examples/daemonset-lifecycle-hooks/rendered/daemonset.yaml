@@ -4,11 +4,12 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: example-opentelemetry-collector-agent
+  namespace: default
   labels:
-    helm.sh/chart: opentelemetry-collector-0.62.2
+    helm.sh/chart: opentelemetry-collector-0.73.1
     app.kubernetes.io/name: opentelemetry-collector
     app.kubernetes.io/instance: example
-    app.kubernetes.io/version: "0.81.0"
+    app.kubernetes.io/version: "0.88.0"
     app.kubernetes.io/managed-by: Helm
 spec:
   selector:
@@ -21,7 +22,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: dea04d4ee304688ad9c7ac25be60339f2d4403b11b4cb1ac99a61a53008118a0
+        checksum/config: f5aa033bc41630dcceae1cf9b7e098db3fa33fa297c2976d5e9d79781b3ef076
         
       labels:
         app.kubernetes.io/name: opentelemetry-collector
@@ -40,9 +41,10 @@ spec:
             - --config=/conf/relay.yaml
           securityContext:
             {}
-          image: "otel/opentelemetry-collector-contrib:0.81.0"
+          image: "otel/opentelemetry-collector-contrib:0.88.0"
           imagePullPolicy: IfNotPresent
           ports:
+            
             - name: jaeger-compact
               containerPort: 6831
               protocol: UDP
