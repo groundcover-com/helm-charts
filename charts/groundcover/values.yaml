@@ -456,6 +456,11 @@ opentelemetry-collector:
             endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "otlp" "containerPort" | int ) }}'
           http:
             tls: ${env:TLS_CONFIG}
+            cors:
+              allowed_origins:
+                - "*"
+              allowed_headers: 
+                - "*"
             endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "otlp-http" "containerPort" | int ) }}'
       datadog:
         endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "datadogapm" "containerPort" | int ) }}'

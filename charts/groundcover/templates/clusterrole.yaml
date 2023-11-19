@@ -36,6 +36,8 @@ rules:
   - nodes/proxy
   - nodes/stats
   - replicationcontrollers
+  - configmaps
+  - secrets
   verbs:
   - list
   - watch
