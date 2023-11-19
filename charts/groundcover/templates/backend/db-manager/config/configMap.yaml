@@ -18,6 +18,8 @@ data:
 
     Incluster: true
     Namespace: {{ .Release.Namespace }}
+    DropPartitionInterval: 6h
+    DropPartitionTimeout: 5m
     httpPort: 8888
     tableDataRetention: 
       Traces: '{{ include "traces.retention" . }}'   

@@ -1,8 +1,33 @@
+annotations:
+  artifacthub.io/category: monitoring-logging
+  artifacthub.io/changes: |-
+    - Add license enforcement for vmbackupmanager in order to avoid running it without enterprise license key. See [these docs](https://docs.victoriametrics.com/enterprise.html) for details.
+    - Fix license flags not being passed to vmsingle when using StatefulSet.
+  artifacthub.io/license: Apache-2.0
+  artifacthub.io/links: |
+    - name: Sources
+      url: https://github.com/VictoriaMetrics/helm-charts
+    - name: Charts repo
+      url: https://victoriametrics.github.io/helm-charts/
+    - name: Docs
+      url: https://docs.victoriametrics.com/Single-server-VictoriaMetrics.html
 apiVersion: v1
-appVersion: v1.93.1
+appVersion: v1.94.0
 description: Victoria Metrics Single version - high-performance, cost-effective and
   scalable TSDB, long-term remote storage for Prometheus
+keywords:
+- victoriametrics
+- vmsingle
+- single
+- monitoring
+- kubernetes
+- observability
+- tsdb
+- metrics
+- metricsql
+- timeseries
+kubeVersion: '>=1.23.0-0'
 name: victoria-metrics-single
 sources:
 - https://github.com/VictoriaMetrics/helm-charts
-version: 0.9.4
+version: 0.9.10

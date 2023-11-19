@@ -4,16 +4,16 @@ dependencies:
   version: 0.1.0
 - name: victoria-metrics-single
   repository: https://victoriametrics.github.io/helm-charts
-  version: 0.9.4
+  version: 0.9.10
 - name: victoria-metrics-agent
   repository: ""
-  version: 0.9.4
+  version: 0.9.11
 - name: victoria-metrics-agent
   repository: ""
-  version: 0.9.4
+  version: 0.9.11
 - name: victoria-metrics-agent
   repository: ""
-  version: 0.9.4
+  version: 0.9.11
 - name: clickhouse
   repository: https://charts.bitnami.com/bitnami
   version: 3.5.5
@@ -26,5 +26,5 @@ dependencies:
 - name: incloud-ingress
   repository: ""
   version: 0.1.0
-digest: sha256:f0530c5ff2e5735cd2f24ecb28f5b85d64ccdd9b3bfe7f11ff60dcd9394d7f18
-generated: "2023-09-03T11:33:30.522613442Z"
+digest: sha256:91ed00e61066941c82f9c50c714a87f242a3bf5de72d6485a5ebc328014b8a19
+generated: "2023-11-14T08:46:54.068580358Z"

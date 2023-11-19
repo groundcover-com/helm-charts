@@ -65,6 +65,9 @@ spec:
           {{- range $key, $value := .Values.extraArgs }}
             - -{{ $key }}={{ tpl $value $ }}
           {{- end }}
+          {{- with (include "chart.license.flag" .) }}
+            - {{ . }}
+          {{- end }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http
@@ -104,8 +107,10 @@ spec:
               protocol: UDP
               containerPort: {{ include "split-host-port" .Values.extraArgs.opentsdbListenAddr }}
           {{- end }}
+          {{- with .Values.env }}
           env:
-            {{- tpl ( toYaml .Values.env ) . | nindent 12 }}
+            {{- tpl (toYaml .) $ | nindent 12 }}
+          {{- end }}
           readinessProbe:
             httpGet:
             {{- if and .Values.extraArgs.tls (eq (tpl .Values.extraArgs.tls .) "true") }}
@@ -139,6 +144,7 @@ spec:
           {{- with .Values.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
+          {{- include "chart.license.mount" . | nindent 12 }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
         {{- with .Values.extraContainers }}
@@ -186,6 +192,7 @@ spec:
       {{- with .Values.extraVolumes }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- include "chart.license.volume" . | nindent 8 }}
     {{- if .Values.priorityClassName }}
       priorityClassName: {{ .Values.priorityClassName }}
     {{- end }}

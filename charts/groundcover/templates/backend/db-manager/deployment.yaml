@@ -33,6 +33,7 @@ spec:
         {{- if .Values.dbManager.podAnnotations }}
 {{ toYaml .Values.dbManager.podAnnotations | indent 8 }}
         {{- end }}
+        checksum/config: {{ include (print $.Template.BasePath "/backend/db-manager/config/configMap.yaml") . | sha256sum }}
       labels:
         app: db-manager
         app.kubernetes.io/name: db-manager

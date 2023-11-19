@@ -3,7 +3,7 @@
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
-groundcover_version: 1.6.7
+groundcover_version: 1.6.8
 # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
 deployment:
   enabled: true
@@ -235,7 +235,7 @@ config:
           # well as HA API server deployments.
     - job_name: "kubernetes-apiservers"
       kubernetes_sd_configs:
-        - role: endpointslices
+        - role: endpoints
       # Default to scraping over https. If required, just disable this or change to
       # `http`.
       scheme: https
@@ -329,6 +329,9 @@ config:
           regex: (.+)
           target_label: __metrics_path__
           replacement: /api/v1/nodes/$1/proxy/metrics/cadvisor
+      # ignore timestamps of cadvisor's metrics by default
+      # more info here https://github.com/VictoriaMetrics/VictoriaMetrics/issues/4697#issuecomment-1656540535
+      honor_timestamps: false
     # Scrape config for service endpoints.
     #
     # The relabeling allows the actual service scrape endpoint to be configured
@@ -501,11 +504,6 @@ config:
           target_label: container
         - source_labels: [__meta_kubernetes_namespace]
           target_label: namespace
-        - source_labels: [__meta_kubernetes_service_name]
-          target_label: service
-        - source_labels: [__meta_kubernetes_service_name]
-          target_label: job
-          replacement: ${1}
         - source_labels: [__meta_kubernetes_pod_node_name]
           action: replace
           target_label: node
@@ -514,3 +512,18 @@ config:
 extraScrapeConfigs: []
 # Add extra specs dynamically to this chart
 extraObjects: []
+# -- Enterprise license key configuration for VictoriaMetrics enterprise.
+# Required only for VictoriaMetrics enterprise.
+# Documentation - https://docs.victoriametrics.com/enterprise.html,
+# for more information, visit https://victoriametrics.com/products/enterprise/ .
+# To request a trial license, go to https://victoriametrics.com/products/enterprise/trial/
+# Supported starting from VictoriaMetrics v1.94.0
+license:
+  # -- License key
+  key: ""
+  # -- Use existing secret with license key
+  secret:
+    # -- Existing secret name
+    name: ""
+    # -- Key in secret with license key
+    key: ""
