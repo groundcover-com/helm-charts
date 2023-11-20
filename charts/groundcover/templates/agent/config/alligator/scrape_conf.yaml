@@ -4,8 +4,6 @@ data:
   config.yaml: |-
       job_name: kubernetes-pods-name
       pipeline_stages:  
-      - cri: {}
-      - docker: {}
       - labeldrop:
         - filename
       - labeldrop:

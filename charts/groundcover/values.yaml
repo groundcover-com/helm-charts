@@ -421,6 +421,12 @@ opentelemetry-collector:
       servicePort: 1777
       hostPort: 1777
       protocol: TCP
+    faro:
+      enabled: true
+      containerPort: 12347
+      servicePort: 12347
+      hostPort: 12347
+      protocol: TCP
     loki-http:
       enabled: true
       containerPort: 3100
@@ -468,6 +474,15 @@ opentelemetry-collector:
               allowed_headers:
                 - "*"
             endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "otlp-http" "containerPort" | int ) }}'
+      faro:
+        http:
+          tls: ${env:TLS_CONFIG}
+          cors:
+            allowed_origins:
+              - "*"
+            allowed_headers: 
+              - "*"
+          endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "faro" "containerPort" | int ) }}'
       datadog:
         endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "datadogapm" "containerPort" | int ) }}'
     processors:
@@ -585,6 +600,7 @@ opentelemetry-collector:
           receivers:
             - otlp
             - datadog
+            - faro
           processors:
             - batch/traces
           exporters:
@@ -593,6 +609,7 @@ opentelemetry-collector:
           receivers:
             - loki
             - otlp
+            - faro
           processors:
             - filter/dropNoneLogs
             - batch/logs
