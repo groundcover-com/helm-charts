@@ -55,6 +55,13 @@ spec:
                 name: {{ include "metrics-ingester.fullname" . }}
                 port:
                   name: http
+          - path: {{ get (urlParse (include "metrics-ingester.datadog.http.url" .)) "path" }} 
+            pathType: Exact
+            backend:
+              service:
+                name: {{ include "metrics-ingester.fullname" . }}
+                port:
+                  name: http
     - host: {{ get (urlParse (include "portal.live.http.url" .)) "host" }}
       http:
         paths:

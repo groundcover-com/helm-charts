@@ -7,6 +7,7 @@ metadata:
 config:
   key_names:
     - apikey
+    - dd-api-key
 {{- if .Values.datasource.enabled }}
     - X-ClickHouse-Key
 {{- end }}
