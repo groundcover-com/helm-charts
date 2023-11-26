@@ -6,10 +6,19 @@ metadata:
     {{- include "groundcover.labels" . | nindent 4 }}
 data:
   aggregation_config.yaml: |
-    - match: '{__name__=~"^groundcover_.+_.+_counter$", node_name!=""}'
+    - match: '{__name__=~"groundcover_.+_.+_counter|groundcover_unavailable_count", node_name!=""}'
       without: [node_name]
       interval: 30s
       outputs: [total]
+      output_relabel_configs:
+      - source_labels: [__name__]
+        target_label: __name__
+        regex: "(.+):.*"
+        replacement: "$1"
+    - match: '{__name__=~"^groundcover_.+latency_seconds$", node_name!=""}'
+      without: [node_name]
+      interval: 30s
+      outputs: [avg]
       output_relabel_configs:
       - source_labels: [__name__]
         target_label: __name__
