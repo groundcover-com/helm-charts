@@ -625,7 +625,7 @@ opentelemetry-collector:
             - groundcover/custom
   initContainers:
     - args:
-        - while [ $(curl -sw '%{http_code}' {{ printf "%s?gc-version=%s " (include "db-manager.ready.http.url" .) (default .Chart.AppVersion .Values.image.tag) }}
+        - while [ $(curl -sw '%{http_code}' {{ printf "%s?gc-version=%s " (include "db-manager.ready.http.url" .) (default .Chart.AppVersion .Values.global.origin.tag) }}
           -o /dev/null) -ne 200 ]; do echo 'Waiting for Db Manager...'; sleep 2; done; echo Db Manager is ready
       command:
         - /bin/sh

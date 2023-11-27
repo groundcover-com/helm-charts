@@ -38,6 +38,8 @@ rules:
   - replicationcontrollers
   - configmaps
   - secrets
+  - persistentvolumeclaims
+  - persistentvolumes
   verbs:
   - list
   - watch
