@@ -125,6 +125,12 @@ priorityClass:
 
 #imagePullSecrets: []
 
+volume-expansion:
+  enabled: true
+  image:
+    tag: latest
+    repository: "{{ .Values.global.origin.registry }}/bitnami/kubectl"
+
 agent:
   additionalLabels:
   podLabels:
