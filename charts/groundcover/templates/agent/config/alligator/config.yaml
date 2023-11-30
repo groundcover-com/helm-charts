@@ -117,6 +117,13 @@ data:
       summarizerActiveTtl: 45s
       aggregationCacheSize: 4096
 
+    pvcIoHandler:
+      sampling:
+        samplingmode: 0 # DontSample
+      interval: 10s
+      summarizerActiveTtl: 90s
+      aggregationCacheSize: 4096
+
     containerStateHandler:
       samplesthreshold: 10
       issuesthreshold: 10

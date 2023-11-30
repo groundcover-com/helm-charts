@@ -344,7 +344,7 @@ clickhouse:
       - ReadWriteOnce
     ## @param persistence.size Size of data volume
     ##
-    size: 128Gi
+    size: 256Gi
 
   ## ClickHouse resource requests and limits
   ## ref: http://kubernetes.io/docs/user-guide/compute-resources/
@@ -486,7 +486,7 @@ opentelemetry-collector:
           cors:
             allowed_origins:
               - "*"
-            allowed_headers: 
+            allowed_headers:
               - "*"
           endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "faro" "containerPort" | int ) }}'
       datadog:
