@@ -105,6 +105,7 @@ data:
       interval: 30s
       summarizerActiveTtl: 45s
       aggregationCacheSize: 4096
+      payloadSizeLimit: 10240 # 10kB
 
     containerInfoHandler:
       samplesthreshold: 10

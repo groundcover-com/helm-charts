@@ -85,6 +85,7 @@ saas:
   scheme: wss
   host: app.groundcover.com
   port: 443
+  basePath: ""
 
 #GENERAL
 clusterId:

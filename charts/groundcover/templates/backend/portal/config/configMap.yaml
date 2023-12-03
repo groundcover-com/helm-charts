@@ -20,6 +20,7 @@ data:
     Router:
       Host: "{{ tpl .Values.saas.host . }}"
       Port: "{{ .Values.saas.port }}"
+      BasePath: "{{ .Values.saas.basePath }}"
       Token: "OVERRIDEN"
       WebsocketScheme: "{{ tpl .Values.saas.scheme . }}"
       TLSSkipVerify: "{{ .Values.saas.tls_skip_verify }}"
