@@ -260,7 +260,7 @@ data:
             job: alligator
         timeout: 10s
         useRingBuffer: {{ .Values.storeIssuesLogsOnly }}
-        filterRunningNamespace: true
+        dropRunningNamespaceLogs: {{ .Values.dropRunningNamespaceLogs }}
         groundcoverTimeTravel: -20s
         logDropFilters: {{ toYaml .Values.logsDropFilters | nindent 10}}
         metricateLabels: false

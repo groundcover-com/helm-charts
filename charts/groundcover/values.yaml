@@ -94,6 +94,7 @@ installationId:
 #  - clusterA
 #  - clusterB
 region:
+dropRunningNamespaceLogs: true
 storeIssuesLogsOnly: false
 tracesNamespaceFilters:
   []
