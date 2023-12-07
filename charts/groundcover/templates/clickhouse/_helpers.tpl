@@ -10,6 +10,10 @@
 {{-  print "default" -}}
 {{- end -}}
 
+{{- define "clickhouse.readerUsername" -}}
+{{-  print "reader" -}}
+{{- end -}}
+
 {{- define "clickhouse.password" -}}
 {{- $secret := (lookup "v1" "Secret" .Release.Namespace (include "clickhouse.secretName" .) | default dict) -}}
 {{- if .Values.global.clickhouse.auth.password -}}

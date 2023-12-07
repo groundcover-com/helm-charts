@@ -320,6 +320,24 @@ clickhouse:
         <ttl>event_date + INTERVAL 3 DAY</ttl>
       </metric_log>
     </clickhouse>
+  usersExtraOverrides: |
+    <clickhouse>
+      <profiles>
+        <readonly_with_settings>
+          <readonly>2</readonly>
+        </readonly_with_settings>
+      </profiles>
+      <users>
+        <reader>
+          <password from_env="CLICKHOUSE_PASSWORD" />
+          <networks>
+            <ip>::/0</ip>
+          </networks>
+          <profile>readonly_with_settings</profile>
+          <quota>default</quota>
+        </reader>
+      </users>
+    </clickhouse>
   persistence:
     ## @param persistence.enabled Enable persistence using Persistent Volume Claims
     ##
