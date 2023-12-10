@@ -169,16 +169,7 @@ agent:
     obfuscateData: false
     dataRetention: 24h
     nodelabels: []
-    contentTypesToDrop:
-      [
-        "text/html",
-        "text/javascript",
-        "text/css",
-        "image",
-        "font",
-        "video",
-        "audio",
-      ]
+    contentTypesToDrop: []
     watchOnlyLocalNode: false
     apmIngestor:
       dataDog:
