@@ -8,3 +8,7 @@ Create the name of the service account to use
     {{ default "default" (index .Values.global "kube-state-metrics" "serviceAccount" "name") }}
 {{- end -}}
 {{- end -}}
+
+{{- define "kube-state-metrics.url" -}}
+    {{- printf "http://%s-kube-state-metrics:8080/metrics" .Release.Name -}}
+{{- end -}}

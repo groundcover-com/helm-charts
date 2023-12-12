@@ -35,6 +35,12 @@ data:
       url: {{ include "metrics-ingester.base.http.internalUrl" . }}
       TLSSkipVerify: true
 
+    KubeStateMetricsScrape:
+      url: {{ include "kube-state-metrics.url" . }}
+      TLSSkipVerify: true
+      scrapeInterval: 15s
+      scrapeTimeout: 10s
+
     dataRetention: {{ .Values.agent.alligator.dataRetention }}
     
     runningNamespace: ""

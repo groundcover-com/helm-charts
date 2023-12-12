@@ -31,6 +31,9 @@ data:
         samplingmode: 1 # DefaultSample
         samplingLimitMaxQueue: 0
         samplingLimitAgeOut: 0s
+      obfuscationConfig: 
+        enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.httphandler.obfuscationConfig.enabled }}
+        jsonConfig: {{ .Values.agent.alligator.httphandler.obfuscationConfig.jsonConfig | toJson }}
       interval: 30s
       summarizerActiveTtl: 45s
       aggregationCacheSize: 4096
@@ -43,6 +46,9 @@ data:
         samplingmode: 1 # DefaultSample
         samplingLimitMaxQueue: 0
         samplingLimitAgeOut: 0s
+      obfuscationConfig: 
+        enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.grpchandler.obfuscationConfig.enabled }}
+        jsonConfig: {{ .Values.agent.alligator.grpchandler.obfuscationConfig.jsonConfig | toJson }}
       interval: 30s
       summarizerActiveTtl: 45s
       aggregationCacheSize: 4096
@@ -55,6 +61,9 @@ data:
         samplingmode: 1 # DefaultSample
         samplingLimitMaxQueue: 0
         samplingLimitAgeOut: 0s
+      obfuscationConfig: 
+        enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.redishandler.obfuscationConfig.enabled }}
+        jsonConfig: {{ .Values.agent.alligator.redishandler.obfuscationConfig.jsonConfig | toJson }}
       interval: 30s
       summarizerActiveTtl: 45s
       aggregationCacheSize: 4096
@@ -67,6 +76,9 @@ data:
         samplingmode: 1 # DefaultSample
         samplingLimitMaxQueue: 0
         samplingLimitAgeOut: 0s
+      obfuscationConfig: 
+        enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.sqlhandler.obfuscationConfig.enabled }}
+        jsonConfig: {{ .Values.agent.alligator.sqlhandler.obfuscationConfig.jsonConfig | toJson }}
       interval: 30s
       summarizerActiveTtl: 45s
       aggregationCacheSize: 4096
@@ -79,6 +91,9 @@ data:
         samplingmode: 1 # DefaultSample
         samplingLimitMaxQueue: 10
         samplingLimitAgeOut: 1s
+      obfuscationConfig: 
+        enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.kafkahandler.obfuscationConfig.enabled }}
+        jsonConfig: {{ .Values.agent.alligator.kafkahandler.obfuscationConfig.jsonConfig | toJson }}
       interval: 30s
       summarizerActiveTtl: 45s
       aggregationCacheSize: 4096
@@ -91,6 +106,9 @@ data:
         samplingmode: 1 # DefaultSample
         samplingLimitMaxQueue: 10
         samplingLimitAgeOut: 1s
+      obfuscationConfig: 
+        enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.dnshandler.obfuscationConfig.enabled }}
+        jsonConfig: {{ .Values.agent.alligator.dnshandler.obfuscationConfig.jsonConfig | toJson }}
       interval: 30s
       summarizerActiveTtl: 45s
       aggregationCacheSize: 300
@@ -102,6 +120,9 @@ data:
         samplingmode: 1 # DefaultSample
         samplingLimitMaxQueue: 0
         samplingLimitAgeOut: 0s
+      obfuscationConfig: 
+        enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.mongodbhandler.obfuscationConfig.enabled }}
+        jsonConfig: {{ .Values.agent.alligator.mongodbhandler.obfuscationConfig.jsonConfig | toJson }}
       interval: 30s
       summarizerActiveTtl: 45s
       aggregationCacheSize: 4096
@@ -197,7 +218,6 @@ data:
       ageout: 100ms
       sampleeverything: false
 
-    obfuscateData: {{ .Values.agent.alligator.obfuscateData }}
     dataRetention: {{ .Values.agent.alligator.dataRetention }}
     watchOnlyLocalNode: {{ .Values.agent.alligator.watchOnlyLocalNode }}
     floraEnabled: {{ ne .Values.mode "legacy" }}
