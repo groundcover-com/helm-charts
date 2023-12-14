@@ -28,10 +28,40 @@ spec:
                 name: {{ include "opentelemetry-collector.fullname" . }}
                 port:
                   number: {{ index .Values.global "opentelemetry-collector" "ports" "health" "servicePort" | int }}
-    - host: {{ get (urlParse (include "opentelemetry-collector.datadogapm.traces.http.url" .)) "host" }} 
+    - host: {{ get (urlParse (include "opentelemetry-collector.datadogapm.tracesv03.http.url" .)) "host" }} 
       http:
         paths:
-          - path: {{ get (urlParse (include "opentelemetry-collector.datadogapm.traces.http.url" .)) "path" }} 
+          - path: {{ get (urlParse (include "opentelemetry-collector.datadogapm.tracesv03.http.url" .)) "path" }} 
+            pathType: Exact
+            backend:
+              service:
+                name: {{ include "opentelemetry-collector.fullname" . }}
+                port:
+                  number: {{ index .Values.global "opentelemetry-collector" "ports" "datadogapm" "servicePort" | int }}
+    - host: {{ get (urlParse (include "opentelemetry-collector.datadogapm.tracesv04.http.url" .)) "host" }} 
+      http:
+        paths:
+          - path: {{ get (urlParse (include "opentelemetry-collector.datadogapm.tracesv04.http.url" .)) "path" }} 
+            pathType: Exact
+            backend:
+              service:
+                name: {{ include "opentelemetry-collector.fullname" . }}
+                port:
+                  number: {{ index .Values.global "opentelemetry-collector" "ports" "datadogapm" "servicePort" | int }}
+    - host: {{ get (urlParse (include "opentelemetry-collector.datadogapm.tracesv05.http.url" .)) "host" }} 
+      http:
+        paths:
+          - path: {{ get (urlParse (include "opentelemetry-collector.datadogapm.tracesv05.http.url" .)) "path" }} 
+            pathType: Exact
+            backend:
+              service:
+                name: {{ include "opentelemetry-collector.fullname" . }}
+                port:
+                  number: {{ index .Values.global "opentelemetry-collector" "ports" "datadogapm" "servicePort" | int }}
+    - host: {{ get (urlParse (include "opentelemetry-collector.datadogapm.tracesv07.http.url" .)) "host" }} 
+      http:
+        paths:
+          - path: {{ get (urlParse (include "opentelemetry-collector.datadogapm.tracesv07.http.url" .)) "path" }} 
             pathType: Exact
             backend:
               service:
@@ -72,6 +102,16 @@ spec:
                 name: {{ include "portal.fullname" . }}
                 port:
                   name: http
+    - host: {{ get (urlParse (include "opentelemetry-collector.otlptraces.http.url" .)) "host" }} 
+      http:
+        paths:
+          - path: {{ get (urlParse (include "opentelemetry-collector.otlptraces.http.url" .)) "path" }} 
+            pathType: Exact
+            backend:
+              service:
+                name: {{ include "opentelemetry-collector.fullname" . }}
+                port:
+                  number: {{ index .Values.global "opentelemetry-collector" "ports" "otlp-http" "servicePort" | int }}
 
 ---
 

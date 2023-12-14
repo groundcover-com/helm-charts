@@ -437,10 +437,14 @@ opentelemetry-collector:
     - name: certificate
       secret:
         secretName: opentelemetry-collector-certificate
+    - name: persistent-queues
+      emptyDir: {}
   extraVolumeMounts:
     - name: certificate
       readOnly: true
       mountPath: /etc/ssl/certs
+    - name: persistent-queues
+      mountPath: /persistent_queues
   image:
     repository: public.ecr.aws/groundcovercom/otel/opentelemetry-collector-contrib
     tag: ""
@@ -490,6 +494,9 @@ opentelemetry-collector:
         endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "health" "containerPort" | int ) }}'
       pprof:
         endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "pprof" "containerPort" | int ) }}'
+      file_storage:
+        directory: /persistent_queues
+        timeout: 10s
     receivers:
       loki:
         protocols:
@@ -556,6 +563,7 @@ opentelemetry-collector:
         ttl_interval: '{{ include "logs.retention" . }}'
         sending_queue:
           queue_size: 10
+          storage: file_storage
         retry_on_failure:
           initial_interval: 5s
           max_interval: 5s
@@ -571,6 +579,7 @@ opentelemetry-collector:
         endpoint: '{{ include "clickhouse.nativeEndpoint" . }}'
         sending_queue:
           queue_size: 10
+          storage: file_storage
         retry_on_failure:
           initial_interval: 5s
           max_interval: 5s
@@ -586,6 +595,7 @@ opentelemetry-collector:
         endpoint: '{{ include "clickhouse.nativeEndpoint" . }}'
         sending_queue:
           queue_size: 10
+          storage: file_storage
         retry_on_failure:
           initial_interval: 5s
           max_interval: 5s
@@ -594,7 +604,7 @@ opentelemetry-collector:
       telemetry:
         metrics:
           address: '{{ printf "0.0.0.0:%d" (index .Values "ports" "metrics" "containerPort" | int ) }}'
-      extensions: [health_check, pprof]
+      extensions: [health_check, pprof, file_storage]
       pipelines:
         metrics:
           receivers:

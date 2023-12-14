@@ -27,7 +27,7 @@
 {{- if .Values.global.logs.overrideUrl -}}
     {{- $baseUrl = .Values.global.logs.overrideUrl -}}
 {{- else if .Values.global.ingress.site -}}
-    {{- $baseUrl = (printf "https://api-otel-http.%s" .Values.global.ingress.site) -}}
+    {{- $baseUrl = (include "incloud.otel.http.url" .) -}}
 {{- else if not .Values.global.backend.enabled -}}
     {{- fail "A valid global.ingress.site or global.logs.overrideUrl is required!" -}}
 {{- else -}}
@@ -52,6 +52,10 @@
 {{- end -}}
 {{- end -}}
 
+{{- define "opentelemetry-collector.otlptraces.http.url" -}}
+{{- printf "%s/v1/traces" (include "opentelemetry-collector.otlp.http.url" .) -}}
+{{- end -}}
+
 {{- define "opentelemetry-collector.otlp.grpc.url" -}}
 {{- if .Values.global.otlp.overrideGrpcURL -}}
     {{- print .Values.global.otlp.overrideGrpcURL -}}
@@ -69,7 +73,7 @@
 {{- if .Values.global.otlp.overrideHttpURL -}}
     {{- $baseUrl = .Values.global.otlp.overrideHttpURL -}}
 {{- else if .Values.global.ingress.site -}}
-    {{- $baseUrl = (printf "https://api-otel-http.%s" .Values.global.ingress.site) -}}
+    {{- $baseUrl = (include "incloud.otel.http.url" .) -}}
 {{- else if not .Values.global.backend.enabled -}}
     {{- fail "A valid global.ingress.site or global.otlp.overrideHttpURL is required!" -}}
 {{- else -}}
@@ -90,6 +94,18 @@
 {{- end -}}
 {{- end -}}
 
-{{- define "opentelemetry-collector.datadogapm.traces.http.url" -}}
+{{- define "opentelemetry-collector.datadogapm.tracesv03.http.url" -}}
+{{- printf "%s/v0.3/traces" (include "opentelemetry-collector.datadogapm.base.http.url" .) -}}
+{{- end -}}
+
+{{- define "opentelemetry-collector.datadogapm.tracesv04.http.url" -}}
+{{- printf "%s/v0.4/traces" (include "opentelemetry-collector.datadogapm.base.http.url" .) -}}
+{{- end -}}
+
+{{- define "opentelemetry-collector.datadogapm.tracesv05.http.url" -}}
+{{- printf "%s/v0.5/traces" (include "opentelemetry-collector.datadogapm.base.http.url" .) -}}
+{{- end -}}
+
+{{- define "opentelemetry-collector.datadogapm.tracesv07.http.url" -}}
 {{- printf "%s/v0.7/traces" (include "opentelemetry-collector.datadogapm.base.http.url" .) -}}
 {{- end -}}
