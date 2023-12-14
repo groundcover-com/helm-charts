@@ -291,6 +291,77 @@ entries:
     version: 0.0.1
   groundcover:
   - apiVersion: v2
+    appVersion: 1.6.26
+    created: "2023-12-14T09:30:19.143155715Z"
+    dependencies:
+    - condition: router.enabled
+      name: router
+      repository: ""
+      version: 0.1.0
+    - condition: global.backend.enabled
+      import-values:
+      - child: server.service
+        parent: global.victoria-metrics.service
+      name: victoria-metrics-single
+      repository: https://victoriametrics.github.io/helm-charts
+      version: 0.9.10
+    - condition: global.telemetry.enabled
+      name: victoria-metrics-agent
+      repository: ""
+      version: 0.9.11
+    - alias: custom-metrics
+      condition: custom-metrics.enabled
+      name: victoria-metrics-agent
+      repository: ""
+      version: 0.9.11
+    - alias: metrics-ingester
+      import-values:
+      - child: service
+        parent: global.metrics-ingester.service
+      name: victoria-metrics-agent
+      repository: ""
+      version: 0.9.11
+    - condition: global.backend.enabled
+      import-values:
+      - child: auth
+        parent: global.clickhouse.auth
+      - child: containerPorts
+        parent: global.clickhouse.containerPorts
+      - child: serviceAccount
+        parent: global.clickhouse.serviceAccount
+      name: clickhouse
+      repository: https://charts.bitnami.com/bitnami
+      version: 4.1.4
+    - condition: global.backend.enabled
+      import-values:
+      - child: ports
+        parent: global.opentelemetry-collector.ports
+      - child: service
+        parent: global.opentelemetry-collector.service
+      name: opentelemetry-collector
+      repository: https://open-telemetry.github.io/opentelemetry-helm-charts
+      version: 0.73.1
+    - condition: global.agent.enabled
+      import-values:
+      - child: serviceAccount
+        parent: global.kube-state-metrics.serviceAccount
+      name: kube-state-metrics
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 5.15.2
+    - condition: incloud-ingress.enabled
+      name: incloud-ingress
+      repository: ""
+      tags:
+      - incloud
+      version: 0.1.0
+    description: Cloud Native Observability
+    digest: bbd091159d5fd9682cb02d7706f42a3ffa0e43f7cb176e4f1faea9e1216cfe83
+    name: groundcover
+    type: application
+    urls:
+    - https://github.com/groundcover-com/helm-charts/releases/download/groundcover-1.6.26/groundcover-1.6.26.tgz
+    version: 1.6.26
+  - apiVersion: v2
     appVersion: 1.6.25
     created: "2023-12-13T17:51:51.886756017Z"
     dependencies:
@@ -17434,6 +17505,37 @@ entries:
     version: 0.1.0
   router:
   - apiVersion: v2
+    appVersion: 1.6.26
+    created: "2023-12-14T09:30:19.353638562Z"
+    dependencies:
+    - condition: global.postgresql.enabled
+      import-values:
+      - child: image
+        parent: global.postgresql.image
+      - child: serviceAccount
+        parent: global.postgresql.serviceAccount
+      name: postgresql
+      repository: https://charts.bitnami.com/bitnami
+      version: 12.6.9
+    - condition: onprem.enabled
+      import-values:
+      - child: serviceAccount
+        parent: global.grafana.serviceAccount
+      name: grafana
+      repository: https://grafana.github.io/helm-charts
+      version: 6.58.6
+    - condition: onprem.enabled
+      name: kong
+      repository: https://charts.konghq.com
+      version: 2.20.0
+    description: groundcover's router helm chart
+    digest: 7dc978fba7b2c107da4357cb7ea8f6f17ff8a6dd85c2a7c5a699be9463966da7
+    name: router
+    type: application
+    urls:
+    - https://github.com/groundcover-com/helm-charts/releases/download/router-1.6.26/router-1.6.26.tgz
+    version: 1.6.26
+  - apiVersion: v2
     appVersion: 1.6.25
     created: "2023-12-13T17:51:52.108500157Z"
     dependencies:
@@ -22072,4 +22174,4 @@ entries:
     urls:
     - https://github.com/groundcover-com/helm-charts/releases/download/router-0.33.4/router-0.33.4.tgz
     version: 0.33.4
-generated: "2023-12-13T17:51:52.110140619Z"
+generated: "2023-12-14T09:30:19.355290532Z"
