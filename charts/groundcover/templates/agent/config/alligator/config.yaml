@@ -31,13 +31,19 @@ data:
         samplingmode: 1 # DefaultSample
         samplingLimitMaxQueue: 0
         samplingLimitAgeOut: 0s
+      {{ if and .Values.agent.alligator.httphandler .Values.agent.alligator.httphandler.truncationConfig }}
+      truncationConfig:
+        enabled: {{ coalesce .Values.agent.alligator.noPayloadsMode .Values.agent.alligator.httphandler.truncationConfig.enabled }}
+        payloadSizeLimit: {{ ternary 0 .Values.agent.alligator.httphandler.truncationConfig.payloadSizeLimit .Values.agent.alligator.noPayloadsMode }}
+      {{ end }}
+      {{ if and .Values.agent.alligator.httphandler .Values.agent.alligator.httphandler.obfuscationConfig }}
       obfuscationConfig: 
         enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.httphandler.obfuscationConfig.enabled }}
         jsonConfig: {{ .Values.agent.alligator.httphandler.obfuscationConfig.jsonConfig | toJson }}
+      {{ end }}
       interval: 30s
       summarizerActiveTtl: 45s
       aggregationCacheSize: 4096
-      payloadSizeLimit: 10240 # 10kB
 
     grpchandler:
       samplesthreshold: 10
@@ -46,13 +52,19 @@ data:
         samplingmode: 1 # DefaultSample
         samplingLimitMaxQueue: 0
         samplingLimitAgeOut: 0s
+      {{ if and .Values.agent.alligator.grpchandler .Values.agent.alligator.grpchandler.truncationConfig }}
+      truncationConfig:
+        enabled: {{ coalesce .Values.agent.alligator.noPayloadsMode .Values.agent.alligator.grpchandler.truncationConfig.enabled }}
+        payloadSizeLimit: {{ ternary 0 .Values.agent.alligator.grpchandler.truncationConfig.payloadSizeLimit .Values.agent.alligator.noPayloadsMode }}
+      {{ end }}
+      {{ if and .Values.agent.alligator.grpchandler .Values.agent.alligator.grpchandler.obfuscationConfig }}
       obfuscationConfig: 
         enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.grpchandler.obfuscationConfig.enabled }}
         jsonConfig: {{ .Values.agent.alligator.grpchandler.obfuscationConfig.jsonConfig | toJson }}
+      {{ end }}
       interval: 30s
       summarizerActiveTtl: 45s
       aggregationCacheSize: 4096
-      payloadSizeLimit: 10240 # 10kB
 
     redishandler:
       samplesthreshold: 10
@@ -61,13 +73,19 @@ data:
         samplingmode: 1 # DefaultSample
         samplingLimitMaxQueue: 0
         samplingLimitAgeOut: 0s
+      {{ if and .Values.agent.alligator.redishandler .Values.agent.alligator.redishandler.truncationConfig }}
+      truncationConfig:
+        enabled: {{ coalesce .Values.agent.alligator.noPayloadsMode .Values.agent.alligator.redishandler.truncationConfig.enabled }}
+        payloadSizeLimit: {{ ternary 0 .Values.agent.alligator.redishandler.truncationConfig.payloadSizeLimit .Values.agent.alligator.noPayloadsMode }}
+      {{ end }}
+      {{ if and .Values.agent.alligator.redishandler .Values.agent.alligator.redishandler.obfuscationConfig }}
       obfuscationConfig: 
         enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.redishandler.obfuscationConfig.enabled }}
         jsonConfig: {{ .Values.agent.alligator.redishandler.obfuscationConfig.jsonConfig | toJson }}
+      {{ end }}
       interval: 30s
       summarizerActiveTtl: 45s
       aggregationCacheSize: 4096
-      payloadSizeLimit: 10240 # 10kB
 
     sqlhandler:
       samplesthreshold: 10
@@ -76,13 +94,19 @@ data:
         samplingmode: 1 # DefaultSample
         samplingLimitMaxQueue: 0
         samplingLimitAgeOut: 0s
+      {{ if .Values.agent.alligator.sqlhandler.truncationConfig }}
+      truncationConfig:
+        enabled: {{ coalesce .Values.agent.alligator.noPayloadsMode .Values.agent.alligator.sqlhandler.truncationConfig.enabled }}
+        payloadSizeLimit: {{ ternary 0 .Values.agent.alligator.sqlhandler.truncationConfig.payloadSizeLimit .Values.agent.alligator.noPayloadsMode }}
+      {{ end }}
+      {{ if .Values.agent.alligator.sqlhandler.obfuscationConfig }}
       obfuscationConfig: 
         enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.sqlhandler.obfuscationConfig.enabled }}
         jsonConfig: {{ .Values.agent.alligator.sqlhandler.obfuscationConfig.jsonConfig | toJson }}
+      {{ end }}
       interval: 30s
       summarizerActiveTtl: 45s
       aggregationCacheSize: 4096
-      payloadSizeLimit: 10240 # 10kB
 
     kafkahandler:
       samplesthreshold: 10
@@ -91,13 +115,19 @@ data:
         samplingmode: 1 # DefaultSample
         samplingLimitMaxQueue: 10
         samplingLimitAgeOut: 1s
+      {{ if and .Values.agent.alligator.sqlhandler .Values.agent.alligator.kafkahandler.truncationConfig }}
+      truncationConfig:
+        enabled: {{ coalesce .Values.agent.alligator.noPayloadsMode .Values.agent.alligator.kafkahandler.truncationConfig.enabled }}
+        payloadSizeLimit: {{ ternary 0 .Values.agent.alligator.kafkahandler.truncationConfig.payloadSizeLimit .Values.agent.alligator.noPayloadsMode }}
+      {{ end }}
+      {{ if and .Values.agent.alligator.sqlhandler .Values.agent.alligator.kafkahandler.obfuscationConfig }}
       obfuscationConfig: 
         enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.kafkahandler.obfuscationConfig.enabled }}
         jsonConfig: {{ .Values.agent.alligator.kafkahandler.obfuscationConfig.jsonConfig | toJson }}
+      {{ end }}
       interval: 30s
       summarizerActiveTtl: 45s
       aggregationCacheSize: 4096
-      payloadSizeLimit: 10240 # 10kB
 
     dnshandler:
       samplesthreshold: 10
@@ -106,9 +136,16 @@ data:
         samplingmode: 1 # DefaultSample
         samplingLimitMaxQueue: 10
         samplingLimitAgeOut: 1s
+      {{ if and .Values.agent.alligator.dnshandler .Values.agent.alligator.dnshandler.truncationConfig }}
+      truncationConfig:
+        enabled: {{ coalesce .Values.agent.alligator.noPayloadsMode .Values.agent.alligator.dnshandler.truncationConfig.enabled }}
+        payloadSizeLimit: {{ ternary 0 .Values.agent.alligator.dnshandler.truncationConfig.payloadSizeLimit .Values.agent.alligator.noPayloadsMode }}
+      {{ end }}
+      {{ if and .Values.agent.alligator.dnshandler .Values.agent.alligator.dnshandler.obfuscationConfig }}
       obfuscationConfig: 
         enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.dnshandler.obfuscationConfig.enabled }}
         jsonConfig: {{ .Values.agent.alligator.dnshandler.obfuscationConfig.jsonConfig | toJson }}
+      {{ end }}
       interval: 30s
       summarizerActiveTtl: 45s
       aggregationCacheSize: 300
@@ -120,13 +157,19 @@ data:
         samplingmode: 1 # DefaultSample
         samplingLimitMaxQueue: 0
         samplingLimitAgeOut: 0s
+      {{ if and .Values.agent.alligator.mongodbhandler .Values.agent.alligator.mongodbhandler.truncationConfig }}
+      truncationConfig:
+        enabled: {{ coalesce .Values.agent.alligator.noPayloadsMode .Values.agent.alligator.mongodbhandler.truncationConfig.enabled }}
+        payloadSizeLimit: {{ ternary 0 .Values.agent.alligator.mongodbhandler.truncationConfig.payloadSizeLimit .Values.agent.alligator.noPayloadsMode }}
+      {{ end }}
+      {{ if and .Values.agent.alligator.mongodbhandler .Values.agent.alligator.mongodbhandler.obfuscationConfig }}
       obfuscationConfig: 
         enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.mongodbhandler.obfuscationConfig.enabled }}
         jsonConfig: {{ .Values.agent.alligator.mongodbhandler.obfuscationConfig.jsonConfig | toJson }}
+      {{ end }}
       interval: 30s
       summarizerActiveTtl: 45s
       aggregationCacheSize: 4096
-      payloadSizeLimit: 10240 # 10kB
 
     containerInfoHandler:
       samplesthreshold: 10

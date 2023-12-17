@@ -183,26 +183,47 @@ agent:
       uploaderType: pyroscope
       cpuSamplingDuration: 60s
     httphandler:
+      truncationConfig:
+        enabled: true
+        payloadSizeLimit: 10240
       obfuscationConfig:
         enabled: false
     grpchandler:
+      truncationConfig:
+        enabled: true
+        payloadSizeLimit: 10240
       obfuscationConfig:
         enabled: false
     redishandler:
+      truncationConfig:
+        enabled: true
+        payloadSizeLimit: 10240
       obfuscationConfig:
         enabled: false
     sqlhandler:
+      truncationConfig:
+        enabled: true
+        payloadSizeLimit: 10240
       obfuscationConfig:
         enabled: false
     kafkahandler:
+      truncationConfig:
+        enabled: true
+        payloadSizeLimit: 10240
       obfuscationConfig:
         enabled: false
     dnshandler:
+      truncationConfig:
+        enabled: false
       obfuscationConfig:
         enabled: false
     mongodbhandler:
+      truncationConfig:
+        enabled: true
+        payloadSizeLimit: 10240
       obfuscationConfig:
         enabled: false
+    noPayloadsMode: false
     env:
   tracy:
     image:
