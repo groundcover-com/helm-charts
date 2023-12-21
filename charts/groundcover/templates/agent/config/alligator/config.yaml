@@ -278,11 +278,20 @@ data:
         batchSize: 100
         flushInterval: 30s
       dataDog:
-        enabled: {{ .Values.agent.alligator.apmIngestor.dataDog.enabled }}
+        proxyEnabled: {{ .Values.agent.alligator.apmIngestor.dataDog.proxyEnabled }}
         endpoint: {{ include "opentelemetry-collector.datadogapm.base.http.url" . }}
         tracesPort: {{ .Values.agent.alligator.apmIngestor.dataDog.tracesPort }}
       otel:
-        enabled: {{ .Values.agent.alligator.apmIngestor.otel.enabled }}
+        proxyEnabled: {{ .Values.agent.alligator.apmIngestor.otel.proxyEnabled }}
+        direct:
+          enabled: {{ .Values.agent.alligator.apmIngestor.otel.direct.enabled }}
+          zipkin:
+            enabled: {{ .Values.agent.alligator.apmIngestor.otel.direct.zipkin.enabled }}
+            port: {{ .Values.agent.alligator.apmIngestor.otel.direct.zipkin.port }}
+          otlp:
+            enabled: {{ .Values.agent.alligator.apmIngestor.otel.direct.otlp.enabled }}
+            grpcPort: {{ .Values.agent.alligator.apmIngestor.otel.direct.otlp.grpcPort }}
+            httpPort: {{ .Values.agent.alligator.apmIngestor.otel.direct.otlp.httpPort }}
     pprofAlligator:
       enabled: {{ include "telemetry.enabled" . }}
       interval: {{ .Values.agent.alligator.pprofAlligator.interval }}

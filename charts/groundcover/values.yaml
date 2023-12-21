@@ -172,10 +172,18 @@ agent:
     watchOnlyLocalNode: false
     apmIngestor:
       dataDog:
-        enabled: true
+        proxyEnabled: true
         tracesPort: 8126
       otel:
-        enabled: false
+        proxyEnabled: false
+        direct:
+          enabled: true
+          zipkin:
+            enabled: true
+            port: 9411
+          otlp:
+            enabled: true
+            grpcPort: 4317
     pprofAlligator:
       enabled: true
       interval: 10s

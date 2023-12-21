@@ -22,7 +22,29 @@ spec:
     app.kubernetes.io/part-of: groundcover
   ports:
   - protocol: TCP
+    name: dd-traces
     port: {{ .Values.agent.alligator.apmIngestor.dataDog.tracesPort }}
     targetPort: {{ .Values.agent.alligator.apmIngestor.dataDog.tracesPort }}
+  {{- if .Values.agent.alligator.apmIngestor.otel.direct.zipkin.enabled }}
+  - protocol: TCP
+    name: zipkin
+    port: {{ .Values.agent.alligator.apmIngestor.otel.direct.zipkin.port }}
+    targetPort: {{ .Values.agent.alligator.apmIngestor.otel.direct.zipkin.port }}
+  {{- end }}
+  {{- if .Values.agent.alligator.apmIngestor.otel.direct.otlp.enabled }}
+  {{- if .Values.agent.alligator.apmIngestor.otel.direct.otlp.grpcPort}} 
+  - protocol: TCP
+    name: otlp-grpc
+    port: {{ .Values.agent.alligator.apmIngestor.otel.direct.otlp.grpcPort }}
+    targetPort: {{ .Values.agent.alligator.apmIngestor.otel.direct.grpcPort }}
+  {{- end }}
+  {{- if .Values.agent.alligator.apmIngestor.otel.direct.otlp.httpPort}}
+  - protocol: TCP
+    name: otlp-http
+    port: {{ .Values.agent.alligator.apmIngestor.otel.direct.otlp.httpPort }}
+    targetPort: {{ .Values.agent.alligator.apmIngestor.otel.direct.httpPort }}
+  {{- end }}
+  {{- end }}
+  
   internalTrafficPolicy: Local
 {{- end }}

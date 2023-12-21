@@ -130,6 +130,16 @@ spec:
             - containerPort: {{ .Values.agent.alligator.apmIngestor.dataDog.tracesPort }}
               name: dd-traces
               protocol: TCP
+            {{- if .Values.agent.alligator.apmIngestor.otel.direct.zipkin.enabled }}
+            - containerPort: {{ .Values.agent.alligator.apmIngestor.otel.direct.zipkin.port }}
+              name: zipkin
+              protocol: TCP
+            {{- end }}
+            {{- if .Values.agent.alligator.apmIngestor.otel.direct.otlp.enabled }}
+            - containerPort: {{ .Values.agent.alligator.apmIngestor.otel.direct.otlp.grpcPort }}
+              name: otlp-grpc
+              protocol: TCP
+            {{- end }}
           securityContext:
             capabilities:
               add:
