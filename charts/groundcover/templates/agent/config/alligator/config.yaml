@@ -39,6 +39,7 @@ data:
       {{ if and .Values.agent.alligator.httphandler .Values.agent.alligator.httphandler.obfuscationConfig }}
       obfuscationConfig: 
         enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.httphandler.obfuscationConfig.enabled }}
+        caseSensitive: {{ .Values.agent.alligator.httphandler.obfuscationConfig.caseSensitive }}
         jsonConfig: {{ .Values.agent.alligator.httphandler.obfuscationConfig.jsonConfig | toJson }}
       {{ end }}
       interval: 30s
@@ -60,6 +61,7 @@ data:
       {{ if and .Values.agent.alligator.grpchandler .Values.agent.alligator.grpchandler.obfuscationConfig }}
       obfuscationConfig: 
         enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.grpchandler.obfuscationConfig.enabled }}
+        caseSensitive: {{ .Values.agent.alligator.grpchandler.obfuscationConfig.caseSensitive }}
         jsonConfig: {{ .Values.agent.alligator.grpchandler.obfuscationConfig.jsonConfig | toJson }}
       {{ end }}
       interval: 30s
@@ -81,6 +83,7 @@ data:
       {{ if and .Values.agent.alligator.redishandler .Values.agent.alligator.redishandler.obfuscationConfig }}
       obfuscationConfig: 
         enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.redishandler.obfuscationConfig.enabled }}
+        caseSensitive: {{ .Values.agent.alligator.redishandler.obfuscationConfig.caseSensitive }}
         jsonConfig: {{ .Values.agent.alligator.redishandler.obfuscationConfig.jsonConfig | toJson }}
       {{ end }}
       interval: 30s
@@ -102,6 +105,7 @@ data:
       {{ if .Values.agent.alligator.sqlhandler.obfuscationConfig }}
       obfuscationConfig: 
         enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.sqlhandler.obfuscationConfig.enabled }}
+        caseSensitive: {{ .Values.agent.alligator.sqlhandler.obfuscationConfig.caseSensitive }}
         jsonConfig: {{ .Values.agent.alligator.sqlhandler.obfuscationConfig.jsonConfig | toJson }}
       {{ end }}
       interval: 30s
@@ -123,6 +127,7 @@ data:
       {{ if and .Values.agent.alligator.sqlhandler .Values.agent.alligator.kafkahandler.obfuscationConfig }}
       obfuscationConfig: 
         enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.kafkahandler.obfuscationConfig.enabled }}
+        caseSensitive: {{ .Values.agent.alligator.kafkahandler.obfuscationConfig.caseSensitive }}
         jsonConfig: {{ .Values.agent.alligator.kafkahandler.obfuscationConfig.jsonConfig | toJson }}
       {{ end }}
       interval: 30s
@@ -144,6 +149,7 @@ data:
       {{ if and .Values.agent.alligator.dnshandler .Values.agent.alligator.dnshandler.obfuscationConfig }}
       obfuscationConfig: 
         enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.dnshandler.obfuscationConfig.enabled }}
+        caseSensitive: {{ .Values.agent.alligator.dnshandler.obfuscationConfig.caseSensitive }}
         jsonConfig: {{ .Values.agent.alligator.dnshandler.obfuscationConfig.jsonConfig | toJson }}
       {{ end }}
       interval: 30s
@@ -165,6 +171,7 @@ data:
       {{ if and .Values.agent.alligator.mongodbhandler .Values.agent.alligator.mongodbhandler.obfuscationConfig }}
       obfuscationConfig: 
         enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.mongodbhandler.obfuscationConfig.enabled }}
+        caseSensitive: {{ .Values.agent.alligator.mongodbhandler.obfuscationConfig.caseSensitive }}
         jsonConfig: {{ .Values.agent.alligator.mongodbhandler.obfuscationConfig.jsonConfig | toJson }}
       {{ end }}
       interval: 30s
@@ -355,6 +362,13 @@ data:
       Cache: false
       KeepSQLAlias: true
       ReplaceDigits: true
+
+    {{ if .Values.agent.alligator.sensitiveHeadersObfuscationConfig }}
+    sensitiveHeadersObfuscationConfig: 
+      enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.sensitiveHeadersObfuscationConfig.enabled }}
+      caseSensitive: false
+      jsonConfig: {{ .Values.agent.alligator.sensitiveHeadersObfuscationConfig.jsonConfig | toJson }}
+    {{ end }}
 kind: ConfigMap
 metadata:
   labels:
