@@ -291,6 +291,81 @@ entries:
     version: 0.0.1
   groundcover:
   - apiVersion: v2
+    appVersion: 1.6.37
+    created: "2023-12-27T15:55:31.334077382Z"
+    dependencies:
+    - condition: router.enabled
+      name: router
+      repository: ""
+      version: 0.1.0
+    - condition: global.backend.enabled
+      import-values:
+      - child: server.service
+        parent: global.victoria-metrics.service
+      name: victoria-metrics-single
+      repository: https://victoriametrics.github.io/helm-charts
+      version: 0.9.10
+    - condition: global.telemetry.enabled
+      name: victoria-metrics-agent
+      repository: ""
+      version: 0.9.11
+    - alias: custom-metrics
+      condition: custom-metrics.enabled
+      name: victoria-metrics-agent
+      repository: ""
+      version: 0.9.11
+    - condition: victoria-metrics-operator.enabled
+      name: victoria-metrics-operator
+      repository: ""
+      version: 0.27.9
+    - alias: metrics-ingester
+      import-values:
+      - child: service
+        parent: global.metrics-ingester.service
+      name: victoria-metrics-agent
+      repository: ""
+      version: 0.9.11
+    - condition: global.backend.enabled
+      import-values:
+      - child: auth
+        parent: global.clickhouse.auth
+      - child: containerPorts
+        parent: global.clickhouse.containerPorts
+      - child: serviceAccount
+        parent: global.clickhouse.serviceAccount
+      name: clickhouse
+      repository: https://charts.bitnami.com/bitnami
+      version: 4.1.4
+    - condition: global.backend.enabled
+      import-values:
+      - child: ports
+        parent: global.opentelemetry-collector.ports
+      - child: service
+        parent: global.opentelemetry-collector.service
+      name: opentelemetry-collector
+      repository: https://open-telemetry.github.io/opentelemetry-helm-charts
+      version: 0.75.1
+    - condition: global.agent.enabled
+      import-values:
+      - child: serviceAccount
+        parent: global.kube-state-metrics.serviceAccount
+      name: kube-state-metrics
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 5.15.2
+    - condition: incloud-ingress.enabled
+      name: incloud-ingress
+      repository: ""
+      tags:
+      - incloud
+      version: 0.1.0
+    description: Cloud Native Observability
+    digest: de328537825466be9d6c24445b5d9bd0cc8172d2f1498188850faded69682e87
+    name: groundcover
+    type: application
+    urls:
+    - https://github.com/groundcover-com/helm-charts/releases/download/groundcover-1.6.37/groundcover-1.6.37.tgz
+    version: 1.6.37
+  - apiVersion: v2
     appVersion: 1.6.36
     created: "2023-12-25T19:58:23.329867601Z"
     dependencies:
@@ -18227,6 +18302,37 @@ entries:
     version: 0.1.0
   router:
   - apiVersion: v2
+    appVersion: 1.6.37
+    created: "2023-12-27T15:55:31.547568894Z"
+    dependencies:
+    - condition: global.postgresql.enabled
+      import-values:
+      - child: image
+        parent: global.postgresql.image
+      - child: serviceAccount
+        parent: global.postgresql.serviceAccount
+      name: postgresql
+      repository: https://charts.bitnami.com/bitnami
+      version: 12.6.9
+    - condition: onprem.enabled
+      import-values:
+      - child: serviceAccount
+        parent: global.grafana.serviceAccount
+      name: grafana
+      repository: https://grafana.github.io/helm-charts
+      version: 6.58.6
+    - condition: onprem.enabled
+      name: kong
+      repository: https://charts.konghq.com
+      version: 2.20.0
+    description: groundcover's router helm chart
+    digest: 45c5612777adb10d7ffede7b2dcebbedfd06f8b1ea4ace4c233559c011bebde8
+    name: router
+    type: application
+    urls:
+    - https://github.com/groundcover-com/helm-charts/releases/download/router-1.6.37/router-1.6.37.tgz
+    version: 1.6.37
+  - apiVersion: v2
     appVersion: 1.6.36
     created: "2023-12-25T19:58:23.550489714Z"
     dependencies:
@@ -23206,4 +23312,4 @@ entries:
     urls:
     - https://github.com/groundcover-com/helm-charts/releases/download/router-0.33.4/router-0.33.4.tgz
     version: 0.33.4
-generated: "2023-12-25T19:58:23.552239215Z"
+generated: "2023-12-27T15:55:31.549321686Z"
