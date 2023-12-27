@@ -90,7 +90,13 @@ spec:
         name: k8s-watcher
         ports:
         - containerPort: 9102
-          name: watcher-metrics        
+          name: watcher-metrics
+        - containerPort: 8888
+          name: watcher-http   
+        readinessProbe:
+          {{ toYaml .Values.k8sWatcher.readinessProbe | nindent 10 }}
+        livenessProbe:
+          {{ toYaml .Values.k8sWatcher.livenessProbe | nindent 10 }}
         resources:
 {{- toYaml .Values.k8sWatcher.resources | nindent 10 }}
         volumeMounts:

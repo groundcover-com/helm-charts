@@ -19,7 +19,7 @@ metadata:
 spec:
   selector:
     app.kubernetes.io/name: alligator
-    app.kubernetes.io/part-of: groundcover
+    app.kubernetes.io/part-of: '{{ include "groundcover.labels.partOf" . }}'
   ports:
   - protocol: TCP
     name: dd-traces

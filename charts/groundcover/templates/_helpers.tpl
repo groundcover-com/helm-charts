@@ -33,8 +33,16 @@ Create chart name and version as used by the chart label.
 {{/*
 Common labels
 */}}
+{{- define "groundcover.labels.partOf" -}}
+{{- if .Values.global.groundcoverPartOf -}}
+{{- .Values.global.groundcoverPartOf -}}
+{{- else -}}
+groundcover
+{{- end -}}
+{{- end }}
+
 {{- define "groundcover.labels" -}}
-app.kubernetes.io/part-of: groundcover
+app.kubernetes.io/part-of: '{{ include "groundcover.labels.partOf" . }}'
 {{ with .Values.global.groundcoverLabels }} 
 {{- toYaml . }}
 {{- end }}

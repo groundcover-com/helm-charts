@@ -30,6 +30,7 @@ global:
     tag: "" # rewrites Chart.AppVersion
   imagePullSecrets: []
 
+  groundcoverPartOf: groundcover
   groundcoverLabels:
 
   clickhouse:
@@ -236,7 +237,7 @@ agent:
       enabled: true
       jsonConfig:
         mode: "ObfuscateSpecificValues"
-        specificKeys: ["Authorization", "Proxy-Authorization", "X-Amz-Security-Token",	"X-Amz-Credential"]
+        specificKeys: ["Authorization", "Proxy-Authorization", "X-Amz-Security-Token", "X-Amz-Credential"]
     env:
   tracy:
     image:
@@ -292,6 +293,22 @@ k8sWatcher:
       cpu: 50m
       memory: 256Mi
   env:
+  readinessProbe:
+    httpGet:
+      scheme: HTTP
+      path: /health
+      port: watcher-http
+    initialDelaySeconds: 45
+    periodSeconds: 15
+    failureThreshold: 20
+  livenessProbe:
+    httpGet:
+      scheme: HTTP
+      path: /health
+      port: watcher-http
+    initialDelaySeconds: 45
+    periodSeconds: 15
+    failureThreshold: 20
 
 portal:
   additionalLabels:
@@ -325,7 +342,7 @@ clickhouse:
   containerSecurityContext:
     enabled: false
   podLabels:
-    app.kubernetes.io/part-of: groundcover
+    app.kubernetes.io/part-of: '{{ include "groundcover.labels.partOf" . }}'
   podSecurityContext:
     enabled: false
   volumePermissions:
@@ -483,7 +500,7 @@ opentelemetry-collector:
     repository: public.ecr.aws/groundcovercom/otel/opentelemetry-collector-contrib
     tag: ""
   podLabels:
-    app.kubernetes.io/part-of: groundcover
+    app.kubernetes.io/part-of: '{{ include "groundcover.labels.partOf" . }}'
   podAnnotations:
     prometheus.io/scrape: "true"
     prometheus.io/port: '{{ index .Values "ports" "metrics" "containerPort" | int }}'
@@ -744,7 +761,7 @@ metrics-ingester:
   resources:
     limits:
       cpu: 500m
-      memory: 256Mi
+      memory: 512Mi
     requests:
       cpu: 100m
       memory: 256Mi
