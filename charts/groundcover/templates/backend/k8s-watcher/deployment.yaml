@@ -56,6 +56,9 @@ spec:
       nodeSelector:
 {{ toYaml .Values.k8sWatcher.nodeSelector | indent 8 }}
 {{- end }}
+{{- if .Values.k8sWatcher.priorityClassName }}
+      priorityClassName: {{ .Values.k8sWatcher.priorityClassName }}
+{{- end }}
       imagePullSecrets: {{ include "imagePullSecrets" . }}
       containers:
       - env:
