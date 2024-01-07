@@ -1,10 +1,9 @@
-# Release notes for version 0.9.10
+# Release notes for version 0.9.13
 
-**Release date:** 2023-10-12
+**Release date:** 2023-12-12
 
-![AppVersion: v1.94.0](https://img.shields.io/static/v1?label=AppVersion&message=v1.94.0&color=success&logo=)
+![AppVersion: v1.96.0](https://img.shields.io/static/v1?label=AppVersion&message=v1.96.0&color=success&logo=)
 ![Helm: v3](https://img.shields.io/static/v1?label=Helm&message=v3&color=informational&logo=helm)
 
-- Add license enforcement for vmbackupmanager in order to avoid running it without enterprise license key. See [these docs](https://docs.victoriametrics.com/enterprise.html) for details.
-- Fix license flags not being passed to vmsingle when using StatefulSet.
+- bump version of VM components to [v1.96.0](https://github.com/VictoriaMetrics/VictoriaMetrics/releases/tag/v1.96.0)
 
