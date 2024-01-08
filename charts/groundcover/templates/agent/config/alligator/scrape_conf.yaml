@@ -23,19 +23,19 @@ data:
       - action: replace
         source_labels:
         - __meta_kubernetes_namespace
-        target_label: gc_namespace
+        target_label: namespace
       - action: replace
         source_labels:
         - __meta_kubernetes_pod_name
-        target_label: gc_pod
+        target_label: pod
       - action: replace
         source_labels:
         - __meta_kubernetes_pod_uid
-        target_label: gc_pod_uid
+        target_label: pod_uid
       - action: replace
         source_labels:
         - __meta_kubernetes_pod_container_name
-        target_label: gc_container
+        target_label: container
       - replacement: /var/log/pods/${3}_${4}_${1}/${2}/*.log
         regex: "([^;]+);([^;]+);([^;]+);([^;]+)"
         source_labels:
