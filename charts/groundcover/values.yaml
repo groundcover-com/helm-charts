@@ -73,6 +73,9 @@ global:
       otlpUrl: https://traces.groundcover.com/v1/traces
       zipkinUrl: https://traces.groundcover.com/api/v2/spans
 
+  monitors:
+    enabled: false
+
 tags:
   # InCloud - Enterprise Setup. groundcover's control-plane reconciled observability infrastructure deployment.
   incloud: false
@@ -1379,6 +1382,47 @@ victoria-metrics-single:
                   values:
                     - SPOT
 
+monitors-manager:
+  image:
+    registry: public.ecr.aws
+    repository: groundcovercom/grafana-groundcover
+    tag: v0.0.8-grafana10.1.2
+  persistence:
+    enabled: true
+    type: statefulset
+    size: 5Gi
+  envValueFrom:
+    CLICKHOUSE_PASSWORD:
+      secretKeyRef:
+        key: '{{ include "clickhouse.secretKey" . }}'
+        name: '{{ include "clickhouse.secretName" . }}'
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+        - name: VM
+          type: prometheus
+          uid: victoria-metrics
+          url: '{{ include "victoria-metrics.base.http.url" . }}'
+          access: proxy
+          jsonData:
+            prometheusType: "Prometheus"
+            prometheusVersion: "2.50.1"
+        - name: Clickhouse
+          type: grafana-clickhouse-datasource
+          uid: clickhouse
+          url: '{{ include "clickhouse.fullname" . }}:{{ .Values.global.clickhouse.containerPorts.tcp | int }}'
+          jsonData:
+            defaultDatabase: '{{ include "clickhouse.database" . }}'
+            port: "{{ .Values.global.clickhouse.containerPorts.tcp | int }}"
+            server: '{{ include "clickhouse.fullname" . }}'
+            username: '{{ include "clickhouse.readerUsername" . }}'
+          access: proxy
+          secureJsonData:
+            password: $CLICKHOUSE_PASSWORD
+  grafana.ini:
+    server:
+      enable_gzip: true
 rbac:
   pspEnabled: false
   sccEnabled: true

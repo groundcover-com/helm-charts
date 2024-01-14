@@ -26,8 +26,11 @@ dependencies:
 - name: kube-state-metrics
   repository: https://prometheus-community.github.io/helm-charts
   version: 5.15.2
+- name: grafana
+  repository: https://grafana.github.io/helm-charts
+  version: 7.2.0
 - name: incloud-ingress
   repository: ""
   version: 0.1.0
-digest: sha256:932bf77ab301e95c1564dcd660906e517151e5f9142794d0b771ca75e36c6ae3
-generated: "2024-01-02T12:38:27.562643355Z"
+digest: sha256:6cfb535a48eb537f07d770693de61a6bcce497861211b8035e92b97271f9ec6f
+generated: "2024-01-14T10:46:40.003749468Z"

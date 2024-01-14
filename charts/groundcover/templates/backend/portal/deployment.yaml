@@ -71,6 +71,22 @@ spec:
             secretKeyRef:
               key: GC_CLUSTER_ID
               name: groundcover-config
+{{ if eq (include "monitors.enabled" .) "true" }}
+        - name: GC_MONITORSMANAGER_ENABLED
+          value: "true"
+        - name: GC_MONITORSMANAGER_URL
+          value: {{ template "monitors-manager.httpEndpoint" . }}
+        - name: GC_MONITORSMANAGER_USERNAME
+          valueFrom:
+            secretKeyRef:
+              key: {{ template "monitors-manager.secret.userKey" . }}
+              name: {{ template "monitors-manager.secretName" . }}
+        - name: GC_MONITORSMANAGER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: {{ template "monitors-manager.secret.passwordKey" . }}
+              name: {{ template "monitors-manager.secretName" . }}
+{{ end }}
 {{ if eq .Values.router.mode "cloud" }}
         - name: GC_ROUTER_TOKEN
           valueFrom:

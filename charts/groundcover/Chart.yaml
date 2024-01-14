@@ -1,5 +1,5 @@
 apiVersion: v2
-appVersion: 1.6.53
+appVersion: 1.6.54
 dependencies:
 - condition: router.enabled
   name: router
@@ -59,6 +59,11 @@ dependencies:
   name: kube-state-metrics
   repository: https://prometheus-community.github.io/helm-charts
   version: 5.15.2
+- alias: monitors-manager
+  condition: global.monitors.enabled
+  name: grafana
+  repository: https://grafana.github.io/helm-charts
+  version: 7.2.0
 - condition: incloud-ingress.enabled
   name: incloud-ingress
   repository: ""
@@ -68,4 +73,4 @@ dependencies:
 description: Cloud Native Observability
 name: groundcover
 type: application
-version: 1.6.53
+version: 1.6.54

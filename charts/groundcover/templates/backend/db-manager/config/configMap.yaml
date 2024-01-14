@@ -15,7 +15,11 @@ data:
     startuptimeout: 1m0s
 
     GroundcoverVersion: "OVERRIDEN"
-
+    {{- if .Values.tags.incloud }}
+    StopMigrationOnFailure: true
+    {{- else }}
+    StopMigrationOnFailure:
+    {{- end }} 
     Incluster: true
     Namespace: {{ .Release.Namespace }}
     DropPartitionInterval: 6h
