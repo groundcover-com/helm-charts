@@ -24,7 +24,7 @@ onprem:
 origin:
   registry: quay.io/groundcover
   repository: router
-  tag: 1.6.54
+  tag: 1.6.55
 serviceAccount:
   annotations:
 ingress:
@@ -75,7 +75,7 @@ configuration:
     Migrations:
       Path: migrations
   Grafana:
-    URL: '{{ printf "http://%s" (include "grafana.fullname" .) }}'
+    URL: '{{ printf "http://%s" (include "theatre.fullname" .) }}'
     Username: "admin"
     Password: ""
     DatasourcesURL: '{{ include "router.ds.url" . }}'
@@ -174,12 +174,14 @@ postgresql:
           createdb -U postgres kong
           createdb -U postgres rbac
 grafana:
+  nameOverride: grafana
   extraLabels:
     app.kubernetes.io/part-of: groundcover
   plugins: []
   image:
-    repository: public.ecr.aws/groundcovercom/grafana-groundcover
-    tag: "v0.0.10-grafana10.1.2"
+    registry: public.ecr.aws
+    repository: groundcovercom/grafana-groundcover
+    tag: v0.0.10-grafana10.1.2
   testFramework:
     enabled: false
   envValueFrom:
@@ -195,13 +197,7 @@ grafana:
       host: '{{ (include "postgresql.base.url" .) }}'
       name: grafana
       user: postgres
-      password: ""
       ssl_mode: require
-    paths:
-      data: /var/lib/grafana/
-      logs: /var/log/grafana
-      plugins: /usr/share/grafana/plugins
-      provisioning: /etc/grafana/provisioning
     log:
       mode: console
     grafana_net:

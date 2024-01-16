@@ -50,7 +50,7 @@ spec:
                 -p {{ splitList ":" (include "postgresql.base.url" .) | last }}
         - name: check-grafana-is-up   
           args:
-          - while [ $(curl -skw '%{http_code}' http://{{ include "grafana.fullname" . }}/grafana/healthz
+          - while [ $(curl -skw '%{http_code}' http://{{ include "theatre.fullname" . }}/grafana/healthz
             -o /dev/null) -ne 200 ]; do echo 'Waiting for grafana...'; sleep 2; done; echo grafana is up
           command:
             - /bin/sh
@@ -83,7 +83,7 @@ spec:
             - name: GC_GRAFANA_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "grafana.fullname" . }}
+                  name: {{ include "theatre.fullname" . }}
                   key: "admin-password"
             - name: GC_RBAC_DB_PASS
               valueFrom:

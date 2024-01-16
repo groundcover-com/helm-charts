@@ -3,6 +3,7 @@ global:
     enabled: true
   backend:
     enabled: true
+    name:
 
   ingress:
     # set ingress site for inCloud / on-prem sensor only deployments
@@ -1386,7 +1387,8 @@ monitors-manager:
   image:
     registry: public.ecr.aws
     repository: groundcovercom/grafana-groundcover
-    tag: v0.0.8-grafana10.1.2
+    tag: v0.0.10-grafana10.1.2
+  nameOverride: monitors-manager
   persistence:
     enabled: true
     type: statefulset
