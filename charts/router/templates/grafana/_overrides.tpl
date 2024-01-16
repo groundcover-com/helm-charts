@@ -1,7 +1,3 @@
-{{- define "grafana.fullname" -}}
-{{- printf "%s-grafana" .Release.Name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
 {{/*
 Create the name of the service account
 */}}

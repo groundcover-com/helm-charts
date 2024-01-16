@@ -3,7 +3,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: {{ printf "%s-scc" (include "grafana.fullname" .) }}
+  name: {{ printf "%s-scc" (include "theatre.fullname" .) }}
   namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/name: grafana
@@ -22,7 +22,7 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: {{ printf "%s-scc" (include "grafana.fullname" .) }}
+  name: {{ printf "%s-scc" (include "theatre.fullname" .) }}
   namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/name: grafana
@@ -31,7 +31,7 @@ metadata:
 roleRef:
   kind: Role
   apiGroup: rbac.authorization.k8s.io
-  name: {{ printf "%s-scc" (include "grafana.fullname" .) }}
+  name: {{ printf "%s-scc" (include "theatre.fullname" .) }}
 subjects:
   - kind: ServiceAccount
     namespace: {{ .Release.Namespace }}
