@@ -1425,6 +1425,12 @@ monitors-manager:
   grafana.ini:
     server:
       enable_gzip: true
+    paths:
+      data: /var/lib/grafana/
+      logs: /var/log/grafana
+      plugins: /usr/share/grafana/plugins
+      provisioning: /etc/grafana/provisioning
+
 rbac:
   pspEnabled: false
   sccEnabled: true
