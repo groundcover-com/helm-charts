@@ -17,6 +17,8 @@ global:
       existingSecret: ""
       secretKeys:
         adminPasswordKey: ""
+  monitors:
+    enabled: false
 enabled: true
 additionalLabels:
 onprem:
@@ -24,7 +26,7 @@ onprem:
 origin:
   registry: quay.io/groundcover
   repository: router
-  tag: 1.6.59
+  tag: 1.6.60
 serviceAccount:
   annotations:
 ingress:
@@ -85,6 +87,17 @@ configuration:
     Enabled: "{{ .Values.onprem.enabled }}"
   Reporter:
     StoreStatus: false
+  Monitors:
+    Enabled: false
+    DB:
+      Host: ''
+      Port: ''
+      Name: "monitors"
+      User: "postgres"
+      Pass: ""
+      Timeout: 150s
+      Interval: 5s
+      SSLMode: "disable"
 resources:
   requests:
     cpu: 1000m
@@ -174,6 +187,7 @@ postgresql:
           export PGPASSWORD=${POSTGRES_PASSWORD}
           createdb -U postgres kong
           createdb -U postgres rbac
+          createdb -U postgres monitors
 grafana:
   nameOverride: grafana
   extraLabels:
