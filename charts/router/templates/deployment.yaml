@@ -90,6 +90,7 @@ spec:
                 secretKeyRef:
                   name: {{ include "postgresql.secretName" . }}
                   key: {{ include "postgresql.adminPasswordKey" . }}
+            {{- if .Values.global.monitors.enabled }}
             # TODO: remove monitors config once we move portal
             - name: GC_MONITORS_DB_PASS
               valueFrom:
@@ -101,6 +102,7 @@ spec:
                 secretKeyRef:
                   name: '{{- printf "%s-monitors-manager" .Release.Name | trunc 63 | trimSuffix "-" -}}'
                   key: "admin-password"
+            {{- end }}
             {{- end }}
             - name: GIN_MODE
               value: "release"
