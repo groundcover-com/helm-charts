@@ -3,7 +3,7 @@
 {{- $shouldDeleteSts := true -}}
 {{- $shouldPatchAnnotations := true -}}
 {{- $pvcSize := index .Values "victoria-metrics-single" "server" "persistentVolume" "size" -}}
-{{- $annotations := (index .Values "victoria-metrics-single" "server" "persistentVolume" "annotations") -}}
+{{- $annotations := (index .Values "victoria-metrics-single" "server" "persistentVolume" "annotations") | toJson -}}
 {{- $patches := (include "volume-expansion.patches" (index .Values "victoria-metrics-single" "server" "persistentVolume")) | fromYaml -}}
 {{- $pvcPatch := (get $patches "pvc") | toJson -}}
 {{- $stsPatch := (get $patches "sts") | toJson -}}
@@ -15,10 +15,10 @@
 {{- $pvcCapacitySize := ($pvc | dig "status" "capacity" "storage" $pvcSize) -}}
 {{- $sts := (lookup "apps/v1" "StatefulSet" $.Release.Namespace $stsName | default dict) -}}
 {{- $stsPvcSize := ($sts | dig "spec" "volumeClaimTemplates" (list dict) | first | dig "spec" "resources" "requests" "storage" $pvcSize) -}}
-{{- $stsPvcAnnotations := ($sts | dig "spec" "volumeClaimTemplates" (list dict) | first | dig "metadata" "annotations" $annotations) | toJson -}}
+{{- $stsPvcAnnotations := ($sts | dig "spec" "volumeClaimTemplates" (list dict) | first | dig "metadata" "annotations" dict) | toJson -}}
 {{- $shouldPatchPvc = (not (eq $pvcSize $pvcCapacitySize)) -}}
 {{- $shouldDeleteSts = (not (eq $pvcSize $stsPvcSize)) -}}
-{{- $shouldPatchAnnotations = (not (eq $stsPvcAnnotations ($annotations | toJson))) -}}
+{{- $shouldPatchAnnotations = (not (eq $stsPvcAnnotations $annotations)) -}}
 {{- end -}}
 {{ if or $shouldPatchPvc $shouldDeleteSts $shouldPatchAnnotations }}
 apiVersion: batch/v1

@@ -14,6 +14,10 @@
 {{ .Values.global.events.retention }}
 {{- end -}}
 
+{{- define "monitors.state.retention" -}}
+{{ .Values.global.monitors.state.retention }}
+{{- end -}}
+
 {{- define "opentelemetry-collector.otlp.scheme" -}}
 {{- ternary "https" "http" .Values.global.otlp.tls.enabled -}}
 {{- end -}}
@@ -66,6 +70,10 @@
 {{- else -}}
     {{- printf "%s:%d" (include "opentelemetry-collector.fullname" .) (index .Values.global "opentelemetry-collector" "ports" "otlp" "servicePort" | int ) -}}
 {{- end -}}
+{{- end -}}
+
+{{- define "opentelemetry-collector.loki-historian.http.url" -}}
+    {{- printf "%s://%s:%d" (include "opentelemetry-collector.otlp.scheme" .) (include "opentelemetry-collector.fullname" .) (index .Values.global "opentelemetry-collector" "ports" "loki-historian" "servicePort" | int ) -}}
 {{- end -}}
 
 {{- define "opentelemetry-collector.health.http.url" -}}

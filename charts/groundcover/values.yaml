@@ -76,6 +76,8 @@ global:
 
   monitors:
     enabled: false
+    state:
+      retention: 1d
 
 tags:
   # InCloud - Enterprise Setup. groundcover's control-plane reconciled observability infrastructure deployment.
@@ -529,6 +531,12 @@ opentelemetry-collector:
       servicePort: 12347
       hostPort: 12347
       protocol: TCP
+    loki-historian:
+      enabled: true
+      containerPort: 3500
+      servicePort: 3500
+      hostPort: 3500
+      protocol: TCP
     loki-http:
       enabled: true
       containerPort: 3100
@@ -559,6 +567,11 @@ opentelemetry-collector:
         directory: /persistent_queues
         timeout: 10s
     receivers:
+      loki/historian:
+        protocols:
+          http:
+            tls: ${env:TLS_CONFIG}
+            endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "loki-historian" "containerPort" | int ) }}'
       loki:
         protocols:
           http:
@@ -591,6 +604,9 @@ opentelemetry-collector:
       datadog:
         endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "datadogapm" "containerPort" | int ) }}'
     processors:
+      batch/monitorState:
+        timeout: 5s
+        send_batch_size: 1000
       batch/logs:
         timeout: 5s
         send_batch_size: 20000
@@ -614,6 +630,20 @@ opentelemetry-collector:
             - attributes["log_type"] != nil and attributes["log_type"] != "log"
             - attributes["type"] != nil
     exporters:
+      groundcover/monitorState:
+        type: monitorState
+        timeout: 5s
+        password: ${env:CLICKHOUSE_PASSWORD}
+        username: '{{ include "clickhouse.username" . }}'
+        database: '{{ include "clickhouse.database" . }}'
+        endpoint: '{{ include "clickhouse.nativeEndpoint" . }}'
+        sending_queue:
+          queue_size: 10
+          storage: file_storage
+        retry_on_failure:
+          initial_interval: 5s
+          max_interval: 5s
+          max_elapsed_time: 15s
       groundcover/logs:
         type: logs
         timeout: 5s
@@ -667,6 +697,13 @@ opentelemetry-collector:
           address: '{{ printf "0.0.0.0:%d" (index .Values "ports" "metrics" "containerPort" | int ) }}'
       extensions: [health_check, pprof, file_storage]
       pipelines:
+        logs/monitorState:
+          receivers: 
+            - loki/historian
+          processors: 
+            - batch/monitorState
+          exporters: 
+            - groundcover/monitorState
         metrics:
           receivers:
             - otlp
@@ -1387,7 +1424,7 @@ monitors-manager:
   image:
     registry: public.ecr.aws
     repository: groundcovercom/grafana-groundcover
-    tag: v0.0.10-grafana10.1.2
+    tag: v0.0.11-grafana10.1.2
   nameOverride: monitors-manager
   persistence:
     enabled: true
@@ -1423,6 +1460,13 @@ monitors-manager:
           secureJsonData:
             password: $CLICKHOUSE_PASSWORD
   grafana.ini:
+    "unified_alerting.state_history":
+      enabled: true
+      backend: "loki"
+      loki_remote_url: '{{ include "opentelemetry-collector.loki-historian.http.url" . }}'
+      log_all: true
+    feature_toggles:
+      enable: "alertStateHistoryLokiSecondary, alertStateHistoryLokiPrimary, alertStateHistoryLokiOnly"
     server:
       enable_gzip: true
     paths:

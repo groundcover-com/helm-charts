@@ -30,6 +30,7 @@ data:
       Logs: '{{ include "logs.retention" . }}'   
       Entities: 5d
       Events: '{{ include "events.retention" . }}'
+      MonitorState: '{{ include "monitors.state.retention" . }}'
     DataMigration:
       BackfillBatchDuration:
         Traces: 1m
@@ -38,6 +39,8 @@ data:
         Events: 1h
       BackfillBatchMaxExecutionTime: 5m
       BackfillBatchDeleteInterval: 60
+    FeatureFlags:
+      Monitors: {{ .Values.global.monitors.enabled }}
       
     ClickHouse:
       Pass: "OVERRIDEN"
