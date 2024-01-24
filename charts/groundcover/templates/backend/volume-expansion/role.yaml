@@ -21,6 +21,7 @@ rules:
       - "statefulsets"
     verbs:
       - "get"
+      - "list"
       - "patch"
       - "delete"
 {{- end -}}

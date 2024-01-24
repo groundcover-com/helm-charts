@@ -2,16 +2,21 @@
 {{- printf "%s-volume-expansion" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{- define "volume-expansion.pvc.patch" -}}
-op: replace
-value: {{ . }}
-path: /spec/resources/requests/storage
-{{- end -}}
-
-{{- define "volume-expansion.sts.patch" -}}
-op: replace
-value: {{ . }}
-path: /spec/volumeClaimTemplates/0/spec/resources/requests/storage
+{{- define "volume-expansion.patches" -}}
+sts:
+- op: add
+  value: {{ .annotations | toJson }}
+  path: /spec/volumeClaimTemplates/0/spec/resources/requests/storage
+- op: replace
+  value: {{ .size }}
+  path: /spec/volumeClaimTemplates/0/metadata/annotations
+pvc:
+- op: add
+  value: {{ .annotations | toJson }}
+  path: /metadata/annotations
+- op: replace
+  value: {{ .size }}
+  path: /spec/resources/requests/storage
 {{- end -}}
 
 {{- define "volume-expansion.job.image" -}}
