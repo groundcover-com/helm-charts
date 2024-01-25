@@ -191,6 +191,7 @@ agent:
           otlp:
             enabled: true
             grpcPort: 4317
+            httpPort: 4318
     pprofAlligator:
       enabled: true
       interval: 10s
