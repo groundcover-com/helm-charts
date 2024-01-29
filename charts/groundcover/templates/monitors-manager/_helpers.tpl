@@ -19,5 +19,5 @@
 {{- end -}}
 
 {{- define "monitors-manager.httpEndpoint" -}}
-{{-  printf "http://%s:%d" (include "monitors-manager.fullname" .) (index .Values "monitors-manager" "service" "targetPort" | int ) -}}
+{{- printf "http://%s:%d" (include "monitors-manager.fullname" .) (index .Values "monitors-manager" "service" "port" | int ) -}}
 {{- end -}}

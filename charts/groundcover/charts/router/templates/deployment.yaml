@@ -114,6 +114,9 @@ spec:
               value: "{{ .Values.origin.tag }}"
             - name: ROUTER_SENTRY_DSN
               value: "{{ .Values.sentryDsn }}"
+{{- if .Values.extraEnv }}
+            {{- toYaml .Values.extraEnv | nindent 12 }}
+{{- end }}
           readinessProbe:
             httpGet:
               path: /health

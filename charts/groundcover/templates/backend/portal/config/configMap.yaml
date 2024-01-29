@@ -49,6 +49,13 @@ data:
       Database: {{ include "clickhouse.database" . }}
       HTTPPort: {{ .Values.global.clickhouse.containerPorts.http | int }}
       NativePort: {{ .Values.global.clickhouse.containerPorts.tcp | int }}
+    
+    MonitorsManager:
+      Enabled: false
+      URL: "OVERRIDEN"
+      Username: "admin"
+      Password: "OVERRIDEN"
+    
     {{- if eq (include "telemetry.enabled" .) "true" }}
     Tracing:
       Enabled: true
