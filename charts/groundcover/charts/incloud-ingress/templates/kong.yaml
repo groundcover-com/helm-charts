@@ -47,7 +47,7 @@ metadata:
 config:
   replace:
     headers:
-      - {{ printf "X-ClickHouse-User: %s" (include "clickhouse.readerUsername" .) | quote }}
+      - {{ printf "X-ClickHouse-User: %s" (include "clickhouse.username" .) | quote }}
       - {{ printf "X-ClickHouse-Key: %s" (include "clickhouse.password" .) | quote }}
 plugin: request-transformer
 {{- end -}}

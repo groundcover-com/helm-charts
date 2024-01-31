@@ -9,6 +9,7 @@ data:
     productmetricsflushmintotalcounter:
       http: 5
       redis: 5
+      amqp: 5
       sql: 5
       kafka: 5
       dns: 5
@@ -90,6 +91,28 @@ data:
       summarizerActiveTtl: 45s
       aggregationCacheSize: 4096
 
+    amqphandler:
+      samplesthreshold: 10
+      issuesthreshold: 10
+      sampling:
+        samplingmode: 1 # DefaultSample
+        samplingLimitMaxQueue: 0
+        samplingLimitAgeOut: 0s
+      {{ if and .Values.agent.alligator.amqphandler .Values.agent.alligator.amqphandler.truncationConfig }}
+      truncationConfig:
+        enabled: {{ coalesce .Values.agent.alligator.noPayloadsMode .Values.agent.alligator.amqphandler.truncationConfig.enabled }}
+        payloadSizeLimit: {{ ternary 0 .Values.agent.alligator.amqphandler.truncationConfig.payloadSizeLimit .Values.agent.alligator.noPayloadsMode }}
+      {{ end }}
+      {{ if and .Values.agent.alligator.amqphandler .Values.agent.alligator.amqphandler.obfuscationConfig }}
+      obfuscationConfig: 
+        enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.amqphandler.obfuscationConfig.enabled }}
+        caseSensitive: {{ .Values.agent.alligator.amqphandler.obfuscationConfig.caseSensitive }}
+        jsonConfig: {{ .Values.agent.alligator.amqphandler.obfuscationConfig.jsonConfig | toJson }}
+      {{ end }}
+      interval: 30s
+      summarizerActiveTtl: 45s
+      aggregationCacheSize: 4096
+
     sqlhandler:
       samplesthreshold: 10
       issuesthreshold: 10
@@ -97,12 +120,12 @@ data:
         samplingmode: 1 # DefaultSample
         samplingLimitMaxQueue: 0
         samplingLimitAgeOut: 0s
-      {{ if .Values.agent.alligator.sqlhandler.truncationConfig }}
+      {{ if and .Values.agent.alligator.sqlhandler .Values.agent.alligator.sqlhandler.truncationConfig }}
       truncationConfig:
         enabled: {{ coalesce .Values.agent.alligator.noPayloadsMode .Values.agent.alligator.sqlhandler.truncationConfig.enabled }}
         payloadSizeLimit: {{ ternary 0 .Values.agent.alligator.sqlhandler.truncationConfig.payloadSizeLimit .Values.agent.alligator.noPayloadsMode }}
       {{ end }}
-      {{ if .Values.agent.alligator.sqlhandler.obfuscationConfig }}
+      {{ if and .Values.agent.alligator.sqlhandler .Values.agent.alligator.sqlhandler.obfuscationConfig }}
       obfuscationConfig: 
         enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.sqlhandler.obfuscationConfig.enabled }}
         caseSensitive: {{ .Values.agent.alligator.sqlhandler.obfuscationConfig.caseSensitive }}
@@ -119,12 +142,12 @@ data:
         samplingmode: 1 # DefaultSample
         samplingLimitMaxQueue: 10
         samplingLimitAgeOut: 1s
-      {{ if and .Values.agent.alligator.sqlhandler .Values.agent.alligator.kafkahandler.truncationConfig }}
+      {{ if and .Values.agent.alligator.kafkahandler .Values.agent.alligator.kafkahandler.truncationConfig }}
       truncationConfig:
         enabled: {{ coalesce .Values.agent.alligator.noPayloadsMode .Values.agent.alligator.kafkahandler.truncationConfig.enabled }}
         payloadSizeLimit: {{ ternary 0 .Values.agent.alligator.kafkahandler.truncationConfig.payloadSizeLimit .Values.agent.alligator.noPayloadsMode }}
       {{ end }}
-      {{ if and .Values.agent.alligator.sqlhandler .Values.agent.alligator.kafkahandler.obfuscationConfig }}
+      {{ if and .Values.agent.alligator.kafkahandler .Values.agent.alligator.kafkahandler.obfuscationConfig }}
       obfuscationConfig: 
         enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.kafkahandler.obfuscationConfig.enabled }}
         caseSensitive: {{ .Values.agent.alligator.kafkahandler.obfuscationConfig.caseSensitive }}

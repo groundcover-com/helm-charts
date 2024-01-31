@@ -44,7 +44,7 @@ data:
 
     ClickHouse:
       Pass: "OVERRIDEN"
-      User: {{ include "clickhouse.readerUsername" . }}
+      User: {{ include "clickhouse.username" . }}
       Host: {{ include "clickhouse.fullname" . }}
       Database: {{ include "clickhouse.database" . }}
       HTTPPort: {{ .Values.global.clickhouse.containerPorts.http | int }}

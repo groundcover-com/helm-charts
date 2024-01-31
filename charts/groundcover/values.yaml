@@ -1456,7 +1456,7 @@ monitors-manager:
             defaultDatabase: '{{ include "clickhouse.database" . }}'
             port: "{{ .Values.global.clickhouse.containerPorts.tcp | int }}"
             server: '{{ include "clickhouse.fullname" . }}'
-            username: '{{ include "clickhouse.readerUsername" . }}'
+            username: '{{ include "clickhouse.username" . }}'
           access: proxy
           secureJsonData:
             password: $CLICKHOUSE_PASSWORD
