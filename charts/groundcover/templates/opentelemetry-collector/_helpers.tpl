@@ -18,6 +18,10 @@
 {{ .Values.global.monitors.state.retention }}
 {{- end -}}
 
+{{- define "monitors.instance.retention" -}}
+{{ .Values.global.monitors.instance.retention }}
+{{- end -}}
+
 {{- define "opentelemetry-collector.otlp.scheme" -}}
 {{- ternary "https" "http" .Values.global.otlp.tls.enabled -}}
 {{- end -}}

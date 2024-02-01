@@ -77,7 +77,9 @@ global:
   monitors:
     enabled: false
     state:
-      retention: 1d
+      retention: 30d # {amount}[h(ours), d(ays), w(eeks), y(ears)]
+    instance:
+      retention: 2d # {amount}[h(ours), d(ays), w(eeks), y(ears)]
 
 tags:
   # InCloud - Enterprise Setup. groundcover's control-plane reconciled observability infrastructure deployment.
@@ -163,6 +165,7 @@ agent:
       limits:
         cpu: 100m
         memory: 64Mi
+    env: []
   alligator:
     image:
       repository: "{{ .Values.global.origin.registry }}/alligator"

@@ -227,6 +227,9 @@ spec:
                 secretKeyRef:
                   key: {{ template "groundcover.apikeySecretKey" . }}
                   name: {{ template "groundcover.apikeySecretName" . }}
+        {{- with .Values.agent.flb.env }}
+          {{ toYaml . | nindent 12 }}
+        {{- end }}
           resources:
             {{- toYaml .Values.agent.flb.resources | nindent 12 }}
 {{- end }}              
