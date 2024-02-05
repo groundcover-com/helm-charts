@@ -702,11 +702,11 @@ opentelemetry-collector:
       extensions: [health_check, pprof, file_storage]
       pipelines:
         logs/monitorState:
-          receivers: 
+          receivers:
             - loki/historian
-          processors: 
+          processors:
             - batch/monitorState
-          exporters: 
+          exporters:
             - groundcover/monitorState
         metrics:
           receivers:
@@ -1428,7 +1428,7 @@ monitors-manager:
   image:
     registry: public.ecr.aws
     repository: groundcovercom/grafana-groundcover
-    tag: v0.0.11-grafana10.1.2
+    tag: v0.0.13-grafana10.1.2
   nameOverride: monitors-manager
   persistence:
     enabled: true
