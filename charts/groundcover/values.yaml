@@ -576,6 +576,7 @@ opentelemetry-collector:
           http:
             tls: ${env:TLS_CONFIG}
             endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "loki-historian" "containerPort" | int ) }}'
+        use_incoming_timestamp: true
       loki:
         protocols:
           http:
@@ -947,7 +948,7 @@ kube-state-metrics:
     - pods
     - replicasets
     - replicationcontrollers
-    # - resourcequotas
+    - resourcequotas
     # - secrets
     # - services
     - statefulsets
