@@ -206,54 +206,60 @@ agent:
         enabled: true
         payloadSizeLimit: 10240
       obfuscationConfig:
-        enabled: false
+        keyValueConfig:
+        unstructuredConfig:
     grpchandler:
       truncationConfig:
         enabled: true
         payloadSizeLimit: 10240
       obfuscationConfig:
-        enabled: false
+        keyValueConfig:
+        unstructuredConfig:
     redishandler:
       truncationConfig:
         enabled: true
         payloadSizeLimit: 10240
       obfuscationConfig:
-        enabled: false
+        keyValueConfig:
+        unstructuredConfig:
     sqlhandler:
       truncationConfig:
         enabled: true
         payloadSizeLimit: 10240
       obfuscationConfig:
-        enabled: false
+        keyValueConfig:
+        unstructuredConfig:
     kafkahandler:
       truncationConfig:
         enabled: true
         payloadSizeLimit: 10240
       obfuscationConfig:
-        enabled: false
+        keyValueConfig:
+        unstructuredConfig:
     dnshandler:
       truncationConfig:
         enabled: false
       obfuscationConfig:
-        enabled: false
+        keyValueConfig:
+        unstructuredConfig:
     mongodbhandler:
       truncationConfig:
         enabled: true
         payloadSizeLimit: 10240
       obfuscationConfig:
-        enabled: false
+        keyValueConfig:
+        unstructuredConfig:
     noPayloadsMode: false
     sensitiveHeadersObfuscationConfig:
       enabled: true
-      jsonConfig:
-        mode: "ObfuscateSpecificValues"
-        specificKeys:
-          [
-            "Authorization",
-            "Proxy-Authorization",
-            "X-Amz-Security-Token",
-            "X-Amz-Credential",
-          ]
+      mode: "ObfuscateSpecificValues"
+      specificKeys:
+        [
+          "Authorization",
+          "Proxy-Authorization",
+          "X-Amz-Security-Token",
+          "X-Amz-Credential",
+        ]
     env:
   tracy:
     image:
@@ -781,7 +787,7 @@ metrics-ingester:
     promscrape.streamParse: "true"
     promscrape.dropOriginalLabels: "true"
     remoteWrite.showURL: "true"
-    remoteWrite.maxDiskUsagePerURL: 1GB
+    remoteWrite.maxDiskUsagePerURL: 10GB
     remoteWrite.headers: "apikey:%{API_KEY}"
     remoteWrite.tlsInsecureSkipVerify: "true"
     remoteWrite.streamAggr.config: "/extra-config/aggregation_config.yaml"
@@ -841,7 +847,7 @@ victoria-metrics-agent:
     promscrape.streamParse: "true"
     promscrape.dropOriginalLabels: "true"
     remoteWrite.showURL: "true"
-    remoteWrite.maxDiskUsagePerURL: 1GB
+    remoteWrite.maxDiskUsagePerURL: 10GB
     remoteWrite.headers: "apikey:%{API_KEY}"
     remoteWrite.url: '{{ include "telemetry.metrics.url" . }}'
     remoteWrite.label: clusterId=$(GC_CLUSTER_ID),groundcover_version=$(GC_VERSION)
@@ -993,7 +999,7 @@ custom-metrics:
     promscrape.streamParse: "true"
     promscrape.dropOriginalLabels: "true"
     remoteWrite.showURL: "true"
-    remoteWrite.maxDiskUsagePerURL: 1GB
+    remoteWrite.maxDiskUsagePerURL: 10GB
     remoteWrite.maxDailySeries: "1000000"
     remoteWrite.maxHourlySeries: "100000"
     remoteWrite.headers: "apikey:%{API_KEY}"

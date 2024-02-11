@@ -13,12 +13,13 @@ data:
       sql: 5
       kafka: 5
       dns: 5
+      grpc: 5
+      mongodb: 5
       node_info: 2
       container_crash: 1
       container_info: 1
       container_state: 1
       pvc_info: 1
-      grpc: 5
     tracyEnabled: {{ template "agent.tracy.enabled" . }}
     tracy:
       address: "ipc:///comm/tracy.data"
@@ -38,10 +39,18 @@ data:
         payloadSizeLimit: {{ ternary 0 .Values.agent.alligator.httphandler.truncationConfig.payloadSizeLimit .Values.agent.alligator.noPayloadsMode }}
       {{ end }}
       {{ if and .Values.agent.alligator.httphandler .Values.agent.alligator.httphandler.obfuscationConfig }}
-      obfuscationConfig: 
-        enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.httphandler.obfuscationConfig.enabled }}
-        caseSensitive: {{ .Values.agent.alligator.httphandler.obfuscationConfig.caseSensitive }}
-        jsonConfig: {{ .Values.agent.alligator.httphandler.obfuscationConfig.jsonConfig | toJson }}
+      obfuscationConfig:
+        {{ if and .Values.agent.alligator.httphandler .Values.agent.alligator.httphandler.obfuscationConfig.keyValueConfig }}
+        keyValueConfig:
+          enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.httphandler.obfuscationConfig.keyValueConfig.enabled }}
+          caseSensitive: {{ .Values.agent.alligator.httphandler.obfuscationConfig.keyValueConfig.caseSensitive }}
+          mode: {{ .Values.agent.alligator.httphandler.obfuscationConfig.keyValueConfig.mode }} 
+          specificKeys: {{ .Values.agent.alligator.httphandler.obfuscationConfig.keyValueConfig.specificKeys | toJson }}
+        {{ end }}
+        {{ if and .Values.agent.alligator.httphandler .Values.agent.alligator.httphandler.obfuscationConfig.unstructuredConfig }}
+        unstructuredConfig: 
+          enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.httphandler.obfuscationConfig.unstructuredConfig.enabled }}
+        {{ end }}
       {{ end }}
       interval: 30s
       summarizerActiveTtl: 45s
@@ -60,10 +69,18 @@ data:
         payloadSizeLimit: {{ ternary 0 .Values.agent.alligator.grpchandler.truncationConfig.payloadSizeLimit .Values.agent.alligator.noPayloadsMode }}
       {{ end }}
       {{ if and .Values.agent.alligator.grpchandler .Values.agent.alligator.grpchandler.obfuscationConfig }}
-      obfuscationConfig: 
-        enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.grpchandler.obfuscationConfig.enabled }}
-        caseSensitive: {{ .Values.agent.alligator.grpchandler.obfuscationConfig.caseSensitive }}
-        jsonConfig: {{ .Values.agent.alligator.grpchandler.obfuscationConfig.jsonConfig | toJson }}
+      obfuscationConfig:
+        {{ if and .Values.agent.alligator.grpchandler .Values.agent.alligator.grpchandler.obfuscationConfig.keyValueConfig }}
+        keyValueConfig:
+          enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.grpchandler.obfuscationConfig.keyValueConfig.enabled }}
+          caseSensitive: {{ .Values.agent.alligator.grpchandler.obfuscationConfig.keyValueConfig.caseSensitive }}
+          mode: {{ .Values.agent.alligator.grpchandler.obfuscationConfig.keyValueConfig.mode }}
+          specificKeys: {{ .Values.agent.alligator.grpchandler.obfuscationConfig.keyValueConfig.specificKeys | toJson }}
+        {{ end }}
+        {{ if and .Values.agent.alligator.grpchandler .Values.agent.alligator.grpchandler.obfuscationConfig.unstructuredConfig }}
+        unstructuredConfig: 
+          enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.grpchandler.obfuscationConfig.unstructuredConfig.enabled }}
+        {{ end }}
       {{ end }}
       interval: 30s
       summarizerActiveTtl: 45s
@@ -82,10 +99,18 @@ data:
         payloadSizeLimit: {{ ternary 0 .Values.agent.alligator.redishandler.truncationConfig.payloadSizeLimit .Values.agent.alligator.noPayloadsMode }}
       {{ end }}
       {{ if and .Values.agent.alligator.redishandler .Values.agent.alligator.redishandler.obfuscationConfig }}
-      obfuscationConfig: 
-        enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.redishandler.obfuscationConfig.enabled }}
-        caseSensitive: {{ .Values.agent.alligator.redishandler.obfuscationConfig.caseSensitive }}
-        jsonConfig: {{ .Values.agent.alligator.redishandler.obfuscationConfig.jsonConfig | toJson }}
+      obfuscationConfig:
+        {{ if and .Values.agent.alligator.redishandler .Values.agent.alligator.redishandler.obfuscationConfig.keyValueConfig }}
+        keyValueConfig:
+          enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.redishandler.obfuscationConfig.keyValueConfig.enabled }}
+          caseSensitive: {{ .Values.agent.alligator.redishandler.obfuscationConfig.keyValueConfig.caseSensitive }}
+          mode: {{ .Values.agent.alligator.redishandler.obfuscationConfig.keyValueConfig.mode }} 
+          specificKeys: {{ .Values.agent.alligator.redishandler.obfuscationConfig.keyValueConfig.specificKeys | toJson }}
+        {{ end }}
+        {{ if and .Values.agent.alligator.redishandler .Values.agent.alligator.redishandler.obfuscationConfig.unstructuredConfig }}
+        unstructuredConfig: 
+          enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.redishandler.obfuscationConfig.unstructuredConfig.enabled }}
+        {{ end }}
       {{ end }}
       interval: 30s
       summarizerActiveTtl: 45s
@@ -104,10 +129,18 @@ data:
         payloadSizeLimit: {{ ternary 0 .Values.agent.alligator.amqphandler.truncationConfig.payloadSizeLimit .Values.agent.alligator.noPayloadsMode }}
       {{ end }}
       {{ if and .Values.agent.alligator.amqphandler .Values.agent.alligator.amqphandler.obfuscationConfig }}
-      obfuscationConfig: 
-        enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.amqphandler.obfuscationConfig.enabled }}
-        caseSensitive: {{ .Values.agent.alligator.amqphandler.obfuscationConfig.caseSensitive }}
-        jsonConfig: {{ .Values.agent.alligator.amqphandler.obfuscationConfig.jsonConfig | toJson }}
+      obfuscationConfig:
+        {{ if and .Values.agent.alligator.amqphandler .Values.agent.alligator.amqphandler.obfuscationConfig.keyValueConfig }}
+        keyValueConfig:
+          enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.amqphandler.obfuscationConfig.keyValueConfig.enabled }}
+          caseSensitive: {{ .Values.agent.alligator.amqphandler.obfuscationConfig.keyValueConfig.caseSensitive }}
+          mode: {{ .Values.agent.alligator.amqphandler.obfuscationConfig.keyValueConfig.mode }} 
+          specificKeys: {{ .Values.agent.alligator.amqphandler.obfuscationConfig.keyValueConfig.specificKeys | toJson }}
+        {{ end }}
+        {{ if and .Values.agent.alligator.amqphandler .Values.agent.alligator.amqphandler.obfuscationConfig.unstructuredConfig }}
+        unstructuredConfig: 
+          enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.amqphandler.obfuscationConfig.unstructuredConfig.enabled }}
+        {{ end }}
       {{ end }}
       interval: 30s
       summarizerActiveTtl: 45s
@@ -126,10 +159,18 @@ data:
         payloadSizeLimit: {{ ternary 0 .Values.agent.alligator.sqlhandler.truncationConfig.payloadSizeLimit .Values.agent.alligator.noPayloadsMode }}
       {{ end }}
       {{ if and .Values.agent.alligator.sqlhandler .Values.agent.alligator.sqlhandler.obfuscationConfig }}
-      obfuscationConfig: 
-        enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.sqlhandler.obfuscationConfig.enabled }}
-        caseSensitive: {{ .Values.agent.alligator.sqlhandler.obfuscationConfig.caseSensitive }}
-        jsonConfig: {{ .Values.agent.alligator.sqlhandler.obfuscationConfig.jsonConfig | toJson }}
+      obfuscationConfig:
+        {{ if and .Values.agent.alligator.sqlhandler .Values.agent.alligator.sqlhandler.obfuscationConfig.keyValueConfig }}
+        keyValueConfig:
+          enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.sqlhandler.obfuscationConfig.keyValueConfig.enabled }}
+          caseSensitive: {{ .Values.agent.alligator.sqlhandler.obfuscationConfig.keyValueConfig.caseSensitive }}
+          mode: {{ .Values.agent.alligator.sqlhandler.obfuscationConfig.keyValueConfig.mode }} 
+          specificKeys: {{ .Values.agent.alligator.sqlhandler.obfuscationConfig.keyValueConfig.specificKeys | toJson }}
+        {{ end }}
+        {{ if and .Values.agent.alligator.sqlhandler .Values.agent.alligator.sqlhandler.obfuscationConfig.unstructuredConfig }}
+        unstructuredConfig: 
+          enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.sqlhandler.obfuscationConfig.unstructuredConfig.enabled }}
+        {{ end }}
       {{ end }}
       interval: 30s
       summarizerActiveTtl: 45s
@@ -148,10 +189,18 @@ data:
         payloadSizeLimit: {{ ternary 0 .Values.agent.alligator.kafkahandler.truncationConfig.payloadSizeLimit .Values.agent.alligator.noPayloadsMode }}
       {{ end }}
       {{ if and .Values.agent.alligator.kafkahandler .Values.agent.alligator.kafkahandler.obfuscationConfig }}
-      obfuscationConfig: 
-        enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.kafkahandler.obfuscationConfig.enabled }}
-        caseSensitive: {{ .Values.agent.alligator.kafkahandler.obfuscationConfig.caseSensitive }}
-        jsonConfig: {{ .Values.agent.alligator.kafkahandler.obfuscationConfig.jsonConfig | toJson }}
+      obfuscationConfig:
+        {{ if and .Values.agent.alligator.kafkahandler .Values.agent.alligator.kafkahandler.obfuscationConfig.keyValueConfig }}
+        keyValueConfig:
+          enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.kafkahandler.obfuscationConfig.keyValueConfig.enabled }}
+          caseSensitive: {{ .Values.agent.alligator.kafkahandler.obfuscationConfig.keyValueConfig.caseSensitive }}
+          mode: {{ .Values.agent.alligator.kafkahandler.obfuscationConfig.keyValueConfig.mode }} 
+          specificKeys: {{ .Values.agent.alligator.kafkahandler.obfuscationConfig.keyValueConfig.specificKeys | toJson }}
+        {{ end }}
+        {{ if and .Values.agent.alligator.kafkahandler .Values.agent.alligator.kafkahandler.obfuscationConfig.unstructuredConfig }}
+        unstructuredConfig: 
+          enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.kafkahandler.obfuscationConfig.unstructuredConfig.enabled }}
+        {{ end }}
       {{ end }}
       interval: 30s
       summarizerActiveTtl: 45s
@@ -170,10 +219,18 @@ data:
         payloadSizeLimit: {{ ternary 0 .Values.agent.alligator.dnshandler.truncationConfig.payloadSizeLimit .Values.agent.alligator.noPayloadsMode }}
       {{ end }}
       {{ if and .Values.agent.alligator.dnshandler .Values.agent.alligator.dnshandler.obfuscationConfig }}
-      obfuscationConfig: 
-        enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.dnshandler.obfuscationConfig.enabled }}
-        caseSensitive: {{ .Values.agent.alligator.dnshandler.obfuscationConfig.caseSensitive }}
-        jsonConfig: {{ .Values.agent.alligator.dnshandler.obfuscationConfig.jsonConfig | toJson }}
+      obfuscationConfig:
+        {{ if and .Values.agent.alligator.dnshandler .Values.agent.alligator.dnshandler.obfuscationConfig.keyValueConfig }}
+        keyValueConfig:
+          enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.dnshandler.obfuscationConfig.keyValueConfig.enabled }}
+          caseSensitive: {{ .Values.agent.alligator.dnshandler.obfuscationConfig.keyValueConfig.caseSensitive }}
+          mode: {{ .Values.agent.alligator.dnshandler.obfuscationConfig.keyValueConfig.mode }} 
+          specificKeys: {{ .Values.agent.alligator.dnshandler.obfuscationConfig.keyValueConfig.specificKeys | toJson }}
+        {{ end }}
+        {{ if and .Values.agent.alligator.dnshandler .Values.agent.alligator.dnshandler.obfuscationConfig.unstructuredConfig }}
+        unstructuredConfig: 
+          enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.dnshandler.obfuscationConfig.unstructuredConfig.enabled }}
+        {{ end }}
       {{ end }}
       interval: 30s
       summarizerActiveTtl: 45s
@@ -192,10 +249,18 @@ data:
         payloadSizeLimit: {{ ternary 0 .Values.agent.alligator.mongodbhandler.truncationConfig.payloadSizeLimit .Values.agent.alligator.noPayloadsMode }}
       {{ end }}
       {{ if and .Values.agent.alligator.mongodbhandler .Values.agent.alligator.mongodbhandler.obfuscationConfig }}
-      obfuscationConfig: 
-        enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.mongodbhandler.obfuscationConfig.enabled }}
-        caseSensitive: {{ .Values.agent.alligator.mongodbhandler.obfuscationConfig.caseSensitive }}
-        jsonConfig: {{ .Values.agent.alligator.mongodbhandler.obfuscationConfig.jsonConfig | toJson }}
+      obfuscationConfig:
+        {{ if and .Values.agent.alligator.mongodbhandler .Values.agent.alligator.mongodbhandler.obfuscationConfig.keyValueConfig }}
+        keyValueConfig:
+          enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.mongodbhandler.obfuscationConfig.keyValueConfig.enabled }}
+          caseSensitive: {{ .Values.agent.alligator.mongodbhandler.obfuscationConfig.keyValueConfig.caseSensitive }}
+          mode: {{ .Values.agent.alligator.mongodbhandler.obfuscationConfig.keyValueConfig.mode }} 
+          specificKeys: {{ .Values.agent.alligator.mongodbhandler.obfuscationConfig.keyValueConfig.specificKeys | toJson }}
+        {{ end }}
+        {{ if and .Values.agent.alligator.mongodbhandler .Values.agent.alligator.mongodbhandler.obfuscationConfig.unstructuredConfig }}
+        unstructuredConfig: 
+          enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.mongodbhandler.obfuscationConfig.unstructuredConfig.enabled }}
+        {{ end }}
       {{ end }}
       interval: 30s
       summarizerActiveTtl: 45s
@@ -390,7 +455,8 @@ data:
     sensitiveHeadersObfuscationConfig: 
       enabled: {{ coalesce .Values.agent.alligator.obfuscateData .Values.agent.alligator.sensitiveHeadersObfuscationConfig.enabled }}
       caseSensitive: false
-      jsonConfig: {{ .Values.agent.alligator.sensitiveHeadersObfuscationConfig.jsonConfig | toJson }}
+      mode: {{ .Values.agent.alligator.sensitiveHeadersObfuscationConfig.mode }}
+      specificKeys: {{ .Values.agent.alligator.sensitiveHeadersObfuscationConfig.specificKeys | toJson }}
     {{ end }}
 kind: ConfigMap
 metadata:
