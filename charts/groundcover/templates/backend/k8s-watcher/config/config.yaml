@@ -57,6 +57,17 @@ data:
       writeTimeout: 10s
       batchSize: 350
       flushInterval: 1s
+    Pprof:
+      enabled: {{ include "telemetry.enabled" . }}
+      interval: {{ .Values.k8sWatcher.pprof.interval }}
+      exponent: {{ .Values.k8sWatcher.pprof.exponent }}
+      cpuSamplingDuration: {{ .Values.k8sWatcher.pprof.cpuSamplingDuration }}
+      httpUploader:
+        enabled: {{ eq .Values.k8sWatcher.pprof.uploaderType "http" }}
+        pushURL: {{ printf "%s/upload/pprof" (include "telemetry.metrics.base.url" .) }}
+      pyroscopeUploader:
+        enabled: {{ eq .Values.k8sWatcher.pprof.uploaderType "pyroscope" }}
+        pushURL: {{ include "telemetry.metrics.base.url" . }}
 kind: ConfigMap
 metadata:
   labels:

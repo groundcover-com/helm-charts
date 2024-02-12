@@ -195,7 +195,7 @@ agent:
             enabled: true
             grpcPort: 4317
             httpPort: 4318
-    pprofAlligator:
+    pprof:
       enabled: true
       interval: 10s
       exponent: 40
@@ -314,6 +314,12 @@ k8sWatcher:
     requests:
       cpu: 50m
       memory: 256Mi
+  pprof:
+    enabled: true
+    interval: 10s
+    exponent: 40
+    uploaderType: pyroscope
+    cpuSamplingDuration: 60s
   env:
   readinessProbe:
     httpGet:
@@ -354,6 +360,12 @@ portal:
     requests:
       cpu: 50m
       memory: 100Mi
+  pprof:
+    enabled: true
+    interval: 10s
+    exponent: 40
+    uploaderType: pyroscope
+    cpuSamplingDuration: 60s
 
 clickhouse:
   enabled: true

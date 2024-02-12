@@ -387,16 +387,16 @@ data:
             enabled: {{ .Values.agent.alligator.apmIngestor.otel.direct.otlp.enabled }}
             grpcPort: {{ .Values.agent.alligator.apmIngestor.otel.direct.otlp.grpcPort }}
             httpPort: {{ .Values.agent.alligator.apmIngestor.otel.direct.otlp.httpPort }}
-    pprofAlligator:
+    pprof:
       enabled: {{ include "telemetry.enabled" . }}
-      interval: {{ .Values.agent.alligator.pprofAlligator.interval }}
-      exponent: {{ .Values.agent.alligator.pprofAlligator.exponent }}
-      cpuSamplingDuration: {{ .Values.agent.alligator.pprofAlligator.cpuSamplingDuration }}
+      interval: {{ .Values.agent.alligator.pprof.interval }}
+      exponent: {{ .Values.agent.alligator.pprof.exponent }}
+      cpuSamplingDuration: {{ .Values.agent.alligator.pprof.cpuSamplingDuration }}
       httpUploader:
-        enabled: {{ eq .Values.agent.alligator.pprofAlligator.uploaderType "http" }}
+        enabled: {{ eq .Values.agent.alligator.pprof.uploaderType "http" }}
         pushURL: {{ printf "%s/upload/pprof" (include "telemetry.metrics.base.url" .) }}
       pyroscopeUploader:
-        enabled: {{ eq .Values.agent.alligator.pprofAlligator.uploaderType "pyroscope" }}
+        enabled: {{ eq .Values.agent.alligator.pprof.uploaderType "pyroscope" }}
         pushURL: {{ include "telemetry.metrics.base.url" . }}
 
     clusterId: {{ include "groundcover.clusterId" . }}
