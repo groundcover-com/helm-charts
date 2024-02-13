@@ -6,7 +6,7 @@ metadata:
     {{- include "groundcover.labels" . | nindent 4 }}
 data:
   aggregation_config.yaml: |
-    - match: '{__name__=~"groundcover_.+_.+_counter|groundcover_unavailable_count", node_name!=""}'
+    - match: '{__name__=~"groundcover_.+_.+_counter|groundcover_unavailable_count|groundcover_network.+", node_name!=""}'
       without: [node_name]
       interval: 30s
       outputs: [total]

@@ -577,6 +577,12 @@ opentelemetry-collector:
       servicePort: 8126
       hostPort: 8126
       protocol: TCP
+    awsfirehose:
+      enabled: true
+      containerPort: 4433
+      servicePort: 4433
+      hostPort: 4433
+      protocol: TCP
   config:
     extensions:
       health_check:
@@ -626,6 +632,9 @@ opentelemetry-collector:
           endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "faro" "containerPort" | int ) }}'
       datadog:
         endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "datadogapm" "containerPort" | int ) }}'
+      awsfirehose:
+        endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "awsfirehose" "containerPort" | int ) }}'
+        record_type: "cwlogs"
     processors:
       batch/monitorState:
         timeout: 5s
@@ -744,6 +753,7 @@ opentelemetry-collector:
             - loki
             - otlp
             - faro
+            - awsfirehose
           processors:
             - filter/dropNoneLogs
             - batch/logs

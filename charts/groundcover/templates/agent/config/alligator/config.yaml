@@ -284,6 +284,13 @@ data:
       summarizerActiveTtl: 90s
       aggregationCacheSize: 4096
 
+    l4MetricsHandler:
+      sampling:
+        samplingmode: 0 # DontSample
+      interval: 10s
+      summarizerActiveTtl: 90s
+      aggregationCacheSize: 10240
+
     containerStateHandler:
       samplesthreshold: 10
       issuesthreshold: 10
