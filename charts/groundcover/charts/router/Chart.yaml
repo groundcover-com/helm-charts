@@ -1,5 +1,5 @@
 apiVersion: v2
-appVersion: 1.6.86
+appVersion: 1.6.87
 dependencies:
 - condition: global.postgresql.enabled
   import-values:
@@ -24,4 +24,4 @@ dependencies:
 description: groundcover's router helm chart
 name: router
 type: application
-version: 1.6.86
+version: 1.6.87
