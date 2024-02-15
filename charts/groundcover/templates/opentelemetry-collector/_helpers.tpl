@@ -14,8 +14,8 @@
 {{ .Values.global.events.retention }}
 {{- end -}}
 
-{{- define "monitors.state.retention" -}}
-{{ .Values.global.monitors.state.retention }}
+{{- define "monitors.evaluation.retention" -}}
+{{ .Values.global.monitors.evaluation.retention }}
 {{- end -}}
 
 {{- define "monitors.instance.retention" -}}

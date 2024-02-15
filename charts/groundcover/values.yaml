@@ -75,8 +75,7 @@ global:
       zipkinUrl: https://traces.groundcover.com/api/v2/spans
 
   monitors:
-    enabled: false
-    state:
+    evaluation:
       retention: 30d # {amount}[h(ours), d(ays), w(eeks), y(ears)]
     instance:
       retention: 2d # {amount}[h(ours), d(ays), w(eeks), y(ears)]

@@ -26,7 +26,7 @@ onprem:
 origin:
   registry: quay.io/groundcover
   repository: router
-  tag: 1.6.87
+  tag: 1.6.88
 serviceAccount:
   annotations:
 ingress:
@@ -88,10 +88,9 @@ configuration:
   Reporter:
     StoreStatus: false
   Monitors:
-    Enabled: false
     DB:
-      Host: ""
-      Port: ""
+      Host: '{{ splitList ":" (include "postgresql.base.url" .) | first }}'
+      Port: '{{ splitList ":" (include "postgresql.base.url" .) | last }}'
       Name: "monitors"
       User: "postgres"
       Pass: ""

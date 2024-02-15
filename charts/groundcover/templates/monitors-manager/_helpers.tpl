@@ -1,7 +1,3 @@
-{{- define "monitors.enabled" }}
-{{- .Values.global.monitors.enabled -}}
-{{- end -}}
-
 {{- define "monitors-manager.fullname" -}}
 {{- printf "%s-monitors-manager" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
