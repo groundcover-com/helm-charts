@@ -22,7 +22,7 @@ dependencies:
   version: 4.1.4
 - name: opentelemetry-collector
   repository: https://open-telemetry.github.io/opentelemetry-helm-charts
-  version: 0.75.1
+  version: 0.81.1
 - name: kube-state-metrics
   repository: https://prometheus-community.github.io/helm-charts
   version: 5.15.2
@@ -32,5 +32,5 @@ dependencies:
 - name: incloud-ingress
   repository: ""
   version: 0.1.0
-digest: sha256:6cfb535a48eb537f07d770693de61a6bcce497861211b8035e92b97271f9ec6f
-generated: "2024-01-14T10:46:40.003749468Z"
+digest: sha256:45635b97aaa3b76a96a84b3f8c947998fb2beb13c4e8c57e09b044074272d2f0
+generated: "2024-02-18T10:42:58.290690741Z"

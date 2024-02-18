@@ -6,10 +6,10 @@ metadata:
   name: example-opentelemetry-collector
   namespace: default
   labels:
-    helm.sh/chart: opentelemetry-collector-0.75.1
+    helm.sh/chart: opentelemetry-collector-0.81.1
     app.kubernetes.io/name: opentelemetry-collector
     app.kubernetes.io/instance: example
-    app.kubernetes.io/version: "0.90.1"
+    app.kubernetes.io/version: "0.94.0"
     app.kubernetes.io/managed-by: Helm
     
 data:
@@ -18,9 +18,8 @@ data:
       debug: {}
       logging: {}
     extensions:
-      health_check: {}
-      memory_ballast:
-        size_in_percentage: 40
+      health_check:
+        endpoint: ${env:MY_POD_IP}:13133
     processors:
       batch: {}
       memory_limiter:
@@ -37,7 +36,6 @@ data:
     service:
       extensions:
       - health_check
-      - memory_ballast
       pipelines:
         traces:
           exporters:
