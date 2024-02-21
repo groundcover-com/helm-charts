@@ -1,5 +1,5 @@
 apiVersion: v2
-appVersion: 1.7.8
+appVersion: 1.7.9
 dependencies:
 - condition: router.enabled
   name: router
@@ -11,27 +11,27 @@ dependencies:
     parent: global.victoria-metrics.service
   name: victoria-metrics-single
   repository: https://victoriametrics.github.io/helm-charts
-  version: 0.9.13
+  version: 0.9.15
 - condition: global.telemetry.enabled
   name: victoria-metrics-agent
   repository: ""
-  version: 0.9.11
+  version: 0.9.17
 - alias: custom-metrics
   condition: custom-metrics.enabled
   name: victoria-metrics-agent
   repository: ""
-  version: 0.9.11
+  version: 0.9.17
 - condition: victoria-metrics-operator.enabled
   name: victoria-metrics-operator
   repository: https://victoriametrics.github.io/helm-charts
-  version: 0.27.9
+  version: 0.28.0
 - alias: metrics-ingester
   import-values:
   - child: service
     parent: global.metrics-ingester.service
   name: victoria-metrics-agent
   repository: ""
-  version: 0.9.11
+  version: 0.9.17
 - condition: global.backend.enabled
   import-values:
   - child: auth
@@ -73,4 +73,4 @@ dependencies:
 description: Cloud Native Observability
 name: groundcover
 type: application
-version: 1.7.8
+version: 1.7.9

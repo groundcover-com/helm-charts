@@ -4,6 +4,33 @@
 
 - TODO
 
+## 0.28.0
+
+**Release date:** 2024-02-09
+
+![AppVersion: 0.41.1](https://img.shields.io/static/v1?label=AppVersion&message=0.41.1&color=success&logo=)
+![Helm: v3](https://img.shields.io/static/v1?label=Helm&message=v3&color=informational&logo=helm)
+
+- Update victoriametrics CRD resources yaml.
+
+## 0.27.11
+
+**Release date:** 2024-02-01
+
+![AppVersion: 0.41.1](https://img.shields.io/static/v1?label=AppVersion&message=0.41.1&color=success&logo=)
+![Helm: v3](https://img.shields.io/static/v1?label=Helm&message=v3&color=informational&logo=helm)
+
+- bump version of VM operator to [0.41.1](https://github.com/VictoriaMetrics/operator/releases/tag/v0.41.1)
+
+## 0.27.10
+
+**Release date:** 2024-01-24
+
+![AppVersion: 0.40.0](https://img.shields.io/static/v1?label=AppVersion&message=0.40.0&color=success&logo=)
+![Helm: v3](https://img.shields.io/static/v1?label=Helm&message=v3&color=informational&logo=helm)
+
+- Bump operator version to [0.40.0](https://github.com/VictoriaMetrics/operator/releases/tag/v0.40.0)
+
 ## 0.27.9
 
 **Release date:** 2023-12-12

@@ -1,8 +1,6 @@
 annotations:
   artifacthub.io/category: monitoring-logging
-  artifacthub.io/changes: |-
-    - bump version of VM components to [v1.94.0](https://github.com/VictoriaMetrics/VictoriaMetrics/releases/tag/v1.94.0)
-    - Add support of providing enterprise license key for VictoriaMetrics enterprise. See [these docs](https://docs.victoriametrics.com/enterprise.html) for details.
+  artifacthub.io/changes: '- bump version of VM components to [v1.97.1](https://github.com/VictoriaMetrics/VictoriaMetrics/releases/tag/v1.97.1)'
   artifacthub.io/license: Apache-2.0
   artifacthub.io/links: |
     - name: Sources
@@ -12,7 +10,7 @@ annotations:
     - name: Docs
       url: https://docs.victoriametrics.com/vmagent.html
 apiVersion: v1
-appVersion: v1.94.0
+appVersion: v1.97.1
 description: Victoria Metrics Agent - collects metrics from various sources and stores
   them to VictoriaMetrics
 home: https://github.com/VictoriaMetrics/helm-charts
@@ -32,4 +30,4 @@ kubeVersion: '>=1.23.0-0'
 name: victoria-metrics-agent
 sources:
 - https://github.com/VictoriaMetrics/helm-charts
-version: 0.9.11
+version: 0.9.17
