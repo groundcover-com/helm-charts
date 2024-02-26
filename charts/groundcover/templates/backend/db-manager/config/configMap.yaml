@@ -31,7 +31,6 @@ data:
       Entities: 5d
       Events: '{{ include "events.retention" . }}'
       MonitorState: '{{ include "monitors.evaluation.retention" . }}'
-      MonitorInstance: '{{ include "monitors.instance.retention" . }}'
     DataMigration:
       BackfillBatchDuration:
         Traces: 1m

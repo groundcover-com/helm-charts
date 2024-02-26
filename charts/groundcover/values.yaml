@@ -77,8 +77,6 @@ global:
   monitors:
     evaluation:
       retention: 30d # {amount}[h(ours), d(ays), w(eeks), y(ears)]
-    instance:
-      retention: 2d # {amount}[h(ours), d(ays), w(eeks), y(ears)]
 
 tags:
   # InCloud - Enterprise Setup. groundcover's control-plane reconciled observability infrastructure deployment.
