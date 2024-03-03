@@ -1,5 +1,5 @@
 apiVersion: v2
-appVersion: 1.7.15
+appVersion: 1.7.16
 dependencies:
 - condition: global.postgresql.enabled
   import-values:
@@ -20,8 +20,12 @@ dependencies:
 - condition: onprem.enabled
   name: kong
   repository: https://charts.konghq.com
-  version: 2.20.0
+  version: 2.32.0
+- condition: onprem.enabled
+  name: kong-crds
+  repository: file://../../../kong-crds
+  version: 2.32.0
 description: groundcover's router helm chart
 name: router
 type: application
-version: 1.7.15
+version: 1.7.16
