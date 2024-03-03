@@ -26,7 +26,7 @@ onprem:
 origin:
   registry: quay.io/groundcover
   repository: router
-  tag: 1.7.15
+  tag: 1.7.16
 serviceAccount:
   annotations:
 ingress:
@@ -107,18 +107,20 @@ resources:
 nodeSelector: {}
 tolerations: []
 extraEnv: []
+kong-crds:
+  upgradeCRDs: true
+  image:
+    repository: public.ecr.aws/groundcovercom/bitnami/kubectl
 kong:
   replicaCount: 1
   image:
-    tag: 3.2.2-alpine
+    tag: 3.4.2
     repository: public.ecr.aws/groundcovercom/kong
   admin:
     enabled: true
     type: ClusterIP
   extraLabels:
     app.kubernetes.io/part-of: groundcover
-  migrations:
-    preUpgrade: false
   env:
     anonymous_reports: "off"
     dump_config: "true"

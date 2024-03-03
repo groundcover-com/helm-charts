@@ -2,7 +2,6 @@
 {{- printf "%s-kong" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-
 {{/*
 The environment values passed to Kong; this should come after all
 the template that it itself is using form the above sections.

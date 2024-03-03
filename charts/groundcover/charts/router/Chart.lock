@@ -7,6 +7,9 @@ dependencies:
   version: 7.2.0
 - name: kong
   repository: https://charts.konghq.com
-  version: 2.20.0
-digest: sha256:a47cb2b20ec893f1a8dc79397e5481e2d2fb1d28a0990d4ee80387fcc8056d7a
-generated: "2024-01-16T08:52:37.876795432Z"
+  version: 2.32.0
+- name: kong-crds
+  repository: file://../../../kong-crds
+  version: 2.32.0
+digest: sha256:57c2134812b29f2d50aca5f86a8bac65485696578ee20b835ca9a27a4863f056
+generated: "2024-02-26T17:32:59.752648207Z"

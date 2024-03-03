@@ -3,7 +3,10 @@ appVersion: 0.1.0
 dependencies:
 - name: kong
   repository: https://charts.konghq.com
-  version: 2.20.0
+  version: 2.32.0
+- name: kong-crds
+  repository: file://../../../kong-crds
+  version: 2.32.0
 description: A Helm chart for Kubernetes
 name: incloud-ingress
 type: application

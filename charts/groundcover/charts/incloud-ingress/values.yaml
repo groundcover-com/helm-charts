@@ -1,7 +1,13 @@
+kong-crds:
+  upgradeCRDs: true
+  image:
+    repository: public.ecr.aws/groundcovercom/bitnami/kubectl
+
 kong:
   replicaCount: 2
   image:
-    tag: 3.2.2-alpine
+    tag: 3.4.2
+    repository: public.ecr.aws/groundcovercom/kong
   env:
     anonymous_reports: "off"
     dump_config: "true"
@@ -25,7 +31,6 @@ kong:
     - maxSkew: 1
       topologyKey: topology.kubernetes.io/zone
       whenUnsatisfiable: ScheduleAnyway
-
 
 ## Kong Plugins for inCloud functionality
 datasource:

@@ -1,5 +1,232 @@
 # Changelog
 
+## Unreleased
+
+Nothing yet.
+
+## 2.32.0
+
+### Improvements
+
+* Add new `deployment.hostname` value to make identifying instances in
+  controlplane/dataplane configurations easier.
+  [#943](https://github.com/Kong/charts/pull/943)
+
+## 2.31.0
+
+### Improvements
+
+* Added controller's RBAC rules for `KongUpstreamPolicy` CRD.
+  [#917](https://github.com/Kong/charts/pull/917)
+* Added services resource to admission webhook config for KIC >= 3.0.0.
+  [#919](https://github.com/Kong/charts/pull/919)
+* Update default ingress controller version to v3.0
+  [#929](https://github.com/Kong/charts/pull/929)
+  [#930](https://github.com/Kong/charts/pull/930)
+
+### Fixed
+
+* The target port for cmetrics should only be applied if the ingress controller is enabled.
+  [#926](https://github.com/Kong/charts/pull/926)
+* Fix RBAC for Gateway API v1.
+  [#928](https://github.com/Kong/charts/pull/928)
+* Enable Admission webhook for Gateway API v1 resources.
+  [#928](https://github.com/Kong/charts/pull/928)
+
+## 2.30.0
+
+### Improvements
+
+* Prevent installing PodDisruptionBudget for `replicaCount: 1` or `autoscaling.minReplicas: 1`.
+  [#896](https://github.com/Kong/charts/pull/896)
+* The admission webhook now will be triggered on Secrets creation for KIC 2.12.1+.
+  [#907](https://github.com/Kong/charts/pull/907)
+* Container security context defaults now comply with the restricted pod
+  security standard. This includes an enforced run as user ID set to 1000. UID
+  1000 is used for official Kong images other than Alpine images (which use UID
+  100) and for KIC images 3.0.0+ (older images use UID 65532). Images that do
+  not use UID 1000 can still run with this user, as static image files are
+  world-accessible and runtime-created files are created in temporary
+  directories created for the run as user.
+  [#911](https://github.com/Kong/charts/pull/911)
+* Allow using templates (via `tpl`) when specifying `proxy.nameOverride`.
+  [#914](https://github.com/Kong/charts/pull/914)
+
+## 2.29.0
+
+### Improvements
+* Make it possible to set the admission webhook's `timeoutSeconds`.
+  [#894](https://github.com/Kong/charts/pull/894)
+
+## 2.28.1
+
+### Fixed
+
+* The admission webhook now includes Gateway API resources and Ingress
+  resources for controller versions 2.12+. This version introduces new
+  validations for Kong's regex path implementation.
+  [#892](https://github.com/Kong/charts/pull/892)
+
+## 2.28.0
+
+### Improvements
+
+* Bump default `kong` image tag to 3.4.
+  [#883](https://github.com/Kong/charts/pull/883)
+* Bump default ingress controller image tag to 2.12.
+* Added validation rule for `latency` upstream load balancing algorithm to
+  CRDs. [Upgrade your CRDs](https://github.com/Kong/charts/blob/main/charts/kong/UPGRADE.md#updates-to-crds)
+  when installing this release.
+
+## 2.27.0
+
+### Improvements
+
+* Listens now all support `.address` configuration. This was an existing
+  setting that was not applied properly for some listens.
+  [#881](https://github.com/Kong/charts/pull/881)
+
+## 2.26.5
+
+### Fixed 
+
+* Kuma ServiceAccount Token hints and volumes are also available in migrations
+  Pods.
+  [#877](https://github.com/Kong/charts/pull/877)
+
+## 2.26.4
+
+### Fixed 
+
+* updated `admin_api_uri` to `admin_gui_api_url` as per [kong documentation](https://docs.konghq.com/gateway/3.4.x/reference/configuration/#admin_api_uri). 
+
+## 2.26.3
+
+### Fixed 
+
+* Enabled Service and Ingress in Kong Manager for non enterprise users.
+
+## 2.26.2
+
+### Fixed 
+
+* Add missing CRD KongConsumerGroup and extend status subresource for CRDs
+
+## 2.26.1
+
+### Fixed
+
+* Fix parsing enterprise tags (like e.g. `3.4.0.0`)
+  [#857](https://github.com/Kong/charts/pull/857)
+
+## 2.26.0
+
+### Breaking changes
+
+2.26 changes the default proxy readiness endpoint for newer Kong versions. This
+causes an issue in a narrow edge case. If all of the following are true:
+
+* You use Kong 3.3 or newer.
+* You use controller 2.10 or older.
+* You run the controller and proxy in separate Deployments.
+
+you are affected and should review [the 2.26 upgrade instructions](https://github.com/Kong/charts/blob/main/charts/kong/UPGRADE.md#2260).
+
+### Improvements
+
+* Use the Kong 3.3 `/status/ready` endpoint for readiness probes by default if
+  available. If not available, use the old `/status` default.
+  [#844](https://github.com/Kong/charts/pull/844)
+* Add ArgoCD `Sync` and `BeforeHookCreation` [hook policies](https://argo-cd.readthedocs.io/en/stable/user-guide/resource_hooks/)
+  to the the init and pre-upgrade migrations Jobs.
+* Add controller's RBAC rules for `KongConsumerGroups` CRD.
+  [#850](https://github.com/Kong/charts/pull/850)
+* Updated controller version to 2.11.
+
+## 2.25.0
+
+- Generate the `adminApiService.name` value from `.Release.Name` rather than
+  hardcoding to `kong`
+  [#839](https://github.com/Kong/charts/pull/839)
+
+## 2.24.0
+
+### Improvements
+
+* Running `tpl` against user-supplied labels and annotations used in Deployment
+  [#814](https://github.com/Kong/charts/pull/814)
+
+  Example:
+  ```yaml
+  podLabels:
+    version: "{{ .Values.image.tag }}"  # Will render dynamically when overridden downstream
+  ```
+
+* Fail to render templates when PodSecurityPolicy was requested but cluster doesn't
+  serve its API.
+  [#823](https://github.com/Kong/charts/pull/823)
+* Add support for multiple hosts and tls configurations for Kong proxy `Ingress`.
+  [#813](https://github.com/Kong/charts/pull/813)
+* Bump postgres default tag to `13.11.0-debian-11-r20` which includes arm64 images.
+  [#834](https://github.com/Kong/charts/pull/834)
+
+### Fixed
+
+* Fix Ingress and HPA API versions during capabilities checking
+  [#827](https://github.com/Kong/charts/pull/827)
+
+## 2.23.0
+
+### Improvements
+
+* Add custom label configuration option for Kong proxy `Ingress`.
+  [#812](https://github.com/Kong/charts/pull/812)
+* Bump default `kong/kubernetes-ingress-controller` image tag to 2.10.
+  Bump default `kong` image tag to 3.3.
+  [#815](https://github.com/Kong/charts/pull/815)
+
+## 2.22.0
+
+### Improvements
+
+* Removed redundant RBAC permissions for non-existing subresources `secrets/status`
+  and `endpoints/status`.
+  [#798](https://github.com/Kong/charts/pull/798)
+* For Kong Ingress Controller in version >= 2.10, RBAC permissions for `Endpoints`
+  are not configured anymore (because it uses `EndpointSlices`).
+  [#798](https://github.com/Kong/charts/pull/798)
+* Added support for setting `certificates.cluster.commonName`. This allows a custom
+  certificate `CommonName` to be provided when deploying Kong Gateway in hybrid
+  mode using Cert Manager [#804](https://github.com/Kong/charts/pull/804)
+
+## 2.21.0
+
+### Improvements
+
+* Added support for `startupProbe` on Kong pods. This can be configured via
+  `.Values.startupProbe`. To maintain backward compatibility, it is disabled by default.
+  [#792](https://github.com/Kong/charts/pull/792)
+* Customize Admission Webhook namespaceSelectors and compose them from values.
+  [#794](https://github.com/Kong/charts/pull/794)
+* Added `CustomResourceDefinition` `list` and `watch` permissions to controller's ClusterRole.
+  [#796](https://github.com/Kong/charts/pull/796)
+
+## 2.20.2
+
+### Fixed
+
+* Automatic license provisioning for Gateways managed by Ingress Controllers in Konnect mode
+  is disabled by default.
+  To enable it, set `.Values.ingressController.konnect.license.enabled=true`.
+  [#793](https://github.com/Kong/charts/pull/793)
+
+## 2.20.1
+
+### Fixed
+
+* Fix correct timestamp format and remove `isCA` in certificates
+  [#791](https://github.com/Kong/charts/pull/791)
+
 ## 2.20.0
 
 ### Improvements
@@ -52,7 +279,7 @@
   [#747](https://github.com/Kong/charts/pull/747)
 * Added experimental support for the ingress controller's Konnect sync feature via `ingressController.konnect.*` values.
   This feature is only available when deploying chart with Kong Ingress Controller in version 2.9 or higher and
-  requires `ingressController.gatewayDiscovery.enabled` set to `true`. 
+  requires `ingressController.gatewayDiscovery.enabled` set to `true`.
   [#746](https://github.com/Kong/charts/pull/746)
 * Added support for annotations on the admission webhook ValidatingWebhookConfiguration.
   [#760](https://github.com/Kong/charts/pull/760)
