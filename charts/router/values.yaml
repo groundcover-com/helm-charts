@@ -26,7 +26,7 @@ onprem:
 origin:
   registry: quay.io/groundcover
   repository: router
-  tag: 1.7.17
+  tag: 1.7.18
 serviceAccount:
   annotations:
 ingress:
