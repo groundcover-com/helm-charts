@@ -19,9 +19,10 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: {{ printf "%s-api-key" .Release.Name }}
+  labels:
+    konghq.com/credential: key-auth
 type: Opaque
 stringData:
-  kongCredType: "key-auth"
   key: {{ .Values.global.groundcover_token }}
 
 ---
