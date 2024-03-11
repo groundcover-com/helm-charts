@@ -56,6 +56,7 @@ data:
       enableTLS: {{ include "opentelemetry-collector.otlp.tls.enabled" . }}
       writeTimeout: 10s
       batchSize: 350
+      concurrency: 15
       flushInterval: 1s
     Pprof:
       enabled: {{ include "telemetry.enabled" . }}

@@ -394,6 +394,9 @@ clickhouse:
           name: '{{ include "clickhouse.secretName" . }}'
   extraOverrides: |
     <clickhouse>
+      <merge_tree>
+        <materialize_ttl_recalculate_only>1</materialize_ttl_recalculate_only>
+      </merge_tree>
       <max_table_size_to_drop>0</max_table_size_to_drop>
       <max_partition_size_to_drop>0</max_partition_size_to_drop>
       <profiles>
