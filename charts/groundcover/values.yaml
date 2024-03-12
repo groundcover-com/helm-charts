@@ -394,11 +394,13 @@ clickhouse:
           name: '{{ include "clickhouse.secretName" . }}'
   extraOverrides: |
     <clickhouse>
-      <merge_tree>
-        <materialize_ttl_recalculate_only>1</materialize_ttl_recalculate_only>
-      </merge_tree>
       <max_table_size_to_drop>0</max_table_size_to_drop>
       <max_partition_size_to_drop>0</max_partition_size_to_drop>
+      <merge_tree>
+        <materialize_ttl_recalculate_only>1</materialize_ttl_recalculate_only>
+        <max_suspicious_broken_parts_bytes>5368709120</max_suspicious_broken_parts_bytes>
+        <max_suspicious_broken_parts>1000</max_suspicious_broken_parts>
+      </merge_tree>
       <profiles>
         <default>
           <async_insert>true</async_insert>
@@ -502,9 +504,7 @@ clickhouse:
 
 opentelemetry-collector:
   enabled: true
-  mode: statefulset
-  statefulset:
-    podManagementPolicy: "OrderedReady"
+  mode: deployment
   extraEnvs:
     - name: CLICKHOUSE_PASSWORD
       valueFrom:
@@ -783,6 +783,13 @@ opentelemetry-collector:
     limits:
       cpu: 1000m
       memory: 2048Mi
+  podDisruptionBudget:
+    enabled: true
+    maxUnavailable: "25%"
+  rollout:
+    maxUnavailable: 0
+    maxSurge: 1
+    strategy: RollingUpdate
   affinity: {}
   nodeSelector: {}
   tolerations: []
