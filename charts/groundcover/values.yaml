@@ -1434,7 +1434,6 @@ victoria-metrics-single:
         cpu: 1000m
         memory: 3000Mi
       limits:
-        cpu: 1000m
         memory: 3000Mi
 
     # -- Node tolerations for server scheduling to nodes with taints. Ref: [https://kubernetes.io/docs/concepts/configuration/assign-pod-node/](https://kubernetes.io/docs/concepts/configuration/assign-pod-node/)
