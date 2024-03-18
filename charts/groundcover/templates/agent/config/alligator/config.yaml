@@ -18,7 +18,9 @@ data:
       node_info: 2
       container_crash: 1
       container_info: 1
+      container_info_rt: 1
       container_state: 1
+      container_oomkill: 1
       pvc_info: 1
     tracyEnabled: {{ template "agent.tracy.enabled" . }}
     tracy:
@@ -277,6 +279,17 @@ data:
       summarizerActiveTtl: 45s
       aggregationCacheSize: 4096
 
+    containerInfoRtHandler:
+      samplesthreshold: 20
+      issuesthreshold: 20
+      sampling:
+        samplingmode: 0 # DontSample
+        samplingLimitMaxQueue: 0
+        samplingLimitAgeOut: 0s
+      interval: 0s
+      summarizerActiveTtl: 5s
+      aggregationCacheSize: 1024
+
     pvcIoHandler:
       sampling:
         samplingmode: 0 # DontSample
@@ -322,6 +335,11 @@ data:
         samplingLimitAgeOut: 0s
       interval: 30s
       summarizerActiveTtl: 45s
+      aggregationCacheSize: 1024
+
+    containeroomkillhandler:
+      interval: 30s
+      summarizerActiveTtl: 0
       aggregationCacheSize: 1024
 
     pvcinfohandler:
