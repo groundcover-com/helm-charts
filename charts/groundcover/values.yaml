@@ -89,7 +89,7 @@ mode: stable
 saas:
   tls_skip_verify: false
   scheme: wss
-  host: app.groundcover.com
+  host: client.groundcover.com
   port: 443
   basePath: ""
 
@@ -674,12 +674,12 @@ opentelemetry-collector:
         database: '{{ include "clickhouse.database" . }}'
         endpoint: '{{ include "clickhouse.nativeEndpoint" . }}'
         sending_queue:
-          queue_size: 10
+          queue_size: 100
           storage: groundcover_file_storage
         retry_on_failure:
           initial_interval: 5s
           max_interval: 5s
-          max_elapsed_time: 15s
+          max_elapsed_time: 3m
       groundcover/logs:
         type: logs
         timeout: 5s
@@ -689,12 +689,12 @@ opentelemetry-collector:
         endpoint: '{{ include "clickhouse.nativeEndpoint" . }}'
         ttl_interval: '{{ include "logs.retention" . }}'
         sending_queue:
-          queue_size: 10
+          queue_size: 100
           storage: groundcover_file_storage
         retry_on_failure:
           initial_interval: 5s
           max_interval: 5s
-          max_elapsed_time: 15s
+          max_elapsed_time: 3m
       groundcover/custom:
         type: custom
         timeout: 5s
@@ -705,12 +705,12 @@ opentelemetry-collector:
         database: '{{ include "clickhouse.database" . }}'
         endpoint: '{{ include "clickhouse.nativeEndpoint" . }}'
         sending_queue:
-          queue_size: 10
+          queue_size: 100
           storage: groundcover_file_storage
         retry_on_failure:
           initial_interval: 5s
           max_interval: 5s
-          max_elapsed_time: 15s
+          max_elapsed_time: 3m
       groundcover/traces:
         type: traces
         timeout: 5s
@@ -721,12 +721,12 @@ opentelemetry-collector:
         database: '{{ include "clickhouse.database" . }}'
         endpoint: '{{ include "clickhouse.nativeEndpoint" . }}'
         sending_queue:
-          queue_size: 10
+          queue_size: 100
           storage: groundcover_file_storage
         retry_on_failure:
           initial_interval: 5s
           max_interval: 5s
-          max_elapsed_time: 15s
+          max_elapsed_time: 3m
     service:
       telemetry:
         metrics:
