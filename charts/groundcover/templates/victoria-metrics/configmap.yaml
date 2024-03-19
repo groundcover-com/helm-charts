@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: metrics-ingester-aggregation-config
+  name: victoria-metrics-aggregation-config
   labels:
     {{- include "groundcover.labels" . | nindent 4 }}
 data:

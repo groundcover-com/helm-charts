@@ -814,7 +814,6 @@ metrics-ingester:
     remoteWrite.maxDiskUsagePerURL: 10GB
     remoteWrite.headers: "apikey:%{API_KEY}"
     remoteWrite.tlsInsecureSkipVerify: "true"
-    remoteWrite.streamAggr.config: "/extra-config/aggregation_config.yaml"
     remoteWrite.url: '{{ include "victoria-metrics.write.http.url" . }}'
     tlsKeyFile: /etc/ssl/certs/tls.key
     tlsCertFile: /etc/ssl/certs/tls.crt
@@ -830,16 +829,10 @@ metrics-ingester:
       secret:
         optional: true
         secretName: metrics-ingester-certificate
-    - name: extra-config
-      configMap:
-        name: metrics-ingester-aggregation-config
   extraVolumeMounts:
     - name: certificate
       readOnly: true
       mountPath: /etc/ssl/certs
-    - name: extra-config
-      readOnly: true
-      mountPath: /extra-config
   resources:
     limits:
       cpu: 500m
@@ -1387,6 +1380,7 @@ victoria-metrics-single:
       search.maxConcurrentRequests: "8"
       maxLabelsPerTimeseries: "50"
       promscrape.maxScrapeSize: "100MB"
+      streamAggr.config: "/extra-config/aggregation_config.yaml"
 
     # -- Data retention period, {amount}[h(ours), d(ays), w(eeks), y(ears)], default is 1 month
     retentionPeriod: 7d
@@ -1428,6 +1422,14 @@ victoria-metrics-single:
       #pvcNameOverride:
 
       size: 100Gi
+    extraVolumes:
+      - name: extra-config
+        configMap:
+          name: victoria-metrics-aggregation-config
+    extraVolumeMounts:
+      - name: extra-config
+        mountPath: "/extra-config"
+        readOnly: true
 
     resources:
       requests:
