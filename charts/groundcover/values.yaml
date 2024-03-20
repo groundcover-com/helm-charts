@@ -352,11 +352,11 @@ portal:
     repository: "{{ .Values.global.origin.registry }}/portal"
   resources:
     limits:
-      cpu: 100m
-      memory: 200Mi
+      cpu: 300m
+      memory: 512Mi
     requests:
       cpu: 50m
-      memory: 100Mi
+      memory: 256Mi
   pprof:
     enabled: true
     interval: 10s
