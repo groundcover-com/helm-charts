@@ -116,7 +116,7 @@ spec:
         command:
           - /bin/sh
           - -c
-        image: '{{ printf "%s/curl:latest" .Values.global.origin.registry }}'
+        image: '{{ printf "%s/curl:8.6.0" .Values.global.origin.registry }}'
       - name: check-metrics-ingestor-ready
         env:
           - name: API_KEY
@@ -129,7 +129,7 @@ spec:
         command:
           - /bin/sh
           - -c
-        image: {{ printf "%s/curl:latest" .Values.global.origin.registry }}
+        image: {{ printf "%s/curl:8.6.0" .Values.global.origin.registry }}
       serviceAccountName: k8s-watcher
 {{- if .Values.k8sWatcher.priorityClassName }}
       priorityClassName: {{ .Values.k8sWatcher.priorityClassName }}

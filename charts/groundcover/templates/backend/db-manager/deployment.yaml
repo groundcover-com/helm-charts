@@ -93,7 +93,7 @@ spec:
         command:
           - /bin/sh
           - -c
-        image: '{{ printf "%s/curl:latest" .Values.global.origin.registry }}'
+        image: '{{ printf "%s/curl:8.6.0" .Values.global.origin.registry }}'
         name: check-ch-ready
 {{- if .Values.dbManager.priorityClassName }}
       priorityClassName: {{ .Values.dbManager.priorityClassName }}
