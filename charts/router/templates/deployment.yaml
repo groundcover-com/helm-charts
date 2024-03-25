@@ -55,7 +55,7 @@ spec:
           command:
             - /bin/sh
             - -c
-          image: '{{ printf "%s/curl:latest" .Values.origin.registry }}'
+          image: '{{ printf "%s/curl:8.6.0" .Values.origin.registry }}'
       {{- end }}
       imagePullSecrets: {{ include "router.imagePullSecrets" . }}
       containers:
