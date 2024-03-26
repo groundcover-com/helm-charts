@@ -41,8 +41,6 @@ data:
       scrapeInterval: 15s
       scrapeTimeout: 10s
 
-    dataRetention: {{ .Values.agent.alligator.dataRetention }}
-    
     runningNamespace: ""
     clusterId: {{ include "groundcover.clusterId" . }}
     region: {{ .Values.region }}

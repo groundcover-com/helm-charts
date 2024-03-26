@@ -381,7 +381,6 @@ data:
       ageout: 100ms
       sampleeverything: false
 
-    dataRetention: {{ .Values.agent.alligator.dataRetention }}
     watchOnlyLocalNode: {{ .Values.agent.alligator.watchOnlyLocalNode }}
     floraEnabled: {{ ne .Values.mode "legacy" }}
     runningNamespace: ""

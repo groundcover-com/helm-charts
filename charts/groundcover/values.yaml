@@ -173,7 +173,6 @@ agent:
       limits:
         memory: 700Mi
         cpu: 800m
-    dataRetention: 24h
     nodelabels: []
     contentTypesToDrop: []
     watchOnlyLocalNode: false
@@ -542,6 +541,19 @@ opentelemetry-collector:
   podAnnotations:
     prometheus.io/scrape: "true"
     prometheus.io/port: '{{ index .Values "ports" "metrics" "containerPort" | int }}'
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/name: opentelemetry-collector
+    - maxSkew: 1
+      topologyKey: topology.kubernetes.io/zone
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/name: opentelemetry-collector
   ports:
     metrics:
       enabled: true
@@ -807,6 +819,13 @@ metrics-ingester:
     prometheus.io/scrape: "true"
   image:
     repository: "{{ .Values.global.origin.registry }}/vmagent"
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: ScheduleAnyway
+    - maxSkew: 1
+      topologyKey: topology.kubernetes.io/zone
+      whenUnsatisfiable: ScheduleAnyway
   extraArgs:
     promscrape.streamParse: "true"
     promscrape.dropOriginalLabels: "true"
