@@ -28,9 +28,10 @@ data:
     tableDataRetention: 
       Traces: '{{ include "traces.retention" . }}'   
       Logs: '{{ include "logs.retention" . }}'   
-      Entities: 5d
+      Entities: '{{ include "entities.retention" . }}'
       Events: '{{ include "events.retention" . }}'
       MonitorState: '{{ include "monitors.evaluation.retention" . }}'
+      Sources: '{{ include "sources.retention" . }}'
     DataMigration:
       BackfillBatchDuration:
         Traces: 1m

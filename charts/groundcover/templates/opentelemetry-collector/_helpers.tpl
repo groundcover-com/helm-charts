@@ -14,8 +14,16 @@
 {{ .Values.global.events.retention }}
 {{- end -}}
 
+{{- define "entities.retention" -}}
+{{ .Values.global.entities.retention }}
+{{- end -}}
+
 {{- define "monitors.evaluation.retention" -}}
 {{ .Values.global.monitors.evaluation.retention }}
+{{- end -}}
+
+{{- define "sources.retention" -}}
+{{ .Values.global.sources.retention }}
 {{- end -}}
 
 {{- define "opentelemetry-collector.otlp.scheme" -}}

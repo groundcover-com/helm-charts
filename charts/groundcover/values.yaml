@@ -64,6 +64,12 @@ global:
   events:
     retention: 7d # {amount}[h(ours), d(ays), w(eeks), y(ears)]
 
+  sources:
+    retention: 30d # {amount}[h(ours), d(ays), w(eeks), y(ears)]
+
+  entities:
+    retention: 5d # {amount}[h(ours), d(ays), w(eeks), y(ears)]
+
   telemetry:
     enabled: true
     logs:
@@ -859,6 +865,10 @@ metrics-ingester:
     requests:
       cpu: 100m
       memory: 256Mi
+  rollout:
+    maxUnavailable: 0
+    maxSurge: 1
+    strategy: RollingUpdate
   config:
     scrape_configs: []
 
