@@ -1,7 +1,4 @@
 dependencies:
-- name: postgresql
-  repository: https://charts.bitnami.com/bitnami
-  version: 12.6.9
 - name: grafana
   repository: https://grafana.github.io/helm-charts
   version: 7.2.0
@@ -11,5 +8,5 @@ dependencies:
 - name: kong-crds
   repository: file://../../../kong-crds
   version: 2.32.0
-digest: sha256:57c2134812b29f2d50aca5f86a8bac65485696578ee20b835ca9a27a4863f056
-generated: "2024-02-26T17:32:59.752648207Z"
+digest: sha256:31ff2b47cc59bb0db5e6d6fec129ea9e1fd9ecfdb32fe21bd3837437e29119f8
+generated: "2024-03-26T11:31:03.754981993Z"

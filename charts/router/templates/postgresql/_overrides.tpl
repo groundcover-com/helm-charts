@@ -3,17 +3,6 @@
 {{- end -}}
 
 {{/*
- Create the name of the service account to use
- */}}
-{{- define "postgresql.serviceAccountName" -}}
-{{- if .Values.global.postgresql.serviceAccount.create -}}
-    {{ default (include "postgresql.primary.fullname" .) .Values.global.postgresql.serviceAccount.name }}
-{{- else -}}
-    {{ default "default" .Values.global.postgresql.serviceAccount.name }}
-{{- end -}}
-{{- end -}}
-
-{{/*
 Get the password secret.
 */}}
 {{- define "postgresql.secretName" -}}
@@ -41,4 +30,8 @@ Get the admin-password key.
 {{- else -}}
     {{- "postgres-password" -}}
 {{- end -}}
+{{- end -}}
+
+{{- define "postgresql.image" -}}
+{{- printf "%s/%s:%s" .Values.global.postgresql.image.registry .Values.global.postgresql.image.repository .Values.global.postgresql.image.tag -}}
 {{- end -}}

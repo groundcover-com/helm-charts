@@ -10,6 +10,8 @@
 helm.sh/hook-weight: "0"
 helm.sh/hook: "pre-upgrade"
 helm.sh/hook-delete-policy: "before-hook-creation,hook-succeeded"
+argocd.argoproj.io/hook: Sync
+argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
 {{- end -}}
 
 {{- define "kong-crds.rbac.annotations" -}}
