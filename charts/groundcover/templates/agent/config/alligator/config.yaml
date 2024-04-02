@@ -327,17 +327,8 @@ data:
       aggregationCacheSize: 1024
 
     containercrashhandler:
-      samplesthreshold: 20
-      issuesthreshold: 20
       sampling:
-        samplingmode: 1 # DefaultSample
-        samplingLimitMaxQueue: 0
-        samplingLimitAgeOut: 0s
-      interval: 30s
-      summarizerActiveTtl: 45s
-      aggregationCacheSize: 1024
-
-    containeroomkillhandler:
+        samplingmode: 0 # DontSample
       interval: 30s
       summarizerActiveTtl: 0
       aggregationCacheSize: 1024
@@ -374,7 +365,9 @@ data:
     hostmodeconfigpath: "/config/instance_metadata.yaml"
 
     allowedportspercontainer: 20
-    kubeletmetricsfetchinterval: 15s
+    k8smetricsfetcher:
+      fetchinterval: 15s
+      requesttimeout: 10s
 
     globallimiter:
       maxqueue: 20

@@ -114,7 +114,11 @@ spec:
               valueFrom:
                 secretKeyRef:
                   key: {{ template "groundcover.apikeySecretKey" . }}
-                  name: {{ template "groundcover.apikeySecretName" . }}        
+                  name: {{ template "groundcover.apikeySecretName" . }}      
+            - name: NODE_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
             {{- with .Values.agent.alligator.env }}
               {{ toYaml . | nindent 12 }}
             {{- end }}                                
