@@ -90,6 +90,10 @@ Get cluster_id from values or generate random one
 {{- .Values.region | default "undefined" }}
 {{- end }}
 
+{{- define "groundcover.gcEnv" -}}
+{{- .Values.env | default "" }}
+{{- end }}
+
 {{- define "agent.monitoring.port" -}}
 {{- default 9102 (.Values.agent.monitoring).port -}}
 {{- end -}}
@@ -161,4 +165,18 @@ Get cluster_id from values or generate random one
 
 {{- define "db-manager.ready.http.url" -}}
 {{- print "http://db-manager:8888/writer-ready" -}}
+{{- end -}}
+
+{{/*
+  Helper for spreading helm love.
+
+  Examples:
+  {{- include "groundcover.debug.dump" (list "a" 1 "x" (dict "x1" nil)) }}
+  {{- include "groundcover.debug.dump" $ }}
+  {{- include "groundcover.debug.dump" . }}
+
+  & co..
+*/}}
+{{- define "groundcover.debug.dump" -}}
+{{- . | mustToPrettyJson | printf "\n\n%s" | fail }}
 {{- end -}}

@@ -1,0 +1,69 @@
+{{- if .Values.global.postgresql.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ printf "%s-create-dbs" (include "postgresql.primary.fullname" .) }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  ttlSecondsAfterFinished: 30
+  template:
+    spec:
+      restartPolicy: OnFailure
+      initContainers:
+      - name: wait-for-db
+        image: '{{ include "postgresql.image" . }}'
+        env:
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: '{{ include "postgresql.secretName" . }}'
+                key: '{{ include "postgresql.adminPasswordKey" . }}'
+        command:
+          - /bin/sh
+          - -c
+        args:
+          - |
+            pg_isready \
+              -U "postgres" \
+              -d "dbname=postgres" \
+              -h {{ splitList ":" (include "postgresql.base.url" .) | first }} \
+              -p {{ splitList ":" (include "postgresql.base.url" .) | last }}
+
+      containers:
+      - name: psql
+        image: '{{ include "postgresql.image" . }}'
+        command:
+          - "/bin/sh"
+          - "-c"
+          - |
+            set -eu 
+
+            cp /create-dbs/create-dbs.sh /tmp
+            chmod u+x /tmp/create-dbs.sh
+            /tmp/create-dbs.sh
+        env:
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: '{{ include "postgresql.secretName" . }}'
+                key: '{{ include "postgresql.adminPasswordKey" . }}'
+          - name: INITDB_PGHOST
+            value: '{{ splitList ":" (include "postgresql.base.url" .) | first }}'
+          - name: INITDB_PGPORT
+            value: '{{ splitList ":" (include "postgresql.base.url" .) | last }}'
+        volumeMounts:
+          - mountPath: /create-dbs
+            name: create-dbs
+
+      volumes:
+      - name: create-dbs
+        configMap:
+          name: {{ include "postgresql.primary.init-scripts-configmap" . }}
+          items:
+          - key: create-dbs.sh
+            path: create-dbs.sh
+
+{{ end -}}

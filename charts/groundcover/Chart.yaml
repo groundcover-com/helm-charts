@@ -1,7 +1,10 @@
 apiVersion: v2
-appVersion: 1.7.52
+appVersion: 1.7.53
 dependencies:
 - condition: router.enabled
+  import-values:
+  - child: dbs
+    parent: backend.postgresql.dbs
   name: router
   repository: ""
   version: 0.1.0
@@ -70,7 +73,16 @@ dependencies:
   tags:
   - incloud
   version: 0.1.0
+- condition: global.backend.enabled
+  import-values:
+  - child: postgresql.image
+    parent: global.postgresql.image
+  - child: postgresql.auth
+    parent: global.postgresql.auth
+  name: backend
+  repository: ""
+  version: 0.0.0
 description: Cloud Native Observability
 name: groundcover
 type: application
-version: 1.7.52
+version: 1.7.53

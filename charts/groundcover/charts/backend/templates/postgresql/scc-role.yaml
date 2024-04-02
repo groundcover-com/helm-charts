@@ -7,7 +7,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/name: postgresql
-  {{- include "router.labels" . | nindent 4 }}
+    {{- include "groundcover.labels" . | nindent 4 }}
   annotations: {}
 rules:
   - apiGroups:
@@ -26,7 +26,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/name: postgresql
-  {{- include "router.labels" . | nindent 4 }}
+    {{- include "groundcover.labels" . | nindent 4 }}
   annotations: {}
 roleRef:
   kind: Role
@@ -37,3 +37,4 @@ subjects:
     namespace: {{ .Release.Namespace }}
     name: {{ include "postgresql.serviceAccountName" . }}
 {{ end -}}
+

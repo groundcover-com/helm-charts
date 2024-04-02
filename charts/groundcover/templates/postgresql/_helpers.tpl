@@ -7,3 +7,4 @@
     {{- printf "%s:5432" (include "postgresql.primary.fullname" .) -}}
 {{- end -}}
 {{- end -}}
+

@@ -32,5 +32,8 @@ dependencies:
 - name: incloud-ingress
   repository: ""
   version: 0.1.0
-digest: sha256:bb7565624ebf2437a8fa22980e7cf6819f6d29824862e46dfb05034d6c65ec86
-generated: "2024-02-20T17:18:50.770837766Z"
+- name: backend
+  repository: ""
+  version: 0.0.0
+digest: sha256:8794be8b3dc04190e61951c85826b14c796f6424ce6bc90a3a469eabe8583c14
+generated: "2024-03-26T17:10:58.280753741Z"

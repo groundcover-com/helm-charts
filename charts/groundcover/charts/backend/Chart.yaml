@@ -1,0 +1,12 @@
+apiVersion: v2
+dependencies:
+- condition: global.postgresql.enabled
+  import-values:
+  - child: serviceAccount
+    parent: global.postgresql.serviceAccount
+  name: postgresql
+  repository: https://charts.bitnami.com/bitnami
+  version: 12.6.9
+name: backend
+type: application
+version: 0.0.0

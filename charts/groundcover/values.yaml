@@ -84,6 +84,10 @@ global:
     evaluation:
       retention: 30d # {amount}[h(ours), d(ays), w(eeks), y(ears)]
 
+  postgresql:
+    enabled: true
+    overrideUrl: ""
+
 tags:
   # InCloud - Enterprise Setup. groundcover's control-plane reconciled observability infrastructure deployment.
   incloud: false
@@ -1500,6 +1504,10 @@ monitors-manager:
       secretKeyRef:
         key: '{{ include "clickhouse.secretKey" . }}'
         name: '{{ include "clickhouse.secretName" . }}'
+    GF_DATABASE_PASSWORD:
+      secretKeyRef:
+        name: '{{ include "postgresql.secretName" . }}'
+        key: '{{ include "postgresql.adminPasswordKey" . }}'
   datasources:
     datasources.yaml:
       apiVersion: 1
@@ -1539,7 +1547,31 @@ monitors-manager:
       logs: /var/log/grafana
       plugins: /usr/share/grafana/plugins
       provisioning: /etc/grafana/provisioning
-
+    database:
+      type: postgres
+      host: '{{ (include "postgresql.base.url" .) }}'
+      name: monitors_manager
+      user: postgres
+      ssl_mode: require
+  extraInitContainers:
+    - name: wait-for-db
+      image: '{{ include "postgresql.image" . }}'
+      env:
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: '{{ include "postgresql.secretName" . }}'
+              key: '{{ include "postgresql.adminPasswordKey" . }}'
+      command:
+        - /bin/sh
+        - -c
+      args:
+        - |
+          pg_isready \
+            -U "postgres" \
+            -d "dbname=postgres" \
+            -h {{ splitList ":" (include "postgresql.base.url" .) | first }} \
+            -p {{ splitList ":" (include "postgresql.base.url" .) | last }}
 rbac:
   pspEnabled: false
   sccEnabled: true
@@ -1553,3 +1585,8 @@ apikey:
 config:
   labels:
   annotations:
+
+backend:
+  postgresql:
+    dbs:
+      monitors-manager: monitors_manager
