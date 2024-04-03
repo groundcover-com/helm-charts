@@ -287,7 +287,7 @@ data:
         samplingLimitMaxQueue: 0
         samplingLimitAgeOut: 0s
       interval: 0s
-      summarizerActiveTtl: 5s
+      summarizerActiveTtl: 15s
       aggregationCacheSize: 1024
 
     pvcIoHandler:
