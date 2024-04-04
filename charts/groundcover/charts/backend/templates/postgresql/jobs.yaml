@@ -8,7 +8,7 @@ metadata:
     argocd.argoproj.io/hook: Sync
     argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
 spec:
-  ttlSecondsAfterFinished: 30
+  ttlSecondsAfterFinished: {{ .Values.postgresql.jobs.ttlSecondsAfterFinished }}
   template:
     spec:
       restartPolicy: OnFailure
