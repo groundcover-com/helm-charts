@@ -77,9 +77,9 @@ spec:
             - name: FLORA_SYSTEMWATCHER_HOSTMOUNTPATH
               value: "/host"
             - name: FLORA_NETWORKTRACER_CONNECTIONMANAGER_PROTOCOLS_HTTP_UNLIMITEDPAYLOADENDPOINTS
-              value: "/api/v0.2/traces,/v1/traces"
+              value: {{ (tpl .Values.agent.alligator.httpUnlimitedEndpoints .) | quote }}
             - name: FLORA_NETWORKTRACER_CONNECTIONMANAGER_PROTOCOLS_HTTP2_UNLIMITEDPAYLOADENDPOINTS
-              value: "/api/v0.2/traces,/v1/traces,/opentelemetry.proto.collector.trace.v1.TraceService/Export"
+              value: {{ (tpl .Values.agent.alligator.http2UnlimitedEndpoints .) | quote }}
             - name: NODE_NAME
               valueFrom:
                 fieldRef:

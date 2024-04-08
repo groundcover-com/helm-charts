@@ -267,6 +267,9 @@ agent:
           "X-Amz-Credential",
         ]
     env:
+    httpUnlimitedEndpoints: "/api/v0.2/traces"
+    http2UnlimitedEndpoints: "/api/v0.2/traces"
+    childcountruleoverrides:
   tracy:
     image:
       repository: "{{ .Values.global.origin.registry }}/tracy"

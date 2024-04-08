@@ -355,6 +355,7 @@ data:
     cluster:
       maxhosts: 10000
       maxchildrens: 40
+      childcountruleoverrides: {{ toJson .Values.agent.alligator.childcountruleoverrides }}
 
     storage:
       timeout: 5s
