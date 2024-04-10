@@ -936,10 +936,6 @@ victoria-metrics-agent:
             regex: true
             source_labels:
               - __meta_kubernetes_pod_container_init
-          - action: keep_if_equal
-            source_labels:
-              - __meta_kubernetes_pod_annotation_prometheus_io_port
-              - __meta_kubernetes_pod_container_port_number
           - action: keep
             regex: true
             source_labels:
@@ -1184,12 +1180,6 @@ custom-metrics:
           - action: drop
             source_labels: [__meta_kubernetes_pod_container_init]
             regex: true
-          - action: keep_if_equal
-            source_labels:
-              [
-                __meta_kubernetes_service_annotation_prometheus_io_port,
-                __meta_kubernetes_pod_container_port_number,
-              ]
           - source_labels:
               [__meta_kubernetes_service_annotation_prometheus_io_scrape]
             action: keep
@@ -1260,12 +1250,6 @@ custom-metrics:
           - action: drop
             source_labels: [__meta_kubernetes_pod_container_init]
             regex: true
-          - action: keep_if_equal
-            source_labels:
-              [
-                __meta_kubernetes_service_annotation_prometheus_io_port,
-                __meta_kubernetes_pod_container_port_number,
-              ]
           - source_labels:
               [__meta_kubernetes_service_annotation_prometheus_io_scrape_slow]
             action: keep
@@ -1364,12 +1348,6 @@ custom-metrics:
           - action: drop
             source_labels: [__meta_kubernetes_pod_container_init]
             regex: true
-          - action: keep_if_equal
-            source_labels:
-              [
-                __meta_kubernetes_pod_annotation_prometheus_io_port,
-                __meta_kubernetes_pod_container_port_number,
-              ]
           - source_labels:
               [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
             action: keep
