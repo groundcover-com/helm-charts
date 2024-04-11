@@ -620,9 +620,6 @@ opentelemetry-collector:
         endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "health" "containerPort" | int ) }}'
       pprof:
         endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "pprof" "containerPort" | int ) }}'
-      groundcover_file_storage:
-        directory: /persistent_queues
-        merge_interval: 1m
     receivers:
       loki/historian:
         protocols:
@@ -698,13 +695,10 @@ opentelemetry-collector:
         username: '{{ include "clickhouse.username" . }}'
         database: '{{ include "clickhouse.database" . }}'
         endpoint: '{{ include "clickhouse.nativeEndpoint" . }}'
-        sending_queue:
-          queue_size: 100
-          storage: groundcover_file_storage
         retry_on_failure:
           initial_interval: 5s
           max_interval: 5s
-          max_elapsed_time: 3m
+          max_elapsed_time: 15s
       groundcover/logs:
         type: logs
         timeout: 5s
@@ -713,13 +707,10 @@ opentelemetry-collector:
         database: '{{ include "clickhouse.database" . }}'
         endpoint: '{{ include "clickhouse.nativeEndpoint" . }}'
         ttl_interval: '{{ include "logs.retention" . }}'
-        sending_queue:
-          queue_size: 100
-          storage: groundcover_file_storage
         retry_on_failure:
           initial_interval: 5s
           max_interval: 5s
-          max_elapsed_time: 3m
+          max_elapsed_time: 15s
       groundcover/custom:
         type: custom
         timeout: 5s
@@ -729,13 +720,10 @@ opentelemetry-collector:
         username: '{{ include "clickhouse.username" . }}'
         database: '{{ include "clickhouse.database" . }}'
         endpoint: '{{ include "clickhouse.nativeEndpoint" . }}'
-        sending_queue:
-          queue_size: 100
-          storage: groundcover_file_storage
         retry_on_failure:
           initial_interval: 5s
           max_interval: 5s
-          max_elapsed_time: 3m
+          max_elapsed_time: 15s
       groundcover/traces:
         type: traces
         timeout: 5s
@@ -745,18 +733,15 @@ opentelemetry-collector:
         username: '{{ include "clickhouse.username" . }}'
         database: '{{ include "clickhouse.database" . }}'
         endpoint: '{{ include "clickhouse.nativeEndpoint" . }}'
-        sending_queue:
-          queue_size: 100
-          storage: groundcover_file_storage
         retry_on_failure:
           initial_interval: 5s
           max_interval: 5s
-          max_elapsed_time: 3m
+          max_elapsed_time: 15s
     service:
       telemetry:
         metrics:
           address: '{{ printf "0.0.0.0:%d" (index .Values "ports" "metrics" "containerPort" | int ) }}'
-      extensions: [health_check, pprof, groundcover_file_storage]
+      extensions: [health_check, pprof]
       pipelines:
         logs/monitorState:
           receivers:
