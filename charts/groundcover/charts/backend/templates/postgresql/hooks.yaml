@@ -1,14 +1,13 @@
 {{- if .Values.global.postgresql.enabled }}
+{{- $name := (printf "%s-create-dbs" (include "postgresql.primary.fullname" $)) -}}
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ printf "%s-create-dbs" (include "postgresql.primary.fullname" .) }}
+  name: {{ $name }}
   namespace: {{ .Release.Namespace }}
   annotations:
-    argocd.argoproj.io/hook: Sync
-    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+  {{- include "postgresql.job.create-dbs.annotations" $ | nindent 4 }}
 spec:
-  ttlSecondsAfterFinished: {{ .Values.postgresql.jobs.ttlSecondsAfterFinished }}
   template:
     spec:
       restartPolicy: OnFailure
@@ -16,22 +15,22 @@ spec:
       - name: wait-for-db
         image: '{{ include "postgresql.image" . }}'
         env:
-          - name: POSTGRES_PASSWORD
+          - name: PGPASSWORD
             valueFrom:
               secretKeyRef:
                 name: '{{ include "postgresql.secretName" . }}'
                 key: '{{ include "postgresql.adminPasswordKey" . }}'
+          - name: PGHOST
+            value: '{{ splitList ":" (include "postgresql.base.url" .) | first }}'
+          - name: PGPORT
+            value: '{{ splitList ":" (include "postgresql.base.url" .) | last }}'
         command:
-          - /bin/sh
+          - /bin/bash
           - -c
-        args:
           - |
-            pg_isready \
-              -U "postgres" \
-              -d "dbname=postgres" \
-              -h {{ splitList ":" (include "postgresql.base.url" .) | first }} \
-              -p {{ splitList ":" (include "postgresql.base.url" .) | last }}
-
+            set -eu
+            . /opt/bitnami/scripts/libautoctl.sh
+            wait_until_can_connect "postgres://postgres:${PGPASSWORD}@${PGHOST}:${PGPORT}/postgres"
       containers:
       - name: psql
         image: '{{ include "postgresql.image" . }}'

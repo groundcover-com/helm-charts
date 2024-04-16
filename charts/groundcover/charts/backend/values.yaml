@@ -1,7 +1,5 @@
 postgresql:
   dbs: {}
-  jobs:
-    ttlSecondsAfterFinished: 900
   nameOverride: postgresql
   image:
     registry: public.ecr.aws/groundcovercom
