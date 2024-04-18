@@ -185,6 +185,11 @@ agent:
         cpu: 800m
     nodelabels: []
     contentTypesToDrop: []
+    forceSampling:
+      gcForceSample: true
+      w3cForceSample: false
+      b3ForceSample: false
+      datadogForceSample: false
     watchOnlyLocalNode: false
     apmIngestor:
       dataDog:
@@ -1036,6 +1041,7 @@ custom-metrics:
   extraArgs:
     promscrape.streamParse: "true"
     promscrape.dropOriginalLabels: "true"
+    promscrape.suppressDuplicateScrapeTargetErrors: "true"
     remoteWrite.showURL: "true"
     remoteWrite.maxDiskUsagePerURL: 10GB
     remoteWrite.maxDailySeries: "1000000"

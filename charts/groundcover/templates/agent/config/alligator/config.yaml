@@ -370,6 +370,10 @@ data:
       fetchinterval: 15s
       requesttimeout: 10s
 
+    piiDetector:
+      enabled: true
+      sizeLimit: 1024
+
     globallimiter:
       maxqueue: 20
       ageout: 100ms
@@ -383,6 +387,8 @@ data:
     tracesWorkloadFilters: {{ toYaml .Values.tracesWorkloadFilters | nindent 6 }}
     nodelabels: {{ toYaml .Values.agent.alligator.nodelabels | nindent 6 }}
     contentTypesToDrop: {{ toYaml .Values.agent.alligator.contentTypesToDrop | nindent 6 }}
+    forceSampling: {{ toYaml .Values.agent.alligator.forceSampling | nindent 6 }}
+
     apmIngestor: 
       collector:
         endpoint: {{ include "opentelemetry-collector.otlp.grpc.url" . }}
