@@ -524,7 +524,7 @@ opentelemetry-collector:
   mode: deployment
   extraEnvs:
     - name: GC_GROUNDCOVERVERSION
-      value: '{{ default .Chart.AppVersion .Values.global.origin.tag }}'
+      value: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
     - name: DB_MANAGER_ADDRESS
       value: '{{ include "db-manager.ready.http.url" .}}'
     - name: CLICKHOUSE_PASSWORD
@@ -692,6 +692,7 @@ opentelemetry-collector:
             # logs can have either explicit 'log' log_type or no log_type at all and no type (reserved for custom logs)
             - attributes["log_type"] != nil and attributes["log_type"] != "log"
             - attributes["type"] != nil
+      groundcover/logs: {}
     exporters:
       groundcover/monitorState:
         type: monitorState
@@ -776,6 +777,7 @@ opentelemetry-collector:
           processors:
             - filter/dropNoneLogs
             - batch/logs
+            - groundcover/logs
           exporters:
             - groundcover/logs
         logs/custom:

@@ -34,7 +34,7 @@ data:
           Value: "True"
     {{- end }} 
     {{- with .Values.portal.extraHeaders }}
-      {{ toYaml . | nindent 6 }}
+      {{ toYaml . | nindent 8 }}
     {{- end }}  
 
     DirectModeGRPCPort: "5555"

@@ -1,7 +1,7 @@
 dependencies:
 - name: router
   repository: ""
-  version: 0.1.0
+  version: '>0.0.0'
 - name: victoria-metrics-single
   repository: https://victoriametrics.github.io/helm-charts
   version: 0.9.15
@@ -31,9 +31,9 @@ dependencies:
   version: 7.2.0
 - name: incloud-ingress
   repository: ""
-  version: 0.1.0
+  version: '>0.0.0'
 - name: backend
   repository: ""
-  version: 0.0.0
-digest: sha256:8794be8b3dc04190e61951c85826b14c796f6424ce6bc90a3a469eabe8583c14
-generated: "2024-03-26T17:10:58.280753741Z"
+  version: '>=0.0.0'
+digest: sha256:72964541fad61b8e53a5ba32d4fb884f5c775b79d464ca871097212948fb458e
+generated: "2024-05-01T16:06:24.21612194Z"
