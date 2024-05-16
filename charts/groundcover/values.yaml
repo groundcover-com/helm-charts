@@ -4,6 +4,8 @@ global:
   backend:
     enabled: true
     name:
+  vector:
+    enabled: false
 
   ingress:
     # set ingress site for inCloud / on-prem sensor only deployments
@@ -743,6 +745,11 @@ opentelemetry-collector:
           initial_interval: 5s
           max_interval: 5s
           max_elapsed_time: 15s
+      otlphttp/vector:
+        endpoint: '{{ include "vector.otlpEndpoint" . }}'
+        tls:
+          insecure: true
+          insecure_skip_verify: true
     service:
       telemetry:
         metrics:
@@ -779,7 +786,7 @@ opentelemetry-collector:
             - batch/logs
             - groundcover/logs
           exporters:
-            - groundcover/logs
+            - '{{ ternary "otlphttp/vector" "groundcover/logs"  .Values.global.vector.enabled }}'
         logs/custom:
           receivers:
             - otlp
@@ -805,6 +812,97 @@ opentelemetry-collector:
   affinity: {}
   nodeSelector: {}
   tolerations: []
+
+vector:
+  service:
+    ports:
+      - name: otel-grpc
+        port: 4317
+      - name: otel-http
+        port: 4318
+      - name: metrics
+        port: 9598
+  containerPorts:
+    - name: otel-grpc
+      containerPort: 4317
+    - name: otel-http
+      containerPort: 4318
+    - name: metrics
+      containerPort: 9598
+  role: "Stateless-Aggregator"
+  replicas: 1
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "200m"
+    limits:
+      memory: "2Gi"
+      cpu: "500m"
+  env:
+    - name: CLICKHOUSE_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          key: '{{ include "clickhouse.secretKey" . }}'
+          name: '{{ include "clickhouse.secretName" . }}'
+  podAnnotations:
+    prometheus.io/port: "9598"
+    prometheus.io/scrape: "true"
+  podLabels:
+    app.kubernetes.io/part-of: groundcover
+  customConfig:
+    sources:
+      otel:
+        type: opentelemetry
+        grpc:
+          address: 0.0.0.0:4317
+        http:
+          address: 0.0.0.0:4318
+          keepalive:
+            max_connection_age_jitter_factor: 0.1
+            max_connection_age_secs: 300
+      telemetry_metrics:
+        type: internal_metrics
+
+    transforms:
+      groundcover_otlp:
+        inputs:
+          - "otel.logs"
+        type: "remap"
+        source: |-
+          . = .attributes
+          .function_name = "from_vector"
+
+    sinks:
+      clickhouse_sink:
+        type: clickhouse
+        inputs:
+          - groundcover_otlp
+        endpoint: '{{ include "clickhouse.httpEndpoint" . }}'
+        database: "groundcover"
+        table: "logs"
+        auth:
+          user: '{{ include "clickhouse.username" . }}'
+          password: $CLICKHOUSE_PASSWORD
+          strategy: "basic"
+        format: "json_each_row"
+        encoding:
+          timestamp_format: rfc3339
+        date_time_best_effort: true
+        buffer:
+          type: disk
+          max_size: 268435488
+      telemtry_prometheus_sink:
+        type: prometheus_exporter
+        inputs:
+          - telemetry_metrics
+
+    api:
+      enabled: true
+  updateStrategy: {}
+  type: RollingUpdate
+  rollingUpdate:
+    maxUnavailable: 0
+    maxSurge: 1
 
 router:
   # onprem or cloud
