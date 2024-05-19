@@ -102,7 +102,14 @@ spec:
                 name: {{ include "metrics-ingester.fullname" . }}
                 port:
                   name: http
-          - path: {{ get (urlParse (include "metrics-ingester.datadog.http.url" .)) "path" }} 
+          - path: {{ get (urlParse (include "metrics-ingester.datadog.http.v1.url" .)) "path" }} 
+            pathType: Exact
+            backend:
+              service:
+                name: {{ include "metrics-ingester.fullname" . }}
+                port:
+                  name: http
+          - path: {{ get (urlParse (include "metrics-ingester.datadog.http.v2.url" .)) "path" }} 
             pathType: Exact
             backend:
               service:

@@ -22,8 +22,12 @@
 {{- end -}}
 {{- end -}}
 
-{{- define "metrics-ingester.datadog.http.url" -}}
+{{- define "metrics-ingester.datadog.http.v1.url" -}}
 {{- printf "%s/datadog/api/v1/series" (include "metrics-ingester.base.http.url" .) -}}
+{{- end -}}
+
+{{- define "metrics-ingester.datadog.http.v2.url" -}}
+{{- printf "%s/datadog/api/v2/series" (include "metrics-ingester.base.http.url" .) -}}
 {{- end -}}
 
 {{- define "metrics-ingester.write.http.url" -}}
