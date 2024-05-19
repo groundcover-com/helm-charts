@@ -890,7 +890,8 @@ vector:
         date_time_best_effort: true
         buffer:
           type: disk
-          max_size: 268435488
+          max_size: 2684354880
+          when_full: drop_newest
       telemtry_prometheus_sink:
         type: prometheus_exporter
         inputs:
