@@ -411,6 +411,12 @@ data:
             enabled: {{ .Values.agent.alligator.apmIngestor.otel.direct.otlp.enabled }}
             grpcPort: {{ .Values.agent.alligator.apmIngestor.otel.direct.otlp.grpcPort }}
             httpPort: {{ .Values.agent.alligator.apmIngestor.otel.direct.otlp.httpPort }}
+          jaeger:
+            enabled: {{ .Values.agent.alligator.apmIngestor.otel.direct.jaeger.enabled }}
+            grpcPort: {{ .Values.agent.alligator.apmIngestor.otel.direct.jaeger.grpcPort }}
+            thriftHttpPort: {{ .Values.agent.alligator.apmIngestor.otel.direct.jaeger.thriftHttpPort }}
+            thriftBinaryPort: {{ .Values.agent.alligator.apmIngestor.otel.direct.jaeger.thriftBinaryPort }}
+            thriftCompactPort: {{ .Values.agent.alligator.apmIngestor.otel.direct.jaeger.thriftCompactPort }}
     pprof:
       enabled: {{ include "telemetry.enabled" . }}
       interval: {{ .Values.agent.alligator.pprof.interval }}

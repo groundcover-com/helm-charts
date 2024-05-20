@@ -208,6 +208,12 @@ agent:
             enabled: true
             grpcPort: 4317
             httpPort: 4318
+          jaeger:
+            enabled: true
+            grpcPort: 14250
+            thriftHttpPort: 14268
+            thriftBinaryPort: 6832
+            thriftCompactPort: 6831
     pprof:
       enabled: true
       interval: 10s

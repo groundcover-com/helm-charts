@@ -134,15 +134,40 @@ spec:
             - containerPort: {{ .Values.agent.alligator.apmIngestor.dataDog.tracesPort }}
               name: dd-traces
               protocol: TCP
-            {{- if .Values.agent.alligator.apmIngestor.otel.direct.zipkin.enabled }}
+            {{- if and .Values.agent.alligator.apmIngestor.otel.direct.zipkin.enabled .Values.agent.alligator.apmIngestor.otel.direct.zipkin.port}}
             - containerPort: {{ .Values.agent.alligator.apmIngestor.otel.direct.zipkin.port }}
               name: zipkin
               protocol: TCP
             {{- end }}
-            {{- if .Values.agent.alligator.apmIngestor.otel.direct.otlp.enabled }}
+            {{- if and .Values.agent.alligator.apmIngestor.otel.direct.otlp.enabled .Values.agent.alligator.apmIngestor.otel.direct.otlp.grpcPort}}
             - containerPort: {{ .Values.agent.alligator.apmIngestor.otel.direct.otlp.grpcPort }}
               name: otlp-grpc
               protocol: TCP
+            {{- end }}
+            {{- if and .Values.agent.alligator.apmIngestor.otel.direct.otlp.enabled .Values.agent.alligator.apmIngestor.otel.direct.otlp.httpPort}}
+            - containerPort: {{ .Values.agent.alligator.apmIngestor.otel.direct.otlp.httpPort }}
+              name: otlp-http
+              protocol: TCP
+            {{- end }}
+            {{- if and .Values.agent.alligator.apmIngestor.otel.direct.jaeger.enabled .Values.agent.alligator.apmIngestor.otel.direct.jaeger.grpcPort}}
+            - containerPort: {{ .Values.agent.alligator.apmIngestor.otel.direct.jaeger.grpcPort }}
+              name: jaeger-grpc
+              protocol: TCP     
+            {{- end }}
+            {{- if and .Values.agent.alligator.apmIngestor.otel.direct.jaeger.enabled .Values.agent.alligator.apmIngestor.otel.direct.jaeger.thriftHttpPort}}
+            - containerPort: {{ .Values.agent.alligator.apmIngestor.otel.direct.jaeger.thriftHttpPort }}
+              name: jaeger-th-http
+              protocol: TCP     
+            {{- end }}
+            {{- if and .Values.agent.alligator.apmIngestor.otel.direct.jaeger.enabled .Values.agent.alligator.apmIngestor.otel.direct.jaeger.thriftBinaryPort}}
+            - containerPort: {{ .Values.agent.alligator.apmIngestor.otel.direct.jaeger.thriftBinaryPort }}
+              name: jaeger-th-bin
+              protocol: UDP     
+            {{- end }}
+            {{- if and .Values.agent.alligator.apmIngestor.otel.direct.jaeger.enabled .Values.agent.alligator.apmIngestor.otel.direct.jaeger.thriftCompactPort}}
+            - containerPort: {{ .Values.agent.alligator.apmIngestor.otel.direct.jaeger.thriftCompactPort }}
+              name: jaeger-th-comp
+              protocol: UDP     
             {{- end }}
           securityContext:
             capabilities:

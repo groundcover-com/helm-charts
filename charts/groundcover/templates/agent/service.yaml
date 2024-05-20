@@ -25,26 +25,47 @@ spec:
     name: dd-traces
     port: {{ .Values.agent.alligator.apmIngestor.dataDog.tracesPort }}
     targetPort: {{ .Values.agent.alligator.apmIngestor.dataDog.tracesPort }}
-  {{- if .Values.agent.alligator.apmIngestor.otel.direct.zipkin.enabled }}
+  {{- if and .Values.agent.alligator.apmIngestor.otel.direct.zipkin.enabled .Values.agent.alligator.apmIngestor.otel.direct.zipkin.port}}
   - protocol: TCP
     name: zipkin
     port: {{ .Values.agent.alligator.apmIngestor.otel.direct.zipkin.port }}
     targetPort: {{ .Values.agent.alligator.apmIngestor.otel.direct.zipkin.port }}
   {{- end }}
-  {{- if .Values.agent.alligator.apmIngestor.otel.direct.otlp.enabled }}
-  {{- if .Values.agent.alligator.apmIngestor.otel.direct.otlp.grpcPort}} 
+  {{- if and .Values.agent.alligator.apmIngestor.otel.direct.otlp.enabled .Values.agent.alligator.apmIngestor.otel.direct.otlp.grpcPort}}
   - protocol: TCP
     name: otlp-grpc
     port: {{ .Values.agent.alligator.apmIngestor.otel.direct.otlp.grpcPort }}
     targetPort: {{ .Values.agent.alligator.apmIngestor.otel.direct.grpcPort }}
   {{- end }}
-  {{- if .Values.agent.alligator.apmIngestor.otel.direct.otlp.httpPort}}
+  {{- if and .Values.agent.alligator.apmIngestor.otel.direct.otlp.enabled .Values.agent.alligator.apmIngestor.otel.direct.otlp.httpPort}}
   - protocol: TCP
     name: otlp-http
     port: {{ .Values.agent.alligator.apmIngestor.otel.direct.otlp.httpPort }}
     targetPort: {{ .Values.agent.alligator.apmIngestor.otel.direct.httpPort }}
   {{- end }}
+  {{- if and .Values.agent.alligator.apmIngestor.otel.direct.jaeger.enabled .Values.agent.alligator.apmIngestor.otel.direct.jaeger.grpcPort }}
+  - protocol: TCP
+    name: jeager-grpc
+    port: {{ .Values.agent.alligator.apmIngestor.otel.direct.jaeger.grpcPort }}
+    targetPort: {{ .Values.agent.alligator.apmIngestor.otel.direct.jaeger.grpcPort }}
   {{- end }}
-  
+  {{- if and .Values.agent.alligator.apmIngestor.otel.direct.jaeger.enabled .Values.agent.alligator.apmIngestor.otel.direct.jaeger.thriftHttpPort }}
+  - protocol: TCP
+    name: jeager-thrift-http
+    port: {{ .Values.agent.alligator.apmIngestor.otel.direct.jaeger.thriftHttpPort }}
+    targetPort: {{ .Values.agent.alligator.apmIngestor.otel.direct.jaeger.thriftHttpPort }}
+  {{- end }}
+  {{- if and .Values.agent.alligator.apmIngestor.otel.direct.jaeger.enabled .Values.agent.alligator.apmIngestor.otel.direct.jaeger.thriftBinaryPort }}
+  - protocol: UDP
+    name: jeager-thrift-binary
+    port: {{ .Values.agent.alligator.apmIngestor.otel.direct.jaeger.thriftBinaryPort }}
+    targetPort: {{ .Values.agent.alligator.apmIngestor.otel.direct.jaeger.thriftBinaryPort }}
+  {{- end }}
+  {{- if and .Values.agent.alligator.apmIngestor.otel.direct.jaeger.enabled .Values.agent.alligator.apmIngestor.otel.direct.jaeger.thriftCompactPort }}
+  - protocol: UDP
+    name: jeager-thrift-compact
+    port: {{ .Values.agent.alligator.apmIngestor.otel.direct.jaeger.thriftCompactPort }}
+    targetPort: {{ .Values.agent.alligator.apmIngestor.otel.direct.jaeger.thriftCompactPort }}
+  {{- end }}
   internalTrafficPolicy: Local
 {{- end }}
