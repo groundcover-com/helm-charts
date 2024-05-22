@@ -431,6 +431,7 @@ data:
 
     clusterId: {{ include "groundcover.clusterId" . }}
     region: {{ .Values.region }}
+    env: {{ include "groundcover.env" . }}
 
     k8sLogs:
       scraper:
@@ -454,6 +455,7 @@ data:
         externalLabels:
           labelSet:
             cluster_id: {{ include "groundcover.clusterId" . }}
+            env_name: {{ include "groundcover.env" . }}
             job: alligator
         timeout: 10s
         useRingBuffer: {{ .Values.storeIssuesLogsOnly }}

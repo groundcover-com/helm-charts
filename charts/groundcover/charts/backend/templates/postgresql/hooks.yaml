@@ -11,6 +11,8 @@ spec:
   template:
     spec:
       restartPolicy: OnFailure
+      imagePullSecrets: {{ include "imagePullSecrets" $ }}
+
       initContainers:
       - name: wait-for-db
         image: '{{ include "postgresql.image" . }}'
@@ -35,14 +37,12 @@ spec:
       - name: psql
         image: '{{ include "postgresql.image" . }}'
         command:
-          - "/bin/sh"
-          - "-c"
+          - /bin/sh
+          - -c
           - |
             set -eu 
 
-            cp /create-dbs/create-dbs.sh /tmp
-            chmod u+x /tmp/create-dbs.sh
-            /tmp/create-dbs.sh
+            . /create-dbs/10-create-dbs.sh
         env:
           - name: POSTGRES_PASSWORD
             valueFrom:
@@ -56,13 +56,8 @@ spec:
         volumeMounts:
           - mountPath: /create-dbs
             name: create-dbs
-
       volumes:
       - name: create-dbs
         configMap:
           name: {{ include "postgresql.primary.init-scripts-configmap" . }}
-          items:
-          - key: create-dbs.sh
-            path: create-dbs.sh
-
 {{ end -}}

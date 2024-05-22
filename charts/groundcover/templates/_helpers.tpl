@@ -90,7 +90,7 @@ Get cluster_id from values or generate random one
 {{- .Values.region | default "undefined" }}
 {{- end }}
 
-{{- define "groundcover.gcEnv" -}}
+{{- define "groundcover.env" -}}
 {{- .Values.env | default "" }}
 {{- end }}
 

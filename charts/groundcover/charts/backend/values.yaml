@@ -28,9 +28,43 @@ postgresql:
       - name: INITDB_PGPORT
         value: '{{ splitList ":" (include "postgresql.base.url" .) | last }}'
 
+    initContainers:
+      - name: reset-user-scripts-initialized-flag
+        image: '{{ include "postgresql.volumePermissions.image" . }}'
+        command: 
+            - /bin/sh
+            - -ec
+            - |
+              initialized_flag="/bitnami/postgresql/.user_scripts_initialized"              
+              if [ -f "${initialized_flag}" ]; then
+                  rm "${initialized_flag}"
+                  echo "${initialized_flag} removed."
+              else
+                  exit 0
+              fi
+        volumeMounts:
+          - name: data
+            mountPath: /bitnami/postgresql
     initdb:
       scripts: 
-        create-dbs.sh: |
+        01-sync-pg-password.sh: |
+          #!/bin/bash
+          
+          info "Syncing pg_authid with secret"
+
+          set -eu -o pipefail
+
+          # Allow passwordless login for local client
+          replace_in_file "$POSTGRESQL_PGHBA_FILE" "^\(local.*\) md5$" "\1 trust" false
+          pg_ctl reload
+
+          # sync password from k8s secret to pg_authid
+          postgresql_alter_postgres_user "${POSTGRESQL_PASSWORD}"
+
+          # Restore password auth constraints
+          postgresql_restrict_pghba
+          pg_ctl reload
+        10-create-dbs.sh: |
           #!/bin/sh
 
           set -eu
@@ -41,10 +75,11 @@ postgresql:
 
           create_database_if_not_exists() {
             local target_db="$1"
+
+            echo "10-create-dbs.sh: CREATE DATABASE IF NOT EXISTS ${target_db}"
             echo "SELECT 'CREATE DATABASE ${target_db}' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '${target_db}')\gexec" | psql -U postgres
           }
 
-          set -x
           {{ range $service, $db := .Values.dbs }}
           create_database_if_not_exists "{{ $db }}"
           {{- end }}
