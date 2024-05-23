@@ -188,7 +188,7 @@ agent:
         cpu: 800m
     nodelabels: []
     contentTypesToDrop: []
-    forceSampling:
+    headersForceSampling:
       gcForceSample: true
       w3cForceSample: false
       b3ForceSample: false
