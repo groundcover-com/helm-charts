@@ -26,12 +26,30 @@ data:
     DropPartitionTimeout: 5m
     httpPort: 8888
     tableDataRetention: 
-      Traces: '{{ include "traces.retention" . }}'   
-      Logs: '{{ include "logs.retention" . }}'   
-      Entities: '{{ include "entities.retention" . }}'
-      Events: '{{ include "events.retention" . }}'
-      MonitorState: '{{ include "monitors.evaluation.retention" . }}'
-      Sources: '{{ include "sources.retention" . }}'
+      Traces:
+        retention: {{ include "traces.retention"  . }}
+        custom_retention_overrides:
+          {{- include "traces.custom_retention_overrides" . | indent 8 }}
+      Logs:
+        retention: {{ include "logs.retention" . }}
+        custom_retention_overrides:
+          {{- include "logs.custom_retention_overrides" . | indent 8 }}
+      Entities:
+        retention: {{ include "entities.retention" . }}
+        custom_retention_overrides:
+          {{- include "entities.custom_retention_overrides" . | indent 8 }}
+      Events:
+        retention: {{ include "events.retention" . }}
+        custom_retention_overrides:
+          {{- include "events.custom_retention_overrides" . | indent 8 }}
+      MonitorState:
+        retention: {{ include "monitors.evaluation.retention" .}}
+        custom_retention_overrides:
+          {{- include "monitors.evaluation.custom_retention_overrides" . | indent 8 }}
+      Sources:
+        retention: {{ include "sources.retention" .  }}
+        custom_retention_overrides:
+          {{- include "sources.custom_retention_overrides" . | indent 8 }}
     DataMigration:
       BackfillBatchDuration:
         Traces: 1m

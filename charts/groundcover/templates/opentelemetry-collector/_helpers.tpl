@@ -6,24 +6,60 @@
 {{- end -}}
 {{- end -}}
 
+{{- define "logs.custom_retention_overrides" -}}
+{{- with .Values.global.logs.custom_retention_overrides }}
+{{ toYaml . | indent 2 }}
+{{- end -}}
+{{- end -}}
+
 {{- define "traces.retention" -}}
 {{ .Values.global.traces.retention }}
+{{- end -}}
+
+{{- define "traces.custom_retention_overrides" -}}
+{{- with .Values.global.traces.custom_retention_overrides }}
+{{ toYaml . | indent 2 }}
+{{- end -}}
 {{- end -}}
 
 {{- define "events.retention" -}}
 {{ .Values.global.events.retention }}
 {{- end -}}
 
+{{- define "events.custom_retention_overrides" -}}
+{{- with .Values.global.events.custom_retention_overrides }}
+{{ toYaml . | indent 2 }}
+{{- end -}}
+{{- end -}}
+
 {{- define "entities.retention" -}}
 {{ .Values.global.entities.retention }}
+{{- end -}}
+
+{{- define "entities.custom_retention_overrides" -}}
+{{- with .Values.global.entities.custom_retention_overrides }}
+{{ toYaml . | indent 2 }}
+{{- end -}}
 {{- end -}}
 
 {{- define "monitors.evaluation.retention" -}}
 {{ .Values.global.monitors.evaluation.retention }}
 {{- end -}}
 
+{{- define "monitors.evaluation.custom_retention_overrides" -}}
+{{- with .Values.global.monitors.evaluation.custom_retention_overrides }}
+{{ toYaml . | indent 2 }}
+{{- end -}}
+{{- end -}}
+
 {{- define "sources.retention" -}}
 {{ .Values.global.sources.retention }}
+{{- end -}}
+
+{{- define "sources.custom_retention_overrides" -}}
+{{- with .Values.global.sources.custom_retention_overrides }}
+{{ toYaml . | indent 2 }}
+{{- end -}}
 {{- end -}}
 
 {{- define "opentelemetry-collector.otlp.scheme" -}}

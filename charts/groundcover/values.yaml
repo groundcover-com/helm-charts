@@ -721,7 +721,6 @@ opentelemetry-collector:
         username: '{{ include "clickhouse.username" . }}'
         database: '{{ include "clickhouse.database" . }}'
         endpoint: '{{ include "clickhouse.nativeEndpoint" . }}'
-        ttl_interval: '{{ include "logs.retention" . }}'
         retry_on_failure:
           initial_interval: 5s
           max_interval: 5s
@@ -742,7 +741,6 @@ opentelemetry-collector:
       groundcover/traces:
         type: traces
         timeout: 5s
-        ttl_interval: '{{ include "traces.retention" . }}'
         traces_table_name: traces
         password: ${env:CLICKHOUSE_PASSWORD}
         username: '{{ include "clickhouse.username" . }}'
@@ -877,7 +875,6 @@ vector:
         type: "remap"
         source: |-
           . = .attributes
-          .function_name = "from_vector"
 
     sinks:
       clickhouse_sink:
