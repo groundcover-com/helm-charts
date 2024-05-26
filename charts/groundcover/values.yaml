@@ -896,6 +896,9 @@ vector:
           type: disk
           max_size: 2684354880
           when_full: drop_newest
+        batch:
+          max_bytes: 200000000
+          timeout_secs: 5
       telemtry_prometheus_sink:
         type: prometheus_exporter
         inputs:
