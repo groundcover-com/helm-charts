@@ -387,6 +387,7 @@ data:
     tracesWorkloadFilters: {{ toYaml .Values.tracesWorkloadFilters | nindent 6 }}
     nodelabels: {{ toYaml .Values.agent.alligator.nodelabels | nindent 6 }}
     contentTypesToDrop: {{ toYaml .Values.agent.alligator.contentTypesToDrop | nindent 6 }}
+    hostHeadersToDrop: {{ toYaml .Values.agent.alligator.hostHeadersToDrop | nindent 6 }}
     headersForceSampling: {{ toYaml .Values.agent.alligator.headersForceSampling | nindent 6 }}
 
     apmIngestor: 
