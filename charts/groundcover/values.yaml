@@ -166,7 +166,7 @@ agent:
     port: 9102
   flb:
     image:
-      tag: 2.1.4
+      tag: 2.2.3
       repository: "{{ .Values.global.origin.registry }}/fluent/fluent-bit"
     resources:
       requests:
