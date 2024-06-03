@@ -27,7 +27,7 @@ onprem:
 origin:
   registry: quay.io/groundcover
   repository: router
-  tag: 1.7.112
+  tag: 1.7.113
 serviceAccount:
   annotations:
 ingress:
@@ -100,6 +100,11 @@ configuration:
       SSLMode: "disable"
   DatasourceRetryAttempts: 10
   DatasourceRetryInterval: 5s
+  QueryOptimizer:
+    Traces:
+      Enabled: true
+    Logs:
+      Enabled: true
 strategy:
   type: RollingUpdate
   rollingUpdate:

@@ -8,6 +8,7 @@ config:
   key_names:
     - apikey
     - dd-api-key
+    - X-Amz-Firehose-Access-Key
 {{- if .Values.datasource.enabled }}
     - X-ClickHouse-Key
 {{- end }}

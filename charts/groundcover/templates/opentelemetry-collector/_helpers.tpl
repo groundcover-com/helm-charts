@@ -104,6 +104,10 @@
 {{- printf "%s/v1/traces" (include "opentelemetry-collector.otlp.http.url" .) -}}
 {{- end -}}
 
+{{- define "opentelemetry-collector.awsfirehose.http.url" -}}
+{{- printf "%s/firehose/logs" (include "opentelemetry-collector.otlp.http.url" .) -}}
+{{- end -}}
+
 {{- define "opentelemetry-collector.otlp.grpc.url" -}}
 {{- if .Values.global.otlp.overrideGrpcURL -}}
     {{- print .Values.global.otlp.overrideGrpcURL -}}
