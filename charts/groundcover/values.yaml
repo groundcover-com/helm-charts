@@ -637,6 +637,10 @@ opentelemetry-collector:
       pprof:
         endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "pprof" "containerPort" | int ) }}'
     receivers:
+      otlp/dummy_receiver:
+        protocols:
+          http:
+            endpoint: "localhost:9999"
       loki/historian:
         protocols:
           http:
@@ -704,6 +708,7 @@ opentelemetry-collector:
             - attributes["log_type"] != nil and attributes["log_type"] != "log"
             - attributes["type"] != nil
       groundcover/logs: {}
+      groundcover/traces: {}
     exporters:
       groundcover/monitorState:
         type: monitorState
@@ -752,11 +757,16 @@ opentelemetry-collector:
           initial_interval: 5s
           max_interval: 5s
           max_elapsed_time: 15s
-      otlphttp/vector:
-        endpoint: '{{ include "vector.otlpEndpoint" . }}'
+      otlphttp/vector_logs:
+        endpoint: '{{ include "vector.otlpLogsEndpoint" . }}'
         tls:
           insecure: true
-          insecure_skip_verify: true
+      otlphttp/vector_traces:
+        endpoint: '{{ include "vector.otlpTracesEndpoint" . }}'
+        tls:
+          insecure: true
+    connectors:
+      groundcover/traces2logs: {}
     service:
       telemetry:
         metrics:
@@ -780,8 +790,9 @@ opentelemetry-collector:
             - faro
           processors:
             - batch/traces
-          exporters:
             - groundcover/traces
+          exporters:
+            - '{{ ternary "groundcover/traces2logs" "groundcover/traces"  .Values.global.vector.enabled }}'
         logs:
           receivers:
             - loki
@@ -793,7 +804,12 @@ opentelemetry-collector:
             - batch/logs
             - groundcover/logs
           exporters:
-            - '{{ ternary "otlphttp/vector" "groundcover/logs"  .Values.global.vector.enabled }}'
+            - '{{ ternary "otlphttp/vector_logs" "groundcover/logs"  .Values.global.vector.enabled }}'
+        logs/traces:
+          receivers:
+            - '{{ ternary "groundcover/traces2logs" "otlp/dummy_receiver" .Values.global.vector.enabled}}'
+          exporters:
+            - otlphttp/vector_traces
         logs/custom:
           receivers:
             - otlp
@@ -823,17 +839,25 @@ opentelemetry-collector:
 vector:
   service:
     ports:
-      - name: otel-grpc
+      - name: grpc-logs
         port: 4317
-      - name: otel-http
+      - name: http-logs
         port: 4318
+      - name: grpc-traces
+        port: 4327
+      - name: http-traces
+        port: 4328
       - name: metrics
         port: 9598
   containerPorts:
-    - name: otel-grpc
+    - name: grpc-logs
       containerPort: 4317
-    - name: otel-http
+    - name: http-logs
       containerPort: 4318
+    - name: grpc-traces
+      containerPort: 4327
+    - name: http-traces
+      containerPort: 4328
     - name: metrics
       containerPort: 9598
   role: "Stateless-Aggregator"
@@ -857,7 +881,7 @@ vector:
     app.kubernetes.io/part-of: groundcover
   customConfig:
     sources:
-      otel:
+      otel_logs:
         type: opentelemetry
         grpc:
           address: 0.0.0.0:4317
@@ -866,22 +890,40 @@ vector:
           keepalive:
             max_connection_age_jitter_factor: 0.1
             max_connection_age_secs: 300
+
       telemetry_metrics:
         type: internal_metrics
 
+      otel_traces:
+        type: opentelemetry
+        grpc:
+          address: 0.0.0.0:4327
+        http:
+          address: 0.0.0.0:4328
+          keepalive:
+            max_connection_age_jitter_factor: 0.1
+            max_connection_age_secs: 300
+
     transforms:
-      groundcover_otlp:
+      logs_from_logs:
         inputs:
-          - "otel.logs"
+          - "otel_logs.logs"
+        type: "remap"
+        source: |-
+          . = .attributes
+
+      traces_from_logs:
+        inputs:
+          - "otel_traces.logs"
         type: "remap"
         source: |-
           . = .attributes
 
     sinks:
-      clickhouse_sink:
+      clickhouse_logs:
         type: clickhouse
         inputs:
-          - groundcover_otlp
+          - logs_from_logs
         endpoint: '{{ include "clickhouse.httpEndpoint" . }}'
         database: "groundcover"
         table: "logs"
@@ -901,11 +943,35 @@ vector:
           max_bytes: 200000000
           max_events: 200000
           timeout_secs: 1
+
+      clickhouse_traces:
+        type: clickhouse
+        inputs:
+          - traces_from_logs
+        endpoint: '{{ include "clickhouse.httpEndpoint" . }}'
+        database: "groundcover"
+        table: "traces"
+        auth:
+          user: '{{ include "clickhouse.username" . }}'
+          password: $CLICKHOUSE_PASSWORD
+          strategy: "basic"
+        format: "json_each_row"
+        encoding:
+          timestamp_format: rfc3339
+        date_time_best_effort: true
+        buffer:
+          type: memory
+          max_events: 500000
+          when_full: drop_newest
+        batch:
+          max_bytes: 200000000
+          max_events: 200000
+          timeout_secs: 1
+
       telemtry_prometheus_sink:
         type: prometheus_exporter
         inputs:
           - telemetry_metrics
-
     api:
       enabled: true
   updateStrategy: {}
