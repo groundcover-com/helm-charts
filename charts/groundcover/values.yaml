@@ -926,7 +926,7 @@ vector:
           - logs_from_logs
         endpoint: '{{ include "clickhouse.httpEndpoint" . }}'
         database: "groundcover"
-        table: "logs"
+        table: "logs_v2"
         auth:
           user: '{{ include "clickhouse.username" . }}'
           password: $CLICKHOUSE_PASSWORD
