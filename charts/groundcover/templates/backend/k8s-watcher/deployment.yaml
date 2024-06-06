@@ -111,8 +111,17 @@ spec:
                 key: {{ template "groundcover.apikeySecretKey" . }}
                 name: {{ template "groundcover.apikeySecretName" . }}        
         args:
-        - while [ $(curl -H "apikey:$API_KEY" -skw '%{http_code}' {{ include "opentelemetry-collector.health.http.url" . }}
-          -o /dev/null) -ne 200 ]; do echo 'Waiting for opentelemetry-collector...'; sleep 2; done; echo opentelemetry-collector is up
+        - |
+            while [ $(curl -H "apikey:$API_KEY" \
+            {{- if .Values.global.ingestion.tls_skip_verify }}
+              -k \
+            {{- end }}
+              -sw '%{http_code}' {{ include "opentelemetry-collector.health.http.url" . }} -o /dev/null) -ne 200 ];
+            do
+              echo 'Waiting for opentelemetry-collector...';
+              sleep 2;
+            done;
+            echo opentelemetry-collector is up
         command:
           - /bin/sh
           - -c
@@ -125,7 +134,17 @@ spec:
                 key: {{ template "groundcover.apikeySecretKey" . }}
                 name: {{ template "groundcover.apikeySecretName" . }}   
         args:
-        - while [ $(curl -H "apikey:$API_KEY" -ksw '%{http_code}' {{ include "metrics-ingester.health.http.url" . }} -o /dev/null) -ne 200 ]; do echo 'Waiting for VictoriaMetrics Agent...'; sleep 2; done; echo VictoriaMetrics Agent is up
+        - |
+            while [ $(curl -H "apikey:$API_KEY" \
+            {{- if .Values.global.ingestion.tls_skip_verify }}
+              -k \
+            {{- end }}
+              -sw '%{http_code}' {{ include "metrics-ingester.health.http.url" . }} -o /dev/null) -ne 200 ];
+            do
+              echo 'Waiting for VictoriaMetrics Agent...';
+              sleep 2;
+            done;
+            echo VictoriaMetrics Agent is up
         command:
           - /bin/sh
           - -c

@@ -11,6 +11,9 @@ global:
     # set ingress site for inCloud / on-prem sensor only deployments
     site:
 
+  ingestion:
+    tls_skip_verify: true
+
   groundcover_token:
   # groundcover_token is preceding groundcoverPredefinedTokenSecret, make sure its empty if using existing secret
   # if the secret is preloaded in the namespace, you can refer it here instead
@@ -1011,7 +1014,7 @@ metrics-ingester:
     remoteWrite.showURL: "true"
     remoteWrite.maxDiskUsagePerURL: 10GB
     remoteWrite.headers: "apikey:%{API_KEY}"
-    remoteWrite.tlsInsecureSkipVerify: "true"
+    remoteWrite.tlsInsecureSkipVerify: '{{ ternary "true" "false" .Values.global.ingestion.tls_skip_verify }}'
     remoteWrite.url: '{{ include "victoria-metrics.write.http.url" . }}'
     tlsKeyFile: /etc/ssl/certs/tls.key
     tlsCertFile: /etc/ssl/certs/tls.crt
@@ -1223,7 +1226,7 @@ custom-metrics:
     remoteWrite.maxDailySeries: "1000000"
     remoteWrite.maxHourlySeries: "100000"
     remoteWrite.headers: "apikey:%{API_KEY}"
-    remoteWrite.tlsInsecureSkipVerify: "true"
+    remoteWrite.tlsInsecureSkipVerify: '{{ ternary "true" "false" .Values.global.ingestion.tls_skip_verify }}'
     remoteWrite.url: '{{ include "victoria-metrics.write.http.url" . }}'
     remoteWrite.label: clusterId=$(GC_CLUSTER_ID)
   env:

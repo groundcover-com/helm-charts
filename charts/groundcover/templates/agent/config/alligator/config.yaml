@@ -394,6 +394,7 @@ data:
       collector:
         endpoint: {{ include "opentelemetry-collector.otlp.grpc.url" . }}
         enableTLS: {{ include "opentelemetry-collector.otlp.tls.enabled" . }}
+        insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
         writeTimeout: 10s
         batchSize: 100
         flushInterval: 30s
@@ -448,7 +449,7 @@ data:
         batchsize: 10485760
         client:
           tlsconfig:
-            insecureSkipVerify: true
+            insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
         backoffConfig:
           minBackoff: 500ms
           maxBackoff: 5m
@@ -469,6 +470,7 @@ data:
     otlp:
       endpoint: {{ include "opentelemetry-collector.otlp.grpc.url" . }}
       enableTLS: {{ include "opentelemetry-collector.otlp.tls.enabled" . }}
+      insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
       writeTimeout: 10s
       batchSize: 350
       flushInterval: 1s
