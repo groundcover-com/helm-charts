@@ -961,11 +961,11 @@ vector:
         date_time_best_effort: true
         buffer:
           type: memory
-          max_events: 500000
+          max_events: 50000
           when_full: drop_newest
         batch:
           max_bytes: 200000000
-          max_events: 200000
+          max_events: 100000
           timeout_secs: 1
 
       telemtry_prometheus_sink:
