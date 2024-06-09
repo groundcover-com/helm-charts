@@ -872,6 +872,11 @@ vector:
     limits:
       memory: "6Gi"
   env:
+    - name: MY_POD_IP
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: status.podIP
     - name: CLICKHOUSE_PASSWORD
       valueFrom:
         secretKeyRef:
@@ -977,11 +982,30 @@ vector:
           - telemetry_metrics
     api:
       enabled: true
-  updateStrategy: {}
-  type: RollingUpdate
-  rollingUpdate:
-    maxUnavailable: 0
-    maxSurge: 1
+      address: "${MY_POD_IP}:8686"
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: 8686
+    initialDelaySeconds: 2
+    timeoutSeconds: 1
+    periodSeconds: 10
+    successThreshold: 1
+    failureThreshold: 3
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: 8686
+    initialDelaySeconds: 2
+    timeoutSeconds: 1
+    periodSeconds: 10
+    successThreshold: 1
+    failureThreshold: 3
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
 
 router:
   # onprem or cloud
@@ -1016,8 +1040,8 @@ metrics-ingester:
     remoteWrite.headers: "apikey:%{API_KEY}"
     remoteWrite.tlsInsecureSkipVerify: '{{ ternary "true" "false" .Values.global.ingestion.tls_skip_verify }}'
     remoteWrite.url: '{{ include "victoria-metrics.write.http.url" . }}'
-    tlsKeyFile: /etc/ssl/certs/tls.key
-    tlsCertFile: /etc/ssl/certs/tls.crt
+    tlsKeyFile: /etc/ssl/gc-certs/tls.key
+    tlsCertFile: /etc/ssl/gc-certs/tls.crt
     tls: "{{ .Values.global.metrics.tls.enabled }}"
   env:
     - name: API_KEY
@@ -1033,7 +1057,7 @@ metrics-ingester:
   extraVolumeMounts:
     - name: certificate
       readOnly: true
-      mountPath: /etc/ssl/certs
+      mountPath: /etc/ssl/gc-certs
   resources:
     limits:
       cpu: 500m
