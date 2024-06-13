@@ -27,7 +27,7 @@ onprem:
 origin:
   registry: quay.io/groundcover
   repository: router
-  tag: 1.7.125
+  tag: 1.7.126
 serviceAccount:
   annotations:
 ingress:
@@ -180,7 +180,7 @@ grafana:
   image:
     registry: public.ecr.aws
     repository: groundcovercom/grafana-groundcover
-    tag: v0.0.14-grafana10.1.2
+    tag: v0.0.16-grafana11.0.0
   testFramework:
     enabled: false
   envValueFrom:
