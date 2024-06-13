@@ -710,7 +710,12 @@ opentelemetry-collector:
             # logs can have either explicit 'log' log_type or no log_type at all and no type (reserved for custom logs)
             - attributes["log_type"] != nil and attributes["log_type"] != "log"
             - attributes["type"] != nil
-      groundcover/logs: {}
+      groundcover/logs:
+        type: logs
+      groundcover/custom:
+        type: custom
+      groundcover/monitorState:
+        type: monitorState
       groundcover/traces: {}
     exporters:
       groundcover/monitorState:
@@ -768,6 +773,14 @@ opentelemetry-collector:
         endpoint: '{{ include "vector.otlpTracesEndpoint" . }}'
         tls:
           insecure: true
+      otlphttp/vector_custom:
+        endpoint: '{{ include "vector.otlpCustomEndpoint" . }}'
+        tls:
+          insecure: true
+      otlphttp/vector_monitors:
+        endpoint: '{{ include "vector.otlpMonitorsEndpoint" . }}'
+        tls:
+          insecure: true
     connectors:
       groundcover/traces2logs: {}
     service:
@@ -781,8 +794,9 @@ opentelemetry-collector:
             - loki/historian
           processors:
             - batch/monitorState
-          exporters:
             - groundcover/monitorState
+          exporters:
+            - '{{ ternary "otlphttp/vector_monitors" "groundcover/monitorState"  .Values.global.vector.enabled }}'
         metrics:
           receivers:
             - otlp
@@ -819,8 +833,9 @@ opentelemetry-collector:
           processors:
             - filter/dropNoneCustom
             - batch/custom
-          exporters:
             - groundcover/custom
+          exporters:
+            - '{{ ternary "otlphttp/vector_custom" "groundcover/custom"  .Values.global.vector.enabled }}'
   resources:
     requests:
       cpu: 100m
@@ -850,6 +865,14 @@ vector:
         port: 4327
       - name: http-traces
         port: 4328
+      - name: grpc-custom
+        port: 4337
+      - name: http-custom
+        port: 4338
+      - name: grpc-monitors
+        port: 4347
+      - name: http-monitors
+        port: 4348
       - name: metrics
         port: 9598
   containerPorts:
@@ -861,6 +884,14 @@ vector:
       containerPort: 4327
     - name: http-traces
       containerPort: 4328
+    - name: grpc-custom
+      containerPort: 4337
+    - name: http-custom
+      containerPort: 4338
+    - name: grpc-monitors
+      containerPort: 4347
+    - name: http-monitors
+      containerPort: 4348
     - name: metrics
       containerPort: 9598
   role: "Stateless-Aggregator"
@@ -902,6 +933,26 @@ vector:
       telemetry_metrics:
         type: internal_metrics
 
+      otel_logs_custom:
+        type: opentelemetry
+        grpc:
+          address: 0.0.0.0:4337
+        http:
+          address: 0.0.0.0:4338
+          keepalive:
+            max_connection_age_jitter_factor: 0.1
+            max_connection_age_secs: 300
+
+      otel_logs_monitors:
+        type: opentelemetry
+        grpc:
+          address: 0.0.0.0:4347
+        http:
+          address: 0.0.0.0:4348
+          keepalive:
+            max_connection_age_jitter_factor: 0.1
+            max_connection_age_secs: 300
+
       otel_traces:
         type: opentelemetry
         grpc:
@@ -923,6 +974,41 @@ vector:
       traces_from_logs:
         inputs:
           - "otel_traces.logs"
+        type: "remap"
+        source: |-
+          . = .attributes
+
+      custom_from_logs:
+        inputs:
+          - "otel_logs_custom.logs"
+        type: "remap"
+        source: |-
+          . = .attributes   
+
+      custom_from_logs_routing:
+        inputs:
+          - custom_from_logs
+        type: "route"
+        reroute_unmatched: true
+        route:
+          entities: .log_type == "entity"
+
+      entities:
+        inputs:
+          - custom_from_logs_routing.entities
+        type: "remap"
+        source: |-
+
+      events:
+        inputs:
+          - custom_from_logs_routing._unmatched
+        type: "remap"
+        source: |-
+          .type = del(.event_type)
+
+      monitors:
+        inputs:
+          - "otel_logs_monitors.logs"
         type: "remap"
         source: |-
           . = .attributes
@@ -973,8 +1059,80 @@ vector:
           when_full: drop_newest
         batch:
           max_bytes: 200000000
-          max_events: 100000
+          max_events: 10000
           timeout_secs: 1
+
+      clickhouse_k8s_entities:
+        type: clickhouse
+        inputs:
+          - entities
+        endpoint: '{{ include "clickhouse.httpEndpoint" . }}'
+        database: "groundcover"
+        table: "entities"
+        auth:
+          user: '{{ include "clickhouse.username" . }}'
+          password: $CLICKHOUSE_PASSWORD
+          strategy: "basic"
+        format: "json_each_row"
+        encoding:
+          timestamp_format: rfc3339
+        date_time_best_effort: true
+        buffer:
+          type: memory
+          max_events: 50000
+          when_full: drop_newest
+        batch:
+          max_bytes: 100000000
+          max_events: 10000
+          timeout_secs: 2
+
+      clickhouse_k8s_events:
+        type: clickhouse
+        inputs:
+          - events
+        endpoint: '{{ include "clickhouse.httpEndpoint" . }}'
+        database: "groundcover"
+        table: "events"
+        auth:
+          user: '{{ include "clickhouse.username" . }}'
+          password: $CLICKHOUSE_PASSWORD
+          strategy: "basic"
+        format: "json_each_row"
+        encoding:
+          timestamp_format: rfc3339
+        date_time_best_effort: true
+        buffer:
+          type: memory
+          max_events: 50000
+          when_full: drop_newest
+        batch:
+          max_bytes: 100000000
+          max_events: 10000
+          timeout_secs: 2
+
+      clickhouse_monitors:
+        type: clickhouse
+        inputs:
+          - monitors
+        endpoint: '{{ include "clickhouse.httpEndpoint" . }}'
+        database: "groundcover"
+        table: "monitor_state"
+        auth:
+          user: '{{ include "clickhouse.username" . }}'
+          password: $CLICKHOUSE_PASSWORD
+          strategy: "basic"
+        format: "json_each_row"
+        encoding:
+          timestamp_format: rfc3339
+        date_time_best_effort: true
+        buffer:
+          type: memory
+          max_events: 50000
+          when_full: drop_newest
+        batch:
+          max_bytes: 100000000
+          max_events: 10000
+          timeout_secs: 2
 
       telemtry_prometheus_sink:
         type: prometheus_exporter
