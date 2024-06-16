@@ -1827,6 +1827,9 @@ victoria-metrics-single:
                     - SPOT
 
 monitors-manager:
+  initChownData:
+    image:
+      tag: "1.36.1"
   image:
     registry: public.ecr.aws
     repository: groundcovercom/grafana-groundcover
