@@ -16,7 +16,7 @@ postgresql:
     image:
       registry: public.ecr.aws/groundcovercom
       repository: bitnami/os-shell
-      tag: 11-debian-11-r19
+      tag: 11-debian-11-r91
   primary:
     containerSecurityContext:
       enabled: false
