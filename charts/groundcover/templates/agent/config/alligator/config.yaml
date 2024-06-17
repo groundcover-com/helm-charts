@@ -391,8 +391,8 @@ data:
     headersForceSampling: {{ toYaml .Values.agent.alligator.headersForceSampling | nindent 6 }}
 
     apmIngestor: 
-      collector:
-        endpoint: {{ include "opentelemetry-collector.otlp.grpc.url" . }}
+      otlpEndpoint:
+        endpoint: {{ include "ingestion.traces.otlp.grpc.url" . }}
         enableTLS: {{ include "opentelemetry-collector.otlp.tls.enabled" . }}
         insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
         writeTimeout: 10s
@@ -467,8 +467,16 @@ data:
         metricateLabels: false
         multiLineConfigs: {{ toYaml .Values.logsMultiLines | nindent 10}}
         decolorize: {{ .Values.decolorizeLogs }}
-    otlp:
-      endpoint: {{ include "opentelemetry-collector.otlp.grpc.url" . }}
+    tracesOtlpEndpoint:
+      endpoint: {{ include "ingestion.traces.otlp.grpc.url" . }}
+      enableTLS: {{ include "opentelemetry-collector.otlp.tls.enabled" . }}
+      insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
+    logsOtlpEndpoint:
+      endpoint: {{ include "ingestion.logs.otlp.grpc.url" . }}
+      enableTLS: {{ include "opentelemetry-collector.otlp.tls.enabled" . }}
+      insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
+    customOtlpEndpoint:
+      endpoint: {{ include "ingestion.custom.otlp.grpc.url" . }}
       enableTLS: {{ include "opentelemetry-collector.otlp.tls.enabled" . }}
       insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
       writeTimeout: 10s

@@ -768,19 +768,19 @@ opentelemetry-collector:
           max_interval: 5s
           max_elapsed_time: 15s
       otlphttp/vector_logs:
-        endpoint: '{{ include "vector.otlpLogsEndpoint" . }}'
+        endpoint: '{{ include "vector.otlpHttpLogsEndpoint" . }}'
         tls:
           insecure: true
       otlphttp/vector_traces:
-        endpoint: '{{ include "vector.otlpTracesEndpoint" . }}'
+        endpoint: '{{ include "vector.otlpHttpTracesEndpoint" . }}'
         tls:
           insecure: true
       otlphttp/vector_custom:
-        endpoint: '{{ include "vector.otlpCustomEndpoint" . }}'
+        endpoint: '{{ include "vector.otlpHttpCustomEndpoint" . }}'
         tls:
           insecure: true
       otlphttp/vector_monitors:
-        endpoint: '{{ include "vector.otlpMonitorsEndpoint" . }}'
+        endpoint: '{{ include "vector.otlpHttpMonitorsEndpoint" . }}'
         tls:
           insecure: true
     connectors:

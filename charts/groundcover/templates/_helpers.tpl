@@ -167,6 +167,38 @@ Get cluster_id from values or generate random one
 {{- print "http://db-manager:8888/writer-ready" -}}
 {{- end -}}
 
+{{- define "ingestion.traces.otlp.grpc.url" -}}
+{{- if and false .Values.global.vector.enabled -}}
+    {{- (include "vector.otlpGrpcTracesEndpoint" .) -}}
+{{- else -}}
+    {{- (include "opentelemetry-collector.otlp.grpc.url" .) -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "ingestion.logs.otlp.grpc.url" -}}
+{{- if and false .Values.global.vector.enabled -}}
+    {{- (include "vector.otlpGrpcLogsEndpoint" .) -}}
+{{- else -}}
+    {{- (include "opentelemetry-collector.otlp.grpc.url" .) -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "ingestion.custom.otlp.grpc.url" -}}
+{{- if and false .Values.global.vector.enabled -}}
+    {{- (include "vector.otlpGrpcCustomEndpoint" .) -}}
+{{- else -}}
+    {{- (include "opentelemetry-collector.otlp.grpc.url" .) -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "ingestion.monitors.otlp.grpc.url" -}}
+{{- if and false .Values.global.vector.enabled -}}
+    {{- (include "vector.otlpGrpcMonitorsEndpoint" .) -}}
+{{- else -}}
+    {{- (include "opentelemetry-collector.otlp.grpc.url" .) -}}
+{{- end -}}
+{{- end -}}
+
 {{/*
   Helper for spreading helm love.
 

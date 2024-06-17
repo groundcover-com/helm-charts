@@ -51,7 +51,7 @@ data:
     commitHashKeyName: {{ .Values.commitHashKeyName }}
     repositoryUrlKeyName: {{ .Values.repositoryUrlKeyName }}
     otlp:
-      endpoint: {{ include "opentelemetry-collector.otlp.grpc.url" . }}
+      endpoint: {{ include "ingestion.custom.otlp.grpc.url" . }}
       enableTLS: {{ include "opentelemetry-collector.otlp.tls.enabled" . }}
       insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
       writeTimeout: 10s
