@@ -167,54 +167,35 @@ Get cluster_id from values or generate random one
 {{- print "http://db-manager:8888/writer-ready" -}}
 {{- end -}}
 
-{{- define "ingestion.traces.otlp.http.url" -}}
-{{- if .Values.global.ingress.site -}}
-    {{- if .Values.global.ingestion.sendToVector -}}
-    {{- printf "%s/vector-traces" (include "incloud.otel.http.url" .) -}}
-    {{- else -}}
-    {{- printf "%s/v1/traces" (include "incloud.otel.http.url" .) -}}
-    {{- end -}}
-{{- else if and .Values.global.vector.enabled .Values.global.ingestion.sendToVector -}}
-    {{- printf "%s/v1/logs" (include "vector.otlpHttpTracesEndpoint" .) -}}
+{{- define "ingestion.traces.otlp.grpc.url" -}}
+{{- if and false .Values.global.vector.enabled -}}
+    {{- (include "vector.otlpGrpcTracesEndpoint" .) -}}
 {{- else -}}
-    {{- printf "%s/v1/traces" (include "opentelemetry-collector.otlp.http.url" .) -}}
+    {{- (include "opentelemetry-collector.otlp.grpc.url" .) -}}
 {{- end -}}
 {{- end -}}
 
-{{- define "ingestion.logs.otlp.http.url" -}}
-{{- if .Values.global.ingress.site -}}
-    {{- if .Values.global.ingestion.sendToVector -}}
-    {{- printf "%s/vector-logs" (include "incloud.otel.http.url" .) -}}
-    {{- else -}}
-    {{- printf "%s/v1/logs" (include "incloud.otel.http.url" .) -}}
-    {{- end -}}
-{{- else if and .Values.global.vector.enabled .Values.global.ingestion.sendToVector -}}
-    {{- printf "%s/v1/logs" (include "vector.otlpHttpLogsEndpoint" .) -}}
+{{- define "ingestion.logs.otlp.grpc.url" -}}
+{{- if and false .Values.global.vector.enabled -}}
+    {{- (include "vector.otlpGrpcLogsEndpoint" .) -}}
 {{- else -}}
-    {{- printf "%s/v1/logs" (include "opentelemetry-collector.otlp.http.url" .) -}}
+    {{- (include "opentelemetry-collector.otlp.grpc.url" .) -}}
 {{- end -}}
 {{- end -}}
 
-{{- define "ingestion.custom.otlp.http.url" -}}
-{{- if .Values.global.ingress.site -}}
-    {{- if .Values.global.ingestion.sendToVector -}}
-    {{- printf "%s/vector-custom" (include "incloud.otel.http.url" .) -}}
-    {{- else -}}
-    {{- printf "%s/v1/logs" (include "incloud.otel.http.url" .) -}}
-    {{- end -}}
-{{- else if and .Values.global.vector.enabled .Values.global.ingestion.sendToVector  -}}
-    {{- printf "%s/v1/logs" (include "vector.otlpHttpCustomEndpoint" .) -}}
+{{- define "ingestion.custom.otlp.grpc.url" -}}
+{{- if and false .Values.global.vector.enabled -}}
+    {{- (include "vector.otlpGrpcCustomEndpoint" .) -}}
 {{- else -}}
-    {{- printf "%s/v1/logs" (include "opentelemetry-collector.otlp.http.url" .) -}}
+    {{- (include "opentelemetry-collector.otlp.grpc.url" .) -}}
 {{- end -}}
 {{- end -}}
 
-/* monitors ignore ingress config, always send to local  */
-{{- define "ingestion.monitors.otlp.http.url" -}}
-{{- if .Values.global.vector.enabled -}}
-    {{- printf "%s/v1/logs" (include "vector.otlpHttpMonitorsEndpoint" .) -}}
+{{- define "ingestion.monitors.otlp.grpc.url" -}}
+{{- if and false .Values.global.vector.enabled -}}
+    {{- (include "vector.otlpGrpcMonitorsEndpoint" .) -}}
 {{- else -}}
-    {{- printf "%s/v1/logs" (include "opentelemetry-collector.otlp.http.url" .) -}}
+    {{- (include "opentelemetry-collector.otlp.grpc.url" .) -}}
 {{- end -}}
 {{- end -}}
 
