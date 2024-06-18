@@ -27,7 +27,7 @@ onprem:
 origin:
   registry: quay.io/groundcover
   repository: router
-  tag: 1.8.4
+  tag: 1.8.5
 serviceAccount:
   annotations:
 ingress:
@@ -227,6 +227,7 @@ grafana:
       jwk_set_url: '{{ ternary "https://auth.groundcover.com/.well-known/jwks.json" "" (eq .Values.global.auth.type "auth0") }}'
       cache_ttl: 60m
       auto_sign_up: false
+      skip_org_role_sync: true
     unified_alerting:
       max_attempts: 3
   extraSecretMounts:
