@@ -74,6 +74,24 @@ spec:
                   number: {{ index .Values.global "opentelemetry-collector" "ports" "otlp-http" "servicePort" | int }}
     - http:
         paths:
+          - path: {{ get (urlParse (include "opentelemetry-collector.otlplogs.http.url" .)) "path" }} 
+            pathType: Exact
+            backend:
+              service:
+                name: {{ include "opentelemetry-collector.fullname" . }}
+                port:
+                  number: {{ index .Values.global "opentelemetry-collector" "ports" "otlp-http" "servicePort" | int }}
+    - http:
+        paths:
+          - path: {{ get (urlParse (include "opentelemetry-collector.otlpmetrics.http.url" .)) "path" }} 
+            pathType: Exact
+            backend:
+              service:
+                name: {{ include "opentelemetry-collector.fullname" . }}
+                port:
+                  number: {{ index .Values.global "opentelemetry-collector" "ports" "otlp-http" "servicePort" | int }}
+    - http:
+        paths:
           - path: {{ get (urlParse (include "opentelemetry-collector.awsfirehose.http.url" .)) "path" }} 
             pathType: Exact
             backend:
