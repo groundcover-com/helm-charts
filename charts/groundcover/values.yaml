@@ -13,6 +13,7 @@ global:
 
   ingestion:
     tls_skip_verify: true
+    sendToVector: false
 
   groundcover_token:
   # groundcover_token is preceding groundcoverPredefinedTokenSecret, make sure its empty if using existing secret
@@ -1014,6 +1015,27 @@ vector:
         type: "remap"
         source: |-
           . = .attributes
+          del(.condition)
+          del(.dashboardUID)
+          del(.fingerprint)
+          del(.folderUID)
+          del(.grafana_folder)
+          del(.from)
+          del(.group)
+          del(.orgID)
+          del(.panelID)
+          del(.ruleUID)
+          del(.values)
+          .previous_state, err = to_string(del(.previous))
+          if err == null {
+            .previous_state = to_string(split(.previous_state, "(", 2)[0])
+            .previous_state = strip_whitespace(.previous_state)
+          }
+          .state, err = to_string(del(.current))
+          if err == null {
+            .state = to_string(split(.state, "(", 2)[0])
+            .state = strip_whitespace(.state)
+          }
 
     sinks:
       clickhouse_logs:
@@ -1835,13 +1857,17 @@ monitors-manager:
   image:
     registry: public.ecr.aws
     repository: groundcovercom/grafana-groundcover
-    tag: v0.0.16-grafana11.0.0
+    tag: v0.0.18-grafana11.0.0
   nameOverride: monitors-manager
   persistence:
     enabled: true
     type: statefulset
     size: 5Gi
   envValueFrom:
+    API_KEY:
+      secretKeyRef:
+        key: '{{ include "groundcover.apikeySecretKey" . }}'
+        name: '{{ include "groundcover.apikeySecretName" . }}'
     CLICKHOUSE_PASSWORD:
       secretKeyRef:
         key: '{{ include "clickhouse.secretKey" . }}'
@@ -1880,6 +1906,10 @@ monitors-manager:
       backend: "loki"
       loki_remote_url: '{{ include "opentelemetry-collector.loki-historian.http.url" . }}'
       log_all: true
+      otel_export_enabled: "{{  .Values.global.vector.enabled }}"
+      otel_endpoint: '{{ include "ingestion.monitors.otlp.http.url" . }}'
+      otel_enable_tls: false
+      otel_tls_skip_verify: true
     feature_toggles:
       enable: "alertStateHistoryLokiSecondary, alertStateHistoryLokiPrimary, alertStateHistoryLokiOnly"
     server:
