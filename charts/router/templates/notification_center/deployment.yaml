@@ -1,0 +1,82 @@
+{{- if .Values.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    {{- include "notification-center.labels" . | nindent 4 }}
+  annotations:
+    groundcover_version: {{ .Values.origin.tag }}
+  name: notification-center
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.notifications.replicas }}
+  selector:
+    matchLabels:
+      {{- include "notification-center.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "notification-center.labels" . | nindent 8 }}
+      annotations:
+        groundcover_version: {{ .Values.origin.tag }}
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9102"
+        checksum/notification-center_config: {{ include (print $.Template.BasePath "/config/configMap.yaml") . | sha256sum }}
+    spec:
+      serviceAccountName: notification-center
+      imagePullSecrets: {{ include "notification-center.imagePullSecrets" . }}
+      containers:
+        - name: notification-center
+          image: {{ include "notification-center.image" . }}
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: config-volume
+              mountPath: /config
+          ports:
+            - containerPort: 8081
+              name: ingest
+              protocol: TCP
+            - containerPort: 9102
+              name: prom-metrics
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            - name: GC_GROUNDCOVERVERSION
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.annotations['groundcover_version']
+{{- if .Values.extraEnv }}
+            {{- toYaml .Values.extraEnv | nindent 12 }}
+{{- end }}
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: ingest
+            initialDelaySeconds: 5
+            periodSeconds: 15
+          livenessProbe:
+            httpGet:
+              scheme: HTTP
+              path: /health
+              port: ingest
+            initialDelaySeconds: 5
+            periodSeconds: 15
+            timeoutSeconds: 5     
+{{- if .Values.tolerations }}
+      tolerations:
+{{ toYaml .Values.tolerations | indent 8 }}
+{{- end }}
+{{- if .Values.affinity }}
+      affinity:
+{{ toYaml .Values.affinity | indent 8 }}
+{{- end }}
+{{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}     
+{{- end }}
+      volumes:
+        - name: config-volume
+          configMap:
+            name: notification-center-config
+{{ end -}}
