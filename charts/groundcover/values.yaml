@@ -6,6 +6,17 @@ global:
     name:
   vector:
     enabled: false
+    tracesAsLogs:
+      otlp:
+        overrideHttpURL:
+    logs:
+      otlp:
+        overrideHttpURL:
+    custom:
+      otlp:
+        overrideHttpURL:
+    health:
+      overrideHttpURL:
 
   ingress:
     # set ingress site for inCloud / on-prem sensor only deployments
@@ -769,19 +780,19 @@ opentelemetry-collector:
           max_interval: 5s
           max_elapsed_time: 15s
       otlphttp/vector_logs:
-        endpoint: '{{ include "vector.otlpHttpLogsEndpoint" . }}'
+        endpoint: '{{ include "vector.cluster.otlp.http.logs.endpoint" . }}'
         tls:
           insecure: true
       otlphttp/vector_traces:
-        endpoint: '{{ include "vector.otlpHttpTracesEndpoint" . }}'
+        endpoint: '{{ include "vector.cluster.otlp.http.traces.endpoint" . }}'
         tls:
           insecure: true
       otlphttp/vector_custom:
-        endpoint: '{{ include "vector.otlpHttpCustomEndpoint" . }}'
+        endpoint: '{{ include "vector.cluster.otlp.http.custom.endpoint" . }}'
         tls:
           insecure: true
       otlphttp/vector_monitors:
-        endpoint: '{{ include "vector.otlpHttpMonitorsEndpoint" . }}'
+        endpoint: '{{ include "vector.cluster.otlp.http.monitors.endpoint" . }}'
         tls:
           insecure: true
     connectors:
@@ -860,6 +871,8 @@ opentelemetry-collector:
 vector:
   service:
     ports:
+      - name: api
+        port: 8686
       - name: grpc-logs
         port: 4317
       - name: http-logs
@@ -879,6 +892,8 @@ vector:
       - name: metrics
         port: 9598
   containerPorts:
+    - name: api
+      containerPort: 8686
     - name: grpc-logs
       containerPort: 4317
     - name: http-logs
@@ -1164,7 +1179,9 @@ vector:
           - telemetry_metrics
     api:
       enabled: true
-      address: "${MY_POD_IP}:8686"
+      playground: false
+      graphql: false
+      address: "0.0.0.0:8686"
   readinessProbe:
     httpGet:
       path: /health

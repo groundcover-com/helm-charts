@@ -393,7 +393,7 @@ data:
     apmIngestor: 
       otlpEndpoint:
         endpoint: {{ include "ingestion.traces.otlp.http.url" . }}
-        enableTLS: {{ include "opentelemetry-collector.otlp.tls.enabled" . }}
+        enableTLS: {{ include "ingestion.otlp.tls.enabled" . }}
         insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
         writeTimeout: 10s
         batchSize: 100
@@ -471,17 +471,17 @@ data:
     otelPreprocess: {{ .Values.global.ingestion.sendToVector }}
     tracesOtlpEndpoint:
       endpoint: {{ include "ingestion.traces.otlp.http.url" . }}
-      enableTLS: {{ include "opentelemetry-collector.otlp.tls.enabled" . }}
+      enableTLS: {{ include "ingestion.otlp.tls.enabled" . }}
       insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
       writeTimeout: 10s
     logsOtlpEndpoint:
       endpoint: {{ include "ingestion.logs.otlp.http.url" . }}
-      enableTLS: {{ include "opentelemetry-collector.otlp.tls.enabled" . }}
+      enableTLS: {{ include "ingestion.otlp.tls.enabled" . }}
       insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
       writeTimeout: 10s
     customOtlpEndpoint:
       endpoint: {{ include "ingestion.custom.otlp.http.url" . }}
-      enableTLS: {{ include "opentelemetry-collector.otlp.tls.enabled" . }}
+      enableTLS: {{ include "ingestion.otlp.tls.enabled" . }}
       insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
       writeTimeout: 10s
       batchSize: 350

@@ -103,7 +103,7 @@ spec:
         - mountPath: /config
           name: k8s-watcher-config-volume
       initContainers:
-      - name: check-opentelemetry-collector-ready
+      - name: check-ingestion-endpoint-ready
         env:
           - name: API_KEY
             valueFrom:
@@ -116,12 +116,12 @@ spec:
             {{- if .Values.global.ingestion.tls_skip_verify }}
               -k \
             {{- end }}
-              -sw '%{http_code}' {{ include "opentelemetry-collector.health.http.url" . }} -o /dev/null) -ne 200 ];
+              -sw '%{http_code}' {{ include "ingestion.health.http.url" . }} -o /dev/null) -ne 200 ];
             do
-              echo 'Waiting for opentelemetry-collector...';
+              echo 'Waiting for ingestion endpoint...';
               sleep 2;
             done;
-            echo opentelemetry-collector is up
+            echo ingestion endpoint is up
         command:
           - /bin/sh
           - -c

@@ -105,6 +105,70 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
+  name: {{ printf "%s-ingest-v2-health" (include "incloud-ingress.name" .) | trunc 63 | trimSuffix "-" }}
+  annotations:
+    konghq.com/plugins: {{ printf "%s-auth,ingest-v2-rewrite-to-health" .Release.Name | quote }}
+    konghq.com/protocols: {{ ternary "https" "http" .Values.kong.proxy.tls.enabled | quote }}
+spec:
+  ingressClassName: kong
+  rules:
+    - http:
+        paths:
+          - path: {{ get (urlParse (include "vector.incloud.http.health.url" .)) "path" }} 
+            pathType: Exact
+            backend:
+              service:
+                name: {{ include "vector.fullname" . }}
+                port:
+                  number: {{ (include "vector.cluster.http.health.port" .) | int }}
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ printf "%s-ingest-v2-otlp" (include "incloud-ingress.name" .) | trunc 63 | trimSuffix "-" }}
+  annotations:
+    konghq.com/plugins: {{ printf "%s-auth,ingest-v2-rewrite-to-v1-logs" .Release.Name | quote }}
+    konghq.com/protocols: {{ ternary "https" "http" .Values.kong.proxy.tls.enabled | quote }}
+spec:
+  ingressClassName: kong
+  rules:
+    - http:
+        paths:
+          - path: {{ get (urlParse (include "vector.incloud.otlp.http.traces-as-logs.url" .)) "path" }} 
+            pathType: Exact
+            backend:
+              service:
+                name: {{ include "vector.fullname" . }}
+                port:
+                  number: {{ (include "vector.cluster.otlp.http.traces.port" .) | int }}
+
+    - http:
+        paths:
+          - path: {{ get (urlParse (include "vector.incloud.otlp.http.logs.url" .)) "path" }} 
+            pathType: Exact
+            backend:
+              service:
+                name: {{ include "vector.fullname" . }}
+                port:
+                  number: {{ (include "vector.cluster.otlp.http.logs.port" .) | int }}
+
+    - http:
+        paths:
+          - path: {{ get (urlParse (include "vector.incloud.otlp.http.custom.url" .)) "path" }} 
+            pathType: Exact
+            backend:
+              service:
+                name: {{ include "vector.fullname" . }}
+                port:
+                  number: {{ (include "vector.cluster.otlp.http.custom.port" .) | int }}
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
   name: {{ printf "%s-metrics-http" (include "incloud-ingress.name" .) | trunc 63 | trimSuffix "-" }}
   annotations:
     konghq.com/host-aliases: "metrics-http.*"

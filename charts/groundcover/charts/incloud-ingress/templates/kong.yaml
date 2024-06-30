@@ -54,3 +54,23 @@ config:
       - {{ printf "X-ClickHouse-Key: %s" (include "clickhouse.password" .) | quote }}
 plugin: request-transformer
 {{- end -}}
+
+---
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: ingest-v2-rewrite-to-v1-logs
+config:
+  replace:
+    uri: '/v1/logs'
+plugin: request-transformer
+
+---
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: ingest-v2-rewrite-to-health
+config:
+  replace:
+    uri: '/health'
+plugin: request-transformer
