@@ -1,5 +1,5 @@
 apiVersion: v2
-appVersion: 1.8.26
+appVersion: 1.8.27
 dependencies:
 - condition: router.enabled
   import-values:
@@ -45,7 +45,7 @@ dependencies:
     parent: global.clickhouse.serviceAccount
   name: clickhouse
   repository: https://charts.bitnami.com/bitnami
-  version: 4.1.4
+  version: 4.2.0
 - condition: global.backend.enabled
   import-values:
   - child: ports
@@ -89,4 +89,4 @@ dependencies:
 description: Cloud Native Observability
 name: groundcover
 type: application
-version: 1.8.26
+version: 1.8.27
