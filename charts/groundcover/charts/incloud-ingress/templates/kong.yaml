@@ -42,7 +42,7 @@ credentials:
 
 ---
 
-{{- if .Values.datasource.enabled -}}
+{{- if .Values.datasource.enabled }}
 apiVersion: configuration.konghq.com/v1
 kind: KongPlugin
 metadata:
@@ -53,7 +53,7 @@ config:
       - {{ printf "X-ClickHouse-User: %s" (include "clickhouse.username" .) | quote }}
       - {{ printf "X-ClickHouse-Key: %s" (include "clickhouse.password" .) | quote }}
 plugin: request-transformer
-{{- end -}}
+{{- end }}
 
 ---
 apiVersion: configuration.konghq.com/v1
