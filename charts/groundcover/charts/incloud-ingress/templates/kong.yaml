@@ -74,3 +74,13 @@ config:
   replace:
     uri: '/health'
 plugin: request-transformer
+
+---
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: ingest-v2-rewrite-root-path 
+config:
+  replace:
+    uri: '/'
+plugin: request-transformer

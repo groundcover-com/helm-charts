@@ -19,7 +19,7 @@ dependencies:
   version: 0.9.17
 - name: clickhouse
   repository: https://charts.bitnami.com/bitnami
-  version: 4.2.0
+  version: 6.2.9
 - name: opentelemetry-collector
   repository: https://open-telemetry.github.io/opentelemetry-helm-charts
   version: 0.81.1
@@ -38,5 +38,5 @@ dependencies:
 - name: vector
   repository: https://helm.vector.dev
   version: 0.32.1
-digest: sha256:8bccc1399ced5b9b552a1f99546a7598bbf8a42214611685ca3e8db090303f1c
-generated: "2024-06-30T09:20:00.494934716Z"
+digest: sha256:bdf301bfa757445b9a8903e1bd0c3f04bb8a1ca08720647c7cec06711619d49c
+generated: "2024-07-04T12:51:15.335526+03:00"

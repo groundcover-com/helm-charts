@@ -46,6 +46,14 @@
 {{-  printf "%s/ingest/v2/otlp/logs" (include "incloud.ingestion.http.url" .) -}}
 {{- end -}}
 
+{{- define "vector.cluster.json.logs.port" -}}
+{{- printf "4319" -}}
+{{- end -}}
+
+{{- define "vector.incloud.json.logs.url" -}}
+{{- printf "%s/logs" (include "incloud.ingestion.json.url" .) -}}
+{{- end -}}
+
 {{- define "vector.cluster.otlp.grpc.traces.port" -}}
 {{-  printf "4327"  -}}
 {{- end -}}
@@ -70,6 +78,14 @@
 {{-  printf "%s/ingest/v2/otlp/traces-as-logs" (include "incloud.ingestion.http.url" .) -}}
 {{- end -}}
 
+{{- define "vector.cluster.json.traces-as-logs.port" -}}
+{{- printf "4329" -}}
+{{- end -}}
+
+{{- define "vector.incloud.json.traces-as-logs.url" -}}
+{{- printf "%s/traces-as-logs" (include "incloud.ingestion.json.url" .) -}}
+{{- end -}}
+
 {{- define "vector.cluster.otlp.grpc.custom.port" -}}
 {{-  printf "4337"  -}}
 {{- end -}}
@@ -92,6 +108,22 @@
 
 {{- define "vector.incloud.otlp.http.custom.url" -}}
 {{-  printf "%s/ingest/v2/otlp/custom" (include "incloud.ingestion.http.url" .) -}}
+{{- end -}}
+
+{{- define "vector.cluster.json.events.port" -}}
+{{- printf "4359" -}}
+{{- end -}}
+
+{{- define "vector.incloud.json.events.url" -}}
+{{- printf "%s/events" (include "incloud.ingestion.json.url" .) -}}
+{{- end -}}
+
+{{- define "vector.cluster.json.entities.port" -}}
+{{- printf "4369" -}}
+{{- end -}}
+
+{{- define "vector.incloud.json.entities.url" -}}
+{{- printf "%s/entities" (include "incloud.ingestion.json.url" .) -}}
 {{- end -}}
 
 {{- define "vector.cluster.otlp.grpc.monitors.port" -}}
@@ -160,4 +192,50 @@
 {{- else -}}
     {{- include "vector.cluster.http.health.url" . -}}
 {{- end -}}
+{{- end -}}
+
+{{- define "vector.config.sinks.telemetry" -}}
+telemtry_prometheus_sink:
+        type: prometheus_exporter
+        inputs:
+          - telemetry_metrics
+{{- end -}}
+
+{{- define "vector.config.sources.telemetry" -}}
+telemetry_metrics:
+  type: internal_metrics
+{{- end -}}
+
+{{- define "vector.config.customConfig" -}}
+sources:
+{{- include "vector.config.sources.telemetry" . | nindent 2 }}
+{{ if .Values.vector.customComponents.sources.overrideSources }}
+{{-  tpl (toYaml .Values.vector.customComponents.sources.overrideSources) $ | nindent 2 -}}
+{{ else }}
+{{-  tpl (toYaml .Values.vector.customComponents.sources.otel) $ | nindent 2 }}
+{{-  tpl (toYaml .Values.vector.customComponents.sources.json) $ | nindent 2 }}
+{{ end }}
+transforms:
+{{ if .Values.vector.customComponents.transforms.overrideTransforms }}
+{{- tpl (toYaml .Values.vector.customComponents.transforms.overrideTransforms) $ | nindent 2 -}}
+{{ else }}
+{{- tpl (toYaml .Values.vector.customComponents.transforms.otel) $ | nindent 2 }}
+{{ end }}
+sinks:
+{{ if .Values.vector.customComponents.sinks.overrideSinks }}
+{{- tpl (toYaml .Values.vector.customComponents.sinks.overrideSinks) $ | nindent 2 -}}
+{{ else }}
+{{- include "vector.config.sinks.telemetry" . | nindent 2 }}
+{{ if .Values.global.backend.enabled }}
+{{- tpl (toYaml .Values.vector.customComponents.sinks.local) $ | nindent 2 }}
+{{ else }}
+{{- tpl (toYaml .Values.vector.customComponents.sinks.remote) $ | nindent 2 }}
+{{ end }}
+{{ end }}
+
+api:
+  enabled: true
+  playground: false
+  graphql: false
+  address: "0.0.0.0:8686"
 {{- end -}}

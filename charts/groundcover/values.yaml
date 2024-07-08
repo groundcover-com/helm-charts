@@ -121,7 +121,7 @@ saas:
   basePath: ""
 
 #GENERAL
-env: 
+env:
 clusterId:
 installationId:
 # multipleClusterIds:
@@ -877,18 +877,28 @@ vector:
         port: 4317
       - name: http-logs
         port: 4318
+      - name: json-logs
+        port: 4319
       - name: grpc-traces
         port: 4327
       - name: http-traces
         port: 4328
+      - name: json-traces
+        port: 4329
       - name: grpc-custom
         port: 4337
       - name: http-custom
         port: 4338
+      - name: json-events
+        port: 4359
+      - name: json-entities
+        port: 4369
       - name: grpc-monitors
         port: 4347
       - name: http-monitors
         port: 4348
+      - name: json-monitors
+        port: 4349
       - name: metrics
         port: 9598
   containerPorts:
@@ -898,18 +908,26 @@ vector:
       containerPort: 4317
     - name: http-logs
       containerPort: 4318
+    - name: json-logs
+      containerPort: 4319
     - name: grpc-traces
       containerPort: 4327
     - name: http-traces
       containerPort: 4328
+    - name: json-traces
+      containerPort: 4329
     - name: grpc-custom
       containerPort: 4337
     - name: http-custom
       containerPort: 4338
+    - name: json-custom
+      containerPort: 4339
     - name: grpc-monitors
       containerPort: 4347
     - name: http-monitors
       containerPort: 4348
+    - name: json-monitors
+      containerPort: 4349
     - name: metrics
       containerPort: 9598
   role: "Stateless-Aggregator"
@@ -931,257 +949,19 @@ vector:
         secretKeyRef:
           key: '{{ include "clickhouse.secretKey" . }}'
           name: '{{ include "clickhouse.secretName" . }}'
+    - name: API_KEY
+      valueFrom:
+        secretKeyRef:
+          key: '{{ include "groundcover.apikeySecretKey" . }}'
+          name: '{{ include "groundcover.apikeySecretName" . }}'
   podAnnotations:
     prometheus.io/port: "9598"
     prometheus.io/scrape: "true"
   podLabels:
     app.kubernetes.io/part-of: groundcover
-  customConfig:
-    sources:
-      otel_logs:
-        type: opentelemetry
-        grpc:
-          address: 0.0.0.0:4317
-        http:
-          address: 0.0.0.0:4318
-          keepalive:
-            max_connection_age_jitter_factor: 0.1
-            max_connection_age_secs: 300
-
-      telemetry_metrics:
-        type: internal_metrics
-
-      otel_logs_custom:
-        type: opentelemetry
-        grpc:
-          address: 0.0.0.0:4337
-        http:
-          address: 0.0.0.0:4338
-          keepalive:
-            max_connection_age_jitter_factor: 0.1
-            max_connection_age_secs: 300
-
-      otel_logs_monitors:
-        type: opentelemetry
-        grpc:
-          address: 0.0.0.0:4347
-        http:
-          address: 0.0.0.0:4348
-          keepalive:
-            max_connection_age_jitter_factor: 0.1
-            max_connection_age_secs: 300
-
-      otel_traces:
-        type: opentelemetry
-        grpc:
-          address: 0.0.0.0:4327
-        http:
-          address: 0.0.0.0:4328
-          keepalive:
-            max_connection_age_jitter_factor: 0.1
-            max_connection_age_secs: 300
-
-    transforms:
-      logs_from_logs:
-        inputs:
-          - "otel_logs.logs"
-        type: "remap"
-        source: |-
-          . = .attributes
-
-      traces_from_logs:
-        inputs:
-          - "otel_traces.logs"
-        type: "remap"
-        source: |-
-          . = .attributes
-
-      custom_from_logs:
-        inputs:
-          - "otel_logs_custom.logs"
-        type: "remap"
-        source: |-
-          . = .attributes   
-
-      custom_from_logs_routing:
-        inputs:
-          - custom_from_logs
-        type: "route"
-        reroute_unmatched: true
-        route:
-          entities: .log_type == "entity"
-
-      entities:
-        inputs:
-          - custom_from_logs_routing.entities
-        type: "remap"
-        source: |-
-
-      events:
-        inputs:
-          - custom_from_logs_routing._unmatched
-        type: "remap"
-        source: |-
-          .type = del(.event_type)
-
-      monitors:
-        inputs:
-          - "otel_logs_monitors.logs"
-        type: "remap"
-        source: |-
-          . = .attributes
-          del(.condition)
-          del(.dashboardUID)
-          del(.fingerprint)
-          del(.folderUID)
-          del(.grafana_folder)
-          del(.from)
-          del(.group)
-          del(.orgID)
-          del(.panelID)
-          del(.ruleUID)
-          del(.values)
-          .previous_state, err = to_string(del(.previous))
-          if err == null {
-            .previous_state = to_string(split(.previous_state, "(", 2)[0])
-            .previous_state = strip_whitespace(.previous_state)
-          }
-          .state, err = to_string(del(.current))
-          if err == null {
-            .state = to_string(split(.state, "(", 2)[0])
-            .state = strip_whitespace(.state)
-          }
-
-    sinks:
-      clickhouse_logs:
-        type: clickhouse
-        inputs:
-          - logs_from_logs
-        endpoint: '{{ include "clickhouse.httpEndpoint" . }}'
-        database: "groundcover"
-        table: "logs_v2"
-        auth:
-          user: '{{ include "clickhouse.username" . }}'
-          password: $CLICKHOUSE_PASSWORD
-          strategy: "basic"
-        format: "json_each_row"
-        encoding:
-          timestamp_format: rfc3339
-        date_time_best_effort: true
-        buffer:
-          type: memory
-          max_events: 500000
-          when_full: drop_newest
-        batch:
-          max_bytes: 200000000
-          max_events: 200000
-          timeout_secs: 1
-
-      clickhouse_traces:
-        type: clickhouse
-        inputs:
-          - traces_from_logs
-        endpoint: '{{ include "clickhouse.httpEndpoint" . }}'
-        database: "groundcover"
-        table: "traces"
-        auth:
-          user: '{{ include "clickhouse.username" . }}'
-          password: $CLICKHOUSE_PASSWORD
-          strategy: "basic"
-        format: "json_each_row"
-        encoding:
-          timestamp_format: rfc3339
-        date_time_best_effort: true
-        buffer:
-          type: memory
-          max_events: 50000
-          when_full: drop_newest
-        batch:
-          max_bytes: 200000000
-          max_events: 10000
-          timeout_secs: 1
-
-      clickhouse_k8s_entities:
-        type: clickhouse
-        inputs:
-          - entities
-        endpoint: '{{ include "clickhouse.httpEndpoint" . }}'
-        database: "groundcover"
-        table: "entities"
-        auth:
-          user: '{{ include "clickhouse.username" . }}'
-          password: $CLICKHOUSE_PASSWORD
-          strategy: "basic"
-        format: "json_each_row"
-        encoding:
-          timestamp_format: rfc3339
-        date_time_best_effort: true
-        buffer:
-          type: memory
-          max_events: 50000
-          when_full: drop_newest
-        batch:
-          max_bytes: 100000000
-          max_events: 10000
-          timeout_secs: 2
-
-      clickhouse_k8s_events:
-        type: clickhouse
-        inputs:
-          - events
-        endpoint: '{{ include "clickhouse.httpEndpoint" . }}'
-        database: "groundcover"
-        table: "events"
-        auth:
-          user: '{{ include "clickhouse.username" . }}'
-          password: $CLICKHOUSE_PASSWORD
-          strategy: "basic"
-        format: "json_each_row"
-        encoding:
-          timestamp_format: rfc3339
-        date_time_best_effort: true
-        buffer:
-          type: memory
-          max_events: 50000
-          when_full: drop_newest
-        batch:
-          max_bytes: 100000000
-          max_events: 10000
-          timeout_secs: 2
-
-      clickhouse_monitors:
-        type: clickhouse
-        inputs:
-          - monitors
-        endpoint: '{{ include "clickhouse.httpEndpoint" . }}'
-        database: "groundcover"
-        table: "monitor_state"
-        auth:
-          user: '{{ include "clickhouse.username" . }}'
-          password: $CLICKHOUSE_PASSWORD
-          strategy: "basic"
-        format: "json_each_row"
-        encoding:
-          timestamp_format: rfc3339
-        date_time_best_effort: true
-        buffer:
-          type: memory
-          max_events: 50000
-          when_full: drop_newest
-        batch:
-          max_bytes: 100000000
-          max_events: 10000
-          timeout_secs: 2
-
-      telemtry_prometheus_sink:
-        type: prometheus_exporter
-        inputs:
-          - telemetry_metrics
-    api:
-      enabled: true
-      playground: false
-      graphql: false
-      address: "0.0.0.0:8686"
+  existingConfigMaps:
+    - vector-config-map
+  dataDir: "/data/vector.yaml"
   readinessProbe:
     httpGet:
       path: /health
@@ -1205,6 +985,353 @@ vector:
     rollingUpdate:
       maxUnavailable: 0
       maxSurge: 1
+  customComponents:
+    sources:
+      overrideSources:
+      otel:
+        otel_logs:
+          type: opentelemetry
+          grpc:
+            address: 0.0.0.0:4317
+          http:
+            address: 0.0.0.0:4318
+            keepalive:
+              max_connection_age_jitter_factor: 0.1
+              max_connection_age_secs: 300
+        otel_logs_custom:
+          type: opentelemetry
+          grpc:
+            address: 0.0.0.0:4337
+          http:
+            address: 0.0.0.0:4338
+            keepalive:
+              max_connection_age_jitter_factor: 0.1
+              max_connection_age_secs: 300
+        otel_logs_monitors:
+          type: opentelemetry
+          grpc:
+            address: 0.0.0.0:4347
+          http:
+            address: 0.0.0.0:4348
+            keepalive:
+              max_connection_age_jitter_factor: 0.1
+              max_connection_age_secs: 300
+        otel_traces:
+          type: opentelemetry
+          grpc:
+            address: 0.0.0.0:4327
+          http:
+            address: 0.0.0.0:4328
+            keepalive:
+              max_connection_age_jitter_factor: 0.1
+              max_connection_age_secs: 300
+      json:
+        json_logs:
+          type: http
+          address: "0.0.0.0:4319"
+          decoding:
+            codec: json
+        json_events:
+          type: http
+          address: "0.0.0.0:4359"
+          decoding:
+            codec: json
+        json_entities:
+          type: http
+          address: "0.0.0.0:4369"
+          decoding:
+            codec: json
+        json_monitors:
+          type: http
+          address: "0.0.0.0:4349"
+          decoding:
+            codec: json
+        json_traces:
+          type: http
+          address: "0.0.0.0:4329"
+          decoding:
+            codec: json
+    transforms:
+      overrideTransforms:
+      otel:
+        logs_from_logs:
+          inputs:
+            - "otel_logs.logs"
+          type: "remap"
+          source: |-
+            . = .attributes
+        traces_from_logs:
+          inputs:
+            - "otel_traces.logs"
+          type: "remap"
+          source: |-
+            . = .attributes
+        custom_from_logs:
+          inputs:
+            - "otel_logs_custom.logs"
+          type: "remap"
+          source: |-
+            . = .attributes
+        custom_from_logs_routing:
+          inputs:
+            - custom_from_logs
+          type: "route"
+          reroute_unmatched: true
+          route:
+            entities: .log_type == "entity"
+        entities:
+          inputs:
+            - custom_from_logs_routing.entities
+          type: "remap"
+          source: |-
+
+        events:
+          inputs:
+            - custom_from_logs_routing._unmatched
+          type: "remap"
+          source: |-
+            .type = del(.event_type)
+        monitors:
+          inputs:
+            - "otel_logs_monitors.logs"
+          type: "remap"
+          source: |-
+            . = .attributes
+            del(.condition)
+            del(.dashboardUID)
+            del(.fingerprint)
+            del(.folderUID)
+            del(.grafana_folder)
+            del(.from)
+            del(.group)
+            del(.orgID)
+            del(.panelID)
+            del(.ruleUID)
+            del(.values)
+            .previous_state, err = to_string(del(.previous))
+            if err == null {
+              .previous_state = to_string(split(.previous_state, "(", 2)[0])
+              .previous_state = strip_whitespace(.previous_state)
+            }
+            .state, err = to_string(del(.current))
+            if err == null {
+              .state = to_string(split(.state, "(", 2)[0])
+              .state = strip_whitespace(.state)
+            }
+    sinks:
+      overrideSinks:
+      remote:
+        json_logs_sink:
+          type: http
+          inputs:
+            - logs_from_logs
+            - json_logs
+          uri: '{{ include "vector.incloud.json.logs.url" . }}'
+          method: post
+          encoding:
+            codec: json
+            json:
+              timestamp_format: rfc3339
+          request:
+            headers:
+              apikey: $API_KEY
+          buffer:
+              type: memory
+              max_events: 50000
+              when_full: drop_newest
+          batch:
+            max_bytes: 2000000
+            max_events: 2000
+            timeout_secs: 1  
+        json_traces_sink:
+          type: http
+          inputs:
+            - traces_from_logs
+            - json_traces
+          uri: '{{ include "vector.incloud.json.traces-as-logs.url" . }}'
+          method: post
+          encoding:
+            codec: json
+            json:
+              timestamp_format: rfc3339
+          request:
+            headers:
+              apikey: $API_KEY
+          buffer:
+              type: memory
+              max_events: 5000
+              when_full: drop_newest
+          batch:
+            max_bytes: 2000000
+            max_events: 2000
+            timeout_secs: 1
+        json_events_sink:
+          type: http
+          inputs:
+            - events
+            - json_events
+          uri: '{{ include "vector.incloud.json.events.url" . }}'
+          method: post
+          encoding:
+            codec: json
+            json:
+              timestamp_format: rfc3339
+          request:
+            headers:
+              apikey: $API_KEY
+          buffer:
+              type: memory
+              max_events: 5000
+              when_full: drop_newest
+          batch:
+            max_bytes: 2000000
+            max_events: 2000
+            timeout_secs: 1
+        json_entities_sink:
+          type: http
+          inputs:
+            - entities
+            - json_entities
+          uri: '{{ include "vector.incloud.json.entities.url" . }}'
+          method: post
+          encoding:
+            codec: json
+            json:
+              timestamp_format: rfc3339
+          request:
+            headers:
+              apikey: $API_KEY
+          buffer:
+              type: memory
+              max_events: 5000
+              when_full: drop_newest
+          batch:
+            max_bytes: 2000000
+            max_events: 2000
+            timeout_secs: 1
+      local:
+        clickhouse_logs:
+          type: clickhouse
+          inputs:
+            - logs_from_logs
+            - json_logs
+          endpoint: '{{ include "clickhouse.httpEndpoint" . }}'
+          database: "groundcover"
+          table: "logs_v2"
+          auth:
+            user: '{{ include "clickhouse.username" . }}'
+            password: $CLICKHOUSE_PASSWORD
+            strategy: "basic"
+          format: "json_each_row"
+          encoding:
+            timestamp_format: rfc3339
+          date_time_best_effort: true
+          buffer:
+              type: memory
+              max_events: 50000
+              when_full: drop_newest
+          batch:
+            max_bytes: 200000000
+            max_events: 200000
+            timeout_secs: 1
+        clickhouse_traces:
+          type: clickhouse
+          inputs:
+            - traces_from_logs
+            - json_traces
+          endpoint: '{{ include "clickhouse.httpEndpoint" . }}'
+          database: "groundcover"
+          table: "traces"
+          auth:
+            user: '{{ include "clickhouse.username" . }}'
+            password: $CLICKHOUSE_PASSWORD
+            strategy: "basic"
+          format: "json_each_row"
+          encoding:
+            timestamp_format: rfc3339
+          date_time_best_effort: true
+          buffer:
+              type: memory
+              max_events: 5000
+              when_full: drop_newest
+          batch:
+            max_bytes: 200000000
+            max_events: 10000
+            timeout_secs: 1
+        clickhouse_k8s_entities:
+          type: clickhouse
+          inputs:
+            - entities
+            - json_entities
+          endpoint: '{{ include "clickhouse.httpEndpoint" . }}'
+          database: "groundcover"
+          table: "entities"
+          auth:
+            user: '{{ include "clickhouse.username" . }}'
+            password: $CLICKHOUSE_PASSWORD
+            strategy: "basic"
+          format: "json_each_row"
+          encoding:
+            timestamp_format: rfc3339
+          date_time_best_effort: true
+          buffer:
+              type: memory
+              max_events: 5000
+              when_full: drop_newest
+          batch:
+            max_bytes: 100000000
+            max_events: 10000
+            timeout_secs: 2
+        clickhouse_k8s_events:
+          type: clickhouse
+          inputs:
+            - events
+            - json_events
+          endpoint: '{{ include "clickhouse.httpEndpoint" . }}'
+          database: "groundcover"
+          table: "events"
+          auth:
+            user: '{{ include "clickhouse.username" . }}'
+            password: $CLICKHOUSE_PASSWORD
+            strategy: "basic"
+          format: "json_each_row"
+          encoding:
+            timestamp_format: rfc3339
+          date_time_best_effort: true
+          buffer:
+              type: memory
+              max_events: 5000
+              when_full: drop_newest
+          batch:
+            max_bytes: 100000000
+            max_events: 10000
+            timeout_secs: 2
+        clickhouse_monitors:
+          type: clickhouse
+          inputs:
+            - monitors
+            - json_monitors
+          endpoint: '{{ include "clickhouse.httpEndpoint" . }}'
+          database: "groundcover"
+          table: "monitor_state"
+          auth:
+            user: '{{ include "clickhouse.username" . }}'
+            password: $CLICKHOUSE_PASSWORD
+            strategy: "basic"
+          format: "json_each_row"
+          encoding:
+            timestamp_format: rfc3339
+          date_time_best_effort: true
+          buffer:
+              type: memory
+              max_events: 5000
+              when_full: drop_newest
+          batch:
+            max_bytes: 100000000
+            max_events: 10000
+            timeout_secs: 2
+        
+
 
 router:
   # onprem or cloud

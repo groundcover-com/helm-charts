@@ -130,6 +130,10 @@ Get cluster_id from values or generate random one
 {{- printf "https://%s" .Values.global.ingress.site -}}
 {{- end -}}
 
+{{- define "incloud.ingestion.json.url" -}}
+{{- printf "https://%s/ingest/v2/json" .Values.global.ingress.site -}}
+{{- end -}}
+
 {{- define "telemetry.enabled" }}
 {{- if .Values.metrics -}}
     {{- .Values.metrics.enabled -}}

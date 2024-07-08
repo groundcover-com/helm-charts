@@ -169,6 +169,57 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
+  name: {{ printf "%s-ingest-v2-json" (include "incloud-ingress.name" .) | trunc 63 | trimSuffix "-" }}
+  annotations:
+    konghq.com/plugins: {{ printf "%s-auth,ingest-v2-rewrite-root-path" .Release.Name | quote }}
+    konghq.com/protocols: {{ ternary "https" "http" .Values.kong.proxy.tls.enabled | quote }}
+spec:
+  ingressClassName: kong
+  rules:
+    - http:
+        paths:
+          - path: {{ get (urlParse (include "vector.incloud.json.traces-as-logs.url" .)) "path" }} 
+            pathType: Exact
+            backend:
+              service:
+                name: {{ include "vector.fullname" . }}
+                port:
+                  number: {{ (include "vector.cluster.json.traces-as-logs.port" .) | int }}
+
+    - http:
+        paths:
+          - path: {{ get (urlParse (include "vector.incloud.json.logs.url" .)) "path" }} 
+            pathType: Exact
+            backend:
+              service:
+                name: {{ include "vector.fullname" . }}
+                port:
+                  number: {{ (include "vector.cluster.json.logs.port" .) | int }}
+
+    - http:
+        paths:
+          - path: {{ get (urlParse (include "vector.incloud.json.events.url" .)) "path" }} 
+            pathType: Exact
+            backend:
+              service:
+                name: {{ include "vector.fullname" . }}
+                port:
+                  number: {{ (include "vector.cluster.json.events.port" .) | int }}
+    - http:
+        paths:
+          - path: {{ get (urlParse (include "vector.incloud.json.entities.url" .)) "path" }} 
+            pathType: Exact
+            backend:
+              service:
+                name: {{ include "vector.fullname" . }}
+                port:
+                  number: {{ (include "vector.cluster.json.entities.port" .) | int }}
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
   name: {{ printf "%s-metrics-http" (include "incloud-ingress.name" .) | trunc 63 | trimSuffix "-" }}
   annotations:
     konghq.com/host-aliases: "metrics-http.*"
