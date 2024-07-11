@@ -1919,6 +1919,7 @@ victoria-metrics-single:
       maxLabelsPerTimeseries: "50"
       promscrape.maxScrapeSize: "100MB"
       streamAggr.config: "/extra-config/aggregation_config.yaml"
+      selfScrapeInterval: "30s"
 
     # -- Data retention period, {amount}[h(ours), d(ays), w(eeks), y(ears)], default is 1 month
     retentionPeriod: 7d
