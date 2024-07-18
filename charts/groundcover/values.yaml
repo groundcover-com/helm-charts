@@ -1107,7 +1107,6 @@ vector:
             del(.orgID)
             del(.panelID)
             del(.ruleUID)
-            del(.values)
             .previous_state, err = to_string(del(.previous))
             if err == null {
               .previous_state = to_string(split(.previous_state, "(", 2)[0])
@@ -1118,6 +1117,12 @@ vector:
               .state = to_string(split(.state, "(", 2)[0])
               .state = strip_whitespace(.state)
             }
+            .cluster = get!(value: .labels, path: ["cluster"])
+            .env = get!(value: .labels, path: ["env"])
+            .namespace = get!(value: .labels, path: ["namespace"])
+            .workload = get!(value: .labels, path: ["workload"])
+            .pod = get!(value: .labels, path: ["pod"])
+            .category = get!(value: .labels, path: ["category"])
     sinks:
       overrideSinks:
       remote:
