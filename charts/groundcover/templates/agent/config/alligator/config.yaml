@@ -467,8 +467,9 @@ data:
         metricateLabels: false
         multiLineConfigs: {{ toYaml .Values.logsMultiLines | nindent 10}}
         decolorize: {{ .Values.decolorizeLogs }}
-    otelTracesAsLogs: {{ .Values.global.ingestion.sendToVector }}
-    otelPreprocess: {{ .Values.global.ingestion.sendToVector }}
+        maxLogSize: {{ .Values.maxLogSize }} 
+    otelTracesAsLogs: {{ .Values.global.vector.enabled }}
+    otelPreprocess: {{ .Values.global.vector.enabled }}
     tracesOtlpEndpoint:
       endpoint: {{ include "ingestion.traces.otlp.http.url" . }}
       enableTLS: {{ include "ingestion.otlp.tls.enabled" . }}

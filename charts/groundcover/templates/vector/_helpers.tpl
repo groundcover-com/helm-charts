@@ -1,3 +1,20 @@
+{{ define "vector.initContainers.command" -}}
+{{ if .Values.global.backend.enabled }}
+    while [ $(curl -sw '%{http_code}' {{ printf "%s?gc-version=%s " (include "db-manager.ready.http.url" .) (default .Chart.AppVersion .Values.global.origin.tag) }} -o /dev/null) -ne 200 ]; do echo 'Waiting for Db Manager...'; sleep 2; done; echo Db Manager is ready
+{{ else }}
+    while [ $(curl -H "apikey:$API_KEY" \
+    {{- if .Values.global.ingestion.tls_skip_verify }}
+    -k \
+    {{- end }}
+    -sw '%{http_code}' {{ include "ingestion.health.http.url" . }} -o /dev/null) -ne 200 ]
+    do
+    echo 'Waiting for ingestion endpoint...';
+    sleep 2;
+    done;
+    echo ingestion endpoint is up
+{{- end -}}
+{{- end -}}
+
 {{- define "vector.cluster.http.health.port" -}}
 {{-  printf "8686"  -}}
 {{- end -}}
@@ -149,10 +166,6 @@
 {{- define "vector.tracesAsLogs.otlp.http.url" -}}
 {{- if .Values.global.vector.tracesAsLogs.otlp.overrideHttpURL -}}
     {{- print .Values.global.vector.tracesAsLogs.otlp.overrideHttpURL -}}
-{{- else if .Values.global.ingress.site -}}
-    {{- include "vector.incloud.otlp.http.traces-as-logs.url" . -}}
-{{- else if not .Values.global.backend.enabled -}}
-    {{- fail "A valid global.ingress.site or global.vector.tracesAsLogs.otlp.overrideHttpURL is required!" -}}
 {{- else -}}
     {{- include "vector.cluster.otlp.http.traces-as-logs.url" . -}}
 {{- end -}}
@@ -161,10 +174,6 @@
 {{- define "vector.logs.otlp.http.url" -}}
 {{- if .Values.global.vector.logs.otlp.overrideHttpURL -}}
     {{- print .Values.global.vector.logs.otlp.overrideHttpURL -}}
-{{- else if .Values.global.ingress.site -}}
-    {{- include "vector.incloud.otlp.http.logs.url" . -}}
-{{- else if not .Values.global.backend.enabled -}}
-    {{- fail "A valid global.ingress.site or global.vector.logs.otlp.overrideHttpURL is required!" -}}
 {{- else -}}
     {{- include "vector.cluster.otlp.http.logs.url" . -}}
 {{- end -}}
@@ -173,10 +182,6 @@
 {{- define "vector.custom.otlp.http.url" -}}
 {{- if .Values.global.vector.custom.otlp.overrideHttpURL -}}
     {{- print .Values.global.vector.custom.otlp.overrideHttpURL -}}
-{{- else if .Values.global.ingress.site -}}
-    {{- include "vector.incloud.otlp.http.custom.url" . -}}
-{{- else if not .Values.global.backend.enabled -}}
-    {{- fail "A valid global.ingress.site or global.vector.custom.otlp.overrideHttpURL is required!" -}}
 {{- else -}}
     {{- include "vector.cluster.otlp.http.custom.url" . -}}
 {{- end -}}
