@@ -5,7 +5,7 @@ global:
     enabled: true
     name:
   vector:
-    enabled: true
+    enabled: false
     tracesAsLogs:
       otlp:
         overrideHttpURL:
@@ -24,6 +24,7 @@ global:
 
   ingestion:
     tls_skip_verify: true
+    sendToVector: false
 
   groundcover_token:
   # groundcover_token is preceding groundcoverPredefinedTokenSecret, make sure its empty if using existing secret
@@ -931,28 +932,13 @@ vector:
     - name: metrics
       containerPort: 9598
   role: "Stateless-Aggregator"
-  initContainers:
-  - name: check-ingestion-endpoint-ready
-    env:
-      - name: API_KEY
-        valueFrom:
-          secretKeyRef:
-            key: '{{ include "groundcover.apikeySecretKey" . }}'
-            name: '{{ include "groundcover.apikeySecretName" . }}'    
-    args:
-    - |
-       {{ include "vector.initContainers.command" . }}
-    command:
-      - /bin/sh
-      - -c
-    image: '{{ printf "%s/curl:8.6.0" .Values.global.origin.registry }}'
-  replicas: 1
+  replicas: 3
   resources:
     requests:
-      cpu: 100m
-      memory: 512Mi
+      memory: "6Gi"
+      cpu: "1"
     limits:
-      memory: 2048Mi
+      memory: "6Gi"
   env:
     - name: MY_POD_IP
       valueFrom:
