@@ -149,10 +149,6 @@
 {{- define "vector.tracesAsLogs.otlp.http.url" -}}
 {{- if .Values.global.vector.tracesAsLogs.otlp.overrideHttpURL -}}
     {{- print .Values.global.vector.tracesAsLogs.otlp.overrideHttpURL -}}
-{{- else if .Values.global.ingress.site -}}
-    {{- include "vector.incloud.otlp.http.traces-as-logs.url" . -}}
-{{- else if not .Values.global.backend.enabled -}}
-    {{- fail "A valid global.ingress.site or global.vector.tracesAsLogs.otlp.overrideHttpURL is required!" -}}
 {{- else -}}
     {{- include "vector.cluster.otlp.http.traces-as-logs.url" . -}}
 {{- end -}}
@@ -161,10 +157,6 @@
 {{- define "vector.logs.otlp.http.url" -}}
 {{- if .Values.global.vector.logs.otlp.overrideHttpURL -}}
     {{- print .Values.global.vector.logs.otlp.overrideHttpURL -}}
-{{- else if .Values.global.ingress.site -}}
-    {{- include "vector.incloud.otlp.http.logs.url" . -}}
-{{- else if not .Values.global.backend.enabled -}}
-    {{- fail "A valid global.ingress.site or global.vector.logs.otlp.overrideHttpURL is required!" -}}
 {{- else -}}
     {{- include "vector.cluster.otlp.http.logs.url" . -}}
 {{- end -}}
@@ -173,10 +165,6 @@
 {{- define "vector.custom.otlp.http.url" -}}
 {{- if .Values.global.vector.custom.otlp.overrideHttpURL -}}
     {{- print .Values.global.vector.custom.otlp.overrideHttpURL -}}
-{{- else if .Values.global.ingress.site -}}
-    {{- include "vector.incloud.otlp.http.custom.url" . -}}
-{{- else if not .Values.global.backend.enabled -}}
-    {{- fail "A valid global.ingress.site or global.vector.custom.otlp.overrideHttpURL is required!" -}}
 {{- else -}}
     {{- include "vector.cluster.otlp.http.custom.url" . -}}
 {{- end -}}

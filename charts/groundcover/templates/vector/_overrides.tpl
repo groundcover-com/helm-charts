@@ -14,8 +14,7 @@ If release name contains chart name it will be used as a full name.
 {{- printf "%s-%s" .Release.Name (include "vector.name" .) | trunc 63 | trimSuffix "-" }}
 {{- end -}}
 
-
-# add tpl to env
+# add tpl to env and initContainers
 # taken from v0.33, https://github.com/vectordotdev/helm-charts/blob/391a7fdb1b7d0c38ec969df0bde9e873c2eb48d5/charts/vector/templates/_pod.tpl
 
 {{/*
@@ -49,7 +48,7 @@ imagePullSecrets:
 {{- end }}
 {{- with .Values.initContainers }}
 initContainers:
-{{ toYaml . | indent 2 }}
+  {{- tpl (toYaml .) $ | nindent 2 }}
 {{- end }}
 containers:
   - name: vector
@@ -74,6 +73,11 @@ containers:
     env:
       - name: VECTOR_LOG
         value: "{{ .Values.logLevel | default "info" }}"
+{{- if .Values.global.backend.enabled -}}
+{{- with .Values.backendEnv -}}
+    {{- tpl (toYaml .) $ | nindent 6 }}
+{{- end }}
+{{- end }}
 {{- if .Values.env }}
 {{- with .Values.env }}
     {{- tpl (toYaml .) $ | nindent 6 }}

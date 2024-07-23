@@ -5,7 +5,7 @@ global:
     enabled: true
     name:
   vector:
-    enabled: false
+    enabled: true
     tracesAsLogs:
       otlp:
         overrideHttpURL:
@@ -24,7 +24,6 @@ global:
 
   ingestion:
     tls_skip_verify: true
-    sendToVector: false
 
   groundcover_token:
   # groundcover_token is preceding groundcoverPredefinedTokenSecret, make sure its empty if using existing secret
@@ -932,24 +931,26 @@ vector:
     - name: metrics
       containerPort: 9598
   role: "Stateless-Aggregator"
-  replicas: 3
+  replicas: 1
   resources:
     requests:
-      memory: "6Gi"
-      cpu: "1"
+      cpu: 100m
+      memory: 512Mi
     limits:
-      memory: "6Gi"
+      memory: 2048Mi
+  # backendEnv will only be created if backend is enabled
+  backendEnv:
+    - name: CLICKHOUSE_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          key: '{{ include "clickhouse.secretKey" . }}'
+          name: '{{ include "clickhouse.secretName" . }}'
   env:
     - name: MY_POD_IP
       valueFrom:
         fieldRef:
           apiVersion: v1
           fieldPath: status.podIP
-    - name: CLICKHOUSE_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          key: '{{ include "clickhouse.secretKey" . }}'
-          name: '{{ include "clickhouse.secretName" . }}'
     - name: API_KEY
       valueFrom:
         secretKeyRef:
@@ -1926,6 +1927,7 @@ victoria-metrics-single:
       promscrape.maxScrapeSize: "100MB"
       streamAggr.config: "/extra-config/aggregation_config.yaml"
       selfScrapeInterval: "30s"
+      usePromCompatibleNaming: "true"
 
     # -- Data retention period, {amount}[h(ours), d(ays), w(eeks), y(ears)], default is 1 month
     retentionPeriod: 7d

@@ -176,7 +176,7 @@ Get cluster_id from values or generate random one
 {{- end -}}
 
 {{- define "ingestion.traces.otlp.http.url" -}}
-{{- if .Values.global.ingestion.sendToVector -}}
+{{- if .Values.global.vector.enabled -}}
     {{ include "vector.tracesAsLogs.otlp.http.url" . }}
 {{- else -}}
     {{ include "opentelemetry-collector.otlptraces.http.url" . }}
@@ -184,7 +184,7 @@ Get cluster_id from values or generate random one
 {{- end -}}
 
 {{- define "ingestion.logs.otlp.http.url" -}}
-{{- if .Values.global.ingestion.sendToVector -}}
+{{- if .Values.global.vector.enabled -}}
     {{ include "vector.logs.otlp.http.url" . }}
 {{- else -}}
     {{ include "opentelemetry-collector.otlplogs.http.url" . }}
@@ -192,7 +192,7 @@ Get cluster_id from values or generate random one
 {{- end -}}
 
 {{- define "ingestion.custom.otlp.http.url" -}}
-{{- if .Values.global.ingestion.sendToVector -}}
+{{- if .Values.global.vector.enabled -}}
     {{ include "vector.custom.otlp.http.url" . }}
 {{- else -}}
     {{ include "opentelemetry-collector.otlplogs.http.url" . }}
@@ -200,7 +200,7 @@ Get cluster_id from values or generate random one
 {{- end -}}
 
 {{- define "ingestion.health.http.url" -}}
-{{- if .Values.global.ingestion.sendToVector -}}
+{{- if .Values.global.vector.enabled -}}
     {{ include "vector.health.http.url" . }}
 {{- else -}}
     {{ include "opentelemetry-collector.health.http.url" . }}
@@ -217,7 +217,7 @@ Get cluster_id from values or generate random one
 {{- end -}}
 
 {{- define "ingestion.otlp.tls.enabled" -}}
-{{- if .Values.global.ingestion.sendToVector -}}
+{{- if .Values.global.vector.enabled -}}
     {{ include "vector.otlp.http.tls.enabled" . }}
 {{- else -}}
     {{ include "opentelemetry-collector.otlp.tls.enabled" . }}
