@@ -869,6 +869,8 @@ opentelemetry-collector:
   tolerations: []
 
 vector:
+  image:
+    repository: public.ecr.aws/groundcovercom/vector
   service:
     ports:
       - name: api
