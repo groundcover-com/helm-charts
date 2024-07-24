@@ -149,6 +149,10 @@ logsMultiLines:
   #   maxWaitTime: 10s               # optional, default = 3s
 decolorizeLogs: false
 maxLogSize: 102400
+logBatchSendQueueWorkerCount: 3
+logBatchSendQueueMaxSize: 5
+oldLogDropThreshold: 60s
+oldLogDelayStart: 60s
 shouldDropRunningNamespaces: true
 commitHashKeyName:
 repositoryUrlKeyName:

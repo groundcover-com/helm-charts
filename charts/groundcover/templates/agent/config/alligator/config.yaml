@@ -467,7 +467,11 @@ data:
         metricateLabels: false
         multiLineConfigs: {{ toYaml .Values.logsMultiLines | nindent 10}}
         decolorize: {{ .Values.decolorizeLogs }}
-        maxLogSize: {{ .Values.maxLogSize }} 
+        maxLogSize: {{ .Values.maxLogSize }}
+        logBatchSendQueueWorkerCount: {{ .Values.logBatchSendQueueWorkerCount }} 
+        logBatchSendQueueMaxSize : {{ .Values.logBatchSendQueueMaxSize }}
+        oldLogDropThreshold: {{ .Values.oldLogDropThreshold }} 
+        oldLogDelayStart: {{ .Values.oldLogDelayStart }} 
     otelTracesAsLogs: {{ .Values.global.vector.enabled }}
     otelPreprocess: {{ .Values.global.vector.enabled }}
     tracesOtlpEndpoint:
