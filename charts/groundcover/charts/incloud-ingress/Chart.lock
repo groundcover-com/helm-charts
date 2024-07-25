@@ -5,5 +5,11 @@ dependencies:
 - name: kong-crds
   repository: file://../../../kong-crds
   version: 2.32.0
-digest: sha256:a6d48b7ac7128c91de69f8f281c498465f716a2fd8a002c9e76b2b4f670b4be3
-generated: "2024-02-26T17:32:43.721948075Z"
+- name: cert-manager
+  repository: https://charts.jetstack.io
+  version: v1.15.1
+- name: cert-manager-crds
+  repository: file://../../../cert-manager-crds
+  version: v1.15.1
+digest: sha256:6cc944c409b74f50e4c92252d5cd256e429e24230c9042d10b668d554643966c
+generated: "2024-07-25T06:08:55.55308697Z"

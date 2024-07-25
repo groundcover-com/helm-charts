@@ -1578,18 +1578,19 @@ custom-metrics:
   resources:
     limits:
       cpu: 500m
-      memory: 512Mi
+      memory: 1024Mi
     requests:
       cpu: 100m
-      memory: 128Mi
+      memory: 256Mi
   extraArgs:
     promscrape.streamParse: "true"
     promscrape.dropOriginalLabels: "true"
     promscrape.suppressDuplicateScrapeTargetErrors: "true"
     remoteWrite.showURL: "true"
     remoteWrite.maxDiskUsagePerURL: 10GB
-    remoteWrite.maxDailySeries: "1000000"
-    remoteWrite.maxHourlySeries: "100000"
+    remoteWrite.maxDailySeries:  '{{ ternary "1000000" "5000000" (empty .Values.global.ingress.site) }}'
+    remoteWrite.maxHourlySeries: '{{ ternary "200000" "1000000" (empty .Values.global.ingress.site) }}'
+    promscrape.maxScrapeSize: "64MiB"
     remoteWrite.headers: "apikey:%{API_KEY}"
     remoteWrite.tlsInsecureSkipVerify: '{{ ternary "true" "false" .Values.global.ingestion.tls_skip_verify }}'
     remoteWrite.url: '{{ include "victoria-metrics.write.http.url" . }}'

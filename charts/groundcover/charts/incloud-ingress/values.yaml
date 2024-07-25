@@ -41,3 +41,26 @@ kong:
 ## Kong Plugins for inCloud functionality
 datasource:
   enabled: false
+
+ingress:
+  annotations:
+  tls:
+    enabled: false
+    certificate:
+      name: site-certificate
+      renewBefore: 600h # only s (seconds), m (minutes), and h (hours) are supported 
+      acme:
+        server: https://acme-v02.api.letsencrypt.org/directory
+
+cert-manager:
+  enabled: false
+  crds:
+    enabled: false
+  prometheus:
+    enabled: true
+    servicemonitor:
+      enabled: false
+
+cert-manager-crds:
+  enabled: false
+  upgradeCRDs: false
