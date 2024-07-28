@@ -939,7 +939,7 @@ vector:
     - name: metrics
       containerPort: 9598
   role: "Stateless-Aggregator"
-  replicas: 1
+  replicas: 2
   resources:
     requests:
       cpu: 100m
@@ -995,6 +995,12 @@ vector:
     rollingUpdate:
       maxUnavailable: 0
       maxSurge: 1
+  customGlobalConfig:
+    api:
+      enabled: true
+      playground: false
+      graphql: false
+      address: "0.0.0.0:8686"
   customComponents:
     sources:
       overrideSources:

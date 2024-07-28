@@ -195,6 +195,11 @@ telemetry_metrics:
 {{- end -}}
 
 {{- define "vector.config.customConfig" -}}
+
+{{ if .Values.vector.customGlobalConfig }}
+{{- tpl (toYaml .Values.vector.customGlobalConfig) $ }}
+{{ end }}
+
 sources:
 {{- include "vector.config.sources.telemetry" . | nindent 2 }}
 {{ if .Values.vector.customComponents.sources.overrideSources }}
@@ -203,12 +208,14 @@ sources:
 {{-  tpl (toYaml .Values.vector.customComponents.sources.otel) $ | nindent 2 }}
 {{-  tpl (toYaml .Values.vector.customComponents.sources.json) $ | nindent 2 }}
 {{ end }}
+
 transforms:
 {{ if .Values.vector.customComponents.transforms.overrideTransforms }}
 {{- tpl (toYaml .Values.vector.customComponents.transforms.overrideTransforms) $ | nindent 2 -}}
 {{ else }}
 {{- tpl (toYaml .Values.vector.customComponents.transforms.otel) $ | nindent 2 }}
 {{ end }}
+
 sinks:
 {{ if .Values.vector.customComponents.sinks.overrideSinks }}
 {{- tpl (toYaml .Values.vector.customComponents.sinks.overrideSinks) $ | nindent 2 -}}
@@ -221,9 +228,4 @@ sinks:
 {{ end }}
 {{ end }}
 
-api:
-  enabled: true
-  playground: false
-  graphql: false
-  address: "0.0.0.0:8686"
 {{- end -}}
