@@ -22,11 +22,6 @@ data:
       container_state: 1
       container_oomkill: 1
       pvc_info: 1
-    tracyEnabled: {{ template "agent.tracy.enabled" . }}
-    tracy:
-      address: "ipc:///comm/tracy.data"
-      timeout: 120s
-      interval: 5s
 
     httphandler:
       samplesthreshold: 10
@@ -380,7 +375,7 @@ data:
       sampleeverything: false
 
     watchOnlyLocalNode: {{ .Values.agent.alligator.watchOnlyLocalNode }}
-    floraEnabled: {{ ne .Values.mode "legacy" }}
+    floraEnabled: true
     runningNamespace: ""
     shouldDropRunningNamespaces: {{ .Values.shouldDropRunningNamespaces }}
     tracesNamespaceFilters: {{ toYaml .Values.tracesNamespaceFilters | nindent 6 }}

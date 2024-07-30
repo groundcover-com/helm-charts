@@ -32,7 +32,6 @@ spec:
         vm.io/path: "vmetrics"
         vm.io/port: {{ (include "agent.monitoring.port" .) | quote  }}
         groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
-        checksum/tracy_config: {{ include (print $.Template.BasePath "/agent/config/tracy/config.yaml") . | sha256sum }}
         checksum/alligator_config: {{ include (print $.Template.BasePath "/agent/config/alligator/config.yaml") . | sha256sum }}
         {{- if .Values.agent.additionalAnnotations }}
 {{ toYaml .Values.agent.additionalAnnotations | indent 8 }}
@@ -262,47 +261,6 @@ spec:
           resources:
             {{- toYaml .Values.agent.flb.resources | nindent 12 }}
 {{- end }}              
-{{- if eq (include "agent.tracy.enabled" .) "true" }}
-        - env:
-            - name: PL_HOST_PATH
-              value: /host
-            - name: NNMSG_LISTENING_ADDRESS
-              value: ipc:///comm/tracy.data
-            - name: KTARGET_DATA_BYTES_PER_SEC
-              value: "104857600"
-            - name: KTARGET_CONTROL_BYTES_PER_SEC
-              value: "5242880"
-        {{- with .Values.agent.tracy.env }}
-          {{ toYaml . | nindent 12 }}
-        {{- end }}
-          envFrom:
-            - configMapRef:
-                name: tracy-conf-fg9h4chctk
-          image: {{ tpl .Values.agent.tracy.image.repository . }}:latest
-          resources:
-{{- toYaml .Values.agent.tracy.resources | nindent 12 }}
-          imagePullPolicy: Always
-          name: tracy
-          securityContext:
-            capabilities:
-              add:
-                - SYS_PTRACE
-                - SYS_ADMIN
-            privileged: true
-          volumeMounts:
-            - mountPath: /host
-              name: host-root
-              readOnly: true
-            - mountPath: /sys
-              name: sys
-              readOnly: true
-            - mountPath: /comm
-              name: comm
-              readOnly: false
-            - mountPath: /linux-headers
-              name: linux-headers
-              readOnly: true
-{{- end }}
       dnsPolicy: ClusterFirstWithHostNet
       hostNetwork: {{ default false .Values.agent.hostNetwork }}
       hostPID: true

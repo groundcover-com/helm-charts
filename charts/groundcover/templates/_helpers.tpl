@@ -106,10 +106,6 @@ Get cluster_id from values or generate random one
 {{- default "API_KEY" .Values.global.groundcoverPredefinedTokenSecret.secretKey -}}
 {{- end -}}
 
-{{- define "agent.tracy.enabled" }}
-{{- eq .Values.mode "legacy" -}}
-{{- end -}}
-
 {{- define "imagePullSecrets" }}
 {{- default .Values.global.imagePullSecrets .Values.imagePullSecrets | toJson -}}
 {{- end -}}}}

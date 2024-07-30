@@ -108,9 +108,6 @@ tags:
   # InCloud - Enterprise Setup. groundcover's control-plane reconciled observability infrastructure deployment.
   incloud: false
 
-# optional parameters: stable, legacy, experimental
-mode: stable
-
 # SAAS parameters, token is mendatory, others only if in cloud mode
 saas:
   tls_skip_verify: false
@@ -307,16 +304,6 @@ agent:
     childcountruleoverrides:
     - depth: 0
       maxChildren: 100
-  tracy:
-    image:
-      repository: "{{ .Values.global.origin.registry }}/tracy"
-    resources:
-      requests:
-        memory: 512Mi
-        cpu: 125m
-      limits:
-        memory: 2048Mi
-        cpu: 750m
 dbManager:
   additionalLabels:
   podLabels:
