@@ -328,6 +328,7 @@ dbManager:
         secretKeyRef:
           key: '{{ include "clickhouse.secretKey" . }}'
           name: '{{ include "clickhouse.secretName" . }}'
+  objectStorageQueues: {}
 
 k8sWatcher:
   image:
@@ -418,6 +419,8 @@ clickhouse:
       registry: public.ecr.aws/groundcovercom
       repository: bitnami/os-shell
       tag: 11-debian-11-r91
+  keeper:
+    enabled: true
   zookeeper:
     enabled: false
   metrics:
@@ -441,6 +444,7 @@ clickhouse:
       </merge_tree>
       <profiles>
         <default>
+          <date_time_input_format>best_effort</date_time_input_format>
           <async_insert>true</async_insert>
           <max_execution_time>60</max_execution_time>
           <wait_for_async_insert>true</wait_for_async_insert>
@@ -940,6 +944,18 @@ vector:
         secretKeyRef:
           key: '{{ include "clickhouse.secretKey" . }}'
           name: '{{ include "clickhouse.secretName" . }}'
+  # objectStorageEnv will only be created if objectStorage is enabled
+  objectStorageEnv:
+    - name: S3_ACCESS_KEY
+      valueFrom:
+        secretKeyRef:
+          key: '{{ include "vector.s3.accessKey" . }}'
+          name: '{{ include "vector.s3.secretName" . }}'
+    - name: S3_ACCESS_KEY_SECRET
+      valueFrom:
+        secretKeyRef:
+          key: '{{ include "vector.s3.secretKey" . }}'
+          name: '{{ include "vector.s3.secretName" . }}'
   env:
     - name: MY_POD_IP
       valueFrom:
@@ -982,6 +998,9 @@ vector:
     rollingUpdate:
       maxUnavailable: 0
       maxSurge: 1
+  objectStorage:
+    s3Bucket:
+    region:
   customGlobalConfig:
     api:
       enabled: true
@@ -1342,7 +1361,79 @@ vector:
             max_bytes: 100000000
             max_events: 10000
             timeout_secs: 2
-        
+      s3:
+        s3_logs:
+          type: "aws_s3"
+          inputs:
+            - logs_from_logs
+            - json_logs
+          auth:
+            access_key_id: $S3_ACCESS_KEY
+            secret_access_key: $S3_ACCESS_KEY_SECRET
+          bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
+          region: '{{ .Values.vector.objectStorage.region }}'
+          key_prefix: "v2/logs/"
+          encoding:
+            codec: json
+            timestamp_format: rfc3339
+          batch:
+            max_bytes: 25000000
+            max_events: 25000
+            timeout_secs: 5
+        s3_traces:
+          type: "aws_s3"
+          inputs:
+            - traces_from_logs
+            - json_traces
+          auth:
+            access_key_id: $S3_ACCESS_KEY
+            secret_access_key: $S3_ACCESS_KEY_SECRET
+          bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
+          region: '{{ .Values.vector.objectStorage.region }}'
+          key_prefix: "v2/traces/"
+          encoding:
+            codec: json
+            timestamp_format: rfc3339
+          batch:
+            max_bytes: 25000000
+            max_events: 2500
+            timeout_secs: 5
+        s3_entities:
+          type: "aws_s3"
+          inputs:
+            - entities
+            - json_entities
+          auth:
+            access_key_id: $S3_ACCESS_KEY
+            secret_access_key: $S3_ACCESS_KEY_SECRET
+          bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
+          region: '{{ .Values.vector.objectStorage.region }}'
+          key_prefix: "v2/entities/"
+          encoding:
+            codec: json
+            timestamp_format: rfc3339
+          batch:
+            max_bytes: 25000000
+            max_events: 25000
+            timeout_secs: 5
+        s3_events:
+          type: "aws_s3"
+          inputs:
+            - events
+            - json_events
+          auth:
+            access_key_id: $S3_ACCESS_KEY
+            secret_access_key: $S3_ACCESS_KEY_SECRET
+          bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
+          region: '{{ .Values.vector.objectStorage.region }}'
+          key_prefix: "v2/events/"
+          encoding:
+            codec: json
+            timestamp_format: rfc3339
+          batch:
+            max_bytes: 25000000
+            max_events: 25000
+            timeout_secs: 5
 
 
 router:
@@ -2103,6 +2194,11 @@ monitors-manager:
             -d "dbname=postgres" \
             -h {{ splitList ":" (include "postgresql.base.url" .) | first }} \
             -p {{ splitList ":" (include "postgresql.base.url" .) | last }}
+  command:
+    - "sh"
+    - "-c"
+    - "grafana cli --homepath=\"${GF_PATHS_HOME}\" --config=\"${GF_PATHS_CONFIG}\" admin reset-admin-password \"${GF_SECURITY_ADMIN_PASSWORD}\" && /run.sh"
+    
 rbac:
   pspEnabled: false
   sccEnabled: true

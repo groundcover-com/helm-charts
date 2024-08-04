@@ -78,6 +78,11 @@ containers:
     {{- tpl (toYaml .) $ | nindent 6 }}
 {{- end }}
 {{- end }}
+{{- if not (empty .Values.objectStorage.s3Bucket) -}}
+{{- with .Values.objectStorageEnv -}}
+    {{- tpl (toYaml .) $ | nindent 6 }}
+{{- end }}
+{{- end }}
 {{- if .Values.env }}
 {{- with .Values.env }}
     {{- tpl (toYaml .) $ | nindent 6 }}

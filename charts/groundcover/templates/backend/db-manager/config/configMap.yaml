@@ -65,4 +65,6 @@ data:
       Database: {{ include "clickhouse.database" . }}
       HTTPPort: {{ .Values.global.clickhouse.containerPorts.http | int }}
       NativePort: {{ .Values.global.clickhouse.containerPorts.tcp | int }}
+    ObjectStorageQueues:
+      {{- toYaml .Values.dbManager.objectStorageQueues | nindent 6 }}
 {{- end -}}

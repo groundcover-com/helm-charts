@@ -1,3 +1,15 @@
+{{- define "vector.s3.secretName" -}}
+{{ print "vector-s3-secret" }}
+{{- end -}}
+
+{{- define "vector.s3.secretKey" -}}
+{{- print "S3_ACCESS_KEY_SECRET" -}}
+{{- end -}}
+
+{{- define "vector.s3.accessKey" -}}
+{{- print "S3_ACCESS_KEY" -}}
+{{- end -}}
+
 {{- define "vector.cluster.http.health.port" -}}
 {{-  printf "8686"  -}}
 {{- end -}}
@@ -223,6 +235,8 @@ sinks:
 {{- include "vector.config.sinks.telemetry" . | nindent 2 }}
 {{ if .Values.global.backend.enabled }}
 {{- tpl (toYaml .Values.vector.customComponents.sinks.local) $ | nindent 2 }}
+{{ else if not (empty .Values.vector.objectStorage.s3Bucket) }}
+{{- tpl (toYaml .Values.vector.customComponents.sinks.s3) $ | nindent 2 }}
 {{ else }}
 {{- tpl (toYaml .Values.vector.customComponents.sinks.remote) $ | nindent 2 }}
 {{ end }}
