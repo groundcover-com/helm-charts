@@ -946,12 +946,12 @@ vector:
           name: '{{ include "clickhouse.secretName" . }}'
   # objectStorageEnv will only be created if objectStorage is enabled
   objectStorageEnv:
-    - name: S3_ACCESS_KEY
+    - name: AWS_ACCESS_KEY_ID
       valueFrom:
         secretKeyRef:
           key: '{{ include "vector.s3.accessKey" . }}'
           name: '{{ include "vector.s3.secretName" . }}'
-    - name: S3_ACCESS_KEY_SECRET
+    - name: AWS_SECRET_ACCESS_KEY
       valueFrom:
         secretKeyRef:
           key: '{{ include "vector.s3.secretKey" . }}'
@@ -1367,9 +1367,6 @@ vector:
           inputs:
             - logs_from_logs
             - json_logs
-          auth:
-            access_key_id: $S3_ACCESS_KEY
-            secret_access_key: $S3_ACCESS_KEY_SECRET
           bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
           region: '{{ .Values.vector.objectStorage.region }}'
           key_prefix: "v2/logs/"
@@ -1385,9 +1382,6 @@ vector:
           inputs:
             - traces_from_logs
             - json_traces
-          auth:
-            access_key_id: $S3_ACCESS_KEY
-            secret_access_key: $S3_ACCESS_KEY_SECRET
           bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
           region: '{{ .Values.vector.objectStorage.region }}'
           key_prefix: "v2/traces/"
@@ -1403,9 +1397,6 @@ vector:
           inputs:
             - entities
             - json_entities
-          auth:
-            access_key_id: $S3_ACCESS_KEY
-            secret_access_key: $S3_ACCESS_KEY_SECRET
           bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
           region: '{{ .Values.vector.objectStorage.region }}'
           key_prefix: "v2/entities/"
@@ -1421,9 +1412,6 @@ vector:
           inputs:
             - events
             - json_events
-          auth:
-            access_key_id: $S3_ACCESS_KEY
-            secret_access_key: $S3_ACCESS_KEY_SECRET
           bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
           region: '{{ .Values.vector.objectStorage.region }}'
           key_prefix: "v2/events/"
