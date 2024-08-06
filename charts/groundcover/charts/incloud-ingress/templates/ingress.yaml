@@ -3,7 +3,7 @@ kind: Ingress
 metadata:
   name: {{ printf "%s-otel-http" (include "incloud-ingress.name" .) | trunc 63 | trimSuffix "-" }}
   annotations:
-    konghq.com/host-aliases: "api-otel-http.*"
+    konghq.com/host-aliases: "*,api-otel-http.*"
     konghq.com/plugins: {{ printf "%s-auth" .Release.Name | quote }}
     konghq.com/protocols: {{ ternary "https" "http" .Values.kong.proxy.tls.enabled | quote }}
     {{- with .Values.ingress.annotations }}
@@ -13,9 +13,8 @@ spec:
   ingressClassName: kong
   {{- if .Values.ingress.tls.enabled }}
   tls:
-    - hosts:
-      - {{ get (urlParse (include "opentelemetry-collector.loki.http.url" .)) "host" }} 
-      secretName: {{ include "incloud-ingress.certificate.name" . }}
+    - secretName: {{ include "incloud-ingress.certificate.name" . }}
+      hosts: {{ include "incloud-ingress.certificate.dnsNames" .  | nindent 8 }}
   {{- end }}
   rules:
     - http:
@@ -27,8 +26,6 @@ spec:
                 name: {{ include "opentelemetry-collector.fullname" . }}
                 port:
                   number: {{ index .Values.global "opentelemetry-collector" "ports" "loki-http" "servicePort" | int }}
-    - http:
-        paths:
           - path: {{ get (urlParse (include "opentelemetry-collector.health.http.url" .)) "path" }} 
             pathType: Exact
             backend:
@@ -36,8 +33,6 @@ spec:
                 name: {{ include "opentelemetry-collector.fullname" . }}
                 port:
                   number: {{ index .Values.global "opentelemetry-collector" "ports" "health" "servicePort" | int }}
-    - http:
-        paths:
           - path: {{ get (urlParse (include "opentelemetry-collector.datadogapm.tracesv03.http.url" .)) "path" }} 
             pathType: Exact
             backend:
@@ -45,8 +40,6 @@ spec:
                 name: {{ include "opentelemetry-collector.fullname" . }}
                 port:
                   number: {{ index .Values.global "opentelemetry-collector" "ports" "datadogapm" "servicePort" | int }}
-    - http:
-        paths:
           - path: {{ get (urlParse (include "opentelemetry-collector.datadogapm.tracesv04.http.url" .)) "path" }} 
             pathType: Exact
             backend:
@@ -54,8 +47,6 @@ spec:
                 name: {{ include "opentelemetry-collector.fullname" . }}
                 port:
                   number: {{ index .Values.global "opentelemetry-collector" "ports" "datadogapm" "servicePort" | int }}
-    - http:
-        paths:
           - path: {{ get (urlParse (include "opentelemetry-collector.datadogapm.tracesv05.http.url" .)) "path" }} 
             pathType: Exact
             backend:
@@ -63,8 +54,6 @@ spec:
                 name: {{ include "opentelemetry-collector.fullname" . }}
                 port:
                   number: {{ index .Values.global "opentelemetry-collector" "ports" "datadogapm" "servicePort" | int }}
-    - http:
-        paths:
           - path: {{ get (urlParse (include "opentelemetry-collector.datadogapm.tracesv07.http.url" .)) "path" }} 
             pathType: Exact
             backend:
@@ -72,8 +61,6 @@ spec:
                 name: {{ include "opentelemetry-collector.fullname" . }}
                 port:
                   number: {{ index .Values.global "opentelemetry-collector" "ports" "datadogapm" "servicePort" | int }}
-    - http:
-        paths:
           - path: {{ get (urlParse (include "opentelemetry-collector.otlptraces.http.url" .)) "path" }} 
             pathType: Exact
             backend:
@@ -81,8 +68,6 @@ spec:
                 name: {{ include "opentelemetry-collector.fullname" . }}
                 port:
                   number: {{ index .Values.global "opentelemetry-collector" "ports" "otlp-http" "servicePort" | int }}
-    - http:
-        paths:
           - path: {{ get (urlParse (include "opentelemetry-collector.otlplogs.http.url" .)) "path" }} 
             pathType: Exact
             backend:
@@ -90,8 +75,6 @@ spec:
                 name: {{ include "opentelemetry-collector.fullname" . }}
                 port:
                   number: {{ index .Values.global "opentelemetry-collector" "ports" "otlp-http" "servicePort" | int }}
-    - http:
-        paths:
           - path: {{ get (urlParse (include "opentelemetry-collector.otlpmetrics.http.url" .)) "path" }} 
             pathType: Exact
             backend:
@@ -99,8 +82,6 @@ spec:
                 name: {{ include "opentelemetry-collector.fullname" . }}
                 port:
                   number: {{ index .Values.global "opentelemetry-collector" "ports" "otlp-http" "servicePort" | int }}
-    - http:
-        paths:
           - path: {{ get (urlParse (include "opentelemetry-collector.awsfirehose.http.url" .)) "path" }} 
             pathType: Exact
             backend:
@@ -125,9 +106,8 @@ spec:
   ingressClassName: kong
   {{- if .Values.ingress.tls.enabled }}
   tls:
-    - hosts:
-      - {{ .Values.global.ingress.site }}
-      secretName: {{ include "incloud-ingress.certificate.name" . }}
+    - secretName: {{ include "incloud-ingress.certificate.name" . }}
+      hosts: {{ include "incloud-ingress.certificate.dnsNames" .  | nindent 8 }}
   {{- end }}
   rules:
     - http:
@@ -156,9 +136,8 @@ spec:
   ingressClassName: kong
   {{- if .Values.ingress.tls.enabled }}
   tls:
-    - hosts:
-      - {{ .Values.global.ingress.site }}
-      secretName: {{ include "incloud-ingress.certificate.name" . }}
+    - secretName: {{ include "incloud-ingress.certificate.name" . }}
+      hosts: {{ include "incloud-ingress.certificate.dnsNames" .  | nindent 8 }}
   {{- end }}
   rules:
     - http:
@@ -207,9 +186,8 @@ spec:
   ingressClassName: kong
   {{- if .Values.ingress.tls.enabled }}
   tls:
-    - hosts:
-      - {{ .Values.global.ingress.site }}
-      secretName: {{ include "incloud-ingress.certificate.name" . }}
+    - secretName: {{ include "incloud-ingress.certificate.name" . }}
+      hosts: {{ include "incloud-ingress.certificate.dnsNames" .  | nindent 8 }}
   {{- end }}
   rules:
     - http:
@@ -221,9 +199,6 @@ spec:
                 name: {{ include "vector.fullname" . }}
                 port:
                   number: {{ (include "vector.cluster.json.traces-as-logs.port" .) | int }}
-
-    - http:
-        paths:
           - path: {{ get (urlParse (include "vector.incloud.json.logs.url" .)) "path" }} 
             pathType: Exact
             backend:
@@ -231,9 +206,6 @@ spec:
                 name: {{ include "vector.fullname" . }}
                 port:
                   number: {{ (include "vector.cluster.json.logs.port" .) | int }}
-
-    - http:
-        paths:
           - path: {{ get (urlParse (include "vector.incloud.json.events.url" .)) "path" }} 
             pathType: Exact
             backend:
@@ -241,8 +213,6 @@ spec:
                 name: {{ include "vector.fullname" . }}
                 port:
                   number: {{ (include "vector.cluster.json.events.port" .) | int }}
-    - http:
-        paths:
           - path: {{ get (urlParse (include "vector.incloud.json.entities.url" .)) "path" }} 
             pathType: Exact
             backend:
@@ -258,7 +228,7 @@ kind: Ingress
 metadata:
   name: {{ printf "%s-metrics-http" (include "incloud-ingress.name" .) | trunc 63 | trimSuffix "-" }}
   annotations:
-    konghq.com/host-aliases: "metrics-http.*"
+    konghq.com/host-aliases: "*,metrics-http.*"
     konghq.com/plugins: {{ printf "%s-auth" .Release.Name | quote }}
     konghq.com/protocols: {{ ternary "https" "http" .Values.kong.proxy.tls.enabled | quote }}
     {{- with .Values.ingress.annotations }}
@@ -268,9 +238,8 @@ spec:
   ingressClassName: kong
   {{- if .Values.ingress.tls.enabled }}
   tls:
-    - hosts:
-      - {{ get (urlParse (include "metrics-ingester.write.http.url" .)) "host" }} 
-      secretName: {{ include "incloud-ingress.certificate.name" . }}
+    - secretName: {{ include "incloud-ingress.certificate.name" . }}
+      hosts: {{ include "incloud-ingress.certificate.dnsNames" .  | nindent 8 }}
   {{- end }}
   rules:
     - http:
@@ -311,7 +280,7 @@ kind: Ingress
 metadata:
   name: {{ printf "%s-grpc" (include "incloud-ingress.name" .) | trunc 63 | trimSuffix "-" }}
   annotations:
-    konghq.com/host-aliases: "api-otel-grpc.*"
+    konghq.com/host-aliases: "*,api-otel-grpc.*"
     konghq.com/headers.content-type: application/grpc
     konghq.com/plugins: {{ printf "%s-auth" .Release.Name | quote }}
     konghq.com/protocols: {{ ternary "grpcs" "grpc" .Values.kong.proxy.tls.enabled | quote }}
@@ -322,15 +291,28 @@ spec:
   ingressClassName: kong
   {{- if .Values.ingress.tls.enabled }}
   tls:
-    - hosts:
-      - {{ splitList ":" (include "opentelemetry-collector.otlp.grpc.url" .) | first }}
-      secretName: {{ include "incloud-ingress.certificate.name" . }}
+    - secretName: {{ include "incloud-ingress.certificate.name" . }}
+      hosts: {{ include "incloud-ingress.certificate.dnsNames" .  | nindent 8 }}
   {{- end }}
   rules:
     - http:
         paths:
-          - path: /
-            pathType: Prefix
+          - path: /opentelemetry.proto.collector.logs.v1.LogsService/Export
+            pathType: Exact
+            backend:
+              service:
+                name: {{ printf "%s-grpc" (include "opentelemetry-collector.fullname" .) }}
+                port:
+                  number: {{ index .Values.global "opentelemetry-collector" "ports" "otlp" "servicePort" | int }}
+          - path: /opentelemetry.proto.collector.metrics.v1.MetricsService/Export
+            pathType: Exact
+            backend:
+              service:
+                name: {{ printf "%s-grpc" (include "opentelemetry-collector.fullname" .) }}
+                port:
+                  number: {{ index .Values.global "opentelemetry-collector" "ports" "otlp" "servicePort" | int }}
+          - path: /opentelemetry.proto.collector.trace.v1.TraceService/Export
+            pathType: Exact
             backend:
               service:
                 name: {{ printf "%s-grpc" (include "opentelemetry-collector.fullname" .) }}
@@ -344,7 +326,7 @@ kind: Ingress
 metadata:
   name: {{ printf "%s-status" (include "incloud-ingress.name" .) | trunc 63 | trimSuffix "-" }}
   annotations:
-    konghq.com/host-aliases: "status.*"
+    konghq.com/host-aliases: "*,status.*"
     konghq.com/plugins: {{ printf "%s-auth" .Release.Name | quote }}
     konghq.com/protocols: {{ ternary "https" "http" .Values.kong.proxy.tls.enabled | quote }}
     {{- with .Values.ingress.annotations }}
@@ -354,9 +336,8 @@ spec:
   ingressClassName: kong
   {{- if .Values.ingress.tls.enabled }}
   tls:
-    - hosts:
-      - {{ get (urlParse (include "portal.live.http.url" .)) "host" }} 
-      secretName: {{ include "incloud-ingress.certificate.name" . }}
+    - secretName: {{ include "incloud-ingress.certificate.name" . }}
+      hosts: {{ include "incloud-ingress.certificate.dnsNames" .  | nindent 8 }}
   {{- end }}
   rules:
     - http:
@@ -387,9 +368,8 @@ spec:
   ingressClassName: kong
   {{- if .Values.ingress.tls.enabled }}
   tls:
-    - hosts:
-      - {{ .Values.global.ingress.site }}
-      secretName: {{ include "incloud-ingress.certificate.name" . }}
+    - secretName: {{ include "incloud-ingress.certificate.name" . }}
+      hosts: {{ include "incloud-ingress.certificate.dnsNames" .  | nindent 8 }}}
   {{- end }}
   rules:
     - http:
@@ -419,9 +399,8 @@ spec:
   ingressClassName: kong
   {{- if .Values.ingress.tls.enabled }}
   tls:
-    - hosts:
-      - {{ .Values.global.ingress.site }}
-      secretName: {{ include "incloud-ingress.certificate.name" . }}
+    - secretName: {{ include "incloud-ingress.certificate.name" . }}
+      hosts: {{ include "incloud-ingress.certificate.dnsNames" .  | nindent 8 }}
   {{- end }}
   rules:
     - http:

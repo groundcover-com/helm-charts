@@ -43,13 +43,13 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
 {{- define "incloud-ingress.certificate.name" -}}
-{{ printf "%s-%s"  .Release.Name .Values.ingress.tls.certificate.name }}
+{{ printf "%s-%s" .Release.Name .Values.ingress.tls.certificate.name }}
 {{- end }}
 
 {{- define "incloud-ingress.certificate.dnsNames" -}}
 - {{ .Values.global.ingress.site }}
-- {{ get (urlParse (include "opentelemetry-collector.loki.http.url" .)) "host" }} 
-- {{ get (urlParse (include "metrics-ingester.write.http.url" .)) "host" }} 
-- {{ splitList ":" (include "opentelemetry-collector.otlp.grpc.url" .) | first }}
-- {{ get (urlParse (include "portal.live.http.url" .)) "host" }} 
+- {{ printf "status.%s" .Values.global.ingress.site }}
+- {{ printf "metrics-http.%s" .Values.global.ingress.site }}
+- {{ printf "api-otel-http.%s" .Values.global.ingress.site }}
+- {{ printf "api-otel-grpc.%s" .Values.global.ingress.site }}
 {{- end }}

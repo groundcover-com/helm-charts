@@ -32,7 +32,7 @@ data:
       aggregationCacheSize: 1024
     
     VictoriaMetrics:
-      url: {{ include "metrics-ingester.base.http.internalUrl" . }}
+      url: {{ include "metrics-ingester.cluster.http.base.url" . }}
       TLSSkipVerify: true
 
     KubeStateMetricsScrape:

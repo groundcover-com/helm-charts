@@ -139,7 +139,7 @@ spec:
             {{- if .Values.global.ingestion.tls_skip_verify }}
               -k \
             {{- end }}
-              -sw '%{http_code}' {{ include "metrics-ingester.health.http.url" . }} -o /dev/null) -ne 200 ];
+              -sw '%{http_code}' {{ include "metrics-ingester.write.http.url" . }} -o /dev/null) -ne 204 ];
             do
               echo 'Waiting for VictoriaMetrics Agent...';
               sleep 2;
