@@ -149,6 +149,7 @@ maxLogSize: 102400
 logBatchSendQueueWorkerCount: 3
 logBatchSendQueueMaxSize: 5
 oldLogDropThreshold: 60s
+oldLogDropAlwaysThreshold: 60m
 oldLogDelayStart: 60s
 shouldDropRunningNamespaces: true
 commitHashKeyName:
@@ -1075,13 +1076,22 @@ vector:
             codec: json
     transforms:
       overrideTransforms:
-      otel:
+      default:
         logs_from_logs:
           inputs:
             - "otel_logs.logs"
           type: "remap"
           source: |-
             . = .attributes
+
+        drop_old_logs:
+          inputs:
+            - logs_from_logs
+            - json_logs
+          type: "filter"
+          condition: |
+            to_unix_timestamp(now()) - 12*3600 < to_unix_timestamp(parse_timestamp!(.timestamp, "%+"))
+
         traces_from_logs:
           inputs:
             - "otel_traces.logs"
@@ -1151,8 +1161,7 @@ vector:
         json_logs_sink:
           type: http
           inputs:
-            - logs_from_logs
-            - json_logs
+            - drop_old_logs
           uri: '{{ include "vector.incloud.json.logs.url" . }}'
           method: post
           encoding:
@@ -1161,6 +1170,7 @@ vector:
               timestamp_format: rfc3339
           compression: zstd
           request:
+            retry_attempts: 5
             headers:
               apikey: $API_KEY
           buffer:
@@ -1184,6 +1194,7 @@ vector:
               timestamp_format: rfc3339
           compression: zstd
           request:
+            retry_attempts: 5
             headers:
               apikey: $API_KEY
           buffer:
@@ -1207,6 +1218,7 @@ vector:
               timestamp_format: rfc3339
           compression: zstd
           request:
+            retry_attempts: 5
             headers:
               apikey: $API_KEY
           buffer:
@@ -1230,6 +1242,7 @@ vector:
               timestamp_format: rfc3339
           compression: zstd
           request:
+            retry_attempts: 5
             headers:
               apikey: $API_KEY
           buffer:
@@ -1244,11 +1257,12 @@ vector:
         clickhouse_logs:
           type: clickhouse
           inputs:
-            - logs_from_logs
-            - json_logs
+            - drop_old_logs
           endpoint: '{{ include "clickhouse.httpEndpoint" . }}'
           database: "groundcover"
           table: "logs_v2"
+          request:
+            retry_attempts: 5
           auth:
             user: '{{ include "clickhouse.username" . }}'
             password: $CLICKHOUSE_PASSWORD
@@ -1273,6 +1287,8 @@ vector:
           endpoint: '{{ include "clickhouse.httpEndpoint" . }}'
           database: "groundcover"
           table: "traces"
+          request:
+            retry_attempts: 5
           auth:
             user: '{{ include "clickhouse.username" . }}'
             password: $CLICKHOUSE_PASSWORD
@@ -1297,6 +1313,8 @@ vector:
           endpoint: '{{ include "clickhouse.httpEndpoint" . }}'
           database: "groundcover"
           table: "entities"
+          request:
+            retry_attempts: 5
           auth:
             user: '{{ include "clickhouse.username" . }}'
             password: $CLICKHOUSE_PASSWORD
@@ -1321,6 +1339,8 @@ vector:
           endpoint: '{{ include "clickhouse.httpEndpoint" . }}'
           database: "groundcover"
           table: "events"
+          request:
+            retry_attempts: 5
           auth:
             user: '{{ include "clickhouse.username" . }}'
             password: $CLICKHOUSE_PASSWORD
@@ -1345,6 +1365,8 @@ vector:
           endpoint: '{{ include "clickhouse.httpEndpoint" . }}'
           database: "groundcover"
           table: "monitor_state"
+          request:
+            retry_attempts: 5
           auth:
             user: '{{ include "clickhouse.username" . }}'
             password: $CLICKHOUSE_PASSWORD
@@ -1365,8 +1387,7 @@ vector:
         s3_logs:
           type: "aws_s3"
           inputs:
-            - logs_from_logs
-            - json_logs
+            - drop_old_logs
           bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
           region: '{{ .Values.vector.objectStorage.region }}'
           key_prefix: "v2/logs/"

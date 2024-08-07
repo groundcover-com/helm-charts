@@ -4,7 +4,7 @@
 {{- else if .Values.global.metrics.overrideUrl -}}
     {{- .Values.global.metrics.overrideUrl -}}
 {{- else if .Values.global.ingress.site -}}
-    {{- include "incloud.ingestion.http.url" . -}}
+    {{- include "incloud.metrics.http.url" . -}}
 {{- else -}}
     {{- fail "A valid global.ingress.site or .Values.global.metrics.overrideUrl is required!" -}}
 {{- end -}}

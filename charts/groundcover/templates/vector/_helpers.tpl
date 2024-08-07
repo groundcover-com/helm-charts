@@ -225,7 +225,7 @@ transforms:
 {{ if .Values.vector.customComponents.transforms.overrideTransforms }}
 {{- tpl (toYaml .Values.vector.customComponents.transforms.overrideTransforms) $ | nindent 2 -}}
 {{ else }}
-{{- tpl (toYaml .Values.vector.customComponents.transforms.otel) $ | nindent 2 }}
+{{- tpl (toYaml .Values.vector.customComponents.transforms.default) $ | nindent 2 }}
 {{ end }}
 
 sinks:

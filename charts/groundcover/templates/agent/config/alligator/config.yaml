@@ -466,6 +466,7 @@ data:
         logBatchSendQueueWorkerCount: {{ .Values.logBatchSendQueueWorkerCount }} 
         logBatchSendQueueMaxSize : {{ .Values.logBatchSendQueueMaxSize }}
         oldLogDropThreshold: {{ .Values.oldLogDropThreshold }} 
+        oldLogDropAlwaysThreshold: {{ .Values.oldLogDropAlwaysThreshold }}
         oldLogDelayStart: {{ .Values.oldLogDelayStart }} 
     otelTracesAsLogs: {{ .Values.global.vector.enabled }}
     otelPreprocess: {{ .Values.global.vector.enabled }}
