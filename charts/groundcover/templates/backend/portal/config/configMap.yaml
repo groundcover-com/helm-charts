@@ -11,7 +11,7 @@ data:
     ClusterId: {{ template "groundcover.clusterId" . }}
     MultipleClusterIds: 
     {{- with .Values.multipleClusterIds }}{{ toYaml . | nindent 6 }}{{- end }}  
-    Autodiscovery: {{ or .Values.tags.incloud .Values.portal.autodiscovery (not (empty .Values.multipleClusterIds)) }}
+    Autodiscovery: {{ .Values.portal.autodiscovery }}
     GroundcoverVersion: "OVERRIDEN"
 
     Incluster: true

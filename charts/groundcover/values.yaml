@@ -401,6 +401,7 @@ portal:
     exponent: 40
     uploaderType: pyroscope
     cpuSamplingDuration: 60s
+  autodiscovery: false
 
 clickhouse:
   enabled: true
@@ -935,9 +936,9 @@ vector:
   resources:
     requests:
       cpu: 100m
-      memory: 512Mi
-    limits:
       memory: 2048Mi
+    limits:
+      memory: 4096Mi
   # backendEnv will only be created if backend is enabled
   backendEnv:
     - name: CLICKHOUSE_PASSWORD
