@@ -260,6 +260,7 @@ agent:
       obfuscationConfig:
         keyValueConfig:
         unstructuredConfig:
+      obfuscateSensitiveValues: true
     sqlhandler:
       truncationConfig:
         enabled: true

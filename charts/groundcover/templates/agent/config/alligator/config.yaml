@@ -112,6 +112,9 @@ data:
       interval: 30s
       summarizerActiveTtl: 45s
       aggregationCacheSize: 4096
+      obfuscateSensitiveValues: {{ .Values.agent.alligator.redishandler.obfuscateSensitiveValues }} 
+
+
 
     amqphandler:
       samplesthreshold: 10
