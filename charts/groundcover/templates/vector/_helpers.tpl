@@ -198,7 +198,20 @@
 telemtry_prometheus_sink:
         type: prometheus_exporter
         inputs:
-          - telemetry_metrics
+          - enriched_telemetry_metrics
+{{- end -}}
+
+{{- define "vector.config.transforms.telemetry" -}}
+enriched_telemetry_metrics:
+  type: remap
+  inputs:
+      - telemetry_metrics
+  source: |-
+{{ if .Values.global.backend.enabled }}
+    .tags.vector_type = "backend"
+{{ else }}
+    .tags.vector_type = "front"
+{{ end }}
 {{- end -}}
 
 {{- define "vector.config.sources.telemetry" -}}
@@ -222,6 +235,7 @@ sources:
 {{ end }}
 
 transforms:
+{{- include "vector.config.transforms.telemetry" . | nindent 2 }}
 {{ if .Values.vector.customComponents.transforms.overrideTransforms }}
 {{- tpl (toYaml .Values.vector.customComponents.transforms.overrideTransforms) $ | nindent 2 -}}
 {{ else }}
