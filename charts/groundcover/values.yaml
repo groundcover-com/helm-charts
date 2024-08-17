@@ -869,6 +869,45 @@ opentelemetry-collector:
   tolerations: []
 
 vector:
+  logsPipeline:
+    inputs:
+      - logs_from_logs
+      - json_logs
+    defaultSteps:
+    - name: dropOldLogs
+      transform:
+        type: "filter"
+        condition: |
+          to_unix_timestamp(now()) - 12*3600 < to_unix_timestamp(parse_timestamp!(.timestamp, "%+"))
+    extraSteps: []
+  # List of steps to perform as part of the pipeline. Will be executed sequentially. Examples:
+  # - name: renameAttribute
+  #   transform:
+  #     type: remap
+  #     source: |-
+  #       .string_attributes.newName = del(.string_attributes.oldName)
+  # - name: parseRegex
+  #   transform:
+  #     type: remap
+  #     source: |-
+  #       . |= parse_regex(.content, r'pattern')
+  tracesPipeline:
+    inputs:
+      - traces_from_logs
+      - json_traces
+    defaultSteps: []
+    extraSteps: []
+  # List of steps to perform as part of the pipeline. Will be executed sequentially. Examples:
+  # - name: renameAttribute
+  #   transform:
+  #     type: remap
+  #     source: |-
+  #       .string_attributes.newName = del(.string_attributes.oldName)
+  # - name: parseRegex
+  #   transform:
+  #     type: remap
+  #     source: |-
+  #       . |= parse_regex(.content, r'pattern')
   image:
     repository: public.ecr.aws/groundcovercom/vector
   service:
@@ -1085,15 +1124,6 @@ vector:
           type: "remap"
           source: |-
             . = .attributes
-
-        drop_old_logs:
-          inputs:
-            - logs_from_logs
-            - json_logs
-          type: "filter"
-          condition: |
-            to_unix_timestamp(now()) - 12*3600 < to_unix_timestamp(parse_timestamp!(.timestamp, "%+"))
-
         traces_from_logs:
           inputs:
             - "otel_traces.logs"
@@ -1160,291 +1190,286 @@ vector:
     sinks:
       overrideSinks:
       remote:
-        json_logs_sink:
-          type: http
-          inputs:
-            - drop_old_logs
-          uri: '{{ include "vector.incloud.json.logs.url" . }}'
-          method: post
-          encoding:
-            codec: json
-            json:
-              timestamp_format: rfc3339
-          compression: zstd
-          request:
-            retry_attempts: 5
-            headers:
-              apikey: $API_KEY
-          buffer:
-              type: memory
-              max_events: 50000
-              when_full: drop_newest
-          batch:
-            max_bytes: 2000000
-            max_events: 2000
-            timeout_secs: 1  
-        json_traces_sink:
-          type: http
-          inputs:
-            - traces_from_logs
-            - json_traces
-          uri: '{{ include "vector.incloud.json.traces-as-logs.url" . }}'
-          method: post
-          encoding:
-            codec: json
-            json:
-              timestamp_format: rfc3339
-          compression: zstd
-          request:
-            retry_attempts: 5
-            headers:
-              apikey: $API_KEY
-          buffer:
-              type: memory
-              max_events: 5000
-              when_full: drop_newest
-          batch:
-            max_bytes: 2000000
-            max_events: 2000
-            timeout_secs: 1
-        json_events_sink:
-          type: http
-          inputs:
+        logs:
+          json_logs_sink:
+            type: http
+            uri: '{{ include "vector.incloud.json.logs.url" . }}'
+            method: post
+            encoding:
+              codec: json
+              json:
+                timestamp_format: rfc3339
+            compression: zstd
+            request:
+              retry_attempts: 5
+              headers:
+                apikey: $API_KEY
+            buffer:
+                type: memory
+                max_events: 50000
+                when_full: drop_newest
+            batch:
+              max_bytes: 2000000
+              max_events: 2000
+              timeout_secs: 1  
+        traces:
+          json_traces_sink:
+            type: http
+            uri: '{{ include "vector.incloud.json.traces-as-logs.url" . }}'
+            method: post
+            encoding:
+              codec: json
+              json:
+                timestamp_format: rfc3339
+            compression: zstd
+            request:
+              retry_attempts: 5
+              headers:
+                apikey: $API_KEY
+            buffer:
+                type: memory
+                max_events: 5000
+                when_full: drop_newest
+            batch:
+              max_bytes: 2000000
+              max_events: 2000
+              timeout_secs: 1
+        custom:
+          json_events_sink:
+            type: http
+            inputs:
             - events
             - json_events
-          uri: '{{ include "vector.incloud.json.events.url" . }}'
-          method: post
-          encoding:
-            codec: json
-            json:
-              timestamp_format: rfc3339
-          compression: zstd
-          request:
-            retry_attempts: 5
-            headers:
-              apikey: $API_KEY
-          buffer:
-              type: memory
-              max_events: 5000
-              when_full: drop_newest
-          batch:
-            max_bytes: 2000000
-            max_events: 2000
-            timeout_secs: 1
-        json_entities_sink:
-          type: http
-          inputs:
-            - entities
-            - json_entities
-          uri: '{{ include "vector.incloud.json.entities.url" . }}'
-          method: post
-          encoding:
-            codec: json
-            json:
-              timestamp_format: rfc3339
-          compression: zstd
-          request:
-            retry_attempts: 5
-            headers:
-              apikey: $API_KEY
-          buffer:
-              type: memory
-              max_events: 5000
-              when_full: drop_newest
-          batch:
-            max_bytes: 2000000
-            max_events: 2000
-            timeout_secs: 1
+            uri: '{{ include "vector.incloud.json.events.url" . }}'
+            method: post
+            encoding:
+              codec: json
+              json:
+                timestamp_format: rfc3339
+            compression: zstd
+            request:
+              retry_attempts: 5
+              headers:
+                apikey: $API_KEY
+            buffer:
+                type: memory
+                max_events: 5000
+                when_full: drop_newest
+            batch:
+              max_bytes: 2000000
+              max_events: 2000
+              timeout_secs: 1
+          json_entities_sink:
+            type: http
+            inputs:
+              - entities
+              - json_entities
+            uri: '{{ include "vector.incloud.json.entities.url" . }}'
+            method: post
+            encoding:
+              codec: json
+              json:
+                timestamp_format: rfc3339
+            compression: zstd
+            request:
+              retry_attempts: 5
+              headers:
+                apikey: $API_KEY
+            buffer:
+                type: memory
+                max_events: 5000
+                when_full: drop_newest
+            batch:
+              max_bytes: 2000000
+              max_events: 2000
+              timeout_secs: 1
       local:
-        clickhouse_logs:
-          type: clickhouse
-          inputs:
-            - drop_old_logs
-          endpoint: '{{ include "clickhouse.httpEndpoint" . }}'
-          database: "groundcover"
-          table: "logs_v2"
-          request:
-            retry_attempts: 5
-          auth:
-            user: '{{ include "clickhouse.username" . }}'
-            password: $CLICKHOUSE_PASSWORD
-            strategy: "basic"
-          format: "json_each_row"
-          encoding:
-            timestamp_format: rfc3339
-          date_time_best_effort: true
-          buffer:
-              type: memory
-              max_events: 50000
-              when_full: drop_newest
-          batch:
-            max_bytes: 200000000
-            max_events: 200000
-            timeout_secs: 1
-        clickhouse_traces:
-          type: clickhouse
-          inputs:
-            - traces_from_logs
-            - json_traces
-          endpoint: '{{ include "clickhouse.httpEndpoint" . }}'
-          database: "groundcover"
-          table: "traces"
-          request:
-            retry_attempts: 5
-          auth:
-            user: '{{ include "clickhouse.username" . }}'
-            password: $CLICKHOUSE_PASSWORD
-            strategy: "basic"
-          format: "json_each_row"
-          encoding:
-            timestamp_format: rfc3339
-          date_time_best_effort: true
-          buffer:
-              type: memory
-              max_events: 5000
-              when_full: drop_newest
-          batch:
-            max_bytes: 200000000
-            max_events: 10000
-            timeout_secs: 1
-        clickhouse_k8s_entities:
-          type: clickhouse
-          inputs:
-            - entities
-            - json_entities
-          endpoint: '{{ include "clickhouse.httpEndpoint" . }}'
-          database: "groundcover"
-          table: "entities"
-          request:
-            retry_attempts: 5
-          auth:
-            user: '{{ include "clickhouse.username" . }}'
-            password: $CLICKHOUSE_PASSWORD
-            strategy: "basic"
-          format: "json_each_row"
-          encoding:
-            timestamp_format: rfc3339
-          date_time_best_effort: true
-          buffer:
-              type: memory
-              max_events: 5000
-              when_full: drop_newest
-          batch:
-            max_bytes: 100000000
-            max_events: 10000
-            timeout_secs: 2
-        clickhouse_k8s_events:
-          type: clickhouse
-          inputs:
+        logs:
+          clickhouse_logs:
+            type: clickhouse
+            endpoint: '{{ include "clickhouse.httpEndpoint" . }}'
+            database: "groundcover"
+            table: "logs_v2"
+            request:
+              retry_attempts: 5
+            auth:
+              user: '{{ include "clickhouse.username" . }}'
+              password: $CLICKHOUSE_PASSWORD
+              strategy: "basic"
+            format: "json_each_row"
+            encoding:
+              timestamp_format: rfc3339
+            date_time_best_effort: true
+            buffer:
+                type: memory
+                max_events: 50000
+                when_full: drop_newest
+            batch:
+              max_bytes: 200000000
+              max_events: 200000
+              timeout_secs: 1
+        traces:
+          clickhouse_traces:
+            type: clickhouse
+            endpoint: '{{ include "clickhouse.httpEndpoint" . }}'
+            database: "groundcover"
+            table: "traces"
+            request:
+              retry_attempts: 5
+            auth:
+              user: '{{ include "clickhouse.username" . }}'
+              password: $CLICKHOUSE_PASSWORD
+              strategy: "basic"
+            format: "json_each_row"
+            encoding:
+              timestamp_format: rfc3339
+            date_time_best_effort: true
+            buffer:
+                type: memory
+                max_events: 5000
+                when_full: drop_newest
+            batch:
+              max_bytes: 200000000
+              max_events: 10000
+              timeout_secs: 1
+        custom:
+          clickhouse_k8s_entities:
+            type: clickhouse
+            inputs:
+              - entities
+              - json_entities
+            endpoint: '{{ include "clickhouse.httpEndpoint" . }}'
+            database: "groundcover"
+            table: "entities"
+            request:
+              retry_attempts: 5
+            auth:
+              user: '{{ include "clickhouse.username" . }}'
+              password: $CLICKHOUSE_PASSWORD
+              strategy: "basic"
+            format: "json_each_row"
+            encoding:
+              timestamp_format: rfc3339
+            date_time_best_effort: true
+            buffer:
+                type: memory
+                max_events: 5000
+                when_full: drop_newest
+            batch:
+              max_bytes: 100000000
+              max_events: 10000
+              timeout_secs: 2
+          clickhouse_k8s_events:
+            type: clickhouse
+            inputs:
             - events
             - json_events
-          endpoint: '{{ include "clickhouse.httpEndpoint" . }}'
-          database: "groundcover"
-          table: "events"
-          request:
-            retry_attempts: 5
-          auth:
-            user: '{{ include "clickhouse.username" . }}'
-            password: $CLICKHOUSE_PASSWORD
-            strategy: "basic"
-          format: "json_each_row"
-          encoding:
-            timestamp_format: rfc3339
-          date_time_best_effort: true
-          buffer:
-              type: memory
-              max_events: 5000
-              when_full: drop_newest
-          batch:
-            max_bytes: 100000000
-            max_events: 10000
-            timeout_secs: 2
-        clickhouse_monitors:
-          type: clickhouse
-          inputs:
-            - monitors
-            - json_monitors
-          endpoint: '{{ include "clickhouse.httpEndpoint" . }}'
-          database: "groundcover"
-          table: "monitor_state"
-          request:
-            retry_attempts: 5
-          auth:
-            user: '{{ include "clickhouse.username" . }}'
-            password: $CLICKHOUSE_PASSWORD
-            strategy: "basic"
-          format: "json_each_row"
-          encoding:
-            timestamp_format: rfc3339
-          date_time_best_effort: true
-          buffer:
-              type: memory
-              max_events: 5000
-              when_full: drop_newest
-          batch:
-            max_bytes: 100000000
-            max_events: 10000
-            timeout_secs: 2
+            endpoint: '{{ include "clickhouse.httpEndpoint" . }}'
+            database: "groundcover"
+            table: "events"
+            request:
+              retry_attempts: 5
+            auth:
+              user: '{{ include "clickhouse.username" . }}'
+              password: $CLICKHOUSE_PASSWORD
+              strategy: "basic"
+            format: "json_each_row"
+            encoding:
+              timestamp_format: rfc3339
+            date_time_best_effort: true
+            buffer:
+                type: memory
+                max_events: 5000
+                when_full: drop_newest
+            batch:
+              max_bytes: 100000000
+              max_events: 10000
+              timeout_secs: 2
+          clickhouse_monitors:
+            type: clickhouse
+            inputs:
+              - monitors
+              - json_monitors
+            endpoint: '{{ include "clickhouse.httpEndpoint" . }}'
+            database: "groundcover"
+            table: "monitor_state"
+            request:
+              retry_attempts: 5
+            auth:
+              user: '{{ include "clickhouse.username" . }}'
+              password: $CLICKHOUSE_PASSWORD
+              strategy: "basic"
+            format: "json_each_row"
+            encoding:
+              timestamp_format: rfc3339
+            date_time_best_effort: true
+            buffer:
+                type: memory
+                max_events: 5000
+                when_full: drop_newest
+            batch:
+              max_bytes: 100000000
+              max_events: 10000
+              timeout_secs: 2
       s3:
-        s3_logs:
-          type: "aws_s3"
-          inputs:
-            - drop_old_logs
-          bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
-          region: '{{ .Values.vector.objectStorage.region }}'
-          key_prefix: "v2/logs/"
-          encoding:
-            codec: json
-            timestamp_format: rfc3339
-          batch:
-            max_bytes: 25000000
-            max_events: 25000
-            timeout_secs: 5
-        s3_traces:
-          type: "aws_s3"
-          inputs:
-            - traces_from_logs
-            - json_traces
-          bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
-          region: '{{ .Values.vector.objectStorage.region }}'
-          key_prefix: "v2/traces/"
-          encoding:
-            codec: json
-            timestamp_format: rfc3339
-          batch:
-            max_bytes: 25000000
-            max_events: 2500
-            timeout_secs: 5
-        s3_entities:
-          type: "aws_s3"
-          inputs:
-            - entities
-            - json_entities
-          bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
-          region: '{{ .Values.vector.objectStorage.region }}'
-          key_prefix: "v2/entities/"
-          encoding:
-            codec: json
-            timestamp_format: rfc3339
-          batch:
-            max_bytes: 25000000
-            max_events: 25000
-            timeout_secs: 5
-        s3_events:
-          type: "aws_s3"
-          inputs:
+        logs:
+          s3_logs:
+            type: "aws_s3"
+            bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
+            region: '{{ .Values.vector.objectStorage.region }}'
+            key_prefix: "v2/logs/"
+            encoding:
+              codec: json
+              timestamp_format: rfc3339
+            batch:
+              max_bytes: 25000000
+              max_events: 25000
+              timeout_secs: 5
+        traces:
+          s3_traces:
+            type: "aws_s3"
+            bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
+            region: '{{ .Values.vector.objectStorage.region }}'
+            key_prefix: "v2/traces/"
+            encoding:
+              codec: json
+              timestamp_format: rfc3339
+            batch:
+              max_bytes: 25000000
+              max_events: 2500
+              timeout_secs: 5
+        custom:
+          s3_entities:
+            type: "aws_s3"
+            inputs:
+              - entities
+              - json_entities
+            bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
+            region: '{{ .Values.vector.objectStorage.region }}'
+            key_prefix: "v2/entities/"
+            encoding:
+              codec: json
+              timestamp_format: rfc3339
+            batch:
+              max_bytes: 25000000
+              max_events: 25000
+              timeout_secs: 5
+          s3_events:
+            type: "aws_s3"
+            inputs:
             - events
             - json_events
-          bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
-          region: '{{ .Values.vector.objectStorage.region }}'
-          key_prefix: "v2/events/"
-          encoding:
-            codec: json
-            timestamp_format: rfc3339
-          batch:
-            max_bytes: 25000000
-            max_events: 25000
-            timeout_secs: 5
+            bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
+            region: '{{ .Values.vector.objectStorage.region }}'
+            key_prefix: "v2/events/"
+            encoding:
+              codec: json
+              timestamp_format: rfc3339
+            batch:
+              max_bytes: 25000000
+              max_events: 25000
+              timeout_secs: 5
+        
 
 
 router:

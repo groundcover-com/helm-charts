@@ -240,6 +240,8 @@ transforms:
 {{- tpl (toYaml .Values.vector.customComponents.transforms.overrideTransforms) $ | nindent 2 -}}
 {{ else }}
 {{- tpl (toYaml .Values.vector.customComponents.transforms.default) $ | nindent 2 }}
+{{- tpl (include "createPipelineStages" (dict "pipeline" .Values.vector.logsPipeline)) $ }}
+{{- tpl (include "createPipelineStages" (dict "pipeline" .Values.vector.tracesPipeline)) $ }}
 {{ end }}
 
 sinks:
@@ -248,12 +250,55 @@ sinks:
 {{ else }}
 {{- include "vector.config.sinks.telemetry" . | nindent 2 }}
 {{ if .Values.global.backend.enabled }}
-{{- tpl (toYaml .Values.vector.customComponents.sinks.local) $ | nindent 2 }}
+{{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.logsPipeline "sinks" .Values.vector.customComponents.sinks.local.logs)) $ -}}
+{{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.tracesPipeline "sinks" .Values.vector.customComponents.sinks.local.traces)) $ -}}
+{{- tpl (toYaml .Values.vector.customComponents.sinks.local.custom) $ | nindent 2 }}
 {{ else if not (empty .Values.vector.objectStorage.s3Bucket) }}
-{{- tpl (toYaml .Values.vector.customComponents.sinks.s3) $ | nindent 2 }}
+{{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.logsPipeline "sinks" .Values.vector.customComponents.sinks.s3.logs)) $ -}}
+{{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.tracesPipeline "sinks" .Values.vector.customComponents.sinks.s3.traces)) $ -}}
+{{- tpl (toYaml .Values.vector.customComponents.sinks.s3.custom) $ | nindent 2 }}
 {{ else }}
-{{- tpl (toYaml .Values.vector.customComponents.sinks.remote) $ | nindent 2 }}
+{{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.logsPipeline "sinks" .Values.vector.customComponents.sinks.remote.logs)) $ -}}
+{{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.tracesPipeline "sinks" .Values.vector.customComponents.sinks.remote.traces)) $ -}}
+{{- tpl (toYaml .Values.vector.customComponents.sinks.remote.custom) $ | nindent 2 }}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "createPipelineStages" -}}
+{{ $allSteps := concat .pipeline.defaultSteps .pipeline.extraSteps }}
+{{ if not (empty $allSteps) }}
+{{- $previousStep := "" }}
+{{- $index := 0 }}
+{{- range $step := $allSteps }}
+  {{ $step.name }}:
+    inputs:
+{{ if eq $index 0 }}
+{{- toYaml $.pipeline.inputs | nindent 4 }}
+{{ else }}
+    -   {{ $previousStep }}
+{{ end }}
+{{ $step.transform | toYaml | nindent 4 }}
+{{- $previousStep = $step.name }}
+{{- $index = add $index 1 }}
+{{- end }}
 {{ end }}
 {{ end }}
 
+{{- define "pipelineOutputFromSteps" -}}
+{{ $allSteps := concat .pipeline.defaultSteps .pipeline.extraSteps }}
+{{ if not (empty $allSteps) }}
+{{- $lastStep := index $allSteps (sub (len $allSteps) 1) }}
+{{ printf "- %s" $lastStep.name }}
+{{ else }}
+{{- toYaml $.pipeline.inputs | nindent 4 }}
+{{ end }}
 {{- end -}}
+{{define "createSinksOutput"}}
+{{- range $k, $v := .sinks }}
+  {{ $k }}:
+    inputs:
+    {{- include "pipelineOutputFromSteps" (dict "pipeline" $.pipeline ) | nindent 4 }}
+    {{ toYaml . | nindent 4 }}
+{{ end }}
+{{end}}
