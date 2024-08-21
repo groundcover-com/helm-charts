@@ -125,7 +125,6 @@ installationId:
 #  - clusterB
 region:
 dropRunningNamespaceLogs: true
-storeIssuesLogsOnly: false
 tracesNamespaceFilters:
   []
   # - matchType: "allow"
