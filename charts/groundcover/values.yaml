@@ -4,6 +4,8 @@ global:
   backend:
     enabled: true
     name:
+  workflows:
+    enabled: false
   vector:
     enabled: true
     tracesAsLogs:
@@ -2143,6 +2145,8 @@ monitors-manager:
     registry: public.ecr.aws
     repository: groundcovercom/grafana-groundcover
     tag: v0.0.18-grafana11.0.0
+  envRenderSecret: 
+    workflows_enabled: '{{ .Values.global.workflows.enabled }}'
   nameOverride: monitors-manager
   persistence:
     enabled: true
@@ -2161,6 +2165,16 @@ monitors-manager:
       secretKeyRef:
         name: '{{ include "postgresql.secretName" . }}'
         key: '{{ include "postgresql.adminPasswordKey" . }}'
+    KEEP_WEB_HOOK_API_KEY:
+      secretKeyRef:
+        optional: true
+        key: webhook-key
+        name: keep-credentials
+  extraConfigmapMounts: 
+    - name: alerting-overrides
+      mountPath: /etc/grafana/provisioning/alerting/
+      configMap: alerting-overrides-config
+      readOnly: true
   datasources:
     datasources.yaml:
       apiVersion: 1
@@ -2252,3 +2266,4 @@ backend:
   postgresql:
     dbs:
       monitors-manager: monitors_manager
+      keep: keep

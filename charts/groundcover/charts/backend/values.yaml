@@ -27,6 +27,24 @@ postgresql:
         value: localhost
       - name: INITDB_PGPORT
         value: '{{ splitList ":" (include "postgresql.base.url" .) | last }}'
+      - name: POSTGRES_KEEP_USER
+        valueFrom:
+          secretKeyRef:
+            optional: true
+            name: keep-postgres
+            key: username
+      - name: POSTGRES_KEEP_DB
+        valueFrom:
+          secretKeyRef:
+            optional: true
+            name: keep-postgres
+            key: database
+      - name: POSTGRES_KEEP_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            optional: true
+            name: keep-postgres
+            key: password
 
     initContainers:
       - name: reset-user-scripts-initialized-flag
@@ -83,3 +101,101 @@ postgresql:
           {{ range $service, $db := .Values.dbs }}
           create_database_if_not_exists "{{ $db }}"
           {{- end }}
+        11-create-keep-user.sh: |
+          #!/bin/sh
+
+            {{- if .Values.global.workflows.enabled }}
+            set -eu
+
+            export PGHOST=${INITDB_PGHOST}
+            export PGPORT=${INITDB_PGPORT}
+            export PGPASSWORD=${POSTGRES_PASSWORD}
+            export PGKEEPUSER=${POSTGRES_KEEP_USER}
+            export PGKEEPDB=${POSTGRES_KEEP_DB}
+            export PGKEEPPASSWORD=${POSTGRES_KEEP_PASSWORD}
+
+            create_database_if_not_exists() {
+              echo "11-create-keep-user.sh: CREATE DATABASE IF NOT EXISTS '${PGKEEPDB}'"
+              echo "SELECT 'CREATE DATABASE ${PGKEEPDB}' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '${PGKEEPDB}')\gexec" | psql -U postgres
+            }
+
+            create_user_with_password_if_not_exists() {
+              echo "11-create-keep-user.sh: CREATE USER IF NOT EXISTS '${PGKEEPUSER}'"
+              echo "SELECT 'CREATE USER ${PGKEEPUSER} WITH PASSWORD ''${PGKEEPPASSWORD}'';' WHERE NOT EXISTS (SELECT FROM pg_user WHERE usename = '${PGKEEPUSER}')\gexec" | psql -U postgres
+            }
+
+            grand_all_privileges_on_database_to_user() {
+              echo "11-create-keep-user.sh: GRANT ALL PRIVILEGES ON DATABASE ${PGKEEPDB} TO ${PGKEEPUSER}"
+              echo "GRANT ALL PRIVILEGES ON DATABASE ${PGKEEPDB} TO ${PGKEEPUSER}" | psql -U postgres
+              echo "ALTER DATABASE ${PGKEEPDB} OWNER TO ${PGKEEPUSER}" | psql -U postgres
+            }
+
+            grand_all_privileges_on_schema_public_to_user() {
+              echo "11-create-keep-user.sh: GRANT ALL PRIVILEGES ON SCHEMA public TO ${PGKEEPUSER}"
+              echo "GRANT ALL PRIVILEGES ON SCHEMA public TO ${PGKEEPUSER}" | psql -U postgres
+            }
+
+            create_database_if_not_exists
+            create_user_with_password_if_not_exists
+            grand_all_privileges_on_database_to_user
+            grand_all_privileges_on_schema_public_to_user
+
+            {{- end }}
+          
+
+keep:
+  backend:
+    enabled: true
+    waitForDatabase: false
+    image:
+      repository: public.ecr.aws/groundcovercom/keep-api
+      tag: "0.21.0"
+    databaseConnectionStringFromSecret:
+      enabled: true
+      secretName: keep-postgres
+      secretKey: connection_string
+    env:
+      - name: KEEP_DEFAULT_API_KEYS
+        secretKeyRef:
+          secretName: keep-credentials
+          secretKey: api-keys
+      - name: AUTH_TYPE
+        value: SINGLE_TENANT
+      - name: KEEP_DEFAULT_USERNAME 
+        secretKeyRef:
+          secretName: keep-credentials
+          secretKey: username
+      - name: KEEP_DEFAULT_PASSWORD
+        secretKeyRef:
+          secretName: keep-credentials
+          secretKey: password
+    extraInitContainers:
+      - name: wait-for-db
+        image: '{{ include "postgresql.image" . }}'
+        env:
+          - name: POSTGRES_USERNAME
+            valueFrom:
+                secretKeyRef:
+                  name: keep-credentials
+                  key: username
+          - name: POSTGRES_DB_NAME
+            valueFrom:
+                secretKeyRef:
+                  name: keep-credentials
+                  key: password
+        command:
+          - /bin/sh
+          - -c
+        args:
+          - |
+            pg_isready \
+              -U "${POSTGRES_USERNAME}" \
+              -d "dbname=${POSTGRES_DB_NAME}" \
+              -h {{ splitList ":" (include "postgresql.base.url" .) | first }} \
+              -p {{ splitList ":" (include "postgresql.base.url" .) | last }}
+  frontend:
+    enabled: false
+  database:
+    enabled: false
+  websocket:
+    enabled: false

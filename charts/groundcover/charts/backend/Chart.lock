@@ -2,5 +2,8 @@ dependencies:
 - name: postgresql
   repository: https://charts.bitnami.com/bitnami
   version: 12.6.9
-digest: sha256:c110df685392d8341e1fb4e00f0946e59f56afa519ca88b17653b0b1d46781bb
-generated: "2024-03-26T16:52:57.387844279Z"
+- name: keep
+  repository: https://keephq.github.io/helm-charts
+  version: 0.1.4
+digest: sha256:373ef37f0477e4b91d76643b86311046a9a3fa6840ae28bfcdb4fbebe5ae4ff8
+generated: "2024-08-21T09:41:14.229420292Z"

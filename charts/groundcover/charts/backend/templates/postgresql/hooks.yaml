@@ -43,7 +43,26 @@ spec:
             set -eu 
 
             . /create-dbs/10-create-dbs.sh
+            . /create-dbs/11-create-keep-user.sh
         env:
+          - name: POSTGRES_KEEP_USER
+            valueFrom:
+              secretKeyRef:
+                optional: true
+                name: keep-postgres
+                key: username
+          - name: POSTGRES_KEEP_DB
+            valueFrom:
+              secretKeyRef:
+                optional: true
+                name: keep-postgres
+                key: database
+          - name: POSTGRES_KEEP_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                optional: true
+                name: keep-postgres
+                key: password
           - name: POSTGRES_PASSWORD
             valueFrom:
               secretKeyRef:

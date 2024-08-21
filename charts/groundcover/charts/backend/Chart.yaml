@@ -7,6 +7,10 @@ dependencies:
   name: postgresql
   repository: https://charts.bitnami.com/bitnami
   version: 12.6.9
+- condition: global.workflows.enabled
+  name: keep
+  repository: https://keephq.github.io/helm-charts
+  version: 0.1.4
 name: backend
 type: application
 version: 0.0.0
