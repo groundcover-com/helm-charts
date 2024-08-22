@@ -456,6 +456,7 @@ data:
           labelSet:
             cluster_id: {{ include "groundcover.clusterId" . }}
             env_name: {{ include "groundcover.env" . }}
+            gc_env_type: k8s
             job: alligator
         timeout: 10s
         useRingBuffer: false

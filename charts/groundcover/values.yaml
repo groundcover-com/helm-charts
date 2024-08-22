@@ -1010,6 +1010,8 @@ vector:
         secretKeyRef:
           key: '{{ include "groundcover.apikeySecretKey" . }}'
           name: '{{ include "groundcover.apikeySecretName" . }}'
+    - name: VECTOR_WATCH_CONFIG
+      value: "true"
   podAnnotations:
     prometheus.io/port: "9598"
     prometheus.io/scrape: "true"
@@ -1124,7 +1126,10 @@ vector:
             - "otel_logs.logs"
           type: "remap"
           source: |-
-            . = .attributes
+            .attributes.body=.message
+            .attributes = object(.attributes)
+            .resources = object!(.resources)
+            .= merge(.attributes, .resources, true)
         traces_from_logs:
           inputs:
             - "otel_traces.logs"
