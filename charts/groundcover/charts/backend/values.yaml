@@ -45,7 +45,8 @@ postgresql:
             optional: true
             name: keep-postgres
             key: password
-
+    podAnnotations: 
+      groundcover.com/workflows: '{{ .Values.global.workflows.enabled }}'
     initContainers:
       - name: reset-user-scripts-initialized-flag
         image: '{{ include "postgresql.volumePermissions.image" . }}'
@@ -135,10 +136,16 @@ postgresql:
               echo "GRANT ALL PRIVILEGES ON SCHEMA public TO ${PGKEEPUSER}" | psql -U postgres
             }
 
+            override_user_password() {
+              echo "11-create-keep-user.sh: OVERRIDE PASSWORD FOR USER ${PGKEEPUSER}"
+              echo "ALTER USER ${PGKEEPUSER} WITH PASSWORD '${PGKEEPPASSWORD}';" | psql -U postgres
+            }
+
             create_database_if_not_exists
             create_user_with_password_if_not_exists
             grand_all_privileges_on_database_to_user
             grand_all_privileges_on_schema_public_to_user
+            override_user_password
 
             {{- end }}
           

@@ -2146,7 +2146,7 @@ monitors-manager:
     repository: groundcovercom/grafana-groundcover
     tag: v0.0.18-grafana11.0.0
   envRenderSecret: 
-    workflows_enabled: '{{ .Values.global.workflows.enabled }}'
+    WORFKLOWS_ENABLED: '{{ .Values.global.workflows.enabled }}'
   nameOverride: monitors-manager
   persistence:
     enabled: true
