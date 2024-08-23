@@ -1126,10 +1126,21 @@ vector:
             - "otel_logs.logs"
           type: "remap"
           source: |-
-            .attributes.body=.message
-            .attributes = object(.attributes)
-            .resources = object!(.resources)
-            .= merge(.attributes, .resources, true)
+            if exists(.message) {
+              message, err = string(.message)
+              if err == null && strlen(message) > 0 {
+                .attributes.body = message
+              }
+            }
+
+            if exists(.resources) {
+              resources, err = object(.resources)
+              if err == null {
+                .attributes, err = merge(.attributes, resources, true)
+              }
+            }
+
+            .= .attributes
         traces_from_logs:
           inputs:
             - "otel_traces.logs"
