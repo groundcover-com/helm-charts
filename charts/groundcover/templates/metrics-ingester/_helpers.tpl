@@ -37,3 +37,7 @@
 {{- define "metrics-ingester.health.http.url" -}}
 {{- printf "%s/health" (include "metrics-ingester.base.http.url" .) -}}
 {{- end -}}
+
+{{- define "metrics-ingester.promethues-exposition.http.url" -}}
+{{- printf "%s/api/v1/import/prometheus" (include "metrics-ingester.base.http.url" .) -}}
+{{- end -}}

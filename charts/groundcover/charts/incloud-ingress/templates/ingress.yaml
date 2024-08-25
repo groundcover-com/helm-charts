@@ -251,6 +251,13 @@ spec:
                 name: {{ include "metrics-ingester.fullname" . }}
                 port:
                   name: http
+          - path: {{ get (urlParse (include "metrics-ingester.promethues-exposition.http.url" .)) "path" }} 
+            pathType: Exact
+            backend:
+              service:
+                name: {{ include "metrics-ingester.fullname" . }}
+                port:
+                  name: http
           - path: {{ get (urlParse (include "metrics-ingester.health.http.url" .)) "path" }} 
             pathType: Exact
             backend:
