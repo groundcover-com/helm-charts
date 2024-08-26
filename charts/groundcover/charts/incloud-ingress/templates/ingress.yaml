@@ -4,7 +4,7 @@ metadata:
   name: {{ printf "%s-otel-http" (include "incloud-ingress.name" .) | trunc 63 | trimSuffix "-" }}
   annotations:
     konghq.com/host-aliases: {{ printf "%s,api-otel-http.*" .Values.global.ingress.site }}
-    konghq.com/plugins: {{ printf "%s-auth" .Release.Name | quote }}
+    konghq.com/plugins: {{ printf "%s-auth" .Release.Name }},{{ printf "%s-basic-auth" .Release.Name }}
     konghq.com/protocols: {{ ternary "https" "http" .Values.kong.proxy.tls.enabled | quote }}
     {{- with .Values.ingress.annotations }}
       {{- toYaml . | nindent 4 }}
@@ -229,7 +229,7 @@ metadata:
   name: {{ printf "%s-metrics-http" (include "incloud-ingress.name" .) | trunc 63 | trimSuffix "-" }}
   annotations:
     konghq.com/host-aliases: {{ printf "%s,metrics-http.*" .Values.global.ingress.site }}
-    konghq.com/plugins: {{ printf "%s-auth" .Release.Name | quote }}
+    konghq.com/plugins: {{ printf "%s-auth" .Release.Name }},{{ printf "%s-basic-auth" .Release.Name }}
     konghq.com/protocols: {{ ternary "https" "http" .Values.kong.proxy.tls.enabled | quote }}
     {{- with .Values.ingress.annotations }}
       {{- toYaml . | nindent 4 }}

@@ -1,3 +1,52 @@
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: {{ printf "%s-request-termination" .Release.Name }}
+plugin: request-termination
+config:
+  status_code: 401
+  content_type: "application/json; charset=utf-8"
+  body: '{"error": "Authentication required"}'
+---
+apiVersion: configuration.konghq.com/v1
+kind: KongConsumer
+metadata:
+  name: {{ printf "%s-anonymous-user" .Release.Name }}
+  annotations:
+    checksum/config: {{ .Values.global.groundcover_token | sha256sum }}
+    kubernetes.io/ingress.class: {{ .Values.kong.ingressController.ingressClass }}
+    konghq.com/plugins: {{ printf "%s-request-termination" .Release.Name }}
+username: anonymous
+---
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: {{ printf "%s-basic-auth" .Release.Name }}
+config:
+  hide_credentials: true
+  anonymous: anonymous
+plugin: basic-auth
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ printf "%s-basic-auth-creds" .Release.Name }}
+  labels:
+    konghq.com/credential: basic-auth
+stringData:
+  username: groundcover
+  password: {{ .Values.global.groundcover_token }}
+---
+apiVersion: configuration.konghq.com/v1
+kind: KongConsumer
+metadata:
+  name: {{ printf "%s-basic-auth" .Release.Name }}
+  annotations:
+    checksum/config: {{ .Values.global.groundcover_token | sha256sum }}
+    kubernetes.io/ingress.class: {{ .Values.kong.ingressController.ingressClass }}
+username: groundcover
+credentials:
+  - {{ printf "%s-basic-auth-creds" .Release.Name }}
 ---
 
 apiVersion: configuration.konghq.com/v1
@@ -5,6 +54,7 @@ kind: KongPlugin
 metadata:
   name: {{ printf "%s-auth" .Release.Name }}
 config:
+  anonymous: anonymous
   key_names:
     - apikey
     - dd-api-key
@@ -39,7 +89,6 @@ metadata:
 username: api
 credentials:
   - {{ printf "%s-api-key" .Release.Name }}
-
 ---
 
 {{- if .Values.datasource.enabled }}
