@@ -163,6 +163,8 @@ keep:
       secretName: keep-postgres
       secretKey: connection_string
     env:
+      - name: SECRET_MANAGER_TYPE
+        value: K8S
       - name: KEEP_DEFAULT_API_KEYS
         secretKeyRef:
           secretName: keep-credentials

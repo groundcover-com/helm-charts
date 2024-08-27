@@ -1126,21 +1126,26 @@ vector:
             - "otel_logs.logs"
           type: "remap"
           source: |-
-            if exists(.message) {
-              message, err = string(.message)
-              if err == null && strlen(message) > 0 {
-                .attributes.body = message
+            .attributes, err = object(.attributes)
+            if err == null {
+              if exists(.message) {
+                message, err = string(.message)
+                if err == null && strlen(message) > 0 {
+                  .attributes.body = message
+                }
               }
-            }
 
-            if exists(.resources) {
-              resources, err = object(.resources)
-              if err == null {
-                .attributes, err = merge(.attributes, resources, true)
+              if exists(.resources) {
+                .resources, err = object(.resources)
+                if err == null {
+                  .attributes = merge(.attributes, .resources, true)
+                }
               }
+              
+              . = .attributes
+            } else {
+              log("Recieved non-object attributes, skipping", level: "error")
             }
-
-            .= .attributes
         traces_from_logs:
           inputs:
             - "otel_traces.logs"
@@ -2161,8 +2166,6 @@ monitors-manager:
     registry: public.ecr.aws
     repository: groundcovercom/grafana-groundcover
     tag: v0.0.18-grafana11.0.0
-  envRenderSecret: 
-    WORFKLOWS_ENABLED: '{{ .Values.global.workflows.enabled }}'
   nameOverride: monitors-manager
   persistence:
     enabled: true
@@ -2216,6 +2219,8 @@ monitors-manager:
           secureJsonData:
             password: $CLICKHOUSE_PASSWORD
   grafana.ini:
+    groundcover:
+      workflows_enabled: '{{ .Values.global.workflows.enabled }}'
     "unified_alerting.state_history":
       enabled: true
       backend: "loki"

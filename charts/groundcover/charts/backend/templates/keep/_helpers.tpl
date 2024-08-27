@@ -39,7 +39,7 @@
 {{- end -}}
 
 {{- define "keep.base.url" -}}
-{{ printf "http://%s:%v" (include "keep.backend.fullname" .)  .Values.global.keep.backend.service.port -}}
+{{ printf "http://%s:8080" (include "keep.backend.fullname" .)  -}}
 {{- end -}}
 
 {{- define "keep.event.alert.url" -}}
