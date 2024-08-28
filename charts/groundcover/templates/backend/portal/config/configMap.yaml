@@ -55,6 +55,11 @@ data:
       URL: "OVERRIDEN"
       Username: "admin"
       Password: "OVERRIDEN"
+
+    Workflows:
+      Enabled: false
+      URL: "OVERRIDEN"
+      APIKey: "OVERRIDEN"
     
     {{- if eq (include "telemetry.enabled" .) "true" }}
     Tracing:

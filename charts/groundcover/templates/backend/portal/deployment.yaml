@@ -85,6 +85,16 @@ spec:
             secretKeyRef:
               key: {{ template "monitors-manager.secret.passwordKey" . }}
               name: {{ template "monitors-manager.secretName" . }}
+        - name: GC_WORKFLOWS_ENABLED
+          value: {{ .Values.global.workflows.enabled | toString | quote }}
+        - name: GC_WORKFLOWS_URL
+          value: {{ template "keep.base.url" . }}
+        - name: GC_WORKFLOWS_APIKEY
+          valueFrom:
+            secretKeyRef:
+              optional: true
+              key: "admin-api-key"
+              name: "keep-credentials"
 {{ if eq .Values.router.mode "cloud" }}
         - name: GC_ROUTER_TOKEN
           valueFrom:

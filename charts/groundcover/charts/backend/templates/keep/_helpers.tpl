@@ -20,6 +20,8 @@
 {{- $secret := (lookup "v1" "Secret" .Release.Namespace "keep-credentials" | default dict) -}}
 {{- if $secret -}}
     {{- index $secret "data" "admin-api-key" | b64dec -}}
+{{- else if .Values.global.workflows.adminApiKey -}}
+    {{- .Values.global.workflows.adminApiKey -}}
 {{- else -}}
     {{- randAlphaNum 16 -}}
 {{- end -}}
@@ -45,4 +47,3 @@
 {{- define "keep.event.alert.url" -}}
 {{ printf "%s/alerts/event/grafana" (include "keep.base.url" .) }}
 {{- end -}}
-
