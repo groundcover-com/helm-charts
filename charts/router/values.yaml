@@ -27,7 +27,7 @@ onprem:
 origin:
   registry: quay.io/groundcover
   repository: router
-  tag: 1.8.116
+  tag: 1.8.117
 serviceAccount:
   annotations:
 ingress:
@@ -260,18 +260,3 @@ dbs:
   router-monitors: monitors
   grafana: grafana
   kong: kong
-notifications:
-  ingress:
-    enabled: false
-  ingresses:
-  image:
-    registry: quay.io/groundcover
-    repository: notification-center
-    tag:
-  serviceAccount:
-    annotations:
-  replicas: 2
-  configuration:
-    loglevel: 4
-    ListenPort: "8081"
-    requestTimeout: 20s
