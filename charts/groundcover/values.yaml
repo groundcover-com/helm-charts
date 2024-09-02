@@ -467,9 +467,12 @@ clickhouse:
   usersExtraOverrides: |
     <clickhouse>
       <profiles>
-        <readonly_with_settings>
-          <readonly>2</readonly>
-        </readonly_with_settings>
+        <reader_profile>
+          <readonly>0</readonly>
+        </reader_profile>
+        <writer_profile>
+          <readonly>0</readonly>
+        </writer_profile>
       </profiles>
       <users>
         <reader>
@@ -477,9 +480,17 @@ clickhouse:
           <networks>
             <ip>::/0</ip>
           </networks>
-          <profile>readonly_with_settings</profile>
+          <profile>reader_profile</profile>
           <quota>default</quota>
         </reader>
+        <writer>
+          <password from_env="CLICKHOUSE_PASSWORD" />
+          <networks>
+            <ip>::/0</ip>
+          </networks>
+          <profile>writer_profile</profile>
+          <quota>default</quota>
+        </writer>
       </users>
     </clickhouse>
   persistence:
