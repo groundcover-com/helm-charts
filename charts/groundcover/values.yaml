@@ -146,12 +146,15 @@ logsMultiLines:
   #   maxLines: 100                  # optional, default = 1024
   #   maxWaitTime: 10s               # optional, default = 3s
 decolorizeLogs: false
-maxLogSize: 102400
+maxLogSize: 102400 # 100KB
+maxLogContentSize: 5120 # 5KB
 logBatchSendQueueWorkerCount: 3
 logBatchSendQueueMaxSize: 5
 oldLogDropThreshold: 60s
 oldLogDropAlwaysThreshold: 60m
 oldLogDelayStart: 60s
+jsonFlattenMaxDepth: 6
+jsonFlattenMaxAttributes: 300
 shouldDropRunningNamespaces: true
 commitHashKeyName:
 repositoryUrlKeyName:
@@ -1399,7 +1402,7 @@ vector:
             - json_events
             endpoint: '{{ include "clickhouse.httpEndpoint" . }}'
             database: "groundcover"
-            table: "events"
+            table: "events_v2"
             request:
               retry_attempts: 5
             auth:

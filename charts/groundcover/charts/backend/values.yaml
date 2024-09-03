@@ -156,12 +156,28 @@ keep:
     waitForDatabase: false
     image:
       repository: public.ecr.aws/groundcovercom/keep-api
-      tag: "0.22.0"
+      tag: "0.23.0"
     databaseConnectionStringFromSecret:
       enabled: true
       secretName: keep-postgres
       secretKey: connection_string
     env:
+      - name: KEEP_IMPERSONATION_ENABLED
+        value: "true"
+      - name: KEEP_IMPERSONATION_AUTO_PROVISION
+        value: "true"
+      - name: SERVICE_NAME
+        value: '{{ include "keep.backend.fullname" . }}'
+      - name: OTLP_ENDPOINT
+        value: '{{ include "telemetry.traces.otlpUrl" . }}'
+      - name: OTLP_SPAN_EXPORTER
+        value: 'http'
+      - name: TRACING_HEADERS_APIKEY 
+        secretKeyRef:
+          secretName: '{{ template "groundcover.apikeySecretName" . }}'
+          secretKey: '{{ template "groundcover.apikeySecretKey" . }}'
+      - name: OTEL_EXPORTER_OTLP_HEADERS
+        value: "apikey=$(TRACING_HEADERS_APIKEY)"
       - name: SECRET_MANAGER_TYPE
         value: K8S
       - name: KEEP_DEFAULT_API_KEYS

@@ -471,7 +471,12 @@ data:
         logBatchSendQueueMaxSize : {{ .Values.logBatchSendQueueMaxSize }}
         oldLogDropThreshold: {{ .Values.oldLogDropThreshold }} 
         oldLogDropAlwaysThreshold: {{ .Values.oldLogDropAlwaysThreshold }}
-        oldLogDelayStart: {{ .Values.oldLogDelayStart }} 
+        oldLogDelayStart: {{ .Values.oldLogDelayStart }}
+        otlpExportLimits:
+          jsonFlattenMaxDepth: {{ .Values.jsonFlattenMaxDepth }}
+          jsonFlattenMaxAttributes: {{ .Values.jsonFlattenMaxAttributes }}
+          maxLogContentSize: {{ .Values.maxLogContentSize }}
+
     otelTracesAsLogs: {{ .Values.global.vector.enabled }}
     otelPreprocess: {{ .Values.global.vector.enabled }}
     tracesOtlpEndpoint:

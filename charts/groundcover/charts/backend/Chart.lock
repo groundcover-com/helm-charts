@@ -4,6 +4,6 @@ dependencies:
   version: 12.6.9
 - name: keep
   repository: https://keephq.github.io/helm-charts
-  version: 0.1.5
-digest: sha256:3fd2acc4a78aefaa26f0f34298766eae16bb14f4c6fadbf69dfccc9e7c7c43bd
-generated: "2024-08-22T08:51:13.026783548Z"
+  version: 0.1.8
+digest: sha256:09ab96ea54b5eac88a2b5d72c576fb8422a029f2f4911e04f6939426e7d0d30c
+generated: "2024-09-03T11:55:00.536372686Z"
