@@ -1200,7 +1200,6 @@ vector:
             . = .attributes
             del(.condition)
             del(.dashboardUID)
-            del(.fingerprint)
             del(.folderUID)
             del(.grafana_folder)
             del(.from)
@@ -2233,8 +2232,27 @@ monitors-manager:
           access: proxy
           secureJsonData:
             password: $CLICKHOUSE_PASSWORD
+  alertingOverrides:
+      contactPoints:
+        - name: workflows-webhook
+          receivers:
+            - uid: workflows-webhook
+              type: webhook
+              settings:
+                url: '{{ include "keep.event.alert.url" . }}'
+                httpMethod: "POST"
+                authorization_scheme: digest
+                authorization_credentials: $KEEP_WEB_HOOK_API_KEY
+      policies:
+      - receiver: workflows-webhook
+        group_by:
+          - '...'
+        group_wait: 30s
+        group_interval: 5m
+        repeat_interval: 4h
   grafana.ini:
     groundcover:
+      alerting_overrides_checksum: '{{ .Values.alertingOverrides | quote | sha256sum }}'
       workflows_enabled: '{{ .Values.global.workflows.enabled }}'
     "unified_alerting.state_history":
       enabled: true
