@@ -407,6 +407,7 @@ portal:
     uploaderType: pyroscope
     cpuSamplingDuration: 60s
   autodiscovery: false
+  maxResponseSizeMegabytes: 15
 
 clickhouse:
   enabled: true

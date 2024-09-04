@@ -162,6 +162,8 @@ keep:
       secretName: keep-postgres
       secretKey: connection_string
     env:
+      - name: PUSHER_DISABLED
+        value: "true"
       - name: KEEP_IMPERSONATION_ENABLED
         value: "true"
       - name: KEEP_IMPERSONATION_AUTO_PROVISION

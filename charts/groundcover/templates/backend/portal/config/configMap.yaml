@@ -7,6 +7,7 @@ data:
 
     Reverse: true
     startuptimeout: 1m0s
+    MaxResponseSizeMegabytes: {{ .Values.portal.maxResponseSizeMegabytes }}
 
     ClusterId: {{ template "groundcover.clusterId" . }}
     MultipleClusterIds: 
