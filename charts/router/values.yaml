@@ -27,7 +27,7 @@ onprem:
 origin:
   registry: quay.io/groundcover
   repository: router
-  tag: 1.8.119
+  tag: 1.8.120
 serviceAccount:
   annotations:
 ingress:
@@ -44,7 +44,7 @@ ingresses:
 #           port: 8080
 imagePullSecrets: []
 configuration:
-  requestTimeout: 20s
+  requestTimeout: 1m
   slowRequestThreshold: 3s
   Activity:
     CheckInterval: 5m
