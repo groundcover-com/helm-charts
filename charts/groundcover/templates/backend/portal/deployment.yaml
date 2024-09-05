@@ -115,7 +115,7 @@ spec:
               name: '{{ include "clickhouse.secretName" . }}'
 {{ end }}
 {{ with .Values.portal.env }}
-          {{ toYaml . | nindent 8 }}
+            {{- tpl (toYaml .) $ | nindent 8 }}
 {{ end }}
         image: {{ tpl .Values.portal.image.repository . }}:{{ default .Chart.AppVersion .Values.global.origin.tag }}
         imagePullPolicy: Always

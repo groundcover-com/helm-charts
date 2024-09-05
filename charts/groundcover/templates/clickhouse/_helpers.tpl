@@ -2,6 +2,10 @@
 {{- printf "%s-clickhouse" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
+{{- define "clickhouse.headlessServiceName" -}}
+{{-  printf "%s-headless" (include "clickhouse.fullname" .) -}}
+{{- end -}}
+
 {{- define "clickhouse.database" -}}
 {{-  print "groundcover" -}}
 {{- end -}}
@@ -31,4 +35,24 @@
 
 {{- define "clickhouse.httpEndpoint" -}}
 {{-  printf "http://%s:%d" (include "clickhouse.fullname" .) (.Values.global.clickhouse.containerPorts.http | int ) -}}
+{{- end -}}
+
+{{- define "clickhouse.shard0Name" -}}
+{{ printf "%s-shard%d-%d.%s.%s.svc.cluster.local" (include "clickhouse.fullname" $ ) 0 0 (include "clickhouse.headlessServiceName" $) (include "common.names.namespace" $) }}
+{{- end -}}
+
+{{- define "clickhouse.shard0HttpEndpoint" -}}
+{{ printf "http://%s:%d" (include "clickhouse.shard0Name" $ ) (.Values.global.clickhouse.containerPorts.http | int ) }}
+{{- end -}}
+
+{{- define "clickhouse.extraShardsList" -}}
+{{- $shards := $.Values.clickhouse.shards | int }}
+{{- $list := list -}}
+{{- range $shard, $e := until $shards }}
+{{- if ne $e 0}}
+{{- $item := printf "%s-shard%d-%d.%s.%s.svc.cluster.local" (include "clickhouse.fullname" $ ) $shard 0 (include "clickhouse.headlessServiceName" $) (include "common.names.namespace" $) }}
+{{- $list = append $list $item }}
+{{- end -}}
+{{- end -}}
+{{- $list | toYaml | nindent 2 }}
 {{- end -}}

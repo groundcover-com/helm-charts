@@ -61,10 +61,12 @@ data:
     ClickHouse:
       Pass: "OVERRIDEN"
       User: {{ include "clickhouse.username" . }}
-      Host: {{ include "clickhouse.fullname" . }}
+      Host: {{ include "clickhouse.shard0Name" . }}
       Database: {{ include "clickhouse.database" . }}
       HTTPPort: {{ .Values.global.clickhouse.containerPorts.http | int }}
       NativePort: {{ .Values.global.clickhouse.containerPorts.tcp | int }}
+    ExtraShards:
+      {{- (include "clickhouse.extraShardsList" .) | nindent 6  }}
     ObjectStorageQueues:
       {{- toYaml .Values.dbManager.objectStorageQueues | nindent 6 }}
 {{- end -}}
