@@ -76,6 +76,9 @@ data:
       pyroscopeUploader:
         enabled: {{ eq .Values.k8sWatcher.pprof.uploaderType "pyroscope" }}
         pushURL: {{ include "telemetry.metrics.base.url" . }}
+    Watch:
+    {{ .Values.k8sWatcher.watch | toYaml | nindent 6 }}
+
 kind: ConfigMap
 metadata:
   labels:

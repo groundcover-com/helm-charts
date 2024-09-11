@@ -337,6 +337,11 @@ dbManager:
   objectStorageQueues: {}
 
 k8sWatcher:
+  watch:
+    configmap:
+      enabled: true
+    secret:
+      enabled: true
   image:
     repository: "{{ .Values.global.origin.registry }}/k8s-watcher"
   additionalLabels:
