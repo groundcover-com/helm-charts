@@ -10,6 +10,14 @@
 {{- end -}}
 {{- end -}}
 
+{{- define "victoria-metrics.cluster.http.port" -}}
+{{ index .Values.global "victoria-metrics" "service" "servicePort" }}
+{{- end -}}
+
+{{- define "victoria-metrics.cluster.http.url_without_port" -}}
+{{- printf "http://%s" (include "victoria-metrics.server.fullname" .) -}}
+{{- end -}}
+
 {{- define "victoria-metrics.cluster.http.base.url" -}}
 {{- printf "http://%s:%d" (include "victoria-metrics.server.fullname" .) (index .Values.global "victoria-metrics" "service" "servicePort" | int ) -}}
 {{- end -}}

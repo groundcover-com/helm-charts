@@ -152,16 +152,40 @@ postgresql:
 keep:
   namespace: ""
   backend:
+    provisionedProviders:
+      groundcoverVictoriaMetrics:
+        type: victoriametrics
+        authentication:
+          vmAlertHost: '{{ include "victoria-metrics.cluster.http.url_without_port" . }}'
+          vmAlertPort: '{{ include "victoria-metrics.cluster.http.port" . }}'
+      groundcoverClickhouse:
+        type: clickhouse
+        authentication:
+          username: '{{ include "clickhouse.username" . }}'
+          password: '{{ include "clickhouse.password" . }}'
+          host: '{{ include "clickhouse.fullname" . }}'
+          port: '{{ .Values.global.clickhouse.containerPorts.tcp }}'
+          database: '{{ include "clickhouse.database" . }}'
     enabled: true
     waitForDatabase: false
     image:
       repository: public.ecr.aws/groundcovercom/keep-api
-      tag: "0.23.0"
+      tag: "0.24.3"
     databaseConnectionStringFromSecret:
       enabled: true
       secretName: keep-postgres
       secretKey: connection_string
+    podAnnotations:
+      groundcover.com/provisioned_providers_checksum: '{{ .Values.backend.provisionedProviders | toJson | sha256sum }}'      
     env:
+      - name: KEEP_PROVIDERS
+        configMapKeyRef:
+          key: provisionedProviders.json
+          name: keep-config
+      - name: CLICKHOUSE_PASS
+        secretKeyRef:
+          secretKey: '{{ include "clickhouse.secretKey" . }}'
+          secretName: '{{ include "clickhouse.secretName" . }}'
       - name: PUSHER_DISABLED
         value: "true"
       - name: KEEP_IMPERSONATION_ENABLED
