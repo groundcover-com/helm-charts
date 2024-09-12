@@ -1,3 +1,4 @@
+{{ if .Values.global.backend.enabled }}
 apiVersion: v1
 data:
   alerting_overrides.yaml: |
@@ -39,3 +40,4 @@ data:
 kind: ConfigMap
 metadata:
   name: alerting-overrides-config
+{{- end }}

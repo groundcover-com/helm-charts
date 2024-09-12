@@ -312,8 +312,12 @@ spec:
             - -c
           image: {{ printf "%s/curl:8.6.0" .Values.global.origin.registry }}
       serviceAccountName: alligator
-{{- if .Values.agent.priorityClassName }}
+{{- if or (.Values.agent.priorityClassName) (.Values.agent.priorityClass.create) }}
+  {{- if .Values.agent.priorityClassName }}
       priorityClassName: {{ .Values.agent.priorityClassName }}
+  {{- else }}
+      priorityClassName: {{ include "groundcover.agentPriorityClass" . }}
+  {{- end }}
 {{- end }}
       terminationGracePeriodSeconds: 10
       volumes:

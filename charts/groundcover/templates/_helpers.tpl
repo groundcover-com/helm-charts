@@ -233,3 +233,14 @@ Get cluster_id from values or generate random one
 {{- define "groundcover.debug.dump" -}}
 {{- . | mustToPrettyJson | printf "\n\n%s" | fail }}
 {{- end -}}
+
+{{/*
+Create the name of the agent priority class to use
+*/}}
+{{- define "groundcover.agentPriorityClass" -}}
+{{- if .Values.agent.priorityClass.fullname }}
+{{- .Values.agent.priorityClass.fullname }}
+{{- else }}
+{{- include "groundcover.fullname" . }}-sensor-high-priority
+{{- end }}
+{{- end }}

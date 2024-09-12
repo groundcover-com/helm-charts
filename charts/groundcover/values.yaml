@@ -178,8 +178,19 @@ agent:
   podLabels:
   additionalAnnotations:
   podAnnotations:
-  tolerations: []
+  tolerations:
+  - operator: "Exists"
   affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: "node-role.kubernetes.io/control-plane"
+            operator: "DoesNotExist"
+          - key: eks.amazonaws.com/compute-type
+            operator: NotIn
+            values:
+            - fargate
   nodeSelector:
   priorityClassName:
   hostNetwork: false
@@ -310,6 +321,11 @@ agent:
     childcountruleoverrides:
     - depth: 0
       maxChildren: 100
+  priorityClass:
+    create: true
+    fullname:
+    value: 1000000000
+    preemptionPolicy: PreemptLowerPriority
 dbManager:
   additionalLabels:
   podLabels:
@@ -435,7 +451,7 @@ clickhouse:
       repository: bitnami/os-shell
       tag: 11-debian-11-r91
   keeper:
-    enabled: true
+    enabled: false
   zookeeper:
     enabled: false
   metrics:
