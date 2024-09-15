@@ -252,7 +252,7 @@ spec:
                 port:
                   name: http
           - path: {{ get (urlParse (include "metrics-ingester.promethues-exposition.http.url" .)) "path" }} 
-            pathType: Exact
+            pathType: Prefix
             backend:
               service:
                 name: {{ include "metrics-ingester.fullname" . }}
