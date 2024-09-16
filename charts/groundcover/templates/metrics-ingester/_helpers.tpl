@@ -6,6 +6,10 @@
 {{- ternary "https" "http" .Values.global.metrics.tls.enabled -}}
 {{- end -}}
 
+{{- define "metrics-ingester.cluster.http.write.url" -}}
+{{- printf "%s/api/v1/write" (include "metrics-ingester.cluster.http.base.url" .) -}}
+{{- end -}}
+
 {{- define "metrics-ingester.cluster.http.base.url" -}}
 {{- printf "%s://%s:%d" (include "metrics-ingester.http.scheme" .) (include "metrics-ingester.fullname" .) (index .Values.global "metrics-ingester" "service" "servicePort" | int ) -}}
 {{- end -}}

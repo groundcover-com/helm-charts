@@ -717,6 +717,7 @@ opentelemetry-collector:
             endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "otlp" "containerPort" | int ) }}'
           http:
             tls: ${env:TLS_CONFIG}
+            include_metadata: true
             cors:
               allowed_origins:
                 - "*"
@@ -763,6 +764,17 @@ opentelemetry-collector:
             # logs can have either explicit 'log' log_type or no log_type at all and no type (reserved for custom logs)
             - attributes["log_type"] != nil and attributes["log_type"] != "log"
             - attributes["type"] != nil
+      resource/enrich_headers:
+        attributes:
+        - key: env_name
+          from_context: x-groundcover-env-name
+          action: upsert
+        - key: service.name
+          from_context: x-groundcover-service-name
+          action: upsert
+        - key: gc_env_type
+          from_context: x-groundcover-env-type
+          action: upsert
       groundcover/logs:
         type: logs
       groundcover/custom:
@@ -871,6 +883,7 @@ opentelemetry-collector:
             - awsfirehose
           processors:
             - filter/dropNoneLogs
+            - resource/enrich_headers
             - batch/logs
             - groundcover/logs
           exporters:
@@ -982,6 +995,11 @@ vector:
         port: 4349
       - name: metrics
         port: 9598
+      - name: statsd-udp
+        port: 8125
+        protocol: UDP
+      - name: statsd-tcp
+        port: 8125
   containerPorts:
     - name: api
       containerPort: 8686
@@ -1011,6 +1029,11 @@ vector:
       containerPort: 4349
     - name: metrics
       containerPort: 9598
+    - name: statsd-udp
+      containerPort: 8125
+      protocol: UDP
+    - name: statsd-tcp
+      containerPort: 8125
   role: "Stateless-Aggregator"
   replicas: 2
   resources:
@@ -1094,7 +1117,17 @@ vector:
   customComponents:
     sources:
       overrideSources:
-      otel:
+      extraSources:
+      metrics:
+        statsd_udp:
+          type: statsd
+          address: 0.0.0.0:8125
+          mode: udp
+        statsd_tcp:
+          type: statsd
+          address: 0.0.0.0:8125
+          mode: tcp
+      otel: 
         otel_logs:
           type: opentelemetry
           grpc:
@@ -1159,6 +1192,7 @@ vector:
             codec: json
     transforms:
       overrideTransforms:
+      extraTransforms:
       default:
         logs_from_logs:
           inputs:
@@ -1249,6 +1283,14 @@ vector:
             .category = get!(value: .labels, path: ["category"])
     sinks:
       overrideSinks:
+      extraSinks:
+      metrics:
+        custom_metrics_sink:
+          inputs:
+            - statsd_udp
+            - statsd_tcp
+          type: prometheus_remote_write 
+          endpoint: '{{ include "metrics-ingester.cluster.http.write.url" . }}'
       remote:
         logs:
           json_logs_sink:

@@ -228,10 +228,14 @@ telemetry_metrics:
 sources:
 {{- include "vector.config.sources.telemetry" . | nindent 2 }}
 {{ if .Values.vector.customComponents.sources.overrideSources }}
-{{-  tpl (toYaml .Values.vector.customComponents.sources.overrideSources) $ | nindent 2 -}}
+{{- tpl (toYaml .Values.vector.customComponents.sources.overrideSources) $ | nindent 2 -}}
 {{ else }}
-{{-  tpl (toYaml .Values.vector.customComponents.sources.otel) $ | nindent 2 }}
-{{-  tpl (toYaml .Values.vector.customComponents.sources.json) $ | nindent 2 }}
+{{ if .Values.vector.customComponents.sources.extraSources }}
+{{- tpl (toYaml .Values.vector.customComponents.sources.extraSources) $ | nindent 2 }}
+{{ end }}
+{{- tpl (toYaml .Values.vector.customComponents.sources.otel) $ | nindent 2 }}
+{{- tpl (toYaml .Values.vector.customComponents.sources.json) $ | nindent 2 }}
+{{- tpl (toYaml .Values.vector.customComponents.sources.metrics) $ | nindent 2 }}
 {{ end }}
 
 transforms:
@@ -239,6 +243,9 @@ transforms:
 {{ if .Values.vector.customComponents.transforms.overrideTransforms }}
 {{- tpl (toYaml .Values.vector.customComponents.transforms.overrideTransforms) $ | nindent 2 -}}
 {{ else }}
+{{ if .Values.vector.customComponents.transforms.extraTransforms }}
+{{- tpl (toYaml .Values.vector.customComponents.transforms.extraTransforms) $ | nindent 2 }}
+{{ end }}
 {{- tpl (toYaml .Values.vector.customComponents.transforms.default) $ | nindent 2 }}
 {{- tpl (include "createPipelineStages" (dict "pipeline" .Values.vector.logsPipeline)) $ }}
 {{- tpl (include "createPipelineStages" (dict "pipeline" .Values.vector.tracesPipeline)) $ }}
@@ -249,6 +256,10 @@ sinks:
 {{- tpl (toYaml .Values.vector.customComponents.sinks.overrideSinks) $ | nindent 2 -}}
 {{ else }}
 {{- include "vector.config.sinks.telemetry" . | nindent 2 }}
+{{ if .Values.vector.customComponents.sinks.extraSinks }}
+{{- tpl (toYaml .Values.vector.customComponents.sinks.extraSinks) $ | nindent 2 }}
+{{ end }}
+{{- tpl (toYaml .Values.vector.customComponents.sinks.metrics) $ | nindent 2 }}
 {{ if .Values.global.backend.enabled }}
 {{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.logsPipeline "sinks" .Values.vector.customComponents.sinks.local.logs)) $ -}}
 {{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.tracesPipeline "sinks" .Values.vector.customComponents.sinks.local.traces)) $ -}}
