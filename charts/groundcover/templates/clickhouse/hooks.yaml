@@ -3,12 +3,12 @@
 {{- $shouldDeleteSts := true -}}
 {{- $shouldPatchAnnotations := true -}}
 {{- $shards := .Values.clickhouse.shards | int -}}
-{{- $pvcSize := $.Values.clickhouse.persistence.size -}}
 {{- $annotations := $.Values.clickhouse.persistence.annotations | toJson -}}
-{{- $patches := (include "volume-expansion.patches" $.Values.clickhouse.persistence) | fromYaml -}}
+{{- range $shardIndex, $e := until $shards -}}
+{{- $pvcSize := (eq $shardIndex 0) | ternary $.Values.clickhouse.persistence.size (default $.Values.clickhouse.persistence.size $.Values.clickhouse.persistence.extraShardsSize) -}}
+{{- $patches := (include "volume-expansion.patches" (merge (dict "size" $pvcSize) $.Values.clickhouse.persistence) ) | fromYaml -}}
 {{- $pvcPatch := (get $patches "pvc") | toJson -}}
 {{- $stsPatch := (get $patches "sts") | toJson -}}
-{{- range $shardIndex, $e := until $shards -}}
 {{- $stsName := (printf "%s-shard%d" (include "clickhouse.fullname" $) $shardIndex) -}}
 {{- $name := (printf "%s-ch-%d" (include "volume-expansion.fullname" $) $shardIndex) -}}
 {{- $pvcName := (printf "data-%s-0" $stsName) -}}
@@ -23,6 +23,7 @@
 {{- $shouldPatchAnnotations = (not (eq $stsPvcAnnotations $annotations)) -}}
 {{- end -}}
 {{ if or $shouldPatchPvc $shouldDeleteSts $shouldPatchAnnotations }}
+---
 apiVersion: batch/v1
 kind: Job
 metadata:

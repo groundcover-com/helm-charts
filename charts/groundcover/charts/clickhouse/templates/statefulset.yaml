@@ -445,7 +445,7 @@ spec:
         {{- end }}
         resources:
           requests:
-            storage: {{ $.Values.persistence.size | quote }}
+            storage: {{ (eq $i 0) | ternary $.Values.persistence.size (default $.Values.persistence.size $.Values.persistence.extraShardsSize) | quote }}
         {{- if $.Values.persistence.selector }}
         selector: {{- include "common.tplvalues.render" (dict "value" $.Values.persistence.selector "context" $) | nindent 10 }}
         {{- end }}
