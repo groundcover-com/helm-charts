@@ -3,7 +3,7 @@
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
-groundcover_version: 1.8.142
+groundcover_version: 1.8.143
 # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
 deployment:
   enabled: true
@@ -26,7 +26,7 @@ statefulset:
   # type: RollingUpdate
 image:
   repository: public.ecr.aws/groundcovercom/vmagent
-  tag: "" # rewrites Chart.AppVersion
+  tag: "v1.103.0" # rewrites Chart.AppVersion
   pullPolicy: IfNotPresent
 imagePullSecrets: []
 nameOverride: ""

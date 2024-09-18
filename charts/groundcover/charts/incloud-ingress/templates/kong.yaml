@@ -56,6 +56,7 @@ metadata:
 config:
   anonymous: anonymous
   key_names:
+    - token
     - apikey
     - dd-api-key
     - X-Amz-Firehose-Access-Key

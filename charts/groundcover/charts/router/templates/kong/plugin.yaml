@@ -8,6 +8,7 @@ metadata:
     {{- include "router.labels" . | nindent 4 }}
 config:
   key_names:
+    - token
     - apikey
     - X-ClickHouse-Key
     - X-Amz-Firehose-Access-Key

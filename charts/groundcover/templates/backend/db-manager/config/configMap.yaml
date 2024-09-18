@@ -42,10 +42,14 @@ data:
         retention: {{ include "events.retention" . }}
         custom_retention_overrides:
           {{- include "events.custom_retention_overrides" . | indent 8 }}
-      MonitorState:
+      Monitor_State:
         retention: {{ include "monitors.evaluation.retention" .}}
         custom_retention_overrides:
           {{- include "monitors.evaluation.custom_retention_overrides" . | indent 8 }}
+      Monitor_Instance:
+        retention: {{ include "monitors.instance.retention" .}}
+        custom_retention_overrides:
+          {{- include "monitors.instance.custom_retention_overrides" . | indent 8 }}
       Sources:
         retention: {{ include "sources.retention" .  }}
         custom_retention_overrides:

@@ -34,7 +34,9 @@ spec:
 {{- end }}
         {{- include "groundcover.labels" . | nindent 8 }}
       annotations:
+        {{- if eq (include "chart.name" .) "victoria-metrics-agent" }}
         groundcover_version: {{ .Values.groundcover_version }}
+        {{- end }}
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
         {{- range $key, $value := .Values.podAnnotations }}
         {{ $key }}: {{ $value | quote }}

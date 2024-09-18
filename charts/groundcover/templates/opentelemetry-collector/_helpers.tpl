@@ -52,6 +52,16 @@
 {{- end -}}
 {{- end -}}
 
+{{- define "monitors.instance.retention" -}}
+{{ .Values.global.monitors.instance.retention }}
+{{- end -}}
+
+{{- define "monitors.instance.custom_retention_overrides" -}}
+{{- with .Values.global.monitors.instance.custom_retention_overrides }}
+{{ toYaml . | indent 2 }}
+{{- end -}}
+{{- end -}}
+
 {{- define "sources.retention" -}}
 {{ .Values.global.sources.retention }}
 {{- end -}}

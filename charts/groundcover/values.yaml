@@ -101,6 +101,8 @@ global:
   monitors:
     evaluation:
       retention: 30d # {amount}[h(ours), d(ays), w(eeks), y(ears)]
+    instance:
+      retention: 90d # {amount}[h(ours), d(ays), w(eeks), y(ears)]
 
   postgresql:
     enabled: true
@@ -1415,7 +1417,7 @@ vector:
             type: clickhouse
             endpoint: '{{ include "clickhouse.shard0HttpEndpoint" . }}'
             database: "groundcover"
-            table: "traces"
+            table: "traces_v2"
             request:
               retry_attempts: 5
             auth:
