@@ -24,7 +24,7 @@ data:
     [SERVICE]
         Daemon Off
         Flush 1
-        Log_Level info
+        Log_Level warning
         Parsers_File parsers.conf
         Parsers_file custom_parsers.conf
         HTTP_Server On
