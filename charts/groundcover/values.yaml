@@ -2152,6 +2152,7 @@ victoria-metrics-single:
   server:
     image:
       repository: public.ecr.aws/groundcovercom/victoria-metrics
+      tag: v1.103.0
 
     extraArgs:
       search.maxUniqueTimeseries: "2000000"
