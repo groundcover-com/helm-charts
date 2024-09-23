@@ -341,7 +341,6 @@ dbManager:
     repository: "{{ .Values.global.origin.registry }}/db-manager"
   resources:
     limits:
-      cpu: 100m
       memory: 1Gi
     requests:
       cpu: 15m
@@ -420,7 +419,6 @@ portal:
     repository: "{{ .Values.global.origin.registry }}/portal"
   resources:
     limits:
-      cpu: 300m
       memory: 512Mi
     requests:
       cpu: 50m
@@ -909,7 +907,6 @@ opentelemetry-collector:
       cpu: 100m
       memory: 512Mi
     limits:
-      cpu: 1000m
       memory: 2048Mi
   podDisruptionBudget:
     enabled: true
@@ -1629,7 +1626,6 @@ metrics-ingester:
       mountPath: /etc/ssl/gc-certs
   resources:
     limits:
-      cpu: 500m
       memory: 512Mi
     requests:
       cpu: 100m
@@ -1647,7 +1643,6 @@ victoria-metrics-agent:
     namespaced: true
   resources:
     limits:
-      cpu: 500m
       memory: 256Mi
     requests:
       cpu: 100m
@@ -1805,7 +1800,6 @@ custom-metrics:
     repository: "{{ .Values.global.origin.registry }}/vmagent"
   resources:
     limits:
-      cpu: 500m
       memory: 1024Mi
     requests:
       cpu: 100m
