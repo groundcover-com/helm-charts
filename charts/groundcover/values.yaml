@@ -454,6 +454,12 @@ clickhouse:
     enabled: false
   zookeeper:
     enabled: false
+  externalAccess:
+    enabled: true
+    service:
+      type: ClusterIP
+      ports:
+        http: 8123
   metrics:
     enabled: true
   auth:
@@ -1280,6 +1286,7 @@ vector:
             .workload = get!(value: .labels, path: ["workload"])
             .pod = get!(value: .labels, path: ["pod"])
             .category = get!(value: .labels, path: ["category"])
+            .severity = get!(value: .labels, path: ["_gc_severity"])
     sinks:
       overrideSinks:
       extraSinks:
@@ -1290,6 +1297,8 @@ vector:
             - statsd_tcp
           type: prometheus_remote_write 
           endpoint: '{{ include "metrics-ingester.cluster.http.write.url" . }}'
+          healthcheck:
+            enabled: false
       remote:
         logs:
           json_logs_sink:
@@ -1526,6 +1535,8 @@ vector:
               max_bytes: 25000000
               max_events: 25000
               timeout_secs: 5
+            healthcheck:
+              enabled: false
         traces:
           s3_traces:
             type: "aws_s3"
@@ -1539,6 +1550,8 @@ vector:
               max_bytes: 25000000
               max_events: 2500
               timeout_secs: 5
+            healthcheck:
+              enabled: false
         custom:
           s3_entities:
             type: "aws_s3"
@@ -1555,6 +1568,8 @@ vector:
               max_bytes: 25000000
               max_events: 25000
               timeout_secs: 5
+            healthcheck:
+              enabled: false
           s3_events:
             type: "aws_s3"
             inputs:
@@ -1570,6 +1585,8 @@ vector:
               max_bytes: 25000000
               max_events: 25000
               timeout_secs: 5
+            healthcheck:
+              enabled: false
         
 
 

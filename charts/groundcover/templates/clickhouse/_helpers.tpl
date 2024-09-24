@@ -38,11 +38,11 @@
 {{- end -}}
 
 {{- define "clickhouse.shard0Name" -}}
-{{ printf "%s-shard%d-%d.%s.%s.svc.cluster.local" (include "clickhouse.fullname" $ ) 0 0 (include "clickhouse.headlessServiceName" $) (include "common.names.namespace" $) }}
+{{ printf "%s-shard0-0-external" (include "clickhouse.fullname" $) }}
 {{- end -}}
 
 {{- define "clickhouse.shard0HttpEndpoint" -}}
-{{ printf "http://%s:%d" (include "clickhouse.shard0Name" $ ) (.Values.global.clickhouse.containerPorts.http | int ) }}
+{{ printf "http://%s:%d" (include "clickhouse.shard0Name" $) (.Values.global.clickhouse.containerPorts.http | int ) }}
 {{- end -}}
 
 {{- define "clickhouse.extraShardsList" -}}
@@ -50,7 +50,7 @@
 {{- $list := list -}}
 {{- range $shard, $e := until $shards }}
 {{- if ne $e 0}}
-{{- $item := printf "%s-shard%d-%d.%s.%s.svc.cluster.local" (include "clickhouse.fullname" $ ) $shard 0 (include "clickhouse.headlessServiceName" $) (include "common.names.namespace" $) }}
+{{- $item := printf "%s-shard%d-%d-external" (include "clickhouse.fullname" $) $shard 0 }}
 {{- $list = append $list $item }}
 {{- end -}}
 {{- end -}}
