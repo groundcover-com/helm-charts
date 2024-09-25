@@ -1,4 +1,5 @@
 {{- range $key,$value := .Values.nodePools }}
+{{- if (ne $value.enabled false)}}
 ---
 apiVersion: karpenter.sh/v1
 kind: NodePool
@@ -28,7 +29,9 @@ spec:
     cpu: "1000" 
     memory: "3000Gi"
   {{- end }}
-  weight: {{ default 0 $value.weight }}
+  {{- if $value.weight }}
+  weight: {{ $value.weight }}
+  {{- end }}
   template: {{if or $value.nodeLabels $value.nodeAnnotations }}
     metadata: 
       {{- with $value.nodeLabels }}
@@ -50,26 +53,24 @@ spec:
       expireAfter: {{ default "Never" $value.expireAfter }}
       terminationGracePeriod: {{ default "48h" $value.terminationGracePeriod }}
       nodeClassRef:
-        apiVersion: karpenter.k8s.aws
+        group: karpenter.k8s.aws
         kind: EC2NodeClass
         name: {{ $value.ec2NodeClass }}
       requirements: 
-      {{- if $value.instanceCategories }}
+      {{- if $value.instanceCategories.values }}
       {{- with $value.instanceCategories }}
       - key: "karpenter.k8s.aws/instance-category"
         operator: {{ default "In" .operator }}
         values: {{- range default (list "c" "m" "r") .values }}
         - {{ . | quote }}
         {{- end }}
-        minValues: {{ default 1 .minValues }}
       {{- end }}
       {{- else }}
       - key: "karpenter.k8s.aws/instance-category"
         operator: "In"
         values: ["c", "m", "r"]
-        minValues: 1   
       {{- end }}
-      {{- if $value.instanceFamily }}
+      {{- if $value.instanceFamily.values }}
       {{- with $value.instanceFamily }}
       - key: "karpenter.k8s.aws/instance-family"
         operator: {{ default "In" .operator }}
@@ -78,7 +79,7 @@ spec:
         {{- end }}
       {{- end }}
       {{- end }}
-      {{- if $value.instanceCpu }}
+      {{- if $value.instanceCpu.values }}
       {{- with $value.instanceCpu }}
       - key: "karpenter.k8s.aws/instance-cpu"
         operator: {{ default "Gt" .operator}}
@@ -91,7 +92,7 @@ spec:
         operator: "Gt" 
         values: ["24"]
       {{- end }}
-      {{- if $value.instanceHypervisor }}
+      {{- if $value.instanceHypervisor.values }}
       {{- with $value.instanceHypervisor }}
       - key: "karpenter.k8s.aws/instance-hypervisor"
         operator: {{ default "In" .operator }}
@@ -104,7 +105,7 @@ spec:
         operator: "In" 
         values: ["nitro"]
       {{- end }}
-      {{- if $value.instanceGeneration }}
+      {{- if $value.instanceGeneration.values }}
       {{- with $value.instanceGeneration }}
       - key: "karpenter.k8s.aws/instance-generation"
         operator: {{ default "Gt" .operator }}
@@ -117,7 +118,7 @@ spec:
         operator: "Gt"
         values: ["5"]
       {{- end }}
-      {{- if $value.instanceZone }}
+      {{- if $value.instanceZone.values }}
       {{- with $value.instanceZone }}
       - key: "topology.kubernetes.io/zone"
         operator: {{ default "In" .operator }}
@@ -126,7 +127,7 @@ spec:
         {{- end }}
       {{- end }}
       {{- end }}
-      {{- if $value.instanceArch }}
+      {{- if $value.instanceArch.values }}
       {{- with $value.instanceArch }}
       - key: "kubernetes.io/arch"
         operator: {{ default "In" .operator }}
@@ -136,10 +137,10 @@ spec:
       {{- end }}
       {{- else }}
       - key: "kubernetes.io/arch"
-        operator:  "In" 
+        operator: "In" 
         values: ["amd64"]
       {{- end }}
-      {{- if $value.capacityType }}
+      {{- if $value.capacityType.values }}
       {{- with $value.capacityType }}
       - key: "karpenter.sh/capacity-type"
         operator: {{ default "In" .operator }}
@@ -152,4 +153,5 @@ spec:
         operator: "In"
         values: ["on-demand"]
       {{- end }}
+{{- end }}
 {{- end }}

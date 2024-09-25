@@ -70,7 +70,6 @@ nodePools:
     instanceCategories: 
       operator: 
       values: []
-      minValues: 
     instanceFamily:
       operator: 
       values: []
