@@ -6,10 +6,11 @@ metadata:
     {{- include "groundcover.labels" . | nindent 4 }}
 data:
   aggregation_config.yaml: |
-    - match: '{__name__=~"groundcover_.+_.+_counter|groundcover_unavailable_count|groundcover_network.+", node_name!=""}'
+    - ignore_old_samples: true
+      match: '{__name__=~"groundcover_.+_.+_counter|groundcover_unavailable_count|groundcover_network.+", node_name!=""}'
       without: [node_name]
       interval: 30s
-      outputs: [total]
+      outputs: [total_prometheus]
       output_relabel_configs:
       - source_labels: [__name__]
         target_label: __name__
