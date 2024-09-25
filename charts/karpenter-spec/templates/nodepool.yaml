@@ -1,0 +1,155 @@
+{{- range $key,$value := .Values.nodePools }}
+---
+apiVersion: karpenter.sh/v1
+kind: NodePool
+metadata:
+  name: {{ $key }}
+spec:
+  disruption:
+  {{- if $value.disruption }}
+  {{- with $value.disruption }}
+    consolidateAfter: {{ default "12h" .consolidateAfter }}
+    consolidationPolicy: {{ default "WhenEmpty" .consolidationPolicy }}
+    budgets: {{ default (list (dict "nodes" "0") ) .budgets | toYaml | nindent 4 }}
+  {{- end }}
+  {{- else }}
+    consolidateAfter: "12h" 
+    consolidationPolicy: "WhenEmpty" 
+    budgets: 
+    - nodes: 0
+  {{- end }}
+  limits:
+  {{- if $value.limits }}
+  {{- with $value.limits }}
+    cpu: {{ default "1000" .cpu }}
+    memory: {{ default "3000Gi" .memory }}
+  {{- end }}
+  {{- else }}
+    cpu: "1000" 
+    memory: "3000Gi"
+  {{- end }}
+  weight: {{ default 0 $value.weight }}
+  template: {{if or $value.nodeLabels $value.nodeAnnotations }}
+    metadata: 
+      {{- with $value.nodeLabels }}
+      labels: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $value.nodeAnnotations }}
+      annotations: {{ toYaml . | nindent 8 }}
+      {{- end }}
+    {{- end }}
+    spec:
+      {{- with $value.taints }}
+      taints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $value.startupTaints }}
+      startupTaints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      expireAfter: {{ default "Never" $value.expireAfter }}
+      terminationGracePeriod: {{ default "48h" $value.terminationGracePeriod }}
+      nodeClassRef:
+        apiVersion: karpenter.k8s.aws
+        kind: EC2NodeClass
+        name: {{ $value.ec2NodeClass }}
+      requirements: 
+      {{- if $value.instanceCategories }}
+      {{- with $value.instanceCategories }}
+      - key: "karpenter.k8s.aws/instance-category"
+        operator: {{ default "In" .operator }}
+        values: {{- range default (list "c" "m" "r") .values }}
+        - {{ . | quote }}
+        {{- end }}
+        minValues: {{ default 1 .minValues }}
+      {{- end }}
+      {{- else }}
+      - key: "karpenter.k8s.aws/instance-category"
+        operator: "In"
+        values: ["c", "m", "r"]
+        minValues: 1   
+      {{- end }}
+      {{- if $value.instanceFamily }}
+      {{- with $value.instanceFamily }}
+      - key: "karpenter.k8s.aws/instance-family"
+        operator: {{ default "In" .operator }}
+        values: {{- range .values }}
+        - {{ . | quote }}
+        {{- end }}
+      {{- end }}
+      {{- end }}
+      {{- if $value.instanceCpu }}
+      {{- with $value.instanceCpu }}
+      - key: "karpenter.k8s.aws/instance-cpu"
+        operator: {{ default "Gt" .operator}}
+        values: {{- range default (list "24") .values }}
+        - {{ . | quote }}
+        {{- end }}
+      {{- end }}
+      {{- else }}
+      - key: "karpenter.k8s.aws/instance-cpu"
+        operator: "Gt" 
+        values: ["24"]
+      {{- end }}
+      {{- if $value.instanceHypervisor }}
+      {{- with $value.instanceHypervisor }}
+      - key: "karpenter.k8s.aws/instance-hypervisor"
+        operator: {{ default "In" .operator }}
+        values: {{- range default (list "nitro") .values }}
+        - {{ . | quote }}
+        {{- end }}
+      {{- end }}
+      {{- else }}
+      - key: "karpenter.k8s.aws/instance-hypervisor"
+        operator: "In" 
+        values: ["nitro"]
+      {{- end }}
+      {{- if $value.instanceGeneration }}
+      {{- with $value.instanceGeneration }}
+      - key: "karpenter.k8s.aws/instance-generation"
+        operator: {{ default "Gt" .operator }}
+        values: {{- range default (list "5") .values }}
+        - {{ . | quote }}
+        {{- end }}
+      {{- end }}
+      {{- else }}
+      - key: "karpenter.k8s.aws/instance-generation"
+        operator: "Gt"
+        values: ["5"]
+      {{- end }}
+      {{- if $value.instanceZone }}
+      {{- with $value.instanceZone }}
+      - key: "topology.kubernetes.io/zone"
+        operator: {{ default "In" .operator }}
+        values: {{- range .values }}
+        - {{ . | quote }}
+        {{- end }}
+      {{- end }}
+      {{- end }}
+      {{- if $value.instanceArch }}
+      {{- with $value.instanceArch }}
+      - key: "kubernetes.io/arch"
+        operator: {{ default "In" .operator }}
+        values: {{- range default (list "amd64") .values }}
+        - {{ . | quote }}
+        {{- end }}
+      {{- end }}
+      {{- else }}
+      - key: "kubernetes.io/arch"
+        operator:  "In" 
+        values: ["amd64"]
+      {{- end }}
+      {{- if $value.capacityType }}
+      {{- with $value.capacityType }}
+      - key: "karpenter.sh/capacity-type"
+        operator: {{ default "In" .operator }}
+        values: {{- range default (list "on-demand") .values }}
+        - {{ . | quote }}
+        {{- end }}
+      {{- end }}
+      {{- else }}
+      - key: "karpenter.sh/capacity-type"
+        operator: "In"
+        values: ["on-demand"]
+      {{- end }}
+{{- end }}

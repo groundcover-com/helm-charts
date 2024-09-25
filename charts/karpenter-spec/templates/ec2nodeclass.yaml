@@ -1,0 +1,96 @@
+{{- range $key,$value := .Values.ec2NodeClass }}
+---
+apiVersion: karpenter.k8s.aws/v1
+kind: EC2NodeClass
+metadata:
+  name: {{ $key }}
+spec: 
+  amiFamily: {{ default "AL2" $value.amiFamily }}
+  {{- if or ($value.instanceProfile) ($.Values.infrastructure.instanceProfile) }}
+  instanceProfile: {{ default $.Values.infrastructure.instanceProfile $value.instanceProfile }}
+  {{- end }}
+  {{- if or $value.role ($.Values.infrastructure.role) }}
+  role: {{ default $.Values.infrastructure.role $value.role }}
+  {{- end }}
+  subnetSelectorTerms:
+  {{- if or ($value.subnetTags) ($.Values.infrastructure.subnetTags) }}
+  - tags: {{ default $.Values.infrastructure.subnetTags $value.subnetTags | toYaml | nindent 6 }}
+  {{- end }}
+  {{- if or ($value.subnetIds) ($.Values.infrastructure.subnetIds) }}
+  {{- range default $.Values.infrastructure.subnetIds $value.SubnetIds }}
+  - id: {{ . }}
+  {{- end }}  
+  {{- end }}
+  securityGroupSelectorTerms:
+  {{- if or ($value.securityGroupTags) ($.Values.infrastructure.securityGroupTags) }}
+  - tags: {{ default $.Values.infrastructure.securityGroupTags $value.securityGroupTags | toYaml | nindent 6 }}
+  {{- end }}
+  {{- if or ($value.securityGroupIds) ($.Values.infrastructure.securityGroupIds) }}
+  {{- range default $.Values.infrastructure.securityGroupIds $value.securityGroupIds }}
+  - id: {{ . }}
+  {{- end }}  
+  {{- end }}
+  {{- if or ($value.securityGroupNames) ($.Values.infrastructure.securityGroupNames) }}
+  {{- range default $.Values.infrastructure.securityGroupNames $value.securityGroupNames }}
+  - name: {{ . }}
+  {{- end }}
+  {{- end }}
+  blockDeviceMappings:
+    {{- with $value.rootVolume }}
+    - deviceName: {{ default "/dev/xvda" .deviceName }}
+      ebs:
+        volumeType: {{ default "gp3" .type }}
+        volumeSize: {{ default "256Gi" .size }}
+        deleteOnTermination: {{ default "true" .deleteOnTermination }}
+        encrypted: {{ default "false" .encrypted }}
+        {{- if .kmsKeyID }}
+        kmsKeyID: {{ .kmsKeyID }}
+        {{- end }}
+        iops: {{ default 3000 .iops }}
+        throughput: {{ default 125 .throughput }}
+    {{- end }}
+  {{- range $value.extraVolumes }}
+    - deviceName: {{ .deviceName }}
+      ebs:
+        volumeType: {{ default "gp3" .type }}
+        volumeSize: {{ default "256Gi" .size }}
+        deleteOnTermination: {{ default "true" .deleteOnTermination }}
+        encrypted: {{ default "false" .encrypted }}
+        {{- if .kmsKeyID }}
+        kmsKeyID: {{ .kmsKeyID }}
+        {{- end }}
+        iops: {{ default 3000 .iops }}
+        throughput: {{ default 125 .throughput }}
+  {{- end }}
+  amiSelectorTerms: 
+  {{- if or ($value.amiSelectorAlias) ($.Values.infrastructure.amiSelectorAlias) }}
+  {{- range default $.Values.infrastructure.amiSelectorAlias $value.amiSelectorAlias }}
+  - alias: {{ . }}
+  {{- end }}  
+  {{- end }}
+  {{- if or ($value.amiSelectorIds) ($.Values.infrastructure.amiSelectorIds) }}
+  {{- range default $.Values.infrastructure.amiSelectorIds $value.amiSelectorIds }}
+  - id: {{ . }}
+  {{- end }}  
+  {{- end }}
+  {{- if or ($value.amiSelectorNames) ($.Values.infrastructure.amiSelectorNames) }}
+  {{- range default $.Values.infrastructure.amiSelectorNames $value.amiSelectorNames }}
+  - name: {{ . }}
+  {{- end }}  
+  {{- end }}
+  {{- if $value.tags }}
+  tags: {{toYaml $value.tags | nindent 4 }}
+  {{- end }}
+  detailedMonitoring: {{ default "false" $value.detailedMonitoring }}
+  associatePublicIPAddress: {{ default "false" $value.associatePublicIPAddress }}
+  {{- with .metadataOptions }}
+  metadataOptions:
+    httpEndpoint: {{ default "enabled" .httpEndpoint }}
+    httpProtocolIPv6: {{ default "disabled" .httpProtocolIPv6 }}
+    httpTokens: {{ default "required" .httpTokens }}
+  {{- end }}
+  {{- if $value.userData }}
+  userData: |
+   {{- toYaml $value.userData | nindent 4 }}
+  {{- end }}
+{{- end }}

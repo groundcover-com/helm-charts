@@ -1,0 +1,94 @@
+infrastructure:
+  securityGroupIds: []
+  securityGroupTags: []
+  securityGroupNames: []
+  subnetIds: []
+  subnetTags: []
+  amiSelectorAlias: 
+  - al2@latest
+  amiSelectorName: []
+  amiSelectorIds: []
+  role: 
+  instanceProfile: 
+
+ec2NodeClass:
+  default: 
+    instanceProfile: 
+    role: 
+    subnetTags: []
+    subnetIds: []
+    securityGroupIds: []
+    securityGroupNames: []
+    securityGroupTags: []
+    amiSelectorAlias: []
+    amiSelectorIds: []
+    amiSelectorNames: []
+    rootVolume:
+      deviceName: 
+      type: 
+      size: 
+      deleteOnTermination: 
+      encrypted: 
+      kmsKeyID: 
+      iops: 
+      throughput: 
+    extraVolumes: []
+      # - deviceName: 
+      #   type: 
+      #   size: 
+      #   deleteOnTermination: 
+      #   encrypted: 
+      #   kmsKeyID: 
+      #   iops: 
+      #   throughput: 
+    tags: 
+    detailedMonitoring: 
+    associatePublicIPAddress: 
+    metadataOptions:
+      httpEndpoint: 
+      httpProtocolIPv6: 
+      httpTokens:
+    userData: 
+
+nodePools:
+  default:
+    ec2NodeClass: default
+    disruption:
+      consolidateAfter: 
+      consolidationPolicy: 
+      budgets:
+    limits:
+      cpu: 
+      memory: 
+    weight: 
+    nodeLabels:
+    nodeAnnotations:
+    taints:
+    startupTaints:
+    expireAfter:
+    terminationGracePeriod: 
+    instanceCategories: 
+      operator: 
+      values: []
+      minValues: 
+    instanceFamily:
+      operator: 
+      values: []
+    instanceCpu:
+      operator: 
+      values: []
+    instanceHypervisor:
+      operator: 
+      values: []
+    instanceGeneration:
+      operator: 
+      values: []
+    instanceZone:
+      operator: 
+      values: []
+    instanceArch:
+      operator: 
+      values: []
+    capacityType:
+      operator: 
+      values: []
