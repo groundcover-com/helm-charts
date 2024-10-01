@@ -89,6 +89,7 @@ spec:
     httpEndpoint: {{ default "enabled" .httpEndpoint }}
     httpProtocolIPv6: {{ default "disabled" .httpProtocolIPv6 }}
     httpTokens: {{ default "required" .httpTokens }}
+    httpPutResponseHopLimit: {{ default 2 .httpPutResponseHopLimit }}
   {{- end }}
   {{- if $value.userData }}
   userData: |

@@ -48,6 +48,7 @@ ec2NodeClass:
       httpEndpoint: 
       httpProtocolIPv6: 
       httpTokens:
+      httpPutResponseHopLimit:
     userData: 
 
 nodePools:
