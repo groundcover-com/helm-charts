@@ -12,14 +12,14 @@ metadata:
     {{- if .Values.agent.additionalAnnotations }}
 {{ toYaml .Values.agent.additionalAnnotations | indent 4 }}
     {{- end }}
-  name: alligator
+  name: {{ include "sensor.fullname" . }}
   namespace: {{ .Release.Namespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: alligator
+  name: {{ include "sensor.fullname" . }}
 subjects:
 - kind: ServiceAccount
-  name: alligator
+  name: {{ include "sensor.fullname" . }}
   namespace: {{ .Release.Namespace }}
 {{ end -}}

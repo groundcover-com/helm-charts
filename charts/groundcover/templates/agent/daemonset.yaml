@@ -1,4 +1,8 @@
 {{ if .Values.global.agent.enabled }}
+{{- $sensorValues := deepCopy .Values.agent.sensor -}}
+{{- if .Values.agent.alligator -}}
+{{ $sensorValues = mergeOverwrite $sensorValues .Values.agent.alligator }}
+{{- end -}}
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -7,12 +11,12 @@ metadata:
     {{- if .Values.agent.additionalAnnotations }}
 {{ toYaml .Values.agent.additionalAnnotations | indent 4 }}
     {{- end }}
-  name: alligator
+  name: {{ include "sensor.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "groundcover.labels" . | nindent 4 }}
-    app: alligator
-    app.kubernetes.io/name: alligator
+    app: sensor
+    app.kubernetes.io/name: sensor
     {{- if .Values.agent.additionalLabels }}
 {{ toYaml .Values.agent.additionalLabels | indent 4 }}
     {{- end }}
@@ -23,7 +27,7 @@ spec:
       maxUnavailable: 100%
   selector:
     matchLabels:
-      app: alligator
+      app: sensor
   template:
     metadata:
       annotations:
@@ -32,7 +36,7 @@ spec:
         vm.io/path: "vmetrics"
         vm.io/port: {{ (include "agent.monitoring.port" .) | quote  }}
         groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
-        checksum/alligator_config: {{ include (print $.Template.BasePath "/agent/config/alligator/config.yaml") . | sha256sum }}
+        checksum/sensor_config: {{ include (print $.Template.BasePath "/agent/config/sensor/config.yaml") . | sha256sum }}
         {{- if .Values.agent.additionalAnnotations }}
 {{ toYaml .Values.agent.additionalAnnotations | indent 8 }}
         {{- end }}
@@ -40,8 +44,8 @@ spec:
 {{ toYaml .Values.agent.podAnnotations | indent 8 }}
         {{- end }}
       labels:
-        app: alligator
-        app.kubernetes.io/name: alligator
+        app: sensor
+        app.kubernetes.io/name: sensor
         {{- include "groundcover.labels" . | nindent 8 }}
         {{- if .Values.agent.additionalLabels }}
 {{ toYaml .Values.agent.additionalLabels | indent 8 }}
@@ -76,9 +80,9 @@ spec:
             - name: FLORA_SYSTEMWATCHER_HOSTMOUNTPATH
               value: "/host"
             - name: FLORA_NETWORKTRACER_CONNECTIONMANAGER_PROTOCOLS_HTTP_UNLIMITEDPAYLOADENDPOINTS
-              value: {{ (tpl .Values.agent.alligator.httpUnlimitedEndpoints .) | quote }}
+              value: {{ (tpl $sensorValues.httpUnlimitedEndpoints .) | quote }}
             - name: FLORA_NETWORKTRACER_CONNECTIONMANAGER_PROTOCOLS_HTTP2_UNLIMITEDPAYLOADENDPOINTS
-              value: {{ (tpl .Values.agent.alligator.http2UnlimitedEndpoints .) | quote }}
+              value: {{ (tpl $sensorValues.http2UnlimitedEndpoints .) | quote }}
             - name: NODE_NAME
               valueFrom:
                 fieldRef:
@@ -118,53 +122,53 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: status.hostIP
-            {{- with .Values.agent.alligator.env }}
+            {{- with $sensorValues.env }}
               {{ toYaml . | nindent 12 }}
             {{- end }}                                
-          image: {{ tpl .Values.agent.alligator.image.repository . }}:{{ default .Chart.AppVersion .Values.global.origin.tag }}
+          image: {{ tpl $sensorValues.image.repository . }}:{{ default .Chart.AppVersion .Values.global.origin.tag }}
           resources:
-{{- toYaml .Values.agent.alligator.resources | nindent 12 }}
+{{- toYaml $sensorValues.resources | nindent 12 }}
           imagePullPolicy: Always
-          name: alligator
+          name: "sensor"
           ports:
             - containerPort: {{ (include "agent.monitoring.port" .) | int }}
               name: prom-metrics
               protocol: TCP
-            - containerPort: {{ .Values.agent.alligator.apmIngestor.dataDog.tracesPort }}
+            - containerPort: {{ $sensorValues.apmIngestor.dataDog.tracesPort }}
               name: dd-traces
               protocol: TCP
-            {{- if and .Values.agent.alligator.apmIngestor.otel.direct.zipkin.enabled .Values.agent.alligator.apmIngestor.otel.direct.zipkin.port}}
-            - containerPort: {{ .Values.agent.alligator.apmIngestor.otel.direct.zipkin.port }}
+            {{- if and $sensorValues.apmIngestor.otel.direct.zipkin.enabled $sensorValues.apmIngestor.otel.direct.zipkin.port}}
+            - containerPort: {{ $sensorValues.apmIngestor.otel.direct.zipkin.port }}
               name: zipkin
               protocol: TCP
             {{- end }}
-            {{- if and .Values.agent.alligator.apmIngestor.otel.direct.otlp.enabled .Values.agent.alligator.apmIngestor.otel.direct.otlp.grpcPort}}
-            - containerPort: {{ .Values.agent.alligator.apmIngestor.otel.direct.otlp.grpcPort }}
+            {{- if and $sensorValues.apmIngestor.otel.direct.otlp.enabled $sensorValues.apmIngestor.otel.direct.otlp.grpcPort}}
+            - containerPort: {{ $sensorValues.apmIngestor.otel.direct.otlp.grpcPort }}
               name: otlp-grpc
               protocol: TCP
             {{- end }}
-            {{- if and .Values.agent.alligator.apmIngestor.otel.direct.otlp.enabled .Values.agent.alligator.apmIngestor.otel.direct.otlp.httpPort}}
-            - containerPort: {{ .Values.agent.alligator.apmIngestor.otel.direct.otlp.httpPort }}
+            {{- if and $sensorValues.apmIngestor.otel.direct.otlp.enabled $sensorValues.apmIngestor.otel.direct.otlp.httpPort}}
+            - containerPort: {{ $sensorValues.apmIngestor.otel.direct.otlp.httpPort }}
               name: otlp-http
               protocol: TCP
             {{- end }}
-            {{- if and .Values.agent.alligator.apmIngestor.otel.direct.jaeger.enabled .Values.agent.alligator.apmIngestor.otel.direct.jaeger.grpcPort}}
-            - containerPort: {{ .Values.agent.alligator.apmIngestor.otel.direct.jaeger.grpcPort }}
+            {{- if and $sensorValues.apmIngestor.otel.direct.jaeger.enabled $sensorValues.apmIngestor.otel.direct.jaeger.grpcPort}}
+            - containerPort: {{ $sensorValues.apmIngestor.otel.direct.jaeger.grpcPort }}
               name: jaeger-grpc
               protocol: TCP     
             {{- end }}
-            {{- if and .Values.agent.alligator.apmIngestor.otel.direct.jaeger.enabled .Values.agent.alligator.apmIngestor.otel.direct.jaeger.thriftHttpPort}}
-            - containerPort: {{ .Values.agent.alligator.apmIngestor.otel.direct.jaeger.thriftHttpPort }}
+            {{- if and $sensorValues.apmIngestor.otel.direct.jaeger.enabled $sensorValues.apmIngestor.otel.direct.jaeger.thriftHttpPort}}
+            - containerPort: {{ $sensorValues.apmIngestor.otel.direct.jaeger.thriftHttpPort }}
               name: jaeger-th-http
               protocol: TCP     
             {{- end }}
-            {{- if and .Values.agent.alligator.apmIngestor.otel.direct.jaeger.enabled .Values.agent.alligator.apmIngestor.otel.direct.jaeger.thriftBinaryPort}}
-            - containerPort: {{ .Values.agent.alligator.apmIngestor.otel.direct.jaeger.thriftBinaryPort }}
+            {{- if and $sensorValues.apmIngestor.otel.direct.jaeger.enabled $sensorValues.apmIngestor.otel.direct.jaeger.thriftBinaryPort}}
+            - containerPort: {{ $sensorValues.apmIngestor.otel.direct.jaeger.thriftBinaryPort }}
               name: jaeger-th-bin
               protocol: UDP     
             {{- end }}
-            {{- if and .Values.agent.alligator.apmIngestor.otel.direct.jaeger.enabled .Values.agent.alligator.apmIngestor.otel.direct.jaeger.thriftCompactPort}}
-            - containerPort: {{ .Values.agent.alligator.apmIngestor.otel.direct.jaeger.thriftCompactPort }}
+            {{- if and $sensorValues.apmIngestor.otel.direct.jaeger.enabled $sensorValues.apmIngestor.otel.direct.jaeger.thriftCompactPort}}
+            - containerPort: {{ $sensorValues.apmIngestor.otel.direct.jaeger.thriftCompactPort }}
               name: jaeger-th-comp
               protocol: UDP     
             {{- end }}
@@ -185,16 +189,16 @@ spec:
               name: sys
               readOnly: true
             - mountPath: /config
-              name: alligator-configuration
+              name: sensor-configuration
               readOnly: false
             - mountPath: /scrape-config
-              name: alligator-scrape-configuration
+              name: sensor-scrape-configuration
               readOnly: false
             - mountPath: /comm
               name: comm
               readOnly: false
             - mountPath: /var/run/positions
-              name: alligator-position
+              name: sensor-position
             - mountPath: /var/lib/docker/containers
               name: docker
               readOnly: true
@@ -311,7 +315,7 @@ spec:
             - /bin/sh
             - -c
           image: {{ printf "%s/curl:8.6.0" .Values.global.origin.registry }}
-      serviceAccountName: alligator
+      serviceAccountName: {{ include "sensor.fullname" . }}
 {{- if or (.Values.agent.priorityClassName) (.Values.agent.priorityClass.create) }}
   {{- if .Values.agent.priorityClassName }}
       priorityClassName: {{ .Values.agent.priorityClassName }}
@@ -340,17 +344,17 @@ spec:
           name: sys
         - configMap:
             defaultMode: 420
-            name: alligator-configuration
-          name: alligator-configuration
+            name: sensor-configuration
+          name: sensor-configuration
         - configMap:
             defaultMode: 420
-            name: alligator-scrape-configuration
-          name: alligator-scrape-configuration
+            name: sensor-scrape-configuration
+          name: sensor-scrape-configuration
         - emptyDir: {}
           name: comm
         - hostPath:
-            path: /run/alligator-position-{{ .Release.Namespace }}
-          name: alligator-position
+            path: /run/sensor-position-{{ .Release.Namespace }}
+          name: sensor-position
         - hostPath:
             path: /var/lib/docker/containers
           name: docker

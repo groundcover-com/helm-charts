@@ -15,7 +15,7 @@ metadata:
     {{- if .Values.agent.additionalAnnotations }}
 {{ toYaml .Values.agent.additionalAnnotations | indent 4 }}
     {{- end }}
-  name: {{ template "groundcover.fullname" . }}-alligator
+  name: {{ template "groundcover.fullname" . }}-sensor
 spec:
   allowPrivilegeEscalation: true
   allowedCapabilities:

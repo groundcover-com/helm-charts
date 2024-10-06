@@ -22,6 +22,6 @@ subjects:
   name: k8s-watcher
   namespace: {{ .Release.Namespace }}
 - kind: ServiceAccount
-  name: alligator
+  name: {{ include "sensor.fullname" . }}
   namespace: {{ .Release.Namespace }}
 {{ end -}}

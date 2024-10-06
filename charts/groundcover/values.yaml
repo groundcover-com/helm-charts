@@ -210,9 +210,9 @@ agent:
         cpu: 100m
         memory: 64Mi
     env: []
-  alligator:
+  sensor:
     image:
-      repository: "{{ .Values.global.origin.registry }}/alligator"
+      repository: "{{ .Values.global.origin.registry }}/sensor"
     resources:
       requests:
         memory: 300Mi
@@ -1054,18 +1054,6 @@ vector:
         secretKeyRef:
           key: '{{ include "clickhouse.secretKey" . }}'
           name: '{{ include "clickhouse.secretName" . }}'
-  # objectStorageEnv will only be created if objectStorage is enabled
-  objectStorageEnv:
-    - name: AWS_ACCESS_KEY_ID
-      valueFrom:
-        secretKeyRef:
-          key: '{{ include "vector.s3.accessKey" . }}'
-          name: '{{ include "vector.s3.secretName" . }}'
-    - name: AWS_SECRET_ACCESS_KEY
-      valueFrom:
-        secretKeyRef:
-          key: '{{ include "vector.s3.secretKey" . }}'
-          name: '{{ include "vector.s3.secretName" . }}'
   env:
     - name: MY_POD_IP
       valueFrom:
@@ -1111,6 +1099,7 @@ vector:
       maxUnavailable: 0
       maxSurge: 1
   objectStorage:
+    allowed: true
     s3Bucket:
     region:
   customGlobalConfig:

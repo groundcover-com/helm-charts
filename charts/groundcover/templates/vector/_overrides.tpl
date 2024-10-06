@@ -78,10 +78,20 @@ containers:
     {{- tpl (toYaml .) $ | nindent 6 }}
 {{- end }}
 {{- end }}
-{{- if not (empty .Values.objectStorage.s3Bucket) -}}
-{{- with .Values.objectStorageEnv -}}
-    {{- tpl (toYaml .) $ | nindent 6 }}
-{{- end }}
+{{- /*
+  predefined envs for object storage access keys
+*/}}
+{{  if and (not (empty .Values.objectStorage.s3Bucket)) (.Values.objectStorage.allowed) (not (empty .Values.objectStorage.accessKey))  }}
+      - name: AWS_ACCESS_KEY_ID
+        valueFrom:
+          secretKeyRef:
+            key: '{{ include "vector.s3.accessKey" . }}'
+            name: '{{ include "vector.s3.secretName" . }}'
+      - name: AWS_SECRET_ACCESS_KEY
+        valueFrom:
+          secretKeyRef:
+            key: '{{ include "vector.s3.secretKey" . }}'
+            name: '{{ include "vector.s3.secretName" . }}'
 {{- end }}
 {{- if .Values.env }}
 {{- with .Values.env }}

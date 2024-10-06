@@ -260,14 +260,17 @@ sinks:
 {{- tpl (toYaml .Values.vector.customComponents.sinks.extraSinks) $ | nindent 2 }}
 {{ end }}
 {{- tpl (toYaml .Values.vector.customComponents.sinks.metrics) $ | nindent 2 }}
-{{ if .Values.global.backend.enabled }}
-{{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.logsPipeline "sinks" .Values.vector.customComponents.sinks.local.logs)) $ -}}
-{{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.tracesPipeline "sinks" .Values.vector.customComponents.sinks.local.traces)) $ -}}
-{{- tpl (toYaml .Values.vector.customComponents.sinks.local.custom) $ | nindent 2 }}
-{{ else if not (empty .Values.vector.objectStorage.s3Bucket) }}
+{{  if and (not (empty .Values.vector.objectStorage.s3Bucket)) .Values.vector.objectStorage.allowed }}
 {{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.logsPipeline "sinks" .Values.vector.customComponents.sinks.s3.logs)) $ -}}
 {{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.tracesPipeline "sinks" .Values.vector.customComponents.sinks.s3.traces)) $ -}}
 {{- tpl (toYaml .Values.vector.customComponents.sinks.s3.custom) $ | nindent 2 }}
+{{  if .Values.global.backend.enabled }}
+{{- tpl (toYaml (dict "clickhouse_monitors" .Values.vector.customComponents.sinks.local.custom.clickhouse_monitors)) $ | nindent 2 }}
+{{ end }}
+{{ else if .Values.global.backend.enabled }}
+{{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.logsPipeline "sinks" .Values.vector.customComponents.sinks.local.logs)) $ -}}
+{{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.tracesPipeline "sinks" .Values.vector.customComponents.sinks.local.traces)) $ -}}
+{{- tpl (toYaml .Values.vector.customComponents.sinks.local.custom) $ | nindent 2 }}
 {{ else }}
 {{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.logsPipeline "sinks" .Values.vector.customComponents.sinks.remote.logs)) $ -}}
 {{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.tracesPipeline "sinks" .Values.vector.customComponents.sinks.remote.traces)) $ -}}

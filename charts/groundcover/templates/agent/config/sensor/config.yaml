@@ -1,0 +1,536 @@
+{{ if .Values.global.agent.enabled }}
+{{- $sensorValues := deepCopy .Values.agent.sensor -}}
+{{- $sensorValues = set $sensorValues "alligatorConfigurationExists" false -}}
+{{- if .Values.agent.alligator -}}
+{{ $sensorValues = mergeOverwrite $sensorValues .Values.agent.alligator }}
+{{- $sensorValues = set $sensorValues "alligatorConfigurationExists" true -}}
+{{- end -}}
+apiVersion: v1
+data:
+  config.yaml: |-
+    alligatorConfigurationExists: {{ $sensorValues.alligatorConfigurationExists }} 
+    startuptimeout: 120s
+    concurrency: 200
+    productchansize: 512
+    pushsummaries: true
+    productmetricsflushmintotalcounter:
+      http: 5
+      redis: 5
+      amqp: 5
+      sql: 5
+      kafka: 5
+      dns: 5
+      grpc: 5
+      mongodb: 5
+      node_info: 2
+      container_crash: 1
+      container_info: 1
+      container_info_rt: 1
+      container_state: 1
+      container_oomkill: 1
+      pvc_info: 1
+
+    httphandler:
+      samplesthreshold: 10
+      issuesthreshold: 10
+      sampling:
+        samplingmode: 1 # DefaultSample
+        samplingLimitMaxQueue: 0
+        samplingLimitAgeOut: 0s
+      {{ if and $sensorValues.httphandler $sensorValues.httphandler.truncationConfig }}
+      truncationConfig:
+        enabled: {{ coalesce $sensorValues.noPayloadsMode $sensorValues.httphandler.truncationConfig.enabled }}
+        payloadSizeLimit: {{ ternary 0 $sensorValues.httphandler.truncationConfig.payloadSizeLimit $sensorValues.noPayloadsMode }}
+      {{ end }}
+      {{ if and $sensorValues.httphandler $sensorValues.httphandler.obfuscationConfig }}
+      obfuscationConfig:
+        {{ if and $sensorValues.httphandler $sensorValues.httphandler.obfuscationConfig.keyValueConfig }}
+        keyValueConfig:
+          enabled: {{ coalesce $sensorValues.obfuscateData $sensorValues.httphandler.obfuscationConfig.keyValueConfig.enabled }}
+          caseSensitive: {{ $sensorValues.httphandler.obfuscationConfig.keyValueConfig.caseSensitive }}
+          mode: {{ $sensorValues.httphandler.obfuscationConfig.keyValueConfig.mode }} 
+          specificKeys: {{ $sensorValues.httphandler.obfuscationConfig.keyValueConfig.specificKeys | toJson }}
+        {{ end }}
+        {{ if and $sensorValues.httphandler $sensorValues.httphandler.obfuscationConfig.unstructuredConfig }}
+        unstructuredConfig: 
+          enabled: {{ coalesce $sensorValues.obfuscateData $sensorValues.httphandler.obfuscationConfig.unstructuredConfig.enabled }}
+        {{ end }}
+      {{ end }}
+      interval: 30s
+      summarizerActiveTtl: 45s
+      aggregationCacheSize: 4096
+
+    grpchandler:
+      samplesthreshold: 10
+      issuesthreshold: 10
+      sampling:
+        samplingmode: 1 # DefaultSample
+        samplingLimitMaxQueue: 0
+        samplingLimitAgeOut: 0s
+      {{ if and $sensorValues.grpchandler $sensorValues.grpchandler.truncationConfig }}
+      truncationConfig:
+        enabled: {{ coalesce $sensorValues.noPayloadsMode $sensorValues.grpchandler.truncationConfig.enabled }}
+        payloadSizeLimit: {{ ternary 0 $sensorValues.grpchandler.truncationConfig.payloadSizeLimit $sensorValues.noPayloadsMode }}
+      {{ end }}
+      {{ if and $sensorValues.grpchandler $sensorValues.grpchandler.obfuscationConfig }}
+      obfuscationConfig:
+        {{ if and $sensorValues.grpchandler $sensorValues.grpchandler.obfuscationConfig.keyValueConfig }}
+        keyValueConfig:
+          enabled: {{ coalesce $sensorValues.obfuscateData $sensorValues.grpchandler.obfuscationConfig.keyValueConfig.enabled }}
+          caseSensitive: {{ $sensorValues.grpchandler.obfuscationConfig.keyValueConfig.caseSensitive }}
+          mode: {{ $sensorValues.grpchandler.obfuscationConfig.keyValueConfig.mode }}
+          specificKeys: {{ $sensorValues.grpchandler.obfuscationConfig.keyValueConfig.specificKeys | toJson }}
+        {{ end }}
+        {{ if and $sensorValues.grpchandler $sensorValues.grpchandler.obfuscationConfig.unstructuredConfig }}
+        unstructuredConfig: 
+          enabled: {{ coalesce $sensorValues.obfuscateData $sensorValues.grpchandler.obfuscationConfig.unstructuredConfig.enabled }}
+        {{ end }}
+      {{ end }}
+      interval: 30s
+      summarizerActiveTtl: 45s
+      aggregationCacheSize: 4096
+
+    redishandler:
+      samplesthreshold: 10
+      issuesthreshold: 10
+      sampling:
+        samplingmode: 1 # DefaultSample
+        samplingLimitMaxQueue: 0
+        samplingLimitAgeOut: 0s
+      {{ if and $sensorValues.redishandler $sensorValues.redishandler.truncationConfig }}
+      truncationConfig:
+        enabled: {{ coalesce $sensorValues.noPayloadsMode $sensorValues.redishandler.truncationConfig.enabled }}
+        payloadSizeLimit: {{ ternary 0 $sensorValues.redishandler.truncationConfig.payloadSizeLimit $sensorValues.noPayloadsMode }}
+      {{ end }}
+      {{ if and $sensorValues.redishandler $sensorValues.redishandler.obfuscationConfig }}
+      obfuscationConfig:
+        {{ if and $sensorValues.redishandler $sensorValues.redishandler.obfuscationConfig.keyValueConfig }}
+        keyValueConfig:
+          enabled: {{ coalesce $sensorValues.obfuscateData $sensorValues.redishandler.obfuscationConfig.keyValueConfig.enabled }}
+          caseSensitive: {{ $sensorValues.redishandler.obfuscationConfig.keyValueConfig.caseSensitive }}
+          mode: {{ $sensorValues.redishandler.obfuscationConfig.keyValueConfig.mode }} 
+          specificKeys: {{ $sensorValues.redishandler.obfuscationConfig.keyValueConfig.specificKeys | toJson }}
+        {{ end }}
+        {{ if and $sensorValues.redishandler $sensorValues.redishandler.obfuscationConfig.unstructuredConfig }}
+        unstructuredConfig: 
+          enabled: {{ coalesce $sensorValues.obfuscateData $sensorValues.redishandler.obfuscationConfig.unstructuredConfig.enabled }}
+        {{ end }}
+      {{ end }}
+      interval: 30s
+      summarizerActiveTtl: 45s
+      aggregationCacheSize: 4096
+      obfuscateSensitiveValues: {{ $sensorValues.redishandler.obfuscateSensitiveValues }}
+
+    amqphandler:
+      samplesthreshold: 10
+      issuesthreshold: 10
+      sampling:
+        samplingmode: 1 # DefaultSample
+        samplingLimitMaxQueue: 0
+        samplingLimitAgeOut: 0s
+      {{ if and $sensorValues.amqphandler $sensorValues.amqphandler.truncationConfig }}
+      truncationConfig:
+        enabled: {{ coalesce $sensorValues.noPayloadsMode $sensorValues.amqphandler.truncationConfig.enabled }}
+        payloadSizeLimit: {{ ternary 0 $sensorValues.amqphandler.truncationConfig.payloadSizeLimit $sensorValues.noPayloadsMode }}
+      {{ end }}
+      {{ if and $sensorValues.amqphandler $sensorValues.amqphandler.obfuscationConfig }}
+      obfuscationConfig:
+        {{ if and $sensorValues.amqphandler $sensorValues.amqphandler.obfuscationConfig.keyValueConfig }}
+        keyValueConfig:
+          enabled: {{ coalesce $sensorValues.obfuscateData $sensorValues.amqphandler.obfuscationConfig.keyValueConfig.enabled }}
+          caseSensitive: {{ $sensorValues.amqphandler.obfuscationConfig.keyValueConfig.caseSensitive }}
+          mode: {{ $sensorValues.amqphandler.obfuscationConfig.keyValueConfig.mode }} 
+          specificKeys: {{ $sensorValues.amqphandler.obfuscationConfig.keyValueConfig.specificKeys | toJson }}
+        {{ end }}
+        {{ if and $sensorValues.amqphandler $sensorValues.amqphandler.obfuscationConfig.unstructuredConfig }}
+        unstructuredConfig: 
+          enabled: {{ coalesce $sensorValues.obfuscateData $sensorValues.amqphandler.obfuscationConfig.unstructuredConfig.enabled }}
+        {{ end }}
+      {{ end }}
+      interval: 30s
+      summarizerActiveTtl: 45s
+      aggregationCacheSize: 4096
+
+    sqlhandler:
+      samplesthreshold: 10
+      issuesthreshold: 10
+      sampling:
+        samplingmode: 1 # DefaultSample
+        samplingLimitMaxQueue: 0
+        samplingLimitAgeOut: 0s
+      {{ if and $sensorValues.sqlhandler $sensorValues.sqlhandler.truncationConfig }}
+      truncationConfig:
+        enabled: {{ coalesce $sensorValues.noPayloadsMode $sensorValues.sqlhandler.truncationConfig.enabled }}
+        payloadSizeLimit: {{ ternary 0 $sensorValues.sqlhandler.truncationConfig.payloadSizeLimit $sensorValues.noPayloadsMode }}
+      {{ end }}
+      {{ if and $sensorValues.sqlhandler $sensorValues.sqlhandler.obfuscationConfig }}
+      obfuscationConfig:
+        {{ if and $sensorValues.sqlhandler $sensorValues.sqlhandler.obfuscationConfig.keyValueConfig }}
+        keyValueConfig:
+          enabled: {{ coalesce $sensorValues.obfuscateData $sensorValues.sqlhandler.obfuscationConfig.keyValueConfig.enabled }}
+          caseSensitive: {{ $sensorValues.sqlhandler.obfuscationConfig.keyValueConfig.caseSensitive }}
+          mode: {{ $sensorValues.sqlhandler.obfuscationConfig.keyValueConfig.mode }} 
+          specificKeys: {{ $sensorValues.sqlhandler.obfuscationConfig.keyValueConfig.specificKeys | toJson }}
+        {{ end }}
+        {{ if and $sensorValues.sqlhandler $sensorValues.sqlhandler.obfuscationConfig.unstructuredConfig }}
+        unstructuredConfig: 
+          enabled: {{ coalesce $sensorValues.obfuscateData $sensorValues.sqlhandler.obfuscationConfig.unstructuredConfig.enabled }}
+        {{ end }}
+      {{ end }}
+      interval: 30s
+      summarizerActiveTtl: 45s
+      aggregationCacheSize: 4096
+
+    kafkahandler:
+      samplesthreshold: 10
+      issuesthreshold: 10
+      sampling:
+        samplingmode: 1 # DefaultSample
+        samplingLimitMaxQueue: 10
+        samplingLimitAgeOut: 1s
+      {{ if and $sensorValues.kafkahandler $sensorValues.kafkahandler.truncationConfig }}
+      truncationConfig:
+        enabled: {{ coalesce $sensorValues.noPayloadsMode $sensorValues.kafkahandler.truncationConfig.enabled }}
+        payloadSizeLimit: {{ ternary 0 $sensorValues.kafkahandler.truncationConfig.payloadSizeLimit $sensorValues.noPayloadsMode }}
+      {{ end }}
+      {{ if and $sensorValues.kafkahandler $sensorValues.kafkahandler.obfuscationConfig }}
+      obfuscationConfig:
+        {{ if and $sensorValues.kafkahandler $sensorValues.kafkahandler.obfuscationConfig.keyValueConfig }}
+        keyValueConfig:
+          enabled: {{ coalesce $sensorValues.obfuscateData $sensorValues.kafkahandler.obfuscationConfig.keyValueConfig.enabled }}
+          caseSensitive: {{ $sensorValues.kafkahandler.obfuscationConfig.keyValueConfig.caseSensitive }}
+          mode: {{ $sensorValues.kafkahandler.obfuscationConfig.keyValueConfig.mode }} 
+          specificKeys: {{ $sensorValues.kafkahandler.obfuscationConfig.keyValueConfig.specificKeys | toJson }}
+        {{ end }}
+        {{ if and $sensorValues.kafkahandler $sensorValues.kafkahandler.obfuscationConfig.unstructuredConfig }}
+        unstructuredConfig: 
+          enabled: {{ coalesce $sensorValues.obfuscateData $sensorValues.kafkahandler.obfuscationConfig.unstructuredConfig.enabled }}
+        {{ end }}
+      {{ end }}
+      interval: 30s
+      summarizerActiveTtl: 45s
+      aggregationCacheSize: 4096
+
+    dnshandler:
+      samplesthreshold: 10
+      issuesthreshold: 10
+      sampling:
+        samplingmode: 1 # DefaultSample
+        samplingLimitMaxQueue: 10
+        samplingLimitAgeOut: 1s
+      {{ if and $sensorValues.dnshandler $sensorValues.dnshandler.truncationConfig }}
+      truncationConfig:
+        enabled: {{ coalesce $sensorValues.noPayloadsMode $sensorValues.dnshandler.truncationConfig.enabled }}
+        payloadSizeLimit: {{ ternary 0 $sensorValues.dnshandler.truncationConfig.payloadSizeLimit $sensorValues.noPayloadsMode }}
+      {{ end }}
+      {{ if and $sensorValues.dnshandler $sensorValues.dnshandler.obfuscationConfig }}
+      obfuscationConfig:
+        {{ if and $sensorValues.dnshandler $sensorValues.dnshandler.obfuscationConfig.keyValueConfig }}
+        keyValueConfig:
+          enabled: {{ coalesce $sensorValues.obfuscateData $sensorValues.dnshandler.obfuscationConfig.keyValueConfig.enabled }}
+          caseSensitive: {{ $sensorValues.dnshandler.obfuscationConfig.keyValueConfig.caseSensitive }}
+          mode: {{ $sensorValues.dnshandler.obfuscationConfig.keyValueConfig.mode }} 
+          specificKeys: {{ $sensorValues.dnshandler.obfuscationConfig.keyValueConfig.specificKeys | toJson }}
+        {{ end }}
+        {{ if and $sensorValues.dnshandler $sensorValues.dnshandler.obfuscationConfig.unstructuredConfig }}
+        unstructuredConfig: 
+          enabled: {{ coalesce $sensorValues.obfuscateData $sensorValues.dnshandler.obfuscationConfig.unstructuredConfig.enabled }}
+        {{ end }}
+      {{ end }}
+      interval: 30s
+      summarizerActiveTtl: 45s
+      aggregationCacheSize: 300
+
+    mongodbhandler:
+      samplesthreshold: 10
+      issuesthreshold: 10
+      sampling:
+        samplingmode: 1 # DefaultSample
+        samplingLimitMaxQueue: 0
+        samplingLimitAgeOut: 0s
+      {{ if and $sensorValues.mongodbhandler $sensorValues.mongodbhandler.truncationConfig }}
+      truncationConfig:
+        enabled: {{ coalesce $sensorValues.noPayloadsMode $sensorValues.mongodbhandler.truncationConfig.enabled }}
+        payloadSizeLimit: {{ ternary 0 $sensorValues.mongodbhandler.truncationConfig.payloadSizeLimit $sensorValues.noPayloadsMode }}
+      {{ end }}
+      {{ if and $sensorValues.mongodbhandler $sensorValues.mongodbhandler.obfuscationConfig }}
+      obfuscationConfig:
+        {{ if and $sensorValues.mongodbhandler $sensorValues.mongodbhandler.obfuscationConfig.keyValueConfig }}
+        keyValueConfig:
+          enabled: {{ coalesce $sensorValues.obfuscateData $sensorValues.mongodbhandler.obfuscationConfig.keyValueConfig.enabled }}
+          caseSensitive: {{ $sensorValues.mongodbhandler.obfuscationConfig.keyValueConfig.caseSensitive }}
+          mode: {{ $sensorValues.mongodbhandler.obfuscationConfig.keyValueConfig.mode }} 
+          specificKeys: {{ $sensorValues.mongodbhandler.obfuscationConfig.keyValueConfig.specificKeys | toJson }}
+        {{ end }}
+        {{ if and $sensorValues.mongodbhandler $sensorValues.mongodbhandler.obfuscationConfig.unstructuredConfig }}
+        unstructuredConfig: 
+          enabled: {{ coalesce $sensorValues.obfuscateData $sensorValues.mongodbhandler.obfuscationConfig.unstructuredConfig.enabled }}
+        {{ end }}
+      {{ end }}
+      interval: 30s
+      summarizerActiveTtl: 45s
+      aggregationCacheSize: 4096
+
+    containerInfoHandler:
+      samplesthreshold: 10
+      issuesthreshold: 10
+      sampling:
+        samplingmode: 1 # DefaultSample
+        samplingLimitMaxQueue: 0
+        samplingLimitAgeOut: 0s
+      interval: 30s
+      summarizerActiveTtl: 45s
+      aggregationCacheSize: 4096
+
+    containerInfoRtHandler:
+      samplesthreshold: 20
+      issuesthreshold: 20
+      sampling:
+        samplingmode: 0 # DontSample
+        samplingLimitMaxQueue: 0
+        samplingLimitAgeOut: 0s
+      interval: 0s
+      summarizerActiveTtl: 15s
+      aggregationCacheSize: 1024
+
+    pvcIoHandler:
+      sampling:
+        samplingmode: 0 # DontSample
+      interval: 10s
+      summarizerActiveTtl: 90s
+      aggregationCacheSize: 4096
+
+    l4MetricsHandler:
+      sampling:
+        samplingmode: 0 # DontSample
+      interval: 10s
+      summarizerActiveTtl: 90s
+      aggregationCacheSize: 10240
+
+    containerStateHandler:
+      samplesthreshold: 10
+      issuesthreshold: 10
+      sampling:
+        samplingmode: 0 # DontSample
+        samplingLimitMaxQueue: 0
+        samplingLimitAgeOut: 0s
+      interval: 30s
+      summarizerActiveTtl: 45s
+      aggregationCacheSize: 4096
+    
+    nodeinfohandler:
+      samplesthreshold: 20
+      issuesthreshold: 20
+      sampling:
+        samplingmode: 0 # DontSample
+        samplingLimitMaxQueue: 0
+        samplingLimitAgeOut: 0s
+      interval: 1m0s
+      summarizerActiveTtl: 45s
+      aggregationCacheSize: 1024
+
+    containercrashhandler:
+      sampling:
+        samplingmode: 0 # DontSample
+      interval: 30s
+      summarizerActiveTtl: 0
+      aggregationCacheSize: 1024
+
+    pvcinfohandler:
+      samplesthreshold: 20
+      issuesthreshold: 20
+      sampling:
+        samplingmode: 0 # DontSample
+        samplingLimitMaxQueue: 0
+        samplingLimitAgeOut: 0s
+      interval: 1m0s
+      summarizerActiveTtl: 45s
+      aggregationCacheSize: 1024
+
+    timeseriesstorage:
+      url: {{ include "metrics-ingester.cluster.http.base.url" . }}
+      tlsskipverify: true
+
+    pidcache:
+      expiration: 5m
+      purge: 20s
+
+    cluster:
+      maxhosts: 10000
+      maxchildrens: 40
+      childcountruleoverrides: {{ toJson $sensorValues.childcountruleoverrides }}
+
+    storage:
+      timeout: 5s
+
+    loglevel: 4 # INFO
+
+    isk8s: true
+    hostmodeconfigpath: "/config/instance_metadata.yaml"
+
+    allowedportspercontainer: 20
+    k8smetricsfetcher:
+      fetchinterval: 15s
+      requesttimeout: 10s
+
+    piiDetector:
+      enabled: true
+      sizeLimit: 1024
+
+    globallimiter:
+      maxqueue: 20
+      ageout: 100ms
+      sampleeverything: false
+
+    watchOnlyLocalNode: {{ $sensorValues.watchOnlyLocalNode }}
+    floraEnabled: true
+    runningNamespace: ""
+    shouldDropRunningNamespaces: {{ .Values.shouldDropRunningNamespaces }}
+    tracesNamespaceFilters: {{ toYaml .Values.tracesNamespaceFilters | nindent 6 }}
+    tracesWorkloadFilters: {{ toYaml .Values.tracesWorkloadFilters | nindent 6 }}
+    nodelabels: {{ toYaml $sensorValues.nodelabels | nindent 6 }}
+    contentTypesToDrop: {{ toYaml $sensorValues.contentTypesToDrop | nindent 6 }}
+    hostHeadersToDrop: {{ toYaml $sensorValues.hostHeadersToDrop | nindent 6 }}
+    headersForceSampling: {{ toYaml $sensorValues.headersForceSampling | nindent 6 }}
+
+    apmIngestor: 
+      otlpEndpoint:
+        endpoint: {{ include "ingestion.traces.otlp.http.url" . }}
+        enableTLS: {{ include "ingestion.otlp.tls.enabled" . }}
+        insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
+        writeTimeout: 10s
+        batchSize: 100
+        flushInterval: 30s
+      dataDog:
+        proxyEnabled: {{ $sensorValues.apmIngestor.dataDog.proxyEnabled }}
+        endpoint: {{ include "opentelemetry-collector.datadogapm.base.http.url" . }}
+        tracesPort: {{ $sensorValues.apmIngestor.dataDog.tracesPort }}
+      otel:
+        proxyEnabled: {{ $sensorValues.apmIngestor.otel.proxyEnabled }}
+        direct:
+          enabled: {{ $sensorValues.apmIngestor.otel.direct.enabled }}
+          zipkin:
+            enabled: {{ $sensorValues.apmIngestor.otel.direct.zipkin.enabled }}
+            port: {{ $sensorValues.apmIngestor.otel.direct.zipkin.port }}
+          otlp:
+            enabled: {{ $sensorValues.apmIngestor.otel.direct.otlp.enabled }}
+            grpcPort: {{ $sensorValues.apmIngestor.otel.direct.otlp.grpcPort }}
+            httpPort: {{ $sensorValues.apmIngestor.otel.direct.otlp.httpPort }}
+          jaeger:
+            enabled: {{ $sensorValues.apmIngestor.otel.direct.jaeger.enabled }}
+            grpcPort: {{ $sensorValues.apmIngestor.otel.direct.jaeger.grpcPort }}
+            thriftHttpPort: {{ $sensorValues.apmIngestor.otel.direct.jaeger.thriftHttpPort }}
+            thriftBinaryPort: {{ $sensorValues.apmIngestor.otel.direct.jaeger.thriftBinaryPort }}
+            thriftCompactPort: {{ $sensorValues.apmIngestor.otel.direct.jaeger.thriftCompactPort }}
+    pprof:
+      enabled: {{ include "telemetry.enabled" . }}
+      interval: {{ $sensorValues.pprof.interval }}
+      exponent: {{ $sensorValues.pprof.exponent }}
+      cpuSamplingDuration: {{ $sensorValues.pprof.cpuSamplingDuration }}
+      httpUploader:
+        enabled: {{ eq $sensorValues.pprof.uploaderType "http" }}
+        pushURL: {{ printf "%s/upload/pprof" (include "telemetry.metrics.base.url" .) }}
+      pyroscopeUploader:
+        enabled: {{ eq $sensorValues.pprof.uploaderType "pyroscope" }}
+        pushURL: {{ include "telemetry.metrics.base.url" . }}
+
+    clusterId: {{ include "groundcover.clusterId" . }}
+    region: {{ .Values.region }}
+    env: {{ include "groundcover.env" . }}
+
+    k8sLogs:
+      scraper:
+        positionsFile: "/var/run/positions/positions.yaml"
+        positionsSyncInterval: 10s
+        targetSyncInterval: 10s
+      clients:
+      - name: "logs_client"
+        enabled: true
+        urlText: {{ include "opentelemetry-collector.loki.http.url" . }}
+        useApiKey: true
+        batchwait: 2500ms
+        batchsize: 10485760
+        client:
+          tlsconfig:
+            insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
+        backoffConfig:
+          minBackoff: 500ms
+          maxBackoff: 5m
+          maxRetries: 10
+        externalLabels:
+          labelSet:
+            cluster_id: {{ include "groundcover.clusterId" . }}
+            env_name: {{ include "groundcover.env" . }}
+            gc_env_type: k8s
+            job: sensor
+        timeout: 10s
+        useRingBuffer: false
+        dropRunningNamespaceLogs: {{ .Values.dropRunningNamespaceLogs }}
+        groundcoverTimeTravel: -20s
+        logDropFilters: {{ toYaml .Values.logsDropFilters | nindent 10}}
+        metricateLabels: false
+        multiLineConfigs: {{ toYaml .Values.logsMultiLines | nindent 10}}
+        decolorize: {{ .Values.decolorizeLogs }}
+        maxLogSize: {{ .Values.maxLogSize }}
+        logBatchSendQueueWorkerCount: {{ .Values.logBatchSendQueueWorkerCount }} 
+        logBatchSendQueueMaxSize : {{ .Values.logBatchSendQueueMaxSize }}
+        oldLogDropThreshold: {{ .Values.oldLogDropThreshold }} 
+        oldLogDropAlwaysThreshold: {{ .Values.oldLogDropAlwaysThreshold }}
+        oldLogDelayStart: {{ .Values.oldLogDelayStart }} 
+        otlpExportLimits:
+          jsonFlattenMaxDepth: {{ .Values.jsonFlattenMaxDepth }}
+          jsonFlattenMaxAttributes: {{ .Values.jsonFlattenMaxAttributes }}
+          maxLogContentSize: {{ .Values.maxLogContentSize }}
+    otelTracesAsLogs: {{ .Values.global.vector.enabled }}
+    otelPreprocess: {{ .Values.global.vector.enabled }}
+    tracesOtlpEndpoint:
+      endpoint: {{ include "ingestion.traces.otlp.http.url" . }}
+      enableTLS: {{ include "ingestion.otlp.tls.enabled" . }}
+      insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
+      writeTimeout: 10s
+    logsOtlpEndpoint:
+      endpoint: {{ include "ingestion.logs.otlp.http.url" . }}
+      enableTLS: {{ include "ingestion.otlp.tls.enabled" . }}
+      insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
+      writeTimeout: 10s
+    customOtlpEndpoint:
+      endpoint: {{ include "ingestion.custom.otlp.http.url" . }}
+      enableTLS: {{ include "ingestion.otlp.tls.enabled" . }}
+      insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
+      writeTimeout: 10s
+      batchSize: 350
+      flushInterval: 1s
+    
+    mySqlConfig:
+      Cache: false
+      KeepSQLAlias: true
+      ReplaceDigits: true
+    
+    postgreSqlConfig:
+      DBMS: "postgresql"
+      Cache: false
+      KeepSQLAlias: true
+      ReplaceDigits: true
+
+    {{ if $sensorValues.sensitiveHeadersObfuscationConfig }}
+    sensitiveHeadersObfuscationConfig: 
+      enabled: {{ coalesce $sensorValues.obfuscateData $sensorValues.sensitiveHeadersObfuscationConfig.enabled }}
+      caseSensitive: false
+      mode: {{ $sensorValues.sensitiveHeadersObfuscationConfig.mode }}
+      specificKeys: {{ $sensorValues.sensitiveHeadersObfuscationConfig.specificKeys | toJson }}
+    {{ end }}
+kind: ConfigMap
+metadata:
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+    {{- if .Values.agent.additionalLabels }}
+{{ toYaml .Values.agent.additionalLabels | indent 4 }}
+    {{- end }}
+  annotations:
+    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+    {{- if .Values.agent.additionalAnnotations }}
+{{ toYaml .Values.agent.additionalAnnotations | indent 4 }}
+    {{- end }}
+  name: sensor-configuration
+  namespace: {{ .Release.Namespace }}
+{{ end }}

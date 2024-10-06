@@ -48,6 +48,6 @@ metadata:
     {{- if .Values.agent.additionalAnnotations }}
 {{ toYaml .Values.agent.additionalAnnotations | indent 4 }}
     {{- end }}
-  name: alligator-scrape-configuration
+  name: sensor-scrape-configuration
   namespace: {{ .Release.Namespace }}
 {{ end }}
