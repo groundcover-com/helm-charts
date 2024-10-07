@@ -9,7 +9,7 @@ spec:
   disruption:
   {{- if $value.disruption }}
   {{- with $value.disruption }}
-    consolidateAfter: {{ default "12h" .consolidateAfter }}
+    consolidateAfter: {{ default "6h" .consolidateAfter }}
     consolidationPolicy: {{ default "WhenEmpty" .consolidationPolicy }}
     budgets: {{ default (list (dict "nodes" "0") ) .budgets | toYaml | nindent 4 }}
   {{- end }}
@@ -51,7 +51,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       expireAfter: {{ default "Never" $value.expireAfter }}
-      terminationGracePeriod: {{ default "48h" $value.terminationGracePeriod }}
+      terminationGracePeriod: {{ default "1h" $value.terminationGracePeriod }}
       nodeClassRef:
         group: karpenter.k8s.aws
         kind: EC2NodeClass
@@ -152,6 +152,19 @@ spec:
       - key: "karpenter.sh/capacity-type"
         operator: "In"
         values: ["on-demand"]
+      {{- end }}
+      {{- if $value.instanceMemory.values }}
+      {{- with $value.instanceMemory }}
+      - key: "karpenter.k8s.aws/instance-memory"
+        operator: {{ default "Gt" .operator}}
+        values: {{- range default (list "126976") .values }}
+        - {{ . | quote }}
+        {{- end }}
+      {{- end }}
+      {{- else }}
+      - key: "karpenter.k8s.aws/instance-memory"
+        operator: "Gt"
+        values: ["126976"]
       {{- end }}
 {{- end }}
 {{- end }}

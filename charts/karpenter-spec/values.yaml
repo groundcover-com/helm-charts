@@ -92,3 +92,6 @@ nodePools:
     capacityType:
       operator: 
       values: []
+    instanceMemory:
+      operator:
+      values: []
