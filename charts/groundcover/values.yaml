@@ -5,7 +5,7 @@ global:
     enabled: true
     name:
   workflows:
-    enabled: false
+    enabled: true
   vector:
     enabled: true
     tracesAsLogs:

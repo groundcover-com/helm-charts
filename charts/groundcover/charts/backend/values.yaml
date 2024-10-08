@@ -220,6 +220,12 @@ keep:
         secretKeyRef:
           secretName: keep-credentials
           secretKey: password
+    resources:
+      limits:
+        memory: 2Gi
+      requests:
+        cpu: 500m
+        memory: 1Gi
     extraInitContainers:
       - name: wait-for-db
         image: '{{ include "postgresql.image" . }}'
