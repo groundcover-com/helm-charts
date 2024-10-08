@@ -138,6 +138,14 @@
 {{- printf "%s/entities" (include "incloud.ingestion.json.url" .) -}}
 {{- end -}}
 
+{{- define "vector.cluster.json.measurements.port" -}}
+{{- printf "4379" -}}
+{{- end -}}
+
+{{- define "vector.incloud.json.measurements.url" -}}
+{{- printf "%s/measurements" (include "incloud.ingestion.json.url" .) -}}
+{{- end -}}
+
 {{- define "vector.cluster.otlp.grpc.monitors.port" -}}
 {{-  printf "4347"  -}}
 {{- end -}}

@@ -82,6 +82,9 @@ global:
   events:
     retention: 7d # {amount}[h(ours), d(ays), w(eeks), y(ears)]
 
+  measurements:
+    retention: 7d # {amount}[h(ours), d(ays), w(eeks), y(ears)]
+
   sources:
     retention: 30d # {amount}[h(ours), d(ays), w(eeks), y(ears)]
 
@@ -352,6 +355,10 @@ dbManager:
           key: '{{ include "clickhouse.secretKey" . }}'
           name: '{{ include "clickhouse.secretName" . }}'
   objectStorageQueues: {}
+  cloudPricing: 
+    enabled: true
+    pricingFileURL: "https://groundcover-public-assets.s3.amazonaws.com/cloud_pricing_v1.csv"
+    refreshInterval: 6h # {amount}[h(ours), d(ays), w(eeks), y(ears)]
 
 k8sWatcher:
   watch:
@@ -992,6 +999,8 @@ vector:
         port: 4359
       - name: json-entities
         port: 4369
+      - name: json-measurements
+        port: 4379
       - name: grpc-monitors
         port: 4347
       - name: http-monitors
@@ -1174,6 +1183,11 @@ vector:
           address: "0.0.0.0:4369"
           decoding:
             codec: json
+        json_measurements:
+          type: http
+          address: "0.0.0.0:4379"
+          decoding:
+            codec: json
         json_monitors:
           type: http
           address: "0.0.0.0:4349"
@@ -1232,9 +1246,16 @@ vector:
           reroute_unmatched: true
           route:
             entities: .log_type == "entity"
+            measurements: .log_type == "measurement"
         entities:
           inputs:
             - custom_from_logs_routing.entities
+          type: "remap"
+          source: |-
+
+        measurements:
+          inputs:
+            - custom_from_logs_routing.measurements
           type: "remap"
           source: |-
 
@@ -1382,6 +1403,30 @@ vector:
               max_bytes: 2000000
               max_events: 2000
               timeout_secs: 1
+          json_measurements_sink:
+            type: http
+            inputs:
+              - measurements
+              - json_measurements
+            uri: '{{ include "vector.incloud.json.measurements.url" . }}'
+            method: post
+            encoding:
+              codec: json
+              json:
+                timestamp_format: rfc3339
+            compression: zstd
+            request:
+              retry_attempts: 5
+              headers:
+                apikey: $API_KEY
+            buffer:
+                type: memory
+                max_events: 5000
+                when_full: drop_newest
+            batch:
+              max_bytes: 2000000
+              max_events: 2000
+              timeout_secs: 1
       local:
         logs:
           clickhouse_logs:
@@ -1440,6 +1485,32 @@ vector:
             endpoint: '{{ include "clickhouse.shard0HttpEndpoint" . }}'
             database: "groundcover"
             table: "entities"
+            request:
+              retry_attempts: 5
+            auth:
+              user: '{{ include "clickhouse.username" . }}'
+              password: $CLICKHOUSE_PASSWORD
+              strategy: "basic"
+            format: "json_each_row"
+            encoding:
+              timestamp_format: rfc3339
+            date_time_best_effort: true
+            buffer:
+                type: memory
+                max_events: 5000
+                when_full: drop_newest
+            batch:
+              max_bytes: 100000000
+              max_events: 10000
+              timeout_secs: 2
+          clickhouse_measurements:
+            type: clickhouse
+            inputs:
+              - measurements
+              - json_measurements
+            endpoint: '{{ include "clickhouse.shard0HttpEndpoint" . }}'
+            database: "groundcover"
+            table: "measurements"
             request:
               retry_attempts: 5
             auth:
@@ -1550,6 +1621,23 @@ vector:
             bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
             region: '{{ .Values.vector.objectStorage.region }}'
             key_prefix: "v2/entities/"
+            encoding:
+              codec: json
+              timestamp_format: rfc3339
+            batch:
+              max_bytes: 25000000
+              max_events: 25000
+              timeout_secs: 5
+            healthcheck:
+              enabled: false
+          s3_measurements:
+            type: "aws_s3"
+            inputs:
+              - measurements
+              - json_measurements
+            bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
+            region: '{{ .Values.vector.objectStorage.region }}'
+            key_prefix: "v2/measurements/"
             encoding:
               codec: json
               timestamp_format: rfc3339

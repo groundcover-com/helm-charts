@@ -220,6 +220,13 @@ spec:
                 name: {{ include "vector.fullname" . }}
                 port:
                   number: {{ (include "vector.cluster.json.entities.port" .) | int }}
+          - path: {{ get (urlParse (include "vector.incloud.json.measurements.url" .)) "path" }} 
+            pathType: Exact
+            backend:
+              service:
+                name: {{ include "vector.fullname" . }}
+                port:
+                  number: {{ (include "vector.cluster.json.measurements.port" .) | int }}
 
 ---
 

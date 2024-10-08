@@ -42,6 +42,10 @@ data:
         retention: {{ include "events.retention" . }}
         custom_retention_overrides:
           {{- include "events.custom_retention_overrides" . | indent 8 }}
+      Measurements:
+        retention: {{ include "measurements.retention" . }}
+        custom_retention_overrides:
+          {{- include "measurements.custom_retention_overrides" . | indent 8 }}
       Monitor_State:
         retention: {{ include "monitors.evaluation.retention" .}}
         custom_retention_overrides:
@@ -73,4 +77,8 @@ data:
       {{- (include "clickhouse.extraShardsList" .) | nindent 6  }}
     ObjectStorageQueues:
       {{- toYaml .Values.dbManager.objectStorageQueues | nindent 6 }}
+    CloudPricing:
+      Enabled: {{ .Values.dbManager.cloudPricing.enabled }}
+      PricingFileURL: {{ .Values.dbManager.cloudPricing.pricingFileURL }}
+      RefershInterval: {{ .Values.dbManager.cloudPricing.refreshInterval }}
 {{- end -}}

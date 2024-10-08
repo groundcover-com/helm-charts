@@ -32,6 +32,16 @@
 {{- end -}}
 {{- end -}}
 
+{{- define "measurements.retention" -}}
+{{ .Values.global.measurements.retention }}
+{{- end -}}
+
+{{- define "measurements.custom_retention_overrides" -}}
+{{- with .Values.global.measurements.custom_retention_overrides }}
+{{ toYaml . | indent 2 }}
+{{- end -}}
+{{- end -}}
+
 {{- define "entities.retention" -}}
 {{ .Values.global.entities.retention }}
 {{- end -}}
