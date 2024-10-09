@@ -19,13 +19,13 @@ data:
     StopMigrationOnFailure: true
     {{- else }}
     StopMigrationOnFailure:
-    {{- end }} 
+    {{- end }}
     Incluster: true
     Namespace: {{ .Release.Namespace }}
     DropPartitionInterval: 6h
     DropPartitionTimeout: 5m
     httpPort: 8888
-    tableDataRetention: 
+    tableDataRetention:
       Traces:
         retention: {{ include "traces.retention"  . }}
         custom_retention_overrides:
@@ -58,6 +58,10 @@ data:
         retention: {{ include "sources.retention" .  }}
         custom_retention_overrides:
           {{- include "sources.custom_retention_overrides" . | indent 8 }}
+      Metrics_Metadata:
+        retention: {{ include "metrics_metadata.retention" . }}
+        custom_retention_overrides:
+          {{- include "metrics_metadata.custom_retention_overrides" . | indent 8 }}
     DataMigration:
       BackfillBatchDuration:
         Traces: 1m
@@ -82,3 +86,4 @@ data:
       PricingFileURL: {{ .Values.dbManager.cloudPricing.pricingFileURL }}
       RefershInterval: {{ .Values.dbManager.cloudPricing.refreshInterval }}
 {{- end -}}
+

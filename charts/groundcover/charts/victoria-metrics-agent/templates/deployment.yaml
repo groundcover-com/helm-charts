@@ -69,7 +69,11 @@ spec:
             - -remoteWrite.multitenantURL={{ . }}
           {{- end }}
           {{- range $key, $value := .Values.extraArgs }}
-            - -{{ $key }}={{ tpl $value $ }}
+          {{- $tplValue := tpl $value $ -}}
+          {{- $valueAsArray := split "," $tplValue -}}
+          {{- range $v := $valueAsArray }}
+            - -{{ $key }}={{ $v }}
+          {{- end }}
           {{- end }}
           {{- with (include "chart.license.flag" .) }}
             - {{ . }}

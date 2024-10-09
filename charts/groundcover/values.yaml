@@ -91,6 +91,9 @@ global:
   entities:
     retention: 5d # {amount}[h(ours), d(ays), w(eeks), y(ears)]
 
+  metricsMetadata:
+    retention: 30d # {amount}[h(ours), d(ays), w(eeks), y(ears)]
+
   telemetry:
     enabled: true
     logs:
@@ -796,6 +799,12 @@ opentelemetry-collector:
         type: monitorState
       groundcover/traces: {}
     exporters:
+      prometheusremotewrite:
+        endpoint: '{{ include "metrics-ingester.cluster.http.write.url" . }}'
+        tls:
+          insecure: true
+        resource_to_telemetry_conversion:
+          enabled: true
       groundcover/monitorState:
         type: monitorState
         timeout: 5s
@@ -878,6 +887,8 @@ opentelemetry-collector:
         metrics:
           receivers:
             - otlp
+          exporters:
+            - prometheusremotewrite
         traces:
           receivers:
             - otlp
@@ -1009,6 +1020,8 @@ vector:
         port: 4349
       - name: metrics
         port: 9598
+      - name: vm-metrics
+        port: 4599
       - name: statsd-udp
         port: 8125
         protocol: UDP
@@ -1043,6 +1056,8 @@ vector:
       containerPort: 4349
     - name: metrics
       containerPort: 9598
+    - name: vm-metrics
+      containerPort: 4599
     - name: statsd-udp
       containerPort: 8125
       protocol: UDP
@@ -1130,7 +1145,11 @@ vector:
           type: statsd
           address: 0.0.0.0:8125
           mode: tcp
-      otel: 
+        vm_metrics:
+          type: prometheus_remote_write
+          address: 0.0.0.0:4599
+          mode: tcp
+      otel:
         otel_logs:
           type: opentelemetry
           grpc:
@@ -1222,7 +1241,7 @@ vector:
                   .attributes = merge(.attributes, .resources, true)
                 }
               }
-              
+
               . = .attributes
             } else {
               log("Recieved non-object attributes, skipping", level: "error")
@@ -1297,6 +1316,29 @@ vector:
             .pod = get!(value: .labels, path: ["pod"])
             .category = get!(value: .labels, path: ["category"])
             .severity = get!(value: .labels, path: ["_gc_severity"])
+        metrics_metadata_to_logs:
+          inputs:
+            - "vm_metrics"
+          type: "metric_to_log"
+        throttled_metrics_metadata_to_logs:
+          inputs:
+            - "metrics_metadata_to_logs"
+          type: "throttle"
+          threshold: 1000
+          window_secs: 1
+        metrics_metadata_extracted:
+          inputs:
+            - "throttled_metrics_metadata_to_logs"
+          type: "remap"
+          source: |-
+            . =  {
+              "timestamp": .timestamp,
+              "cluster": .tags.clusterId,
+              "env": .tags.env,
+              "namespace": .tags.namespace,
+              "name": .name,
+              "tags": .tags
+            }
     sinks:
       overrideSinks:
       extraSinks:
@@ -1305,7 +1347,7 @@ vector:
           inputs:
             - statsd_udp
             - statsd_tcp
-          type: prometheus_remote_write 
+          type: prometheus_remote_write
           endpoint: '{{ include "metrics-ingester.cluster.http.write.url" . }}'
           healthcheck:
             enabled: false
@@ -1331,7 +1373,7 @@ vector:
             batch:
               max_bytes: 2000000
               max_events: 2000
-              timeout_secs: 1  
+              timeout_secs: 1
         traces:
           json_traces_sink:
             type: http
@@ -1581,6 +1623,31 @@ vector:
               max_bytes: 100000000
               max_events: 10000
               timeout_secs: 2
+          clickhouse_metrics_metadata:
+            type: clickhouse
+            inputs:
+              - metrics_metadata_extracted
+            endpoint: '{{ include "clickhouse.shard0HttpEndpoint" . }}'
+            database: "groundcover"
+            table: "metrics_metadata"
+            request:
+              retry_attempts: 5
+            auth:
+              user: '{{ include "clickhouse.username" . }}'
+              password: $CLICKHOUSE_PASSWORD
+              strategy: "basic"
+            format: "json_each_row"
+            encoding:
+              timestamp_format: rfc3339
+            date_time_best_effort: true
+            buffer:
+                type: memory
+                max_events: 5000
+                when_full: drop_newest
+            batch:
+              max_bytes: 100000000
+              max_events: 10000
+              timeout_secs: 2
       s3:
         logs:
           s3_logs:
@@ -1664,7 +1731,7 @@ vector:
               timeout_secs: 5
             healthcheck:
               enabled: false
-        
+
 
 
 router:
@@ -1699,7 +1766,7 @@ metrics-ingester:
     remoteWrite.maxDiskUsagePerURL: 10GB
     remoteWrite.headers: "apikey:%{API_KEY}"
     remoteWrite.tlsInsecureSkipVerify: '{{ ternary "true" "false" .Values.global.ingestion.tls_skip_verify }}'
-    remoteWrite.url: '{{ include "victoria-metrics.write.http.url" . }}'
+    remoteWrite.url: '{{ include "ingester.buildRemoteWriteURLTargets" . }}'
     tlsKeyFile: /etc/ssl/gc-certs/tls.key
     tlsCertFile: /etc/ssl/gc-certs/tls.crt
     tls: "{{ .Values.global.metrics.tls.enabled }}"
@@ -2360,7 +2427,7 @@ monitors-manager:
         optional: true
         key: webhook-key
         name: keep-credentials
-  extraConfigmapMounts: 
+  extraConfigmapMounts:
     - name: alerting-overrides
       mountPath: /etc/grafana/provisioning/alerting/
       configMap: alerting-overrides-config
@@ -2458,7 +2525,7 @@ monitors-manager:
     - "sh"
     - "-c"
     - "grafana cli --homepath=\"${GF_PATHS_HOME}\" --config=\"${GF_PATHS_CONFIG}\" admin reset-admin-password \"${GF_SECURITY_ADMIN_PASSWORD}\" && /run.sh"
-    
+
 rbac:
   pspEnabled: false
   sccEnabled: true

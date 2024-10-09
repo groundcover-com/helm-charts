@@ -82,6 +82,16 @@
 {{- end -}}
 {{- end -}}
 
+{{- define "metrics_metadata.retention" -}}
+{{ .Values.global.metricsMetadata.retention }}
+{{- end -}}
+
+{{- define "metrics_metadata.custom_retention_overrides" -}}
+{{- with .Values.global.metricsMetadata.custom_retention_overrides }}
+{{ toYaml . | indent 2 }}
+{{- end -}}
+{{- end -}}
+
 {{- define "opentelemetry-collector.otlp.scheme" -}}
 {{- ternary "https" "http" .Values.global.otlp.tls.enabled -}}
 {{- end -}}

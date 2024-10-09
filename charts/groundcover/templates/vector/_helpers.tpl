@@ -154,6 +154,14 @@
 {{-  printf "%s:%d" (include "vector.fullname" .) (include "vector.cluster.otlp.grpc.monitors.port" . | int )  -}}
 {{- end -}}
 
+{{- define "vector.cluster.prometheus_remote_write.vm_metrics.port" -}}
+{{-  printf "4599"  -}}
+{{- end -}}
+
+{{- define "vector.cluster.prometheus_remote_write.vm_metrics.endpoint" -}}
+{{-  printf "http://%s:%d" (include "vector.fullname" .) (include "vector.cluster.prometheus_remote_write.vm_metrics.port" . | int )  -}}
+{{- end -}}
+
 {{- define "vector.cluster.otlp.http.monitors.port" -}}
 {{-  printf "4348"  -}}
 {{- end -}}

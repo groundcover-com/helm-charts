@@ -244,3 +244,15 @@ Create the name of the agent priority class to use
 {{- include "groundcover.fullname" . }}-sensor-high-priority
 {{- end }}
 {{- end }}
+
+{{- define "ingester.buildRemoteWriteURLTargets" -}}
+  {{- $vmSingleUrl := include "victoria-metrics.write.http.url" . -}}
+  {{- $vectorUrl := include "vector.cluster.prometheus_remote_write.vm_metrics.endpoint" . -}}
+
+  {{- $value := $vmSingleUrl -}}
+  {{- if .Values.global.backend.enabled -}}
+    {{- $value = print $vmSingleUrl "," $vectorUrl -}}
+  {{- end -}}
+
+  {{- $value -}}
+{{- end }}
