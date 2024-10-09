@@ -1767,6 +1767,8 @@ metrics-ingester:
     remoteWrite.headers: "apikey:%{API_KEY}"
     remoteWrite.tlsInsecureSkipVerify: '{{ ternary "true" "false" .Values.global.ingestion.tls_skip_verify }}'
     remoteWrite.url: '{{ include "ingester.buildRemoteWriteURLTargets" . }}'
+    remoteWrite.rateLimit: '{{ include "ingester.buildRemoteWriteRateLimit" . }}'
+    remoteWrite.disableOnDiskQueue: '{{ include "ingester.buildRemoteWriteDisableOnDiskQueue" . }}'
     tlsKeyFile: /etc/ssl/gc-certs/tls.key
     tlsCertFile: /etc/ssl/gc-certs/tls.crt
     tls: "{{ .Values.global.metrics.tls.enabled }}"

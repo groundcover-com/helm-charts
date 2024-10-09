@@ -282,6 +282,7 @@ sinks:
 {{- tpl (toYaml .Values.vector.customComponents.sinks.s3.custom) $ | nindent 2 }}
 {{  if .Values.global.backend.enabled }}
 {{- tpl (toYaml (dict "clickhouse_monitors" .Values.vector.customComponents.sinks.local.custom.clickhouse_monitors)) $ | nindent 2 }}
+{{- tpl (toYaml (dict "clickhouse_metrics_metadata" .Values.vector.customComponents.sinks.local.custom.clickhouse_metrics_metadata)) $ | nindent 2 }}
 {{ end }}
 {{ else if .Values.global.backend.enabled }}
 {{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.logsPipeline "sinks" .Values.vector.customComponents.sinks.local.logs)) $ -}}

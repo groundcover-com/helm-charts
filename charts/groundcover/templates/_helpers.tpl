@@ -245,6 +245,9 @@ Create the name of the agent priority class to use
 {{- end }}
 {{- end }}
 
+{{/*
+The next three functions are coupled, order of response is important and should be kept in sync
+*/}}
 {{- define "ingester.buildRemoteWriteURLTargets" -}}
   {{- $vmSingleUrl := include "victoria-metrics.write.http.url" . -}}
   {{- $vectorUrl := include "vector.cluster.prometheus_remote_write.vm_metrics.endpoint" . -}}
@@ -256,3 +259,27 @@ Create the name of the agent priority class to use
 
   {{- $value -}}
 {{- end }}
+
+{{- define "ingester.buildRemoteWriteRateLimit" -}}
+    {{- $vmSingleRateLimit := 0 -}}
+    {{- $vectorRateLimit := 100000 -}}
+
+    {{- $value := $vmSingleRateLimit -}}
+    {{- if .Values.global.backend.enabled -}}
+        {{- $value = print $vmSingleRateLimit "," $vectorRateLimit -}}
+    {{- end -}}
+
+    {{- $value -}}
+{{- end -}}
+
+{{- define "ingester.buildRemoteWriteDisableOnDiskQueue" -}}
+    {{- $vmSingleDisableOnDiskQueue := false -}}
+    {{- $vectorDisableOnDiskQueue := true -}}
+
+    {{- $value := $vmSingleDisableOnDiskQueue -}}
+    {{- if .Values.global.backend.enabled -}}
+        {{- $value = print $vmSingleDisableOnDiskQueue "," $vectorDisableOnDiskQueue -}}
+    {{- end -}}
+
+    {{- $value -}}
+{{- end -}}
