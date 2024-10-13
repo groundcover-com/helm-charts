@@ -84,6 +84,5 @@ data:
     CloudPricing:
       Enabled: {{ .Values.dbManager.cloudPricing.enabled }}
       PricingFileURL: {{ .Values.dbManager.cloudPricing.pricingFileURL }}
-      RefershInterval: {{ .Values.dbManager.cloudPricing.refreshInterval }}
+      RefreshInterval: {{ .Values.dbManager.cloudPricing.refreshInterval }}
 {{- end -}}
-

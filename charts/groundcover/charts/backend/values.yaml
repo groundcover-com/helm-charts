@@ -167,6 +167,8 @@ keep:
           port: '{{ .Values.global.clickhouse.containerPorts.tcp }}'
           database: '{{ include "clickhouse.database" . }}'
     enabled: true
+    ingress:
+        enabled: false
     waitForDatabase: false
     image:
       repository: public.ecr.aws/groundcovercom/keep-api
@@ -220,12 +222,6 @@ keep:
         secretKeyRef:
           secretName: keep-credentials
           secretKey: password
-    resources:
-      limits:
-        memory: 2Gi
-      requests:
-        cpu: 500m
-        memory: 1Gi
     extraInitContainers:
       - name: wait-for-db
         image: '{{ include "postgresql.image" . }}'

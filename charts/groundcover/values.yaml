@@ -193,8 +193,6 @@ agent:
       requiredDuringSchedulingIgnoredDuringExecution:
         nodeSelectorTerms:
         - matchExpressions:
-          - key: "node-role.kubernetes.io/control-plane"
-            operator: "DoesNotExist"
           - key: eks.amazonaws.com/compute-type
             operator: NotIn
             values:
@@ -2547,6 +2545,14 @@ backend:
     dbs:
       monitors-manager: monitors_manager
       keep: keep
+  keep:
+    backend:
+      resources:
+        limits:
+          memory: 2Gi
+        requests:
+          cpu: 500m
+          memory: 1Gi
 
 groundcover:
   extraObjects: {}
