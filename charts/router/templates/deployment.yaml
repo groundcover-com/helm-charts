@@ -59,7 +59,7 @@ spec:
           command:
             - /bin/sh
             - -c
-          image: '{{ printf "%s/curl:8.6.0" .Values.origin.registry }}'
+          image: '{{ tpl .Values.curl.image.repository . }}:{{ tpl .Values.curl.image.tag . }}'
       {{- end }}
       imagePullSecrets: {{ include "router.imagePullSecrets" . }}
       containers:
