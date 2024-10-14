@@ -217,6 +217,7 @@ agent:
   sensor:
     image:
       repository: "{{ .Values.global.origin.registry }}/sensor"
+      tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
     resources:
       requests:
         memory: 300Mi
@@ -343,6 +344,7 @@ dbManager:
   priorityClassName:
   image:
     repository: "{{ .Values.global.origin.registry }}/db-manager"
+    tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
   resources:
     limits:
       memory: 1Gi
@@ -369,6 +371,7 @@ k8sWatcher:
       enabled: true
   image:
     repository: "{{ .Values.global.origin.registry }}/k8s-watcher"
+    tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
   additionalLabels:
   podLabels:
   additionalAnnotations:
@@ -425,6 +428,7 @@ portal:
   #   Value: "Header Value"
   image:
     repository: "{{ .Values.global.origin.registry }}/portal"
+    tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
   resources:
     limits:
       memory: 512Mi
@@ -1730,8 +1734,6 @@ vector:
             healthcheck:
               enabled: false
 
-
-
 router:
   # onprem or cloud
   mode: cloud
@@ -2525,6 +2527,11 @@ monitors-manager:
     - "sh"
     - "-c"
     - "grafana cli --homepath=\"${GF_PATHS_HOME}\" --config=\"${GF_PATHS_CONFIG}\" admin reset-admin-password \"${GF_SECURITY_ADMIN_PASSWORD}\" && /run.sh"
+
+curl:
+  image:
+    repository: '{{ .Values.global.origin.registry }}/curl' 
+    tag: 8.6.0
 
 rbac:
   pspEnabled: false

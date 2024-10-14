@@ -27,7 +27,11 @@ onprem:
 origin:
   registry: quay.io/groundcover
   repository: router
-  tag: 1.8.178
+  tag: 1.8.179
+curl:
+  image:
+    repository: '{{ .Values.origin.registry }}/curl'
+    tag: 8.6.0
 serviceAccount:
   annotations:
 ingress:

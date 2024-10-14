@@ -73,7 +73,7 @@ spec:
         {{- with .Values.dbManager.env }}
           {{ toYaml . | nindent 8 }}
         {{- end }}
-        image: {{ tpl .Values.dbManager.image.repository . }}:{{ default .Chart.AppVersion .Values.global.origin.tag }}
+        image: {{ tpl .Values.dbManager.image.repository . }}:{{ tpl .Values.dbManager.image.tag . }}
         imagePullPolicy: Always
         name: db-manager     
         ports:
@@ -93,7 +93,7 @@ spec:
         command:
           - /bin/sh
           - -c
-        image: '{{ printf "%s/curl:8.6.0" .Values.global.origin.registry }}'
+        image: '{{ tpl .Values.curl.image.repository . }}:{{ tpl .Values.curl.image.tag . }}'
         name: check-ch-ready
 {{- if .Values.dbManager.priorityClassName }}
       priorityClassName: {{ .Values.dbManager.priorityClassName }}

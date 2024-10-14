@@ -125,7 +125,7 @@ spec:
             {{- with $sensorValues.env }}
               {{ toYaml . | nindent 12 }}
             {{- end }}                                
-          image: {{ tpl $sensorValues.image.repository . }}:{{ default .Chart.AppVersion .Values.global.origin.tag }}
+          image: {{ tpl $sensorValues.image.repository . }}:{{ tpl $sensorValues.image.tag .}}
           resources:
 {{- toYaml $sensorValues.resources | nindent 12 }}
           imagePullPolicy: Always
@@ -291,7 +291,7 @@ spec:
           command:
             - /bin/sh
             - -c
-          image: '{{ printf "%s/curl:8.6.0" .Values.global.origin.registry }}'
+          image: '{{ tpl .Values.curl.image.repository . }}:{{ tpl .Values.curl.image.tag . }}'
         - name: check-metrics-ingestor-ready
           env:
             - name: API_KEY
@@ -314,7 +314,7 @@ spec:
           command:
             - /bin/sh
             - -c
-          image: {{ printf "%s/curl:8.6.0" .Values.global.origin.registry }}
+          image: '{{ tpl .Values.curl.image.repository . }}:{{ tpl .Values.curl.image.tag . }}'
       serviceAccountName: {{ include "sensor.fullname" . }}
 {{- if or (.Values.agent.priorityClassName) (.Values.agent.priorityClass.create) }}
   {{- if .Values.agent.priorityClassName }}

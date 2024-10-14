@@ -85,7 +85,7 @@ spec:
         {{- with .Values.k8sWatcher.env }}
           {{ toYaml . | nindent 8 }}
         {{- end }}
-        image: {{ tpl .Values.k8sWatcher.image.repository . }}:{{ default .Chart.AppVersion .Values.global.origin.tag }}
+        image: {{ tpl .Values.k8sWatcher.image.repository . }}:{{ tpl .Values.k8sWatcher.image.tag . }}
         imagePullPolicy: Always
         name: k8s-watcher
         ports:
@@ -125,7 +125,7 @@ spec:
         command:
           - /bin/sh
           - -c
-        image: '{{ printf "%s/curl:8.6.0" .Values.global.origin.registry }}'
+        image: '{{ tpl .Values.curl.image.repository . }}:{{ tpl .Values.curl.image.tag . }}'
       - name: check-metrics-ingestor-ready
         env:
           - name: API_KEY
@@ -148,7 +148,7 @@ spec:
         command:
           - /bin/sh
           - -c
-        image: {{ printf "%s/curl:8.6.0" .Values.global.origin.registry }}
+        image: '{{ tpl .Values.curl.image.repository . }}:{{ tpl .Values.curl.image.tag . }}'
       serviceAccountName: k8s-watcher
 {{- if .Values.k8sWatcher.priorityClassName }}
       priorityClassName: {{ .Values.k8sWatcher.priorityClassName }}
