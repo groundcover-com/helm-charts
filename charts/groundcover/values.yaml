@@ -202,6 +202,21 @@ agent:
   hostNetwork: false
   monitoring:
     port: 9102
+  initContainers:  
+    checkIngestion:
+      builtinEnv:
+      - name: API_KEY
+        valueFrom:
+          secretKeyRef:
+            key: '{{ template "groundcover.apikeySecretKey" . }}'
+            name: '{{ template "groundcover.apikeySecretName" . }}' 
+    checkMetrics:
+      builtinEnv:
+      - name: API_KEY
+        valueFrom:
+          secretKeyRef:
+            key: '{{ template "groundcover.apikeySecretKey" . }}'
+            name: '{{ template "groundcover.apikeySecretName" . }}' 
   flb:
     image:
       tag: 2.2.3
@@ -214,6 +229,12 @@ agent:
         cpu: 100m
         memory: 64Mi
     env: []
+    builtinEnv:
+    - name: API_KEY
+      valueFrom:
+        secretKeyRef:
+          key: '{{ template "groundcover.apikeySecretKey" . }}'
+          name: '{{ template "groundcover.apikeySecretName" . }}' 
   sensor:
     image:
       repository: "{{ .Values.global.origin.registry }}/sensor"
@@ -323,6 +344,12 @@ agent:
           "X-Amz-Firehose-Access-Key",
         ]
     env:
+    builtinEnv:
+    - name: API_KEY
+      valueFrom:
+        secretKeyRef:
+          key: '{{ template "groundcover.apikeySecretKey" . }}'
+          name: '{{ template "groundcover.apikeySecretName" . }}' 
     httpUnlimitedEndpoints: "/api/v0.2/traces"
     http2UnlimitedEndpoints: "/api/v0.2/traces"
     childcountruleoverrides:
@@ -364,6 +391,21 @@ dbManager:
     refreshInterval: 6h # {amount}[h(ours), d(ays), w(eeks), y(ears)]
 
 k8sWatcher:
+  initContainers:
+    checkIngestion:
+      builtinEnv:
+      - name: API_KEY
+        valueFrom:
+          secretKeyRef:
+            key: '{{ template "groundcover.apikeySecretKey" . }}'
+            name: '{{ template "groundcover.apikeySecretName" . }}'
+    checkMetrics:
+      builtinEnv:
+      - name: API_KEY
+        valueFrom:
+          secretKeyRef:
+            key: '{{ template "groundcover.apikeySecretKey" . }}'
+            name: '{{ template "groundcover.apikeySecretName" . }}'   
   watch:
     configmap:
       enabled: true
@@ -393,7 +435,13 @@ k8sWatcher:
     exponent: 40
     uploaderType: pyroscope
     cpuSamplingDuration: 60s
-  env:
+  env: []
+  builtinEnv:
+  - name: API_KEY
+    valueFrom:
+      secretKeyRef:
+        key: '{{ template "groundcover.apikeySecretKey" . }}'
+        name: '{{ template "groundcover.apikeySecretName" . }}'        
   readinessProbe:
     httpGet:
       scheme: HTTP

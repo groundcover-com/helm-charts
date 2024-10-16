@@ -77,13 +77,11 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.annotations['groundcover_version']              
-        - name: API_KEY
-          valueFrom:
-            secretKeyRef:
-              key: {{ template "groundcover.apikeySecretKey" . }}
-              name: {{ template "groundcover.apikeySecretName" . }}        
         {{- with .Values.k8sWatcher.env }}
-          {{ toYaml . | nindent 8 }}
+          {{ tpl (toYaml .) $ | nindent 8 }}
+        {{- end }}
+        {{- with .Values.k8sWatcher.builtinEnv }}
+          {{ tpl (toYaml .) $ | nindent 8 }}
         {{- end }}
         image: {{ tpl .Values.k8sWatcher.image.repository . }}:{{ tpl .Values.k8sWatcher.image.tag . }}
         imagePullPolicy: Always
@@ -105,11 +103,9 @@ spec:
       initContainers:
       - name: check-ingestion-endpoint-ready
         env:
-          - name: API_KEY
-            valueFrom:
-              secretKeyRef:
-                key: {{ template "groundcover.apikeySecretKey" . }}
-                name: {{ template "groundcover.apikeySecretName" . }}        
+        {{- with .Values.k8sWatcher.initContainers.checkIngestion.builtinEnv }}
+          {{ tpl (toYaml .) $ | nindent 12 }}
+        {{- end }}     
         args:
         - |
             while [ $(curl -H "apikey:$API_KEY" \
@@ -128,11 +124,9 @@ spec:
         image: '{{ tpl .Values.curl.image.repository . }}:{{ tpl .Values.curl.image.tag . }}'
       - name: check-metrics-ingestor-ready
         env:
-          - name: API_KEY
-            valueFrom:
-              secretKeyRef:
-                key: {{ template "groundcover.apikeySecretKey" . }}
-                name: {{ template "groundcover.apikeySecretName" . }}   
+        {{- with .Values.k8sWatcher.initContainers.checkMetrics.builtinEnv }}
+          {{ tpl (toYaml .) $ | nindent 12 }}
+        {{- end }} 
         args:
         - |
             while [ $(curl -H "apikey:$API_KEY" \

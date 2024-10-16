@@ -112,19 +112,17 @@ spec:
             - name: GC_GROUNDCOVERVERSION
               valueFrom:
                 fieldRef:
-                  fieldPath: metadata.annotations['groundcover_version']
-            - name: API_KEY
-              valueFrom:
-                secretKeyRef:
-                  key: {{ template "groundcover.apikeySecretKey" . }}
-                  name: {{ template "groundcover.apikeySecretName" . }}      
+                  fieldPath: metadata.annotations['groundcover_version']     
             - name: NODE_IP
               valueFrom:
                 fieldRef:
                   fieldPath: status.hostIP
             {{- with $sensorValues.env }}
-              {{ toYaml . | nindent 12 }}
-            {{- end }}                                
+              {{ tpl (toYaml .) $ | nindent 12 }}
+            {{- end }}
+            {{- with $sensorValues.builtinEnv }}
+              {{ tpl (toYaml .) $ | nindent 12 }}
+            {{- end }}                              
           image: {{ tpl $sensorValues.image.repository . }}:{{ tpl $sensorValues.image.tag .}}
           resources:
 {{- toYaml $sensorValues.resources | nindent 12 }}
@@ -254,13 +252,11 @@ spec:
                 secretKeyRef:
                     name: groundcover-config
                     key: GC_CLUSTER_ID
-            - name: API_KEY
-              valueFrom:
-                secretKeyRef:
-                  key: {{ template "groundcover.apikeySecretKey" . }}
-                  name: {{ template "groundcover.apikeySecretName" . }}
         {{- with .Values.agent.flb.env }}
-          {{ toYaml . | nindent 12 }}
+          {{ tpl (toYaml .) $ | nindent 12 }}
+        {{- end }}
+        {{- with .Values.agent.flb.builtinEnv }}
+          {{ tpl (toYaml .) $ | nindent 12 }}
         {{- end }}
           resources:
             {{- toYaml .Values.agent.flb.resources | nindent 12 }}
@@ -271,11 +267,9 @@ spec:
       initContainers:
         - name: check-ingestion-endpoint-ready
           env:
-            - name: API_KEY
-              valueFrom:
-                secretKeyRef:
-                  key: {{ template "groundcover.apikeySecretKey" . }}
-                  name: {{ template "groundcover.apikeySecretName" . }}        
+          {{- with .Values.agent.initContainers.checkIngestion.builtinEnv }}
+            {{ tpl (toYaml .) $ | nindent 12 }}
+          {{- end }}    
           args:
           - | 
               while [ $(curl -H "apikey:$API_KEY" \
@@ -294,11 +288,9 @@ spec:
           image: '{{ tpl .Values.curl.image.repository . }}:{{ tpl .Values.curl.image.tag . }}'
         - name: check-metrics-ingestor-ready
           env:
-            - name: API_KEY
-              valueFrom:
-                secretKeyRef:
-                  key: {{ template "groundcover.apikeySecretKey" . }}
-                  name: {{ template "groundcover.apikeySecretName" . }}   
+          {{- with .Values.agent.initContainers.checkMetrics.builtinEnv }}
+            {{ tpl (toYaml .) $ | nindent 12 }}
+          {{- end }}      
           args:
           - |
               while [ $(curl -H "apikey:$API_KEY" \
