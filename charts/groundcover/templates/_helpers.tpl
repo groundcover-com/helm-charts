@@ -262,7 +262,7 @@ The next three functions are coupled, order of response is important and should 
 
 {{- define "ingester.buildRemoteWriteRateLimit" -}}
     {{- $vmSingleRateLimit := 0 -}}
-    {{- $vectorRateLimit := 100000 -}}
+    {{- $vectorRateLimit := 500000 -}}
 
     {{- $value := $vmSingleRateLimit -}}
     {{- if .Values.global.backend.enabled -}}
@@ -274,11 +274,23 @@ The next three functions are coupled, order of response is important and should 
 
 {{- define "ingester.buildRemoteWriteDisableOnDiskQueue" -}}
     {{- $vmSingleDisableOnDiskQueue := false -}}
-    {{- $vectorDisableOnDiskQueue := true -}}
+    {{- $vectorDisableOnDiskQueue := false -}}
 
     {{- $value := $vmSingleDisableOnDiskQueue -}}
     {{- if .Values.global.backend.enabled -}}
         {{- $value = print $vmSingleDisableOnDiskQueue "," $vectorDisableOnDiskQueue -}}
+    {{- end -}}
+
+    {{- $value -}}
+{{- end -}}
+
+{{- define "ingester.buildRemoteWriteMaxDiskUsagePerURL" -}}
+    {{- $vmSignleMaxDiskUsagePerURL := "10GB" -}}
+    {{- $vectorMaxDiskUsagePerURL := "512MB" -}}
+
+    {{- $value := $vmSignleMaxDiskUsagePerURL -}}
+    {{- if .Values.global.backend.enabled -}}
+        {{- $value = print $vmSignleMaxDiskUsagePerURL "," $vectorMaxDiskUsagePerURL -}}
     {{- end -}}
 
     {{- $value -}}

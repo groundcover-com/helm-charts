@@ -1820,7 +1820,7 @@ metrics-ingester:
     promscrape.streamParse: "true"
     promscrape.dropOriginalLabels: "true"
     remoteWrite.showURL: "true"
-    remoteWrite.maxDiskUsagePerURL: 10GB
+    remoteWrite.maxDiskUsagePerURL: '{{ include "ingester.buildRemoteWriteMaxDiskUsagePerURL" . }}'
     remoteWrite.headers: "apikey:%{API_KEY}"
     remoteWrite.tlsInsecureSkipVerify: '{{ ternary "true" "false" .Values.global.ingestion.tls_skip_verify }}'
     remoteWrite.url: '{{ include "ingester.buildRemoteWriteURLTargets" . }}'
