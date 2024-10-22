@@ -14,7 +14,7 @@ spec:
     budgets: {{ default (list (dict "nodes" "0") ) .budgets | toYaml | nindent 4 }}
   {{- end }}
   {{- else }}
-    consolidateAfter: "12h" 
+    consolidateAfter: "6h" 
     consolidationPolicy: "WhenEmpty" 
     budgets: 
     - nodes: 0
@@ -165,6 +165,132 @@ spec:
       - key: "karpenter.k8s.aws/instance-memory"
         operator: "Gt"
         values: ["126976"]
+      {{- end }}
+      {{- if $value.instanceType.values }}
+      {{- with $value.instanceType }}
+      - key: "node.kubernetes.io/instance-type"
+        operator: {{ default "In" .operator }}
+        values: {{- range .values }}
+        - {{ . | quote }}
+        {{- end }}
+      {{- end }}
+      {{- end }}
+      {{- if $value.windowsBuild.values }}
+      {{- with $value.windowsBuild }}
+      - key: "node.kubernetes.io/windows-build"
+        operator: {{ default "In" .operator }}
+        values: {{- range .values }}
+        - {{ . | quote }}
+        {{- end }}
+      {{- end }}
+      {{- end }}
+      {{- if $value.os.values }}
+      {{- with $value.os }}
+      - key: "kubernetes.io/os"
+        operator: {{ default "In" .operator }}
+        values: {{- range .values }}
+        - {{ . | quote }}
+        {{- end }}
+      {{- end }}
+      {{- end }}
+      {{- if $value.encryptionInTransit.values }}
+      {{- with $value.encryptionInTransit }}
+      - key: "karpenter.k8s.aws/instance-encryption-in-transit-supported"
+        operator: {{ default "In" .operator }}
+        values: {{- range .values }}
+        - {{ . | quote }}
+        {{- end }}
+      {{- end }}
+      {{- end }}
+      {{- if $value.size.values }}
+      {{- with $value.size }}
+      - key: "karpenter.k8s.aws/instance-size"
+        operator: {{ default "In" .operator }}
+        values: {{- range .values }}
+        - {{ . | quote }}
+        {{- end }}
+      {{- end }}
+      {{- end }}
+      {{- if $value.cpuManufacturer.values }}
+      {{- with $value.cpuManufacturer }}
+      - key: "karpenter.k8s.aws/instance-cpu-manufacturer"
+        operator: {{ default "In" .operator }}
+        values: {{- range .values }}
+        - {{ . | quote }}
+        {{- end }}
+      {{- end }}
+      {{- end }}
+      {{- if $value.ebsBandwith.values }}
+      {{- with $value.ebsBandwith }}
+      - key: "karpenter.k8s.aws/instance-ebs-bandwidth"
+        operator: {{ default "In" .operator }}
+        values: {{- range .values }}
+        - {{ . | quote }}
+        {{- end }}
+      {{- end }}
+      {{- end }}
+      {{- if $value.networkBandwith.values }}
+      {{- with $value.networkBandwith }}
+      - key: "karpenter.k8s.aws/instance-network-bandwidth"
+        operator: {{ default "In" .operator }}
+        values: {{- range .values }}
+        - {{ . | quote }}
+        {{- end }}
+      {{- end }}
+      {{- end }}
+      {{- if $value.pods.values }}
+      {{- with $value.pods }}
+      - key: "karpenter.k8s.aws/instance-pods"
+        operator: {{ default "In" .operator }}
+        values: {{- range .values }}
+        - {{ . | quote }}
+        {{- end }}
+      {{- end }}
+      {{- end }}
+      {{- if $value.gpuName.values }}
+      {{- with $value.gpuName }}
+      - key: "karpenter.k8s.aws/instance-gpu-name"
+        operator: {{ default "In" .operator }}
+        values: {{- range .values }}
+        - {{ . | quote }}
+        {{- end }}
+      {{- end }}
+      {{- end }}
+      {{- if $value.gpuManufacturer.values }}
+      {{- with $value.gpuManufacturer }}
+      - key: "karpenter.k8s.aws/instance-gpu-manufacturer"
+        operator: {{ default "In" .operator }}
+        values: {{- range .values }}
+        - {{ . | quote }}
+        {{- end }}
+      {{- end }}
+      {{- end }}
+      {{- if $value.gpuCount.values }}
+      {{- with $value.gpuCount }}
+      - key: "karpenter.k8s.aws/instance-gpu-count"
+        operator: {{ default "In" .operator }}
+        values: {{- range .values }}
+        - {{ . | quote }}
+        {{- end }}
+      {{- end }}
+      {{- end }}
+      {{- if $value.gpuMemory.values }}
+      {{- with $value.gpuMemory }}
+      - key: "karpenter.k8s.aws/instance-gpu-memory"
+        operator: {{ default "In" .operator }}
+        values: {{- range .values }}
+        - {{ . | quote }}
+        {{- end }}
+      {{- end }}
+      {{- end }}
+      {{- if $value.localNvme.values }}
+      {{- with $value.localNvme }}
+      - key: "karpenter.k8s.aws/instance-local-nvme"
+        operator: {{ default "In" .operator }}
+        values: {{- range .values }}
+        - {{ . | quote }}
+        {{- end }}
+      {{- end }}
       {{- end }}
 {{- end }}
 {{- end }}

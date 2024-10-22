@@ -5,7 +5,7 @@ infrastructure:
   subnetIds: []
   subnetTags: []
   amiSelectorAlias: 
-  - al2@latest
+  - bottlerocket@v1.25.0
   amiSelectorName: []
   amiSelectorIds: []
   role: 
@@ -93,5 +93,47 @@ nodePools:
       operator: 
       values: []
     instanceMemory:
+      operator:
+      values: []
+    instanceType:
+      operator:
+      values: []
+    windowsBuild:
+      operator:
+      values: []
+    os:
+      operator:
+      values: []
+    encryptionInTransit:
+      operator:
+      values: []
+    size:
+      operator:
+      values: []
+    cpuManufacturer:
+      operator:
+      values: []
+    ebsBandwith:
+      operator:
+      values: []
+    networkBandwith:
+      operator:
+      values: []
+    pods:
+      operator:
+      values: []
+    gpuName:
+      operator:
+      values: []
+    gpuManufacturer:
+      operator:
+      values: []
+    gpuCount:
+      operator:
+      values: []
+    gpuMemory:
+      operator:
+      values: []
+    localNvme:
       operator:
       values: []
