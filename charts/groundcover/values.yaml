@@ -1360,10 +1360,19 @@ vector:
               .state = strip_whitespace(.state)
             }
             .cluster = get!(value: .labels, path: ["cluster"])
+            if .cluster == "" {
+              .cluster = get!(value: .labels, path: ["clusterId"])
+            }
             .env = get!(value: .labels, path: ["env"])
             .namespace = get!(value: .labels, path: ["namespace"])
             .workload = get!(value: .labels, path: ["workload"])
+            if .workload == "" {
+              .workload = get!(value: .labels, path: ["workload_name"])
+            } 
             .pod = get!(value: .labels, path: ["pod"])
+            if .pod == "" {
+              .pod = get!(value: .labels, path: ["pod_name"])
+            }
             .category = get!(value: .labels, path: ["category"])
             .severity = get!(value: .labels, path: ["_gc_severity"])
         metrics_metadata_to_logs:
