@@ -490,7 +490,7 @@ portal:
     uploaderType: pyroscope
     cpuSamplingDuration: 60s
   autodiscovery: false
-  maxResponseSizeMegabytes: 15
+  maxResponseSizeBytes: 15728640
 
 clickhouse:
   enabled: true
