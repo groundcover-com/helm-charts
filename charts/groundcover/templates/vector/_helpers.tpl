@@ -252,6 +252,7 @@ sources:
 {{- tpl (toYaml .Values.vector.customComponents.sources.otel) $ | nindent 2 }}
 {{- tpl (toYaml .Values.vector.customComponents.sources.json) $ | nindent 2 }}
 {{- tpl (toYaml .Values.vector.customComponents.sources.metrics) $ | nindent 2 }}
+{{- tpl (toYaml .Values.vector.customComponents.sources.empty) $ | nindent 2 }}
 {{ end }}
 
 transforms:
@@ -265,6 +266,8 @@ transforms:
 {{- tpl (toYaml .Values.vector.customComponents.transforms.default) $ | nindent 2 }}
 {{- tpl (include "createPipelineStages" (dict "pipeline" .Values.vector.logsPipeline)) $ }}
 {{- tpl (include "createPipelineStages" (dict "pipeline" .Values.vector.tracesPipeline)) $ }}
+{{- tpl (include "createEventsPipelines" (dict "pipelines" .Values.vector.eventsPipelines)) $ -}}
+{{- tpl (include "logsToEventsTransform" (dict "pipelines" .Values.vector.eventsPipelines "transform" .Values.vector.customComponents.transforms.logs_to_events)) $ }}
 {{ end }}
 
 sinks:
@@ -316,6 +319,13 @@ sinks:
 {{ end }}
 {{ end }}
 
+{{- define "createEventsPipelines" -}}
+{{ range $k, $v := .pipelines }}
+{{ $finalStep :=  (list (dict "name" (include "eventsPipelineFinalStepName" $k) "transform" (dict "type" "remap" "source" (printf ".event_type = \"%s\"" $k)) )) }}
+{{- include "createPipelineStages" (dict "pipeline" (merge (dict "extraSteps" (concat $v.extraSteps $finalStep)) $v)) }}
+{{ end }}
+{{ end }}
+
 {{- define "pipelineOutputFromSteps" -}}
 {{ $allSteps := concat .pipeline.defaultSteps .pipeline.extraSteps }}
 {{ if not (empty $allSteps) }}
@@ -325,6 +335,7 @@ sinks:
 {{- toYaml $.pipeline.inputs | nindent 4 }}
 {{ end }}
 {{- end -}}
+
 {{define "createSinksOutput"}}
 {{- range $k, $v := .sinks }}
   {{ $k }}:
@@ -333,3 +344,17 @@ sinks:
     {{ toYaml . | nindent 4 }}
 {{ end }}
 {{end}}
+
+{{ define "logsToEventsTransform" }} 
+  logs_to_events_transform:
+    inputs:
+    - emptySource
+    {{- range $k, $v := .pipelines }}
+    - {{ include "eventsPipelineFinalStepName" $k }}
+    {{- end }}
+    {{ toYaml $.transform | nindent 4 }}
+{{ end }}
+
+{{- define "eventsPipelineFinalStepName" -}}
+{{ printf "_final_%s" . -}}
+{{ end }}

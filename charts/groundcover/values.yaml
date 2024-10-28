@@ -1034,6 +1034,27 @@ vector:
   #     type: remap
   #     source: |-
   #       . |= parse_regex(.content, r'pattern')
+  eventsPipelines: {}
+  # map of pipeline names to pipeline configurations
+  # every pipeline configuration is made of a list of steps. for example:
+    # random_number_event:
+    #   inputs:
+    #     - logs_from_logs
+    #     - json_logs
+    #   defaultSteps: []
+    #   extraSteps:
+    #   - name: filterWorkloadAndContent
+    #     transform:
+    #       type: "filter"
+    #       condition: |
+    #         .workload == "random-logger" && contains(string!(.content), "Random number")
+    #   - name: parseRandomNumber
+    #     transform:
+    #       type: "remap"
+    #       source: |-
+    #         res = parse_regex!(string!(.content), r'Random number: (?P<number>[\d]+)')
+    #         .float_attributes = object!(.float_attributes)
+    #         .float_attributes.random_number = to_int!(res.number)
   image:
     repository: public.ecr.aws/groundcovercom/vector
   service:
@@ -1186,6 +1207,13 @@ vector:
     sources:
       overrideSources:
       extraSources:
+      empty:
+        emptySource:
+          type: file
+          include:
+            - /non_exiding_dir/non_existing_file
+          exclude:
+            - /*
       metrics:
         statsd_udp:
           type: statsd
@@ -1398,6 +1426,43 @@ vector:
               "name": .name,
               "tags": .tags
             }
+      logs_to_events: # inputs list should be injected
+        type: "remap"
+        source: |-
+          if !exists(.event_type) {
+            abort "no event_type for custom event"
+          }
+          . = {
+            "event_id": .guid,
+            "first_timestamp": .timestamp,
+            "last_timestamp": .timestamp,
+            "created_timestamp": .timestamp,
+            "seen_timestamp": .timestamp,
+            "timestamp": .timestamp,
+            "env": .env,
+            "source": .source,
+            "is_external": false,
+            "entity_uid": .pod_uid,
+            "entity_name": .pod_name,
+            "entity_kind": "pod",
+            "entity_namespace": .namespace,
+            "entity_workload": .workload,
+            "category": "custom",
+            "type": .event_type,
+            "severity": "",
+            "k8s_event_uid": "",
+            "k8s_reason": "",
+            "reason": "",
+            "k8s_message": "",
+            "message": .content,
+            "count": 1,
+            "raw": .content,
+            "string_attributes": .string_attributes,
+            "float_attributes": .float_attributes,
+            "cluster": .cluster,
+            "env_name": .env,
+          }
+
     sinks:
       overrideSinks:
       extraSinks:
@@ -1461,6 +1526,7 @@ vector:
             inputs:
             - events
             - json_events
+            - logs_to_events_transform
             uri: '{{ include "vector.incloud.json.events.url" . }}'
             method: post
             encoding:
@@ -1635,6 +1701,7 @@ vector:
             inputs:
             - events
             - json_events
+            - logs_to_events_transform
             endpoint: '{{ include "clickhouse.shard0HttpEndpoint" . }}'
             database: "groundcover"
             table: "events_v2"
@@ -1778,6 +1845,7 @@ vector:
             inputs:
             - events
             - json_events
+            - logs_to_events_transform
             bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
             region: '{{ .Values.vector.objectStorage.region }}'
             key_prefix: "v2/events/"
@@ -1829,6 +1897,7 @@ metrics-ingester:
     tlsKeyFile: /etc/ssl/gc-certs/tls.key
     tlsCertFile: /etc/ssl/gc-certs/tls.crt
     tls: "{{ .Values.global.metrics.tls.enabled }}"
+    usePromCompatibleNaming: "true"
   env:
     - name: API_KEY
       valueFrom:
