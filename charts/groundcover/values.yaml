@@ -1858,6 +1858,80 @@ vector:
               timeout_secs: 5
             healthcheck:
               enabled: false
+      gcs:
+        logs:
+          gcs_logs:
+            type: gcp_cloud_storage
+            key_prefix: v2/logs/
+            compression: zstd
+            bucket: '{{ .Values.vector.objectStorage.gcsBucket }}'
+            batch:
+              max_bytes: 25000000
+              max_events: 25000
+              timeout_secs: 5
+            encoding:
+              codec: json
+              timestamp_format: rfc3339
+            healthcheck:
+              enabled: false
+        traces:
+          gcs_traces:
+            type: gcp_cloud_storage
+            key_prefix: v2/traces/
+            compression: zstd
+            bucket: '{{ .Values.vector.objectStorage.gcsBucket }}'
+            batch:
+              max_bytes: 25000000
+              max_events: 2500
+              timeout_secs: 5
+            encoding:
+              codec: json
+              timestamp_format: rfc3339
+            healthcheck:
+              enabled: false
+        custom:
+          gcs_entities:
+            type: gcp_cloud_storage
+            key_prefix: v2/entities/
+            compression: zstd
+            bucket: '{{ .Values.vector.objectStorage.gcsBucket }}'
+            batch:
+              max_bytes: 25000000
+              max_events: 25000
+              timeout_secs: 5
+            encoding:
+              codec: json
+              timestamp_format: rfc3339
+            healthcheck:
+              enabled: false
+          gcs_measurements:
+            type: gcp_cloud_storage
+            key_prefix: v2/measurements/
+            compression: zstd
+            bucket: '{{ .Values.vector.objectStorage.gcsBucket }}'
+            batch:
+              max_bytes: 25000000
+              max_events: 25000
+              timeout_secs: 5
+            encoding:
+              codec: json
+              timestamp_format: rfc3339
+            healthcheck:
+              enabled: false
+          gcs_events:
+            type: gcp_cloud_storage
+            key_prefix: v2/events/
+            compression: zstd
+            bucket: '{{ .Values.vector.objectStorage.gcsBucket }}'
+            batch:
+              max_bytes: 25000000
+              max_events: 25000
+              timeout_secs: 5
+            encoding:
+              codec: json
+              timestamp_format: rfc3339
+            healthcheck:
+              enabled: false
 
 router:
   # onprem or cloud
