@@ -259,10 +259,12 @@ agent:
       dataDog:
         proxyEnabled: false
         tracesPort: 8126
+        samplingRatio: 1
       otel:
         proxyEnabled: false
         direct:
           enabled: true
+          samplingRatio: 1
           zipkin:
             enabled: true
             port: 9411

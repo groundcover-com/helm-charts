@@ -405,10 +405,12 @@ data:
         proxyEnabled: {{ $sensorValues.apmIngestor.dataDog.proxyEnabled }}
         endpoint: {{ include "opentelemetry-collector.datadogapm.base.http.url" . }}
         tracesPort: {{ $sensorValues.apmIngestor.dataDog.tracesPort }}
+        samplingRatio: {{ $sensorValues.apmIngestor.dataDog.samplingRatio }}
       otel:
         proxyEnabled: {{ $sensorValues.apmIngestor.otel.proxyEnabled }}
         direct:
           enabled: {{ $sensorValues.apmIngestor.otel.direct.enabled }}
+          samplingRatio: {{ $sensorValues.apmIngestor.otel.direct.samplingRatio }}
           zipkin:
             enabled: {{ $sensorValues.apmIngestor.otel.direct.zipkin.enabled }}
             port: {{ $sensorValues.apmIngestor.otel.direct.zipkin.port }}
