@@ -1981,17 +1981,11 @@ metrics-ingester:
     remoteWrite.url: '{{ include "ingester.buildRemoteWriteURLTargets" . }}'
     remoteWrite.rateLimit: '{{ include "ingester.buildRemoteWriteRateLimit" . }}'
     remoteWrite.disableOnDiskQueue: '{{ include "ingester.buildRemoteWriteDisableOnDiskQueue" . }}'
-    remoteWrite.label: clusterId=$(GC_CLUSTER_ID)
     tlsKeyFile: /etc/ssl/gc-certs/tls.key
     tlsCertFile: /etc/ssl/gc-certs/tls.crt
     tls: "{{ .Values.global.metrics.tls.enabled }}"
     usePromCompatibleNaming: "true"
   env:
-    - name: GC_CLUSTER_ID
-      valueFrom:
-        secretKeyRef:
-          name: groundcover-config
-          key: GC_CLUSTER_ID
     - name: API_KEY
       valueFrom:
         secretKeyRef:
@@ -2626,7 +2620,7 @@ monitors-manager:
   image:
     registry: public.ecr.aws
     repository: groundcovercom/grafana-groundcover
-    tag: v0.0.21-grafana11.2.0
+    tag: v0.0.23-grafana11.2.0
   nameOverride: monitors-manager
   persistence:
     enabled: true
@@ -2711,7 +2705,7 @@ monitors-manager:
       otel_enable_tls: false
       otel_tls_skip_verify: true
     feature_toggles:
-      enable: "alertStateHistoryLokiSecondary, alertStateHistoryLokiPrimary, alertStateHistoryLokiOnly"
+      enable: "alertStateHistoryLokiSecondary, alertStateHistoryLokiPrimary, alertStateHistoryLokiOnly, disableInstanceStore"
     server:
       enable_gzip: true
     paths:
