@@ -986,7 +986,7 @@ opentelemetry-collector:
       memory: 2048Mi
   podDisruptionBudget:
     enabled: true
-    maxUnavailable: "25%"
+    maxUnavailable: "1%"
   rollout:
     maxUnavailable: 0
     maxSurge: 1
@@ -1169,6 +1169,7 @@ vector:
     prometheus.io/scrape: "true"
   podLabels:
     app.kubernetes.io/part-of: groundcover
+    app.groundcover.com/component: vector
   existingConfigMaps:
     - vector-config-map
   dataDir: "/data/vector.yaml"
@@ -1894,6 +1895,9 @@ vector:
         custom:
           gcs_entities:
             type: gcp_cloud_storage
+            inputs:
+              - entities
+              - json_entities
             key_prefix: v2/entities/
             compression: zstd
             bucket: '{{ .Values.vector.objectStorage.gcsBucket }}'
@@ -1908,6 +1912,9 @@ vector:
               enabled: false
           gcs_measurements:
             type: gcp_cloud_storage
+            inputs:
+              - measurements
+              - json_measurements
             key_prefix: v2/measurements/
             compression: zstd
             bucket: '{{ .Values.vector.objectStorage.gcsBucket }}'
@@ -1922,6 +1929,10 @@ vector:
               enabled: false
           gcs_events:
             type: gcp_cloud_storage
+            inputs:
+              - events
+              - json_events
+              - logs_to_events_transform
             key_prefix: v2/events/
             compression: zstd
             bucket: '{{ .Values.vector.objectStorage.gcsBucket }}'
@@ -1970,11 +1981,17 @@ metrics-ingester:
     remoteWrite.url: '{{ include "ingester.buildRemoteWriteURLTargets" . }}'
     remoteWrite.rateLimit: '{{ include "ingester.buildRemoteWriteRateLimit" . }}'
     remoteWrite.disableOnDiskQueue: '{{ include "ingester.buildRemoteWriteDisableOnDiskQueue" . }}'
+    remoteWrite.label: clusterId=$(GC_CLUSTER_ID)
     tlsKeyFile: /etc/ssl/gc-certs/tls.key
     tlsCertFile: /etc/ssl/gc-certs/tls.crt
     tls: "{{ .Values.global.metrics.tls.enabled }}"
     usePromCompatibleNaming: "true"
   env:
+    - name: GC_CLUSTER_ID
+      valueFrom:
+        secretKeyRef:
+          name: groundcover-config
+          key: GC_CLUSTER_ID
     - name: API_KEY
       valueFrom:
         secretKeyRef:
@@ -2001,7 +2018,8 @@ metrics-ingester:
     strategy: RollingUpdate
   config:
     scrape_configs: []
-
+  podLabels: 
+    app.groundcover.com/pipeline: metrics
 victoria-metrics-agent:
   nodeSelector:
   rbac:
@@ -2531,7 +2549,8 @@ victoria-metrics-single:
     # -- Sts/Deploy additional labels
     extraLabels: {}
     # -- Pod's additional labels
-    podLabels: {}
+    podLabels: 
+      app.groundcover.com/pipeline: metrics
     # -- Pod's annotations
     podAnnotations:
       prometheus.io/port: "8428"
@@ -2765,3 +2784,14 @@ backend:
 
 groundcover:
   extraObjects: {}
+  podDisruptionBudget:
+    metrics-ingestion-pipeline:
+      maxUnavailable: "1%"
+      selector:
+        matchLabels:
+          app.groundcover.com/pipeline: metrics
+    vector:
+      maxUnavailable: "1%"
+      selector:
+        matchLabels:
+          app.groundcover.com/component: vector

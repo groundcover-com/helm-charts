@@ -222,6 +222,8 @@ keep:
         secretKeyRef:
           secretName: keep-credentials
           secretKey: password
+      - name: DATABASE_POOL_SIZE
+        value: 200
     extraInitContainers:
       - name: wait-for-db
         image: '{{ include "postgresql.image" . }}'

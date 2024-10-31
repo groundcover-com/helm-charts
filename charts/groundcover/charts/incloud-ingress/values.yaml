@@ -37,7 +37,9 @@ kong:
       labelSelector:
         matchLabels:
           app.kubernetes.io/name: kong
-
+  podDisruptionBudget:
+    enabled: true
+    maxUnavailable: "1%"
 ## Kong Plugins for inCloud functionality
 datasource:
   enabled: false

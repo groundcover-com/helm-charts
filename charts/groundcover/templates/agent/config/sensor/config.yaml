@@ -394,8 +394,15 @@ data:
     headersForceSampling: {{ toYaml $sensorValues.headersForceSampling | nindent 6 }}
 
     apmIngestor: 
-      otlpEndpoint:
+      tracesOtlpEndpoint:
         endpoint: {{ include "ingestion.traces.otlp.http.url" . }}
+        enableTLS: {{ include "ingestion.otlp.tls.enabled" . }}
+        insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
+        writeTimeout: 10s
+        batchSize: 100
+        flushInterval: 30s
+      logsOtlpEndpoint:
+        endpoint: {{ include "ingestion.logs.otlp.http.url" . }}
         enableTLS: {{ include "ingestion.otlp.tls.enabled" . }}
         insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
         writeTimeout: 10s
@@ -504,15 +511,15 @@ data:
       flushInterval: 1s
     
     mySqlConfig:
-      Cache: false
       KeepSQLAlias: true
       ReplaceDigits: true
+      CollectCommands: true
     
     postgreSqlConfig:
       DBMS: "postgresql"
-      Cache: false
       KeepSQLAlias: true
       ReplaceDigits: true
+      CollectCommands: true
 
     {{ if $sensorValues.sensitiveHeadersObfuscationConfig }}
     sensitiveHeadersObfuscationConfig: 

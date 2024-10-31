@@ -1,0 +1,23 @@
+{{- range $name, $pdb := .Values.groundcover.podDisruptionBudget }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ $name }}
+  namespace: {{ .namespace | default $.Release.Namespace }}
+  labels:
+  {{- include "groundcover.labels" $ | nindent 4 }}
+spec:
+  {{- with .minAvailable }}
+  minAvailable: {{ . }}
+  {{- end }}
+  {{- with .maxUnavailable }}
+  maxUnavailable: {{ . }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- range $key, $value := .selector.matchLabels }}
+      {{ $key }}: {{ $value | quote }}
+      {{- end }}
+---
+{{- end }}
+
