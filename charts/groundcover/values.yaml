@@ -365,12 +365,15 @@ agent:
 dbManager:
   additionalLabels:
   podLabels:
-  additionalAnnotations:
+  additionalAnnotations: {}
   podAnnotations:
   affinity:
   nodeSelector:
   tolerations: []
   priorityClassName:
+  serviceAccount:
+    name: ""
+    annotations: {}
   image:
     repository: "{{ .Values.global.origin.registry }}/db-manager"
     tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"

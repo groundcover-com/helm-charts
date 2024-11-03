@@ -58,7 +58,7 @@ spec:
 {{ toYaml .Values.dbManager.nodeSelector | indent 8 }}
 {{- end }}
       imagePullSecrets: {{ include "imagePullSecrets" . }}
-      serviceAccountName: db-manager
+      serviceAccountName: {{ default "db-manager" .Values.dbManager.serviceAccount.name }}
       containers:
       - env:
         - name: GC_GROUNDCOVERVERSION
