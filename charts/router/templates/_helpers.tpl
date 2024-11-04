@@ -88,12 +88,16 @@ Create the name of the service account to use
 {{ printf "https://%s.%s.svc.cluster.local" (include "router.proxy.service.name" .) .Release.Namespace }}
 {{- end -}}
 
-{{- define "router.image" -}}
-{{ $repository := .Values.origin.repository }}
-{{- if eq .Values.global.auth.type "no-auth" }}
-{{- $repository = (printf "%s-no-auth" $repository) -}}
+{{- define "router.repository" -}}
+{{- if or (eq .Values.global.auth.type "no-auth") .Values.global.airgap }}
+{{- printf "router-no-auth"  -}}
+{{- else -}}
+{{ printf "router"  -}}
 {{- end -}}
-{{ printf "%s/%s:%s" .Values.origin.registry $repository .Values.origin.tag }}
+{{- end -}}
+
+{{- define "router.image" -}}
+{{ printf "%s/%s:%s" .Values.origin.registry (tpl .Values.origin.repository .) .Values.origin.tag -}}
 {{- end -}}
 
 {{- define "router.jwt.secretName" -}}

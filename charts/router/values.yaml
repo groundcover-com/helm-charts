@@ -26,8 +26,8 @@ onprem:
   enabled: true
 origin:
   registry: quay.io/groundcover
-  repository: router
-  tag: 1.8.204
+  repository: '{{ include "router.repository" . }}'
+  tag: 1.8.205
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/curl'
@@ -226,8 +226,8 @@ grafana:
       username_claim: "https://client.info/email"
       email_claim: "https://client.info/email"
       org_claim: "https://client.info/org"
-      key_file: '{{ ternary "/certs/public_key.pem" "" (eq .Values.global.auth.type "no-auth") }}'
-      jwk_set_url: '{{ ternary "https://auth.groundcover.com/.well-known/jwks.json" "" (eq .Values.global.auth.type "auth0") }}'
+      key_file: '{{ ternary "/certs/public_key.pem" "" ( or (eq .Values.global.auth.type "no-auth") ( eq .Values.global.airgap true) ) }}'
+      jwk_set_url: '{{ ternary "https://auth.groundcover.com/.well-known/jwks.json" "" ( and (eq .Values.global.auth.type "auth0") ( not .Values.global.airgap) ) }}'
       cache_ttl: 60m
       auto_sign_up: false
       skip_org_role_sync: true
