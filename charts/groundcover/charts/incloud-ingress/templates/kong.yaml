@@ -14,7 +14,7 @@ metadata:
   name: {{ printf "%s-anonymous-user" .Release.Name }}
   annotations:
     checksum/config: {{ .Values.global.groundcover_token | sha256sum }}
-    kubernetes.io/ingress.class: {{ .Values.kong.ingressController.ingressClass }}
+    kubernetes.io/ingress.class: {{ include "incloud-ingress.ingressClass" .}}
     konghq.com/plugins: {{ printf "%s-request-termination" .Release.Name }}
 username: anonymous
 ---
@@ -43,7 +43,7 @@ metadata:
   name: {{ printf "%s-basic-auth" .Release.Name }}
   annotations:
     checksum/config: {{ .Values.global.groundcover_token | sha256sum }}
-    kubernetes.io/ingress.class: {{ .Values.kong.ingressController.ingressClass }}
+    kubernetes.io/ingress.class: {{ include "incloud-ingress.ingressClass" .}}
 username: groundcover
 credentials:
   - {{ printf "%s-basic-auth-creds" .Release.Name }}
@@ -86,7 +86,7 @@ metadata:
   name: {{ printf "%s-api" .Release.Name }}
   annotations:
     checksum/config: {{ .Values.global.groundcover_token | sha256sum }}
-    kubernetes.io/ingress.class: {{ .Values.kong.ingressController.ingressClass }}
+    kubernetes.io/ingress.class: {{ include "incloud-ingress.ingressClass" .}}
 username: api
 credentials:
   - {{ printf "%s-api-key" .Release.Name }}

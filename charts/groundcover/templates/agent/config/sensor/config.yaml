@@ -385,7 +385,7 @@ data:
     watchOnlyLocalNode: {{ $sensorValues.watchOnlyLocalNode }}
     floraEnabled: true
     runningNamespace: ""
-    shouldDropRunningNamespaces: {{ .Values.shouldDropRunningNamespaces }}
+    shouldDropRunningNamespaces: {{ include "groundcover.shouldDropRunningNamespaces" . }}
     tracesNamespaceFilters: {{ toYaml .Values.tracesNamespaceFilters | nindent 6 }}
     tracesWorkloadFilters: {{ toYaml .Values.tracesWorkloadFilters | nindent 6 }}
     nodelabels: {{ toYaml $sensorValues.nodelabels | nindent 6 }}
@@ -474,7 +474,7 @@ data:
             job: sensor
         timeout: 10s
         useRingBuffer: false
-        dropRunningNamespaceLogs: {{ .Values.dropRunningNamespaceLogs }}
+        dropRunningNamespaceLogs: {{  include "groundcover.dropRunningNamespaceLogs" .}}
         groundcoverTimeTravel: -20s
         logDropFilters: {{ toYaml .Values.logsDropFilters | nindent 10}}
         metricateLabels: false

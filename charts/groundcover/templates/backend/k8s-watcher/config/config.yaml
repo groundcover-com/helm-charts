@@ -44,7 +44,7 @@ data:
     clusterId: {{ include "groundcover.clusterId" . }}
     region: {{ .Values.region }}
     env: {{ include "groundcover.env" . }}
-    shouldDropRunningNamespaces: {{ .Values.shouldDropRunningNamespaces }}
+    shouldDropRunningNamespaces: {{ include "groundcover.shouldDropRunningNamespaces" . }}
     tracesNamespaceFilters: {{ toYaml .Values.tracesNamespaceFilters | nindent 6 }}
     tracesWorkloadFilters: {{ toYaml .Values.tracesWorkloadFilters | nindent 6 }}
     commitHashKeyName: {{ .Values.commitHashKeyName }}

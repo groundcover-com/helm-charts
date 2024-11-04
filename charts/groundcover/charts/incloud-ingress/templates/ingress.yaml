@@ -5,12 +5,12 @@ metadata:
   annotations:
     konghq.com/host-aliases: {{ printf "%s,api-otel-http.*" .Values.global.ingress.site }}
     konghq.com/plugins: {{ printf "%s-auth" .Release.Name }},{{ printf "%s-basic-auth" .Release.Name }}
-    konghq.com/protocols: {{ ternary "https" "http" .Values.kong.proxy.tls.enabled | quote }}
+    konghq.com/protocols: {{ ternary "https" "http" ( eq (tpl .Values.secure . ) "true" )  | quote }}
     {{- with .Values.ingress.annotations }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  ingressClassName: kong
+  ingressClassName: {{ include "incloud-ingress.ingressClass" .}}
   {{- if .Values.ingress.tls.enabled }}
   tls:
     - secretName: {{ include "incloud-ingress.certificate.name" . }}
@@ -98,12 +98,12 @@ metadata:
   name: {{ printf "%s-ingest-v2-health" (include "incloud-ingress.name" .) | trunc 63 | trimSuffix "-" }}
   annotations:
     konghq.com/plugins: {{ printf "%s-auth,ingest-v2-rewrite-to-health" .Release.Name | quote }}
-    konghq.com/protocols: {{ ternary "https" "http" .Values.kong.proxy.tls.enabled | quote }}
+    konghq.com/protocols: {{ ternary "https" "http" ( eq (tpl .Values.secure . ) "true" ) | quote }}
     {{- with .Values.ingress.annotations }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  ingressClassName: kong
+  ingressClassName: {{ include "incloud-ingress.ingressClass" .}}
   {{- if .Values.ingress.tls.enabled }}
   tls:
     - secretName: {{ include "incloud-ingress.certificate.name" . }}
@@ -128,12 +128,12 @@ metadata:
   name: {{ printf "%s-ingest-v2-otlp" (include "incloud-ingress.name" .) | trunc 63 | trimSuffix "-" }}
   annotations:
     konghq.com/plugins: {{ printf "%s-auth,ingest-v2-rewrite-to-v1-logs" .Release.Name | quote }}
-    konghq.com/protocols: {{ ternary "https" "http" .Values.kong.proxy.tls.enabled | quote }}
+    konghq.com/protocols: {{ ternary "https" "http" ( eq (tpl .Values.secure . ) "true" ) | quote }}
     {{- with .Values.ingress.annotations }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  ingressClassName: kong
+  ingressClassName: {{ include "incloud-ingress.ingressClass" .}}
   {{- if .Values.ingress.tls.enabled }}
   tls:
     - secretName: {{ include "incloud-ingress.certificate.name" . }}
@@ -178,12 +178,12 @@ metadata:
   name: {{ printf "%s-ingest-v2-json" (include "incloud-ingress.name" .) | trunc 63 | trimSuffix "-" }}
   annotations:
     konghq.com/plugins: {{ printf "%s-auth,ingest-v2-rewrite-root-path" .Release.Name | quote }}
-    konghq.com/protocols: {{ ternary "https" "http" .Values.kong.proxy.tls.enabled | quote }}
+    konghq.com/protocols: {{ ternary "https" "http" ( eq (tpl .Values.secure . ) "true" ) | quote }}
     {{- with .Values.ingress.annotations }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  ingressClassName: kong
+  ingressClassName: {{ include "incloud-ingress.ingressClass" .}}
   {{- if .Values.ingress.tls.enabled }}
   tls:
     - secretName: {{ include "incloud-ingress.certificate.name" . }}
@@ -237,12 +237,12 @@ metadata:
   annotations:
     konghq.com/host-aliases: {{ printf "%s,metrics-http.*" .Values.global.ingress.site }}
     konghq.com/plugins: {{ printf "%s-auth" .Release.Name }},{{ printf "%s-basic-auth" .Release.Name }}
-    konghq.com/protocols: {{ ternary "https" "http" .Values.kong.proxy.tls.enabled | quote }}
+    konghq.com/protocols: {{ ternary "https" "http" ( eq (tpl .Values.secure . ) "true" ) | quote }}
     {{- with .Values.ingress.annotations }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  ingressClassName: kong
+  ingressClassName: {{ include "incloud-ingress.ingressClass" .}}
   {{- if .Values.ingress.tls.enabled }}
   tls:
     - secretName: {{ include "incloud-ingress.certificate.name" . }}
@@ -297,12 +297,12 @@ metadata:
     konghq.com/host-aliases: {{ printf "%s,api-otel-grpc.*" .Values.global.ingress.site }}
     konghq.com/headers.content-type: application/grpc
     konghq.com/plugins: {{ printf "%s-auth" .Release.Name | quote }}
-    konghq.com/protocols: {{ ternary "grpcs" "grpc" .Values.kong.proxy.tls.enabled | quote }}
+    konghq.com/protocols: {{ ternary "grpcs" "grpc" ( eq (tpl .Values.secure . ) "true" ) | quote }}
     {{- with .Values.ingress.annotations }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  ingressClassName: kong
+  ingressClassName: {{ include "incloud-ingress.ingressClass" .}}
   {{- if .Values.ingress.tls.enabled }}
   tls:
     - secretName: {{ include "incloud-ingress.certificate.name" . }}
@@ -342,12 +342,12 @@ metadata:
   annotations:
     konghq.com/host-aliases: {{ printf "%s,status.*" .Values.global.ingress.site }}
     konghq.com/plugins: {{ printf "%s-auth" .Release.Name | quote }}
-    konghq.com/protocols: {{ ternary "https" "http" .Values.kong.proxy.tls.enabled | quote }}
+    konghq.com/protocols: {{ ternary "https" "http" ( eq (tpl .Values.secure . ) "true" ) | quote }}
     {{- with .Values.ingress.annotations }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  ingressClassName: kong
+  ingressClassName: {{ include "incloud-ingress.ingressClass" .}}
   {{- if .Values.ingress.tls.enabled }}
   tls:
     - secretName: {{ include "incloud-ingress.certificate.name" . }}
@@ -372,14 +372,14 @@ kind: Ingress
 metadata:
   name: {{ printf "%s-clickhouse" (include "incloud-ingress.name" .) | trunc 63 | trimSuffix "-" }}
   annotations:
-    konghq.com/protocols: {{ ternary "https" "http" .Values.kong.proxy.tls.enabled | quote }}
+    konghq.com/protocols: {{ ternary "https" "http" ( eq (tpl .Values.secure . ) "true" ) | quote }}
     konghq.com/headers.X-Clickhouse-User: default
     konghq.com/plugins: {{ printf "%s-auth,clickhouse-ds-rewrite" .Release.Name | quote }}
     {{- with .Values.ingress.annotations }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  ingressClassName: kong
+  ingressClassName: {{ include "incloud-ingress.ingressClass" .}}
   {{- if .Values.ingress.tls.enabled }}
   tls:
     - secretName: {{ include "incloud-ingress.certificate.name" . }}
@@ -403,14 +403,14 @@ kind: Ingress
 metadata:
   name: {{ printf "%s-prometheus" (include "incloud-ingress.name" .) | trunc 63 | trimSuffix "-" }}
   annotations:
-    konghq.com/protocols: {{ ternary "https" "http" .Values.kong.proxy.tls.enabled | quote }}
+    konghq.com/protocols: {{ ternary "https" "http" ( eq (tpl .Values.secure . ) "true" ) | quote }}
     konghq.com/strip-path: "true"
     konghq.com/plugins: {{ printf "%s-auth" .Release.Name | quote }}
     {{- with .Values.ingress.annotations }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  ingressClassName: kong
+  ingressClassName: {{ include "incloud-ingress.ingressClass" .}}
   {{- if .Values.ingress.tls.enabled }}
   tls:
     - secretName: {{ include "incloud-ingress.certificate.name" . }}

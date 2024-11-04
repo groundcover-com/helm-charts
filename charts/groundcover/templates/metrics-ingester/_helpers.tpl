@@ -17,6 +17,8 @@
 {{- define "metrics-ingester.base.http.url" -}}
 {{- if .Values.global.metrics.overrideUrl -}}
     {{- .Values.global.metrics.overrideUrl -}}
+{{- else if and .Values.global.airgap .Values.global.backend.enabled -}}
+    {{- include "metrics-ingester.cluster.http.base.url" . -}}
 {{- else if .Values.global.ingress.site -}}
     {{- include "incloud.metrics.http.url" . -}}
 {{- else if not .Values.global.backend.enabled -}}

@@ -201,6 +201,8 @@
 {{- define "vector.health.http.url" -}}
 {{- if .Values.global.vector.health.overrideHttpURL -}}
     {{- print .Values.global.vector.health.overrideHttpURL -}}
+{{- else if and .Values.global.airgap .Values.global.backend.enabled -}}
+    {{- include "vector.cluster.http.health.url" . -}}
 {{- else if .Values.global.ingress.site -}}
     {{- include "vector.incloud.http.health.url" . -}}
 {{- else if not .Values.global.backend.enabled -}}

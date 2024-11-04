@@ -24,6 +24,8 @@ global:
     # set ingress site for inCloud / on-prem sensor only deployments
     site:
 
+  airgap: false
+
   ingestion:
     tls_skip_verify: true
 
@@ -117,13 +119,14 @@ global:
 tags:
   # InCloud - Enterprise Setup. groundcover's control-plane reconciled observability infrastructure deployment.
   incloud: false
-
+  managed: true
+  
 # SAAS parameters, token is mendatory, others only if in cloud mode
 saas:
-  tls_skip_verify: false
-  scheme: wss
-  host: client.groundcover.com
-  port: 443
+  tls_skip_verify: '{{ include "portal.saas.tls_skip_verify" . }}'
+  scheme: '{{ include "portal.saas.scheme" . }}'
+  host: '{{ include "portal.saas.host" . }}'
+  port: '{{ include "portal.saas.port" . }}'
   basePath: ""
 
 #GENERAL
@@ -134,7 +137,7 @@ installationId:
 #  - clusterA
 #  - clusterB
 region:
-dropRunningNamespaceLogs: true
+dropRunningNamespaceLogs: 
 tracesNamespaceFilters:
   []
   # - matchType: "allow"
@@ -163,7 +166,7 @@ oldLogDropAlwaysThreshold: 60m
 oldLogDelayStart: 60s
 jsonFlattenMaxDepth: 6
 jsonFlattenMaxAttributes: 300
-shouldDropRunningNamespaces: true
+shouldDropRunningNamespaces: 
 commitHashKeyName:
 repositoryUrlKeyName:
 

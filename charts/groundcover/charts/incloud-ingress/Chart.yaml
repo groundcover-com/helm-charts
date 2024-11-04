@@ -3,9 +3,13 @@ appVersion: 0.1.0
 dependencies:
 - name: kong
   repository: https://charts.konghq.com
+  tags:
+  - managed
   version: 2.32.0
 - name: kong-crds
   repository: file://../../../kong-crds
+  tags:
+  - managed
   version: 2.32.0
 - condition: cert-manager.enabled
   name: cert-manager

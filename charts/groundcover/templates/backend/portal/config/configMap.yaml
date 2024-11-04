@@ -20,11 +20,11 @@ data:
     
     Router:
       Host: "{{ tpl .Values.saas.host . }}"
-      Port: "{{ .Values.saas.port }}"
+      Port: "{{ tpl (print .Values.saas.port) . }}"
       BasePath: "{{ .Values.saas.basePath }}"
       Token: "OVERRIDEN"
       WebsocketScheme: "{{ tpl .Values.saas.scheme . }}"
-      TLSSkipVerify: "{{ .Values.saas.tls_skip_verify }}"
+      TLSSkipVerify: "{{ tpl (print .Values.saas.tls_skip_verify) . }}"
       ExtraHeaders:
     {{- if .Values.installationId }}
         - Key: X-Portal-InstallationId
@@ -34,6 +34,10 @@ data:
         - Key: X-Portal-InCloud
           Value: "True"
     {{- end }} 
+    {{- if .Values.global.airgap }}
+        - Key: X-Consumer-Username
+          Value: org.com@org.com
+    {{- end }}    
     {{- with .Values.portal.extraHeaders }}
       {{ toYaml . | nindent 8 }}
     {{- end }}  

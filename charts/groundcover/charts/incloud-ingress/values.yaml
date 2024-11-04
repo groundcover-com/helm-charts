@@ -1,3 +1,6 @@
+ingressClass: kong
+secure: '{{ include "incloud-ingress.secure" .}}'
+
 kong-crds:
   upgradeCRDs: true
   image:

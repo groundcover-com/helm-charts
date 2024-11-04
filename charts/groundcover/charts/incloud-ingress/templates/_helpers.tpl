@@ -5,6 +5,14 @@ Expand the name of the chart.
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
+{{- define "incloud-ingress.ingressClass" -}}
+{{- if .Values.kong.ingressController }}
+{{- default "kong" .Values.kong.ingressController.ingressClass }}
+{{- else }}
+{{- ternary "groundcover-kong" "kong" .Values.global.airgap }}
+{{- end }}
+{{- end }}
+
 {{/*
 Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
@@ -20,6 +28,14 @@ If release name contains chart name it will be used as a full name.
 {{- else }}
 {{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}
 {{- end }}
+{{- end }}
+{{- end }}
+
+{{- define "incloud-ingress.secure" -}}
+{{- if (and .Values.kong.proxy.tls.enabled (not .Values.global.airgap)) }}
+{{- true -}}
+{{- else }}
+{{- false -}}
 {{- end }}
 {{- end }}
 

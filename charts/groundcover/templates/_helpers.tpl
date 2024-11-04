@@ -94,6 +94,29 @@ Get cluster_id from values or generate random one
 {{- .Values.env | default "" }}
 {{- end }}
 
+
+{{- define "groundcover.shouldDropRunningNamespaces" -}}
+{{ if not (quote .Values.shouldDropRunningNamespaces | empty)  }}
+{{- .Values.shouldDropRunningNamespaces -}}
+{{- else if .Values.global.airgap -}}
+{{- printf "false"  -}}
+{{- else -}}
+{{- printf "true" }}
+{{- end }}
+{{- end }}
+
+
+{{- define "groundcover.dropRunningNamespaceLogs" -}}
+{{ if not (quote .Values.dropRunningNamespaceLogs | empty)  }}
+{{- .Values.dropRunningNamespaceLogs -}}
+{{- else if .Values.global.airgap -}}
+{{- printf "false"  -}}
+{{- else -}}
+{{- printf "true" }}
+{{- end }}
+{{- end }}
+
+
 {{- define "agent.monitoring.port" -}}
 {{- default 9102 (.Values.agent.monitoring).port -}}
 {{- end -}}
