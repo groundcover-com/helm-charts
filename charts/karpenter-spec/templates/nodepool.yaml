@@ -11,7 +11,7 @@ spec:
   {{- with $value.disruption }}
     consolidateAfter: {{ default "6h" .consolidateAfter }}
     consolidationPolicy: {{ default "WhenEmpty" .consolidationPolicy }}
-    budgets: {{ default (list (dict "nodes" "0") ) .budgets | toYaml | nindent 4 }}
+    budgets: {{ default (list (dict "nodes" "0" "reasons"  (list "Underutilized")) (dict "nodes" "10%" "reasons"  (list "Empty" "Drifted"))) .budgets | toYaml | nindent 4 }}
   {{- end }}
   {{- else }}
     consolidateAfter: "6h" 
