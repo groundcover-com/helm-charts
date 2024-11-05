@@ -45,6 +45,8 @@ postgresql:
             optional: true
             name: keep-postgres
             key: password
+      - name: POSTGRESQL_MAX_CONNECTIONS
+        value: "400"
     podAnnotations: 
       groundcover.com/workflows: '{{ .Values.global.workflows.enabled }}'
     initContainers:

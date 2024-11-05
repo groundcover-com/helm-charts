@@ -540,6 +540,9 @@ clickhouse:
           name: '{{ include "clickhouse.secretName" . }}'
   extraOverrides: |
     <clickhouse>
+      <logger>
+          <formatting><type>json</type></formatting>
+      </logger>
       <max_table_size_to_drop>0</max_table_size_to_drop>
       <max_partition_size_to_drop>0</max_partition_size_to_drop>
       <merge_tree>
