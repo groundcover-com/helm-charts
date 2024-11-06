@@ -291,6 +291,102 @@ entries:
     version: 0.0.1
   groundcover:
   - apiVersion: v2
+    appVersion: 1.8.208
+    created: "2024-11-06T15:16:56.1648047Z"
+    dependencies:
+    - condition: router.enabled
+      import-values:
+      - child: dbs
+        parent: backend.postgresql.dbs
+      name: router
+      repository: ""
+      version: '>0.0.0'
+    - condition: global.backend.enabled
+      import-values:
+      - child: server.service
+        parent: global.victoria-metrics.service
+      name: victoria-metrics-single
+      repository: https://victoriametrics.github.io/helm-charts
+      version: 0.9.15
+    - condition: global.telemetry.enabled
+      name: victoria-metrics-agent
+      repository: ""
+      version: 0.9.17
+    - alias: custom-metrics
+      condition: custom-metrics.enabled
+      name: victoria-metrics-agent
+      repository: ""
+      version: 0.9.17
+    - condition: victoria-metrics-operator.enabled
+      name: victoria-metrics-operator
+      repository: https://victoriametrics.github.io/helm-charts
+      version: 0.37.0
+    - alias: metrics-ingester
+      import-values:
+      - child: service
+        parent: global.metrics-ingester.service
+      name: victoria-metrics-agent
+      repository: ""
+      version: 0.9.17
+    - condition: global.backend.enabled
+      import-values:
+      - child: auth
+        parent: global.clickhouse.auth
+      - child: containerPorts
+        parent: global.clickhouse.containerPorts
+      - child: serviceAccount
+        parent: global.clickhouse.serviceAccount
+      name: clickhouse
+      repository: ""
+      version: 6.3.1
+    - condition: global.backend.enabled
+      import-values:
+      - child: ports
+        parent: global.opentelemetry-collector.ports
+      - child: service
+        parent: global.opentelemetry-collector.service
+      name: opentelemetry-collector
+      repository: https://open-telemetry.github.io/opentelemetry-helm-charts
+      version: 0.81.1
+    - condition: global.agent.enabled
+      import-values:
+      - child: serviceAccount
+        parent: global.kube-state-metrics.serviceAccount
+      name: kube-state-metrics
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 5.15.2
+    - alias: monitors-manager
+      condition: global.backend.enabled
+      name: grafana
+      repository: https://grafana.github.io/helm-charts
+      version: 7.2.0
+    - condition: incloud-ingress.enabled
+      name: incloud-ingress
+      repository: ""
+      tags:
+      - incloud
+      version: '>0.0.0'
+    - condition: global.backend.enabled
+      import-values:
+      - child: postgresql.image
+        parent: global.postgresql.image
+      - child: postgresql.auth
+        parent: global.postgresql.auth
+      name: backend
+      repository: ""
+      version: '>=0.0.0'
+    - condition: global.vector.enabled
+      name: vector
+      repository: https://helm.vector.dev
+      version: 0.32.1
+    description: Cloud Native Observability
+    digest: 6eb13a99aee59e31d34cf53824e80e28fabcb19f4aa996bb7317d3f2c34cc9a6
+    name: groundcover
+    type: application
+    urls:
+    - https://github.com/groundcover-com/helm-charts/releases/download/groundcover-1.8.208/groundcover-1.8.208.tgz
+    version: 1.8.208
+  - apiVersion: v2
     appVersion: 1.8.207
     created: "2024-11-05T19:00:18.946823747Z"
     dependencies:
@@ -53606,6 +53702,16 @@ entries:
     version: 0.28.1
   karpenter-spec:
   - apiVersion: v2
+    appVersion: 1.8.208
+    created: "2024-11-06T15:16:56.376760953Z"
+    description: A Helm chart for groundcover karpenter CRs.
+    digest: ad0ee5173637997958f4ca215429a88e52834c0c406e63aa05666d8a4e5c3c88
+    name: karpenter-spec
+    type: application
+    urls:
+    - https://github.com/groundcover-com/helm-charts/releases/download/karpenter-spec-1.8.208/karpenter-spec-1.8.208.tgz
+    version: 1.8.208
+  - apiVersion: v2
     appVersion: 1.8.207
     created: "2024-11-05T19:00:19.133983359Z"
     description: A Helm chart for groundcover karpenter CRs.
@@ -54137,6 +54243,32 @@ entries:
     - https://github.com/groundcover-com/helm-charts/releases/download/loki-proxy-0.1.0/loki-proxy-0.1.0.tgz
     version: 0.1.0
   router:
+  - apiVersion: v2
+    appVersion: 1.8.208
+    created: "2024-11-06T15:16:56.611147543Z"
+    dependencies:
+    - condition: onprem.enabled
+      import-values:
+      - child: serviceAccount
+        parent: global.grafana.serviceAccount
+      name: grafana
+      repository: https://grafana.github.io/helm-charts
+      version: 7.2.0
+    - condition: onprem.enabled
+      name: kong
+      repository: https://charts.konghq.com
+      version: 2.32.0
+    - condition: onprem.enabled
+      name: kong-crds
+      repository: file://../../../kong-crds
+      version: 2.32.0
+    description: groundcover's router helm chart
+    digest: b122c2a2be1bb3c2529138606335a1412b239ab6863e39a2a3af832242903ea1
+    name: router
+    type: application
+    urls:
+    - https://github.com/groundcover-com/helm-charts/releases/download/router-1.8.208/router-1.8.208.tgz
+    version: 1.8.208
   - apiVersion: v2
     appVersion: 1.8.207
     created: "2024-11-05T19:00:19.350170875Z"
@@ -69873,4 +70005,4 @@ entries:
     urls:
     - https://github.com/groundcover-com/helm-charts/releases/download/router-0.33.4/router-0.33.4.tgz
     version: 0.33.4
-generated: "2024-11-05T19:00:19.355602309Z"
+generated: "2024-11-06T15:16:56.615155212Z"
