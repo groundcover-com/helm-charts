@@ -1,26 +1,48 @@
+{{- $ctx := dict "helm" . }}
+{{- $fullname := include "vm.plain.fullname" $ctx }}
 apiVersion: v1
 kind: Service
 metadata:
-  namespace: {{ .Release.Namespace }}
-  {{- with .Values.annotations }}
-  annotations:
-  {{- toYaml . | nindent 4 }}
+  namespace: {{ include "vm.namespace" . }}
+  {{- with .Values.service.annotations }}
+  annotations: {{ toYaml . | nindent 4 }}
   {{- end }}
-  labels:
-  {{- include "vm-operator.labels" . | nindent 4 }}
-  {{- with .Values.extraLabels }}
-  {{- toYaml . | nindent 4}}
-  {{- end }}
-  name: {{ template "vm-operator.fullname" . }}
+  {{- $_ := set $ctx "extraLabels" .Values.extraLabels }}
+  labels: {{ include "vm.labels" $ctx | nindent 4 }}
+  {{- $_ := unset $ctx "extraLabels" }}
+  name: {{ $fullname }}
 spec:
+  {{- with .Values.service.clusterIP }}
+  clusterIP: {{ . }}
+  {{- end }}
+  {{- with .Values.service.externalIPs }}
+  externalIPs: {{ toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.service.loadBalancerIP }}
+  loadBalancerIP: {{ . }}
+  {{- end }}
+  {{- with .Values.service.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges: {{ toYaml . | nindent 4 }}
+  {{- end }}
+  type: {{ .Values.service.type }}
+  {{- with .Values.service.healthCheckNodePort }}
+  healthCheckNodePort: {{ . }}
+  {{- end }}
+  {{- with .Values.service.externalTrafficPolicy }}
+  externalTrafficPolicy: {{ . }}
+  {{- end }}
+  {{- with .Values.service.ipFamilyPolicy }}
+  ipFamilyPolicy: {{ . }}
+  {{- end }}
+  {{- with .Values.service.ipFamilies }}
+  ipFamilies: {{ toYaml . | nindent 4 }}
+  {{- end }}
   ports:
     - name: http
-      port: 8080
-      targetPort: 8080
+      port: {{ .Values.service.servicePort }}
+      targetPort: http
       protocol: TCP
     - name: webhook
-      port: 443
-      targetPort: 9443
-  selector:
-    {{- include "vm-operator.selectorLabels" . | nindent 4 }}
-  type: "ClusterIP"
+      port: {{ .Values.service.webhookPort }}
+      targetPort: webhook
+  selector: {{ include "vm.selectorLabels" $ctx | nindent 4 }}

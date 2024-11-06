@@ -1,15 +1,16 @@
 {{- /* do not update crds here, please update in /victoria-metrics-operator/crd.yaml */ -}}
 {{- /* this is used to add "helm.sh/resource-policy: keep" annotation for each crd */ -}}
 {{- /* see this pull request https://github.com/VictoriaMetrics/helm-charts/pull/771 for details */ -}}
-{{- if .Values.createCRD }}
-{{- $files := .Files }}
-{{- $fileContentsList := $files.Get "crd.yaml" | splitList "---" }}
-{{- range $fileContentsList }}
-    {{- $fileContents := . | fromYaml }}
-    {{- $newAnnotations := dict "helm.sh/resource-policy" "keep" | merge $fileContents.metadata.annotations }}
-    {{- $newMetadata := dict "annotations" $newAnnotations | merge $fileContents.metadata }}
-    {{- $newFileContents := dict "metadata" $newMetadata | merge $fileContents }}
-    {{- $newFileContents | toYaml }}
+{{- $ctx := dict "helm" . }}
+{{- if not .Values.crds.plain }}
+  {{- $files := .Files }}
+  {{- $crds := $files.Get "crd.yaml" | splitList "---" }}
+  {{- $labels := (include "vm.labels" $ctx) | fromYaml -}}
+  {{- $annotations := (include "vm-operator.crds.annotations" .) | fromYaml -}}
+  {{- $extra := dict "metadata" (dict "annotations" $annotations "labels" $labels) -}}
+  {{- range $crds }}
+    {{- $crd := . | fromYaml }}
+    {{- toYaml (merge $crd $extra) }}
     {{- print "\n---\n" }}
-{{- end }}
+  {{- end }}
 {{- end }}

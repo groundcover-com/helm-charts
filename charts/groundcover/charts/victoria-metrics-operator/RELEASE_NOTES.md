@@ -1,9 +1,10 @@
-# Release notes for version 0.28.0
+# Release notes for version 0.37.0
 
-**Release date:** 2024-02-09
+**Release date:** 2024-11-05
 
-![AppVersion: 0.41.1](https://img.shields.io/static/v1?label=AppVersion&message=0.41.1&color=success&logo=)
+![AppVersion: v0.49.0](https://img.shields.io/static/v1?label=AppVersion&message=v0.49.0&color=success&logo=)
 ![Helm: v3](https://img.shields.io/static/v1?label=Helm&message=v3&color=informational&logo=helm)
 
-- Update victoriametrics CRD resources yaml.
+- Migrated to common templates
+- updates operator to [v0.49.0](https://github.com/VictoriaMetrics/operator/releases/tag/v0.49.0) version
 

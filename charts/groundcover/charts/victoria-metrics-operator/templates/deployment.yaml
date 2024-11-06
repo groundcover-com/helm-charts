@@ -1,63 +1,52 @@
+{{- $ctx := dict "helm" . }}
+{{- $fullname := include "vm.plain.fullname" $ctx }}
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "vm-operator.fullname" . }}
-  namespace: {{ .Release.Namespace }}
-  labels:
-{{ include "vm-operator.labels" . | indent 4 }}
-{{- with .Values.extraLabels }}
-{{ toYaml . | indent 4 }}
-{{- end }}
-  annotations:
-{{- if .Values.admissionWebhooks.certManager.enabled }}
-
-{{- end }}
-{{- with .Values.annotations }}
-{{ toYaml . | indent 4 }}
-{{- end }}
+  name: {{ $fullname }}
+  namespace: {{ include "vm.namespace" . }}
+  {{- $_ := set $ctx "extraLabels" .Values.extraLabels }}
+  labels: {{ include "vm.labels" $ctx | nindent 4 }}
+  {{- $_ := unset $ctx "extraLabels" }}
+  {{- with .Values.annotations }}
+  annotations: {{ toYaml . | nindent 4 }}
+  {{- end }}
 spec:
-  replicas: {{.Values.replicaCount}}
+  replicas: {{.Values.replicaCount }}
   selector:
-    matchLabels:
-      {{- include "vm-operator.selectorLabels" . | nindent 6 }}
+    matchLabels: {{ include "vm.selectorLabels" $ctx | nindent 6 }}
   template:
     metadata:
-{{- with .Values.annotations }}
-      annotations:
-{{ toYaml . | indent 8 }}
-{{- end }}
-      labels:
-        {{- include "vm-operator.selectorLabels" . | nindent 8}}
-        {{- with .Values.podLabels }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
+      {{- with .Values.annotations }}
+      annotations: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- $_ := set $ctx "extraLabels" .Values.podLabels }}
+      labels: {{ include "vm.selectorLabels" $ctx | nindent 8}}
     spec:
-    {{- with .Values.imagePullSecrets }}
-      imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-    {{- end }}
-{{- with .Values.podSecurityContext }}
-      securityContext:
-{{- toYaml . | nindent 8 }}
-{{- end }}
-      serviceAccountName: {{ template "vm-operator.serviceAccountName" . }}
+      {{- if .Values.podSecurityContext.enabled }}
+      securityContext: {{ include "vm.securityContext" (dict "securityContext" .Values.podSecurityContext "helm" .) | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ (.Values.serviceAccount).name | default $fullname }}
+      {{- with (.Values.imagePullSecrets | default .Values.global.imagePullSecrets) }}
+      imagePullSecrets: {{ toYaml . | nindent 8 }}
+      {{- end }}
       containers:
-        - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
+        - name: operator
+          image: {{ include "vm.image" (dict "helm" . "app" .Values ) }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          {{- if .Values.envFrom }}
-          envFrom:
-            {{- with .Values.envFrom -}}
-            {{ toYaml . | nindent 12 }}
-            {{- end }}
+          {{- with .Values.envFrom }}
+          envFrom: {{ toYaml . | nindent 12 }}
           {{- end }}
           env:
-          {{- range .Values.env }}
+            {{- range .Values.env }}
             - name: {{ .name }}
               value: {{ .value | quote }}
-          {{- end }}
+            {{- end }}
+            {{- if .Values.watchNamespaces }}
             - name: WATCH_NAMESPACE
-              value: {{ .Values.watchNamespace | quote }}
+              value: {{ (tpl (.Values.watchNamespaces | join ",") .) | quote }}
+            {{- end }}
             - name: POD_NAME
               valueFrom:
                 fieldRef:
@@ -83,28 +72,43 @@ spec:
             - name: VM_PROMETHEUSCONVERTERADDARGOCDIGNOREANNOTATIONS
               value: "true"
             {{- end }}
-            - name: VM_PSPAUTOCREATEENABLED
-              value: {{ .Values.operator.psp_auto_creation_enabled | quote }}
             - name: VM_ENABLEDPROMETHEUSCONVERTEROWNERREFERENCES
               value: {{.Values.operator.enable_converter_ownership | quote}}
           args:
             - --zap-log-level={{ .Values.logLevel }}
-            - --enable-leader-election
+            - --leader-elect
+            - --health-probe-bind-address=:8081
             {{- if .Values.admissionWebhooks.enabled }}
             - --webhook.enable=true
             {{- end }}
             {{- range $key, $value := .Values.extraArgs }}
+            {{- if kindIs "slice" $value }}
+            {{- range $v := $value }}
+            - --{{ $key }}={{ $v }}
+            {{- end }}
+            {{- else }}
             - --{{ $key }}={{ $value }}
             {{- end }}
-          command:
-            - manager
+            {{- end }}
           ports:
-            - containerPort: 8080
-              name: http
+            - name: http
+              containerPort: {{ include "vm.port.from.flag" (dict "flag" (index .Values.extraArgs "metrics-bind-address") "default" "8080") }}
               protocol: TCP
-            - containerPort: 9443
-              name: webhook
+            - name: probe
+              containerPort: {{ include "vm.port.from.flag" (dict "flag" (index .Values.extraArgs "health-probe-bind-address") "default" "8081") }}
               protocol: TCP
+            - name: webhook
+              containerPort: {{ include "vm.port.from.flag" (dict "flag" (index .Values.extraArgs "webhook.port") "default" "9443") }}
+              protocol: TCP
+          {{- with (fromYaml (include "vm.probe" (dict "app" .Values "type" "readiness"))) }}
+          readinessProbe: {{ toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with (fromYaml (include "vm.probe" (dict "app" .Values "type" "liveness"))) }}
+          livenessProbe: {{ toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with (fromYaml (include "vm.probe" (dict "app" .Values "type" "startup"))) }}
+          startupProbe: {{ toYaml . | nindent 12 }}
+          {{- end }}
           volumeMounts:
             {{- if .Values.admissionWebhooks.enabled }}
             - mountPath: /tmp/k8s-webhook-server/serving-certs
@@ -114,45 +118,43 @@ spec:
             {{- with .Values.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
-          resources:
-            {{- toYaml .Values.resources | nindent 12 }}
-          {{- with .Values.securityContext }}
-          securityContext:
-          {{- toYaml . | nindent 12 }}
+          resources: {{ toYaml .Values.resources | nindent 12 }}
+          {{- if .Values.securityContext.enabled }}
+          securityContext: {{ include "vm.securityContext" (dict "securityContext" .Values.securityContext "helm" .) | nindent 12 }}
           {{- end }}
         {{- with.Values.extraContainers }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
       {{- with .Values.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
+      nodeSelector: {{ toYaml . | nindent 8 }}
       {{- end }}
-    {{- with .Values.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-    {{- end }}
-    {{- if .Values.topologySpreadConstraints }}
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
+      {{- with .Values.lifecycle }}
+      lifecycle: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.topologySpreadConstraints }}
       topologySpreadConstraints:
         {{- range $constraint := .Values.topologySpreadConstraints }}
         - {{ toYaml $constraint | nindent 10 | trim }}
           {{- if not $constraint.labelSelector }}
           labelSelector:
-            matchLabels:
-              {{- include "vm-operator.selectorLabels" $ | nindent 14 }}
+            matchLabels: {{ include "vm.selectorLabels" $ctx | nindent 14 }}
           {{- end }}
         {{- end }}
-    {{- end }}
-    {{- with .Values.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-    {{- end }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations: {{ toYaml . | nindent 8 }}
+      {{- end }}
       volumes:
-      {{- if .Values.admissionWebhooks.enabled }}
+        {{- if .Values.admissionWebhooks.enabled }}
         - name: cert
           secret:
             defaultMode: 420
-            secretName: {{ template "vm-operator.fullname" . }}-validation
-      {{- end }}
-      {{- with .Values.extraVolumes }}
-      {{- toYaml .| nindent 10 }}
-      {{- end }}
+            secretName: {{ $fullname }}-validation
+        {{- end }}
+        {{- with .Values.extraVolumes }}
+        {{- toYaml .| nindent 8 }}
+        {{- end }}

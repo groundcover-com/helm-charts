@@ -14,15 +14,15 @@ data:
     productchansize: 512
     pushsummaries: true
     productmetricsflushmintotalcounter:
-      http: 5
-      redis: 5
-      amqp: 5
-      sql: 5
-      kafka: 5
-      dns: 5
-      grpc: 5
-      mongodb: 5
-      node_info: 2
+      http: 1
+      redis: 1
+      amqp: 1
+      sql: 1
+      kafka: 1
+      dns: 1
+      grpc: 1
+      mongodb: 1
+      node_info: 1
       container_crash: 1
       container_info: 1
       container_info_rt: 1
