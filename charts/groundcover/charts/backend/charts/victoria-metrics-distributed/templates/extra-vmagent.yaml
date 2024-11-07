@@ -1,0 +1,10 @@
+{{- if .Values.extraVMAgent.enabled }}
+---
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMAgent
+metadata:
+  labels: {{ include "victoria-metrics-distributed.labels" . | nindent 4 }}
+  name: {{ .Values.extraVMAgent.name }}
+  namespace: {{ include "vm.namespace" . }}
+spec: {{ include "victoria-metrics-distributed.extravmagentSpec" . | nindent 2 }}
+{{- end }}

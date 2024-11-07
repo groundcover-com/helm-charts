@@ -1,0 +1,39 @@
+annotations:
+  artifacthub.io/category: monitoring-logging
+  artifacthub.io/changes: |
+    - bump version of VM components to [v1.106.0](https://github.com/VictoriaMetrics/VictoriaMetrics/releases/tag/v1.106.0)
+  artifacthub.io/license: Apache-2.0
+  artifacthub.io/links: |
+    - name: Charts repo
+      url: https://victoriametrics.github.io/helm-charts/
+    - name: Docs
+      url: https://docs.victoriametrics.com
+  artifacthub.io/operator: "true"
+apiVersion: v2
+appVersion: v1.106.0
+dependencies:
+- name: victoria-metrics-common
+  repository: https://victoriametrics.github.io/helm-charts
+  version: 0.0.*
+- condition: victoria-metrics-k8s-stack.enabled
+  name: victoria-metrics-k8s-stack
+  repository: https://victoriametrics.github.io/helm-charts
+  version: 0.27.*
+description: A Helm chart for Running VMCluster on Multiple Availability Zones
+home: https://github.com/VictoriaMetrics/helm-charts
+keywords:
+- victoriametrics
+- operator
+- monitoring
+- kubernetes
+- observability
+- tsdb
+- metrics
+- metricsql
+- timeseries
+kubeVersion: '>=1.25.0-0'
+name: victoria-metrics-distributed
+sources:
+- https://github.com/VictoriaMetrics/helm-charts
+type: application
+version: 0.4.2

@@ -2,8 +2,11 @@ global:
   agent:
     enabled: true
   backend:
-    enabled: true
     name:
+    enabled: true
+    victoria-metrics-distributed:
+      enabled: false
+
   workflows:
     enabled: true
   vector:

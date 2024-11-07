@@ -256,3 +256,14 @@ keep:
     enabled: false
   websocket:
     enabled: false
+
+victoria-metrics-distributed:
+  nameOverride: "victoriametrics"
+  extraVMAgent:
+    enabled: false
+  enableMultitenancy: false
+  victoria-metrics-k8s-stack:
+    enabled: false
+    grafana:
+      enabled: false
+  availabilityZones: []

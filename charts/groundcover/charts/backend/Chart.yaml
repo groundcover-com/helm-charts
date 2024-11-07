@@ -11,6 +11,10 @@ dependencies:
   name: keep
   repository: https://keephq.github.io/helm-charts
   version: 0.1.12
+- condition: global.backend.victoria-metrics-distributed.enabled
+  name: victoria-metrics-distributed
+  repository: https://victoriametrics.github.io/helm-charts/
+  version: 0.4.2
 name: backend
 type: application
 version: 0.0.0
