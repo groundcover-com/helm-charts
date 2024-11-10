@@ -93,33 +93,4 @@ metadata:
 spec:
   type: ExternalName
   externalName: {{ include "sensor.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
-{{- if and $sensorValues.metricIngestor.serverEnabled $sensorValues.metricIngestor.serverPort}}
----
-kind: Service
-apiVersion: v1
-metadata:
-  annotations:
-    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
-    {{- if .Values.agent.additionalAnnotations }}
-{{ toYaml .Values.agent.additionalAnnotations | indent 4 }}
-    {{- end }}
-  labels:
-    {{- include "groundcover.labels" . | nindent 4 }}
-    app: sensor
-    app.kubernetes.io/name: sensor
-    {{- if .Values.agent.additionalLabels }}
-{{ toYaml .Values.agent.additionalLabels | indent 4 }}
-    {{- end }}
-  name: {{ include "sensor.metric-ingestor-hostname" . }}
-  namespace: {{ .Release.Namespace }}
-spec:
-  selector:
-    app.kubernetes.io/name: sensor
-    app.kubernetes.io/part-of: '{{ include "groundcover.labels.partOf" . }}'
-  ports:
-  - protocol: TCP
-    name: metric-ingestor
-    port: {{ $sensorValues.metricIngestor.serverPort }}
-    targetPort: {{ $sensorValues.metricIngestor.serverPort }}
-{{- end }}
 {{- end }}

@@ -347,6 +347,10 @@ data:
       summarizerActiveTtl: 45s
       aggregationCacheSize: 1024
 
+    timeseriesstorage:
+      url: {{ include "metrics-ingester.cluster.http.base.url" . }}
+      tlsskipverify: true
+
     pidcache:
       expiration: 5m
       purge: 20s
@@ -388,12 +392,6 @@ data:
     contentTypesToDrop: {{ toYaml $sensorValues.contentTypesToDrop | nindent 6 }}
     hostHeadersToDrop: {{ toYaml $sensorValues.hostHeadersToDrop | nindent 6 }}
     headersForceSampling: {{ toYaml $sensorValues.headersForceSampling | nindent 6 }}
-
-    metricIngestor:
-      serverEnabled: {{ $sensorValues.metricIngestor.serverEnabled }}
-      serverPort: {{ $sensorValues.metricIngestor.serverPort }}
-      remoteURL: {{ include "metrics-ingester.write.http.url" . }}
-      tlsSkipVerify: true
 
     apmIngestor: 
       tracesOtlpEndpoint:

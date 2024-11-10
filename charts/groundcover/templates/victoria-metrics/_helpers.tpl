@@ -14,16 +14,12 @@
 {{ index .Values.global "victoria-metrics" "service" "servicePort" }}
 {{- end -}}
 
-{{- define "victoria-metrics.cluster.http.server_name" -}}
-    {{- printf "%s" (include "victoria-metrics.server.fullname" .) -}}
-{{- end -}}
-
 {{- define "victoria-metrics.cluster.http.url_without_port" -}}
-{{- printf "http://%s" (include "victoria-metrics.cluster.http.server_name" .) -}}
+{{- printf "http://%s" (include "victoria-metrics.server.fullname" .) -}}
 {{- end -}}
 
 {{- define "victoria-metrics.cluster.http.base.url" -}}
-{{- printf "%s:%d" (include "victoria-metrics.cluster.http.url_without_port" .) (include "victoria-metrics.cluster.http.port" . | int) -}}
+{{- printf "http://%s:%d" (include "victoria-metrics.server.fullname" .) (index .Values.global "victoria-metrics" "service" "servicePort" | int ) -}}
 {{- end -}}
 
 {{- define "victoria-metrics.write.http.url" -}}
