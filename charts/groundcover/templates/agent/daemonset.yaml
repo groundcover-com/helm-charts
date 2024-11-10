@@ -170,6 +170,11 @@ spec:
               name: jaeger-th-comp
               protocol: UDP     
             {{- end }}
+            {{- if and $sensorValues.metricIngestor.serverEnabled $sensorValues.metricIngestor.serverPort}}
+            - containerPort: {{ $sensorValues.metricIngestor.serverPort }}
+              name: metric-ingestor
+              protocol: TCP     
+            {{- end }}
           securityContext:
             capabilities:
               add:

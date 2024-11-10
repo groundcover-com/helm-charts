@@ -27,7 +27,7 @@
 {{- end -}}
 
 {{- define "vector.otlp.scheme" -}}
-{{- ternary "https" "http" .Values.global.otlp.tls.enabled -}}
+http
 {{- end -}}
 
 {{- define "vector.otlp.http.tls.enabled" -}}

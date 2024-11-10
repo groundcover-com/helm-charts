@@ -93,12 +93,9 @@
 {{- end -}}
 
 {{- define "opentelemetry-collector.otlp.scheme" -}}
-{{- ternary "https" "http" .Values.global.otlp.tls.enabled -}}
+http
 {{- end -}}
 
-{{- define "opentelemetry-collector.tlsConfig" -}}
-{{- ternary (dict "key_file" "/etc/ssl/certs/tls.key" "cert_file" "/etc/ssl/certs/tls.crt" | toJson) "null" .Values.global.otlp.tls.enabled -}}
-{{- end -}}
 
 {{- define "opentelemetry-collector.loki.http.url" -}}
 {{- $baseUrl := "" -}}

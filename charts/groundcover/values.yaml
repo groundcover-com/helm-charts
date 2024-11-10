@@ -73,8 +73,6 @@ global:
     overrideUrl: ""
 
   otlp:
-    tls:
-      enabled: false
     overrideGrpcURL: ""
     overrideHttpURL: ""
 
@@ -261,6 +259,9 @@ agent:
       b3ForceSample: false
       datadogForceSample: false
     watchOnlyLocalNode: false
+    metricIngestor:
+      serverEnabled: true
+      serverPort: 8428
     apmIngestor:
       dataDog:
         proxyEnabled: false
@@ -501,7 +502,7 @@ portal:
     uploaderType: pyroscope
     cpuSamplingDuration: 60s
   autodiscovery: false
-  maxResponseSizeBytes: 15728640
+  maxResponseSizeBytes: 33554432
 
 clickhouse:
   enabled: true
@@ -679,23 +680,15 @@ opentelemetry-collector:
         secretKeyRef:
           key: '{{ include "clickhouse.secretKey" . }}'
           name: '{{ include "clickhouse.secretName" . }}'
-    - name: TLS_CONFIG
-      value: '{{ include "opentelemetry-collector.tlsConfig" . }}'
     - name: CLUSTER_ID
       valueFrom:
         secretKeyRef:
           name: groundcover-config
           key: GC_CLUSTER_ID
   extraVolumes:
-    - name: certificate
-      secret:
-        secretName: opentelemetry-collector-certificate
     - name: persistent-queues
       emptyDir: {}
   extraVolumeMounts:
-    - name: certificate
-      readOnly: true
-      mountPath: /etc/ssl/certs
     - name: persistent-queues
       mountPath: /persistent_queues
   image:
@@ -2177,6 +2170,7 @@ victoria-metrics-operator:
 
 custom-metrics:
   enabled: false
+  useSensorAsEndpoint: false
   service:
     enabled: true
   nodeSelector:
@@ -2204,7 +2198,7 @@ custom-metrics:
     promscrape.maxScrapeSize: "64MiB"
     remoteWrite.headers: "apikey:%{API_KEY}"
     remoteWrite.tlsInsecureSkipVerify: '{{ ternary "true" "false" .Values.global.ingestion.tls_skip_verify }}'
-    remoteWrite.url: '{{ include "victoria-metrics.write.http.url" . }}'
+    remoteWrite.url: '{{ include "custom-metrics.remote-server-url" . }}'
     remoteWrite.label: clusterId=$(GC_CLUSTER_ID)
   env:
     - name: GC_CLUSTER_ID
