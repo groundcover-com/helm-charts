@@ -1,0 +1,66 @@
+{{ if and .Values.global.backend.enabled .Values.global.postgresql.enabled (index .Values "volume-expansion" "enabled")}}
+{{- $shouldPatchPvc := true -}}
+{{- $shouldDeleteSts := true -}}
+{{- $shouldPatchAnnotations := true -}}
+{{- $pvcSize := index .Values "backend" "postgresql" "primary" "persistence" "size" -}}
+{{- $annotations := (index .Values "backend" "postgresql" "primary" "persistence" "annotations") | toJson -}}
+{{- $patches := (include "volume-expansion.patches" (index .Values "backend" "postgresql" "primary" "persistence")) | fromYaml -}}
+{{- $pvcPatch := (get $patches "pvc") | toJson -}}
+{{- $stsPatch := (get $patches "sts") | toJson -}}
+{{- $name := (printf "%s-psql" (include "volume-expansion.fullname" $)) -}}
+{{- $stsName := (include "postgresql.primary.fullname" .) -}}
+{{- $pvcName := (printf "data-%s-0" $stsName) -}}
+{{ if $.Release.IsUpgrade }}
+{{- $pvc := (lookup "v1" "PersistentVolumeClaim" $.Release.Namespace $pvcName | default dict) -}}
+{{- $pvcCapacitySize := ($pvc | dig "status" "capacity" "storage" $pvcSize) -}}
+{{- $sts := (lookup "apps/v1" "StatefulSet" $.Release.Namespace $stsName | default dict) -}}
+{{- $stsPvcSize := ($sts | dig "spec" "volumeClaimTemplates" (list dict) | first | dig "spec" "resources" "requests" "storage" $pvcSize) -}}
+{{- $stsPvcAnnotations := ($sts | dig "spec" "volumeClaimTemplates" (list dict) | first | dig "metadata" "annotations" dict) | toJson -}}
+{{- $shouldPatchPvc = (not (eq $pvcSize $pvcCapacitySize)) -}}
+{{- $shouldDeleteSts = (not (eq $pvcSize $stsPvcSize)) -}}
+{{- $shouldPatchAnnotations = (not (eq $stsPvcAnnotations $annotations)) -}}
+{{- end -}}
+{{ if or $shouldPatchPvc $shouldDeleteSts $shouldPatchAnnotations }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ $name }}
+  labels:
+  annotations:
+  {{- include "volume-expansion.job.annotations" $ | nindent 4 }}
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      name: {{ $name }}
+    spec:
+      restartPolicy: Never
+      imagePullSecrets: {{ include "imagePullSecrets" $ }}
+      serviceAccountName: {{ include "volume-expansion.fullname" $ }}
+      containers:
+{{ if or $shouldDeleteSts $shouldPatchAnnotations }}
+      - name: sts-delete
+        imagePullPolicy: IfNotPresent
+        image: {{ include "volume-expansion.job.image" $ }}
+        command:
+          - /bin/sh
+          - -c
+          - |
+            set -e
+            kubectl patch sts {{ $stsName | quote }} --type json --patch {{ $stsPatch | quote }} || \
+            kubectl delete sts {{ $stsName | quote }} --ignore-not-found --cascade=orphan
+{{- end -}}
+{{ if or $shouldPatchPvc $shouldPatchAnnotations }}
+      - name: pvc-patch
+        imagePullPolicy: IfNotPresent
+        image: {{ include "volume-expansion.job.image" $ }}
+        command:
+          - /bin/sh
+          - -c
+          - |
+            set -e
+            kubectl patch pvc {{ $pvcName | quote }} --type json --patch {{ $pvcPatch | quote }} || exit 0
+{{- end -}}
+{{- end -}}
+{{- end -}}
