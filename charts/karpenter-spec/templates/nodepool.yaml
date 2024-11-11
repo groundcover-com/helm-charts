@@ -9,12 +9,12 @@ spec:
   disruption:
   {{- if $value.disruption }}
   {{- with $value.disruption }}
-    consolidateAfter: {{ default "6h" .consolidateAfter }}
+    consolidateAfter: {{ default "5m" .consolidateAfter }}
     consolidationPolicy: {{ default "WhenEmpty" .consolidationPolicy }}
     budgets: {{ default (list (dict "nodes" "0" "reasons"  (list "Underutilized")) (dict "nodes" "10%" "reasons"  (list "Empty" "Drifted"))) .budgets | toYaml | nindent 4 }}
   {{- end }}
   {{- else }}
-    consolidateAfter: "6h" 
+    consolidateAfter: "5m" 
     consolidationPolicy: "WhenEmpty" 
     budgets: 
     - nodes: 0

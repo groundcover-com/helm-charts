@@ -38,7 +38,7 @@ spec:
   {{- end }}
   blockDeviceMappings:
     {{- with $value.rootVolume }}
-    - deviceName: {{ default "/dev/xvda" .deviceName }}
+    - deviceName: {{ default "/dev/xvdb" .deviceName }}
       ebs:
         volumeType: {{ default "gp3" .type }}
         volumeSize: {{ default "256Gi" .size }}
