@@ -1,5 +1,5 @@
 apiVersion: v2
-appVersion: 1.8.220
+appVersion: 1.8.221
 description: OpenTelemetry Collector Helm chart for Kubernetes
 home: https://opentelemetry.io/
 icon: https://opentelemetry.io/img/logos/opentelemetry-logo-nav.png
