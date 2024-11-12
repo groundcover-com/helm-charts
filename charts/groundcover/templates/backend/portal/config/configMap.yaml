@@ -45,7 +45,7 @@ data:
     DirectModeGRPCPort: "5555"
 
     VictoriaMetrics:
-      URL: {{ include "victoria-metrics.read.http.url" . }}
+      URL: {{ include "victoria-metrics.base.http.url" . }}
 
     ClickHouse:
       Pass: "OVERRIDEN"

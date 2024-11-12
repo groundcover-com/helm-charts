@@ -267,3 +267,54 @@ Create the name of the agent priority class to use
 {{- include "groundcover.fullname" . }}-sensor-high-priority
 {{- end }}
 {{- end }}
+
+{{/*
+The next three functions are coupled, order of response is important and should be kept in sync
+*/}}
+{{- define "ingester.buildRemoteWriteURLTargets" -}}
+  {{- $vmSingleUrl := include "victoria-metrics.write.http.url" . -}}
+  {{- $vectorUrl := include "vector.cluster.prometheus_remote_write.vm_metrics.endpoint" . -}}
+
+  {{- $value := $vmSingleUrl -}}
+  {{- if .Values.global.backend.enabled -}}
+    {{- $value = print $vmSingleUrl "," $vectorUrl -}}
+  {{- end -}}
+
+  {{- $value -}}
+{{- end }}
+
+{{- define "ingester.buildRemoteWriteRateLimit" -}}
+    {{- $vmSingleRateLimit := 0 -}}
+    {{- $vectorRateLimit := 500000 -}}
+
+    {{- $value := $vmSingleRateLimit -}}
+    {{- if .Values.global.backend.enabled -}}
+        {{- $value = print $vmSingleRateLimit "," $vectorRateLimit -}}
+    {{- end -}}
+
+    {{- $value -}}
+{{- end -}}
+
+{{- define "ingester.buildRemoteWriteDisableOnDiskQueue" -}}
+    {{- $vmSingleDisableOnDiskQueue := false -}}
+    {{- $vectorDisableOnDiskQueue := false -}}
+
+    {{- $value := $vmSingleDisableOnDiskQueue -}}
+    {{- if .Values.global.backend.enabled -}}
+        {{- $value = print $vmSingleDisableOnDiskQueue "," $vectorDisableOnDiskQueue -}}
+    {{- end -}}
+
+    {{- $value -}}
+{{- end -}}
+
+{{- define "ingester.buildRemoteWriteMaxDiskUsagePerURL" -}}
+    {{- $vmSignleMaxDiskUsagePerURL := "10GB" -}}
+    {{- $vectorMaxDiskUsagePerURL := "512MB" -}}
+
+    {{- $value := $vmSignleMaxDiskUsagePerURL -}}
+    {{- if .Values.global.backend.enabled -}}
+        {{- $value = print $vmSignleMaxDiskUsagePerURL "," $vectorMaxDiskUsagePerURL -}}
+    {{- end -}}
+
+    {{- $value -}}
+{{- end -}}

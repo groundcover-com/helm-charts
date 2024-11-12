@@ -158,8 +158,8 @@ keep:
       groundcoverVictoriaMetrics:
         type: victoriametrics
         authentication:
-          vmAlertHost: '{{ include "victoria-metrics.read.http.scheme" . }}://{{ include "victoria-metrics.read.http.host" . }}'
-          vmAlertPort: '{{ include "victoria-metrics.read.http.port" . }}'
+          vmAlertHost: '{{ include "victoria-metrics.cluster.http.url_without_port" . }}'
+          vmAlertPort: '{{ include "victoria-metrics.cluster.http.port" . }}'
       groundcoverClickhouse:
         type: clickhouse
         authentication:

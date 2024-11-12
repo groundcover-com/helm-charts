@@ -71,18 +71,6 @@ global:
     tls:
       enabled: false
     overrideUrl: ""
-    write:
-      destinations:
-        vm:
-          url: '{{ include "victoria-metrics.write.http.url" . }}'
-          rateLimit: 0
-          disableOnDiskQueue: false
-          maxDiskUsagePerURL: "10GB"
-        vector:
-          url: '{{ include "vector.cluster.prometheus_remote_write.vm_metrics.endpoint" . }}'
-          rateLimit: 500000
-          disableOnDiskQueue: false
-          maxDiskUsagePerURL: "512MB"
 
   otlp:
     overrideGrpcURL: ""
@@ -2678,7 +2666,7 @@ monitors-manager:
         - name: VM
           type: prometheus
           uid: victoria-metrics
-          url: '{{ include "victoria-metrics.read.http.url" . }}'
+          url: '{{ include "victoria-metrics.base.http.url" . }}'
           access: proxy
           jsonData:
             prometheusType: "Prometheus"
