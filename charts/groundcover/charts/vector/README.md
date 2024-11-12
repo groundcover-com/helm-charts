@@ -1,6 +1,6 @@
 # Vector
 
-![Version: 0.32.1](https://img.shields.io/badge/Version-0.32.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.37.1-distroless-libc](https://img.shields.io/badge/AppVersion-0.37.1--distroless--libc-informational?style=flat-square)
+![Version: 0.37.0](https://img.shields.io/badge/Version-0.37.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.42.0-distroless-libc](https://img.shields.io/badge/AppVersion-0.42.0--distroless--libc-informational?style=flat-square)
 
 [Vector](https://vector.dev/) is a high-performance, end-to-end observability data pipeline that puts you in control of your observability data. Collect, transform, and route all your logs, metrics, and traces to any vendors you want today and any other vendors you may want tomorrow. Vector enables dramatic cost reduction, novel data enrichment, and data security where you need it, not where is most convenient for your vendors.
 
@@ -26,8 +26,7 @@ By default, Vector runs as a `StatefulSet` in the "Aggregator" role. It can alte
 To install the chart with the release name `<RELEASE_NAME>` run:
 
 ```bash
-helm install --name <RELEASE_NAME> \
-  vector/vector
+helm install <RELEASE_NAME> vector/vector
 ```
 
 ### Upgrading
@@ -112,9 +111,9 @@ customConfig:
 The following table lists the configurable parameters of the Vector chart and their default values. Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example,
 
 ```bash
-helm install --name <RELEASE_NAME> \
-  --set role=Agent \
-  vector/vector
+helm install <RELEASE_NAME> \
+  vector/vector \
+  --set role=Agent
 ```
 
 ## Values
@@ -129,6 +128,7 @@ helm install --name <RELEASE_NAME> \
 | autoscaling.behavior | object | `{}` | Configure separate scale-up and scale-down behaviors. |
 | autoscaling.customMetric | object | `{}` | Target a custom metric for autoscaling. |
 | autoscaling.enabled | bool | `false` | Create a [HorizontalPodAutoscaler](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/) for Vector. Valid for the "Aggregator" and "Stateless-Aggregator" roles. |
+| autoscaling.external | bool | `false` | Set to `true` if using an external autoscaler like [KEDA](https://keda.sh/). Valid for the "Aggregator and "Stateless-Aggregator" roles. |
 | autoscaling.maxReplicas | int | `10` | Maximum replicas for Vector's HPA. |
 | autoscaling.minReplicas | int | `1` | Minimum replicas for Vector's HPA. |
 | autoscaling.targetCPUUtilizationPercentage | int | `80` | Target CPU utilization for Vector's HPA. |
@@ -150,6 +150,8 @@ helm install --name <RELEASE_NAME> \
 | extraVolumeMounts | list | `[]` | Additional Volume to mount into Vector Containers. |
 | extraVolumes | list | `[]` | Additional Volumes to use with Vector Pods. |
 | fullnameOverride | string | `""` | Override the full name of resources. |
+| hostAliases | list | `[]` |  |
+| image.base | string | `""` | The base distribution to use for vector. If set, then the base in appVersion will be replaced with this base alongside the version. For example: with a `base` of `debian` `0.38.0-distroless-libc` becomes `0.38.0-debian` |
 | image.pullPolicy | string | `"IfNotPresent"` | The [pullPolicy](https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy) for Vector's image. |
 | image.pullSecrets | list | `[]` | The [imagePullSecrets](https://kubernetes.io/docs/concepts/containers/images/#specifying-imagepullsecrets-on-a-pod) to reference for the Vector Pods. |
 | image.repository | string | `"timberio/vector"` | Override default registry and name for Vector's image. |
@@ -173,6 +175,7 @@ helm install --name <RELEASE_NAME> \
 | persistence.finalizers | list | `["kubernetes.io/pvc-protection"]` | Specifies the finalizers of PersistentVolumeClaims. Valid for the "Aggregator" role. |
 | persistence.hostPath.enabled | bool | `true` | If true, use hostPath persistence. Valid for the "Agent" role, if it's disabled the "Agent" role will use emptyDir. |
 | persistence.hostPath.path | string | `"/var/lib/vector"` | Override path used for hostPath persistence. Valid for the "Agent" role, persistence is always used for the "Agent" role. |
+| persistence.retentionPolicy | object | `{}` | Configure a [PersistentVolumeClaimRetentionPolicy](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#persistentvolumeclaim-retention) for Vector's PersistentVolumeClaims. Valid for the "Aggregator" role. |
 | persistence.selectors | object | `{}` | Specifies the selectors for PersistentVolumeClaims. Valid for the "Aggregator" role. |
 | persistence.size | string | `"10Gi"` | Specifies the size of PersistentVolumeClaims. Valid for the "Aggregator" role. |
 | podAnnotations | object | `{}` | Set annotations on Vector Pods. |
@@ -234,6 +237,7 @@ helm install --name <RELEASE_NAME> \
 | haproxy.affinity | object | `{}` | Configure [affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity) rules for HAProxy Pods. |
 | haproxy.autoscaling.customMetric | object | `{}` | Target a custom metric for autoscaling. |
 | haproxy.autoscaling.enabled | bool | `false` | Create a HorizontalPodAutoscaler for HAProxy. |
+| haproxy.autoscaling.external | bool | `false` | HAProxy is controlled by an external HorizontalPodAutoscaler. |
 | haproxy.autoscaling.maxReplicas | int | `10` | Maximum replicas for HAProxy's HPA. |
 | haproxy.autoscaling.minReplicas | int | `1` | Minimum replicas for HAProxy's HPA. |
 | haproxy.autoscaling.targetCPUUtilizationPercentage | int | `80` | Target CPU utilization for HAProxy's HPA. |

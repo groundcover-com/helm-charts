@@ -14,8 +14,10 @@ If release name contains chart name it will be used as a full name.
 {{- printf "%s-%s" .Release.Name (include "vector.name" .) | trunc 63 | trimSuffix "-" }}
 {{- end -}}
 
-# add tpl to env and initContainers
-# taken from v0.33, https://github.com/vectordotdev/helm-charts/blob/391a7fdb1b7d0c38ec969df0bde9e873c2eb48d5/charts/vector/templates/_pod.tpl
+# modified the PodSpec for Vector
+# - add tpl to env and initContainers
+# - add backendEnv to env if global.backend.enabled is true
+# taken from chart v0.37, https://github.com/vectordotdev/helm-charts/blob/vector-0.37.0/charts/vector/templates/_pod.tpl
 
 {{/*
 Defines the PodSpec for Vector.
@@ -46,6 +48,10 @@ dnsConfig:
 imagePullSecrets:
 {{ toYaml . | indent 2 }}
 {{- end }}
+{{- with .Values.hostAliases }}
+hostAliases:
+{{ toYaml . | indent 2 }}
+{{- end }}
 {{- with .Values.initContainers }}
 initContainers:
   {{- tpl (toYaml .) $ | nindent 2 }}
@@ -57,9 +63,9 @@ containers:
 {{ toYaml . | indent 6 }}
 {{- end }}
 {{- if .Values.image.sha }}
-    image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}@sha256:{{ .Values.image.sha }}"
+    image: "{{ .Values.image.repository }}:{{ include "vector.image.tag" . }}@sha256:{{ .Values.image.sha }}"
 {{- else }}
-    image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+    image: "{{ .Values.image.repository }}:{{ include "vector.image.tag" . }}"
 {{- end }}
     imagePullPolicy: {{ .Values.image.pullPolicy }}
 {{- with .Values.command }}
