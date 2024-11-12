@@ -47,3 +47,51 @@
 {{- define "metrics-ingester.promethues-exposition.http.url" -}}
 {{- printf "%s/api/v1/import/prometheus" (include "metrics-ingester.base.http.url" .) -}}
 {{- end -}}
+
+{{/*
+binary config facade helper
+*/}}
+{{- define "ingester.getDeploymentDestinations" -}}
+{{- if .Values.global.backend.enabled -}}
+  {{- "backend" -}}
+{{- else -}}
+  {{- "sensor" -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "ingester.buildCommaSeparatedValues" -}}
+  {{- $context := .Context -}}
+  {{- $items := (index .Items (include "ingester.getDeploymentDestinations" $context)) -}}
+  {{- $field := .Field -}}
+  {{- $values := "" -}}
+
+  {{- /* Sort keys to ensure stable ordering */ -}}
+  {{- $sortedKeys := sortAlpha (keys $items) -}}
+
+  {{- range $index, $key := $sortedKeys -}}
+    {{- $value := tpl (toString (index $items $key $field)) $context -}}
+    {{- if $values -}}
+      {{- $values = print $values "," $value -}}
+    {{- else -}}
+      {{- $values = $value -}}
+    {{- end -}}
+  {{- end -}}
+
+  {{- $values -}}
+{{- end }}
+
+{{- define "ingester.buildRemoteWriteURLTargets" -}}
+{{- include "ingester.buildCommaSeparatedValues" (dict "Items" .Values.global.metrics.write.destinations "Field" "url" "Context" .) }}
+{{- end -}}
+
+{{- define "ingester.buildRemoteWriteRateLimit" -}}
+{{- include "ingester.buildCommaSeparatedValues" (dict "Items" .Values.global.metrics.write.destinations "Field" "rateLimit" "Context" .) }}
+{{- end -}}
+
+{{- define "ingester.buildRemoteWriteDisableOnDiskQueue" -}}
+{{- include "ingester.buildCommaSeparatedValues" (dict "Items" .Values.global.metrics.write.destinations "Field" "disableOnDiskQueue" "Context" .) }}
+{{- end -}}
+
+{{- define "ingester.buildRemoteWriteMaxDiskUsagePerURL" -}}
+{{- include "ingester.buildCommaSeparatedValues" (dict "Items" .Values.global.metrics.write.destinations "Field" "maxDiskUsagePerURL" "Context" .) }}
+{{- end -}}
