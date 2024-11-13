@@ -74,22 +74,15 @@ global:
     write:
       destinations:
         backend:
-          vm:
-            url: '{{ include "victoria-metrics.write.http.url" . }}'
-            rateLimit: 0
-            disableOnDiskQueue: false
-            maxDiskUsagePerURL: "10GB"
-          vector:
-            url: '{{ include "vector.cluster.prometheus_remote_write.vm_metrics.endpoint" . }}'
-            rateLimit: 500000
-            disableOnDiskQueue: false
-            maxDiskUsagePerURL: "512MB"
+          url: '{{ include "victoria-metrics.write.http.url" . }},{{ include "vector.cluster.prometheus_remote_write.vm_metrics.endpoint" . }}'
+          rateLimit: '0,500000'
+          disableOnDiskQueue: 'false,false'
+          maxDiskUsagePerURL: '10GB,512MB'
         sensor:
-          vm:
-            url: '{{ include "victoria-metrics.write.http.url" . }}'
-            rateLimit: 0
-            disableOnDiskQueue: false
-            maxDiskUsagePerURL: "10GB"
+          url: '{{ include "victoria-metrics.write.http.url" . }}'
+          rateLimit: '0'
+          disableOnDiskQueue: 'false'
+          maxDiskUsagePerURL: '10GB'
 
   otlp:
     overrideGrpcURL: ""

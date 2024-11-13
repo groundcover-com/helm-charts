@@ -51,47 +51,30 @@
 {{/*
 binary config facade helper
 */}}
-{{- define "ingester.getDeploymentDestinations" -}}
-{{- if .Values.global.backend.enabled -}}
-  {{- "backend" -}}
-{{- else -}}
-  {{- "sensor" -}}
-{{- end -}}
-{{- end -}}
-
-{{- define "ingester.buildCommaSeparatedValues" -}}
+{{- define "ingester.getCommaSeparatedValues" -}}
   {{- $context := .Context -}}
-  {{- $items := (index .Items (include "ingester.getDeploymentDestinations" $context)) -}}
+  {{- $items := (index .Items (ternary "backend" "sensor" $context.Values.global.backend.enabled)) -}}
   {{- $field := .Field -}}
-  {{- $values := "" -}}
-
-  {{- /* Sort keys to ensure stable ordering */ -}}
-  {{- $sortedKeys := sortAlpha (keys $items) -}}
-
-  {{- range $index, $key := $sortedKeys -}}
-    {{- $value := tpl (toString (index $items $key $field)) $context -}}
-    {{- if $values -}}
-      {{- $values = print $values "," $value -}}
-    {{- else -}}
-      {{- $values = $value -}}
-    {{- end -}}
+  
+  {{- if $items -}}
+    {{- tpl (index $items $field) $context -}}
+  {{- else -}}
+    ""
   {{- end -}}
-
-  {{- $values -}}
-{{- end }}
+{{- end -}}
 
 {{- define "ingester.buildRemoteWriteURLTargets" -}}
-{{- include "ingester.buildCommaSeparatedValues" (dict "Items" .Values.global.metrics.write.destinations "Field" "url" "Context" .) }}
+{{- include "ingester.getCommaSeparatedValues" (dict "Items" .Values.global.metrics.write.destinations "Field" "url" "Context" .) }}
 {{- end -}}
 
 {{- define "ingester.buildRemoteWriteRateLimit" -}}
-{{- include "ingester.buildCommaSeparatedValues" (dict "Items" .Values.global.metrics.write.destinations "Field" "rateLimit" "Context" .) }}
+{{- include "ingester.getCommaSeparatedValues" (dict "Items" .Values.global.metrics.write.destinations "Field" "rateLimit" "Context" .) }}
 {{- end -}}
 
 {{- define "ingester.buildRemoteWriteDisableOnDiskQueue" -}}
-{{- include "ingester.buildCommaSeparatedValues" (dict "Items" .Values.global.metrics.write.destinations "Field" "disableOnDiskQueue" "Context" .) }}
+{{- include "ingester.getCommaSeparatedValues" (dict "Items" .Values.global.metrics.write.destinations "Field" "disableOnDiskQueue" "Context" .) }}
 {{- end -}}
 
 {{- define "ingester.buildRemoteWriteMaxDiskUsagePerURL" -}}
-{{- include "ingester.buildCommaSeparatedValues" (dict "Items" .Values.global.metrics.write.destinations "Field" "maxDiskUsagePerURL" "Context" .) }}
+{{- include "ingester.getCommaSeparatedValues" (dict "Items" .Values.global.metrics.write.destinations "Field" "maxDiskUsagePerURL" "Context" .) }}
 {{- end -}}
