@@ -271,6 +271,9 @@ agent:
       b3ForceSample: false
       datadogForceSample: false
     watchOnlyLocalNode: false
+    metricIngestor:
+      serverEnabled: true
+      serverPort: 8428
     apmIngestor:
       dataDog:
         proxyEnabled: false
@@ -2187,6 +2190,7 @@ victoria-metrics-operator:
 
 custom-metrics:
   enabled: false
+  useSensorAsEndpoint: false
   service:
     enabled: true
   nodeSelector:
@@ -2214,7 +2218,7 @@ custom-metrics:
     promscrape.maxScrapeSize: "64MiB"
     remoteWrite.headers: "apikey:%{API_KEY}"
     remoteWrite.tlsInsecureSkipVerify: '{{ ternary "true" "false" .Values.global.ingestion.tls_skip_verify }}'
-    remoteWrite.url: '{{ include "victoria-metrics.write.http.url" . }}'
+    remoteWrite.url: '{{ include "custom-metrics.remote-server-url" . }}'
     remoteWrite.label: clusterId=$(GC_CLUSTER_ID)
   env:
     - name: GC_CLUSTER_ID

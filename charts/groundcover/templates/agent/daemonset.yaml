@@ -170,6 +170,11 @@ spec:
               name: jaeger-th-comp
               protocol: UDP     
             {{- end }}
+            {{- if and $sensorValues.metricIngestor.serverEnabled $sensorValues.metricIngestor.serverPort}}
+            - containerPort: {{ $sensorValues.metricIngestor.serverPort }}
+              name: metric-ingestor
+              protocol: TCP     
+            {{- end }}
           securityContext:
             capabilities:
               add:
@@ -183,9 +188,12 @@ spec:
             - mountPath: /host
               name: host-root
               readOnly: true
-            - mountPath: /sys
-              name: sys
-              readOnly: true
+            - mountPath: /sys/kernel/debug
+              name: sys-kernel-debug
+              readOnly: false
+            - mountPath: /sys/kernel/tracing
+              name: sys-kernel-tracing
+              readOnly: false
             - mountPath: /config
               name: sensor-configuration
               readOnly: false
@@ -331,9 +339,13 @@ spec:
             type: Directory
           name: host-root
         - hostPath:
-            path: /sys
+            path: /sys/kernel/debug
             type: Directory
-          name: sys
+          name: sys-kernel-debug
+        - hostPath:
+            path: /sys/kernel/tracing
+            type: Directory
+          name: sys-kernel-tracing
         - configMap:
             defaultMode: 420
             name: sensor-configuration
