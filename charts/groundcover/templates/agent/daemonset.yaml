@@ -73,11 +73,7 @@ spec:
               value: {{ (include "agent.monitoring.port" .) | quote }}
             - name: FLORA_PROMETHEUSSERVER_ENABLED
               value: "false"
-            - name: FLORA_NATTRACKER_PROCMOUNTPATH
-              value: "/host/proc"
-            - name: FLORA_SYSTEMWATCHER_PROCMOUNTPATH
-              value: "/host/proc"
-            - name: FLORA_SYSTEMWATCHER_HOSTMOUNTPATH
+            - name: FLORA_SYSTEMINFO_HOSTMOUNTPATH
               value: "/host"
             - name: FLORA_NETWORKTRACER_CONNECTIONMANAGER_PROTOCOLS_HTTP_UNLIMITEDPAYLOADENDPOINTS
               value: {{ (tpl $sensorValues.httpUnlimitedEndpoints .) | quote }}
