@@ -25,7 +25,7 @@
   {{- if $host -}}
     {{- $host -}}
   {{- else if index .Values.global.backend "victoria-metrics-distributed" "enabled" -}}
-    {{- printf "vmauth-vmauth-read-balancer-%s" ( include "victoria-metrics-distributed.cluster.availabilityZone" . ) -}}
+    {{- printf "vmauth-%s" (include "victoria-metrics-distributed.vmauthQueryGlobalName" .) -}}
   {{- else -}}
     {{- printf "%s" (include "victoria-metrics.server.fullname" .) -}}
   {{- end -}}
@@ -99,7 +99,7 @@
   {{- if $host -}}
     {{- $host -}}
   {{- else if index .Values.global.backend "victoria-metrics-distributed" "enabled" -}}
-    {{- printf "vmauth-vmauth-write-balancer-%s" ( include "victoria-metrics-distributed.cluster.availabilityZone" . ) -}}
+    {{- printf "vmauth-%s" (include "victoria-metrics-distributed.vmauthIngestGlobalName" .) -}}
   {{- else -}}
     {{- printf "%s" (include "victoria-metrics.server.fullname" .) -}}
   {{- end -}}
@@ -140,7 +140,7 @@
   {{- if (ne $path "-") -}}
     {{- $path -}}
   {{- else if index .Values.global.backend "victoria-metrics-distributed" "enabled" -}}
-    {{- printf "insert/0/prometheus/api/v1/write" -}}
+    {{- printf "prometheus/api/v1/write" -}}
   {{- else -}}
     {{- printf "api/v1/write" -}}
   {{- end -}}
@@ -172,15 +172,4 @@ WRITE: Used by metrics-ingestor and custom-metrics
 {{- else -}}
     {{- fail "A valid global.ingress.site or global.metrics.overrideUrl is required" -}}
 {{- end -}}
-{{- end -}}
-
-{{/*
-victoria-metrics-distributed
-*/}}
-{{- define "victoria-metrics-distributed.vmauthIngestGlobalName" -}}
-{{- printf "vmauth-global-write-%s" (include "groundcover.name" .) | trunc 63 -}}
-{{- end -}}
-
-{{- define "victoria-metrics-distributed.vmauthQueryGlobalName" -}}
-{{- printf "vmauth-global-read-%s" (include "groundcover.name" .) | trunc 63 -}}
 {{- end -}}
