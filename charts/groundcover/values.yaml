@@ -521,6 +521,7 @@ clickhouse:
   shards: 1
   replicaCount: 1
   image:
+    tag: 24.6.1-debian-12-r0
     registry: public.ecr.aws/groundcovercom
   containerSecurityContext:
     enabled: false
