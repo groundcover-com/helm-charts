@@ -10,14 +10,18 @@ spec:
   {{- if $value.disruption }}
   {{- with $value.disruption }}
     consolidateAfter: {{ default "5m" .consolidateAfter }}
-    consolidationPolicy: {{ default "WhenEmpty" .consolidationPolicy }}
-    budgets: {{ default (list (dict "nodes" "0" "reasons"  (list "Underutilized")) (dict "nodes" "10%" "reasons"  (list "Empty" "Drifted"))) .budgets | toYaml | nindent 4 }}
+    consolidationPolicy: {{ default "WhenEmptyOrUnderutilized" .consolidationPolicy }}
+    budgets: {{ default (list (dict "nodes" "10%" "reasons"  (list "Empty" "Drifted" "Underutilized"))) .budgets | toYaml | nindent 4 }}
   {{- end }}
   {{- else }}
     consolidateAfter: "5m" 
-    consolidationPolicy: "WhenEmpty" 
+    consolidationPolicy: "WhenEmptyOrUnderutilized" 
     budgets: 
-    - nodes: 0
+    - nodes: 10%
+      reasons:
+      - Empty
+      - Drifted
+      - Underutilized
   {{- end }}
   limits:
   {{- if $value.limits }}
@@ -83,14 +87,10 @@ spec:
       {{- with $value.instanceCpu }}
       - key: "karpenter.k8s.aws/instance-cpu"
         operator: {{ default "Gt" .operator}}
-        values: {{- range default (list "24") .values }}
+        values: {{- range .values }}
         - {{ . | quote }}
         {{- end }}
       {{- end }}
-      {{- else }}
-      - key: "karpenter.k8s.aws/instance-cpu"
-        operator: "Gt" 
-        values: ["24"]
       {{- end }}
       {{- if $value.instanceHypervisor.values }}
       {{- with $value.instanceHypervisor }}
@@ -157,14 +157,10 @@ spec:
       {{- with $value.instanceMemory }}
       - key: "karpenter.k8s.aws/instance-memory"
         operator: {{ default "Gt" .operator}}
-        values: {{- range default (list "126976") .values }}
+        values: {{- range .values }}
         - {{ . | quote }}
         {{- end }}
       {{- end }}
-      {{- else }}
-      - key: "karpenter.k8s.aws/instance-memory"
-        operator: "Gt"
-        values: ["126976"]
       {{- end }}
       {{- if $value.instanceType.values }}
       {{- with $value.instanceType }}
