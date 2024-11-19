@@ -274,6 +274,7 @@ agent:
     metricIngestor:
       serverEnabled: true
       serverPort: 8428
+      usePrometheusCompatibleNaming: true
     apmIngestor:
       dataDog:
         proxyEnabled: false

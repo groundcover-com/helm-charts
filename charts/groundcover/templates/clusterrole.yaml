@@ -36,10 +36,14 @@ rules:
   - nodes/proxy
   - nodes/stats
   - replicationcontrollers
-  - configmaps
-  - secrets
   - persistentvolumeclaims
   - persistentvolumes
+  {{- if .Values.k8sWatcher.watch.configmap.enabled }}
+  - configmaps
+  {{- end }}
+  {{- if .Values.k8sWatcher.watch.secret.enabled }}
+  - secrets
+  {{- end }}
   verbs:
   - list
   - watch
