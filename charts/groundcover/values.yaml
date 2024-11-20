@@ -1802,7 +1802,7 @@ vector:
             type: "aws_s3"
             bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
             region: '{{ .Values.vector.objectStorage.region }}'
-            key_prefix: "v2/logs/"
+            key_prefix: "v2/logs_v3/"
             encoding:
               codec: json
               timestamp_format: rfc3339
@@ -1817,7 +1817,7 @@ vector:
             type: "aws_s3"
             bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
             region: '{{ .Values.vector.objectStorage.region }}'
-            key_prefix: "v2/traces/"
+            key_prefix: "v2/traces_v2/"
             encoding:
               codec: json
               timestamp_format: rfc3339
@@ -1884,7 +1884,7 @@ vector:
         logs:
           gcs_logs:
             type: gcp_cloud_storage
-            key_prefix: v2/logs/
+            key_prefix: v2/logs_v3/
             compression: zstd
             bucket: '{{ .Values.vector.objectStorage.gcsBucket }}'
             batch:
@@ -1899,7 +1899,7 @@ vector:
         traces:
           gcs_traces:
             type: gcp_cloud_storage
-            key_prefix: v2/traces/
+            key_prefix: v2/traces_v2/
             compression: zstd
             bucket: '{{ .Values.vector.objectStorage.gcsBucket }}'
             batch:
