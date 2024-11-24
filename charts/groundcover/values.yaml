@@ -78,11 +78,13 @@ global:
           rateLimit: '0,500000'
           disableOnDiskQueue: 'false,false'
           maxDiskUsagePerURL: '10GB,512MB'
+          forceVMProto: "true,false"
         sensor:
           url: '{{ include "victoria-metrics.write.http.url" . }}'
           rateLimit: '0'
           disableOnDiskQueue: 'false'
           maxDiskUsagePerURL: '10GB'
+          forceVMProto: "true"
 
   otlp:
     overrideGrpcURL: ""
@@ -279,12 +281,12 @@ agent:
       dataDog:
         proxyEnabled: false
         tracesPort: 8126
-        samplingRatio: 1
+        samplingRatio: 0.05
       otel:
         proxyEnabled: false
         direct:
           enabled: true
-          samplingRatio: 1
+          samplingRatio: 0.05
           zipkin:
             enabled: true
             port: 9411
@@ -1991,15 +1993,16 @@ metrics-ingester:
       topologyKey: topology.kubernetes.io/zone
       whenUnsatisfiable: ScheduleAnyway
   extraArgs:
+    remoteWrite.url: '{{ include "ingester.buildRemoteWriteURLTargets" . }}'
+    remoteWrite.rateLimit: '{{ include "ingester.buildRemoteWriteRateLimit" . }}'
+    remoteWrite.maxDiskUsagePerURL: '{{ include "ingester.buildRemoteWriteMaxDiskUsagePerURL" . }}'
+    remoteWrite.disableOnDiskQueue: '{{ include "ingester.buildRemoteWriteDisableOnDiskQueue" . }}'
+    remoteWrite.forceVMProto: '{{ include "ingester.buildRemoteWriteForceVMProto" . }}'
     promscrape.streamParse: "true"
     promscrape.dropOriginalLabels: "true"
     remoteWrite.showURL: "true"
-    remoteWrite.maxDiskUsagePerURL: '{{ include "ingester.buildRemoteWriteMaxDiskUsagePerURL" . }}'
     remoteWrite.headers: "apikey:%{API_KEY}"
     remoteWrite.tlsInsecureSkipVerify: '{{ ternary "true" "false" .Values.global.ingestion.tls_skip_verify }}'
-    remoteWrite.url: '{{ include "ingester.buildRemoteWriteURLTargets" . }}'
-    remoteWrite.rateLimit: '{{ include "ingester.buildRemoteWriteRateLimit" . }}'
-    remoteWrite.disableOnDiskQueue: '{{ include "ingester.buildRemoteWriteDisableOnDiskQueue" . }}'
     tlsKeyFile: /etc/ssl/gc-certs/tls.key
     tlsCertFile: /etc/ssl/gc-certs/tls.crt
     tls: "{{ .Values.global.metrics.tls.enabled }}"

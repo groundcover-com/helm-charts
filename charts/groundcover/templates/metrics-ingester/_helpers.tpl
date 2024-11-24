@@ -51,30 +51,40 @@
 {{/*
 binary config facade helper
 */}}
-{{- define "ingester.getCommaSeparatedValues" -}}
-  {{- $context := .Context -}}
-  {{- $items := (index .Items (ternary "backend" "sensor" $context.Values.global.backend.enabled)) -}}
+{{- define "ingester.vmCLIConfigHelper" -}}
+  {{- $ctx := .Context -}}
   {{- $field := .Field -}}
-  
-  {{- if $items -}}
-    {{- tpl (index $items $field) $context -}}
-  {{- else -}}
-    ""
+  {{- $mode := (ternary "backend" "sensor" $ctx.Values.global.backend.enabled) -}}
+  {{- $destinations := (index .Destinations $mode) -}}
+
+  {{- $result := tpl (index $destinations $field) $ctx -}}
+
+  {{/* guard vm order & quantity dependent param array misconfiguration */}}
+  {{- $required_items_count := (index $destinations "url") | split "," | len -}}
+  {{- $actual_items_count := $result | split "," | len -}}
+  {{- if ne $required_items_count $actual_items_count -}}
+    {{- printf ".global.metrics.write.destinations.%s.url has %d params, .global.metrics.write.destinations.%s.%s must have equivalent number of params (has %d)" $mode $required_items_count $mode $field $actual_items_count | fail -}}
   {{- end -}}
+
+  {{- $result -}}
 {{- end -}}
 
 {{- define "ingester.buildRemoteWriteURLTargets" -}}
-{{- include "ingester.getCommaSeparatedValues" (dict "Items" .Values.global.metrics.write.destinations "Field" "url" "Context" .) }}
+{{- include "ingester.vmCLIConfigHelper" (dict "Destinations" .Values.global.metrics.write.destinations "Field" "url" "Context" .) }}
 {{- end -}}
 
 {{- define "ingester.buildRemoteWriteRateLimit" -}}
-{{- include "ingester.getCommaSeparatedValues" (dict "Items" .Values.global.metrics.write.destinations "Field" "rateLimit" "Context" .) }}
+{{- include "ingester.vmCLIConfigHelper" (dict "Destinations" .Values.global.metrics.write.destinations "Field" "rateLimit" "Context" .) }}
 {{- end -}}
 
 {{- define "ingester.buildRemoteWriteDisableOnDiskQueue" -}}
-{{- include "ingester.getCommaSeparatedValues" (dict "Items" .Values.global.metrics.write.destinations "Field" "disableOnDiskQueue" "Context" .) }}
+{{- include "ingester.vmCLIConfigHelper" (dict "Destinations" .Values.global.metrics.write.destinations "Field" "disableOnDiskQueue" "Context" .) }}
 {{- end -}}
 
 {{- define "ingester.buildRemoteWriteMaxDiskUsagePerURL" -}}
-{{- include "ingester.getCommaSeparatedValues" (dict "Items" .Values.global.metrics.write.destinations "Field" "maxDiskUsagePerURL" "Context" .) }}
+{{- include "ingester.vmCLIConfigHelper" (dict "Destinations" .Values.global.metrics.write.destinations "Field" "maxDiskUsagePerURL" "Context" .) }}
+{{- end -}}
+
+{{- define "ingester.buildRemoteWriteForceVMProto" -}}
+{{- include "ingester.vmCLIConfigHelper" (dict "Destinations" .Values.global.metrics.write.destinations "Field" "forceVMProto" "Context" .) }}
 {{- end -}}
