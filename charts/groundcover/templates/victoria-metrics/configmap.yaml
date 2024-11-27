@@ -25,3 +25,16 @@ data:
         target_label: __name__
         regex: "(.+):.*"
         replacement: "$1"
+    - match: '{__name__="groundcover_kube_pod_status_phase"}'
+      interval: 15s
+      outputs: [last]
+      keep_metric_names: true
+    - match: '{__name__="groundcover_kube_pod_status_phase"}'
+      without: [pod, uid]
+      interval: 15s
+      outputs: [count_series]
+      output_relabel_configs:
+      - source_labels: [__name__]
+        target_label: __name__
+        regex: "(.+)"
+        replacement: "groundcover_workload_pods_status_phase"
