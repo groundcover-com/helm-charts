@@ -2,7 +2,7 @@
 apiVersion: v1
 data:
   config.yaml: |-
-      job_name: kubernetes-pods-name
+    - job_name: kubernetes-logs
       kubernetes_sd_configs:
       - role: pod
       relabel_configs:
@@ -36,6 +36,16 @@ data:
         - __meta_kubernetes_namespace
         - __meta_kubernetes_pod_name
         target_label: __path__
+    - job_name: docker-logs
+      docker_sd_configs:
+        - host: unix:///var/run/docker.sock
+      relabel_configs:
+      - source_labels: [__meta_docker_container_name]
+        regex: '/(.*)'
+        target_label: container
+      - source_labels: [__meta_docker_container_id]
+        target_label: container_id
+
 kind: ConfigMap
 metadata:
   labels:

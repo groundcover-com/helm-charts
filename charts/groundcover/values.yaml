@@ -147,6 +147,7 @@ saas:
 #GENERAL
 env:
 clusterId:
+env_type: k8s
 installationId:
 # multipleClusterIds:
 #  - clusterA
@@ -171,6 +172,8 @@ logsMultiLines:
   #   firstLineRegex: "PlaceOrder"   # mandatory
   #   maxLines: 100                  # optional, default = 1024
   #   maxWaitTime: 10s               # optional, default = 3s
+isk8s: true
+positionsFile: "/var/run/positions/positions.yaml"
 decolorizeLogs: false
 maxLogSize: 102400 # 100KB
 maxLogContentSize: 5120 # 5KB

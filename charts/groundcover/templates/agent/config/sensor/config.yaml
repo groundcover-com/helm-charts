@@ -361,7 +361,7 @@ data:
 
     loglevel: 4 # INFO
 
-    isk8s: true
+    isk8s: {{.Values.isk8s }}
     hostmodeconfigpath: "/config/instance_metadata.yaml"
 
     allowedportspercontainer: 20
@@ -452,9 +452,10 @@ data:
 
     k8sLogs:
       scraper:
-        positionsFile: "/var/run/positions/positions.yaml"
+        positionsFile: {{ .Values.positionsFile }}
         positionsSyncInterval: 10s
         targetSyncInterval: 10s
+        dockerMaxLogSize: {{ .Values.maxLogSize }}
       clients:
       - name: "logs_client"
         enabled: true
@@ -473,7 +474,7 @@ data:
           labelSet:
             cluster_id: {{ include "groundcover.clusterId" . }}
             env_name: {{ include "groundcover.env" . }}
-            gc_env_type: k8s
+            gc_env_type: {{ .Values.env_type }}
             job: sensor
         timeout: 10s
         useRingBuffer: false
