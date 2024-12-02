@@ -172,6 +172,16 @@ logsMultiLines:
   #   firstLineRegex: "PlaceOrder"   # mandatory
   #   maxLines: 100                  # optional, default = 1024
   #   maxWaitTime: 10s               # optional, default = 3s
+grokParserConfig:
+  - containers:
+      - "kong"
+      - "nginx"
+    pattern: '(?<timestamp>%{YEAR}[./]%{MONTHNUM}[./]%{MONTHDAY} %{TIME}) \[%{LOGLEVEL:level}\] %{POSINT:pid}(?:#%{NUMBER:tid})?: (?:\*%{NUMBER:connectionid} )?(?<message>[^,]+)(?:, excess: %{NUMBER:excess})?(?:, by zone "%{DATA:zone}")?(?:, client: %{IP:client})?(?:, server: (%{HOSTNAME:server}|))?(?:, request: "%{DATA:request}")?(?:, host: "%{DATA:host}")?(?:, refer(?:rer)?: "%{DATA:referer}")?'
+    ruleName: "nginx_error"
+  - containers:
+      - "postgresql"
+    pattern: '%{TIMESTAMP_ISO8601:timestamp} %{WORD:timezone} \[%{DATA:user_id}\] +%{GREEDYDATA:message}'
+    ruleName: "postgresql"
 isk8s: true
 positionsFile: "/var/run/positions/positions.yaml"
 decolorizeLogs: false
@@ -282,6 +292,7 @@ agent:
       usePrometheusCompatibleNaming: true
     apmIngestor:
       dataDog:
+        enabled: true
         proxyEnabled: false
         tracesPort: 8126
         samplingRatio: 0.05

@@ -413,6 +413,7 @@ data:
         flushInterval: 30s
       dataDog:
         proxyEnabled: {{ $sensorValues.apmIngestor.dataDog.proxyEnabled }}
+        enabled: {{ $sensorValues.apmIngestor.dataDog.enabled }}
         endpoint: {{ include "opentelemetry-collector.datadogapm.base.http.url" . }}
         tracesPort: {{ $sensorValues.apmIngestor.dataDog.tracesPort }}
         samplingRatio: {{ $sensorValues.apmIngestor.dataDog.samplingRatio }}
@@ -483,6 +484,7 @@ data:
         logDropFilters: {{ toYaml .Values.logsDropFilters | nindent 10}}
         metricateLabels: false
         multiLineConfigs: {{ toYaml .Values.logsMultiLines | nindent 10}}
+        grokParserConfig: {{ toYaml .Values.grokParserConfig | nindent 10}}
         decolorize: {{ .Values.decolorizeLogs }}
         maxLogSize: {{ .Values.maxLogSize }}
         logBatchSendQueueWorkerCount: {{ .Values.logBatchSendQueueWorkerCount }} 
