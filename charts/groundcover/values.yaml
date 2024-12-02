@@ -1199,6 +1199,8 @@ vector:
           name: '{{ include "groundcover.apikeySecretName" . }}'
     - name: VECTOR_WATCH_CONFIG
       value: "true"
+    - name: VECTOR_LOG_FORMAT
+      value: "json"
   podAnnotations:
     prometheus.io/port: "9598"
     prometheus.io/scrape: "true"
