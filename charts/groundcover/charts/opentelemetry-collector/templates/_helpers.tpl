@@ -59,6 +59,15 @@ helm.sh/chart: {{ include "opentelemetry-collector.chart" . }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- if eq .Values.mode "deployment" }}
+app.kubernetes.io/component: standalone-collector
+{{- end -}}
+{{- if eq .Values.mode "daemonset" }}
+app.kubernetes.io/component: agent-collector
+{{- end -}}
+{{- if eq .Values.mode "statefulset" }}
+app.kubernetes.io/component: statefulset-collector
+{{- end -}}
 {{ include "opentelemetry-collector.additionalLabels" . }}
 {{- end }}
 
@@ -213,4 +222,32 @@ The capitalization is important for StatefulSet.
 {{- if eq .Values.mode "statefulset" -}}
 {{- print "StatefulSet" -}}
 {{- end -}}
+{{- end }}
+
+{{/*
+Get ConfigMap name if existingName is defined, otherwise use default name for generated config.
+*/}}
+{{- define "opentelemetry-collector.configName" -}}
+  {{- if .Values.configMap.existingName -}}
+    {{- .Values.configMap.existingName }}
+  {{- else }}
+    {{- printf "%s%s" (include "opentelemetry-collector.fullname" .) (.configmapSuffix) }}
+  {{- end -}}
+{{- end }}
+
+{{/*
+Create ConfigMap checksum annotation if configMap.existingPath is defined, otherwise use default templates
+*/}}
+{{- define "opentelemetry-collector.configTemplateChecksumAnnotation" -}}
+  {{- if .Values.configMap.existingPath -}}
+  checksum/config: {{ include (print $.Template.BasePath "/" .Values.configMap.existingPath) . | sha256sum }}
+  {{- else -}}
+    {{- if eq .Values.mode "daemonset" -}}
+    checksum/config: {{ include (print $.Template.BasePath "/configmap-agent.yaml") . | sha256sum }}
+    {{- else if eq .Values.mode "deployment" -}}
+    checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+    {{- else if eq .Values.mode "statefulset" -}}
+    checksum/config: {{ include (print $.Template.BasePath "/configmap-statefulset.yaml") . | sha256sum }}
+    {{- end -}}
+  {{- end }}
 {{- end }}

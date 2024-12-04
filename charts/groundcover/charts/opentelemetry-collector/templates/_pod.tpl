@@ -6,11 +6,21 @@ imagePullSecrets:
 serviceAccountName: {{ include "opentelemetry-collector.serviceAccountName" . }}
 securityContext:
   {{- toYaml .Values.podSecurityContext | nindent 2 }}
+{{- with .Values.hostAliases }}
+hostAliases:
+  {{- toYaml . | nindent 2 }}
+{{- end }}
+{{- if $.Values.shareProcessNamespace }}
+shareProcessNamespace: true
+{{- end }}
 containers:
   - name: {{ include "opentelemetry-collector.lowercase_chartname" . }}
+    {{- if .Values.command.name }}
     command:
       - /{{ .Values.command.name }}
-      {{- if .Values.configMap.create }}
+    {{- end }}
+    args:
+      {{- if or .Values.configMap.create .Values.configMap.existingName }}
       - --config=/conf/relay.yaml
       {{- end }}
       {{- range .Values.command.extraArgs }}
@@ -100,12 +110,33 @@ containers:
       httpGet:
         path: {{ .Values.readinessProbe.httpGet.path }}
         port: {{ .Values.readinessProbe.httpGet.port }}
+    {{- if .Values.startupProbe }}
+    startupProbe:
+      {{- if .Values.startupProbe.initialDelaySeconds | empty | not }}
+      initialDelaySeconds: {{ .Values.startupProbe.initialDelaySeconds }}
+      {{- end }}
+      {{- if .Values.startupProbe.periodSeconds | empty | not }}
+      periodSeconds: {{ .Values.startupProbe.periodSeconds }}
+      {{- end }}
+      {{- if .Values.startupProbe.timeoutSeconds | empty | not }}
+      timeoutSeconds: {{ .Values.startupProbe.timeoutSeconds }}
+      {{- end }}
+      {{- if .Values.startupProbe.failureThreshold | empty | not }}
+      failureThreshold: {{ .Values.startupProbe.failureThreshold }}
+      {{- end }}
+      {{- if .Values.startupProbe.terminationGracePeriodSeconds | empty | not }}
+      terminationGracePeriodSeconds: {{ .Values.startupProbe.terminationGracePeriodSeconds }}
+      {{- end }}
+      httpGet:
+        path: {{ .Values.startupProbe.httpGet.path }}
+        port: {{ .Values.startupProbe.httpGet.port }}
+    {{- end }}
     {{- with .Values.resources }}
     resources:
       {{- toYaml . | nindent 6 }}
     {{- end }}
     volumeMounts:
-      {{- if .Values.configMap.create }}
+      {{- if or .Values.configMap.create .Values.configMap.existingName }}
       - mountPath: /conf
         name: {{ include "opentelemetry-collector.lowercase_chartname" . }}-configmap
       {{- end }}
@@ -128,10 +159,10 @@ containers:
         mountPropagation: HostToContainer
       {{- end }}
       {{- if .Values.extraVolumeMounts }}
-      {{- toYaml .Values.extraVolumeMounts | nindent 6 }}
+      {{- tpl (toYaml .Values.extraVolumeMounts) . | nindent 6 }}
       {{- end }}
-{{- with .Values.extraContainers }}
-{{- toYaml . | nindent 2 }}
+{{- if .Values.extraContainers }}
+  {{- tpl (toYaml .Values.extraContainers) . | nindent 2 }}
 {{- end }}
 {{- if .Values.initContainers }}
 initContainers:
@@ -141,10 +172,10 @@ initContainers:
 priorityClassName: {{ .Values.priorityClassName | quote }}
 {{- end }}
 volumes:
-  {{- if .Values.configMap.create }}
+  {{- if or .Values.configMap.create .Values.configMap.existingName }}
   - name: {{ include "opentelemetry-collector.lowercase_chartname" . }}-configmap
     configMap:
-      name: {{ include "opentelemetry-collector.fullname" . }}{{ .configmapSuffix }}
+      name: {{ include "opentelemetry-collector.configName" . }}
       items:
         - key: relay
           path: relay.yaml
@@ -169,7 +200,7 @@ volumes:
       path: /
   {{- end }}
   {{- if .Values.extraVolumes }}
-  {{- toYaml .Values.extraVolumes | nindent 2 }}
+  {{- tpl (toYaml .Values.extraVolumes) . | nindent 2 }}
   {{- end }}
 {{- with .Values.nodeSelector }}
 nodeSelector:

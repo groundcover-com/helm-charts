@@ -700,6 +700,8 @@ clickhouse:
 opentelemetry-collector:
   enabled: true
   mode: deployment
+  command:
+    name: otelcol-contrib
   extraEnvs:
     - name: GC_GROUNDCOVERVERSION
       value: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
