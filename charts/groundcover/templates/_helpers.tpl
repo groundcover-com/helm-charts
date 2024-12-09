@@ -153,22 +153,6 @@ Get cluster_id from values or generate random one
 {{- printf "https://%s/ingest/v2/json" .Values.global.ingress.site -}}
 {{- end -}}
 
-{{- define "incloud.ingestion.otlp.health.url" -}}
-{{-  printf "%s/ingest/v2/health" (include "incloud.ingestion.http.url" .) -}}
-{{- end -}}
-
-{{- define "incloud.ingestion.otlp.http.logs.url" -}}
-{{-  printf "%s/ingest/v2/otlp/logs" (include "incloud.ingestion.http.url" .) -}}
-{{- end -}}
-
-{{- define "incloud.ingestion.otlp.http.traces-as-logs.url" -}}
-{{-  printf "%s/ingest/v2/otlp/traces-as-logs" (include "incloud.ingestion.http.url" .) -}}
-{{- end -}}
-
-{{- define "incloud.ingestion.otlp.http.custom.url" -}}
-{{-  printf "%s/ingest/v2/otlp/custom" (include "incloud.ingestion.http.url" .) -}}
-{{- end -}}
-
 {{- define "telemetry.enabled" }}
 {{- if .Values.metrics -}}
     {{- .Values.metrics.enabled -}}
@@ -211,40 +195,32 @@ Get cluster_id from values or generate random one
 {{- end -}}
 
 {{- define "ingestion.traces.otlp.http.url" -}}
-{{- if (include  "vector.useVector" .) -}}
+{{- if .Values.global.vector.enabled -}}
     {{ include "vector.tracesAsLogs.otlp.http.url" . }}
-{{- else if .Values.global.ingress.site -}}
-    {{ include "incloud.ingestion.otlp.http.traces-as-logs.url" . }}
 {{- else -}}
     {{ include "opentelemetry-collector.otlptraces.http.url" . }}
 {{- end -}}
 {{- end -}}
 
 {{- define "ingestion.logs.otlp.http.url" -}}
-{{- if (include  "vector.useVector" .) -}}
+{{- if .Values.global.vector.enabled -}}
     {{ include "vector.logs.otlp.http.url" . }}
-{{- else if .Values.global.ingress.site -}}
-    {{ include "incloud.ingestion.otlp.http.logs.url" . }}
 {{- else -}}
     {{ include "opentelemetry-collector.otlplogs.http.url" . }}
 {{- end -}}
 {{- end -}}
 
 {{- define "ingestion.custom.otlp.http.url" -}}
-{{- if (include  "vector.useVector" .) -}}
+{{- if .Values.global.vector.enabled -}}
     {{ include "vector.custom.otlp.http.url" . }}
-{{- else if .Values.global.ingress.site -}}
-    {{ include "incloud.ingestion.otlp.http.custom.url" . }}
 {{- else -}}
     {{ include "opentelemetry-collector.otlplogs.http.url" . }}
 {{- end -}}
 {{- end -}}
 
 {{- define "ingestion.health.http.url" -}}
-{{- if (include  "vector.useVector" .) -}}
+{{- if .Values.global.vector.enabled -}}
     {{ include "vector.health.http.url" . }}
-{{- else if .Values.global.ingress.site -}}
-    {{ include "incloud.ingestion.otlp.health.url" . }}
 {{- else -}}
     {{ include "opentelemetry-collector.health.http.url" . }}
 {{- end -}}

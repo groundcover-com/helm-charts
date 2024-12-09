@@ -10,7 +10,7 @@ global:
   workflows:
     enabled: true
   vector:
-    enabled: false
+    enabled: true
     tracesAsLogs:
       otlp:
         overrideHttpURL:
