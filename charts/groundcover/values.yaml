@@ -10,7 +10,7 @@ global:
   workflows:
     enabled: true
   vector:
-    enabled: true
+    enabled: false
     tracesAsLogs:
       otlp:
         overrideHttpURL:
@@ -1445,6 +1445,8 @@ vector:
             }
             .category = get!(value: .labels, path: ["category"])
             .severity = get!(value: .labels, path: ["_gc_severity"])
+            .measurement_type = get!(value: .annotations, path: ["_gc_measurement_type"])
+            del(.annotations)
         metrics_metadata_to_logs:
           inputs:
             - "vm_metrics"
@@ -2407,7 +2409,7 @@ monitors-manager:
   image:
     registry: public.ecr.aws
     repository: groundcovercom/grafana-groundcover
-    tag: v0.0.26-grafana11.3.1
+    tag: v0.0.28-grafana11.3.0
   nameOverride: monitors-manager
   persistence:
     enabled: true

@@ -1,3 +1,23 @@
+{{- define "vector.useVector" -}}
+{{ if .Values.global.vector.enabled }}
+true
+{{ else if (not (.Values.global.ingress.site)) }}
+true
+{{ else if (and (not (empty .Values.vector.objectStorage.s3Bucket)) .Values.vector.objectStorage.allowed) }}
+true
+{{ else if (and (not (empty .Values.vector.objectStorage.gcsBucket)) .Values.vector.objectStorage.allowed) }}
+true
+{{ else if (or (.Values.vector.customComponents.sinks.overrideSinks) (.Values.vector.customComponents.transforms.overrideTransforms) (.Values.vector.customComponents.sources.overrideSources)) }}
+true
+{{ else if (or (.Values.vector.logsPipeline.extraSteps) (.Values.vector.tracesPipeline.extraSteps)) }}
+true
+{{ else if (.Values.vector.eventsPipelines) }}
+true
+{{ else if (or (.Values.vector.customComponents.transforms.extraTransforms) (.Values.vector.customComponents.sinks.extraSinks)) }}
+true
+{{- end -}}
+{{- end -}}
+
 {{- define "vector.s3.secretName" -}}
 {{ print "vector-s3-secret" }}
 {{- end -}}
@@ -20,10 +40,6 @@
 
 {{- define "vector.cluster.http.health.url" -}}
 {{-  printf "%s/health" (include "vector.cluster.http.health.endpoint" .) -}}
-{{- end -}}
-
-{{- define "vector.incloud.http.health.url" -}}
-{{-  printf "%s/ingest/v2/health" (include "incloud.ingestion.http.url" .) -}}
 {{- end -}}
 
 {{- define "vector.otlp.scheme" -}}
@@ -54,10 +70,6 @@ http
 {{-  printf "%s/v1/logs" (include "vector.cluster.otlp.http.logs.endpoint" .) -}}
 {{- end -}}
 
-{{- define "vector.incloud.otlp.http.logs.url" -}}
-{{-  printf "%s/ingest/v2/otlp/logs" (include "incloud.ingestion.http.url" .) -}}
-{{- end -}}
-
 {{- define "vector.cluster.json.logs.port" -}}
 {{- printf "4319" -}}
 {{- end -}}
@@ -86,10 +98,6 @@ http
 {{-  printf "%s/v1/logs" (include "vector.cluster.otlp.http.traces.endpoint" .) -}}
 {{- end -}}
 
-{{- define "vector.incloud.otlp.http.traces-as-logs.url" -}}
-{{-  printf "%s/ingest/v2/otlp/traces-as-logs" (include "incloud.ingestion.http.url" .) -}}
-{{- end -}}
-
 {{- define "vector.cluster.json.traces-as-logs.port" -}}
 {{- printf "4329" -}}
 {{- end -}}
@@ -116,10 +124,6 @@ http
 
 {{- define "vector.cluster.otlp.http.custom.url" -}}
 {{-  printf "%s/v1/logs" (include "vector.cluster.otlp.http.custom.endpoint" .) -}}
-{{- end -}}
-
-{{- define "vector.incloud.otlp.http.custom.url" -}}
-{{-  printf "%s/ingest/v2/otlp/custom" (include "incloud.ingestion.http.url" .) -}}
 {{- end -}}
 
 {{- define "vector.cluster.json.events.port" -}}
@@ -204,7 +208,7 @@ http
 {{- else if and .Values.global.airgap .Values.global.backend.enabled -}}
     {{- include "vector.cluster.http.health.url" . -}}
 {{- else if .Values.global.ingress.site -}}
-    {{- include "vector.incloud.http.health.url" . -}}
+    {{- include "incloud.ingestion.otlp.health.url" . -}}
 {{- else if not .Values.global.backend.enabled -}}
     {{- fail "A valid global.ingress.site or global.vector.health.overrideHttpURL is required!" -}}
 {{- else -}}
