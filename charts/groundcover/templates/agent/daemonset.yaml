@@ -79,6 +79,8 @@ spec:
               value: {{ (tpl $sensorValues.httpUnlimitedEndpoints .) | quote }}
             - name: FLORA_NETWORKTRACER_CONNECTIONMANAGER_PROTOCOLS_HTTP2_UNLIMITEDPAYLOADENDPOINTS
               value: {{ (tpl $sensorValues.http2UnlimitedEndpoints .) | quote }}
+            - name: FLORA_CONTAINERREPOSITORY_TRACKEDCONTAINERTYPE
+              value: {{ "kubernetes" }}
             - name: NODE_NAME
               valueFrom:
                 fieldRef:
