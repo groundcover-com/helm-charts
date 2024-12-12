@@ -112,7 +112,7 @@ spec:
   rules:
     - http:
         paths:
-          - path: {{ get (urlParse (include "vector.incloud.http.health.url" .)) "path" }} 
+          - path: {{ get (urlParse (include "incloud.ingestion.otlp.health.url" .)) "path" }}
             pathType: Exact
             backend:
               service:
@@ -142,7 +142,7 @@ spec:
   rules:
     - http:
         paths:
-          - path: {{ get (urlParse (include "vector.incloud.otlp.http.traces-as-logs.url" .)) "path" }} 
+          - path: {{ get (urlParse (include "incloud.ingestion.otlp.http.traces-as-logs.url" .)) "path" }}
             pathType: Exact
             backend:
               service:
@@ -152,7 +152,7 @@ spec:
 
     - http:
         paths:
-          - path: {{ get (urlParse (include "vector.incloud.otlp.http.logs.url" .)) "path" }} 
+          - path: {{ get (urlParse (include "incloud.ingestion.otlp.http.logs.url" .)) "path" }}
             pathType: Exact
             backend:
               service:
@@ -162,7 +162,7 @@ spec:
 
     - http:
         paths:
-          - path: {{ get (urlParse (include "vector.incloud.otlp.http.custom.url" .)) "path" }} 
+          - path: {{ get (urlParse (include "incloud.ingestion.otlp.http.custom.url" .)) "path" }}
             pathType: Exact
             backend:
               service:
