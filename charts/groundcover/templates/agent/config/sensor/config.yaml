@@ -496,8 +496,8 @@ data:
           jsonFlattenMaxDepth: {{ .Values.jsonFlattenMaxDepth }}
           jsonFlattenMaxAttributes: {{ .Values.jsonFlattenMaxAttributes }}
           maxLogContentSize: {{ .Values.maxLogContentSize }}
-    otelTracesAsLogs: {{ .Values.global.vector.enabled }}
-    otelPreprocess: {{ .Values.global.vector.enabled }}
+    otelTracesAsLogs: true
+    otelPreprocess: true
     tracesOtlpEndpoint:
       endpoint: {{ include "ingestion.traces.otlp.http.url" . }}
       enableTLS: {{ include "ingestion.otlp.tls.enabled" . }}

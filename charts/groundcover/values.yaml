@@ -10,7 +10,7 @@ global:
   workflows:
     enabled: true
   vector:
-    enabled: true
+    forceLocal: false
     tracesAsLogs:
       otlp:
         overrideHttpURL:
@@ -972,7 +972,7 @@ opentelemetry-collector:
             - batch/monitorState
             - groundcover/monitorState
           exporters:
-            - '{{ ternary "otlphttp/vector_monitors" "groundcover/monitorState"  .Values.global.vector.enabled }}'
+            - otlphttp/vector_monitors
         metrics:
           receivers:
             - otlp
@@ -987,7 +987,7 @@ opentelemetry-collector:
             - batch/traces
             - groundcover/traces
           exporters:
-            - '{{ ternary "groundcover/traces2logs" "groundcover/traces"  .Values.global.vector.enabled }}'
+            -  groundcover/traces2logs
         logs:
           receivers:
             - loki
@@ -1000,10 +1000,10 @@ opentelemetry-collector:
             - batch/logs
             - groundcover/logs
           exporters:
-            - '{{ ternary "otlphttp/vector_logs" "groundcover/logs"  .Values.global.vector.enabled }}'
+            - otlphttp/vector_logs
         logs/traces:
           receivers:
-            - '{{ ternary "groundcover/traces2logs" "otlp/dummy_receiver" .Values.global.vector.enabled}}'
+            - groundcover/traces2logs
           exporters:
             - otlphttp/vector_traces
         logs/custom:
@@ -1014,7 +1014,7 @@ opentelemetry-collector:
             - batch/custom
             - groundcover/custom
           exporters:
-            - '{{ ternary "otlphttp/vector_custom" "groundcover/custom"  .Values.global.vector.enabled }}'
+            - otlphttp/vector_custom
   resources:
     requests:
       cpu: 100m
@@ -2489,7 +2489,7 @@ monitors-manager:
       backend: "loki"
       loki_remote_url: '{{ include "opentelemetry-collector.loki-historian.http.url" . }}'
       log_all: true
-      otel_export_enabled: "{{  .Values.global.vector.enabled }}"
+      otel_export_enabled: true
       otel_endpoint: '{{ include "ingestion.monitors.otlp.http.url" . }}'
       otel_enable_tls: false
       otel_tls_skip_verify: true
