@@ -1,7 +1,7 @@
 annotations:
   app: keep
 apiVersion: v2
-appVersion: 0.30.7
+appVersion: 0.32.0
 description: Keep Helm Chart
 home: https://platform.keephq.dev/
 icon: https://platform.keephq.dev/_next/image?url=%2Fkeep.png&w=48&q=75
@@ -20,4 +20,4 @@ name: keep
 sources:
 - https://github.com/keephq/helm-charts
 type: application
-version: 0.1.45
+version: 0.1.48

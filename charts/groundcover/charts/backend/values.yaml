@@ -175,7 +175,7 @@ keep:
     waitForDatabase: false
     image:
       repository: public.ecr.aws/groundcovercom/keep-api
-      tag: "0.31.4"
+      tag: "0.32.0"
     databaseConnectionStringFromSecret:
       enabled: true
       secretName: keep-postgres
@@ -184,6 +184,30 @@ keep:
       groundcover.com/provisioned_providers_checksum: '{{ .Values.backend.provisionedProviders | toJson | sha256sum }}'      
       prometheus.io/port: "8080"
     env:
+      - name: KEEP_ENRICHMENT_DISABLED
+        value: "true"
+      - name: KEEP_MAINTENANCE_WINDOWS_ENABLED
+        value: "false"
+      - name: KEEP_CORRELATION_ENABLED
+        value: "false"
+      - name: KEEP_PROVIDER_DISTRIBUTION_ENABLED
+        value: "false"
+      - name: KEEP_AUDIT_EVENTS_ENABLED
+        value: "false"
+      - name: KEEP_CALCULATE_START_FIRING_TIME_ENABLED
+        value: "false"
+      - name: KEEP_DEBUG_TASKS
+        value: "true"
+      - name: KEEP_ALERT_FIELDS_ENABLED
+        value: "false"
+      - name: CONSUMER
+        value: "false"
+      - name: KEEP_DEDUPLICATION_DISTRIBUTION_ENABLED
+        value: "false"
+      - name: KEEP_CUSTOM_DEDUPLICATION_ENABLED
+        value: "false"
+      - name: POSTHOG_DISABLED
+        value: "true"
       - name: KEEP_PROVIDERS
         configMapKeyRef:
           key: provisionedProviders.json
