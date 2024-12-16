@@ -182,6 +182,7 @@ keep:
       secretKey: connection_string
     podAnnotations:
       groundcover.com/provisioned_providers_checksum: '{{ .Values.backend.provisionedProviders | toJson | sha256sum }}'      
+      prometheus.io/port: "8080"
     env:
       - name: KEEP_PROVIDERS
         configMapKeyRef:

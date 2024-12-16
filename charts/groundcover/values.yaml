@@ -448,6 +448,8 @@ k8sWatcher:
             key: '{{ template "groundcover.apikeySecretKey" . }}'
             name: '{{ template "groundcover.apikeySecretName" . }}'   
   watch:
+    cronjob:
+      enabled: true
     configmap:
       enabled: true
     secret:
@@ -553,7 +555,7 @@ clickhouse:
       repository: bitnami/os-shell
       tag: 11-debian-11-r91
   keeper:
-    enabled: false
+    enabled: true
   zookeeper:
     enabled: false
   externalAccess:

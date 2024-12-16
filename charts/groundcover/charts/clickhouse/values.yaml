@@ -285,7 +285,6 @@ defaultConfigurationOverrides: |
     <logger>
       <level>{{ .Values.logLevel }}</level>
     </logger>
-    {{- if or (ne (int .Values.shards) 1) (ne (int .Values.replicaCount) 1)}}
     <!-- Cluster configuration - Any update of the shards and replicas requires helm upgrade -->
     <remote_servers>
       <{{ .Values.clusterName }}>
@@ -305,7 +304,6 @@ defaultConfigurationOverrides: |
         {{- end }}
       </{{ .Values.clusterName }}>
     </remote_servers>
-    {{- end }}
     {{- if .Values.keeper.enabled }}
     <!-- keeper configuration -->
     <keeper_server>
