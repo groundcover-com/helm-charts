@@ -175,7 +175,7 @@ keep:
     waitForDatabase: false
     image:
       repository: public.ecr.aws/groundcovercom/keep-api
-      tag: "0.32.0"
+      tag: "0.32.1"
     databaseConnectionStringFromSecret:
       enabled: true
       secretName: keep-postgres
