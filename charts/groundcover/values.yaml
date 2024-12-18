@@ -615,6 +615,16 @@ clickhouse:
         </writer_profile>
       </profiles>
       <users>
+        <default>
+          <default_database>groundcover</default_database>
+        </default>
+        <manager>
+          <default_database>default</default_database>
+          <password from_env="CLICKHOUSE_PASSWORD" />
+          <networks>
+            <ip>::/0</ip>
+          </networks>
+        </manager>
         <reader>
           <password from_env="CLICKHOUSE_PASSWORD" />
           <networks>
@@ -1697,7 +1707,7 @@ vector:
               - json_entities
             endpoint: '{{ include "clickhouse.shard0HttpEndpoint" . }}'
             database: "groundcover"
-            table: "entities"
+            table: "entities_v1"
             request:
               retry_attempts: 5
             auth:
@@ -1776,7 +1786,7 @@ vector:
               - json_monitors
             endpoint: '{{ include "clickhouse.shard0HttpEndpoint" . }}'
             database: "groundcover"
-            table: "monitor_state"
+            table: "monitor_state_v1"
             request:
               retry_attempts: 5
             auth:

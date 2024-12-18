@@ -72,7 +72,7 @@ data:
       BackfillBatchDeleteInterval: 60
     ClickHouse:
       Pass: "OVERRIDEN"
-      User: {{ include "clickhouse.username" . }}
+      User: "manager"
       Host: {{ include "clickhouse.shard0Name" . }}
       Database: {{ include "clickhouse.database" . }}
       HTTPPort: {{ .Values.global.clickhouse.containerPorts.http | int }}

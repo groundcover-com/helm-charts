@@ -461,6 +461,7 @@ data:
     clusterId: {{ include "groundcover.clusterId" . }}
     region: {{ .Values.region }}
     env: {{ include "groundcover.env" . }}
+    envType: {{ .Values.env_type }}
 
     k8sLogs:
       scraper:
