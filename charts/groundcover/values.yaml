@@ -1916,6 +1916,23 @@ vector:
               timeout_secs: 5
             healthcheck:
               enabled: false
+          s3_monitors:
+            type: "aws_s3"
+            inputs:
+            - monitors
+            - json_monitors
+            bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
+            region: '{{ .Values.vector.objectStorage.region }}'
+            key_prefix: "v2/monitors/"
+            encoding:
+              codec: json
+              timestamp_format: rfc3339
+            batch:
+              max_bytes: 25000000
+              max_events: 25000
+              timeout_secs: 5
+            healthcheck:
+              enabled: false
       gcs:
         logs:
           gcs_logs:
@@ -1989,6 +2006,23 @@ vector:
               - json_events
               - logs_to_events_transform
             key_prefix: v2/events/
+            compression: zstd
+            bucket: '{{ .Values.vector.objectStorage.gcsBucket }}'
+            batch:
+              max_bytes: 25000000
+              max_events: 25000
+              timeout_secs: 5
+            encoding:
+              codec: json
+              timestamp_format: rfc3339
+            healthcheck:
+              enabled: false
+          gcs_monitors:
+            type: gcp_cloud_storage
+            inputs:
+              - monitors
+              - json_monitors
+            key_prefix: v2/monitors/
             compression: zstd
             bucket: '{{ .Values.vector.objectStorage.gcsBucket }}'
             batch:

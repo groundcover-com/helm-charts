@@ -286,7 +286,6 @@ sinks:
 {{ end }}
 {{- tpl (toYaml .Values.vector.customComponents.sinks.metrics) $ | nindent 2 }}
 {{ if .Values.global.backend.enabled }} {{- /* these sinks are always local only, no matter of ingestion mode */ -}}
-{{- tpl (toYaml (dict "clickhouse_monitors" .Values.vector.customComponents.sinks.local.custom.clickhouse_monitors)) $ | nindent 2 }}
 {{- tpl (toYaml (dict "clickhouse_metrics_metadata" .Values.vector.customComponents.sinks.local.custom.clickhouse_metrics_metadata)) $ | nindent 2 }}
 {{ end }}
 {{- /* ingestion modes */ -}}
@@ -304,6 +303,7 @@ sinks:
 {{- tpl (toYaml (dict "clickhouse_k8s_entities" .Values.vector.customComponents.sinks.local.custom.clickhouse_k8s_entities)) $ | nindent 2 }}
 {{- tpl (toYaml (dict "clickhouse_measurements" .Values.vector.customComponents.sinks.local.custom.clickhouse_measurements)) $ | nindent 2 }}
 {{- tpl (toYaml (dict "clickhouse_k8s_events" .Values.vector.customComponents.sinks.local.custom.clickhouse_k8s_events)) $ | nindent 2 }}
+{{- tpl (toYaml (dict "clickhouse_monitors" .Values.vector.customComponents.sinks.local.custom.clickhouse_monitors)) $ | nindent 2 }}
 {{ else }} {{- /* remote ingestion over ingress */}}
 {{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.logsPipeline "sinks" .Values.vector.customComponents.sinks.remote.logs)) $ -}}
 {{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.tracesPipeline "sinks" .Values.vector.customComponents.sinks.remote.traces)) $ -}}
