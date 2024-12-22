@@ -81,6 +81,10 @@ binary config facade helper
 {{- include "ingester.vmCLIConfigHelper" (dict "Destinations" .Values.global.metrics.write.destinations "Field" "disableOnDiskQueue" "Context" .) }}
 {{- end -}}
 
+{{- define "ingester.buildRemoteWriteForcePromProto" -}}
+{{- include "ingester.vmCLIConfigHelper" (dict "Destinations" .Values.global.metrics.write.destinations "Field" "forcePromProto" "Context" .) }}
+{{- end -}}
+
 {{- define "ingester.buildRemoteWriteMaxDiskUsagePerURL" -}}
 {{- include "ingester.vmCLIConfigHelper" (dict "Destinations" .Values.global.metrics.write.destinations "Field" "maxDiskUsagePerURL" "Context" .) }}
 {{- end -}}

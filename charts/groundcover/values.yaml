@@ -79,12 +79,14 @@ global:
           disableOnDiskQueue: 'false,false'
           maxDiskUsagePerURL: '10GB,512MB'
           forceVMProto: "true,false"
+          forcePromProto: "false,true"
         sensor:
           url: '{{ include "victoria-metrics.write.http.url" . }}'
           rateLimit: '0'
           disableOnDiskQueue: 'false'
           maxDiskUsagePerURL: '10GB'
           forceVMProto: "true"
+          forcePromProto: "false"
 
   otlp:
     overrideGrpcURL: ""
@@ -2030,6 +2032,7 @@ metrics-ingester:
     remoteWrite.maxDiskUsagePerURL: '{{ include "ingester.buildRemoteWriteMaxDiskUsagePerURL" . }}'
     remoteWrite.disableOnDiskQueue: '{{ include "ingester.buildRemoteWriteDisableOnDiskQueue" . }}'
     remoteWrite.forceVMProto: '{{ include "ingester.buildRemoteWriteForceVMProto" . }}'
+    remoteWrite.forcePromProto: '{{ include "ingester.buildRemoteWriteForcePromProto" . }}'
     promscrape.streamParse: "true"
     promscrape.dropOriginalLabels: "true"
     remoteWrite.showURL: "true"
