@@ -27,7 +27,7 @@ onprem:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.9.49
+  tag: 1.9.50
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/curl'
@@ -109,6 +109,7 @@ configuration:
       Enabled: true
     Logs:
       Enabled: true
+  UseStaticAssets: false
 strategy:
   type: RollingUpdate
   rollingUpdate:
