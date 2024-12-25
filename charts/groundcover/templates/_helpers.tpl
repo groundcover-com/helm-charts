@@ -185,6 +185,22 @@ Get cluster_id from values or generate random one
 {{- end -}}
 {{- end -}}
 
+{{- define "sensor.telemetry.metrics.url" }}
+{{- if and .Values.metrics .Values.metrics.host -}}
+    {{- printf "https://%s/api/v1/import/prometheus" .Values.metrics.host -}}
+{{- else -}}
+    {{- .Values.global.telemetry.metrics.url -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "telemetry.metrics.interval" }}
+{{- if .Values.metrics -}}
+    {{- .Values.metrics.interval -}}
+{{- else -}}
+    {{- .Values.global.telemetry.metrics.interval -}}
+{{- end -}}
+{{- end -}}
+
 {{- define "telemetry.metrics.base.url" }}
 {{- $url := urlParse (include "telemetry.metrics.url" .) -}}
 {{- printf "%s://%s" (get $url "scheme") (get $url "host") -}}

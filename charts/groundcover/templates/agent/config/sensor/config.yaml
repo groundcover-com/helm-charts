@@ -508,6 +508,15 @@ data:
           jsonFlattenMaxDepth: {{ .Values.jsonFlattenMaxDepth }}
           jsonFlattenMaxAttributes: {{ .Values.jsonFlattenMaxAttributes }}
           maxLogContentSize: {{ .Values.maxLogContentSize }}
+        logPatternsConfig:
+          enabled: {{ .Values.logPatternsConfig.enabled }}
+          logClusterDepth: {{ .Values.logPatternsConfig.logClusterDepth }}
+          similarityThreshold: {{ .Values.logPatternsConfig.similarityThreshold }}
+          maxChildren: {{ .Values.logPatternsConfig.maxChildren }}
+          maxClusters: {{ .Values.logPatternsConfig.maxClusters }}
+          paramString: {{ .Values.logPatternsConfig.paramString }}
+          maxEvictionRatio: {{ .Values.logPatternsConfig.maxEvictionRatio }}
+          maxTokens: {{ .Values.logPatternsConfig.maxTokens }}
     otelTracesAsLogs: true
     otelPreprocess: true
     tracesOtlpEndpoint:
@@ -538,6 +547,12 @@ data:
       KeepSQLAlias: true
       ReplaceDigits: true
       CollectCommands: true
+
+    telemetry:
+      enabled: {{ include "telemetry.enabled" . }}
+      metrics:
+        url: {{ include "sensor.telemetry.metrics.url" . }}
+        interval: {{ include "telemetry.metrics.interval" . }}
 
     {{ if $sensorValues.sensitiveHeadersObfuscationConfig }}
     sensitiveHeadersObfuscationConfig: 

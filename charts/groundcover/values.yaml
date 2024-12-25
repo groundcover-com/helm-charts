@@ -119,6 +119,7 @@ global:
       url: https://logs.groundcover.com/v1/logs
     metrics:
       url: https://metrics.groundcover.com/api/v1/write
+      interval: 10s
     traces:
       otlpUrl: https://traces.groundcover.com/v1/traces
       zipkinUrl: https://traces.groundcover.com/api/v2/spans
@@ -199,6 +200,15 @@ jsonFlattenMaxAttributes: 300
 shouldDropRunningNamespaces: 
 commitHashKeyName:
 repositoryUrlKeyName:
+logPatternsConfig:
+  enabled: false
+  logClusterDepth: 5
+  similarityThreshold: 0.6
+  maxChildren: 20
+  maxClusters: 2000
+  paramString: "<*>"
+  maxEvictionRatio: 0.8
+  maxTokens: 128
 
 priorityClass:
   create: false
