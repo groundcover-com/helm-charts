@@ -1,7 +1,25 @@
 {{ if .Values.global.workflows.enabled }}
 apiVersion: v1
 data:
-  provisionedProviders.json: '{"groundcoverVictoriaMetrics":{"type":"victoriametrics","authentication":{"VMAlertHost":"{{ tpl .Values.keep.backend.provisionedProviders.groundcoverVictoriaMetrics.authentication.vmAlertHost . }}","VMAlertPort":"{{ tpl .Values.keep.backend.provisionedProviders.groundcoverVictoriaMetrics.authentication.vmAlertPort . }}"}},"groundcoverClickhouse":{"type":"clickhouse","authentication":{"host":"{{ tpl .Values.keep.backend.provisionedProviders.groundcoverClickhouse.authentication.host . }}","port":"{{ tpl .Values.keep.backend.provisionedProviders.groundcoverClickhouse.authentication.port . }}","username":"{{ tpl .Values.keep.backend.provisionedProviders.groundcoverClickhouse.authentication.username . }}","password":"$(CLICKHOUSE_PASS)","database":"{{ tpl .Values.keep.backend.provisionedProviders.groundcoverClickhouse.authentication.database . }}"}}}'
+  provisionedProviders.json: |
+    {
+      "groundcoverVictoriaMetrics": {
+        "type": "victoriametrics",
+        "authentication": {
+          "VMAlertURL": "{{ tpl .Values.keep.backend.provisionedProviders.victoriametrics.authentication.VMAlertURL . }}"
+        }
+      },
+      "groundcoverClickhouse": {
+        "type": "clickhouse",
+        "authentication": {
+          "host": "{{ tpl .Values.keep.backend.provisionedProviders.clickhouse.authentication.host . }}",
+          "port": "{{ tpl .Values.keep.backend.provisionedProviders.clickhouse.authentication.port . }}",
+          "username": "{{ tpl .Values.keep.backend.provisionedProviders.clickhouse.authentication.username . }}",
+          "password": "$(CLICKHOUSE_PASS)",
+          "database": "{{ tpl .Values.keep.backend.provisionedProviders.clickhouse.authentication.database . }}"
+        }
+      }
+    }
 kind: ConfigMap
 metadata:
   name: keep-config

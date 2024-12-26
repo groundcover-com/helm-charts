@@ -1443,6 +1443,10 @@ vector:
             del(.orgID)
             del(.panelID)
             del(.ruleUID)
+            .evaluation_error = .error
+            del(.error)
+            .evaluation_duration_seconds = .evaluationDurationSeconds
+            del(.evaluationDurationSeconds)
             .previous_state, err = to_string(del(.previous))
             if err == null {
               .previous_state = to_string(split(.previous_state, "(", 2)[0])
@@ -2260,6 +2264,8 @@ victoria-metrics-operator:
       value: "900s"
     - name: VM_PODWAITREADYTIMEOUT
       value: "900s"
+    - name: VM_USECUSTOMCONFIGRELOADER # https://docs.victoriametrics.com/operator/resources/readme/#configuration-synchronization
+      value: "true"
   builtinVMAgent:
     enabled: false
     spec:
@@ -2468,7 +2474,7 @@ monitors-manager:
   image:
     registry: public.ecr.aws
     repository: groundcovercom/grafana-groundcover
-    tag: v0.0.28-grafana11.3.0
+    tag: v0.0.30-grafana11.3.0
   nameOverride: monitors-manager
   persistence:
     enabled: true
@@ -2552,6 +2558,7 @@ monitors-manager:
       otel_endpoint: '{{ include "ingestion.monitors.otlp.http.url" . }}'
       otel_enable_tls: false
       otel_tls_skip_verify: true
+      otel_write_timeout: 10s
     feature_toggles:
       enable: "alertStateHistoryLokiSecondary, alertStateHistoryLokiPrimary, alertStateHistoryLokiOnly, disableInstanceStore"
     server:

@@ -158,12 +158,11 @@ keep:
   namespace: ""
   backend:
     provisionedProviders:
-      groundcoverVictoriaMetrics:
+      victoriametrics:
         type: victoriametrics
         authentication:
-          vmAlertHost: '{{ include "victoria-metrics.read.http.scheme" . }}://{{ include "victoria-metrics.read.http.host" . }}'
-          vmAlertPort: '{{ include "victoria-metrics.read.http.port" . }}'
-      groundcoverClickhouse:
+          VMAlertURL: '{{ include "victoria-metrics.read.http.url" . }}'
+      clickhouse:
         type: clickhouse
         authentication:
           username: '{{ include "clickhouse.username" . }}'
@@ -181,7 +180,7 @@ keep:
       secretName: keep-postgres
       secretKey: connection_string
     podAnnotations:
-      groundcover.com/provisioned_providers_checksum: '{{ .Values.backend.provisionedProviders | toJson | sha256sum }}'      
+      checksum/values: '{{ .Values | toJson | sha256sum }}'
       prometheus.io/port: "8080"
     env:
       - name: KEEP_ENRICHMENT_DISABLED
