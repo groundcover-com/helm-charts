@@ -174,7 +174,7 @@ keep:
     waitForDatabase: false
     image:
       repository: public.ecr.aws/groundcovercom/keep-api
-      tag: "0.32.1"
+      tag: "0.33.2"
     databaseConnectionStringFromSecret:
       enabled: true
       secretName: keep-postgres
@@ -207,6 +207,8 @@ keep:
         value: "false"
       - name: POSTHOG_DISABLED
         value: "true"
+      - name: PROMETHEUS_MULTIPROC_DIR
+        value: "/tmp/prometheus"
       - name: KEEP_PROVIDERS
         configMapKeyRef:
           key: provisionedProviders.json
