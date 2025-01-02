@@ -202,7 +202,7 @@ commitHashKeyName:
 repositoryUrlKeyName:
 logPatternsConfig:
   enabled: false
-  logClusterDepth: 5
+  logClusterDepth: 6
   similarityThreshold: 0.6
   maxChildren: 20
   maxClusters: 2000
@@ -600,6 +600,7 @@ clickhouse:
       </merge_tree>
       <profiles>
         <default>
+          <allow_experimental_analyzer>0</allow_experimental_analyzer>
           <date_time_input_format>best_effort</date_time_input_format>
           <async_insert>true</async_insert>
           <max_execution_time>60</max_execution_time>
