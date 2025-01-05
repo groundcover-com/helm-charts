@@ -261,6 +261,8 @@ agent:
             key: '{{ template "groundcover.apikeySecretKey" . }}'
             name: '{{ template "groundcover.apikeySecretName" . }}' 
   flb:
+    # for ipv6, change to "[::]"
+    bindAddress: 0.0.0.0
     image:
       tag: 2.2.3
       repository: "{{ .Values.global.origin.registry }}/fluent/fluent-bit"
