@@ -580,7 +580,6 @@ clickhouse:
         http: 8123
   metrics:
     enabled: true
-  allowSimdjson: true
   auth:
     existingSecret: "false" # override global.clickhouse.auth.existingSecret to use exisiting secret
   extraEnvVars:
@@ -591,7 +590,6 @@ clickhouse:
           name: '{{ include "clickhouse.secretName" . }}'
   extraOverrides: |
     <clickhouse>
-      <allow_simdjson>{{ include "clickhouse.useSimdjson" . }}</allow_simdjson>
       <logger>
           <formatting><type>json</type></formatting>
       </logger>

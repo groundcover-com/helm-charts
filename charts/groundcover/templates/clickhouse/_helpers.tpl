@@ -56,11 +56,3 @@
 {{- end -}}
 {{- $list | toYaml | nindent 2 }}
 {{- end -}}
-
-{{- define "clickhouse.useSimdjson" -}}
-{{- if eq .Values.allowSimdjson false -}}
-false
-{{- else -}}
-true
-{{- end -}}
-{{- end -}}
