@@ -580,6 +580,7 @@ clickhouse:
         http: 8123
   metrics:
     enabled: true
+  allowSimdjson: true
   auth:
     existingSecret: "false" # override global.clickhouse.auth.existingSecret to use exisiting secret
   extraEnvVars:
@@ -590,6 +591,7 @@ clickhouse:
           name: '{{ include "clickhouse.secretName" . }}'
   extraOverrides: |
     <clickhouse>
+      <allow_simdjson>{{ include "clickhouse.useSimdjson" . }}</allow_simdjson>
       <logger>
           <formatting><type>json</type></formatting>
       </logger>
@@ -2312,7 +2314,7 @@ custom-metrics:
     remoteWrite.headers: "apikey:%{API_KEY}"
     remoteWrite.tlsInsecureSkipVerify: '{{ ternary "true" "false" .Values.global.ingestion.tls_skip_verify }}'
     remoteWrite.url: '{{ include "custom-metrics.remote-server-url" . }}'
-    remoteWrite.label: clusterId=$(GC_CLUSTER_ID)
+    remoteWrite.label: clusterId=$(GC_CLUSTER_ID),cluster=$(GC_CLUSTER_ID)
   env:
     - name: GC_CLUSTER_ID
       valueFrom:
