@@ -470,7 +470,7 @@ data:
         targetSyncInterval: 10s
         dockerMaxLogSize: {{ .Values.maxLogSize }}
         journalConfig:
-          serviceNames: {{ toYaml .Values.journalScraper.serviceNames | nindent 10}}
+          serviceNames: {{ toYaml .Values.journalScraper.serviceNames | nindent 12}}
           historyDuration: {{ .Values.journalScraper.historyDuration }}
           journalFilter: "{{ .Values.journalScraper.journalFilter }}"
       clients: 
