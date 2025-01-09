@@ -469,7 +469,11 @@ data:
         positionsSyncInterval: 10s
         targetSyncInterval: 10s
         dockerMaxLogSize: {{ .Values.maxLogSize }}
-      clients:
+        journalConfig:
+          serviceNames: {{ toYaml .Values.journalScraper.serviceNames | nindent 10}}
+          historyDuration: {{ .Values.journalScraper.historyDuration }}
+          journalFilter: "{{ .Values.journalScraper.journalFilter }}"
+      clients: 
       - name: "logs_client"
         enabled: true
         urlText: {{ include "opentelemetry-collector.loki.http.url" . }}

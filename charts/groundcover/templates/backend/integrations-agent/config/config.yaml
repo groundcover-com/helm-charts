@@ -1,0 +1,291 @@
+{{ if .Values.global.integrations.agent.enabled }}
+apiVersion: v1
+data:
+  config.yaml: |
+    config.yaml: |
+    LogLevel: 4
+    {{ if .Values.integrationsAgent }}
+    {{ if .Values.integrationsAgent.targets }}
+    Targets:
+    {{ if .Values.integrationsAgent.targets.cloudwatch }}
+    {{- range .Values.integrationsAgent.targets.cloudwatch }}
+    - Type: "cloudwatch"
+      Name: "{{ .name }}"
+      StsRegion: "{{ .stsRegion }}"
+      RoleArn: "{{ .roleArn }}"
+      Regions:
+      {{- range .regions }}
+        - "{{ . }}"
+      {{- end }}
+      Namespaces:
+      {{- range .namespaces }}
+        - "{{ . }}"
+      {{- end }}
+      {{- if .metrics }}
+      Metrics:
+        {{- range $namespace, $metrics := .metrics }}
+        {{$namespace}}:
+        {{- range $metrics }}
+          - Name: "{{ . }}"
+            Statistics:
+        {{- range .statistics }}
+            - "{{ . }}"
+        {{- end }}
+        {{- end }}
+        {{- end }}
+      {{- end }}
+      Exporters:
+        - "prometheus"
+    {{- end }}
+    {{- range .Values.integrationsAgent.targets.additionalExporters }}
+        - "{{ . }}"
+    {{- end }}
+    {{- end }}
+    {{- end }}
+    {{- end }}
+
+    Exporters:
+    - Type: "prometheus"
+      Name: "prometheus"
+      url: {{ include "metrics-ingester.base.http.url" . }}
+      TlsSkipVerify: true
+
+    Pprof:
+      enabled: {{ include "telemetry.enabled" . }}
+      interval: {{ .Values.integrationsAgent.pprof.interval }}
+      exponent: {{ .Values.integrationsAgent.pprof.exponent }}
+      cpuSamplingDuration: {{ .Values.integrationsAgent.pprof.cpuSamplingDuration }}
+      httpUploader:
+        enabled: {{ eq .Values.integrationsAgent.pprof.uploaderType "http" }}
+        pushURL: {{ printf "%s/upload/pprof" (include "telemetry.metrics.base.url" .) }}
+      pyroscopeUploader:
+        enabled: {{ eq .Values.integrationsAgent.pprof.uploaderType "pyroscope" }}
+        pushURL: {{ include "telemetry.metrics.base.url" . }}
+      
+    TargetMetricGroups:
+      cloudwatch:
+        AWS/EC2:
+        - Name: CPUCreditBalance
+          Statistics:
+          - Average
+        - Name: CPUCreditUsage
+          Statistics:
+          - Average
+        - Name: CPUSurplusCreditBalance
+          Statistics:
+          - Average
+        - Name: CPUSurplusCreditsCharged
+          Statistics:
+          - Average
+        - Name: CPUUtilization
+          Statistics:
+          - Average
+          - Maximum
+        - Name: DiskReadBytes
+          Statistics:
+          - Average
+        - Name: DiskReadOps
+          Statistics:
+          - Average
+        - Name: DiskWriteOps
+          Statistics:
+          - Average
+        - Name: EBSByteBalance%
+          Statistics:
+          - Average
+        - Name: EBSIOBalance%
+          Statistics:
+          - Average
+        - Name: EBSReadBytes
+          Statistics:
+          - Average
+          - Sum
+        - Name: EBSReadOps
+          Statistics:
+          - Average
+          - Sum
+        - Name: EBSWriteBytes
+          Statistics:
+          - Average
+          - Sum
+        - Name: EBSWriteOps
+          Statistics:
+          - Average
+          - Sum
+        - Name: NetworkAddressUsage
+          Statistics:
+          - Average
+        - Name: NetworkAddressUsagePeered
+          Statistics:
+          - Average
+        - Name: NetworkIn
+          Statistics:
+          - Average
+          - Maximum
+        - Name: NetworkOut
+          Statistics:
+          - Average
+          - Maximum
+        - Name: NetworkPacketsIn
+          Statistics:
+          - Average
+        - Name: NetworkPacketsOut
+          Statistics:
+          - Average
+        - Name: StatusCheckFailed
+          Statistics:
+          - Average
+        - Name: StatusCheckFailedInstance
+          Statistics:
+          - Average
+        - Name: StatusCheckFailedSystem
+          Statistics:
+          - Average
+        AWS/ELB:
+        - Name: ActiveConnectionCount
+          Statistics:
+          - Average
+        - Name: BackendConnectionErrors
+          Statistics:
+          - Average
+        - Name: ClientTLSNegotiationErrorCount
+          Statistics:
+          - Average
+        - Name: ConsumedLBCapacityUnits
+          Statistics:
+          - Average
+        - Name: ConsumedLCUs
+          Statistics:
+          - Average
+        - Name: EstimatedALBActiveConnectionCount
+          Statistics:
+          - Average
+        - Name: EstimatedALBConsumedLCUs
+          Statistics:
+          - Average
+        - Name: EstimatedALBNewConnectionCount
+          Statistics:
+          - Average
+        - Name: EstimatedProcessedBytes
+          Statistics:
+          - Average
+        - Name: HealthyHostCount
+          Statistics:
+          - Average
+          - Maximum
+          - Minimum
+        - Name: HealthyHostCountDeduped
+          Statistics:
+          - Average
+        - Name: HTTPCodeBackend2xx
+          Statistics:
+          - Average
+        - Name: HTTPCodeBackend3xx
+          Statistics:
+          - Average
+        - Name: HTTPCodeBackend4xx
+          Statistics:
+          - Average
+        - Name: HTTPCodeBackend5xx
+          Statistics:
+          - Average
+        - Name: HTTPCodeELB4xx
+          Statistics:
+          - Average
+        - Name: HTTPCodeELB500
+          Statistics:
+          - Average
+        - Name: HTTPCodeELB502
+          Statistics:
+          - Average
+        - Name: HTTPCodeELB503
+          Statistics:
+          - Average
+        - Name: HTTPCodeELB504
+          Statistics:
+          - Average
+        - Name: HTTPCodeELB5xx
+          Statistics:
+          - Average
+        - Name: HTTPCodeRedirect
+          Statistics:
+          - Average
+        - Name: HTTPCodeTarget2xx
+          Statistics:
+          - Average
+        - Name: HTTPCodeTarget3xx
+          Statistics:
+          - Average
+        - Name: HTTPCodeTarget4xx
+          Statistics:
+          - Average
+        - Name: HTTPCodeTarget5xx
+          Statistics:
+          - Average
+        - Name: IPv6ProcessedBytes
+          Statistics:
+          - Average
+        - Name: IPv6RequestCount
+          Statistics:
+          - Average
+        - Name: Latency
+          Statistics:
+          - Average
+          - Maximum
+          - Minimum
+          - p95
+          - p99
+        - Name: NewConnectionCount
+          Statistics:
+          - Average
+        - Name: ProcessedBytes
+          Statistics:
+          - Average
+        - Name: RequestCount
+          Statistics:
+          - Average
+        - Name: RequestCountPerTarget
+          Statistics:
+          - Average
+        - Name: RuleEvaluations
+          Statistics:
+          - Average
+        - Name: SpilloverCount
+          Statistics:
+          - Average
+          - Maximum
+        - Name: SurgeQueueLength
+          Statistics:
+          - Average
+        - Name: TargetConnectionErrorCount
+          Statistics:
+          - Average
+        - Name: TargetResponseTime
+          Statistics:
+          - Average
+          - Maximum
+          - p95
+          - p99
+        - Name: UnhealthyHostCount
+          Statistics:
+          - Average
+          - Maximum
+          - Minimum
+        - Name: UnhealthyHostCountDeduped
+          Statistics:
+          - Average
+kind: ConfigMap
+metadata:
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+    {{- if .Values.integrationsAgent.additionalLabels }}
+{{ toYaml .Values.integrationsAgent.additionalLabels | indent 4 }}
+    {{- end }}
+  annotations:
+    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+    {{- if .Values.integrationsAgent.additionalAnnotations }}
+{{ toYaml .Values.integrationsAgent.additionalAnnotations | indent 4 }}
+    {{- end }}
+  name: integrations-agent-config
+  namespace: {{ .Release.Namespace }}
+{{ end }}

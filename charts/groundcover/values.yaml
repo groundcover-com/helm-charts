@@ -1,6 +1,9 @@
 global:
   agent:
     enabled: true
+  integrations:
+    agent:
+      enabled: false
   backend:
     name:
     enabled: true
@@ -445,6 +448,69 @@ dbManager:
     pricingFileURL: "https://groundcover-public-assets.s3.amazonaws.com/cloud_pricing_v1.csv"
     refreshInterval: 6h # {amount}[h(ours), d(ays), w(eeks), y(ears)]
 
+integrationsAgent:
+  initContainers:
+    checkIngestion:
+      builtinEnv:
+      - name: API_KEY
+        valueFrom:
+          secretKeyRef:
+            key: '{{ template "groundcover.apikeySecretKey" . }}'
+            name: '{{ template "groundcover.apikeySecretName" . }}'
+    checkMetrics:
+      builtinEnv:
+      - name: API_KEY
+        valueFrom:
+          secretKeyRef:
+            key: '{{ template "groundcover.apikeySecretKey" . }}'
+            name: '{{ template "groundcover.apikeySecretName" . }}'   
+  image:
+    repository: "{{ .Values.global.origin.registry }}/integrations-agent"
+    tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
+  additionalLabels:
+  podLabels:
+  podAnnotations:
+  affinity:
+  nodeSelector:
+  tolerations: []
+  priorityClassName:
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 1024Mi
+    requests:
+      cpu: 500m
+      memory: 256Mi
+  pprof:
+    enabled: true
+    interval: 10s
+    exponent: 40
+    uploaderType: pyroscope
+    cpuSamplingDuration: 60s
+  env: []
+  builtinEnv:
+  - name: API_KEY
+    valueFrom:
+      secretKeyRef:
+        key: '{{ template "groundcover.apikeySecretKey" . }}'
+        name: '{{ template "groundcover.apikeySecretName" . }}'        
+  readinessProbe:
+    httpGet:
+      scheme: HTTP
+      path: /health
+      port: agent-http
+    initialDelaySeconds: 45
+    periodSeconds: 15
+    failureThreshold: 20
+  livenessProbe:
+    httpGet:
+      scheme: HTTP
+      path: /health
+      port: agent-http
+    initialDelaySeconds: 45
+    periodSeconds: 15
+    failureThreshold: 20
+
 k8sWatcher:
   initContainers:
     checkIngestion:
@@ -515,6 +581,11 @@ k8sWatcher:
     initialDelaySeconds: 45
     periodSeconds: 15
     failureThreshold: 20
+
+journalScraper:
+  serviceNames: []
+  historyDuration: 10m
+  journalFilter: "system.journal"
 
 portal:
   additionalLabels:
