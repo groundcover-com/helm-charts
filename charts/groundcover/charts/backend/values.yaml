@@ -183,6 +183,8 @@ keep:
       checksum/values: '{{ .Values | toJson | sha256sum }}'
       prometheus.io/port: "8080"
     env:
+      - name: KEEP_LIMIT_CONCURRENCY
+        value: "15/second"
       - name: KEEP_NO_AUTH_METRICS
         value: "true"
       - name: KEEP_STORE_WORKFLOW_LOGS
