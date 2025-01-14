@@ -476,13 +476,8 @@ data:
       clients: 
       - name: "logs_client"
         enabled: true
-        urlText: {{ include "opentelemetry-collector.loki.http.url" . }}
-        useApiKey: true
-        batchwait: 2500ms
+        batchwait: 5000ms
         batchsize: 10485760
-        client:
-          tlsconfig:
-            insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
         backoffConfig:
           minBackoff: 500ms
           maxBackoff: 5m
@@ -496,9 +491,7 @@ data:
         timeout: 10s
         useRingBuffer: false
         dropRunningNamespaceLogs: {{  include "groundcover.dropRunningNamespaceLogs" .}}
-        groundcoverTimeTravel: -20s
         logDropFilters: {{ toYaml .Values.logsDropFilters | nindent 10}}
-        metricateLabels: false
         multiLineConfigs: {{ toYaml .Values.logsMultiLines | nindent 10}}
         grokParserConfig: {{ toYaml .Values.grokParserConfig | nindent 10}}
         decolorize: {{ .Values.decolorizeLogs }}
