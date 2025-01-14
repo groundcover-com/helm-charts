@@ -274,6 +274,308 @@ data:
         - Name: UnhealthyHostCountDeduped
           Statistics:
           - Average
+        AWS/S3:
+        - Name: 4xxErrors
+          Statistics:
+            - Average
+        - Name: 5xxErrors
+          Statistics:
+            - Average
+        - Name: AllRequests
+          Statistics:
+            - Average
+        - Name: BucketSizeBytes
+          Statistics:
+            - Average
+        - Name: BytesDownloaded
+          Statistics:
+            - Average
+        - Name: BytesPendingReplication
+          Statistics:
+            - Average
+        - Name: BytesUploaded
+          Statistics:
+            - Average
+        - Name: DeleteRequests
+          Statistics:
+            - Average
+        - Name: FirstByteLatency
+          Statistics:
+            - Average
+            - Maximum
+            - Minimum
+            - P50
+            - P90
+            - P95
+            - P99
+            - P9999
+        - Name: GetRequests
+          Statistics:
+            - Average
+        - Name: HeadRequests
+          Statistics:
+            - Average
+        - Name: ListRequests
+          Statistics:
+            - Average
+        - Name: NumberOfObjects
+          Statistics:
+            - Average
+        - Name: OperationsFailedReplication
+          Statistics:
+            - Average
+            - SampleCount
+            - Sum
+        - Name: OperationsPendingReplication
+          Statistics:
+            - Average
+        - Name: PostRequests
+          Statistics:
+            - Average
+        - Name: PutRequests
+          Statistics:
+            - Average
+        - Name: ReplicationLatency
+          Statistics:
+            - Average
+        - Name: TotalRequestLatency
+          Statistics:
+            - Average
+            - Maximum
+            - Minimum
+            - P50
+            - P90
+            - P95
+            - P99
+            - P9999
+        AWS/RDS:
+        - Name: ActiveTransactions
+          Statistics:
+            - Average
+        - Name: AuroraBinlogReplicaLag
+          Statistics:
+            - Average
+        - Name: AuroraReplicaLag
+          Statistics:
+            - Average
+        - Name: AuroraReplicaLagMaximum
+          Statistics:
+            - Average
+        - Name: AuroraReplicaLagMinimum
+          Statistics:
+            - Average
+        - Name: BackupRetentionPeriodStorageUsed
+          Statistics:
+            - Average
+        - Name: BinLogDiskUsage
+          Statistics:
+            - Average
+        - Name: BlockedTransactions
+          Statistics:
+            - Average
+        - Name: BufferCacheHitRatio
+          Statistics:
+            - Average
+        - Name: BurstBalance
+          Statistics:
+            - Average
+        - Name: CommitLatency
+          Statistics:
+            - Average
+        - Name: CommitThroughput
+          Statistics:
+            - Average
+        - Name: CpuCreditBalance
+          Statistics:
+            - Average
+        - Name: CpuCreditUsage
+          Statistics:
+            - Average
+        - Name: CpuSurplusCreditBalance
+          Statistics:
+            - Average
+        - Name: CpuSurplusCreditsCharged
+          Statistics:
+            - Average
+        - Name: CpuUtilization
+          Statistics:
+            - Average
+        - Name: DatabaseConnections
+          Statistics:
+            - Average
+        - Name: DbLoad
+          Statistics:
+            - Average
+        - Name: DbLoadCpu
+          Statistics:
+            - Average
+        - Name: DbLoadNonCpu
+          Statistics:
+            - Average
+        - Name: DbLoadRelativeToNumVcpus
+          Statistics:
+            - Average
+        - Name: DdlLatency
+          Statistics:
+            - Average
+        - Name: DdlThroughput
+          Statistics:
+            - Average
+        - Name: Deadlocks
+          Statistics:
+            - Average
+        - Name: DeleteLatency
+          Statistics:
+            - Average
+        - Name: DeleteThroughput
+          Statistics:
+            - Average
+        - Name: DiskQueueDepth
+          Statistics:
+            - Average
+        - Name: DmlLatency
+          Statistics:
+            - Average
+        - Name: DmlThroughput
+          Statistics:
+            - Average
+        - Name: EngineUptime
+          Statistics:
+            - Average
+        - Name: FailedSqlserverAgentJobsCount
+          Statistics:
+            - Average
+        - Name: FreeLocalStorage
+          Statistics:
+            - Average
+        - Name: FreeStorageSpace
+          Statistics:
+            - Average
+        - Name: FreeableMemory
+          Statistics:
+            - Average
+        - Name: InsertLatency
+          Statistics:
+            - Average
+        - Name: InsertThroughput
+          Statistics:
+            - Average
+        - Name: LoginFailures
+          Statistics:
+            - Average
+        - Name: MaximumUsedTransactionIds
+          Statistics:
+            - Average
+        - Name: NetworkReceiveThroughput
+          Statistics:
+            - Average
+        - Name: NetworkThroughput
+          Statistics:
+            - Average
+        - Name: NetworkTransmitThroughput
+          Statistics:
+            - Average
+        - Name: OldestReplicationSlotLag
+          Statistics:
+            - Average
+        - Name: Queries
+          Statistics:
+            - Average
+        - Name: RdstoAuroraPostgreSqlReplicaLag
+          Statistics:
+            - Average
+        - Name: ReadIops
+          Statistics:
+            - Average
+        - Name: ReadLatency
+          Statistics:
+            - Average
+        - Name: ReadThroughput
+          Statistics:
+            - Average
+        - Name: ReplicaLag
+          Statistics:
+            - Average
+        - Name: ReplicationSlotDiskUsage
+          Statistics:
+            - Average
+        - Name: ResultSetCacheHitRatio
+          Statistics:
+            - Average
+        - Name: SelectLatency
+          Statistics:
+            - Average
+        - Name: SelectThroughput
+          Statistics:
+            - Average
+        - Name: SnapshotStorageUsed
+          Statistics:
+            - Average
+        - Name: TransactionLogsDiskUsage
+          Statistics:
+            - Average
+        - Name: TransactionLogsGeneration
+          Statistics:
+            - Average
+        - Name: UpdateLatency
+          Statistics:
+            - Average
+        - Name: UpdateThroughput
+          Statistics:
+            - Average
+        - Name: VolumeReadIOPS
+          Statistics:
+            - Average
+        - Name: VolumeWriteIOPS
+          Statistics:
+            - Average
+        - Name: VolumeReadThroughput
+          Statistics:
+            - Average
+        - Name: VolumeWriteThroughput
+          Statistics:
+            - Average
+        - Name: VolumeBytesUsed
+          Statistics:
+            - Average
+        - Name: WriteIops
+          Statistics:
+            - Average
+        - Name: WriteLatency
+          Statistics:
+            - Average
+        - Name: WriteThroughput
+          Statistics:
+            - Average
+        AWS/SQS:
+        - Name: ApproximateAgeOfOldestMessage
+          Statistics: 
+          - Average
+        - Name: ApproximateNumberOfMessagesDelayed
+          Statistics: 
+          - Average
+        - Name: ApproximateNumberOfMessagesNotVisible
+          Statistics: 
+          - Average
+        - Name: ApproximateNumberOfMessagesVisible
+          Statistics: 
+          - Average
+        - Name: NumberOfEmptyReceives
+          Statistics: 
+          - Average
+        - Name: NumberOfMessagesDeleted
+          Statistics: 
+          - Average
+        - Name: NumberOfMessagesReceived
+          Statistics: 
+          - Average
+        - Name: NumberOfMessagesSent
+          Statistics: 
+          - Average
+        - Name: SentMessageSize
+          Statistics: 
+          - Average
+      
 kind: ConfigMap
 metadata:
   labels:
