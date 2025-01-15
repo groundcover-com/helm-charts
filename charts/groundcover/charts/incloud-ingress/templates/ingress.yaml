@@ -423,7 +423,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: {{ include "victoria-metrics.service.fullname" . }}
+                name: {{ include "victoria-metrics.read.http.host" . }}
                 port:
                   name: http
 {{- end -}}

@@ -167,13 +167,6 @@ READ: Used by monitors-manager, portal
 {{- (printf "%s://%s/%s" (include "victoria-metrics.read.http.scheme" .) (include "victoria-metrics.read.http.hostport" .) (include "victoria-metrics.read.http.path" .)) | trimSuffix "/" -}}
 {{- end -}}
 
-{{/*
-READ: Used by kong for exposing access point to external grafana
-TODO: Fix for VMCluster
-*/}}
-{{- define "victoria-metrics.service.fullname" -}}
-{{- printf "%s-victoria-metrics" .Release.Name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
 
 {{/*
 WRITE: Used by metrics-ingestor and custom-metrics
