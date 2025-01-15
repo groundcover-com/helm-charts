@@ -586,6 +586,12 @@ journalScraper:
   serviceNames: []
   historyDuration: 10m
   journalFilter: "system.journal"
+logFileTargets: []
+# - path: /var/log/syslog.*
+#   excludedPath: "*.gz"
+#   labels:
+#     label1: "value1"
+#   workload: "syslog" # optional
 
 portal:
   additionalLabels:

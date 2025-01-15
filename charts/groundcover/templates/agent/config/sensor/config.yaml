@@ -473,6 +473,7 @@ data:
           serviceNames: {{ toYaml .Values.journalScraper.serviceNames | nindent 12}}
           historyDuration: {{ .Values.journalScraper.historyDuration }}
           journalFilter: "{{ .Values.journalScraper.journalFilter }}"
+        logFileTargets: {{ toYaml .Values.logFileTargets | nindent 10 }}
       clients: 
       - name: "logs_client"
         enabled: true
