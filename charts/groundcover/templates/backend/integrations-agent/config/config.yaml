@@ -304,11 +304,10 @@ data:
             - Average
             - Maximum
             - Minimum
-            - P50
-            - P90
-            - P95
-            - P99
-            - P9999
+            - p50
+            - p90
+            - p95
+            - p99
         - Name: GetRequests
           Statistics:
             - Average
@@ -343,11 +342,10 @@ data:
             - Average
             - Maximum
             - Minimum
-            - P50
-            - P90
-            - P95
-            - P99
-            - P9999
+            - p50
+            - p90
+            - p95
+            - p99
         AWS/RDS:
         - Name: ActiveTransactions
           Statistics:
