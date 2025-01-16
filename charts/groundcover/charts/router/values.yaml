@@ -27,7 +27,7 @@ onprem:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.9.94
+  tag: 1.9.95
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/curl'
@@ -60,13 +60,11 @@ configuration:
     Host: "portal"
     Port: "5555"
   ListenPort: "8080"
-  JWT:
-    RequiredScope: "email"
+  Auth0:
+    RequiredScope: "access:router"
     OrgClaimKey: "https://client.info/org"
     Audience: "https://groundcover"
-    Issuer: "https://auth.groundcover.com/"
-    TenantURL: "https://auth.groundcover.com/"
-    JWKSPath: ".well-known/jwks.json"
+    Tenant: "auth.groundcover.com"
   RBAC:
     DB:
       Host: '{{ splitList ":" (include "postgresql.base.url" .) | first }}'
