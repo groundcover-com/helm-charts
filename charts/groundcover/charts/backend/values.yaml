@@ -174,7 +174,7 @@ keep:
     waitForDatabase: false
     image:
       repository: public.ecr.aws/groundcovercom/keep-api
-      tag: "0.33.9"
+      tag: "0.34.8"
     databaseConnectionStringFromSecret:
       enabled: true
       secretName: keep-postgres
@@ -183,6 +183,8 @@ keep:
       checksum/values: '{{ .Values | toJson | sha256sum }}'
       prometheus.io/port: "8080"
     env:
+      - name: KEEP_EXTRACT_IDENTITY
+        value: "false"
       - name: KEEP_USE_LIMITER
         value: "true"
       - name: KEEP_LIMIT_CONCURRENCY
