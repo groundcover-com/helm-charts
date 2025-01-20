@@ -473,6 +473,8 @@ data:
           serviceNames: {{ toYaml .Values.journalScraper.serviceNames | nindent 12}}
           historyDuration: {{ .Values.journalScraper.historyDuration }}
           journalFilter: "{{ .Values.journalScraper.journalFilter }}"
+          includeRemoteJournals: {{ .Values.journalScraper.includeRemoteJournals }}
+          checkInterval: {{ .Values.journalScraper.checkInterval }}
         logFileTargets: {{ toYaml .Values.logFileTargets | nindent 10 }}
       clients: 
       - name: "logs_client"

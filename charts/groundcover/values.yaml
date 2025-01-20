@@ -586,6 +586,8 @@ journalScraper:
   serviceNames: []
   historyDuration: 10m
   journalFilter: "system.journal"
+  includeRemoteJournals: false
+  checkInterval: 5s
 logFileTargets: []
 # - path: /var/log/syslog.*
 #   excludedPath: "*.gz"
