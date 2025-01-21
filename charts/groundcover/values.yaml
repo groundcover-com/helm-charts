@@ -510,6 +510,8 @@ integrationsAgent:
     initialDelaySeconds: 45
     periodSeconds: 15
     failureThreshold: 20
+  extraVolumes: []
+  extraVolumeMounts: []
 
 k8sWatcher:
   initContainers:

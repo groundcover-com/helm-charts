@@ -100,6 +100,9 @@ spec:
         volumeMounts:
         - mountPath: /config
           name: integrations-agent-config-volume
+        {{- with .Values.integrationsAgent.extraVolumeMounts }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
       initContainers:
       - name: check-ingestion-endpoint-ready
         env:
@@ -150,5 +153,8 @@ spec:
       volumes:
       - configMap:
           name: integrations-agent-config
-        name: integrations-agent-config-volume     
+        name: integrations-agent-config-volume
+      {{- with .Values.integrationsAgent.extraVolumes }}
+        {{- toYaml . | nindent 6 }}
+      {{- end }}
 {{ end }}

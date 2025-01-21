@@ -41,6 +41,30 @@ data:
         - "{{ . }}"
     {{- end }}
     {{- end }}
+    {{ if .Values.integrationsAgent.targets.gcpmetrics }}
+    {{- range .Values.integrationsAgent.targets.gcpmetrics }}
+    - Type: gcpmetrics
+      Name: "{{ .name }}"
+      TargetServiceAccount: "{{ .targetServiceAccount }}"
+      Regions:
+      {{- range .regions }}
+        - "{{ . }}"
+      {{- end }}
+      ProjectIds:
+      {{- range .projectIds }}
+        - "{{ . }}"
+      {{- end }}
+      MetricPrefixes:
+      {{- range .metricPrefixes }}
+        - "{{ . }}"
+      {{- end }}
+      Exporters:
+        - "prometheus"
+    {{- end }}
+    {{- range .Values.integrationsAgent.targets.additionalExporters }}
+        - "{{ . }}"
+    {{- end }}
+    {{- end }}
     {{- end }}
     {{- end }}
 
