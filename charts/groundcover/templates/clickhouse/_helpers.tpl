@@ -56,3 +56,11 @@
 {{- end -}}
 {{- $list | toYaml | nindent 2 }}
 {{- end -}}
+
+{{- define "clickhouse.opentelemetrySpanLogSetting" -}}
+{{ if eq .Values.disableOpentelemetrySpanLog false }}
+{{- else -}}
+<opentelemetry_span_log remove="1"/>
+{{- end -}}
+{{- end -}}
+

@@ -661,6 +661,8 @@ clickhouse:
         http: 8123
   metrics:
     enabled: true
+  allowSimdjson: true
+  disableOpentelemetrySpanLog: true
   auth:
     existingSecret: "false" # override global.clickhouse.auth.existingSecret to use exisiting secret
   extraEnvVars:
@@ -671,6 +673,7 @@ clickhouse:
           name: '{{ include "clickhouse.secretName" . }}'
   extraOverrides: |
     <clickhouse>
+      {{ include "clickhouse.opentelemetrySpanLogSetting" . }}
       <logger>
           <formatting><type>json</type></formatting>
       </logger>
@@ -683,6 +686,7 @@ clickhouse:
       </merge_tree>
       <profiles>
         <default>
+          <allow_simdjson>{{ .Values.allowSimdjson }}</allow_simdjson>
           <allow_experimental_analyzer>0</allow_experimental_analyzer>
           <date_time_input_format>best_effort</date_time_input_format>
           <async_insert>true</async_insert>
