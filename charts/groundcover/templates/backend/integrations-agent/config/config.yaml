@@ -12,6 +12,9 @@ data:
       Name: "{{ .name }}"
       StsRegion: "{{ .stsRegion }}"
       RoleArn: "{{ .roleArn }}"
+      {{ if eq .enabled false }}
+      Enabled: {{ .enabled }}
+      {{ end }}
       Regions:
       {{- range .regions }}
         - "{{ . }}"
@@ -45,6 +48,9 @@ data:
     - Type: gcpmetrics
       Name: "{{ .name }}"
       TargetServiceAccount: "{{ .targetServiceAccount }}"
+      {{ if eq .enabled false }}
+      Enabled: {{ .enabled }}
+      {{ end }}
       Regions:
       {{- range .regions }}
         - "{{ . }}"
@@ -72,6 +78,11 @@ data:
       Name: "prometheus"
       url: {{ include "metrics-ingester.cluster.http.base.url" . }}
       TlsSkipVerify: true
+      {{- if .Values.integrationsAgent.exporters }}
+      {{- if .Values.integrationsAgent.exporters.prometheus }}
+      RequestTimeout: {{ .Values.integrationsAgent.exporters.prometheus.requestTimeout }}
+      {{- end }}
+      {{- end }}
 
     Pprof:
       enabled: {{ include "telemetry.enabled" . }}
