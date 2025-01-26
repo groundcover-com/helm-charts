@@ -142,6 +142,10 @@ http
 {{- printf "%s/firehose/logs" (include "opentelemetry-collector.otlp.http.url" .) -}}
 {{- end -}}
 
+{{- define "opentelemetry-collector.httpreceiver.http.url" -}}
+{{- printf "http://%s:%d/json/logs" (include "opentelemetry-collector.fullname" .) (index .Values.global "opentelemetry-collector" "ports" "http-json" "servicePort" | int ) -}}
+{{- end -}}
+
 {{- define "opentelemetry-collector.otlp.grpc.url" -}}
 {{- if .Values.global.otlp.overrideGrpcURL -}}
     {{- print .Values.global.otlp.overrideGrpcURL -}}

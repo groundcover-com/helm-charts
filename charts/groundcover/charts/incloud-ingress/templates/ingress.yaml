@@ -89,6 +89,13 @@ spec:
                 name: {{ include "opentelemetry-collector.fullname" . }}
                 port:
                   number: {{ index .Values.global "opentelemetry-collector" "ports" "awsfirehose" "servicePort" | int }}
+          - path: {{ get (urlParse (include "opentelemetry-collector.httpreceiver.http.url" .)) "path" }} 
+            pathType: Exact
+            backend:
+              service:
+                name: {{ include "opentelemetry-collector.fullname" . }}
+                port:
+                  number: {{ index .Values.global "opentelemetry-collector" "ports" "http-json" "servicePort" | int }}
 
 ---
 

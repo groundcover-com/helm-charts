@@ -901,6 +901,12 @@ opentelemetry-collector:
       servicePort: 4433
       hostPort: 4433
       protocol: TCP
+    http-json:
+      enabled: true
+      containerPort: 8016
+      servicePort: 8016
+      hostPort: 8016
+      protocol: TCP
   config:
     extensions:
       health_check:
@@ -910,6 +916,8 @@ opentelemetry-collector:
       pprof:
         endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "pprof" "containerPort" | int ) }}'
     receivers:
+      http:
+        endpoint: 0.0.0.0:8016
       otlp/dummy_receiver:
         protocols:
           http:
@@ -1106,6 +1114,7 @@ opentelemetry-collector:
             - otlp
             - faro
             - awsfirehose
+            - http
           processors:
             - filter/dropNoneLogs
             - resource/enrich_headers
