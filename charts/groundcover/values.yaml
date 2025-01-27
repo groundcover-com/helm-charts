@@ -2395,18 +2395,22 @@ custom-metrics:
       cpu: 100m
       memory: 256Mi
   extraArgs:
+    remoteWrite.url: '{{ include "ingester.buildRemoteWriteURLTargets" . }}'
+    remoteWrite.rateLimit: '{{ include "ingester.buildRemoteWriteRateLimit" . }}'
+    remoteWrite.maxDiskUsagePerURL: '{{ include "ingester.buildRemoteWriteMaxDiskUsagePerURL" . }}'
+    remoteWrite.disableOnDiskQueue: '{{ include "ingester.buildRemoteWriteDisableOnDiskQueue" . }}'
+    remoteWrite.forceVMProto: '{{ include "ingester.buildRemoteWriteForceVMProto" . }}'
+    remoteWrite.forcePromProto: '{{ include "ingester.buildRemoteWriteForcePromProto" . }}'
+    remoteWrite.showURL: "true"
+    remoteWrite.maxDailySeries:  '{{ ternary "1000000" "5000000" (empty .Values.global.ingress.site) }}'
+    remoteWrite.maxHourlySeries: '{{ ternary "200000" "1000000" (empty .Values.global.ingress.site) }}'
+    remoteWrite.headers: "apikey:%{API_KEY}"
+    remoteWrite.tlsInsecureSkipVerify: '{{ ternary "true" "false" .Values.global.ingestion.tls_skip_verify }}'
+    remoteWrite.label: clusterId=$(GC_CLUSTER_ID),cluster=$(GC_CLUSTER_ID)
     promscrape.streamParse: "true"
     promscrape.dropOriginalLabels: "true"
     promscrape.suppressDuplicateScrapeTargetErrors: "true"
-    remoteWrite.showURL: "true"
-    remoteWrite.maxDiskUsagePerURL: 10GB
-    remoteWrite.maxDailySeries:  '{{ ternary "1000000" "5000000" (empty .Values.global.ingress.site) }}'
-    remoteWrite.maxHourlySeries: '{{ ternary "200000" "1000000" (empty .Values.global.ingress.site) }}'
     promscrape.maxScrapeSize: "64MiB"
-    remoteWrite.headers: "apikey:%{API_KEY}"
-    remoteWrite.tlsInsecureSkipVerify: '{{ ternary "true" "false" .Values.global.ingestion.tls_skip_verify }}'
-    remoteWrite.url: '{{ include "custom-metrics.remote-server-url" . }}'
-    remoteWrite.label: clusterId=$(GC_CLUSTER_ID),cluster=$(GC_CLUSTER_ID)
   env:
     - name: GC_CLUSTER_ID
       valueFrom:
