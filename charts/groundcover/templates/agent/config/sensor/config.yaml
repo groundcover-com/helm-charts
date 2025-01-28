@@ -463,7 +463,7 @@ data:
     env: {{ include "groundcover.env" . }}
     envType: {{ .Values.env_type }}
 
-    k8sLogs:
+    logs:
       scraper:
         positionsFile: {{ .Values.positionsFile }}
         positionsSyncInterval: 10s
@@ -476,9 +476,7 @@ data:
           includeRemoteJournals: {{ .Values.journalScraper.includeRemoteJournals }}
           checkInterval: {{ .Values.journalScraper.checkInterval }}
         logFileTargets: {{ toYaml .Values.logFileTargets | nindent 10 }}
-      clients: 
-      - name: "logs_client"
-        enabled: true
+      client:
         batchwait: 5000ms
         batchsize: 10485760
         backoffConfig:
@@ -494,16 +492,8 @@ data:
         timeout: 10s
         useRingBuffer: false
         dropRunningNamespaceLogs: {{  include "groundcover.dropRunningNamespaceLogs" .}}
-        logDropFilters: {{ toYaml .Values.logsDropFilters | nindent 10}}
-        multiLineConfigs: {{ toYaml .Values.logsMultiLines | nindent 10}}
-        grokParserConfig: {{ toYaml .Values.grokParserConfig | nindent 10}}
-        decolorize: {{ .Values.decolorizeLogs }}
-        maxLogSize: {{ .Values.maxLogSize }}
         logBatchSendQueueWorkerCount: {{ .Values.logBatchSendQueueWorkerCount }} 
         logBatchSendQueueMaxSize : {{ .Values.logBatchSendQueueMaxSize }}
-        oldLogDropThreshold: {{ .Values.oldLogDropThreshold }} 
-        oldLogDropAlwaysThreshold: {{ .Values.oldLogDropAlwaysThreshold }}
-        oldLogDelayStart: {{ .Values.oldLogDelayStart }} 
         otlpExportLimits:
           jsonFlattenMaxDepth: {{ .Values.jsonFlattenMaxDepth }}
           jsonFlattenMaxAttributes: {{ .Values.jsonFlattenMaxAttributes }}
@@ -517,6 +507,15 @@ data:
           paramString: {{ .Values.logPatternsConfig.paramString }}
           maxEvictionRatio: {{ .Values.logPatternsConfig.maxEvictionRatio }}
           maxTokens: {{ .Values.logPatternsConfig.maxTokens }}
+      pipeline:
+        logDropFilters: {{ toYaml .Values.logsDropFilters | nindent 10}}
+        multiLineConfigs: {{ toYaml .Values.logsMultiLines | nindent 10}}
+        grokParserConfig: {{ toYaml .Values.grokParserConfig | nindent 10}}
+        decolorize: {{ .Values.decolorizeLogs }}
+        maxLogSize: {{ .Values.maxLogSize }}
+        oldLogDropThreshold: {{ .Values.oldLogDropThreshold }} 
+        oldLogDropAlwaysThreshold: {{ .Values.oldLogDropAlwaysThreshold }}
+        oldLogDelayStart: {{ .Values.oldLogDelayStart }} 
     otelTracesAsLogs: true
     otelPreprocess: true
     tracesOtlpEndpoint:
