@@ -303,6 +303,13 @@ agent:
       b3ForceSample: false
       datadogForceSample: false
     watchOnlyLocalNode: false
+    customEntityTags:
+      labels:
+        keys: []
+        collectAll: false
+      annotations:
+        keys: []
+        collectAll: false
     metricIngestor:
       serverEnabled: true
       serverPort: 8428

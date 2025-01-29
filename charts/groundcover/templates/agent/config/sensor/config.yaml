@@ -399,6 +399,7 @@ data:
     contentTypesToDrop: {{ toYaml $sensorValues.contentTypesToDrop | nindent 6 }}
     hostHeadersToDrop: {{ toYaml $sensorValues.hostHeadersToDrop | nindent 6 }}
     headersForceSampling: {{ toYaml $sensorValues.headersForceSampling | nindent 6 }}
+    customEntityTags: {{ toYaml $sensorValues.customEntityTags | nindent 6 }}
 
     metricIngestor:
       serverEnabled: {{ $sensorValues.metricIngestor.serverEnabled }}
