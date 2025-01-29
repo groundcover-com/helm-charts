@@ -592,10 +592,10 @@ k8sWatcher:
     failureThreshold: 20
 
 journalScraper:
-  serviceNames: []
+  serviceNames: ["kubelet"]
   historyDuration: 10m
   journalFilter: "system.journal"
-  includeRemoteJournals: false
+  includeRemoteJournals: true
   checkInterval: 5s
 logFileTargets: []
 # - path: /var/log/syslog.*

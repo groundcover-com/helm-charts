@@ -36,6 +36,10 @@ data:
         source_labels:
         - __meta_kubernetes_pod_container_name
         target_label: container
+      - action: replace
+        source_labels:
+        - __meta_kubernetes_pod_container_id
+        target_label: container_id
       - replacement: /var/log/pods/${3}_${4}_${1}/${2}/*.log
         regex: "([^;]+);([^;]+);([^;]+);([^;]+)"
         source_labels:
@@ -58,6 +62,8 @@ data:
         target_label: instance
       - source_labels: [__meta_docker_container_id]
         target_label: instance_id
+      - source_labels: [__meta_docker_container_id]
+        target_label: container_id
       - target_label: source_type
         replacement: "docker"
 kind: ConfigMap
