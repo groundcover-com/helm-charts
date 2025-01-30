@@ -221,7 +221,7 @@ priorityClass:
 
 #imagePullSecrets: []
 
-volume-expansion:
+statefulset-modifier:
   enabled: true
   image:
     tag: latest
@@ -777,6 +777,9 @@ clickhouse:
     ## @param persistence.size Size of data volume
     ##
     size: 256Gi
+
+    # Should STS be removed to allow planned rollout of immutable spec. Incurs downtime.
+    dropBeforeCreate: false
 
   ## ClickHouse resource requests and limits
   ## ref: http://kubernetes.io/docs/user-guide/compute-resources/

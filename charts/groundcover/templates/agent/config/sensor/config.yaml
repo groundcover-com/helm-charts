@@ -468,7 +468,7 @@ data:
       scraper:
         positionsFile: {{ .Values.positionsFile }}
         positionsSyncInterval: 10s
-        targetSyncInterval: 10s
+        targetSyncInterval: 5s
         dockerMaxLogSize: {{ .Values.maxLogSize }}
         journalConfig:
           serviceNames: {{ toYaml .Values.journalScraper.serviceNames | nindent 12}}

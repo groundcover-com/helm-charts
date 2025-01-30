@@ -1,4 +1,4 @@
-{{ if and .Values.global.backend.enabled .Values.clickhouse.persistence.enabled (index .Values "volume-expansion" "enabled")}}
+{{ if and (.Values.global.backend.enabled) (.Values.clickhouse.persistence.enabled) (index .Values "statefulset-modifier" "enabled") (not (index .Values "clickhouse" "persistence" "dropBeforeCreate")) }}
 {{- $shouldPatchPvc := true -}}
 {{- $shouldDeleteSts := true -}}
 {{- $shouldPatchAnnotations := true -}}
@@ -10,7 +10,7 @@
 {{- $pvcPatch := (get $patches "pvc") | toJson -}}
 {{- $stsPatch := (get $patches "sts") | toJson -}}
 {{- $stsName := (printf "%s-shard%d" (include "clickhouse.fullname" $) $shardIndex) -}}
-{{- $name := (printf "%s-ch-%d" (include "volume-expansion.fullname" $) $shardIndex) -}}
+{{- $name := (printf "%s-ch-%d" (include "statefulset-modifier.fullname" $) $shardIndex) -}}
 {{- $pvcName := (printf "data-%s-0" $stsName) -}}
 {{ if $.Release.IsUpgrade }}
 {{- $pvc := (lookup "v1" "PersistentVolumeClaim" $.Release.Namespace $pvcName | default dict) -}}
@@ -30,7 +30,7 @@ metadata:
   name: {{ $name }}
   labels:
   annotations:
-  {{- include "volume-expansion.job.annotations" $ | nindent 4 }}
+  {{- include "statefulset-modifier.job.annotations" $ | nindent 4 }}
 spec:
   backoffLimit: 0
   template:
@@ -39,12 +39,12 @@ spec:
     spec:
       restartPolicy: Never
       imagePullSecrets: {{ include "imagePullSecrets" $ }}
-      serviceAccountName: {{ include "volume-expansion.fullname" $ }}
+      serviceAccountName: {{ include "statefulset-modifier.fullname" $ }}
       containers:
 {{ if or $shouldDeleteSts $shouldPatchAnnotations }}
       - name: sts-delete
         imagePullPolicy: IfNotPresent
-        image: {{ include "volume-expansion.job.image" $ }}
+        image: {{ include "statefulset-modifier.job.image" $ }}
         command:
           - /bin/sh
           - -c
@@ -56,7 +56,7 @@ spec:
 {{ if or $shouldPatchPvc $shouldPatchAnnotations }}
       - name: pvc-patch
         imagePullPolicy: IfNotPresent
-        image: {{ include "volume-expansion.job.image" $ }}
+        image: {{ include "statefulset-modifier.job.image" $ }}
         command:
           - /bin/sh
           - -c
@@ -67,3 +67,36 @@ spec:
 {{- end -}}
 {{- end -}}
 {{- end -}}
+
+---
+
+{{ if and (.Values.global.backend.enabled) (index .Values "statefulset-modifier" "enabled") (.Values.clickhouse.persistence.enabled) (index .Values "clickhouse" "persistence" "dropBeforeCreate") }}
+{{- $shards := .Values.clickhouse.shards | int -}}
+{{- range $shardIndex, $e := until $shards -}}
+{{- $hookJobName := (printf "%s-ch-delete-sts-hook-%d" (include "statefulset-modifier.fullname" $) $shardIndex) -}}
+{{- $stsName := (printf "%s-shard%d" (include "clickhouse.fullname" $) $shardIndex) }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ $hookJobName }}
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-delete-policy": "before-hook-creation"    
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      imagePullSecrets: {{ include "imagePullSecrets" $ }}
+      serviceAccountName: {{ include "statefulset-modifier.fullname" $ }}
+      containers:
+        - name: kubectl
+          image: {{ include "statefulset-modifier.job.image" $ }}
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              kubectl delete sts {{ $stsName | quote }} --cascade=foreground
+{{- end }}
+{{- end }}

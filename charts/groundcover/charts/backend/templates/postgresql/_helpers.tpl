@@ -5,5 +5,5 @@
 {{- define "postgresql.job.create-dbs.annotations" -}}
 helm.sh/hook-weight: "0"
 helm.sh/hook: "post-upgrade"
-helm.sh/hook-delete-policy: "before-hook-creation,hook-succeeded"
+helm.sh/hook-delete-policy: "before-hook-creation"
 {{- end -}}

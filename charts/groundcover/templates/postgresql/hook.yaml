@@ -1,4 +1,4 @@
-{{ if and .Values.global.backend.enabled .Values.global.postgresql.enabled (index .Values "volume-expansion" "enabled")}}
+{{ if and .Values.global.backend.enabled .Values.global.postgresql.enabled (index .Values "statefulset-modifier" "enabled")}}
 {{- $shouldPatchPvc := true -}}
 {{- $shouldDeleteSts := true -}}
 {{- $shouldPatchAnnotations := true -}}
@@ -7,7 +7,7 @@
 {{- $patches := (include "volume-expansion.patches" (index .Values "backend" "postgresql" "primary" "persistence")) | fromYaml -}}
 {{- $pvcPatch := (get $patches "pvc") | toJson -}}
 {{- $stsPatch := (get $patches "sts") | toJson -}}
-{{- $name := (printf "%s-psql" (include "volume-expansion.fullname" $)) -}}
+{{- $name := (printf "%s-psql" (include "statefulset-modifier.fullname" $)) -}}
 {{- $stsName := (include "postgresql.primary.fullname" .) -}}
 {{- $pvcName := (printf "data-%s-0" $stsName) -}}
 {{ if $.Release.IsUpgrade }}
@@ -28,7 +28,7 @@ metadata:
   name: {{ $name }}
   labels:
   annotations:
-  {{- include "volume-expansion.job.annotations" $ | nindent 4 }}
+  {{- include "statefulset-modifier.job.annotations" $ | nindent 4 }}
 spec:
   backoffLimit: 0
   template:
@@ -37,12 +37,12 @@ spec:
     spec:
       restartPolicy: Never
       imagePullSecrets: {{ include "imagePullSecrets" $ }}
-      serviceAccountName: {{ include "volume-expansion.fullname" $ }}
+      serviceAccountName: {{ include "statefulset-modifier.fullname" $ }}
       containers:
 {{ if or $shouldDeleteSts $shouldPatchAnnotations }}
       - name: sts-delete
         imagePullPolicy: IfNotPresent
-        image: {{ include "volume-expansion.job.image" $ }}
+        image: {{ include "statefulset-modifier.job.image" $ }}
         command:
           - /bin/sh
           - -c
@@ -54,7 +54,7 @@ spec:
 {{ if or $shouldPatchPvc $shouldPatchAnnotations }}
       - name: pvc-patch
         imagePullPolicy: IfNotPresent
-        image: {{ include "volume-expansion.job.image" $ }}
+        image: {{ include "statefulset-modifier.job.image" $ }}
         command:
           - /bin/sh
           - -c
