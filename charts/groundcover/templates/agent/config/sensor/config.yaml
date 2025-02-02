@@ -470,12 +470,7 @@ data:
         positionsSyncInterval: 10s
         targetSyncInterval: 5s
         dockerMaxLogSize: {{ .Values.maxLogSize }}
-        journalConfig:
-          serviceNames: {{ toYaml .Values.journalScraper.serviceNames | nindent 12}}
-          historyDuration: {{ .Values.journalScraper.historyDuration }}
-          journalFilter: "{{ .Values.journalScraper.journalFilter }}"
-          includeRemoteJournals: {{ .Values.journalScraper.includeRemoteJournals }}
-          checkInterval: {{ .Values.journalScraper.checkInterval }}
+        journalConfig: {{ toYaml .Values.journalScraper | nindent 10 }}
         logFileTargets: {{ toYaml .Values.logFileTargets | nindent 10 }}
       client:
         batchwait: 5000ms

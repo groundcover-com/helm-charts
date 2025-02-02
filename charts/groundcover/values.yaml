@@ -598,7 +598,7 @@ k8sWatcher:
     failureThreshold: 20
 
 journalScraper:
-  serviceNames: ["kubelet"]
+  serviceNames: ["kubelet", "kernel"]
   historyDuration: 10m
   journalFilter: "system.journal"
   includeRemoteJournals: true
@@ -648,7 +648,7 @@ clickhouse:
   shards: 1
   replicaCount: 1
   image:
-    tag: 24.6.1-debian-12-r0
+    tag: 24.11.2-debian-12-r0
     registry: public.ecr.aws/groundcovercom
   containerSecurityContext:
     enabled: false
