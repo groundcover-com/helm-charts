@@ -188,6 +188,12 @@ grokParserConfig:
       - "postgresql"
     pattern: '%{TIMESTAMP_ISO8601:timestamp} %{WORD:timezone} \[%{DATA:user_id}\] +%{GREEDYDATA:message}'
     ruleName: "postgresql"
+ottlRules:
+  []
+  # - ruleName: "test"
+  #   statements:
+  #     - "set attributes['test'] = 'test_value'"
+
 isk8s: true
 positionsFile: "/var/run/positions/positions.yaml"
 decolorizeLogs: false
@@ -292,8 +298,8 @@ agent:
         memory: 300Mi
         cpu: 160m
       limits:
-        memory: 700Mi
-        cpu: 800m
+        memory: 1Gi
+        cpu: 1000m
     nodelabels: []
     contentTypesToDrop: []
     hostHeadersToDrop: []

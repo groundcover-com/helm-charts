@@ -508,6 +508,7 @@ data:
           paramString: {{ .Values.logPatternsConfig.paramString }}
           maxEvictionRatio: {{ .Values.logPatternsConfig.maxEvictionRatio }}
           maxTokens: {{ .Values.logPatternsConfig.maxTokens }}
+        ottlRules: {{ toYaml .Values.ottlRules | nindent 10 }}
       pipeline:
         logDropFilters: {{ toYaml .Values.logsDropFilters | nindent 10}}
         multiLineConfigs: {{ toYaml .Values.logsMultiLines | nindent 10}}
