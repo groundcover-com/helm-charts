@@ -69,6 +69,7 @@ global:
   logs:
     overrideUrl: ""
     retention: 3d # {amount}[h(ours), d(ays), w(eeks), y(ears)]
+    cold_move_duration: 7d
 
   metrics:
     tls:
@@ -100,21 +101,27 @@ global:
 
   traces:
     retention: 24h # {amount}[h(ours), d(ays), w(eeks), y(ears)]
+    cold_move_duration: 7d
 
   events:
     retention: 7d # {amount}[h(ours), d(ays), w(eeks), y(ears)]
+    cold_move_duration: 7d
 
   measurements:
     retention: 7d # {amount}[h(ours), d(ays), w(eeks), y(ears)]
+    cold_move_duration: 7d
 
   sources:
     retention: 30d # {amount}[h(ours), d(ays), w(eeks), y(ears)]
+    cold_move_duration: 7d
 
   entities:
     retention: 5d # {amount}[h(ours), d(ays), w(eeks), y(ears)]
+    cold_move_duration: 7d
 
   metricsMetadata:
     retention: 30d # {amount}[h(ours), d(ays), w(eeks), y(ears)]
+    cold_move_duration: 7d
 
   telemetry:
     enabled: true
@@ -130,8 +137,10 @@ global:
   monitors:
     evaluation:
       retention: 30d # {amount}[h(ours), d(ays), w(eeks), y(ears)]
+      cold_move_duration: 7d
     instance:
       retention: 90d # {amount}[h(ours), d(ays), w(eeks), y(ears)]
+      cold_move_duration: 7d
 
   postgresql:
     enabled: true
@@ -650,6 +659,7 @@ clickhouse:
   image:
     tag: 24.11.2-debian-12-r0
     registry: public.ecr.aws/groundcovercom
+  coldVolume: ""
   containerSecurityContext:
     enabled: false
   podLabels:

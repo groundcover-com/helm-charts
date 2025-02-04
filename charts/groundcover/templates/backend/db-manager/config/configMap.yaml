@@ -28,38 +28,61 @@ data:
     tableDataRetention:
       Traces:
         retention: {{ include "traces.retention"  . }}
+        cold_volume: {{ .Values.clickhouse.coldVolume }}
+        cold_move_duration: {{ .Values.global.traces.cold_move_duration }}
         custom_retention_overrides:
           {{- include "traces.custom_retention_overrides" . | indent 8 }}
+      Traces_Interactions:
+        retention: {{ include "traces.retention" . }}
+        cold_volume: {{ .Values.clickhouse.coldVolume }}
+        cold_move_duration: {{ .Values.global.traces.cold_move_duration }}
+        custom_retention_overrides:
       Logs:
         retention: {{ include "logs.retention" . }}
+        cold_volume: {{ .Values.clickhouse.coldVolume }}
+        cold_move_duration: {{ .Values.global.logs.cold_move_duration }}
         custom_retention_overrides:
           {{- include "logs.custom_retention_overrides" . | indent 8 }}
       Entities:
         retention: {{ include "entities.retention" . }}
+        cold_volume: {{ .Values.clickhouse.coldVolume }}
+        cold_move_duration: {{ .Values.global.entities.cold_move_duration }}
         custom_retention_overrides:
           {{- include "entities.custom_retention_overrides" . | indent 8 }}
       Events:
         retention: {{ include "events.retention" . }}
+        cold_volume: {{ .Values.clickhouse.coldVolume }}
+        cold_move_duration: {{ .Values.global.events.cold_move_duration }}
         custom_retention_overrides:
           {{- include "events.custom_retention_overrides" . | indent 8 }}
       Measurements:
         retention: {{ include "measurements.retention" . }}
+        cold_volume: {{ .Values.clickhouse.coldVolume }}
+        cold_move_duration: {{ .Values.global.measurements.cold_move_duration }}
         custom_retention_overrides:
           {{- include "measurements.custom_retention_overrides" . | indent 8 }}
       Monitor_State:
         retention: {{ include "monitors.evaluation.retention" .}}
+        cold_volume: {{ .Values.clickhouse.coldVolume }}
+        cold_move_duration: {{ .Values.global.monitors.evaluation.cold_move_duration }}
         custom_retention_overrides:
           {{- include "monitors.evaluation.custom_retention_overrides" . | indent 8 }}
       Monitor_Instance:
         retention: {{ include "monitors.instance.retention" .}}
+        cold_volume: {{ .Values.clickhouse.coldVolume }}
+        cold_move_duration: {{ .Values.global.monitors.instance.cold_move_duration }}
         custom_retention_overrides:
           {{- include "monitors.instance.custom_retention_overrides" . | indent 8 }}
       Sources:
         retention: {{ include "sources.retention" .  }}
+        cold_volume: {{ .Values.clickhouse.coldVolume }}
+        cold_move_duration: {{ .Values.global.sources.cold_move_duration }}
         custom_retention_overrides:
           {{- include "sources.custom_retention_overrides" . | indent 8 }}
       Metrics_Metadata:
         retention: {{ include "metrics_metadata.retention" . }}
+        cold_volume: {{ .Values.clickhouse.coldVolume }}
+        cold_move_duration: {{ .Values.global.metricsMetadata.cold_move_duration }}
         custom_retention_overrides:
           {{- include "metrics_metadata.custom_retention_overrides" . | indent 8 }}
     DataMigration:
