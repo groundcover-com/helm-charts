@@ -78,6 +78,10 @@ http
 {{- printf "%s/logs" (include "incloud.ingestion.json.url" .) -}}
 {{- end -}}
 
+{{- define "vector.cluster.json.tables.write.path" -}}
+{{-  printf "/ingest/v2/json/table/write" -}}
+{{- end -}}
+
 {{- define "vector.cluster.otlp.grpc.traces.port" -}}
 {{-  printf "4327"  -}}
 {{- end -}}
@@ -199,6 +203,37 @@ http
     {{- print .Values.global.vector.custom.otlp.overrideHttpURL -}}
 {{- else -}}
     {{- include "vector.cluster.otlp.http.custom.url" . -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "vector.cluster.json.table.write.port" -}}
+{{-  printf "4350"  -}}
+{{- end -}}
+
+{{- define "vector.cluster.json.table.write.endpoint" -}}
+{{-  printf "%s://%s:%d" (include "vector.otlp.scheme" .) (include "vector.fullname" .) (include "vector.cluster.json.table.write.port" . | int )  -}}
+{{- end -}}
+
+{{- define "vector.json.tables.write.metrics_metadata.path" -}}
+{{-  printf "%s/metrics_metadata" (include "vector.cluster.json.tables.write.path" .) -}}
+{{- end -}}
+
+
+{{- define "vector.cluster.json.table.write.metrics_metadata.url" -}}
+{{-  printf "%s%s" (include "vector.cluster.json.table.write.endpoint" .) (include "vector.json.tables.write.metrics_metadata.path" . )  -}}
+{{- end -}}
+
+{{- define "vector.incloud.json.table.write.metrics_metadata.url" -}}
+{{- printf "%s%s" .Values.global.ingress.site (include "vector.json.tables.write.metrics_metadata.path" . )  -}}
+{{- end -}}
+
+{{- define "vector.json.table.write.metrics_metadata.url" -}}
+{{- if .Values.global.backend.enabled -}}
+    {{- include "vector.cluster.json.table.write.metrics_metadata.url" . -}}
+{{- else if .Values.global.ingress.site -}}
+    {{- include "vector.incloud.json.table.write.metrics_metadata.url" . -}}
+{{- else if not .Values.global.backend.enabled -}}
+    {{- fail "A valid global.ingress.site is required!" -}}
 {{- end -}}
 {{- end -}}
 

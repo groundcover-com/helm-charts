@@ -234,7 +234,13 @@ spec:
                 name: {{ include "vector.fullname" . }}
                 port:
                   number: {{ (include "vector.cluster.json.measurements.port" .) | int }}
-
+          - path: {{ include "vector.cluster.json.tables.write.path" . }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "vector.fullname" . }}
+                port:
+                  number: {{ (include "vector.cluster.json.table.write.port" .) | int }}
 ---
 
 apiVersion: networking.k8s.io/v1

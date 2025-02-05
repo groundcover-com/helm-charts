@@ -534,6 +534,20 @@ integrationsAgent:
     failureThreshold: 20
   extraVolumes: []
   extraVolumeMounts: []
+  exporters:
+    prometheus:
+      requestTimeout: 30s
+      batchSize: 2000
+      maxRetries: 3
+      maxDelay: 15s
+      baseDelay: 5s
+      metadata:
+        maxRetries: 3
+        maxDelay: 15s
+        baseDelay: 5s
+        compress: true
+        cacheTTL: 1h
+        cacheSize: 100000
 
 k8sWatcher:
   initContainers:
@@ -1284,6 +1298,8 @@ vector:
         protocol: UDP
       - name: statsd-tcp
         port: 8125
+      - name: json-table-write
+        port: 4350
   containerPorts:
     - name: api
       containerPort: 8686
@@ -1320,6 +1336,8 @@ vector:
       protocol: UDP
     - name: statsd-tcp
       containerPort: 8125
+    - name: json-tablewrite
+      containerPort: 4350
   role: "Stateless-Aggregator"
   replicas: 2
   resources:
@@ -1484,6 +1502,14 @@ vector:
           address: "0.0.0.0:4329"
           decoding:
             codec: json
+        json_metrics_metadata:
+          type: http
+          address: "0.0.0.0:4350"
+          path: '{{ include "vector.json.tables.write.metrics_metadata.path" . }}'
+          strict_path: false
+          method: "POST"
+          decoding:
+            codec: json
     transforms:
       overrideTransforms:
       extraTransforms:
@@ -1539,6 +1565,13 @@ vector:
           type: "remap"
           source: |-
 
+        table_write_routing:
+          inputs:
+            - "json_metrics_metadata"
+          type: "route"
+          reroute_unmatched: false
+          route:
+            metrics_metadata: .path == {{ include "vector.json.tables.write.metrics_metadata.path" . | quote}}
         measurements:
           inputs:
             - custom_from_logs_routing.measurements
@@ -1948,6 +1981,7 @@ vector:
             type: clickhouse
             inputs:
               - metrics_metadata_extracted
+              - table_write_routing.metrics_metadata
             endpoint: '{{ include "clickhouse.shard0HttpEndpoint" . }}'
             database: "groundcover"
             table: "metrics_metadata"

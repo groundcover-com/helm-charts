@@ -3,32 +3,32 @@ apiVersion: v1
 data:
   config.yaml: |
     LogLevel: 4
-    {{ if .Values.integrationsAgent }}
-    {{ if .Values.integrationsAgent.targets }}
+    ApiKey: 
+    ClusterId: 
+    {{- if .Values.integrationsAgent }}
+    {{- if .Values.integrationsAgent.targets }}
     Targets:
-    {{ if .Values.integrationsAgent.targets.cloudwatch }}
+    {{- if .Values.integrationsAgent.targets.cloudwatch }}
     {{- range .Values.integrationsAgent.targets.cloudwatch }}
     - Type: "cloudwatch"
       Name: "{{ .name }}"
       AwsStsRegion: "{{ .stsRegion }}"
       AwsRoleArn: "{{ .roleArn }}"
-      {{ if .metricNamePefix }}
-      {{ if .extraLabels }}
+      {{- if .extraLabels }}
       ExtraLabels:
       {{- range $key, $value := .extraLabels }}
         {{ $key }}: "{{ $value }}"
       {{- end }}
-      {{- end }}
-      {{ if .dropLabels }}
+      {{- if .dropLabels }}
       DropLabels:
       {{- range $label := .dropLabels }}
         - "{{ $label }}"
       {{- end }}
       {{- end }}
-      {{ end }}
-      {{ if eq .enabled false }}
+      {{- end }}
+      {{- if eq .enabled false }}
       Enabled: {{ .enabled }}
-      {{ end }}
+      {{- end }}
       Regions:
       {{- range .regions }}
         - "{{ . }}"
@@ -58,27 +58,27 @@ data:
         - "{{ . }}"
     {{- end }}
     {{- end }}
-    {{ if .Values.integrationsAgent.targets.gcpmetrics }}
+    {{- if .Values.integrationsAgent.targets.gcpmetrics }}
     {{- range .Values.integrationsAgent.targets.gcpmetrics }}
     - Type: gcpmetrics
       Name: "{{ .name }}"
       GcpTargetServiceAccount: "{{ .targetServiceAccount }}"
-      {{ if .extraLabels }}
+      {{- if .extraLabels }}
       ExtraLabels:
       {{- range $key, $value := .extraLabels }}
         {{ $key }}: "{{ $value }}"
       {{- end }}
       {{- end }}
-      {{ if .dropLabels }}
+      {{- if .dropLabels }}
       DropLabels:
       {{- range $label := .dropLabels }}
         - "{{ $label }}"
       {{- end }}
       {{- end }}
-      {{ if eq .enabled false }}
+      {{- if eq .enabled false }}
       Enabled: {{ .enabled }}
-      {{ end }}
-      {{ if .regions }}
+      {{- end }}
+      {{- if .regions }}
       Regions:
       {{- range .regions }}
         - "{{ . }}"
@@ -99,36 +99,36 @@ data:
         - "{{ . }}"
     {{- end }}
     {{- end }}
-    {{ if .Values.integrationsAgent.targets.azuremetrics }}
+    {{- if .Values.integrationsAgent.targets.azuremetrics }}
     {{- range .Values.integrationsAgent.targets.azuremetrics }}
     - Type: azuremetrics
       Name: "{{ .name }}"
-      {{ if .regions }}
+      {{- if .regions }}
       Regions:
       {{- range .regions }}
         - "{{ . }}"
       {{- end }}
       {{- end }}
-      {{ if .extraLabels }}
+      {{- if .extraLabels }}
       ExtraLabels:
       {{- range $key, $value := .extraLabels }}
         {{ $key }}: "{{ $value }}"
       {{- end }}
       {{- end }}
-      {{ if .dropLabels }}
+      {{- if .dropLabels }}
       DropLabels:
       {{- range $label := .dropLabels }}
         - "{{ $label }}"
       {{- end }}
       {{- end }}
-      {{ if eq .enabled false }}
+      {{- if eq .enabled false }}
       Enabled: {{ .enabled }}
-      {{ end }}
+      {{- end }}
       AzureSubscriptions:
       {{- range .subscriptionIds }}
         - "{{ . }}"
       {{- end }}
-      {{ if .resourceTypes }}
+      {{- if .resourceTypes }}
       AzureResourceTypes:
       {{- range .resourceTypes }}
         - "{{ . }}"
@@ -162,12 +162,55 @@ data:
     - Type: "prometheus"
       Name: "prometheus"
       url: {{ include "metrics-ingester.cluster.http.base.url" . }}
-      TlsSkipVerify: true
+      TlsSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
       {{- if .Values.integrationsAgent.exporters }}
       {{- if .Values.integrationsAgent.exporters.prometheus }}
       RequestTimeout: {{ .Values.integrationsAgent.exporters.prometheus.requestTimeout }}
+      {{- if .Values.integrationsAgent.exporters.prometheus.batchSize }}
+      BatchSize: {{ .Values.integrationsAgent.exporters.prometheus.batchSize }}
+      {{- end }}
+      {{- if .Values.integrationsAgent.exporters.prometheus.maxRetries }}
+      MaxRetries: {{ .Values.integrationsAgent.exporters.prometheus.maxRetries }}
+      {{- end }}
+      {{- if .Values.integrationsAgent.exporters.prometheus.maxDelay }}
+      MaxDelay: {{ .Values.integrationsAgent.exporters.prometheus.maxDelay }}
+      {{- end }}
+      {{- if .Values.integrationsAgent.exporters.prometheus.baseDelay }}
+      BaseDelay: {{ .Values.integrationsAgent.exporters.prometheus.baseDelay }}
       {{- end }}
       {{- end }}
+      {{- end }}
+      MetricsMetadata:
+        Url: {{ include "vector.json.table.write.metrics_metadata.url" . }}
+        {{- if .Values.integrationsAgent.exporters }}
+        {{- if .Values.integrationsAgent.exporters.prometheus }}
+        {{- if .Values.integrationsAgent.exporters.prometheus.metadata }}
+        {{- if .Values.integrationsAgent.exporters.prometheus.metadata.compress }}
+        Compress: {{ .Values.integrationsAgent.exporters.prometheus.metadata.compress }}
+        {{- end }}
+        TlsSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
+        {{- if .Values.integrationsAgent.exporters.prometheus.metadata.maxRetries }}
+        MaxRetries: {{ .Values.integrationsAgent.exporters.prometheus.metadata.maxRetries }}
+        {{- end }}
+        {{- if .Values.integrationsAgent.exporters.prometheus.metadata.maxDelay }}
+        MaxDelay: {{ .Values.integrationsAgent.exporters.prometheus.metadata.maxDelay }}
+        {{- end }}
+        {{- if .Values.integrationsAgent.exporters.prometheus.metadata.baseDelay }}
+        BaseDelay: {{ .Values.integrationsAgent.exporters.prometheus.metadata.baseDelay }}
+        {{- end }}
+        {{- if .Values.integrationsAgent.exporters.prometheus.metadata.cacheSize }}
+        CacheSize: {{ .Values.integrationsAgent.exporters.prometheus.metadata.cacheSize }}
+        {{- end }}
+        {{- if .Values.integrationsAgent.exporters.prometheus.metadata.cacheTTL }}
+        CacheTTL: {{ .Values.integrationsAgent.exporters.prometheus.metadata.cacheTTL }}
+        {{- end }}
+        {{- if .Values.integrationsAgent.exporters.prometheus.metadata.maxWriteSize }}
+        MaxWriteSize: {{ .Values.integrationsAgent.exporters.prometheus.metadata.maxWriteSize }}
+      {{- end }}
+      {{- end }}
+      {{- end }}
+      {{- end }}
+
 
     Pprof:
       enabled: {{ include "telemetry.enabled" . }}
