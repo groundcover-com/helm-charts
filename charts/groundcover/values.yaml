@@ -168,7 +168,7 @@ installationId:
 #  - clusterA
 #  - clusterB
 region:
-dropRunningNamespaceLogs: 
+dropRunningNamespaceLogs: false
 tracesNamespaceFilters:
   []
   # - matchType: "allow"
@@ -215,7 +215,7 @@ oldLogDropAlwaysThreshold: 60m
 oldLogDelayStart: 60s
 jsonFlattenMaxDepth: 6
 jsonFlattenMaxAttributes: 300
-shouldDropRunningNamespaces: 
+shouldDropRunningNamespaces: false
 commitHashKeyName:
 repositoryUrlKeyName:
 logPatternsConfig:
