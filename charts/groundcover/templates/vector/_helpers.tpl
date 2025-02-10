@@ -46,10 +46,6 @@ true
 http
 {{- end -}}
 
-{{- define "vector.otlp.http.tls.enabled" -}}
-{{- eq (get (urlParse (include "vector.logs.otlp.http.url" .)) "scheme") "https" -}}
-{{- end -}}
-
 {{- define "vector.cluster.otlp.grpc.logs.port" -}}
 {{-  printf "4317"  -}}
 {{- end -}}
@@ -340,11 +336,31 @@ sinks:
 {{- tpl (toYaml (dict "clickhouse_k8s_events" .Values.vector.customComponents.sinks.local.custom.clickhouse_k8s_events)) $ | nindent 2 }}
 {{- tpl (toYaml (dict "clickhouse_monitors" .Values.vector.customComponents.sinks.local.custom.clickhouse_monitors)) $ | nindent 2 }}
 {{ else }} {{- /* remote ingestion over ingress */}}
+{{- tpl (include "remoteSinksWithTLS" .) $ }}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "createRemoteSinks" -}}
 {{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.logsPipeline "sinks" .Values.vector.customComponents.sinks.remote.logs)) $ -}}
 {{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.tracesPipeline "sinks" .Values.vector.customComponents.sinks.remote.traces)) $ -}}
 {{- tpl (toYaml .Values.vector.customComponents.sinks.remote.custom) $ | nindent 2 }}
 {{- end -}}
-{{- end -}}
+
+{{- define "remoteSinksWithTLS" -}}
+  {{- $tlsConfig := dict "tls" (dict "verify_certificate" (not .Values.global.ingestion.tls_skip_verify)) -}}
+  {{- $remoteSinksYaml := include "createRemoteSinks" . -}}
+  {{- $remoteSinks := fromYaml $remoteSinksYaml -}}
+
+  {{- /* For each sink in the remoteSinks map, merge in the TLS configuration if sink is http and uri starts https  */ -}}
+  {{- range $key, $sink := $remoteSinks }}
+    {{ if and (eq $sink.type "http") (eq (get (urlParse $sink.uri) "scheme") "https")   }} 
+    {{- $_ := set $remoteSinks $key (merge $sink $tlsConfig) -}}
+    {{ end }}        
+  {{- end }}
+
+  {{- /* Render the final merged map as YAML, indented as desired */ -}}
+  {{- toYaml $remoteSinks | nindent 2 }}
 {{- end -}}
 
 {{- define "createPipelineStages" -}}

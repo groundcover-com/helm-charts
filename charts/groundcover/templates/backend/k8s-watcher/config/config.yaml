@@ -52,7 +52,6 @@ data:
     otelTracesAsLogs: true
     customOtlpEndpoint:
       endpoint: {{ include "ingestion.custom.otlp.http.url" . }}
-      enableTLS: {{ include "ingestion.otlp.tls.enabled" . }}
       insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
       writeTimeout: 10s
       batchSize: 350
@@ -60,7 +59,6 @@ data:
       flushInterval: 1s
     tracesOtlpEndpoint:
       endpoint: {{ include "ingestion.traces.otlp.http.url" . }}
-      enableTLS: {{ include "ingestion.otlp.tls.enabled" . }}
       insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
       writeTimeout: 10s
     Pprof:

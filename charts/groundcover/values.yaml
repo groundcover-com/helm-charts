@@ -201,7 +201,7 @@ ottlRules:
   []
   # - ruleName: "test"
   #   statements:
-  #     - "set attributes['test'] = 'test_value'"
+  #     - set(attributes["test"], "test_value")
 
 isk8s: true
 positionsFile: "/var/run/positions/positions.yaml"

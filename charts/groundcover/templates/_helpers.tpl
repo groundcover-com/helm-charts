@@ -249,10 +249,6 @@ Get cluster_id from values or generate random one
 {{ include "vector.cluster.otlp.http.monitors.url" . }}
 {{- end -}}
 
-{{- define "ingestion.otlp.tls.enabled" -}}
-{{ include "vector.otlp.http.tls.enabled" . }}
-{{- end -}}
-
 {{/*
   Helper for spreading helm love.
 
