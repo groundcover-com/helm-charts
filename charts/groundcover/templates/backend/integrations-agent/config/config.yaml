@@ -14,6 +14,9 @@ data:
       Name: "{{ .name }}"
       AwsStsRegion: "{{ .stsRegion }}"
       AwsRoleArn: "{{ .roleArn }}"
+      {{- if .interval }}
+      Interval: "{{ .interval }}"
+      {{- end }}
       {{- if .extraLabels }}
       ExtraLabels:
       {{- range $key, $value := .extraLabels }}
@@ -63,6 +66,9 @@ data:
     - Type: gcpmetrics
       Name: "{{ .name }}"
       GcpTargetServiceAccount: "{{ .targetServiceAccount }}"
+      {{- if .interval }}
+      Interval: "{{ .interval }}"
+      {{- end }}
       {{- if .extraLabels }}
       ExtraLabels:
       {{- range $key, $value := .extraLabels }}
@@ -108,6 +114,9 @@ data:
       {{- range .regions }}
         - "{{ . }}"
       {{- end }}
+      {{- end }}
+      {{- if .interval }}
+      Interval: "{{ .interval }}"
       {{- end }}
       {{- if .extraLabels }}
       ExtraLabels:
@@ -204,9 +213,18 @@ data:
         {{- if .Values.integrationsAgent.exporters.prometheus.metadata.cacheTTL }}
         CacheTTL: {{ .Values.integrationsAgent.exporters.prometheus.metadata.cacheTTL }}
         {{- end }}
-        {{- if .Values.integrationsAgent.exporters.prometheus.metadata.maxWriteSize }}
-        MaxWriteSize: {{ .Values.integrationsAgent.exporters.prometheus.metadata.maxWriteSize }}
-      {{- end }}
+        {{- if .Values.integrationsAgent.exporters.prometheus.metadata.maxBatchSize }}
+        MaxBatchSize: {{ .Values.integrationsAgent.exporters.prometheus.metadata.maxBatchSize }}
+        {{- end }}
+        {{- if .Values.integrationsAgent.exporters.prometheus.metadata.bufferSize }}
+        BufferSize: {{ .Values.integrationsAgent.exporters.prometheus.metadata.bufferSize }}
+        {{- end }}
+        {{- if .Values.integrationsAgent.exporters.prometheus.metadata.writeInterval }}
+        WriteInterval: {{ .Values.integrationsAgent.exporters.prometheus.metadata.writeInterval }}
+        {{- end }}
+        {{- if .Values.integrationsAgent.exporters.prometheus.metadata.maxBatchWait }}
+        MaxBatchWait: {{ .Values.integrationsAgent.exporters.prometheus.metadata.maxBatchWait }}
+        {{- end }}
       {{- end }}
       {{- end }}
       {{- end }}

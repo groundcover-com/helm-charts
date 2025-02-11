@@ -548,6 +548,9 @@ integrationsAgent:
         compress: true
         cacheTTL: 1h
         cacheSize: 100000
+        writeInterval: 10s
+        maxBatchSize: 2000
+        maxBatchWait: 10s
 
 k8sWatcher:
   initContainers:
