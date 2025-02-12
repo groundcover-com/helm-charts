@@ -27,7 +27,7 @@ onprem:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.9.156
+  tag: 1.9.157
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/curl'
@@ -186,7 +186,7 @@ grafana:
   image:
     registry: public.ecr.aws
     repository: groundcovercom/grafana-groundcover
-    tag: v0.0.26-grafana11.3.1
+    tag: v0.0.32-grafana11.3.2
   testFramework:
     enabled: false
   envValueFrom:
