@@ -1505,10 +1505,10 @@ vector:
           address: "0.0.0.0:4329"
           decoding:
             codec: json
-        json_metrics_metadata:
+        json_table_write:
           type: http
           address: "0.0.0.0:4350"
-          path: '{{ include "vector.json.tables.write.metrics_metadata.path" . }}'
+          path: '{{ include "vector.cluster.json.tables.write.path" . }}'
           strict_path: false
           method: "POST"
           decoding:
@@ -1570,7 +1570,7 @@ vector:
 
         table_write_routing:
           inputs:
-            - "json_metrics_metadata"
+            - "json_table_write"
           type: "route"
           reroute_unmatched: false
           route:
