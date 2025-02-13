@@ -379,6 +379,7 @@ data:
     k8smetricsfetcher:
       fetchinterval: 15s
       requesttimeout: 10s
+      fetchKubeletInfraMetrics: {{ .Values.fetchKubeletInfraMetrics }}
 
     piiDetector:
       enabled: true
@@ -400,6 +401,7 @@ data:
     hostHeadersToDrop: {{ toYaml $sensorValues.hostHeadersToDrop | nindent 6 }}
     headersForceSampling: {{ toYaml $sensorValues.headersForceSampling | nindent 6 }}
     customEntityTags: {{ toYaml $sensorValues.customEntityTags | nindent 6 }}
+    sendKubeletInfraMetrics: {{ .Values.sendKubeletInfraMetrics }}
 
     metricIngestor:
       serverEnabled: {{ $sensorValues.metricIngestor.serverEnabled }}
@@ -501,6 +503,7 @@ data:
           paramString: {{ .Values.logPatternsConfig.paramString }}
           maxEvictionRatio: {{ .Values.logPatternsConfig.maxEvictionRatio }}
           maxTokens: {{ .Values.logPatternsConfig.maxTokens }}
+          summarizerConfig: {{ toYaml .Values.logPatternsConfig.summarizerConfig | nindent 12 }}
         ottlRules: {{ toYaml .Values.ottlRules | nindent 10 }}
       pipeline:
         logDropFilters: {{ toYaml .Values.logsDropFilters | nindent 10}}

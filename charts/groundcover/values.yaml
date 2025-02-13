@@ -204,6 +204,8 @@ ottlRules:
   #     - set(attributes["test"], "test_value")
 
 isk8s: true
+fetchKubeletInfraMetrics: false
+sendKubeletInfraMetrics: true
 positionsFile: "/var/run/positions/positions.yaml"
 decolorizeLogs: false
 maxLogSize: 102400 # 100KB
@@ -227,6 +229,10 @@ logPatternsConfig:
   paramString: "<*>"
   maxEvictionRatio: 0.8
   maxTokens: 128
+  summarizerConfig:
+    flushInterval: 30s
+    workloadCacheSize: 1000
+    patternsTopCount: 20
 
 priorityClass:
   create: false
