@@ -1,0 +1,6846 @@
+{{ if .Values.global.integrations.agent.enabled }}
+apiVersion: v1
+data:
+  aws_presets.yaml: |
+    AWS/Kinesis:
+    - Name: GetRecords.Bytes
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: GetRecords.IteratorAge
+      Statistics:
+      - Average
+      - Maximum
+    - Name: GetRecords.IteratorAgeMilliseconds
+      Statistics:
+      - Average
+      - Maximum
+    - Name: GetRecords.Latency
+      Statistics:
+      - Average
+      - Maximum
+    - Name: GetRecords.Records
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: GetRecords.Success
+      Statistics:
+      - Average
+    - Name: IncomingBytes
+      Statistics:
+      - Average
+      - Sum
+    - Name: IncomingRecords
+      Statistics:
+      - Average
+    - Name: IteratorAgeMilliseconds
+      Statistics:
+      - Average
+    - Name: OutgoingBytes
+      Statistics:
+      - Average
+      - Sum
+    - Name: OutgoingRecords
+      Statistics:
+      - Average
+    - Name: PutRecord.Bytes
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: PutRecord.Latency
+      Statistics:
+      - Average
+      - Maximum
+    - Name: PutRecord.Success
+      Statistics:
+      - Average
+    - Name: PutRecords.Bytes
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: PutRecords.FailedRecords
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: PutRecords.Latency
+      Statistics:
+      - Average
+      - Maximum
+    - Name: PutRecords.Records
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: PutRecords.Success
+      Statistics:
+      - Average
+    - Name: PutRecords.SuccessfulRecords
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: PutRecords.ThrottledRecords
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: PutRecords.TotalRecords
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: ReadProvisionedThroughputExceeded
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: SubscribeToShardEvent.Bytes
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: SubscribeToShardEvent.MillisBehindLatest
+      Statistics:
+      - Average
+      - Maximum
+    - Name: SubscribeToShardEvent.Records
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: SubscribeToShardEvent.Success
+      Statistics:
+      - Average
+    - Name: SubscribeToShard.RateExceeded
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: SubscribeToShard.Success
+      Statistics:
+      - Average
+    - Name: WriteProvisionedThroughputExceeded
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    AWS/ECS:
+    - Name: CPUReservation
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+    - Name: CPUUtilization
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+    - Name: MemoryReservation
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: MemoryUtilization
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: PendingTasksCount
+      Statistics:
+      - Average
+    - Name: RegisteredCpu
+      Statistics:
+      - Average
+    - Name: RegisteredMemory
+      Statistics:
+      - Average
+    - Name: RemainingCpu
+      Statistics:
+      - Average
+    - Name: RemainingMemory
+      Statistics:
+      - Average
+    - Name: RunningTasksCount
+      Statistics:
+      - Average
+    - Name: Services
+      Statistics:
+      - Average
+    AWS/DX:
+    - Name: ConnectionBpsEgress
+      Statistics:
+      - Average
+    - Name: ConnectionBpsIngress
+      Statistics:
+      - Average
+    - Name: ConnectionErrorCount
+      Statistics:
+      - Average
+    - Name: ConnectionLightLevelRx
+      Statistics:
+      - Average
+    - Name: ConnectionLightLevelTx
+      Statistics:
+      - Average
+    - Name: ConnectionPpsEgress
+      Statistics:
+      - Average
+    - Name: ConnectionPpsIngress
+      Statistics:
+      - Average
+    - Name: ConnectionState
+      Statistics:
+      - Average
+    - Name: VirtualInterfaceBpsEgress
+      Statistics:
+      - Average
+    - Name: VirtualInterfaceBpsIngress
+      Statistics:
+      - Average
+    - Name: VirtualInterfacePpsEgress
+      Statistics:
+      - Average
+    - Name: VirtualInterfacePpsIngress
+      Statistics:
+      - Average
+    AWS/ElasticBeanstalk:
+    - Name: ApplicationLatencyP10
+      Statistics:
+      - Average
+    - Name: ApplicationLatencyP50
+      Statistics:
+      - Average
+    - Name: ApplicationLatencyP75
+      Statistics:
+      - Average
+    - Name: ApplicationLatencyP85
+      Statistics:
+      - Average
+    - Name: ApplicationLatencyP90
+      Statistics:
+      - Average
+    - Name: ApplicationLatencyP95
+      Statistics:
+      - Average
+    - Name: ApplicationLatencyP99
+      Statistics:
+      - Average
+    - Name: ApplicationLatencyP99.9
+      Statistics:
+      - Average
+    - Name: ApplicationRequests2XX
+      Statistics:
+      - Average
+    - Name: ApplicationRequests3XX
+      Statistics:
+      - Average
+    - Name: ApplicationRequests4XX
+      Statistics:
+      - Average
+    - Name: ApplicationRequests5XX
+      Statistics:
+      - Average
+    - Name: ApplicationRequestsTotal
+      Statistics:
+      - Average
+    - Name: CPUIdle
+      Statistics:
+      - Average
+    - Name: CPUIowait
+      Statistics:
+      - Average
+    - Name: CPUIrq
+      Statistics:
+      - Average
+    - Name: CPUNice
+      Statistics:
+      - Average
+    - Name: CPUSoftirq
+      Statistics:
+      - Average
+    - Name: CPUSystem
+      Statistics:
+      - Average
+    - Name: CPUUser
+      Statistics:
+      - Average
+    - Name: EnvironmentHealth
+      Statistics:
+      - Average
+    - Name: InstanceHealth
+      Statistics:
+      - Average
+    - Name: InstancesDegraded
+      Statistics:
+      - Average
+    - Name: InstancesInfo
+      Statistics:
+      - Average
+    - Name: InstancesNoData
+      Statistics:
+      - Average
+    - Name: InstancesOk
+      Statistics:
+      - Average
+    - Name: InstancesPending
+      Statistics:
+      - Average
+    - Name: InstancesSevere
+      Statistics:
+      - Average
+    - Name: InstancesUnknown
+      Statistics:
+      - Average
+    - Name: InstancesWarning
+      Statistics:
+      - Average
+    - Name: LoadAverage1min
+      Statistics:
+      - Average
+    - Name: LoadAverage5min
+      Statistics:
+      - Average
+    - Name: RootFilesystemUtil
+      Statistics:
+      - Average
+    AWS/AppStream:
+    - Name: ActualCapacity
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: AvailableCapacity
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: CapacityUtilization
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: DesiredCapacity
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: InUseCapacity
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: InsufficientCapacityError
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: PendingCapacity
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: RunningCapacity
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    AWS/Network Manager:
+    - Name: DataIn
+      Statistics:
+      - Average
+    - Name: DataOut
+      Statistics:
+      - Average
+    - Name: TunnelDownCount
+      Statistics:
+      - Average
+    AWS/ES:
+    - Name: 2xx
+      Statistics:
+      - Average
+    - Name: 3xx
+      Statistics:
+      - Average
+    - Name: 4xx
+      Statistics:
+      - Average
+    - Name: 5xx
+      Statistics:
+      - Average
+    - Name: AlertingDegraded
+      Statistics:
+      - Average
+    - Name: AlertingIndexExists
+      Statistics:
+      - Average
+    - Name: AlertingIndexStatusgreen
+      Statistics:
+      - Average
+    - Name: AlertingIndexStatusred
+      Statistics:
+      - Average
+    - Name: AlertingIndexStatusyellow
+      Statistics:
+      - Average
+    - Name: AlertingNodesNotOnSchedule
+      Statistics:
+      - Average
+    - Name: AlertingNodesOnSchedule
+      Statistics:
+      - Average
+    - Name: AlertingScheduledJobEnabled
+      Statistics:
+      - Average
+    - Name: ADExecuteFailureCount
+      Statistics:
+      - Average
+    - Name: ADPluginUnhealthy
+      Statistics:
+      - Average
+    - Name: ADExecuteRequestCount
+      Statistics:
+      - Average
+    - Name: AnomalyDetectorsIndexStatusIndexExists
+      Statistics:
+      - Average
+    - Name: AnomalyDetectorsIndexStatus.red
+      Statistics:
+      - Average
+    - Name: ADAnomalyResultsIndexStatusIndexExists
+      Statistics:
+      - Average
+    - Name: ADAnomalyResultsIndexStatusred
+      Statistics:
+      - Average
+    - Name: AutomatedSnapshotFailure
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: ClusterIndexWritesBlocked
+      Statistics:
+      - Average
+    - Name: ClusterStatus.green
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: ClusterStatus.red
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: ClusterStatus.yellow
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: ClusterUsedSpace
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: CPUCreditBalance
+      Statistics:
+      - Average
+    - Name: CPUUtilization
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: CrossClusterInboundRequests
+      Statistics:
+      - Average
+    - Name: CrossClusterOutboundConnections
+      Statistics:
+      - Average
+    - Name: CrossClusterOutboundRequests
+      Statistics:
+      - Average
+    - Name: DeletedDocuments
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: DiskQueueDepth
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: ElasticsearchRequests
+      Statistics:
+      - Average
+    - Name: FreeStorageSpace
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: HotStorageSpaceUtilization
+      Statistics:
+      - Average
+    - Name: HotToWarmMigrationQueueSize
+      Statistics:
+      - Average
+    - Name: IndexingLatency
+      Statistics:
+      - Average
+    - Name: IndexingRate
+      Statistics:
+      - Average
+    - Name: InvalidHostHeaderRequests
+      Statistics:
+      - Average
+    - Name: JVMGColdCollectionCount
+      Statistics:
+      - Average
+    - Name: JVMGColdCollectionTime
+      Statistics:
+      - Average
+    - Name: JVMGCYoungCollectionCount
+      Statistics:
+      - Average
+    - Name: JVMGCYoungCollectionTime
+      Statistics:
+      - Average
+    - Name: JVMMemoryPressure
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: KibanaHealthyNodes
+      Statistics:
+      - Average
+    - Name: KMSkeyError
+      Statistics:
+      - Average
+    - Name: KMSkeyInaccessible
+      Statistics:
+      - Average
+    - Name: MasterCPUCreditBalance
+      Statistics:
+      - Average
+    - Name: MasterCPUUtilization
+      Statistics:
+      - Average
+    - Name: MasterFreeStorageSpace
+      Statistics:
+      - Average
+    - Name: MasterJVMMemoryPressure
+      Statistics:
+      - Average
+    - Name: MasterReachableFromNode
+      Statistics:
+      - Average
+    - Name: MasterSysMemoryUtilization
+      Statistics:
+      - Average
+    - Name: ModelsCheckpointIndexStatusIndexExists
+      Statistics:
+      - Average
+    - Name: ModelsCheckpointIndexStatusred
+      Statistics:
+      - Average
+    - Name: Nodes
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: OpenSearchDashboardsHealthyNodes
+      Statistics:
+      - Average
+    - Name: OpenSearchRequests
+      Statistics:
+      - Average
+    - Name: ReadIOPS
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: ReadLatency
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: ReadThroughput
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: SearchLatency
+      Statistics:
+      - Average
+    - Name: SearchRate
+      Statistics:
+      - Average
+    - Name: SearchableDocuments
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: SQLdefaultCursorRequestCount
+      Statistics:
+      - Average
+    - Name: SQLfailedRequestCountByCusErr
+      Statistics:
+      - Average
+    - Name: SQLfailedRequestCountBySysErr
+      Statistics:
+      - Average
+    - Name: SQLrequestCount
+      Statistics:
+      - Average
+    - Name: SQLunhealthy
+      Statistics:
+      - Average
+    - Name: SysMemoryUtilization
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: ThreadpoolBulkQueue
+      Statistics:
+      - Average
+    - Name: ThreadpoolBulkRejected
+      Statistics:
+      - Average
+    - Name: ThreadpoolBulkThreads
+      Statistics:
+      - Average
+    - Name: ThreadpoolForcemergeQueue
+      Statistics:
+      - Average
+    - Name: ThreadpoolForcemergeRejected
+      Statistics:
+      - Average
+    - Name: ThreadpoolForcemergeThreads
+      Statistics:
+      - Average
+    - Name: ThreadpoolIndexQueue
+      Statistics:
+      - Average
+    - Name: ThreadpoolIndexRejected
+      Statistics:
+      - Average
+    - Name: ThreadpoolIndexThreads
+      Statistics:
+      - Average
+    - Name: ThreadpoolMergeQueue
+      Statistics:
+      - Average
+    - Name: ThreadpoolMergeRejected
+      Statistics:
+      - Average
+    - Name: ThreadpoolMergeThreads
+      Statistics:
+      - Average
+    - Name: ThreadpoolSearchQueue
+      Statistics:
+      - Average
+    - Name: ThreadpoolSearchRejected
+      Statistics:
+      - Average
+    - Name: ThreadpoolSearchThreads
+      Statistics:
+      - Average
+    - Name: ThreadpoolWriteQueue
+      Statistics:
+      - Average
+    - Name: ThreadpoolWriteRejected
+      Statistics:
+      - Average
+    - Name: ThreadpoolWriteThreads
+      Statistics:
+      - Average
+    - Name: WarmCPUUtilization
+      Statistics:
+      - Average
+    - Name: WarmFreeStorageSpace
+      Statistics:
+      - Average
+    - Name: WarmJVMMemoryPressure
+      Statistics:
+      - Average
+    - Name: WarmSearchLatency
+      Statistics:
+      - Average
+    - Name: WarmSearchRate
+      Statistics:
+      - Average
+    - Name: WarmSearchableDocuments
+      Statistics:
+      - Average
+    - Name: WarmStorageSpaceUtilization
+      Statistics:
+      - Average
+    - Name: WarmSysMemoryUtilization
+      Statistics:
+      - Average
+    - Name: WarmToHotMigrationQueueSize
+      Statistics:
+      - Average
+    - Name: WriteIOPS
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: WriteLatency
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: WriteThroughput
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    AWS/Athena:
+    - Name: EngineExecutionTime
+      Statistics:
+      - Average
+    - Name: ProcessedBytes
+      Statistics:
+      - Average
+    - Name: QueryPlanningTime
+      Statistics:
+      - Average
+    - Name: QueryQueueTime
+      Statistics:
+      - Average
+    - Name: ServiceProcessingTime
+      Statistics:
+      - Average
+    - Name: TotalExecutionTime
+      Statistics:
+      - Average
+    AWS/DynamoDB:
+    - Name: AccountMaxReads
+      Statistics:
+      - Maximum
+    - Name: AccountMaxTableLevelReads
+      Statistics:
+      - Maximum
+    - Name: AccountMaxTableLevelWrites
+      Statistics:
+      - Maximum
+    - Name: AccountMaxWrites
+      Statistics:
+      - Maximum
+    - Name: AccountProvisionedReadCapacityUtilization
+      Statistics:
+      - Average
+    - Name: AccountProvisionedWriteCapacityUtilization
+      Statistics:
+      - Average
+    - Name: ConditionalCheckFailedRequests
+      Statistics:
+      - Average
+    - Name: ConsumedReadCapacityUnits
+      Statistics:
+      - Average
+    - Name: ConsumedWriteCapacityUnits
+      Statistics:
+      - Average
+    - Name: ItemCount
+      Statistics:
+      - Average
+    - Name: MaxProvisionedTableReadCapacityUtilization
+      Statistics:
+      - Average
+    - Name: MaxProvisionedTableWriteCapacityUtilization
+      Statistics:
+      - Average
+    - Name: OnlineIndexConsumedWriteCapacity
+      Statistics:
+      - Average
+    - Name: OnlineIndexPercentageProgress
+      Statistics:
+      - Average
+    - Name: OnlineIndexThrottleEvents
+      Statistics:
+      - Average
+    - Name: PendingReplicationCount
+      Statistics:
+      - Average
+    - Name: ProvisionedReadCapacityUnits
+      Statistics:
+      - Average
+    - Name: ProvisionedWriteCapacityUnits
+      Statistics:
+      - Average
+    - Name: ReadThrottleEvents
+      Statistics:
+      - Sum
+    - Name: ReplicationLatency
+      Statistics:
+      - Average
+    - Name: ReturnedBytes
+      Statistics:
+      - Average
+    - Name: ReturnedItemCount
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: ReturnedRecordsCount
+      Statistics:
+      - Average
+    - Name: SuccessfulRequestLatency
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+    - Name: SystemErrors
+      Statistics:
+      - Sum
+    - Name: TableSize
+      Statistics:
+      - Average
+    - Name: ThrottledRequests
+      Statistics:
+      - Sum
+    - Name: TimeToLiveDeletedItemCount
+      Statistics:
+      - Sum
+    - Name: TransactionConflict
+      Statistics:
+      - Average
+    - Name: UserErrors
+      Statistics:
+      - Sum
+    - Name: WriteThrottleEvents
+      Statistics:
+      - Sum
+    AWS/MediaConvert:
+    - Name: AudioOutputDuration
+      Statistics:
+      - Average
+    - Name: SDOutputDuration
+      Statistics:
+      - Average
+    - Name: HDOutputDuration
+      Statistics:
+      - Average
+    - Name: UHDoutputDuration
+      Statistics:
+      - Average
+    - Name: 8KOutputDuration
+      Statistics:
+      - Average
+    - Name: JobsCompletedCount
+      Statistics:
+      - Average
+    - Name: JobsErroredCount
+      Statistics:
+      - Average
+    - Name: StandbyTime
+      Statistics:
+      - Average
+    - Name: TranscodingTime
+      Statistics:
+      - Average
+    - Name: Errors
+      Statistics:
+      - Average
+    AWS/GlobalAccelerator:
+    - Name: Flows_Dropped_No_Endpoint_Found
+      Statistics:
+      - Average
+    - Name: HealthyEndpointCount
+      Statistics:
+      - Average
+    - Name: NewFlowCount
+      Statistics:
+      - Average
+    - Name: ProcessedBytesIn
+      Statistics:
+      - Average
+    - Name: ProcessedBytesOut
+      Statistics:
+      - Average
+    - Name: UnhealthyEndpointCount
+      Statistics:
+      - Average
+    AWS/EC2Spot:
+    - Name: AvailableInstancePoolsCount
+      Statistics:
+      - Average
+    - Name: BidsSubmittedForCapacity
+      Statistics:
+      - Average
+    - Name: EligibleInstancePoolCount
+      Statistics:
+      - Average
+    - Name: FulfilledCapacity
+      Statistics:
+      - Average
+    - Name: MaxPercentCapacityAllocation
+      Statistics:
+      - Average
+    - Name: PendingCapacity
+      Statistics:
+      - Average
+    - Name: PercentCapacityAllocation
+      Statistics:
+      - Average
+    - Name: TargetCapacity
+      Statistics:
+      - Average
+    - Name: TerminatingCapacity
+      Statistics:
+      - Average
+    AWS/TrustedAdvisor:
+    - Name: ServiceLimit
+      Statistics:
+      - Average
+      - Maximum
+    - Name: GreenChecks
+      Statistics:
+      - Average
+    - Name: RedChecks
+      Statistics:
+      - Average
+    - Name: ServiceLimitUsage
+      Statistics:
+      - Average
+    - Name: YellowChecks
+      Statistics:
+      - Average
+    AWS/ElastiCache:
+    - Name: ActiveDefragHits
+      Statistics:
+      - Average
+    - Name: BytesReadIntoMemcached
+      Statistics:
+      - Average
+    - Name: BytesUsedForCache
+      Statistics:
+      - Average
+    - Name: BytesUsedForCacheItems
+      Statistics:
+      - Average
+    - Name: BytesUsedForHash
+      Statistics:
+      - Average
+    - Name: BytesWrittenOutFromMemcached
+      Statistics:
+      - Average
+    - Name: CacheHitRate
+      Statistics:
+      - Average
+    - Name: CacheHits
+      Statistics:
+      - Average
+    - Name: CacheMisses
+      Statistics:
+      - Average
+    - Name: CasBadval
+      Statistics:
+      - Average
+    - Name: CasHits
+      Statistics:
+      - Average
+    - Name: CasMisses
+      Statistics:
+      - Average
+    - Name: ClusterCount
+      Statistics:
+      - Average
+    - Name: CmdConfigGet
+      Statistics:
+      - Average
+    - Name: CmdConfigSet
+      Statistics:
+      - Average
+    - Name: CmdFlush
+      Statistics:
+      - Average
+    - Name: CmdGet
+      Statistics:
+      - Average
+    - Name: CmdSet
+      Statistics:
+      - Average
+    - Name: CmdTouch
+      Statistics:
+      - Average
+    - Name: CPUCreditBalance
+      Statistics:
+      - Average
+    - Name: CPUCreditUsage
+      Statistics:
+      - Average
+    - Name: CPUUtilization
+      Statistics:
+      - Average
+    - Name: CurrConfig
+      Statistics:
+      - Average
+    - Name: CurrConnections
+      Statistics:
+      - Average
+    - Name: CurrItems
+      Statistics:
+      - Average
+    - Name: DatabaseMemoryUsagePercentage
+      Statistics:
+      - Average
+    - Name: DB0AverageTtl
+      Statistics:
+      - Average
+    - Name: DecrHits
+      Statistics:
+      - Average
+    - Name: DecrMisses
+      Statistics:
+      - Average
+    - Name: DeleteHits
+      Statistics:
+      - Average
+    - Name: DeleteMisses
+      Statistics:
+      - Average
+    - Name: EngineCPUUtilization
+      Statistics:
+      - Average
+    - Name: EvalBasedCmds
+      Statistics:
+      - Average
+    - Name: EvalBasedCmdsLatency
+      Statistics:
+      - Average
+    - Name: EvictedUnfetched
+      Statistics:
+      - Average
+    - Name: Evictions
+      Statistics:
+      - Average
+    - Name: ExpiredUnfetched
+      Statistics:
+      - Average
+    - Name: FreeableMemory
+      Statistics:
+      - Average
+    - Name: GeoSpatialBasedCmds
+      Statistics:
+      - Average
+    - Name: GetHits
+      Statistics:
+      - Average
+    - Name: GetMisses
+      Statistics:
+      - Average
+    - Name: GetTypeCmds
+      Statistics:
+      - Average
+    - Name: GetTypeCmdsLatency
+      Statistics:
+      - Average
+    - Name: HashBasedCmds
+      Statistics:
+      - Average
+    - Name: HashBasedCmdsLatency
+      Statistics:
+      - Average
+    - Name: HyperLogLogBasedCmds
+      Statistics:
+      - Average
+    - Name: IncrHits
+      Statistics:
+      - Average
+    - Name: IncrMisses
+      Statistics:
+      - Average
+    - Name: IsMaster
+      Statistics:
+      - Average
+    - Name: KeyBasedCmds
+      Statistics:
+      - Average
+    - Name: KeyBasedCmdsLatency
+      Statistics:
+      - Average
+    - Name: ListBasedCmds
+      Statistics:
+      - Average
+    - Name: MasterLinkHealthStatus
+      Statistics:
+      - Average
+    - Name: MemoryFragmentationRatio
+      Statistics:
+      - Average
+    - Name: NetworkBytesIn
+      Statistics:
+      - Average
+    - Name: NetworkBytesOut
+      Statistics:
+      - Average
+    - Name: NetworkPacketsIn
+      Statistics:
+      - Average
+    - Name: NetworkPacketsOut
+      Statistics:
+      - Average
+    - Name: NewConnections
+      Statistics:
+      - Average
+    - Name: NewItems
+      Statistics:
+      - Average
+    - Name: NodeCount
+      Statistics:
+      - Average
+    - Name: Reclaimed
+      Statistics:
+      - Average
+    - Name: ReplicationBytes
+      Statistics:
+      - Average
+    - Name: ReplicationLag
+      Statistics:
+      - Average
+    - Name: SaveInProgress
+      Statistics:
+      - Average
+    - Name: SetBasedCmds
+      Statistics:
+      - Average
+    - Name: SetBasedCmdsLatency
+      Statistics:
+      - Average
+    - Name: SetTypeCmds
+      Statistics:
+      - Average
+    - Name: SetTypeCmdsLatency
+      Statistics:
+      - Average
+    - Name: SlabsMoved
+      Statistics:
+      - Average
+    - Name: SortedSetBasedCmds
+      Statistics:
+      - Average
+    - Name: SortedSetBasedCmdsLatency
+      Statistics:
+      - Average
+    - Name: StreamBasedCmds
+      Statistics:
+      - Average
+    - Name: StreamBasedCmdsLatency
+      Statistics:
+      - Average
+    - Name: StringBasedCmds
+      Statistics:
+      - Average
+    - Name: StringBasedCmdsLatency
+      Statistics:
+      - Average
+    - Name: SwapUsage
+      Statistics:
+      - Average
+    - Name: TouchHits
+      Statistics:
+      - Average
+    - Name: TouchMisses
+      Statistics:
+      - Average
+    - Name: UnusedMemory
+      Statistics:
+      - Average
+    AWS/NetworkFirewall:
+    - Name: DroppedPackets
+      Statistics:
+      - Average
+    - Name: PassedPackets
+      Statistics:
+      - Average
+    - Name: ReceivedPackets
+      Statistics:
+      - Average
+    AWS/ApiGateway:
+    - Name: 4XX
+      Statistics:
+      - Average
+    - Name: 4XXError
+      Statistics:
+      - Average
+    - Name: 5XX
+      Statistics:
+      - Average
+    - Name: 5XXError
+      Statistics:
+      - Average
+    - Name: CacheHitCount
+      Statistics:
+      - Average
+    - Name: CacheMissCount
+      Statistics:
+      - Average
+    - Name: ClientError
+      Statistics:
+      - Average
+      - Sum
+    - Name: ConnectCount
+      Statistics:
+      - Average
+      - Sum
+    - Name: Count
+      Statistics:
+      - Average
+    - Name: ExecutionError
+      Statistics:
+      - Average
+      - Sum
+    - Name: IntegrationError
+      Statistics:
+      - Average
+      - Sum
+    - Name: IntegrationLatency
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - p90
+      - p95
+      - p99
+    - Name: Latency
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - p50
+      - p75
+      - p90
+      - p95
+      - p99
+    - Name: MessageCount
+      Statistics:
+      - Average
+      - Sum
+    AWS/SQS:
+    - Name: ApproximateAgeOfOldestMessage
+      Statistics:
+      - Average
+    - Name: ApproximateNumberOfMessagesDelayed
+      Statistics:
+      - Average
+    - Name: ApproximateNumberOfMessagesNotVisible
+      Statistics:
+      - Average
+    - Name: ApproximateNumberOfMessagesVisible
+      Statistics:
+      - Average
+    - Name: NumberOfEmptyReceives
+      Statistics:
+      - Average
+    - Name: NumberOfMessagesDeleted
+      Statistics:
+      - Average
+    - Name: NumberOfMessagesReceived
+      Statistics:
+      - Average
+    - Name: NumberOfMessagesSent
+      Statistics:
+      - Average
+    - Name: SentMessageSize
+      Statistics:
+      - Average
+    AWS/TransitGateway:
+    - Name: BytesIn
+      Statistics:
+      - Average
+    - Name: BytesOut
+      Statistics:
+      - Average
+    - Name: PacketDropCountBlackhole
+      Statistics:
+      - Average
+    - Name: PacketDropCountNoRoute
+      Statistics:
+      - Average
+    - Name: PacketsIn
+      Statistics:
+      - Average
+    - Name: PacketsOut
+      Statistics:
+      - Average
+    ECS/ContainerInsights:
+    - Name: ContainerInstanceCount
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: CpuReserved
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: CpuUtilized
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: DeploymentCount
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: DesiredTaskCount
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: MemoryReserved
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: MemoryUtilized
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: PendingTaskCount
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: RunningTaskCount
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: ServiceCount
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: StorageReadBytes
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: StorageWriteBytes
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: TaskCount
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: TaskSetCount
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    AWS/IoT:
+    - Name: Connect.AuthError
+      Statistics:
+      - Average
+    - Name: Connect.ClientError
+      Statistics:
+      - Average
+    - Name: Connect.ClientIdthrottle
+      Statistics:
+      - Average
+    - Name: Connect.ServerError
+      Statistics:
+      - Average
+    - Name: Connect.Success
+      Statistics:
+      - Average
+    - Name: Connect.Throttle
+      Statistics:
+      - Average
+    - Name: Connection.AuthNError
+      Statistics:
+      - Average
+    - Name: CredentialExchangeSuccess
+      Statistics:
+      - Average
+    - Name: DeleteThingShadow.Accepted
+      Statistics:
+      - Average
+    - Name: ErrorActionFailure
+      Statistics:
+      - Average
+    - Name: ErrorActionSuccess
+      Statistics:
+      - Average
+    - Name: Failure
+      Statistics:
+      - Average
+    - Name: GetThingShadow.Accepted
+      Statistics:
+      - Average
+    - Name: HTTPCode_4XX
+      Statistics:
+      - Average
+    - Name: HTTPCode_5XX
+      Statistics:
+      - Average
+    - Name: HttpRequestTimeout
+      Statistics:
+      - Average
+    - Name: HttpUnknownHost
+      Statistics:
+      - Average
+    - Name: ParseError
+      Statistics:
+      - Average
+    - Name: PingSuccess
+      Statistics:
+      - Average
+    - Name: PublishIn.AuthError
+      Statistics:
+      - Average
+    - Name: PublishIn.ClientError
+      Statistics:
+      - Average
+    - Name: PublishIn.ServerError
+      Statistics:
+      - Average
+    - Name: PublishIn.Success
+      Statistics:
+      - Average
+    - Name: PublishIn.Throttle
+      Statistics:
+      - Average
+    - Name: PublishOut.AuthError
+      Statistics:
+      - Average
+    - Name: PublishOut.ClientError
+      Statistics:
+      - Average
+    - Name: PublishOut.Success
+      Statistics:
+      - Average
+    - Name: PublishOut.Throttle
+      Statistics:
+      - Average
+    - Name: PublishRetained.AuthError
+      Statistics:
+      - Average
+    - Name: PublishRetained.Success
+      Statistics:
+      - Average
+    - Name: PublishRetained.Throttle
+      Statistics:
+      - Average
+    - Name: Queued.ServerError
+      Statistics:
+      - Average
+    - Name: Queued.Success
+      Statistics:
+      - Average
+    - Name: Queued.Throttle
+      Statistics:
+      - Average
+    - Name: RuleMessageThrottled
+      Statistics:
+      - Average
+    - Name: RuleNotFound
+      Statistics:
+      - Average
+    - Name: RulesExecuted
+      Statistics:
+      - Average
+    - Name: Subscribe.AuthError
+      Statistics:
+      - Average
+    - Name: Subscribe.ClientError
+      Statistics:
+      - Average
+    - Name: Subscribe.ServerError
+      Statistics:
+      - Average
+    - Name: Subscribe.Success
+      Statistics:
+      - Average
+    - Name: Subscribe.Throttle
+      Statistics:
+      - Average
+    - Name: Success
+      Statistics:
+      - Average
+    - Name: Throttle.Exceeded
+      Statistics:
+      - Average
+    - Name: TopicMatch
+      Statistics:
+      - Average
+    - Name: Unsubscribe.ClientError
+      Statistics:
+      - Average
+    - Name: Unsubscribe.ServerError
+      Statistics:
+      - Average
+    - Name: Unsubscribe.Success
+      Statistics:
+      - Average
+    - Name: Unsubscribe.Throttle
+      Statistics:
+      - Average
+    - Name: UpdateThingShadow.Accepted
+      Statistics:
+      - Average
+    AWS/DMS:
+    - Name: CDCChangesDiskSource
+      Statistics:
+      - Average
+    - Name: CDCChangesDiskTarget
+      Statistics:
+      - Average
+    - Name: CDCChangesMemorySource
+      Statistics:
+      - Average
+    - Name: CDCChangesMemoryTarget
+      Statistics:
+      - Average
+    - Name: CdcincomingChanges
+      Statistics:
+      - Average
+    - Name: CDCLatencySource
+      Statistics:
+      - Average
+    - Name: CDCLatencyTarget
+      Statistics:
+      - Average
+    - Name: CDCThroughputBandwidthSource
+      Statistics:
+      - Average
+    - Name: CDCThroughputBandwidthTarget
+      Statistics:
+      - Average
+    - Name: CDCThroughputRowsSource
+      Statistics:
+      - Average
+    - Name: CDCThroughputRowsTarget
+      Statistics:
+      - Average
+    - Name: CPUUtilization
+      Statistics:
+      - Average
+    - Name: FreeStorageSpace
+      Statistics:
+      - Average
+    - Name: FreeableMemory
+      Statistics:
+      - Average
+    - Name: FullLoadThroughputBandwidthSource
+      Statistics:
+      - Average
+    - Name: FullLoadThroughputBandwidthTarget
+      Statistics:
+      - Average
+    - Name: FullLoadThroughputRowsSource
+      Statistics:
+      - Average
+    - Name: FullLoadThroughputRowsTarget
+      Statistics:
+      - Average
+    - Name: NetworkReceiveThroughput
+      Statistics:
+      - Average
+    - Name: NetworkTransmitThroughput
+      Statistics:
+      - Average
+    - Name: ReadIOPS
+      Statistics:
+      - Average
+    - Name: ReadLatency
+      Statistics:
+      - Average
+    - Name: ReadThroughput
+      Statistics:
+      - Average
+    - Name: SwapUsage
+      Statistics:
+      - Average
+    - Name: WriteIOPS
+      Statistics:
+      - Average
+    - Name: WriteLatency
+      Statistics:
+      - Average
+    - Name: WriteThroughput
+      Statistics:
+      - Average
+    AWS/States:
+    - Name: ActivitiesFailed
+      Statistics:
+      - Average
+    - Name: ActivitiesHeartbeatTimedOut
+      Statistics:
+      - Average
+    - Name: ActivitiesScheduled
+      Statistics:
+      - Average
+    - Name: ActivitiesStarted
+      Statistics:
+      - Average
+    - Name: ActivitiesSucceeded
+      Statistics:
+      - Average
+    - Name: ActivitiesTimedOut
+      Statistics:
+      - Average
+    - Name: ActivityRunTime
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - p95
+      - p99
+    - Name: ActivityScheduleTime
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - p95
+      - p99
+    - Name: ActivityTime
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - p95
+      - p99
+    - Name: ExecutionThrottled
+      Statistics:
+      - Average
+    - Name: ExecutionTime
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - p95
+      - p99
+    - Name: ExecutionsAborted
+      Statistics:
+      - Average
+    - Name: ExecutionsFailed
+      Statistics:
+      - Average
+    - Name: ExecutionsStarted
+      Statistics:
+      - Average
+    - Name: ExecutionsSucceeded
+      Statistics:
+      - Average
+    - Name: ExecutionsTimedOut
+      Statistics:
+      - Average
+    - Name: LambdaFunctionRunTime
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - p95
+      - p99
+    - Name: LambdaFunctionScheduleTime
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - p95
+      - p99
+    - Name: LambdaFunctionTime
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - p95
+      - p99
+    - Name: LambdaFunctionsFailed
+      Statistics:
+      - Average
+    - Name: LambdaFunctionsHeartbeatTimedOut
+      Statistics:
+      - Average
+    - Name: LambdaFunctionsScheduled
+      Statistics:
+      - Average
+    - Name: LambdaFunctionsStarted
+      Statistics:
+      - Average
+    - Name: LambdaFunctionsSucceeded
+      Statistics:
+      - Average
+    - Name: LambdaFunctionsTimedOut
+      Statistics:
+      - Average
+    AWS/AutoScaling:
+    - Name: GroupDesiredCapacity
+      Statistics:
+      - Average
+    - Name: GroupInServiceInstances
+      Statistics:
+      - Average
+    - Name: GroupMaxSize
+      Statistics:
+      - Average
+    - Name: GroupMinSize
+      Statistics:
+      - Average
+    - Name: GroupPendingInstances
+      Statistics:
+      - Average
+    - Name: GroupTerminatingInstances
+      Statistics:
+      - Average
+    - Name: GroupTotalInstances
+      Statistics:
+      - Average
+    AWS/SageMaker:
+    - Name: ConsumedReadRequestsUnits
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+      - p90
+      - p95
+      - p99
+    - Name: ConsumedWriteRequestsUnits
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+      - p90
+      - p95
+      - p99
+    - Name: Invocation4XXErrors
+      Statistics:
+      - Average
+      - Sum
+    - Name: Invocation5XXErrors
+      Statistics:
+      - Average
+      - Sum
+    - Name: InvocationModelErrors
+      Statistics:
+      - Average
+    - Name: Invocations
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+    - Name: InvocationsPerInstance
+      Statistics:
+      - Average
+      - Sum
+    - Name: JobsFailed
+      Statistics:
+      - Average
+      - SampleCount
+      - Sum
+    - Name: JobsStopped
+      Statistics:
+      - Average
+      - SampleCount
+      - Sum
+    - Name: DatasetObjectsAutoAnnotated
+      Statistics:
+      - Average
+      - Maximum
+    - Name: DatasetObjectsHumanAnnotated
+      Statistics:
+      - Average
+      - Maximum
+    - Name: DatasetObjectsLabelingFailed
+      Statistics:
+      - Average
+      - Maximum
+    - Name: JobsSucceeded
+      Statistics:
+      - Average
+      - SampleCount
+      - Sum
+    - Name: TotalDatasetObjectsLabeled
+      Statistics:
+      - Average
+      - Maximum
+    - Name: ModelCacheHit
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: ModelDownloadingTime
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: ModelLatency
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: ModelLoadingTime
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: ModelLoadingWaitTime
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: ModelSetupTime
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: ModelUnloadingTime
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: OverheadLatency
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: TasksReturned
+      Statistics:
+      - Average
+      - SampleCount
+      - Sum
+    - Name: ActiveWorkers
+      Statistics:
+      - Average
+      - SampleCount
+      - Sum
+    - Name: TasksAccepted
+      Statistics:
+      - Average
+      - SampleCount
+      - Sum
+    - Name: TasksDeclined
+      Statistics:
+      - Average
+      - SampleCount
+      - Sum
+    - Name: TasksSubmitted
+      Statistics:
+      - Average
+      - SampleCount
+      - Sum
+    - Name: TimeSpent
+      Statistics:
+      - Average
+      - SampleCount
+      - Sum
+    /aws/sagemaker/Endpoints:
+    - Name: CPUUtilization
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: DiskUtilization
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: GPUMemoryUtilization
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: GPUUtilization
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: LoadedModelCount
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: MemoryUtilization
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    /aws/sagemaker/ProcessingJobs:
+    - Name: CPUUtilization
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: DiskUtilization
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: GPUMemoryUtilization
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: GPUUtilization
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: MemoryUtilization
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    /aws/sagemaker/TrainingJobs:
+    - Name: CPUUtilization
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: DiskUtilization
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: GPUMemoryUtilization
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: GPUUtilization
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: MemoryUtilization
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    /aws/sagemaker/TransformJobs:
+    - Name: CPUUtilization
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: DiskUtilization
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: GPUMemoryUtilization
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: GPUUtilization
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: MemoryUtilization
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    AWS/SES:
+    - Name: Bounce
+      Statistics:
+      - Average
+      - Sum
+    - Name: Bounces
+      Statistics:
+      - Average
+    - Name: Complaints
+      Statistics:
+      - Average
+    - Name: Delivery
+      Statistics:
+      - Average
+      - Sum
+    - Name: Deliveryattempts
+      Statistics:
+      - Average
+    - Name: Max24HourSend
+      Statistics:
+      - Average
+    - Name: Open
+      Statistics:
+      - Average
+    - Name: PublishExpired
+      Statistics:
+      - Average
+    - Name: PublishFailure
+      Statistics:
+      - Average
+    - Name: Rejects
+      Statistics:
+      - Average
+    - Name: ReputationBounceRate
+      Statistics:
+      - Average
+    - Name: ReputationComplaintRate
+      Statistics:
+      - Average
+    - Name: Send
+      Statistics:
+      - Average
+      - Sum
+    - Name: SentLast24Hours
+      Statistics:
+      - Average
+    AWS/ELB:
+      - Name: BackendConnectionErrors
+        Statistics:
+        - Average
+      - Name: EstimatedALBActiveConnectionCount
+        Statistics:
+        - Average
+      - Name: EstimatedALBConsumedLCUs
+        Statistics:
+        - Average
+      - Name: EstimatedALBNewConnectionCount
+        Statistics:
+        - Average
+      - Name: EstimatedProcessedBytes
+        Statistics:
+        - Average
+      - Name: HealthyHostCount
+        Statistics:
+        - Average
+        - Maximum
+        - Minimum
+      - Name: HTTPCode_Backend_2XX
+        Statistics:
+        - Sum
+      - Name: HTTPCode_Backend_3XX
+        Statistics:
+        - Sum
+      - Name: HTTPCode_Backend_4XX
+        Statistics:
+        - Sum
+      - Name: HTTPCode_Backend_5XX
+        Statistics:
+        - Sum
+      - Name: HTTPCode_ELB_4XX
+        Statistics:
+        - Sum
+      - Name: HTTPCode_ELB_5XX
+        Statistics:
+        - Sum
+      - Name: Latency
+        Statistics:
+        - Average
+        - Maximum
+        - Minimum
+        - p95
+        - p99
+      - Name: RequestCount
+        Statistics:
+        - Sum
+      - Name: SpilloverCount
+        Statistics:
+        - Sum
+        - Maximum
+      - Name: SurgeQueueLength
+        Statistics:
+        - Maximum
+      - Name: UnhealthyHostCount
+        Statistics:
+        - Average
+        - Maximum
+        - Minimum
+    AWS/Neptune:
+    - Name: BackupRetentionPeriodStorageUsed
+      Statistics:
+      - Average
+    - Name: BufferCacheHitRatio
+      Statistics:
+      - Average
+    - Name: ClusterReplicaLag
+      Statistics:
+      - Average
+    - Name: ClusterReplicaLagMaximum
+      Statistics:
+      - Average
+    - Name: ClusterReplicaLagMinimum
+      Statistics:
+      - Average
+    - Name: CPUUtilization
+      Statistics:
+      - Average
+    - Name: EngineUptime
+      Statistics:
+      - Average
+    - Name: FreeLocalStorage
+      Statistics:
+      - Average
+    - Name: FreeableMemory
+      Statistics:
+      - Average
+    - Name: GlobalDbDataTransferBytes
+      Statistics:
+      - Average
+    - Name: GlobalDbReplicatedWriteIo
+      Statistics:
+      - Average
+    - Name: GlobalDbProgressLag
+      Statistics:
+      - Average
+    - Name: GremlinRequestsPerSec
+      Statistics:
+      - Average
+    - Name: GremlinWebSocketOpenConnections
+      Statistics:
+      - Average
+    - Name: LoaderRequestsPerSec
+      Statistics:
+      - Average
+    - Name: MainRequestQueuePendingRequests
+      Statistics:
+      - Average
+    - Name: Ncuutilization
+      Statistics:
+      - Average
+    - Name: NetowrkTransmitThroughput
+      Statistics:
+      - Average
+    - Name: NetworkReceieveThroughput
+      Statistics:
+      - Average
+    - Name: NetworkThroughput
+      Statistics:
+      - Average
+    - Name: NumTxCommitted
+      Statistics:
+      - Average
+    - Name: NumTxOpened
+      Statistics:
+      - Average
+    - Name: NumTxRolledBack
+      Statistics:
+      - Average
+    - Name: OpenCypherRequestsPerSec
+      Statistics:
+      - Average
+    - Name: OpenCypherBoltOpenConnections
+      Statistics:
+      - Average
+    - Name: ServerlessDatabaseCapacity
+      Statistics:
+      - Average
+    - Name: SnapshotStorageUsed
+      Statistics:
+      - Average
+    - Name: SparqlRequestsPerSec
+      Statistics:
+      - Average
+    - Name: StatsNumStatementsScanned
+      Statistics:
+      - Average
+    - Name: TotalBackupStorageBilled
+      Statistics:
+      - Average
+    - Name: TotalClientErrorsPerSec
+      Statistics:
+      - Average
+    - Name: TotalRequestsPerSec
+      Statistics:
+      - Average
+    - Name: TotalServerErrorsPerSec
+      Statistics:
+      - Average
+    - Name: UndoLogListSize
+      Statistics:
+      - Average
+    - Name: VolumeBytesUsed
+      Statistics:
+      - Average
+    - Name: VolumeReadIops
+      Statistics:
+      - Average
+    - Name: VolumeWriteIops
+      Statistics:
+      - Average
+    AWS/KMS:
+    - Name: SecondsUntilKeyMaterialExpiration
+      Statistics:
+      - Average
+    AWS/Kafka:
+    - Name: ActiveControllerCount
+      Statistics:
+      - Average
+      - Maximum
+    - Name: BytesInPerSec
+      Statistics:
+      - Average
+    - Name: BytesOutPerSec
+      Statistics:
+      - Average
+    - Name: CpuIdle
+      Statistics:
+      - Average
+    - Name: CpuSystem
+      Statistics:
+      - Average
+    - Name: CpuUser
+      Statistics:
+      - Average
+    - Name: EstimatedMaxTimeLag
+      Statistics:
+      - Average
+    - Name: EstimatedTimeLag
+      Statistics:
+      - Average
+    - Name: FetchConsumerLocalTimeMsMean
+      Statistics:
+      - Average
+    - Name: FetchConsumerRequestQueueTimeMsMean
+      Statistics:
+      - Average
+    - Name: FetchConsumerResponseQueueTimeMsMean
+      Statistics:
+      - Average
+    - Name: FetchConsumerTotalTimeMsMean
+      Statistics:
+      - Average
+    - Name: FetchFollowerLocalTimeMsMean
+      Statistics:
+      - Average
+    - Name: FetchFollowerRequestQueueTimeMsMean
+      Statistics:
+      - Average
+    - Name: FetchFollowerResponseQueueTimeMsMean
+      Statistics:
+      - Average
+    - Name: FetchFollowerResponseSendTimeMsMean
+      Statistics:
+      - Average
+    - Name: FetchFollowerTotalTimeMsMean
+      Statistics:
+      - Average
+    - Name: FetchMessageConversionsPerSec
+      Statistics:
+      - Average
+    - Name: FetchThrottleByteRate
+      Statistics:
+      - Average
+    - Name: FetchThrottleQueueSize
+      Statistics:
+      - Average
+    - Name: FetchThrottleTime
+      Statistics:
+      - Average
+    - Name: GlobalPartitionCount
+      Statistics:
+      - Average
+      - Maximum
+    - Name: GlobalTopicCount
+      Statistics:
+      - Average
+      - Maximum
+    - Name: KafkaAppLogsDiskUsed
+      Statistics:
+      - Average
+    - Name: KafkaDataLogsDiskUsed
+      Statistics:
+      - Average
+    - Name: LeaderCount
+      Statistics:
+      - Average
+    - Name: MaxOffsetLag
+      Statistics:
+      - Average
+    - Name: MemoryBuffered
+      Statistics:
+      - Average
+    - Name: MemoryCached
+      Statistics:
+      - Average
+    - Name: MemoryFree
+      Statistics:
+      - Average
+    - Name: MemoryUsed
+      Statistics:
+      - Average
+    - Name: MessagesInPerSec
+      Statistics:
+      - Average
+    - Name: NetworkProcessorAvgIdlePercent
+      Statistics:
+      - Average
+    - Name: NetworkRxDropped
+      Statistics:
+      - Average
+    - Name: NetworkRxErrors
+      Statistics:
+      - Average
+    - Name: NetworkRxPackets
+      Statistics:
+      - Average
+    - Name: NetworkTxDropped
+      Statistics:
+      - Average
+    - Name: NetworkTxErrors
+      Statistics:
+      - Average
+    - Name: NetworkTxPackets
+      Statistics:
+      - Average
+    - Name: OfflinePartitionsCount
+      Statistics:
+      - Average
+    - Name: OffsetLag
+      Statistics:
+      - Average
+    - Name: PartitionCount
+      Statistics:
+      - Average
+    - Name: ProduceLocalTimeMsMean
+      Statistics:
+      - Average
+    - Name: ProduceMessageConversionsPerSec
+      Statistics:
+      - Average
+    - Name: ProduceMessageConversionsTimeMsMean
+      Statistics:
+      - Average
+    - Name: ProduceRequestQueueTimeMsMean
+      Statistics:
+      - Average
+    - Name: ProduceResponseQueueTimeMsMean
+      Statistics:
+      - Average
+    - Name: ProduceResponseSendTimeMsMean
+      Statistics:
+      - Average
+    - Name: ProduceThrottleByteRate
+      Statistics:
+      - Average
+    - Name: ProduceThrottleQueueSize
+      Statistics:
+      - Average
+    - Name: ProduceThrottleTime
+      Statistics:
+      - Average
+    - Name: ProduceTotalTimeMsMean
+      Statistics:
+      - Average
+    - Name: ReplicationBytesInPerSec
+      Statistics:
+      - Average
+    - Name: ReplicationBytesOutPerSec
+      Statistics:
+      - Average
+    - Name: RequestBytesMean
+      Statistics:
+      - Average
+    - Name: RequestExemptFromThrottleTime
+      Statistics:
+      - Average
+    - Name: RequestHandlerAvgIdlePercent
+      Statistics:
+      - Average
+    - Name: RequestThrottleQueueSize
+      Statistics:
+      - Average
+    - Name: RequestThrottleTime
+      Statistics:
+      - Average
+    - Name: RequestTime
+      Statistics:
+      - Average
+    - Name: RootDiskUsed
+      Statistics:
+      - Average
+    - Name: SumOffsetLag
+      Statistics:
+      - Average
+    - Name: SwapFree
+      Statistics:
+      - Average
+    - Name: SwapUsed
+      Statistics:
+      - Average
+    - Name: TcpConnections
+      Statistics:
+      - Average
+    - Name: TrafficBytes
+      Statistics:
+      - Average
+    - Name: UnderReplicatedPartitions
+      Statistics:
+      - Average
+    - Name: VolumeQueueLength
+      Statistics:
+      - Average
+    - Name: VolumeReadBytes
+      Statistics:
+      - Average
+    - Name: VolumeReadOps
+      Statistics:
+      - Average
+    - Name: VolumeTotalReadTime
+      Statistics:
+      - Average
+    - Name: VolumeTotalWriteTime
+      Statistics:
+      - Average
+    - Name: VolumeWriteBytes
+      Statistics:
+      - Average
+    - Name: VolumeWriteOps
+      Statistics:
+      - Average
+    - Name: ZooKeeperRequestLatencyMsMean
+      Statistics:
+      - Average
+    - Name: BwInAllowanceExceeded
+      Statistics:
+      - Average
+    - Name: BwOutAllowanceExceeded
+      Statistics:
+      - Average
+    - Name: ConnTrackAllowanceExceeded
+      Statistics:
+      - Average
+    - Name: ConnectionCloseRate
+      Statistics:
+      - Average
+    - Name: ConnectionCreationRate
+      Statistics:
+      - Average
+    - Name: ConsumerResponseSendTimeMsMean
+      Statistics:
+      - Average
+    - Name: CpuCreditBalance
+      Statistics:
+      - Average
+    - Name: CpuCreditUsage
+      Statistics:
+      - Average
+    - Name: MemoryHeapAfterGc
+      Statistics:
+      - Average
+    - Name: PpsAllowanceExceeded
+      Statistics:
+      - Average
+    - Name: UnderMinlsrPartitionCount
+      Statistics:
+      - Average
+    AWS/KinesisAnalytics:
+    - Name: Bytes
+      Statistics:
+      - Average
+    - Name: InputProcessing.DroppedRecords
+      Statistics:
+      - Average
+    - Name: InputProcessing.Duration
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: InputProcessing.OkBytes
+      Statistics:
+      - Average
+    - Name: InputProcessing.OkRecords
+      Statistics:
+      - Average
+    - Name: InputProcessing.ProcessingFailedRecords
+      Statistics:
+      - Average
+    - Name: InputProcessing.Success
+      Statistics:
+      - Average
+    - Name: KPUs
+      Statistics:
+      - Average
+    - Name: LambdaDelivery.DeliveryFailedRecords
+      Statistics:
+      - Average
+    - Name: LambdaDelivery.Duration
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: LambdaDelivery.OkRecords
+      Statistics:
+      - Average
+    - Name: MillisBehindLatest
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: Records
+      Statistics:
+      - Average
+    - Name: Success
+      Statistics:
+      - Average
+    AWS/CertificateManager:
+    - Name: DaysToExpiry
+      Statistics:
+      - Average
+    AWS/Redshift:
+    - Name: CommitQueueLength
+      Statistics:
+      - Average
+    - Name: ConcurrencyScalingActiveClusters
+      Statistics:
+      - Average
+    - Name: ConcurrencyScalingSeconds
+      Statistics:
+      - Average
+    - Name: CPUUtilization
+      Statistics:
+      - Average
+    - Name: DatabaseConnections
+      Statistics:
+      - Average
+    - Name: HealthStatus
+      Statistics:
+      - Average
+    - Name: MaintenanceMode
+      Statistics:
+      - Average
+    - Name: MaxConfiguredConcurrencyScalingClusters
+      Statistics:
+      - Average
+    - Name: NetworkReceiveThroughput
+      Statistics:
+      - Average
+    - Name: NetworkTransmitThroughput
+      Statistics:
+      - Average
+    - Name: NumExceededSchemaQuotas
+      Statistics:
+      - Average
+    - Name: PercentageDiskSpaceUsed
+      Statistics:
+      - Average
+    - Name: PercentageQuotaUsed
+      Statistics:
+      - Average
+    - Name: QueriesCompletedPerSecond
+      Statistics:
+      - Average
+    - Name: QueryDuration
+      Statistics:
+      - Average
+    - Name: QueryRuntimeBreakdown
+      Statistics:
+      - Average
+    - Name: ReadIOPS
+      Statistics:
+      - Average
+    - Name: ReadLatency
+      Statistics:
+      - Average
+    - Name: ReadThroughput
+      Statistics:
+      - Average
+    - Name: SchemaQuota
+      Statistics:
+      - Average
+    - Name: StorageUsed
+      Statistics:
+      - Average
+    - Name: TotalTableCount
+      Statistics:
+      - Average
+    - Name: WlmqueriesCompletedPerSecond
+      Statistics:
+      - Average
+    - Name: WlmqueryDuration
+      Statistics:
+      - Average
+    - Name: WlmqueueLength
+      Statistics:
+      - Average
+    - Name: WlmqueueWaitTime
+      Statistics:
+      - Average
+    - Name: WlmrunningQueries
+      Statistics:
+      - Average
+    - Name: WriteIOPS
+      Statistics:
+      - Average
+    - Name: WriteLatency
+      Statistics:
+      - Average
+    - Name: WriteThroughput
+      Statistics:
+      - Average
+    AWS/PrivateLinkEndpoints:
+    - Name: ActiveConnections
+      Statistics:
+      - Average
+    - Name: BytesProcessed
+      Statistics:
+      - Average
+    - Name: NewConnections
+      Statistics:
+      - Average
+    - Name: PacketsDropped
+      Statistics:
+      - Average
+    - Name: RstPacketsReceived
+      Statistics:
+      - Average
+    - Name: EndpointsCount
+      Statistics:
+      - Average
+    - Name: RstPacketsSent
+      Statistics:
+      - Average
+    AWS/Cassandra:
+    - Name: AccountMaxTableLevelReads
+      Statistics:
+      - Average
+    - Name: AccountMaxTableLevelWrites
+      Statistics:
+      - Average
+    - Name: AccountProvisionedReadCapacityUtilization
+      Statistics:
+      - Average
+    - Name: AccountProvisionedWriteCapacityUtilization
+      Statistics:
+      - Average
+    - Name: ConditionalCheckFailedRequests
+      Statistics:
+      - Average
+    - Name: ConsumedReadCapacityUnits
+      Statistics:
+      - Average
+    - Name: ConsumedWriteCapacityUnits
+      Statistics:
+      - Average
+    - Name: MaxProvisionedTableReadCapacityUtilization
+      Statistics:
+      - Average
+    - Name: MaxProvisionedTableWriteCapacityUtilization
+      Statistics:
+      - Average
+    - Name: PerConnectionRequestRateExceeded
+      Statistics:
+      - Average
+    - Name: ProvisionedReadCapacityUnits
+      Statistics:
+      - Average
+    - Name: ProvisionedWriteCapacityUnits
+      Statistics:
+      - Average
+    - Name: ReadThrottleEvents
+      Statistics:
+      - Average
+    - Name: ReturnedItemCount
+      Statistics:
+      - Average
+    - Name: StoragePartitionThroughputCapacityExceeded
+      Statistics:
+      - Average
+    - Name: SuccessfulRequestLatency
+      Statistics:
+      - Average
+      - SampleCount
+    - Name: SystemErrors
+      Statistics:
+      - Average
+    - Name: Ttldeletes
+      Statistics:
+      - Average
+    - Name: UserErrors
+      Statistics:
+      - Average
+    - Name: WriteThrottleEvents
+      Statistics:
+      - Average
+    AWS/Route53:
+    - Name: ChildHealthCheckHealthyCount
+      Statistics:
+      - Average
+    - Name: ConnectionTime
+      Statistics:
+      - Average
+    - Name: DNSqueries
+      Statistics:
+      - Average
+    - Name: HealthCheckPercentageHealthy
+      Statistics:
+      - Average
+    - Name: HealthCheckStatus
+      Statistics:
+      - Average
+    - Name: SSLhandshakeTime
+      Statistics:
+      - Average
+    - Name: TimeToFirstByte
+      Statistics:
+      - Average
+    - Name: EndpointHealthyEnicount
+      Statistics:
+      - Average
+    - Name: EndpointUnhealthyEnicount
+      Statistics:
+      - Average
+    - Name: FirewallRuleGroupQueryVolume
+      Statistics:
+      - Average
+    - Name: FirewallRuleGroupVpcQueryVolume
+      Statistics:
+      - Average
+    - Name: FirewallRuleQueryVolume
+      Statistics:
+      - Average
+    - Name: InboundQueryVolume
+      Statistics:
+      - Average
+    - Name: OutboundQueryAggregateVolume
+      Statistics:
+      - Average
+    - Name: OutboundQueryVolume
+      Statistics:
+      - Average
+    - Name: VpcFirewallQueryVolume
+      Statistics:
+      - Average
+    AWS/WorkSpaces:
+    - Name: Available
+      Statistics:
+      - Average
+    - Name: ConnectionAttempt
+      Statistics:
+      - Average
+    - Name: ConnectionFailure
+      Statistics:
+      - Average
+    - Name: ConnectionSuccess
+      Statistics:
+      - Average
+    - Name: InSessionLatency
+      Statistics:
+      - Average
+    - Name: Maintenance
+      Statistics:
+      - Average
+    - Name: SessionDisconnect
+      Statistics:
+      - Average
+    - Name: SessionLaunchTime
+      Statistics:
+      - Average
+    - Name: Stopped
+      Statistics:
+      - Average
+    - Name: Unhealthy
+      Statistics:
+      - Average
+    - Name: UserConnected
+      Statistics:
+      - Average
+    AWS/FSx:
+    - Name: AgeOfOldestQueuedMessage
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: CapacityPoolReadBytes
+      Statistics:
+      - Average
+    - Name: CapacityPoolReadOperations
+      Statistics:
+      - Average
+    - Name: CapacityPoolWriteBytes
+      Statistics:
+      - Average
+    - Name: CapacityPoolWriteOperations
+      Statistics:
+      - Average
+    - Name: ClientConnections
+      Statistics:
+      - Average
+    - Name: CompressionRatio
+      Statistics:
+      - Average
+    - Name: CPUUtilization
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: DataReadBytes
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+    - Name: DataReadOperationTime
+      Statistics:
+      - Average
+    - Name: DataReadOperations
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+    - Name: DataWriteBytes
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+    - Name: DataWriteOperationTime
+      Statistics:
+      - Average
+    - Name: DataWriteOperations
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+    - Name: DeduplicationSavedStorage
+      Statistics:
+      - Average
+    - Name: DiskIopsUtilization
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: DiskReadBytes
+      Statistics:
+      - Average
+    - Name: DiskReadOperations
+      Statistics:
+      - Average
+    - Name: DiskThroughputBalance
+      Statistics:
+      - Average
+    - Name: DiskThroughputUtilization
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: DiskWriteBytes
+      Statistics:
+      - Average
+    - Name: DiskWriteOperations
+      Statistics:
+      - Average
+    - Name: FileServerCacheHitRatio
+      Statistics:
+      - Average
+    - Name: FileServerDiskIopsBalance
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: FileServerDiskIopsUtilization
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: FileServerDiskThroughputBalance
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: FileServerDiskThroughputUtilization
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: FilesCapacity
+      Statistics:
+      - Average
+    - Name: FilesUsed
+      Statistics:
+      - Average
+    - Name: FreeDataStorageCapacity
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: FreeStorageCapacity
+      Statistics:
+      - Average
+      - Minimum
+    - Name: LogicalDataStored
+      Statistics:
+      - Average
+    - Name: LogicalDiskUsage
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: MemoryUtilization
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: MetadataOperationTime
+      Statistics:
+      - Average
+    - Name: MetadataOperations
+      Statistics:
+      - Average
+    - Name: NetworkReceivedBytes
+      Statistics:
+      - Average
+    - Name: NetworkSentBytes
+      Statistics:
+      - Average
+    - Name: NetworkThroughputUtilization
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: NfsBadCalls
+      Statistics:
+      - Average
+    - Name: PhysicalDiskUsage
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: RepositoryRenameOperations
+      Statistics:
+      - Average
+    - Name: StorageCapacity
+      Statistics:
+      - Average
+    - Name: StorageCapacityUtilization
+      Statistics:
+      - Average
+    - Name: StorageEfficiencySavings
+      Statistics:
+      - Average
+    - Name: StorageUsed
+      Statistics:
+      - Average
+    - Name: ThroughputCapacity
+      Statistics:
+      - Average
+    - Name: UsedStorageCapacity
+      Statistics:
+      - Average
+    AWS/MediaPackage:
+    - Name: ActiveInput
+      Statistics:
+      - Average
+    - Name: EgressBytes
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: EgressRequestCount
+      Statistics:
+      - Average
+    - Name: EgressResponseTime
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: IngressBytes
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: IngressResponseTime
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    AWS/ECR:
+    - Name: RepositoryPullCount
+      Statistics:
+      - Average
+    AWS/Lambda:
+    - Name: AsyncEventAge
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: AsyncEventsDropped
+      Statistics:
+      - Average
+    - Name: AsyncEventsReceived
+      Statistics:
+      - Average
+    - Name: ClaimedAccountConcurrency
+      Statistics:
+      - Average
+    - Name: ConcurrentExecutions
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: ConcurrentExecutionsGlobal
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: DeadLetterErrors
+      Statistics:
+      - Average
+    - Name: DeletedEventCount
+      Statistics:
+      - Average
+    - Name: DestinationDeliveryFailures
+      Statistics:
+      - Average
+    - Name: DroppedEventCount
+      Statistics:
+      - Average
+    - Name: Duration
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+      - p50
+      - p80
+      - p95
+      - p99
+    - Name: Errors
+      Statistics:
+      - Average
+    - Name: FailedInvokeEventCount
+      Statistics:
+      - Average
+    - Name: FilteredOutEventCount
+      Statistics:
+      - Average
+    - Name: Invocations
+      Statistics:
+      - Average
+    - Name: InvokedEventCount
+      Statistics:
+      - Average
+    - Name: IteratorAge
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: Memorysize
+      Statistics:
+      - Average
+    - Name: OnFailureDestinationDeliveredEventCount
+      Statistics:
+      - Average
+    - Name: PolledEventCount
+      Statistics:
+      - Average
+    - Name: PostRuntimeExtensionsDuration
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+      - p50
+      - p99
+    - Name: ProvisionedConcurrencyInvocations
+      Statistics:
+      - Average
+    - Name: ProvisionedConcurrencySpilloverInvocations
+      Statistics:
+      - Average
+    - Name: ProvisionedConcurrencyUtilization
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: ProvisionedConcurrentExecutions
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: RecursiveInvocationsDropped
+      Statistics:
+      - Average
+    - Name: SignatureValidationErrors
+      Statistics:
+      - Average
+    - Name: StreamedOutboundBytes
+      Statistics:
+      - Average
+    - Name: StreamedOutboundThroughput
+      Statistics:
+      - Average
+    - Name: Throttles
+      Statistics:
+      - Average
+    - Name: Timeout
+      Statistics:
+      - Average
+    - Name: UnreservedConcurrentExecutions
+      Statistics:
+      - Average
+    - Name: Url4XXCount
+      Statistics:
+      - Average
+    - Name: Url5XXCount
+      Statistics:
+      - Average
+    - Name: UrlRequestCount
+      Statistics:
+      - Average
+    - Name: UrlRequestLatency
+      Statistics:
+      - Average
+      - Maximum
+    AWS/AppRunner:
+    - Name: 2xxStatusResponses
+      Statistics:
+      - Average
+    - Name: 4xxStatusResponses
+      Statistics:
+      - Average
+    - Name: 5xxStatusResponses
+      Statistics:
+      - Average
+    - Name: ActiveInstances
+      Statistics:
+      - Average
+    - Name: CPUUtilization
+      Statistics:
+      - Average
+    - Name: MemoryUtilization
+      Statistics:
+      - Average
+    - Name: RequestLatency
+      Statistics:
+      - Average
+      - p50
+      - p95
+      - p99
+    - Name: Requests
+      Statistics:
+      - Average
+    AWS/NATGateway:
+    - Name: ActiveConnectionCount
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: BytesInFromDestination
+      Statistics:
+      - Average
+      - Sum
+    - Name: BytesInFromSource
+      Statistics:
+      - Average
+      - Sum
+    - Name: BytesOutToDestination
+      Statistics:
+      - Average
+      - Sum
+    - Name: BytesOutToSource
+      Statistics:
+      - Average
+      - Sum
+    - Name: ConnectionAttemptCount
+      Statistics:
+      - Average
+      - Sum
+    - Name: ConnectionEstablishedCount
+      Statistics:
+      - Average
+      - Sum
+    - Name: ErrorPortAllocation
+      Statistics:
+      - Average
+      - Sum
+    - Name: IdleTimeoutCount
+      Statistics:
+      - Average
+      - Sum
+    - Name: PacketsDropCount
+      Statistics:
+      - Average
+      - Sum
+    - Name: PacketsInFromDestination
+      Statistics:
+      - Average
+      - Sum
+    - Name: PacketsInFromSource
+      Statistics:
+      - Average
+      - Sum
+    - Name: PacketsOutToDestination
+      Statistics:
+      - Average
+      - Sum
+    - Name: PacketsOutToSource
+      Statistics:
+      - Average
+      - Sum
+    AWS/ApplicationELB:
+      - Name: ActiveConnectionCount
+        Statistics:
+        - Average
+      - Name: ClientTLSNegotiationErrorCount
+        Statistics:
+        - Average
+      - Name: ConsumedLCUs
+        Statistics:
+        - Average
+      - Name: HealthyHostCount
+        Statistics:
+        - Average
+        - Maximum
+        - Minimum
+      - Name: HTTPCode_ELB_3XX_Count
+        Statistics:
+        - Sum
+      - Name: HTTPCode_ELB_4XX_Count
+        Statistics:
+        - Sum
+      - Name: HTTPCode_ELB_5XX_Count
+        Statistics:
+        - Sum
+      - Name: HTTPCode_ELB_500_Count
+        Statistics:
+        - Sum
+      - Name: HTTPCode_ELB_502_Count
+        Statistics:
+        - Sum
+      - Name: HTTPCode_ELB_503_Count
+        Statistics:
+        - Sum
+      - Name: HTTPCode_ELB_504_Count
+        Statistics:
+        - Sum
+      - Name: HTTP_Redirect_Count
+        Statistics:
+        - Sum
+      - Name: HTTPCode_Target_2XX_Count
+        Statistics:
+        - Sum
+      - Name: HTTPCode_Target_3XX_Count
+        Statistics:
+        - Sum
+      - Name: HTTPCode_Target_4XX_Count
+        Statistics:
+        - Sum
+      - Name: HTTPCode_Target_xXX_Count
+        Statistics:
+        - Sum
+      - Name: IPv6ProcessedBytes
+        Statistics:
+        - Sum
+      - Name: IPv6RequestCount
+        Statistics:
+        - Sum
+      - Name: NewConnectionCount
+        Statistics:
+        - Sum
+      - Name: ProcessedBytes
+        Statistics:
+        - Sum
+      - Name: RequestCount
+        Statistics:
+        - Sum
+      - Name: RequestCountPerTarget
+        Statistics:
+        - Sum
+      - Name: RuleEvaluations
+        Statistics:
+        - Sum
+      - Name: TargetConnectionErrorCount
+        Statistics:
+        - Sum
+      - Name: TargetResponseTime
+        Statistics:
+        - Average
+        - Maximum
+        - p95
+        - p99
+      - Name: UnhealthyHostCount
+        Statistics:
+        - Average
+        - Maximum
+        - Minimum
+    AWS/EBS:
+    - Name: BurstBalance
+      Statistics:
+      - Average
+    - Name: SnapshotAge
+      Statistics:
+      - Average
+    - Name: VolumeConsumedReadWriteOps
+      Statistics:
+      - Average
+    - Name: VolumeIdleTime
+      Statistics:
+      - Average
+    - Name: VolumeQueueLength
+      Statistics:
+      - Average
+    - Name: VolumeReadBytes
+      Statistics:
+      - Average
+      - Sum
+    - Name: VolumeReadOps
+      Statistics:
+      - Average
+    - Name: VolumeThroughputPercentage
+      Statistics:
+      - Average
+    - Name: VolumeTotalReadTime
+      Statistics:
+      - Average
+      - Sum
+    - Name: VolumeTotalWriteTime
+      Statistics:
+      - Average
+      - Sum
+    - Name: VolumeWriteBytes
+      Statistics:
+      - Average
+      - Sum
+    - Name: VolumeWriteOps
+      Statistics:
+      - Average
+    AWS/StorageGateway:
+    - Name: CacheHitPercent
+      Statistics:
+      - Average
+    - Name: CachePercentDirty
+      Statistics:
+      - Average
+    - Name: CachePercentUsed
+      Statistics:
+      - Average
+    - Name: CloudBytesDownloaded
+      Statistics:
+      - Average
+    - Name: CloudBytesUploaded
+      Statistics:
+      - Average
+    - Name: CloudDownloadLatency
+      Statistics:
+      - Average
+    - Name: QueuedWrites
+      Statistics:
+      - Average
+    - Name: ReadBytes
+      Statistics:
+      - Average
+    - Name: ReadTime
+      Statistics:
+      - Average
+    - Name: TimeSinceLastRecoveryPoint
+      Statistics:
+      - Average
+    - Name: TotalCacheSize
+      Statistics:
+      - Average
+    - Name: UploadBufferFree
+      Statistics:
+      - Average
+    - Name: UploadBufferPercentUsed
+      Statistics:
+      - Average
+    - Name: UploadBufferUsed
+      Statistics:
+      - Average
+    - Name: WorkingStorageFree
+      Statistics:
+      - Average
+    - Name: WorkingStoragePercentUsed
+      Statistics:
+      - Average
+    - Name: WorkingStorageUsed
+      Statistics:
+      - Average
+    - Name: WriteBytes
+      Statistics:
+      - Average
+    - Name: WriteTime
+      Statistics:
+      - Average
+    AWS/Firehose:
+    - Name: BackupToS3.Bytes
+      Statistics:
+      - Average
+    - Name: BackupToS3.DataFreshness
+      Statistics:
+      - Average
+    - Name: BackupToS3.Records
+      Statistics:
+      - Average
+    - Name: BackupToS3.Success
+      Statistics:
+      - Average
+      - Sum
+    - Name: BytesPerSecondLimit
+      Statistics:
+      - Average
+    - Name: DataReadFromKinesisStream.Bytes
+      Statistics:
+      - Average
+    - Name: DataReadFromKinesisStream.Records
+      Statistics:
+      - Average
+    - Name: DeliveryToOpenSearch.Bytes
+      Statistics:
+      - Average
+    - Name: DeliveryToOpenSearch.Records
+      Statistics:
+      - Average
+    - Name: DeliveryToOpenSearch.Success
+      Statistics:
+      - Average
+      - Sum
+    - Name: DeliveryToHttpEndpoint.Bytes
+      Statistics:
+      - Average
+    - Name: DeliveryToHttpEndpoint.DataFreshness
+      Statistics:
+      - Average
+    - Name: DeliveryToHttpEndpoint.ProcessedBytes
+      Statistics:
+      - Average
+    - Name: DeliveryToHttpEndpoint.ProcessedRecords
+      Statistics:
+      - Average
+    - Name: DeliveryToHttpEndpoint.Records
+      Statistics:
+      - Average
+    - Name: DeliveryToHttpEndpoint.Success
+      Statistics:
+      - Average
+      - Sum
+    - Name: DeliveryToRedshift.Bytes
+      Statistics:
+      - Average
+      - Sum
+    - Name: DeliveryToRedshift.Records
+      Statistics:
+      - Average
+    - Name: DeliveryToRedshift.Success
+      Statistics:
+      - Average
+      - Sum
+    - Name: DeliveryToS3.Bytes
+      Statistics:
+      - Average
+      - Sum
+    - Name: DeliveryToS3.DataFreshness
+      Statistics:
+      - Average
+    - Name: DeliveryToS3.Records
+      Statistics:
+      - Average
+    - Name: DeliveryToS3.Success
+      Statistics:
+      - Average
+      - Sum
+    - Name: DeliveryToSplunk.Bytes
+      Statistics:
+      - Average
+      - Sum
+    - Name: DeliveryToSplunk.DataAckLatency
+      Statistics:
+      - Average
+      - Maximum
+    - Name: DeliveryToSplunk.DataFreshness
+      Statistics:
+      - Average
+      - Maximum
+    - Name: DeliveryToSplunk.Records
+      Statistics:
+      - Average
+    - Name: DeliveryToSplunk.Success
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: DescribeDeliveryStream.Latency
+      Statistics:
+      - Average
+      - Maximum
+    - Name: DescribeDeliveryStream.Requests
+      Statistics:
+      - Average
+    - Name: IncomingBytes
+      Statistics:
+      - Average
+    - Name: IncomingPutRequests
+      Statistics:
+      - Average
+    - Name: IncomingRecords
+      Statistics:
+      - Average
+    - Name: KinesisMillisBehindLatest
+      Statistics:
+      - Average
+      - Maximum
+    - Name: KMSKeyAccessDenied
+      Statistics:
+      - Average
+    - Name: KMSKeyDisabled
+      Statistics:
+      - Average
+    - Name: KMSKeyInvalidState
+      Statistics:
+      - Average
+    - Name: KMSKeyNotFound
+      Statistics:
+      - Average
+    - Name: ListDeliveryStreams.Latency
+      Statistics:
+      - Average
+      - Maximum
+    - Name: ListDeliveryStreams.Requests
+      Statistics:
+      - Average
+    - Name: PutRecordBatch.Bytes
+      Statistics:
+      - Average
+    - Name: PutRecordBatch.Latency
+      Statistics:
+      - Average
+      - Maximum
+    - Name: PutRecordBatch.Records
+      Statistics:
+      - Average
+    - Name: PutRecordBatch.Requests
+      Statistics:
+      - Average
+    - Name: PutRecord.Bytes
+      Statistics:
+      - Average
+    - Name: PutRecord.Latency
+      Statistics:
+      - Average
+      - Maximum
+    - Name: PutRecord.Requests
+      Statistics:
+      - Average
+    - Name: PutRequestsPerSecondLimit
+      Statistics:
+      - Average
+    - Name: RecordsPerSecondLimit
+      Statistics:
+      - Average
+    - Name: ThrottledDescribeStream
+      Statistics:
+      - Average
+    - Name: ThrottledGetRecords
+      Statistics:
+      - Average
+    - Name: ThrottledGetShardIterator
+      Statistics:
+      - Average
+    - Name: ThrottledRecords
+      Statistics:
+      - Average
+    - Name: UpdateDeliveryStream.Latency
+      Statistics:
+      - Average
+      - Maximum
+    - Name: UpdateDeliveryStream.Requests
+      Statistics:
+      - Average
+    - Name: UpdateFirehose.Latency
+      Statistics:
+      - Average
+      - Maximum
+    - Name: UpdateFirehose.Requests
+      Statistics:
+      - Average
+    AWS/MediaConnect:
+    - Name: ARQRecovered
+      Statistics:
+      - Average
+    - Name: ARQRequests
+      Statistics:
+      - Average
+    - Name: BitRate
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: CATError
+      Statistics:
+      - Average
+    - Name: Connected
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: ConnectedOutputs
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: ContinuityCounter
+      Statistics:
+      - Average
+    - Name: CRCError
+      Statistics:
+      - Average
+    - Name: Disconnections
+      Statistics:
+      - Average
+    - Name: DroppedPackets
+      Statistics:
+      - Average
+    - Name: FailoverSwitches
+      Statistics:
+      - Average
+    - Name: FECPackets
+      Statistics:
+      - Average
+    - Name: FECRecovered
+      Statistics:
+      - Average
+    - Name: MaintenanceCanceled
+      Statistics:
+      - Average
+    - Name: MaintenanceFailed
+      Statistics:
+      - Average
+    - Name: MaintenanceRescheduled
+      Statistics:
+      - Average
+    - Name: MaintenanceScheduled
+      Statistics:
+      - Average
+    - Name: MaintenanceStarted
+      Statistics:
+      - Average
+    - Name: MaintenanceSucceeded
+      Statistics:
+      - Average
+    - Name: MergeActive
+      Statistics:
+      - Average
+    - Name: MergeLatency
+      Statistics:
+      - Average
+    - Name: NotRecoveredPackets
+      Statistics:
+      - Average
+    - Name: OutputConnected
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: OutputDisconnections
+      Statistics:
+      - Average
+    - Name: OutputDroppedPayloads
+      Statistics:
+      - Average
+    - Name: OutputLatePayloads
+      Statistics:
+      - Average
+    - Name: OutputTotalBytes
+      Statistics:
+      - Average
+    - Name: OutputTotalPayloads
+      Statistics:
+      - Average
+    - Name: OverflowPackets
+      Statistics:
+      - Average
+    - Name: PacketLossPercent
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: PATError
+      Statistics:
+      - Average
+    - Name: PCRAccuracyError
+      Statistics:
+      - Average
+    - Name: PCRError
+      Statistics:
+      - Average
+    - Name: PIDError
+      Statistics:
+      - Average
+    - Name: PMTError
+      Statistics:
+      - Average
+    - Name: PTSError
+      Statistics:
+      - Average
+    - Name: RecoveredPackets
+      Statistics:
+      - Average
+    - Name: RoundTripTime
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: SourceARQRecovered
+      Statistics:
+      - Average
+    - Name: SourceARQRequests
+      Statistics:
+      - Average
+    - Name: SourceBitRate
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: SourceCATError
+      Statistics:
+      - Average
+    - Name: SourceConnected
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: SourceContinuityCounter
+      Statistics:
+      - Average
+    - Name: SourceCRCError
+      Statistics:
+      - Average
+    - Name: SourceDisconnections
+      Statistics:
+      - Average
+    - Name: SourceDroppedPackets
+      Statistics:
+      - Average
+    - Name: SourceDroppedPayloads
+      Statistics:
+      - Average
+    - Name: SourceFECPackets
+      Statistics:
+      - Average
+    - Name: SourceFECRecovered
+      Statistics:
+      - Average
+    - Name: SourceLatePayloads
+      Statistics:
+      - Average
+    - Name: SourceMergeActive
+      Statistics:
+      - Average
+    - Name: SourceMergeLatency
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: SourceMergeStatusWarnMismatch
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: SourceMergeStatusWarnSolo
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: SourceMissingPackets
+      Statistics:
+      - Average
+    - Name: SourceNotRecoveredPackets
+      Statistics:
+      - Average
+    - Name: SourceOverflowPackets
+      Statistics:
+      - Average
+    - Name: SourcePacketLossPercent
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: SourcePATError
+      Statistics:
+      - Average
+    - Name: SourcePCRAccuracyError
+      Statistics:
+      - Average
+    - Name: SourcePCRError
+      Statistics:
+      - Average
+    - Name: SourcePIDError
+      Statistics:
+      - Average
+    - Name: SourcePMTError
+      Statistics:
+      - Average
+    - Name: SourcePTSError
+      Statistics:
+      - Average
+    - Name: SourceRecoveredPackets
+      Statistics:
+      - Average
+    - Name: SourceRoundTripTime
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: SourceSelected
+      Statistics:
+      - Average
+    - Name: SourceTotalBytes
+      Statistics:
+      - Average
+    - Name: SourceTotalPackets
+      Statistics:
+      - Average
+    - Name: SourceTotalPayloads
+      Statistics:
+      - Average
+    - Name: SourceTransportError
+      Statistics:
+      - Average
+    - Name: SourceTSByteError
+      Statistics:
+      - Average
+    - Name: SourceTSSyncLoss
+      Statistics:
+      - Average
+    - Name: TotalPackets
+      Statistics:
+      - Average
+    - Name: TransportError
+      Statistics:
+      - Average
+    - Name: TSByteError
+      Statistics:
+      - Average
+    - Name: TSSyncLoss
+      Statistics:
+      - Average
+    AWS/ElasticMapReduce:
+    - Name: AppsCompleted
+      Statistics:
+      - Average
+      - Sum
+    - Name: AppsFailed
+      Statistics:
+      - Average
+      - Sum
+    - Name: AppsKilled
+      Statistics:
+      - Average
+      - Sum
+    - Name: AppsPending
+      Statistics:
+      - Average
+      - Sum
+    - Name: AppsRunning
+      Statistics:
+      - Average
+      - Sum
+    - Name: AppsSubmitted
+      Statistics:
+      - Average
+      - Sum
+    - Name: BackupFailed
+      Statistics:
+      - Average
+    - Name: CapacityRemainingGB
+      Statistics:
+      - Average
+      - Sum
+    - Name: ContainerAllocated
+      Statistics:
+      - Average
+      - Sum
+    - Name: ContainerPending
+      Statistics:
+      - Average
+      - Sum
+    - Name: ContainerPendingRatio
+      Statistics:
+      - Average
+    - Name: ContainerReserved
+      Statistics:
+      - Average
+      - Sum
+    - Name: CoreNodesPending
+      Statistics:
+      - Average
+      - Sum
+    - Name: CoreNodesRequested
+      Statistics:
+      - Average
+      - Sum
+    - Name: CoreNodesRunning
+      Statistics:
+      - Average
+      - Sum
+    - Name: CoreUnitsRequested
+      Statistics:
+      - Average
+      - Sum
+    - Name: CoreUnitsRunning
+      Statistics:
+      - Average
+      - Sum
+    - Name: CoreVCPURequested
+      Statistics:
+      - Average
+      - Sum
+    - Name: CoreVCPURunning
+      Statistics:
+      - Average
+      - Sum
+    - Name: CorruptBlocks
+      Statistics:
+      - Average
+      - Sum
+    - Name: DfsPendingReplicationBlocks
+      Statistics:
+      - Average
+    - Name: HDFSbytesRead
+      Statistics:
+      - Average
+      - Sum
+    - Name: HDFSbytesWritten
+      Statistics:
+      - Average
+      - Sum
+    - Name: HDFSutilization
+      Statistics:
+      - Average
+    - Name: IsIdle
+      Statistics:
+      - Average
+    - Name: JobsFailed
+      Statistics:
+      - Average
+      - Sum
+    - Name: JobsRunning
+      Statistics:
+      - Average
+      - Sum
+    - Name: LiveDataNodes
+      Statistics:
+      - Average
+    - Name: LiveTaskTrackers
+      Statistics:
+      - Average
+    - Name: MapSlotsOpen
+      Statistics:
+      - Average
+      - Sum
+    - Name: MemoryAllocatedMB
+      Statistics:
+      - Average
+      - Sum
+    - Name: MemoryAvailableMB
+      Statistics:
+      - Average
+      - Sum
+    - Name: MemoryReservedMB
+      Statistics:
+      - Average
+      - Sum
+    - Name: MemoryTotalMB
+      Statistics:
+      - Average
+      - Sum
+    - Name: MissingBlocks
+      Statistics:
+      - Average
+      - Sum
+    - Name: MRActiveNodes
+      Statistics:
+      - Average
+      - Sum
+    - Name: MRDecommissionedNodes
+      Statistics:
+      - Average
+      - Sum
+    - Name: MRLostNodes
+      Statistics:
+      - Average
+      - Sum
+    - Name: MRRebootedNodes
+      Statistics:
+      - Average
+      - Sum
+    - Name: MRTotalNodes
+      Statistics:
+      - Average
+      - Sum
+    - Name: MRUnhealthyNodes
+      Statistics:
+      - Average
+      - Sum
+    - Name: MultiMasterInstanceGroupNodesRequested
+      Statistics:
+      - Average
+    - Name: MultiMasterInstanceGroupNodesRunning
+      Statistics:
+      - Average
+    - Name: MultiMasterInstanceGroupNodesRunningPercentage
+      Statistics:
+      - Average
+    - Name: NoOfBlackListedTaskTrackers
+      Statistics:
+      - Average
+      - Sum
+    - Name: NoOfGrayListedTaskTrackers
+      Statistics:
+      - Average
+      - Sum
+    - Name: PendingDeletionBlocks
+      Statistics:
+      - Average
+      - Sum
+    - Name: ReduceSlotsOpen
+      Statistics:
+      - Average
+      - Sum
+    - Name: RemainingMapTasks
+      Statistics:
+      - Average
+      - Sum
+    - Name: RemainingMapTasksPerSlot
+      Statistics:
+      - Average
+    - Name: RemainingReduceTasks
+      Statistics:
+      - Average
+      - Sum
+    - Name: RunningMapTasks
+      Statistics:
+      - Average
+      - Sum
+    - Name: RunningReduceTasks
+      Statistics:
+      - Average
+      - Sum
+    - Name: S3BytesRead
+      Statistics:
+      - Average
+      - Sum
+    - Name: S3BytesWritten
+      Statistics:
+      - Average
+      - Sum
+    - Name: TaskNodesPending
+      Statistics:
+      - Average
+      - Sum
+    - Name: TaskNodesRequested
+      Statistics:
+      - Average
+      - Sum
+    - Name: TaskNodesRunning
+      Statistics:
+      - Average
+      - Sum
+    - Name: TaskUnitsRequested
+      Statistics:
+      - Average
+      - Sum
+    - Name: TaskUnitsRunning
+      Statistics:
+      - Average
+      - Sum
+    - Name: TaskVCPURequested
+      Statistics:
+      - Average
+      - Sum
+    - Name: TaskVCPURunning
+      Statistics:
+      - Average
+      - Sum
+    - Name: TotalLoad
+      Statistics:
+      - Average
+      - Sum
+    - Name: TotalMapTasks
+      Statistics:
+      - Average
+      - Sum
+    - Name: TotalNodesRequested
+      Statistics:
+      - Average
+    - Name: TotalNodesRunning
+      Statistics:
+      - Average
+      - Sum
+    - Name: TotalReduceTasks
+      Statistics:
+      - Average
+      - Sum
+    - Name: TotalUnitsRequested
+      Statistics:
+      - Average
+      - Sum
+    - Name: TotalUnitsRunning
+      Statistics:
+      - Average
+      - Sum
+    - Name: TotalVCPURequested
+      Statistics:
+      - Average
+      - Sum
+    - Name: TotalVCPURunning
+      Statistics:
+      - Average
+      - Sum
+    - Name: UnderReplicatedBlocks
+      Statistics:
+      - Average
+      - Sum
+    - Name: YARNMemoryAvailablePercentage
+      Statistics:
+      - Average
+    AWS/MediaLive:
+    - Name: ActiveAlerts
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: FecRowPacketsReceived
+      Statistics:
+      - Average
+    - Name: FecColumnPacketsReceived
+      Statistics:
+      - Average
+    - Name: InputTimecodesPresent
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: InputVideoFrameRate
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: NetworkIn
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: PrimaryInputActive
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: RtpPacketsLost
+      Statistics:
+      - Average
+    - Name: RtpPacketsReceived
+      Statistics:
+      - Average
+    - Name: RtpPacketsRecoveredViaFec
+      Statistics:
+      - Average
+    - Name: UdpInputLossSeconds
+      Statistics:
+      - Average
+    - Name: ChannelInputErrorSeconds
+      Statistics:
+      - Average
+    - Name: ActiveOutputs
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: FillMsec
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: OutputAudioLevelDbfs
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: OutputAudioLevelLkfs
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: NetworkOut
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: Output4XXErrors
+      Statistics:
+      - Average
+    - Name: Output5XXErrors
+      Statistics:
+      - Average
+    - Name: UsingSdi
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: UsingHdmi
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: InputLocked
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: EncoderRunning
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: LinkedToStreamEndpoint
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: Streaming
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: Temperature
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: ConfiguredBitrate
+      Statistics:
+      - Average
+      - p90
+    - Name: EncoderBitrate
+      Statistics:
+      - Average
+      - p90
+    - Name: ConfiguredBitrateAvailable
+      Statistics:
+      - Average
+      - p90
+    - Name: TotalPackets
+      Statistics:
+      - Average
+    - Name: RecoveredPackets
+      Statistics:
+      - Average
+    - Name: NotRecoveredPackets
+      Statistics:
+      - Average
+    - Name: ErrorSeconds
+      Statistics:
+      - Average
+    - Name: PipelinesLocked
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: OutputVideoFrameRate
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: SvqTime
+      Statistics:
+      - Average
+    AWS/EC2:
+    - Name: CPUCreditBalance
+      Statistics:
+      - Average
+    - Name: CPUCreditUsage
+      Statistics:
+      - Average
+    - Name: CPUSurplusCreditBalance
+      Statistics:
+      - Average
+    - Name: CPUSurplusCreditsCharged
+      Statistics:
+      - Average
+    - Name: CPUUtilization
+      Statistics:
+      - Average
+      - Maximum
+    - Name: DiskReadBytes
+      Statistics:
+      - Average
+    - Name: DiskReadOps
+      Statistics:
+      - Average
+    - Name: DiskWriteBytes
+      Statistics:
+      - Average
+    - Name: DiskWriteOps
+      Statistics:
+      - Average
+    - Name: EBSByteBalance%
+      Statistics:
+      - Average
+    - Name: EBSIOBalance%
+      Statistics:
+      - Average
+    - Name: EBSReadBytes
+      Statistics:
+      - Average
+      - Sum
+    - Name: EBSReadOps
+      Statistics:
+      - Average
+      - Sum
+    - Name: EBSWriteBytes
+      Statistics:
+      - Average
+      - Sum
+    - Name: EBSWriteOps
+      Statistics:
+      - Average
+      - Sum
+    - Name: NetworkAddressUsage
+      Statistics:
+      - Average
+    - Name: NetworkAddressUsagePeered
+      Statistics:
+      - Average
+    - Name: NetworkIn
+      Statistics:
+      - Average
+      - Maximum
+    - Name: NetworkOut
+      Statistics:
+      - Average
+      - Maximum
+    - Name: NetworkPacketsIn
+      Statistics:
+      - Average
+    - Name: NetworkPacketsOut
+      Statistics:
+      - Average
+    - Name: StatusCheckFailed
+      Statistics:
+      - Average
+    - Name: StatusCheckFailedInstance
+      Statistics:
+      - Average
+    - Name: StatusCheckFailedSystem
+      Statistics:
+      - Average
+    AWS/PrivateLinkServices:
+    - Name: ActiveConnections
+      Statistics:
+      - Average
+    - Name: BytesProcessed
+      Statistics:
+      - Average
+    - Name: NewConnections
+      Statistics:
+      - Average
+    - Name: PacketsDropped
+      Statistics:
+      - Average
+    - Name: RstPacketsReceived
+      Statistics:
+      - Average
+    - Name: EndpointsCount
+      Statistics:
+      - Average
+    - Name: RstPacketsSent
+      Statistics:
+      - Average
+    AWS/DDoSProtection:
+    - Name: DDoSAttackBitsPerSecond
+      Statistics:
+      - Average
+    - Name: DDoSAttackPacketsPerSecond
+      Statistics:
+      - Average
+    - Name: DDoSAttackRequestsPerSecond
+      Statistics:
+      - Average
+    - Name: DDoSDetected
+      Statistics:
+      - Average
+    AWS/S3:
+    - Name: 4xxErrors
+      Statistics:
+      - Average
+    - Name: 5xxErrors
+      Statistics:
+      - Average
+    - Name: AllRequests
+      Statistics:
+      - Average
+    - Name: BucketSizeBytes
+      Statistics:
+      - Average
+    - Name: BytesDownloaded
+      Statistics:
+      - Average
+    - Name: BytesPendingReplication
+      Statistics:
+      - Average
+    - Name: BytesUploaded
+      Statistics:
+      - Average
+    - Name: DeleteRequests
+      Statistics:
+      - Average
+    - Name: FirstByteLatency
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - p50
+      - p90
+      - p95
+      - p99
+    - Name: GetRequests
+      Statistics:
+      - Average
+    - Name: HeadRequests
+      Statistics:
+      - Average
+    - Name: ListRequests
+      Statistics:
+      - Average
+    - Name: NumberOfObjects
+      Statistics:
+      - Average
+    - Name: OperationsFailedReplication
+      Statistics:
+      - Average
+      - SampleCount
+      - Sum
+    - Name: OperationsPendingReplication
+      Statistics:
+      - Average
+    - Name: PostRequests
+      Statistics:
+      - Average
+    - Name: PutRequests
+      Statistics:
+      - Average
+    - Name: ReplicationLatency
+      Statistics:
+      - Average
+    - Name: TotalRequestLatency
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - p50
+      - p90
+      - p95
+      - p99
+    AWS/Sagemaker/ModelBuildingPipeline:
+    - Name: ExecutionDuration
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: ExecutionFailed
+      Statistics:
+      - Average
+      - Sum
+    - Name: ExecutionStarted
+      Statistics:
+      - Average
+      - Sum
+    - Name: ExecutionStopped
+      Statistics:
+      - Average
+      - Sum
+    - Name: ExecutionSucceeded
+      Statistics:
+      - Average
+      - Sum
+    - Name: StepDuration
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: StepFailed
+      Statistics:
+      - Average
+      - Sum
+    - Name: StepStarted
+      Statistics:
+      - Average
+      - Sum
+    - Name: StepStopped
+      Statistics:
+      - Average
+      - Sum
+    - Name: StepSucceeded
+      Statistics:
+      - Average
+      - Sum
+    AWS/CloudFront:
+    - Name: 401ErrorRate
+      Statistics:
+      - Average
+    - Name: 403ErrorRate
+      Statistics:
+      - Average
+    - Name: 404ErrorRate
+      Statistics:
+      - Average
+    - Name: 4xxErrorRate
+      Statistics:
+      - Average
+    - Name: 502ErrorRate
+      Statistics:
+      - Average
+    - Name: 503ErrorRate
+      Statistics:
+      - Average
+    - Name: 504ErrorRate
+      Statistics:
+      - Average
+    - Name: 5xxErrorRate
+      Statistics:
+      - Average
+    - Name: BytesDownloaded
+      Statistics:
+      - Sum
+    - Name: BytesUploaded
+      Statistics:
+      - Sum
+    - Name: CacheHitRate
+      Statistics:
+      - Average
+    - Name: FunctionComputeUtilization
+      Statistics:
+      - Average
+    - Name: FunctionExecutionErrors
+      Statistics:
+      - Average
+    - Name: FunctionInvocations
+      Statistics:
+      - Average
+    - Name: FunctionThrottles
+      Statistics:
+      - Average
+    - Name: FunctionValidationErrors
+      Statistics:
+      - Average
+    - Name: LambdaExecutionError
+      Statistics:
+      - Average
+    - Name: LambdaLimitExceededError
+      Statistics:
+      - Average
+    - Name: LambdaValidationError
+      Statistics:
+      - Average
+    - Name: OriginLatency
+      Statistics:
+      - p50
+      - p95
+    - Name: Requests
+      Statistics:
+      - Sum
+    - Name: TotalErrorRate
+      Statistics:
+      - Average
+    AWS/GameLift:
+    - Name: ActivatingGameSessions
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: ActiveGameSessions
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: ActiveInstances
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: ActiveServerProcesses
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: AvailableGameServers
+      Statistics:
+      - Average
+    - Name: AvailableGameSessions
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: AverageWaitTime
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: CurrentPlayerSessions
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: CurrentTickets
+      Statistics:
+      - Average
+    - Name: DesiredInstances
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: DrainingAvailableGameServers
+      Statistics:
+      - Average
+    - Name: DrainingUtilizedGameServers
+      Statistics:
+      - Average
+    - Name: FirstChoiceNotViable
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: FirstChoiceOutOfCapacity
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: GameServerInterruptions
+      Statistics:
+      - Average
+    - Name: GameSessionInterruptions
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: HealthyServerProcesses
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: IdleInstances
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: InstanceInterruptions
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: LowestLatencyPlacement
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: LowestPricePlacement
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: MatchesAccepted
+      Statistics:
+      - Average
+    - Name: MatchesCreated
+      Statistics:
+      - Average
+    - Name: MatchesPlaced
+      Statistics:
+      - Average
+    - Name: MatchesRejected
+      Statistics:
+      - Average
+    - Name: MaxInstances
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: MinInstances
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: MinimumInstances
+      Statistics:
+      - Average
+      - Maximum
+    - Name: Instances
+      Statistics:
+      - Average
+      - Minimum
+    - Name: PercentAvailableGameSessions
+      Statistics:
+      - Average
+    - Name: PercentHealthyServerProcesses
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: PercentIdleInstances
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: PercentUtilizedGameServers
+      Statistics:
+      - Average
+    - Name: PlacementsCancelled
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: PlacementsFailed
+      Statistics:
+      - Average
+    - Name: PlacementsStarted
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: PlacementsSucceeded
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: PlacementsTimedOut
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: PlayerSessionActivations
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: PlayersStarted
+      Statistics:
+      - Average
+    - Name: QueueDepth
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: RuleEvaluationsFailed
+      Statistics:
+      - Average
+    - Name: RuleEvaluationsPassed
+      Statistics:
+      - Average
+    - Name: ServerProcessAbnormalTerminations
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: ServerProcessActivations
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: ServerProcessTerminations
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: TicketsFailed
+      Statistics:
+      - Average
+    - Name: TicketsStarted
+      Statistics:
+      - Average
+    - Name: TicketsTimedOut
+      Statistics:
+      - Average
+    - Name: TimeToMatch
+      Statistics:
+      - Average
+    - Name: TimeToTicketCancel
+      Statistics:
+      - Average
+    - Name: TimeToTicketSuccess
+      Statistics:
+      - Average
+    - Name: UtilizedGameServers
+      Statistics:
+      - Average
+    AWS/DocDB:
+    - Name: BackupRetentionPeriodStorageUsed
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: BufferCacheHitRatio
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: ChangeStreamLogSize
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: CPUCreditBalance
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: CPUCreditUsage
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: CPUSurplusCreditBalance
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: CPUSurplusCreditsCharged
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: CPUUtilization
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: DatabaseConnections
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: DatabaseConnectionsMax
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: DatabaseCursors
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: DatabaseCursorsMax
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: DatabaseCursorsTimedOut
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: DbInstanceReplicaLag
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: DbclusterReplicaLagMaximum
+      Statistics:
+      - Average
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: DbclusterReplicaLag
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: DbclusterReplicaLagMinimum
+      Statistics:
+      - Average
+      - Maximum
+      - SampleCount
+      - Sum
+    - Name: DiskQueueDepth
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: DocumentsDeleted
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: DocumentsInserted
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: DocumentsReturned
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: DocumentsUpdated
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: EngineUptime
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: FreeLocalStorage
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: FreeableMemory
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: IndexBufferCacheHitRatio
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: LowMemNumOperationsThrottled
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: LowMemThrottleMaxQueueDepth
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: LowMemThrottleQueueDepth
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: NetworkReceiveThroughput
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: NetworkThroughput
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: NetworkTransmitThroughput
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: OpcountersCommand
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: OpcountersDelete
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: OpcountersGetmore
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: OpcountersInsert
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: OpcountersQuery
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: OpcountersUpdate
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: ReadIOPS
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: ReadLatency
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: ReadThroughput
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: SnapshotStorageUsed
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: SwapUsage
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: TotalBackupStorageBilled
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: TransactionsAborted
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: TransactionsCommitted
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: TransactionsOpen
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: TransactionsOpenMax
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: TransactionsStarted
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: TtldeletedDocuments
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: VolumeBytesUsed
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: VolumeReadIOPS
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: VolumeWriteIOPS
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: WriteIOPS
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: WriteLatency
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: WriteThroughput
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    AWS/Backup:
+    - Name: NumberOfBackupJobsAborted
+      Statistics:
+      - Average
+    - Name: NumberOfBackupJobsCompleted
+      Statistics:
+      - Average
+    - Name: NumberOfBackupJobsCreated
+      Statistics:
+      - Average
+    - Name: NumberOfBackupJobsExpired
+      Statistics:
+      - Average
+    - Name: NumberOfBackupJobsFailed
+      Statistics:
+      - Average
+    - Name: NumberOfBackupJobsPending
+      Statistics:
+      - Average
+    - Name: NumberOfBackupJobsRunning
+      Statistics:
+      - Average
+    - Name: NumberOfCopyJobsCompleted
+      Statistics:
+      - Average
+    - Name: NumberOfCopyJobsCreated
+      Statistics:
+      - Average
+    - Name: NumberOfCopyJobsFailed
+      Statistics:
+      - Average
+    - Name: NumberOfCopyJobsRunning
+      Statistics:
+      - Average
+    - Name: NumberOfRecoveryPointsCold
+      Statistics:
+      - Average
+    - Name: NumberOfRecoveryPointsCompleted
+      Statistics:
+      - Average
+    - Name: NumberOfRecoveryPointsDeleting
+      Statistics:
+      - Average
+    - Name: NumberOfRecoveryPointsExpired
+      Statistics:
+      - Average
+    - Name: NumberOfRecoveryPointsPartial
+      Statistics:
+      - Average
+    - Name: NumberOfRestoreJobsCompleted
+      Statistics:
+      - Average
+    - Name: NumberOfRestoreJobsFailed
+      Statistics:
+      - Average
+    - Name: NumberOfRestoreJobsPending
+      Statistics:
+      - Average
+    - Name: NumberOfRestoreJobsRunning
+      Statistics:
+      - Average
+    AWS/NetworkELB:
+      - Name: ConsumedLCUs
+        Statistics:
+        - Average
+      - Name: HealthyHostCount
+        Statistics:
+        - Average
+        - Maximum
+        - Minimum
+      - Name: ProcessedBytes
+        Statistics:
+        - Sum
+      - Name: UnhealthyHostCount
+        Statistics:
+        - Average
+        - Maximum
+        - Minimum
+    AWS/AppSync:
+    - Name: 4XXError
+      Statistics:
+      - Average
+    - Name: 5XXError
+      Statistics:
+      - Average
+    - Name: ActiveConnections
+      Statistics:
+      - Average
+      - Sum
+    - Name: ActiveSubscriptions
+      Statistics:
+      - Average
+      - Sum
+    - Name: ConnectClientError
+      Statistics:
+      - Average
+      - Sum
+    - Name: ConnectServerError
+      Statistics:
+      - Average
+      - Sum
+    - Name: ConnectSuccess
+      Statistics:
+      - Average
+      - Sum
+    - Name: ConnectionDuration
+      Statistics:
+      - Average
+    - Name: DisconnectClientError
+      Statistics:
+      - Average
+      - Sum
+    - Name: DisconnectServerError
+      Statistics:
+      - Average
+      - Sum
+    - Name: DisconnectSuccess
+      Statistics:
+      - Average
+      - Sum
+    - Name: Latency
+      Statistics:
+      - Average
+      - Maximum
+      - p90
+    - Name: PublishDataMessageClientError
+      Statistics:
+      - Average
+      - Sum
+    - Name: PublishDataMessageServerError
+      Statistics:
+      - Average
+      - Sum
+    - Name: PublishDataMessageSize
+      Statistics:
+      - Average
+    - Name: PublishDataMessageSuccess
+      Statistics:
+      - Average
+      - Sum
+    - Name: Requests
+      Statistics:
+      - Average
+    - Name: SubscribeClientError
+      Statistics:
+      - Average
+      - Sum
+    - Name: SubscribeServerError
+      Statistics:
+      - Average
+      - Sum
+    - Name: SubscribeSuccess
+      Statistics:
+      - Average
+      - Sum
+    - Name: UnsubscribeClientError
+      Statistics:
+      - Average
+      - Sum
+    - Name: UnsubscribeServerError
+      Statistics:
+      - Average
+      - Sum
+    - Name: UnsubscribeSuccess
+      Statistics:
+      - Average
+      - Sum
+    AWS/EFS:
+    - Name: BurstCreditBalance
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: ClientConnections
+      Statistics:
+      - Average
+    - Name: DataReadIObytes
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+    - Name: DataWriteIObytes
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+    - Name: MetadataIObytes
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+    - Name: MeteredIObytes
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+      - Sum
+    - Name: PercentIOlimit
+      Statistics:
+      - Average
+    - Name: PermittedThroughput
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: StorageBytes
+      Statistics:
+      - Average
+    - Name: TotalIObytes
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - SampleCount
+    AWS/RDS:
+    - Name: ActiveTransactions
+      Statistics:
+      - Average
+    - Name: AuroraBinlogReplicaLag
+      Statistics:
+      - Average
+    - Name: AuroraReplicaLag
+      Statistics:
+      - Average
+    - Name: AuroraReplicaLagMaximum
+      Statistics:
+      - Average
+    - Name: AuroraReplicaLagMinimum
+      Statistics:
+      - Average
+    - Name: BackupRetentionPeriodStorageUsed
+      Statistics:
+      - Average
+    - Name: BinLogDiskUsage
+      Statistics:
+      - Average
+    - Name: BlockedTransactions
+      Statistics:
+      - Average
+    - Name: BufferCacheHitRatio
+      Statistics:
+      - Average
+    - Name: BurstBalance
+      Statistics:
+      - Average
+    - Name: CommitLatency
+      Statistics:
+      - Average
+    - Name: CommitThroughput
+      Statistics:
+      - Average
+    - Name: CPUCreditBalance
+      Statistics:
+      - Average
+    - Name: CPUCreditUsage
+      Statistics:
+      - Average
+    - Name: CPUSurplusCreditBalance
+      Statistics:
+      - Average
+    - Name: CPUSurplusCreditsCharged
+      Statistics:
+      - Average
+    - Name: CPUUtilization
+      Statistics:
+      - Average
+    - Name: cpuutilization.guest
+      Statistics:
+      - Average
+    - Name: cpuutilization.idle
+      Statistics:
+      - Average
+    - Name: cpuutilization.irq
+      Statistics:
+      - Average
+    - Name: cpuutilization.kern
+      Statistics:
+      - Average
+    - Name: cpuutilization.nice
+      Statistics:
+      - Average
+    - Name: cpuutilization.steal
+      Statistics:
+      - Average
+    - Name: cpuutilization.system
+      Statistics:
+      - Average
+    - Name: cpuutilization.total
+      Statistics:
+      - Average
+    - Name: cpuutilization.user
+      Statistics:
+      - Average
+    - Name: cpuutilization.wait
+      Statistics:
+      - Average
+    - Name: DatabaseConnections
+      Statistics:
+      - Average
+    - Name: DBLoad
+      Statistics:
+      - Average
+    - Name: DBLoadCpu
+      Statistics:
+      - Average
+    - Name: DBLoadNonCpu
+      Statistics:
+      - Average
+    - Name: DBLoadRelativeToNumVcpus
+      Statistics:
+      - Average
+    - Name: DDLLatency
+      Statistics:
+      - Average
+    - Name: DDLThroughput
+      Statistics:
+      - Average
+    - Name: Deadlocks
+      Statistics:
+      - Average
+    - Name: DeleteLatency
+      Statistics:
+      - Average
+    - Name: DeleteThroughput
+      Statistics:
+      - Average
+    - Name: DiskQueueDepth
+      Statistics:
+      - Average
+    - Name: diskio.avgqueuelen
+      Statistics:
+      - Average
+    - Name: diskio.avgreqsz
+      Statistics:
+      - Average
+    - Name: diskio.await
+      Statistics:
+      - Average
+    - Name: diskio.readiosps
+      Statistics:
+      - Average
+    - Name: diskio.readkb
+      Statistics:
+      - Average
+    - Name: diskio.readkbps
+      Statistics:
+      - Average
+    - Name: diskio.readlatency
+      Statistics:
+      - Average
+    - Name: diskio.readthroughput
+      Statistics:
+      - Average
+    - Name: diskio.rrqmps
+      Statistics:
+      - Average
+    - Name: diskio.tps
+      Statistics:
+      - Average
+    - Name: diskio.util
+      Statistics:
+      - Average
+    - Name: diskio.writeiosps
+      Statistics:
+      - Average
+    - Name: diskio.writekb
+      Statistics:
+      - Average
+    - Name: diskio.writekbps
+      Statistics:
+      - Average
+    - Name: diskio.writelatency
+      Statistics:
+      - Average
+    - Name: diskio.writethroughput
+      Statistics:
+      - Average
+    - Name: diskio.wrqmps
+      Statistics:
+      - Average
+    - Name: Dmllatency
+      Statistics:
+      - Average
+    - Name: Dmlthroughput
+      Statistics:
+      - Average
+    - Name: EngineUptime
+      Statistics:
+      - Average
+    - Name: FailedSQLserverAgentJobsCount
+      Statistics:
+      - Average
+    - Name: filesystem.maxfiles
+      Statistics:
+      - Average
+    - Name: filesystem.total
+      Statistics:
+      - Average
+    - Name: filesystem.used
+      Statistics:
+      - Average
+    - Name: filesystem.usedfilepercent
+      Statistics:
+      - Average
+    - Name: filesystem.usedfiles
+      Statistics:
+      - Average
+    - Name: filesystem.usedpercent
+      Statistics:
+      - Average
+    - Name: FreeLocalStorage
+      Statistics:
+      - Average
+    - Name: FreeStorageSpace
+      Statistics:
+      - Average
+    - Name: FreeableMemory
+      Statistics:
+      - Average
+    - Name: InsertLatency
+      Statistics:
+      - Average
+    - Name: InsertThroughput
+      Statistics:
+      - Average
+    - Name: load.1
+      Statistics:
+      - Average
+    - Name: load.15
+      Statistics:
+      - Average
+    - Name: load.5
+      Statistics:
+      - Average
+    - Name: LoginFailures
+      Statistics:
+      - Average
+    - Name: MaximumUsedTransactionIds
+      Statistics:
+      - Average
+    - Name: memory.active
+      Statistics:
+      - Average
+    - Name: memory.buffers
+      Statistics:
+      - Average
+    - Name: memory.cached
+      Statistics:
+      - Average
+    - Name: memory.commitlimitkb
+      Statistics:
+      - Average
+    - Name: memory.commitpeakkb
+      Statistics:
+      - Average
+    - Name: memory.committotkb
+      Statistics:
+      - Average
+    - Name: memory.dirty
+      Statistics:
+      - Average
+    - Name: memory.free
+      Statistics:
+      - Average
+    - Name: memory.hugepagesfree
+      Statistics:
+      - Average
+    - Name: memory.hugepagesrsvd
+      Statistics:
+      - Average
+    - Name: memory.hugepagessize
+      Statistics:
+      - Average
+    - Name: memory.hugepagessurp
+      Statistics:
+      - Average
+    - Name: memory.hugepagestotal
+      Statistics:
+      - Average
+    - Name: memory.inactive
+      Statistics:
+      - Average
+    - Name: memory.kernnonpagedkb
+      Statistics:
+      - Average
+    - Name: memory.kernpagedkb
+      Statistics:
+      - Average
+    - Name: memory.kerntotkb
+      Statistics:
+      - Average
+    - Name: memory.mapped
+      Statistics:
+      - Average
+    - Name: memory.pagesize
+      Statistics:
+      - Average
+    - Name: memory.pagetables
+      Statistics:
+      - Average
+    - Name: memory.physavailkb
+      Statistics:
+      - Average
+    - Name: memory.phystotkb
+      Statistics:
+      - Average
+    - Name: memory.slab
+      Statistics:
+      - Average
+    - Name: memory.sqlservertotkb
+      Statistics:
+      - Average
+    - Name: memory.syscachekb
+      Statistics:
+      - Average
+    - Name: memory.total
+      Statistics:
+      - Average
+    - Name: memory.writeback
+      Statistics:
+      - Average
+    - Name: network.rdbytesps
+      Statistics:
+      - Average
+    - Name: network.rx
+      Statistics:
+      - Average
+    - Name: network.tx
+      Statistics:
+      - Average
+    - Name: network.wrbytesps
+      Statistics:
+      - Average
+    - Name: NetworkReceiveThroughput
+      Statistics:
+      - Average
+    - Name: NetworkThroughput
+      Statistics:
+      - Average
+    - Name: NetworkTransmitThroughput
+      Statistics:
+      - Average
+    - Name: OldestReplicationSlotLag
+      Statistics:
+      - Average
+    - Name: processList.cpuusedpc
+      Statistics:
+      - Average
+    - Name: processList.memusedpc
+      Statistics:
+      - Average
+    - Name: processList.memoryusedpc
+      Statistics:
+      - Average
+    - Name: processList.parentid
+      Statistics:
+      - Average
+    - Name: processList.pid
+      Statistics:
+      - Average
+    - Name: processList.ppid
+      Statistics:
+      - Average
+    - Name: processList.rss
+      Statistics:
+      - Average
+    - Name: processList.tgid
+      Statistics:
+      - Average
+    - Name: processList.tid
+      Statistics:
+      - Average
+    - Name: processList.virtkb
+      Statistics:
+      - Average
+    - Name: processList.vss
+      Statistics:
+      - Average
+    - Name: processList.workingsetkb
+      Statistics:
+      - Average
+    - Name: processList.workingsetprivkb
+      Statistics:
+      - Average
+    - Name: processList.workingsetshareablekb
+      Statistics:
+      - Average
+    - Name: Queries
+      Statistics:
+      - Average
+    - Name: RDStoAuroraPostgreSQLreplicaLag
+      Statistics:
+      - Average
+    - Name: ReadIOPS
+      Statistics:
+      - Average
+    - Name: ReadLatency
+      Statistics:
+      - Average
+    - Name: ReadThroughput
+      Statistics:
+      - Average
+    - Name: ReplicaLag
+      Statistics:
+      - Average
+    - Name: ReplicationSlotDiskUsage
+      Statistics:
+      - Average
+    - Name: ResultSetCacheHitRatio
+      Statistics:
+      - Average
+    - Name: SelectLatency
+      Statistics:
+      - Average
+    - Name: SelectThroughput
+      Statistics:
+      - Average
+    - Name: SnapshotStorageUsed
+      Statistics:
+      - Average
+    - Name: swap.cached
+      Statistics:
+      - Average
+    - Name: swap.free
+      Statistics:
+      - Average
+    - Name: swap.in
+      Statistics:
+      - Average
+    - Name: swap.out
+      Statistics:
+      - Average
+    - Name: swap.total
+      Statistics:
+      - Average
+    - Name: SwapUsage
+      Statistics:
+      - Average
+    - Name: Tasks.blocked
+      Statistics:
+      - Average
+    - Name: Tasks.running
+      Statistics:
+      - Average
+    - Name: Tasks.sleeping
+      Statistics:
+      - Average
+    - Name: Tasks.stopped
+      Statistics:
+      - Average
+    - Name: Tasks.total
+      Statistics:
+      - Average
+    - Name: Tasks.zombie
+      Statistics:
+      - Average
+    - Name: TotalBackupStorageBilled
+      Statistics:
+      - Average
+    - Name: TotalStorageSpace
+      Statistics:
+      - Average
+    - Name: TransactionLogsDiskUsage
+      Statistics:
+      - Average
+    - Name: TransactionLogsGeneration
+      Statistics:
+      - Average
+    - Name: UpdateLatency
+      Statistics:
+      - Average
+    - Name: UpdateThroughput
+      Statistics:
+      - Average
+    - Name: Uptime
+      Statistics:
+      - Average
+    - Name: VirtualCPUS
+      Statistics:
+      - Average
+    - Name: VolumeBytesUsed
+      Statistics:
+      - Average
+    - Name: VolumeReadIOPS
+      Statistics:
+      - Average
+    - Name: VolumeWriteIOPS
+      Statistics:
+      - Average
+    - Name: WriteIOPS
+      Statistics:
+      - Average
+    - Name: WriteLatency
+      Statistics:
+      - Average
+    - Name: WriteThroughput
+      Statistics:
+      - Average
+    AWS/MemoryDB:
+    - Name: ActiveDefragHits
+      Statistics:
+      - Average
+    - Name: AuthenticationFailures
+      Statistics:
+      - Average
+    - Name: BytesReadFromDisk
+      Statistics:
+      - Average
+    - Name: BytesUsedForMemoryDB
+      Statistics:
+      - Average
+    - Name: BytesWrittenToDisk
+      Statistics:
+      - Average
+    - Name: ChannelAuthorizationFailures
+      Statistics:
+      - Average
+    - Name: CommandAuthorizationFailures
+      Statistics:
+      - Average
+    - Name: CPUUtilization
+      Statistics:
+      - Average
+    - Name: CurrConnections
+      Statistics:
+      - Average
+    - Name: CurrItems
+      Statistics:
+      - Average
+    - Name: DatabaseMemoryUsagePercentage
+      Statistics:
+      - Average
+    - Name: DB0AverageTTL
+      Statistics:
+      - Average
+    - Name: EngineCPUUtilization
+      Statistics:
+      - Average
+    - Name: EvalBasedCmds
+      Statistics:
+      - Average
+    - Name: Evictions
+      Statistics:
+      - Average
+    - Name: FreeableMemory
+      Statistics:
+      - Average
+    - Name: GeoSpatialBasedCmds
+      Statistics:
+      - Average
+    - Name: GetTypeCmds
+      Statistics:
+      - Average
+    - Name: HashBasedCmds
+      Statistics:
+      - Average
+    - Name: HyperLogLogBasedCmds
+      Statistics:
+      - Average
+    - Name: IsPrimary
+      Statistics:
+      - Average
+    - Name: JsonBasedCmds
+      Statistics:
+      - Average
+    - Name: JsonBasedGetCmds
+      Statistics:
+      - Average
+    - Name: JsonBasedSetCmds
+      Statistics:
+      - Average
+    - Name: KeyAuthorizationFailures
+      Statistics:
+      - Average
+    - Name: KeyBasedCmds
+      Statistics:
+      - Average
+    - Name: KeysTracked
+      Statistics:
+      - Average
+    - Name: KeyspaceHits
+      Statistics:
+      - Average
+    - Name: KeyspaceMisses
+      Statistics:
+      - Average
+    - Name: ListBasedCmds
+      Statistics:
+      - Average
+    - Name: MaxReplicationThroughput
+      Statistics:
+      - Average
+    - Name: MemoryFragmentationRatio
+      Statistics:
+      - Average
+    - Name: NetworkBandwidthInAllowanceExceeded
+      Statistics:
+      - Average
+    - Name: NetworkBandwidthOutAllowanceExceeded
+      Statistics:
+      - Average
+    - Name: NetworkBytesIn
+      Statistics:
+      - Average
+    - Name: NetworkBytesOut
+      Statistics:
+      - Average
+    - Name: NetworkConntrackAllowanceExceeded
+      Statistics:
+      - Average
+    - Name: NetworkPacketsIn
+      Statistics:
+      - Average
+    - Name: NetworkPacketsOut
+      Statistics:
+      - Average
+    - Name: NetworkPacketsPerSecondAllowanceExceeded
+      Statistics:
+      - Average
+    - Name: NewConnections
+      Statistics:
+      - Average
+    - Name: NumItemsReadFromDisk
+      Statistics:
+      - Average
+    - Name: NumItemsWrittenToDisk
+      Statistics:
+      - Average
+    - Name: PrimaryLinkHealthStatus
+      Statistics:
+      - Average
+    - Name: PubSubBasedCmds
+      Statistics:
+      - Average
+    - Name: Reclaimed
+      Statistics:
+      - Average
+    - Name: ReplicationBytes
+      Statistics:
+      - Average
+    - Name: ReplicationDelayedWriteCommands
+      Statistics:
+      - Average
+    - Name: ReplicationLag
+      Statistics:
+      - Average
+    - Name: SetBasedCmds
+      Statistics:
+      - Average
+    - Name: SetTypeCmds
+      Statistics:
+      - Average
+    - Name: SortedSetBasedCmds
+      Statistics:
+      - Average
+    - Name: StreamBasedCmds
+      Statistics:
+      - Average
+    - Name: StringBasedCmds
+      Statistics:
+      - Average
+    AWS/VPN:
+    - Name: TunnelDataIn
+      Statistics:
+      - Average
+      - Sum
+    - Name: TunnelDataOut
+      Statistics:
+      - Average
+      - Sum
+    - Name: TunnelState
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    AWS/SNS:
+    - Name: DwellTime
+      Statistics:
+      - Average
+    - Name: NumberOfMessagesPublished
+      Statistics:
+      - Average
+    - Name: NumberOfNotificationsDelivered
+      Statistics:
+      - Average
+    - Name: NumberOfNotificationsFailed
+      Statistics:
+      - Average
+    - Name: NumberOfNotificationsFilteredOut
+      Statistics:
+      - Average
+    - Name: NumberOfNotificationsFilteredOutInvalidAttributes
+      Statistics:
+      - Average
+    - Name: NumberOfNotificationsFilteredOutNoMessageAttributes
+      Statistics:
+      - Average
+    - Name: PublishSize
+      Statistics:
+      - Average
+    - Name: SMSSuccessRate
+      Statistics:
+      - Average
+    AWS/MediaTailor:
+    - Name: 4xxErrorCount
+      Statistics:
+      - Average
+    - Name: 5xxErrorCount
+      Statistics:
+      - Average
+    - Name: AdDecisionServer.Ads
+      Statistics:
+      - Average
+    - Name: AdDecisionServer.Duration
+      Statistics:
+      - Average
+    - Name: AdDecisionServer.Errors
+      Statistics:
+      - Average
+    - Name: AdDecisionServer.FillRate
+      Statistics:
+      - Average
+    - Name: AdDecisionServer.Latency
+      Statistics:
+      - Average
+    - Name: AdDecisionServer.Timeouts
+      Statistics:
+      - Average
+    - Name: AdNotReady
+      Statistics:
+      - Average
+    - Name: AdsBilled
+      Statistics:
+      - Average
+    - Name: Avail.Duration
+      Statistics:
+      - Average
+    - Name: Avail.FillRate
+      Statistics:
+      - Average
+    - Name: Avail.FilledDuration
+      Statistics:
+      - Average
+    - Name: Avail.Impression
+      Statistics:
+      - Average
+    - Name: Avail.ObservedDuration
+      Statistics:
+      - Average
+    - Name: Avail.ObservedFillRate
+      Statistics:
+      - Average
+    - Name: Avail.ObservedFilledDuration
+      Statistics:
+      - Average
+    - Name: Avail.ObservedSlateDuration
+      Statistics:
+      - Average
+    - Name: GetManifest.Errors
+      Statistics:
+      - Average
+    - Name: GetManifest.Latency
+      Statistics:
+      - Average
+    - Name: Origin.Errors
+      Statistics:
+      - Average
+    - Name: Origin.Latency
+      Statistics:
+      - Average
+    - Name: Origin.ManifestFileSizeBytes
+      Statistics:
+      - Average
+    - Name: Origin.ManifestFileSizeTooLarge
+      Statistics:
+      - Average
+    - Name: Origin.Timeouts
+      Statistics:
+      - Average
+    - Name: RequestCount
+      Statistics:
+      - Average
+    - Name: Requests
+      Statistics:
+      - Average
+    - Name: SkippedReason.DurationExceeded
+      Statistics:
+      - Average
+    - Name: SkippedReason.EarlyCueIn
+      Statistics:
+      - Average
+    - Name: SkippedReason.InternalError
+      Statistics:
+      - Average
+    - Name: SkippedReason.NewCreative
+      Statistics:
+      - Average
+    - Name: SkippedReason.NoVariantMatch
+      Statistics:
+      - Average
+    - Name: SkippedReason.PersonalizationThresholdExceeded
+      Statistics:
+      - Average
+    - Name: SkippedReason.ProfileNotFound
+      Statistics:
+      - Average
+    - Name: SkippedReason.TranscodeError
+      Statistics:
+      - Average
+    - Name: SkippedReason.TranscodeInProgress
+      Statistics:
+      - Average
+    - Name: TotalTime
+      Statistics:
+      - Average
+    AWS/AOSS:
+    - Name: 2xx
+      Statistics:
+      - Average
+    - Name: 3xx
+      Statistics:
+      - Average
+    - Name: 4xx
+      Statistics:
+      - Average
+    - Name: 5xx
+      Statistics:
+      - Average
+    - Name: ActiveCollection
+      Statistics:
+      - Average
+    - Name: DeletedDocuments
+      Statistics:
+      - Average
+    - Name: IndexingOCU
+      Statistics:
+      - Average
+    - Name: IngestionDataRate
+      Statistics:
+      - Average
+    - Name: IngestionDocumentErrors
+      Statistics:
+      - Average
+    - Name: IngestionDocumentRate
+      Statistics:
+      - Average
+    - Name: IngestionRequestErrors
+      Statistics:
+      - Average
+    - Name: IngestionRequestLatency
+      Statistics:
+      - Average
+    - Name: IngestionRequestRate
+      Statistics:
+      - Average
+    - Name: IngestionRequestSuccess
+      Statistics:
+      - Average
+    - Name: SearchOCU
+      Statistics:
+      - Average
+    - Name: SearchRequestErrors
+      Statistics:
+      - Average
+    - Name: SearchRequestLatency
+      Statistics:
+      - Average
+    - Name: SearchRequestRate
+      Statistics:
+      - Average
+    - Name: SearchableDocuments
+      Statistics:
+      - Average
+    - Name: StorageUsedInS3
+      Statistics:
+      - Average
+    AWS/Bedrock:
+    - Name: ContentFilteredCount
+      Statistics:
+      - Average
+    - Name: InputTokenCount
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: InvocationClientErrors
+      Statistics:
+      - Average
+    - Name: InvocationLatency
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - p90
+      - p95
+      - p99
+    - Name: InvocationServerErrors
+      Statistics:
+      - Average
+    - Name: InvocationThrottles
+      Statistics:
+      - Average
+    - Name: Invocations
+      Statistics:
+      - Average
+    - Name: OutputImageCount
+      Statistics:
+      - Average
+    - Name: OutputTokenCount
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    AWS/Cognito:
+    - Name: AccountTakeoverRisk
+      Statistics:
+      - Average
+    - Name: CompromisedCredentialRisk
+      Statistics:
+      - Average
+    - Name: FederationSuccesses
+      Statistics:
+      - Average
+    - Name: FederationThrottles
+      Statistics:
+      - Sum
+    - Name: NoRisk
+      Statistics:
+      - Average
+    - Name: OverrideBlock
+      Statistics:
+      - Average
+    - Name: Risk
+      Statistics:
+      - Average
+    - Name: SignInSuccesses
+      Statistics:
+      - Average
+    - Name: SignInThrottles
+      Statistics:
+      - Sum
+    - Name: SignUpSuccesses
+      Statistics:
+      - Average
+    - Name: SignUpThrottles
+      Statistics:
+      - Sum
+    - Name: TokenRefreshSuccesses
+      Statistics:
+      - Average
+    - Name: TokenRefreshThrottles
+      Statistics:
+      - Sum
+    AWS/MWAA:
+    - Name: CollectDBDAGS
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: CriticalSectionBusy
+      Statistics:
+      - Average
+    - Name: CriticalSectionDuration
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: DagBagSize
+      Statistics:
+      - Average
+    - Name: DagCallbackExceptions
+      Statistics:
+      - Average
+    - Name: DAGDependencyCheck
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: DAGDurationFailed
+      Statistics:
+      - Average
+    - Name: DAGDurationSuccess
+      Statistics:
+      - Average
+    - Name: DAGFileProcessingLastDuration
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: DAGFileProcessingLastRunSecondsAgo
+      Statistics:
+      - Average
+    - Name: DAGFileRefreshError
+      Statistics:
+      - Average
+    - Name: DAGScheduleDelay
+      Statistics:
+      - Average
+    - Name: ExceptionFailures
+      Statistics:
+      - Average
+    - Name: FailedSlaemailAttempts
+      Statistics:
+      - Average
+    - Name: FirstTaskSchedulingDelay
+      Statistics:
+      - Average
+    - Name: ImportErrors
+      Statistics:
+      - Average
+    - Name: InfraFailures
+      Statistics:
+      - Average
+    - Name: JobEnd
+      Statistics:
+      - Average
+    - Name: JobHeartbeatFailure
+      Statistics:
+      - Average
+    - Name: JobStart
+      Statistics:
+      - Average
+    - Name: ManagerStalls
+      Statistics:
+      - Average
+    - Name: OpenSlots
+      Statistics:
+      - Average
+    - Name: OperatorFailures
+      Statistics:
+      - Average
+    - Name: OperatorSuccesses
+      Statistics:
+      - Average
+    - Name: OrphanedTasksAdopted
+      Statistics:
+      - Average
+    - Name: OrphanedTasksCleared
+      Statistics:
+      - Average
+    - Name: PokedExceptions
+      Statistics:
+      - Average
+    - Name: PokedSuccess
+      Statistics:
+      - Average
+    - Name: PokedTasks
+      Statistics:
+      - Average
+    - Name: PoolOpenSlots
+      Statistics:
+      - Average
+    - Name: PoolQueuedSlots
+      Statistics:
+      - Average
+    - Name: PoolRunningSlots
+      Statistics:
+      - Average
+    - Name: PoolStarvingTasks
+      Statistics:
+      - Average
+    - Name: PoolUsedSlots
+      Statistics:
+      - Average
+    - Name: ProcessorTimeouts
+      Statistics:
+      - Average
+    - Name: QueuedTasks
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: RunningTasks
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: SchedulerHeartbeat
+      Statistics:
+      - Average
+    - Name: TaskInstanceCreatedUsingOperator
+      Statistics:
+      - Average
+    - Name: TaskInstanceDuration
+      Statistics:
+      - Average
+    - Name: TaskInstanceFailures
+      Statistics:
+      - Average
+    - Name: TaskInstanceFinished
+      Statistics:
+      - Average
+    - Name: TaskInstancePreviouslySucceeded
+      Statistics:
+      - Average
+    - Name: TaskInstanceStarted
+      Statistics:
+      - Average
+    - Name: TaskInstanceSuccesses
+      Statistics:
+      - Average
+    - Name: TaskRemovedFromDAG
+      Statistics:
+      - Average
+    - Name: TaskRestoredToDAG
+      Statistics:
+      - Average
+    - Name: TaskTimeoutError
+      Statistics:
+      - Average
+    - Name: TasksExecutable
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: TasksKilledExternally
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: TasksPending
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: TasksRunning
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: TasksStarving
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: TasksWithoutDagRun
+      Statistics:
+      - Average
+    - Name: TotalParseTime
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: ZombiesKilled
+      Statistics:
+      - Average
+    Glue:
+    - Name: glue.driver.ExecutorAllocationManager.executors.numberAllExecutors
+      Statistics:
+      - Average
+    - Name: glue.driver.ExecutorAllocationManager.executors.numberMaxNeededExecutors
+      Statistics:
+      - Average
+    - Name: glue.ALL.jvm.heap.usage
+      Statistics:
+      - Average
+    - Name: glue.ALL.jvm.heap.used
+      Statistics:
+      - Average
+    - Name: glue.ALL.s3.filesystem.read_bytes
+      Statistics:
+      - Average
+    - Name: glue.ALL.system.cpuSystemLoad
+      Statistics:
+      - Average
+    - Name: glue.driver.aggregate.bytesRead
+      Statistics:
+      - Average
+    - Name: glue.driver.aggregate.elapsedTime
+      Statistics:
+      - Average
+    - Name: glue.driver.aggregate.numCompletedStages
+      Statistics:
+      - Average
+    - Name: glue.driver.aggregate.numCompletedTasks
+      Statistics:
+      - Average
+    - Name: glue.driver.aggregate.numFailedTasks
+      Statistics:
+      - Average
+    - Name: glue.driver.aggregate.numKilledTasks
+      Statistics:
+      - Average
+    - Name: glue.driver.aggregate.recordsRead
+      Statistics:
+      - Average
+    - Name: glue.driver.aggregate.shuffleBytesWritten
+      Statistics:
+      - Average
+    - Name: glue.driver.aggregate.shuffleLocalBytesRead
+      Statistics:
+      - Average
+    - Name: glue.driver.BlockManager.disk.diskSpaceUsed_MB
+      Statistics:
+      - Average
+    - Name: glue.driver.jvm.HeapUsage
+      Statistics:
+      - Average
+    - Name: glue.driver.jvm.HeapUsed
+      Statistics:
+      - Average
+    - Name: glue.driver.s3.filesystem.read_bytes
+      Statistics:
+      - Average
+    - Name: glue.driver.s3.filesystem.write_bytes
+      Statistics:
+      - Average
+    - Name: glue.driver.system.CpuSystemLoad
+      Statistics:
+      - Average
+    - Name: glue.executorId.jvm.heap.usage
+      Statistics:
+      - Average
+    - Name: glue.executorId.jvm.heap.used
+      Statistics:
+      - Average
+    - Name: glue.executorId.system.cpuSystemLoad
+      Statistics:
+      - Average
+    - Name: glue.executorId.s3.filesystem.read_bytes
+      Statistics:
+      - Average
+    - Name: glue.executorId.s3.filesystem.write_bytes
+      Statistics:
+      - Average
+
+  azure_presets.yaml: |
+    Microsoft.Compute/virtualMachines:
+      Metrics:
+        - Name: Available Memory Bytes
+        - Name: CPU Credits Consumed
+        - Name: CPU Credits Remaining
+        - Name: Data Disk Bandwidth Consumed Percentage
+        - Name: Data Disk IOPS Consumed Percentage
+        - Name: Data Disk Latency
+        - Name: Data Disk Max Burst Bandwidth
+        - Name: Data Disk Max Burst IOPS
+        - Name: Data Disk Queue Depth
+        - Name: Data Disk Read Bytes/Sec
+        - Name: Data Disk Read Operations/Sec
+        - Name: Data Disk Target Bandwidth
+        - Name: Data Disk Target IOPS
+        - Name: Data Disk Used Burst BPS Credits Percentage
+        - Name: Data Disk Used Burst IO Credits Percentage
+        - Name: Data Disk Write Bytes/Sec
+        - Name: Data Disk Write Operations/Sec
+        - Name: Disk Read Bytes
+        - Name: Disk Read Operations/Sec
+        - Name: Disk Write Bytes
+        - Name: Disk Write Operations/Sec
+        - Name: Inbound Flows
+        - Name: Inbound Flows Maximum Creation Rate
+        - Name: Network In Total
+        - Name: Network Out Total
+        - Name: OS Disk Bandwidth Consumed Percentage
+        - Name: OS Disk IOPS Consumed Percentage
+        - Name: OS Disk Latency
+        - Name: OS Disk Max Burst Bandwidth
+        - Name: OS Disk Max Burst IOPS
+        - Name: OS Disk Queue Depth
+        - Name: OS Disk Read Bytes/Sec
+        - Name: OS Disk Read Operations/Sec
+        - Name: OS Disk Target Bandwidth
+        - Name: OS Disk Target IOPS
+        - Name: OS Disk Used Burst BPS Credits Percentage
+        - Name: OS Disk Used Burst IO Credits Percentage
+        - Name: OS Disk Write Bytes/Sec
+        - Name: OS Disk Write Operations/Sec
+        - Name: Outbound Flows
+        - Name: Outbound Flows Maximum Creation Rate
+        - Name: Percentage CPU
+        - Name: Premium Data Disk Cache Read Hit
+        - Name: Premium Data Disk Cache Read Miss
+        - Name: Premium OS Disk Cache Read Hit
+        - Name: Premium OS Disk Cache Read Miss
+        - Name: Temp Disk Latency
+        - Name: Temp Disk Queue Depth
+        - Name: Temp Disk Read Bytes/Sec
+        - Name: Temp Disk Read Operations/Sec
+        - Name: Temp Disk Write Bytes/Sec
+        - Name: Temp Disk Write Operations/Sec
+        - Name: VM Cached Bandwidth Consumed Percentage
+        - Name: VM Cached IOPS Consumed Percentage
+        - Name: VM Local Used Burst BPS Credits Percentage
+        - Name: VM Local Used Burst IO Credits Percentage
+        - Name: VM Remote Used Burst BPS Credits Percentage
+        - Name: VM Remote Used Burst IO Credits Percentage
+        - Name: VM Uncached Bandwidth Consumed Percentage
+        - Name: VM Uncached IOPS Consumed Percentage
+        - Name: VmAvailabilityMetric
+      Aggregations:
+      - Average
+      - Maximum
+      - Minimum  
+    Microsoft.Network/loadBalancers:
+      Metrics:
+        - Name: AllocatedSnatPorts
+        - Name: ByteCount
+        - Name: DipAvailability
+        - Name: GlobalBackendAvailability
+        - Name: PacketCount
+        - Name: SNATConnectionCount
+        - Name: SYNCount
+        - Name: UsedSNATPorts
+        - Name: VipAvailability
+      Aggregations:
+        - Average
+        - Total
+    Microsoft.Sql/servers/databases:
+      Metrics:
+        - Name: active_queries
+        - Name: allocated_data_storage
+        - Name: app_cpu_billed
+        - Name: app_cpu_billed_ha_replicas
+        - Name: app_cpu_percent
+        - Name: app_memory_percent
+        - Name: availability
+        - Name: base_blob_size_bytes
+        - Name: blocked_by_firewall
+        - Name: cache_hit_percent
+        - Name: cache_used_percent
+        - Name: connection_failed
+        - Name: connection_failed_user_error
+        - Name: connection_successful
+        - Name: cpu_limit
+        - Name: cpu_percent
+        - Name: cpu_used
+        - Name: deadlock
+        - Name: diff_backup_size_bytes
+        - Name: dtu_consumption_percent
+        - Name: dtu_limit
+        - Name: dtu_used
+        - Name: dwu_consumption_percent
+        - Name: dwu_limit
+        - Name: dwu_used
+        - Name: free_amount_consumed
+        - Name: free_amount_remaining
+        - Name: full_backup_size_bytes
+        - Name: ledger_digest_upload_failed
+        - Name: ledger_digest_upload_success
+        - Name: local_tempdb_usage_percent
+        - Name: log_backup_size_bytes
+        - Name: log_write_percent
+        - Name: memory_usage_percent
+        - Name: physical_data_read_percent
+        - Name: queued_queries
+        - Name: sessions_count
+        - Name: sessions_percent
+        - Name: snapshot_backup_size_bytes
+        - Name: sql_instance_cpu_percent
+        - Name: sql_instance_memory_percent
+        - Name: sqlserver_process_core_percent
+        - Name: sqlserver_process_memory_percent
+        - Name: storage
+        - Name: storage_percent
+        - Name: tempdb_data_size
+        - Name: tempdb_log_size
+        - Name: tempdb_log_used_percent
+        - Name: wlg_active_queries
+        - Name: wlg_active_queries_timeouts
+        - Name: wlg_allocation_relative_to_system_percent
+        - Name: wlg_allocation_relative_to_wlg_effective_cap_percent
+        - Name: wlg_effective_cap_resource_percent
+        - Name: wlg_effective_min_resource_percent
+        - Name: wlg_queued_queries
+        - Name: workers_percent
+        - Name: xtp_storage_percent
+      Aggregations:
+        - Average
+        - Maximum
+        - Minimum
+        - Total
+
+kind: ConfigMap
+metadata:
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+    {{- if .Values.integrationsAgent.additionalLabels }}
+{{ toYaml .Values.integrationsAgent.additionalLabels | indent 4 }}
+    {{- end }}
+  annotations:
+    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+    {{- if .Values.integrationsAgent.additionalAnnotations }}
+{{ toYaml .Values.integrationsAgent.additionalAnnotations | indent 4 }}
+    {{- end }}
+  name: integrations-agent-metric-presets
+  namespace: {{ .Release.Namespace }}
+{{ end }}

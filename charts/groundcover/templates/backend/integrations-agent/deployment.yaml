@@ -100,6 +100,8 @@ spec:
         volumeMounts:
         - mountPath: /config
           name: integrations-agent-config-volume
+        - mountPath: /metric_presets
+          name: integrations-agent-metric-presets-volume
         {{- with .Values.integrationsAgent.extraVolumeMounts }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -154,6 +156,9 @@ spec:
       - configMap:
           name: integrations-agent-config
         name: integrations-agent-config-volume
+      - configMap:
+          name: integrations-agent-metric-presets
+        name: integrations-agent-metric-presets-volume
       {{- with .Values.integrationsAgent.extraVolumes }}
         {{- toYaml . | nindent 6 }}
       {{- end }}
