@@ -36,6 +36,7 @@ data:
       {{- range .regions }}
         - "{{ . }}"
       {{- end }}
+      AwsAPIConcurrencyLimits: {{ toYaml .apiConcurrencyLimits | nindent 8 }}
       AwsNamespaces:
       {{- range .namespaces }}
         - "{{ . }}"
