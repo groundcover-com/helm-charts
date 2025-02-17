@@ -8,7 +8,7 @@ data:
   aggregation_config.yaml: |
     - ignore_old_samples: true
       match: '{__name__=~"groundcover_.+_.+_counter|groundcover_unavailable_count|groundcover_network.+", node_name!=""}'
-      without: [node_name]
+      without: [node_name, node]
       interval: 30s
       outputs: [total_prometheus]
       output_relabel_configs:
@@ -17,7 +17,7 @@ data:
         regex: "(.+):.*"
         replacement: "$1"
     - match: '{__name__=~"^groundcover_.+latency_seconds$", node_name!=""}'
-      without: [node_name]
+      without: [node_name, node]
       interval: 30s
       outputs: [avg]
       output_relabel_configs:
