@@ -1581,6 +1581,7 @@ vector:
           reroute_unmatched: false
           route:
             metrics_metadata: .path == {{ include "vector.json.tables.write.metrics_metadata.path" . | quote}}
+            aws_billing_report: .path == {{ include "vector.json.tables.write.aws_billing_report.path" . | quote}}
         measurements:
           inputs:
             - custom_from_logs_routing.measurements
@@ -2007,6 +2008,31 @@ vector:
             buffer:
                 type: memory
                 max_events: 5000
+                when_full: drop_newest
+            batch:
+              max_bytes: 100000000
+              max_events: 10000
+              timeout_secs: 2
+          clickhouse_aws_billing_report:
+            type: clickhouse
+            inputs:
+              - table_write_routing.aws_billing_report
+            endpoint: '{{ include "clickhouse.shard0HttpEndpoint" . }}'
+            database: "groundcover"
+            table: "aws_billing_report"
+            request:
+              retry_attempts: 5
+            auth:
+              user: '{{ include "clickhouse.username" . }}'
+              password: $CLICKHOUSE_PASSWORD
+              strategy: "basic"
+            format: "json_each_row"
+            encoding:
+              timestamp_format: rfc3339
+            date_time_best_effort: true
+            buffer:
+                type: memory
+                max_events: 50000
                 when_full: drop_newest
             batch:
               max_bytes: 100000000

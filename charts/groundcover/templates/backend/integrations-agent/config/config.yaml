@@ -8,6 +8,38 @@ data:
     {{- if .Values.integrationsAgent }}
     {{- if .Values.integrationsAgent.targets }}
     Targets:
+    {{- if .Values.integrationsAgent.targets.awsBillingSQS }}
+    {{- range .Values.integrationsAgent.targets.awsBillingSQS }}
+    - Type: "awsbilling_sqs"
+      Name: "{{ .name }}"
+      {{- if .stsRegion }}
+      AwsStsRegion: "{{ .stsRegion }}"
+      {{- end }}
+      Region: "{{ .region }}"
+      {{- if .outChannelSize }}
+      OutChanSize: {{ .outChannelSize }}
+      {{- end }}
+      {{- if .rowsBatchSize }}
+      AwsBillingRowsBatchSize: {{ .rowsBatchSize }}
+      {{- end }}
+      AwsSqsWatchTopicUrl: "{{ .sqsTopicUrl }}"
+      AwsRoleArn: "{{ .roleArn }}"
+      {{- if .extraLabels }}
+      ExtraLabels:
+      {{- range $key, $value := .extraLabels }}
+        {{ $key }}: "{{ $value }}"
+      {{- end }}
+      {{- end }}
+      {{- if eq .enabled false }}
+      Enabled: {{ .enabled }}
+      {{- end }}
+      Exporters:
+        - "awsbilling_http_json"
+    {{- range .additionalExporters }}
+        - "{{ . }}"
+    {{- end }}
+    {{- end }}
+    {{- end }}
     {{- if .Values.integrationsAgent.targets.cloudwatch }}
     {{- range .Values.integrationsAgent.targets.cloudwatch }}
     - Type: "cloudwatch"
@@ -22,11 +54,11 @@ data:
       {{- range $key, $value := .extraLabels }}
         {{ $key }}: "{{ $value }}"
       {{- end }}
+      {{- end }}
       {{- if .dropLabels }}
       DropLabels:
       {{- range $label := .dropLabels }}
         - "{{ $label }}"
-      {{- end }}
       {{- end }}
       {{- end }}
       {{- if eq .enabled false }}
@@ -57,9 +89,9 @@ data:
       {{- end }}
       Exporters:
         - "prometheus"
-    {{- end }}
-    {{- range .Values.integrationsAgent.targets.additionalExporters }}
+    {{- range .additionalExporters }}
         - "{{ . }}"
+    {{- end }}
     {{- end }}
     {{- end }}
     {{- if .Values.integrationsAgent.targets.gcpmetrics }}
@@ -101,9 +133,9 @@ data:
       {{- end }}
       Exporters:
         - "prometheus"
-    {{- end }}
-    {{- range .Values.integrationsAgent.targets.additionalExporters }}
+    {{- range .additionalExporters }}
         - "{{ . }}"
+    {{- end }}
     {{- end }}
     {{- end }}
     {{- if .Values.integrationsAgent.targets.azuremetrics }}
@@ -160,9 +192,9 @@ data:
       {{- end }}
       Exporters:
         - "prometheus"
-    {{- end }}
-    {{- range .Values.integrationsAgent.targets.additionalExporters }}
+    {{- range .additionalExporters }}
         - "{{ . }}"
+    {{- end }}
     {{- end }}
     {{- end }}
     {{- end }}
@@ -171,7 +203,7 @@ data:
     Exporters:
     - Type: "prometheus"
       Name: "prometheus"
-      url: {{ include "metrics-ingester.cluster.http.base.url" . }}
+      Url: {{ include "metrics-ingester.cluster.http.base.url" . }}
       TlsSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
       {{- if .Values.integrationsAgent.exporters }}
       {{- if .Values.integrationsAgent.exporters.prometheus }}
@@ -226,6 +258,27 @@ data:
         {{- if .Values.integrationsAgent.exporters.prometheus.metadata.maxBatchWait }}
         MaxBatchWait: {{ .Values.integrationsAgent.exporters.prometheus.metadata.maxBatchWait }}
         {{- end }}
+      {{- end }}
+      {{- end }}
+      {{- end }}
+    - Type: "awsbilling_http_json"
+      Name: "awsbilling_http_json"
+      Url: {{ include "vector.json.table.write.aws_billing_report.url" . }}
+      TlsSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
+      {{- if .Values.integrationsAgent.exporters }}
+      {{- if .Values.integrationsAgent.exporters.httpJsonAwsBilling }}
+      RequestTimeout: {{ .Values.integrationsAgent.exporters.httpJsonAwsBilling.requestTimeout }}
+      {{- if .Values.integrationsAgent.exporters.httpJsonAwsBilling.maxRetries }}
+      MaxRetries: {{ .Values.integrationsAgent.exporters.httpJsonAwsBilling.maxRetries }}
+      {{- end }}
+      {{- if .Values.integrationsAgent.exporters.httpJsonAwsBilling.maxDelay }}
+      MaxDelay: {{ .Values.integrationsAgent.exporters.httpJsonAwsBilling.maxDelay }}
+      {{- end }}
+      {{- if .Values.integrationsAgent.exporters.httpJsonAwsBilling.baseDelay }}
+      BaseDelay: {{ .Values.integrationsAgent.exporters.httpJsonAwsBilling.baseDelay }}
+      {{- end }}
+      {{- if .Values.integrationsAgent.exporters.httpJsonAwsBilling.compress }}
+      Compress: {{ .Values.integrationsAgent.exporters.httpJsonAwsBilling.compress }}
       {{- end }}
       {{- end }}
       {{- end }}

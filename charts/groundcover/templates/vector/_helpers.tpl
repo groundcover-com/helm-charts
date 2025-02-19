@@ -214,7 +214,6 @@ http
 {{-  printf "%s/metrics_metadata" (include "vector.cluster.json.tables.write.path" .) -}}
 {{- end -}}
 
-
 {{- define "vector.cluster.json.table.write.metrics_metadata.url" -}}
 {{-  printf "%s%s" (include "vector.cluster.json.table.write.endpoint" .) (include "vector.json.tables.write.metrics_metadata.path" . )  -}}
 {{- end -}}
@@ -228,6 +227,28 @@ http
     {{- include "vector.cluster.json.table.write.metrics_metadata.url" . -}}
 {{- else if .Values.global.ingress.site -}}
     {{- include "vector.incloud.json.table.write.metrics_metadata.url" . -}}
+{{- else if not .Values.global.backend.enabled -}}
+    {{- fail "A valid global.ingress.site is required!" -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "vector.json.tables.write.aws_billing_report.path" -}}
+{{-  printf "%s/aws_billing_report" (include "vector.cluster.json.tables.write.path" .) -}}
+{{- end -}}
+
+{{- define "vector.cluster.json.table.write.aws_billing_report.url" -}}
+{{-  printf "%s%s" (include "vector.cluster.json.table.write.endpoint" .) (include "vector.json.tables.write.aws_billing_report.path" . )  -}}
+{{- end -}}
+
+{{- define "vector.incloud.json.table.write.aws_billing_report.url" -}}
+{{- printf "%s%s" .Values.global.ingress.site (include "vector.json.tables.write.aws_billing_report.path" . )  -}}
+{{- end -}}
+
+{{- define "vector.json.table.write.aws_billing_report.url" -}}
+{{- if .Values.global.backend.enabled -}}
+    {{- include "vector.cluster.json.table.write.aws_billing_report.url" . -}}
+{{- else if .Values.global.ingress.site -}}
+    {{- include "vector.incloud.json.table.write.aws_billing_report.url" . -}}
 {{- else if not .Values.global.backend.enabled -}}
     {{- fail "A valid global.ingress.site is required!" -}}
 {{- end -}}
@@ -318,6 +339,7 @@ sinks:
 {{- tpl (toYaml .Values.vector.customComponents.sinks.metrics) $ | nindent 2 }}
 {{ if .Values.global.backend.enabled }} {{- /* these sinks are always local only, no matter of ingestion mode */ -}}
 {{- tpl (toYaml (dict "clickhouse_metrics_metadata" .Values.vector.customComponents.sinks.local.custom.clickhouse_metrics_metadata)) $ | nindent 2 }}
+{{- tpl (toYaml (dict "clickhouse_aws_billing_report" .Values.vector.customComponents.sinks.local.custom.clickhouse_aws_billing_report)) $ | nindent 2 }}
 {{ end }}
 {{- /* ingestion modes */ -}}
 {{ if and (not (empty .Values.vector.objectStorage.s3Bucket)) .Values.vector.objectStorage.allowed }} {{- /* ingestion using s3 */}}
