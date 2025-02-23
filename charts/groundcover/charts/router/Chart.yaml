@@ -1,5 +1,5 @@
 apiVersion: v2
-appVersion: 1.9.176
+appVersion: 1.9.177
 dependencies:
 - condition: onprem.enabled
   import-values:
@@ -19,4 +19,4 @@ dependencies:
 description: groundcover's router helm chart
 name: router
 type: application
-version: 1.9.176
+version: 1.9.177
