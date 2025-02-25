@@ -2,19 +2,9 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.16.4
+    controller-gen.kubebuilder.io/version: v0.16.5
   name: vlogs.operator.victoriametrics.com
 spec:
-  conversion:
-    strategy: Webhook
-    webhook:
-      clientConfig:
-        service:
-          name: webhook-service
-          namespace: system
-          path: /convert
-      conversionReviewVersions:
-      - v1
   group: operator.victoriametrics.com
   names:
     kind: VLogs
@@ -28,10 +18,15 @@ spec:
       jsonPath: .status.status
       name: Status
       type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
     name: v1beta1
     schema:
       openAPIV3Schema:
-        description: VLogs is the Schema for the vlogs API
+        description: |-
+          VLogs is fast, cost-effective and scalable logs database.
+          VLogs is the Schema for the vlogs API
         properties:
           apiVersion:
             description: |-
@@ -299,9 +294,32 @@ spec:
                   this can be useful for debugging of high cardinality issues with
                   log streams; see https://docs.victoriametrics.com/victorialogs/keyconcepts/#stream-fields
                 type: boolean
+              managedMetadata:
+                description: |-
+                  ManagedMetadata defines metadata that will be added to the all objects
+                  created by operator for the given CustomResource
+                properties:
+                  annotations:
+                    additionalProperties:
+                      type: string
+                    description: |-
+                      Annotations is an unstructured key value map stored with a resource that may be
+                      set by external tools to store and retrieve arbitrary metadata. They are not
+                      queryable and should be preserved when modifying objects.
+                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations
+                    type: object
+                  labels:
+                    additionalProperties:
+                      type: string
+                    description: |-
+                      Labels Map of string keys and values that can be used to organize and categorize
+                      (scope and select) objects.
+                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels
+                    type: object
+                type: object
               minReadySeconds:
                 description: |-
-                  MinReadySeconds defines a minim number os seconds to wait before starting update next pod
+                  MinReadySeconds defines a minimum number of seconds to wait before starting update next pod
                   if previous in healthy state
                   Has no effect for VLogs and VMSingle
                 format: int32
@@ -404,6 +422,12 @@ spec:
                             Name must match the name of one entry in pod.spec.resourceClaims of
                             the Pod where this field is used. It makes that resource available
                             inside a container.
+                          type: string
+                        request:
+                          description: |-
+                            Request is the name chosen for a request in the referenced claim.
+                            If empty, everything from the claim is made available, otherwise
+                            only the result of this request.
                           type: string
                       required:
                       - name
@@ -721,7 +745,7 @@ spec:
                       set to a Pending state, as reflected by the modifyVolumeStatus field, until such as a resource
                       exists.
                       More info: https://kubernetes.io/docs/concepts/storage/volume-attributes-classes/
-                      (Alpha) Using this field requires the VolumeAttributesClass feature gate to be enabled.
+                      (Beta) Using this field requires the VolumeAttributesClass feature gate to be enabled (off by default).
                     type: string
                   volumeMode:
                     description: |-
@@ -928,29 +952,93 @@ spec:
             description: VLogsStatus defines the observed state of VLogs
             properties:
               availableReplicas:
-                description: AvailableReplicas Total number of available pods (ready
-                  for at least minReadySeconds) targeted by this VLogs.
+                description: deprecated and will be removed at v0.52.0
                 format: int32
+                type: integer
+              conditions:
+                description: 'Known .status.conditions.type are: "Available", "Progressing",
+                  and "Degraded"'
+                items:
+                  description: Condition defines status condition of the resource
+                  properties:
+                    lastTransitionTime:
+                      description: lastTransitionTime is the last time the condition
+                        transitioned from one status to another.
+                      format: date-time
+                      type: string
+                    lastUpdateTime:
+                      description: |-
+                        LastUpdateTime is the last time of given type update.
+                        This value is used for status TTL update and removal
+                      format: date-time
+                      type: string
+                    message:
+                      description: |-
+                        message is a human readable message indicating details about the transition.
+                        This may be an empty string.
+                      maxLength: 32768
+                      type: string
+                    observedGeneration:
+                      description: |-
+                        observedGeneration represents the .metadata.generation that the condition was set based upon.
+                        For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date
+                        with respect to the current state of the instance.
+                      format: int64
+                      minimum: 0
+                      type: integer
+                    reason:
+                      description: |-
+                        reason contains a programmatic identifier indicating the reason for the condition's last transition.
+                        Producers of specific condition types may define expected values and meanings for this field,
+                        and whether the values are considered a guaranteed API.
+                        The value should be a CamelCase string.
+                        This field may not be empty.
+                      maxLength: 1024
+                      minLength: 1
+                      type: string
+                    status:
+                      description: status of the condition, one of True, False, Unknown.
+                      enum:
+                      - "True"
+                      - "False"
+                      - Unknown
+                      type: string
+                    type:
+                      description: Type of condition in CamelCase or in name.namespace.resource.victoriametrics.com/CamelCase.
+                      maxLength: 316
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - lastUpdateTime
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+                x-kubernetes-list-map-keys:
+                - type
+                x-kubernetes-list-type: map
+              observedGeneration:
+                description: |-
+                  ObservedGeneration defines current generation picked by operator for the
+                  reconcile
+                format: int64
                 type: integer
               reason:
-                description: Reason defines a reason in case of update failure
+                description: Reason defines human readable error reason
                 type: string
               replicas:
-                description: ReplicaCount Total number of non-terminated pods targeted
-                  by this VLogs.
+                description: deprecated and will be removed at v0.52.0
                 format: int32
                 type: integer
-              status:
-                description: UpdateStatus defines a status of vlogs instance rollout
-                type: string
               unavailableReplicas:
-                description: UnavailableReplicas Total number of unavailable pods
-                  targeted by this VLogs.
+                description: deprecated and will be removed at v0.52.0
                 format: int32
                 type: integer
+              updateStatus:
+                description: UpdateStatus defines a status for update rollout
+                type: string
               updatedReplicas:
-                description: UpdatedReplicas Total number of non-terminated pods targeted
-                  by this VLogs.
                 format: int32
                 type: integer
             type: object
@@ -964,19 +1052,9 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.16.4
+    controller-gen.kubebuilder.io/version: v0.16.5
   name: vmagents.operator.victoriametrics.com
 spec:
-  conversion:
-    strategy: Webhook
-    webhook:
-      clientConfig:
-        service:
-          name: webhook-service
-          namespace: vm
-          path: /convert
-      conversionReviewVersions:
-      - v1
   group: operator.victoriametrics.com
   names:
     kind: VMAgent
@@ -998,6 +1076,9 @@ spec:
       jsonPath: .status.updateStatus
       name: Status
       type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
     name: v1beta1
     schema:
       openAPIV3Schema:
@@ -1550,7 +1631,7 @@ spec:
                             set to a Pending state, as reflected by the modifyVolumeStatus field, until such as a resource
                             exists.
                             More info: https://kubernetes.io/docs/concepts/storage/volume-attributes-classes/
-                            (Alpha) Using this field requires the VolumeAttributesClass feature gate to be enabled.
+                            (Beta) Using this field requires the VolumeAttributesClass feature gate to be enabled (off by default).
                           type: string
                         volumeMode:
                           description: |-
@@ -1693,8 +1774,16 @@ spec:
                               status:
                                 type: string
                               type:
-                                description: PersistentVolumeClaimConditionType is
-                                  a valid value of PersistentVolumeClaimCondition.Type
+                                description: |-
+                                  PersistentVolumeClaimConditionType defines the condition of PV claim.
+                                  Valid values are:
+                                    - "Resizing", "FileSystemResizePending"
+
+                                  If RecoverVolumeExpansionFailure feature gate is enabled, then following additional values can be expected:
+                                    - "ControllerResizeError", "NodeResizeError"
+
+                                  If VolumeAttributesClass feature gate is enabled, then following additional values can be expected:
+                                    - "ModifyVolumeError", "ModifyingVolume"
                                 type: string
                             required:
                             - status
@@ -1708,13 +1797,13 @@ spec:
                           description: |-
                             currentVolumeAttributesClassName is the current name of the VolumeAttributesClass the PVC is using.
                             When unset, there is no VolumeAttributeClass applied to this PersistentVolumeClaim
-                            This is an alpha field and requires enabling VolumeAttributesClass feature.
+                            This is a beta field and requires enabling VolumeAttributesClass feature (off by default).
                           type: string
                         modifyVolumeStatus:
                           description: |-
                             ModifyVolumeStatus represents the status object of ControllerModifyVolume operation.
                             When this is unset, there is no ModifyVolume operation being attempted.
-                            This is an alpha field and requires enabling VolumeAttributesClass feature.
+                            This is a beta field and requires enabling VolumeAttributesClass feature (off by default).
                           properties:
                             status:
                               description: "status is the status of the ControllerModifyVolume
@@ -1785,6 +1874,12 @@ spec:
                             Name must match the name of one entry in pod.spec.resourceClaims of
                             the Pod where this field is used. It makes that resource available
                             inside a container.
+                          type: string
+                        request:
+                          description: |-
+                            Request is the name chosen for a request in the referenced claim.
+                            If empty, everything from the claim is made available, otherwise
+                            only the result of this request.
                           type: string
                       required:
                       - name
@@ -2156,6 +2251,9 @@ spec:
                   Using license key is supported starting from VictoriaMetrics v1.94.0.
                   See [here](https://docs.victoriametrics.com/enterprise)
                 properties:
+                  forceOffline:
+                    description: Enforce offline verification of the license key.
+                    type: boolean
                   key:
                     description: |-
                       Enterprise license key. This flag is available only in [VictoriaMetrics enterprise](https://docs.victoriametrics.com/enterprise).
@@ -2186,6 +2284,10 @@ spec:
                     - key
                     type: object
                     x-kubernetes-map-type: atomic
+                  reloadInterval:
+                    description: Interval to be used for checking for license key
+                      changes. Note that this is only applicable when using KeyRef.
+                    type: string
                 type: object
               livenessProbe:
                 description: LivenessProbe that will be added CRD pod
@@ -2208,6 +2310,29 @@ spec:
                 - FATAL
                 - PANIC
                 type: string
+              managedMetadata:
+                description: |-
+                  ManagedMetadata defines metadata that will be added to the all objects
+                  created by operator for the given CustomResource
+                properties:
+                  annotations:
+                    additionalProperties:
+                      type: string
+                    description: |-
+                      Annotations is an unstructured key value map stored with a resource that may be
+                      set by external tools to store and retrieve arbitrary metadata. They are not
+                      queryable and should be preserved when modifying objects.
+                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations
+                    type: object
+                  labels:
+                    additionalProperties:
+                      type: string
+                    description: |-
+                      Labels Map of string keys and values that can be used to organize and categorize
+                      (scope and select) objects.
+                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels
+                    type: object
+                type: object
               maxScrapeInterval:
                 description: |-
                   MaxScrapeInterval allows limiting maximum scrape interval for VMServiceScrape, VMPodScrape and other scrapes
@@ -2215,7 +2340,7 @@ spec:
                 type: string
               minReadySeconds:
                 description: |-
-                  MinReadySeconds defines a minim number os seconds to wait before starting update next pod
+                  MinReadySeconds defines a minimum number of seconds to wait before starting update next pod
                   if previous in healthy state
                   Has no effect for VLogs and VMSingle
                 format: int32
@@ -3769,6 +3894,12 @@ spec:
                             the Pod where this field is used. It makes that resource available
                             inside a container.
                           type: string
+                        request:
+                          description: |-
+                            Request is the name chosen for a request in the referenced claim.
+                            If empty, everything from the claim is made available, otherwise
+                            only the result of this request.
+                          type: string
                       required:
                       - name
                       type: object
@@ -4592,7 +4723,7 @@ spec:
                               set to a Pending state, as reflected by the modifyVolumeStatus field, until such as a resource
                               exists.
                               More info: https://kubernetes.io/docs/concepts/storage/volume-attributes-classes/
-                              (Alpha) Using this field requires the VolumeAttributesClass feature gate to be enabled.
+                              (Beta) Using this field requires the VolumeAttributesClass feature gate to be enabled (off by default).
                             type: string
                           volumeMode:
                             description: |-
@@ -4737,8 +4868,16 @@ spec:
                                 status:
                                   type: string
                                 type:
-                                  description: PersistentVolumeClaimConditionType
-                                    is a valid value of PersistentVolumeClaimCondition.Type
+                                  description: |-
+                                    PersistentVolumeClaimConditionType defines the condition of PV claim.
+                                    Valid values are:
+                                      - "Resizing", "FileSystemResizePending"
+
+                                    If RecoverVolumeExpansionFailure feature gate is enabled, then following additional values can be expected:
+                                      - "ControllerResizeError", "NodeResizeError"
+
+                                    If VolumeAttributesClass feature gate is enabled, then following additional values can be expected:
+                                      - "ModifyVolumeError", "ModifyingVolume"
                                   type: string
                               required:
                               - status
@@ -4752,13 +4891,13 @@ spec:
                             description: |-
                               currentVolumeAttributesClassName is the current name of the VolumeAttributesClass the PVC is using.
                               When unset, there is no VolumeAttributeClass applied to this PersistentVolumeClaim
-                              This is an alpha field and requires enabling VolumeAttributesClass feature.
+                              This is a beta field and requires enabling VolumeAttributesClass feature (off by default).
                             type: string
                           modifyVolumeStatus:
                             description: |-
                               ModifyVolumeStatus represents the status object of ControllerModifyVolume operation.
                               When this is unset, there is no ModifyVolume operation being attempted.
-                              This is an alpha field and requires enabling VolumeAttributesClass feature.
+                              This is a beta field and requires enabling VolumeAttributesClass feature (off by default).
                             properties:
                               status:
                                 description: "status is the status of the ControllerModifyVolume
@@ -4919,7 +5058,7 @@ spec:
                 type: array
               staticScrapeSelector:
                 description: |-
-                  StaticScrapeSelector defines PodScrapes to be selected for target discovery.
+                  StaticScrapeSelector defines VMStaticScrape to be selected for target discovery.
                   Works in combination with NamespaceSelector.
                   If both nil - match everything.
                   NamespaceSelector nil - only objects at VMAgent namespace.
@@ -5459,14 +5598,80 @@ spec:
             description: VMAgentStatus defines the observed state of VMAgent
             properties:
               availableReplicas:
-                description: |-
-                  AvailableReplicas Total number of available pods (ready for at least minReadySeconds)
-                  targeted by this VMAlert cluster.
+                description: deprecated and will be removed at v0.52.0
                 format: int32
                 type: integer
+              conditions:
+                description: 'Known .status.conditions.type are: "Available", "Progressing",
+                  and "Degraded"'
+                items:
+                  description: Condition defines status condition of the resource
+                  properties:
+                    lastTransitionTime:
+                      description: lastTransitionTime is the last time the condition
+                        transitioned from one status to another.
+                      format: date-time
+                      type: string
+                    lastUpdateTime:
+                      description: |-
+                        LastUpdateTime is the last time of given type update.
+                        This value is used for status TTL update and removal
+                      format: date-time
+                      type: string
+                    message:
+                      description: |-
+                        message is a human readable message indicating details about the transition.
+                        This may be an empty string.
+                      maxLength: 32768
+                      type: string
+                    observedGeneration:
+                      description: |-
+                        observedGeneration represents the .metadata.generation that the condition was set based upon.
+                        For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date
+                        with respect to the current state of the instance.
+                      format: int64
+                      minimum: 0
+                      type: integer
+                    reason:
+                      description: |-
+                        reason contains a programmatic identifier indicating the reason for the condition's last transition.
+                        Producers of specific condition types may define expected values and meanings for this field,
+                        and whether the values are considered a guaranteed API.
+                        The value should be a CamelCase string.
+                        This field may not be empty.
+                      maxLength: 1024
+                      minLength: 1
+                      type: string
+                    status:
+                      description: status of the condition, one of True, False, Unknown.
+                      enum:
+                      - "True"
+                      - "False"
+                      - Unknown
+                      type: string
+                    type:
+                      description: Type of condition in CamelCase or in name.namespace.resource.victoriametrics.com/CamelCase.
+                      maxLength: 316
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - lastUpdateTime
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+                x-kubernetes-list-map-keys:
+                - type
+                x-kubernetes-list-type: map
+              observedGeneration:
+                description: |-
+                  ObservedGeneration defines current generation picked by operator for the
+                  reconcile
+                format: int64
+                type: integer
               reason:
-                description: Reason defines fail reason for update process, effective
-                  only for statefulMode
+                description: Reason defines human readable error reason
                 type: string
               replicas:
                 description: ReplicaCount Total number of pods targeted by this VMAgent
@@ -5481,18 +5686,14 @@ spec:
                 format: int32
                 type: integer
               unavailableReplicas:
-                description: UnavailableReplicas Total number of unavailable pods
-                  targeted by this VMAgent cluster.
+                description: deprecated and will be removed at v0.52.0
                 format: int32
                 type: integer
               updateStatus:
-                description: UpdateStatus defines a status for update rollout, effective
-                  only for statefulMode
+                description: UpdateStatus defines a status for update rollout
                 type: string
               updatedReplicas:
-                description: |-
-                  UpdatedReplicas Total number of non-terminated pods targeted by this VMAgent
-                  cluster that have the desired version spec.
+                description: deprecated and will be removed at v0.52.0
                 format: int32
                 type: integer
             type: object
@@ -5510,19 +5711,9 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.16.4
+    controller-gen.kubebuilder.io/version: v0.16.5
   name: vmalertmanagerconfigs.operator.victoriametrics.com
 spec:
-  conversion:
-    strategy: Webhook
-    webhook:
-      clientConfig:
-        service:
-          name: webhook-service
-          namespace: vm
-          path: /convert
-      conversionReviewVersions:
-      - v1
   group: operator.victoriametrics.com
   names:
     kind: VMAlertmanagerConfig
@@ -5535,13 +5726,10 @@ spec:
     - jsonPath: .metadata.creationTimestamp
       name: Age
       type: date
-    - jsonPath: .status.status
+    - jsonPath: .status.updateStatus
       name: Status
       type: string
-    - jsonPath: .status.lastErrorParentAlertmanagerName
-      name: VMAlertmanager Error
-      type: string
-    - jsonPath: .status.lastSyncError
+    - jsonPath: .status.reason
       name: Sync Error
       type: string
     name: v1beta1
@@ -7837,6 +8025,10 @@ spec:
                           message:
                             description: Message is templated message
                             type: string
+                          message_thread_id:
+                            description: MessageThreadID defines ID of the message
+                              thread where to send the messages.
+                            type: integer
                           parse_mode:
                             description: |-
                               ParseMode for telegram message,
@@ -9412,18 +9604,82 @@ spec:
             description: VMAlertmanagerConfigStatus defines the observed state of
               VMAlertmanagerConfig
             properties:
+              conditions:
+                description: 'Known .status.conditions.type are: "Available", "Progressing",
+                  and "Degraded"'
+                items:
+                  description: Condition defines status condition of the resource
+                  properties:
+                    lastTransitionTime:
+                      description: lastTransitionTime is the last time the condition
+                        transitioned from one status to another.
+                      format: date-time
+                      type: string
+                    lastUpdateTime:
+                      description: |-
+                        LastUpdateTime is the last time of given type update.
+                        This value is used for status TTL update and removal
+                      format: date-time
+                      type: string
+                    message:
+                      description: |-
+                        message is a human readable message indicating details about the transition.
+                        This may be an empty string.
+                      maxLength: 32768
+                      type: string
+                    observedGeneration:
+                      description: |-
+                        observedGeneration represents the .metadata.generation that the condition was set based upon.
+                        For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date
+                        with respect to the current state of the instance.
+                      format: int64
+                      minimum: 0
+                      type: integer
+                    reason:
+                      description: |-
+                        reason contains a programmatic identifier indicating the reason for the condition's last transition.
+                        Producers of specific condition types may define expected values and meanings for this field,
+                        and whether the values are considered a guaranteed API.
+                        The value should be a CamelCase string.
+                        This field may not be empty.
+                      maxLength: 1024
+                      minLength: 1
+                      type: string
+                    status:
+                      description: status of the condition, one of True, False, Unknown.
+                      enum:
+                      - "True"
+                      - "False"
+                      - Unknown
+                      type: string
+                    type:
+                      description: Type of condition in CamelCase or in name.namespace.resource.victoriametrics.com/CamelCase.
+                      maxLength: 316
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - lastUpdateTime
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+                x-kubernetes-list-map-keys:
+                - type
+                x-kubernetes-list-type: map
               lastErrorParentAlertmanagerName:
                 type: string
-              lastSyncError:
-                description: LastSyncError contains error message for unsuccessful
-                  config generation
-                type: string
-              lastSyncErrorTimestamp:
-                description: LastSyncErrorTimestamp defines time when error occured
+              observedGeneration:
+                description: |-
+                  ObservedGeneration defines current generation picked by operator for the
+                  reconcile
                 format: int64
                 type: integer
-              status:
-                description: Status defines CRD processing status
+              reason:
+                description: Reason defines human readable error reason
+                type: string
+              updateStatus:
+                description: UpdateStatus defines a status for update rollout
                 type: string
             type: object
         type: object
@@ -9436,19 +9692,9 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.16.4
+    controller-gen.kubebuilder.io/version: v0.16.5
   name: vmalertmanagers.operator.victoriametrics.com
 spec:
-  conversion:
-    strategy: Webhook
-    webhook:
-      clientConfig:
-        service:
-          name: webhook-service
-          namespace: vm
-          path: /convert
-      conversionReviewVersions:
-      - v1
   group: operator.victoriametrics.com
   names:
     kind: VMAlertmanager
@@ -9460,10 +9706,6 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - description: The version of VMAlertmanager
-      jsonPath: .spec.image.tag
-      name: Version
-      type: string
     - description: The desired replicas number of Alertmanagers
       jsonPath: .spec.replicaCount
       name: ReplicaCount
@@ -9727,7 +9969,7 @@ spec:
                             set to a Pending state, as reflected by the modifyVolumeStatus field, until such as a resource
                             exists.
                             More info: https://kubernetes.io/docs/concepts/storage/volume-attributes-classes/
-                            (Alpha) Using this field requires the VolumeAttributesClass feature gate to be enabled.
+                            (Beta) Using this field requires the VolumeAttributesClass feature gate to be enabled (off by default).
                           type: string
                         volumeMode:
                           description: |-
@@ -9870,8 +10112,16 @@ spec:
                               status:
                                 type: string
                               type:
-                                description: PersistentVolumeClaimConditionType is
-                                  a valid value of PersistentVolumeClaimCondition.Type
+                                description: |-
+                                  PersistentVolumeClaimConditionType defines the condition of PV claim.
+                                  Valid values are:
+                                    - "Resizing", "FileSystemResizePending"
+
+                                  If RecoverVolumeExpansionFailure feature gate is enabled, then following additional values can be expected:
+                                    - "ControllerResizeError", "NodeResizeError"
+
+                                  If VolumeAttributesClass feature gate is enabled, then following additional values can be expected:
+                                    - "ModifyVolumeError", "ModifyingVolume"
                                 type: string
                             required:
                             - status
@@ -9885,13 +10135,13 @@ spec:
                           description: |-
                             currentVolumeAttributesClassName is the current name of the VolumeAttributesClass the PVC is using.
                             When unset, there is no VolumeAttributeClass applied to this PersistentVolumeClaim
-                            This is an alpha field and requires enabling VolumeAttributesClass feature.
+                            This is a beta field and requires enabling VolumeAttributesClass feature (off by default).
                           type: string
                         modifyVolumeStatus:
                           description: |-
                             ModifyVolumeStatus represents the status object of ControllerModifyVolume operation.
                             When this is unset, there is no ModifyVolume operation being attempted.
-                            This is an alpha field and requires enabling VolumeAttributesClass feature.
+                            This is a beta field and requires enabling VolumeAttributesClass feature (off by default).
                           properties:
                             status:
                               description: "status is the status of the ControllerModifyVolume
@@ -10031,6 +10281,12 @@ spec:
                             Name must match the name of one entry in pod.spec.resourceClaims of
                             the Pod where this field is used. It makes that resource available
                             inside a container.
+                          type: string
+                        request:
+                          description: |-
+                            Request is the name chosen for a request in the referenced claim.
+                            If empty, everything from the claim is made available, otherwise
+                            only the result of this request.
                           type: string
                       required:
                       - name
@@ -10632,9 +10888,32 @@ spec:
                 - WARN
                 - ERROR
                 type: string
+              managedMetadata:
+                description: |-
+                  ManagedMetadata defines metadata that will be added to the all objects
+                  created by operator for the given CustomResource
+                properties:
+                  annotations:
+                    additionalProperties:
+                      type: string
+                    description: |-
+                      Annotations is an unstructured key value map stored with a resource that may be
+                      set by external tools to store and retrieve arbitrary metadata. They are not
+                      queryable and should be preserved when modifying objects.
+                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations
+                    type: object
+                  labels:
+                    additionalProperties:
+                      type: string
+                    description: |-
+                      Labels Map of string keys and values that can be used to organize and categorize
+                      (scope and select) objects.
+                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels
+                    type: object
+                type: object
               minReadySeconds:
                 description: |-
-                  MinReadySeconds defines a minim number os seconds to wait before starting update next pod
+                  MinReadySeconds defines a minimum number of seconds to wait before starting update next pod
                   if previous in healthy state
                   Has no effect for VLogs and VMSingle
                 format: int32
@@ -10767,6 +11046,12 @@ spec:
                             Name must match the name of one entry in pod.spec.resourceClaims of
                             the Pod where this field is used. It makes that resource available
                             inside a container.
+                          type: string
+                        request:
+                          description: |-
+                            Request is the name chosen for a request in the referenced claim.
+                            If empty, everything from the claim is made available, otherwise
+                            only the result of this request.
                           type: string
                       required:
                       - name
@@ -11194,7 +11479,7 @@ spec:
                               set to a Pending state, as reflected by the modifyVolumeStatus field, until such as a resource
                               exists.
                               More info: https://kubernetes.io/docs/concepts/storage/volume-attributes-classes/
-                              (Alpha) Using this field requires the VolumeAttributesClass feature gate to be enabled.
+                              (Beta) Using this field requires the VolumeAttributesClass feature gate to be enabled (off by default).
                             type: string
                           volumeMode:
                             description: |-
@@ -11339,8 +11624,16 @@ spec:
                                 status:
                                   type: string
                                 type:
-                                  description: PersistentVolumeClaimConditionType
-                                    is a valid value of PersistentVolumeClaimCondition.Type
+                                  description: |-
+                                    PersistentVolumeClaimConditionType defines the condition of PV claim.
+                                    Valid values are:
+                                      - "Resizing", "FileSystemResizePending"
+
+                                    If RecoverVolumeExpansionFailure feature gate is enabled, then following additional values can be expected:
+                                      - "ControllerResizeError", "NodeResizeError"
+
+                                    If VolumeAttributesClass feature gate is enabled, then following additional values can be expected:
+                                      - "ModifyVolumeError", "ModifyingVolume"
                                   type: string
                               required:
                               - status
@@ -11354,13 +11647,13 @@ spec:
                             description: |-
                               currentVolumeAttributesClassName is the current name of the VolumeAttributesClass the PVC is using.
                               When unset, there is no VolumeAttributeClass applied to this PersistentVolumeClaim
-                              This is an alpha field and requires enabling VolumeAttributesClass feature.
+                              This is a beta field and requires enabling VolumeAttributesClass feature (off by default).
                             type: string
                           modifyVolumeStatus:
                             description: |-
                               ModifyVolumeStatus represents the status object of ControllerModifyVolume operation.
                               When this is unset, there is no ModifyVolume operation being attempted.
-                              This is an alpha field and requires enabling VolumeAttributesClass feature.
+                              This is a beta field and requires enabling VolumeAttributesClass feature (off by default).
                             properties:
                               status:
                                 description: "status is the status of the ControllerModifyVolume
@@ -11752,11 +12045,80 @@ spec:
               Operator API itself. More info:
               https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md#spec-and-status
             properties:
+              conditions:
+                description: 'Known .status.conditions.type are: "Available", "Progressing",
+                  and "Degraded"'
+                items:
+                  description: Condition defines status condition of the resource
+                  properties:
+                    lastTransitionTime:
+                      description: lastTransitionTime is the last time the condition
+                        transitioned from one status to another.
+                      format: date-time
+                      type: string
+                    lastUpdateTime:
+                      description: |-
+                        LastUpdateTime is the last time of given type update.
+                        This value is used for status TTL update and removal
+                      format: date-time
+                      type: string
+                    message:
+                      description: |-
+                        message is a human readable message indicating details about the transition.
+                        This may be an empty string.
+                      maxLength: 32768
+                      type: string
+                    observedGeneration:
+                      description: |-
+                        observedGeneration represents the .metadata.generation that the condition was set based upon.
+                        For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date
+                        with respect to the current state of the instance.
+                      format: int64
+                      minimum: 0
+                      type: integer
+                    reason:
+                      description: |-
+                        reason contains a programmatic identifier indicating the reason for the condition's last transition.
+                        Producers of specific condition types may define expected values and meanings for this field,
+                        and whether the values are considered a guaranteed API.
+                        The value should be a CamelCase string.
+                        This field may not be empty.
+                      maxLength: 1024
+                      minLength: 1
+                      type: string
+                    status:
+                      description: status of the condition, one of True, False, Unknown.
+                      enum:
+                      - "True"
+                      - "False"
+                      - Unknown
+                      type: string
+                    type:
+                      description: Type of condition in CamelCase or in name.namespace.resource.victoriametrics.com/CamelCase.
+                      maxLength: 316
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - lastUpdateTime
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+                x-kubernetes-list-map-keys:
+                - type
+                x-kubernetes-list-type: map
+              observedGeneration:
+                description: |-
+                  ObservedGeneration defines current generation picked by operator for the
+                  reconcile
+                format: int64
+                type: integer
               reason:
-                description: Reason has non empty reason for update failure
+                description: Reason defines human readable error reason
                 type: string
               updateStatus:
-                description: Status defines a status of object update
+                description: UpdateStatus defines a status for update rollout
                 type: string
             type: object
         required:
@@ -11771,19 +12133,9 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.16.4
+    controller-gen.kubebuilder.io/version: v0.16.5
   name: vmalerts.operator.victoriametrics.com
 spec:
-  conversion:
-    strategy: Webhook
-    webhook:
-      clientConfig:
-        service:
-          name: webhook-service
-          namespace: vm
-          path: /convert
-      conversionReviewVersions:
-      - v1
   group: operator.victoriametrics.com
   names:
     kind: VMAlert
@@ -11797,6 +12149,13 @@ spec:
       jsonPath: .status.updateStatus
       name: Status
       type: string
+    - description: The desired replicas number of Alertmanagers
+      jsonPath: .spec.replicaCount
+      name: ReplicaCount
+      type: integer
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
     name: v1beta1
     schema:
       openAPIV3Schema:
@@ -11868,6 +12227,12 @@ spec:
                             Name must match the name of one entry in pod.spec.resourceClaims of
                             the Pod where this field is used. It makes that resource available
                             inside a container.
+                          type: string
+                        request:
+                          description: |-
+                            Request is the name chosen for a request in the referenced claim.
+                            If empty, everything from the claim is made available, otherwise
+                            only the result of this request.
                           type: string
                       required:
                       - name
@@ -12246,6 +12611,9 @@ spec:
                   Using license key is supported starting from VictoriaMetrics v1.94.0.
                   See [here](https://docs.victoriametrics.com/enterprise)
                 properties:
+                  forceOffline:
+                    description: Enforce offline verification of the license key.
+                    type: boolean
                   key:
                     description: |-
                       Enterprise license key. This flag is available only in [VictoriaMetrics enterprise](https://docs.victoriametrics.com/enterprise).
@@ -12276,6 +12644,10 @@ spec:
                     - key
                     type: object
                     x-kubernetes-map-type: atomic
+                  reloadInterval:
+                    description: Interval to be used for checking for license key
+                      changes. Note that this is only applicable when using KeyRef.
+                    type: string
                 type: object
               livenessProbe:
                 description: LivenessProbe that will be added CRD pod
@@ -12298,9 +12670,32 @@ spec:
                 - FATAL
                 - PANIC
                 type: string
+              managedMetadata:
+                description: |-
+                  ManagedMetadata defines metadata that will be added to the all objects
+                  created by operator for the given CustomResource
+                properties:
+                  annotations:
+                    additionalProperties:
+                      type: string
+                    description: |-
+                      Annotations is an unstructured key value map stored with a resource that may be
+                      set by external tools to store and retrieve arbitrary metadata. They are not
+                      queryable and should be preserved when modifying objects.
+                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations
+                    type: object
+                  labels:
+                    additionalProperties:
+                      type: string
+                    description: |-
+                      Labels Map of string keys and values that can be used to organize and categorize
+                      (scope and select) objects.
+                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels
+                    type: object
+                type: object
               minReadySeconds:
                 description: |-
-                  MinReadySeconds defines a minim number os seconds to wait before starting update next pod
+                  MinReadySeconds defines a minimum number of seconds to wait before starting update next pod
                   if previous in healthy state
                   Has no effect for VLogs and VMSingle
                 format: int32
@@ -13116,6 +13511,12 @@ spec:
                             the Pod where this field is used. It makes that resource available
                             inside a container.
                           type: string
+                        request:
+                          description: |-
+                            Request is the name chosen for a request in the referenced claim.
+                            If empty, everything from the claim is made available, otherwise
+                            only the result of this request.
+                          type: string
                       required:
                       - name
                       type: object
@@ -13569,34 +13970,94 @@ spec:
             description: VMAlertStatus defines the observed state of VMAlert
             properties:
               availableReplicas:
-                description: |-
-                  AvailableReplicas Total number of available pods (ready for at least minReadySeconds)
-                  targeted by this VMAlert cluster.
+                description: Deprecated
                 format: int32
                 type: integer
+              conditions:
+                description: 'Known .status.conditions.type are: "Available", "Progressing",
+                  and "Degraded"'
+                items:
+                  description: Condition defines status condition of the resource
+                  properties:
+                    lastTransitionTime:
+                      description: lastTransitionTime is the last time the condition
+                        transitioned from one status to another.
+                      format: date-time
+                      type: string
+                    lastUpdateTime:
+                      description: |-
+                        LastUpdateTime is the last time of given type update.
+                        This value is used for status TTL update and removal
+                      format: date-time
+                      type: string
+                    message:
+                      description: |-
+                        message is a human readable message indicating details about the transition.
+                        This may be an empty string.
+                      maxLength: 32768
+                      type: string
+                    observedGeneration:
+                      description: |-
+                        observedGeneration represents the .metadata.generation that the condition was set based upon.
+                        For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date
+                        with respect to the current state of the instance.
+                      format: int64
+                      minimum: 0
+                      type: integer
+                    reason:
+                      description: |-
+                        reason contains a programmatic identifier indicating the reason for the condition's last transition.
+                        Producers of specific condition types may define expected values and meanings for this field,
+                        and whether the values are considered a guaranteed API.
+                        The value should be a CamelCase string.
+                        This field may not be empty.
+                      maxLength: 1024
+                      minLength: 1
+                      type: string
+                    status:
+                      description: status of the condition, one of True, False, Unknown.
+                      enum:
+                      - "True"
+                      - "False"
+                      - Unknown
+                      type: string
+                    type:
+                      description: Type of condition in CamelCase or in name.namespace.resource.victoriametrics.com/CamelCase.
+                      maxLength: 316
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - lastUpdateTime
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+                x-kubernetes-list-map-keys:
+                - type
+                x-kubernetes-list-type: map
+              observedGeneration:
+                description: |-
+                  ObservedGeneration defines current generation picked by operator for the
+                  reconcile
+                format: int64
+                type: integer
               reason:
-                description: Reason defines fail reason for update process, effective
-                  only for statefulMode
+                description: Reason defines human readable error reason
                 type: string
               replicas:
-                description: |-
-                  ReplicaCount Total number of non-terminated pods targeted by this VMAlert
-                  cluster (their labels match the selector).
+                description: Deprecated
                 format: int32
                 type: integer
               unavailableReplicas:
-                description: UnavailableReplicas Total number of unavailable pods
-                  targeted by this VMAlert cluster.
+                description: Deprecated
                 format: int32
                 type: integer
               updateStatus:
-                description: UpdateStatus defines a status for update rollout, effective
-                  only for statefulMode
+                description: UpdateStatus defines a status for update rollout
                 type: string
               updatedReplicas:
-                description: |-
-                  UpdatedReplicas Total number of non-terminated pods targeted by this VMAlert
-                  cluster that have the desired version spec.
+                description: Deprecated
                 format: int32
                 type: integer
             type: object
@@ -13610,19 +14071,9 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.16.4
+    controller-gen.kubebuilder.io/version: v0.16.5
   name: vmauths.operator.victoriametrics.com
 spec:
-  conversion:
-    strategy: Webhook
-    webhook:
-      clientConfig:
-        service:
-          name: webhook-service
-          namespace: system
-          path: /convert
-      conversionReviewVersions:
-      - v1
   group: operator.victoriametrics.com
   names:
     kind: VMAuth
@@ -13636,6 +14087,13 @@ spec:
       jsonPath: .status.updateStatus
       name: Status
       type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    - description: The desired replicas number of Alertmanagers
+      jsonPath: .spec.replicaCount
+      name: ReplicaCount
+      type: integer
     name: v1beta1
     schema:
       openAPIV3Schema:
@@ -13707,6 +14165,12 @@ spec:
                             the Pod where this field is used. It makes that resource available
                             inside a container.
                           type: string
+                        request:
+                          description: |-
+                            Request is the name chosen for a request in the referenced claim.
+                            If empty, everything from the claim is made available, otherwise
+                            only the result of this request.
+                          type: string
                       required:
                       - name
                       type: object
@@ -13760,22 +14224,11 @@ spec:
                   type: object
                   x-kubernetes-preserve-unknown-fields: true
                 type: array
-              default_url:
-                description: |-
-                  DefaultURLs backend url for non-matching paths filter
-                  usually used for default backend with error message
-                items:
-                  type: string
-                type: array
               disableSelfServiceScrape:
                 description: |-
                   DisableSelfServiceScrape controls creation of VMServiceScrape by operator
                   for the application.
                   Has priority over `VM_DISABLESELFSERVICESCRAPECREATION` operator env variable
-                type: boolean
-              discover_backend_ips:
-                description: DiscoverBackendIPs instructs discovering URLPrefix backend
-                  IPs via DNS.
                 type: boolean
               dnsConfig:
                 description: |-
@@ -13825,11 +14278,6 @@ spec:
               dnsPolicy:
                 description: DNSPolicy sets DNS policy for the pod
                 type: string
-              drop_src_path_prefix_parts:
-                description: |-
-                  DropSrcPathPrefixParts is the number of `/`-delimited request path prefix parts to drop before proxying the request to backend.
-                  See [here](https://docs.victoriametrics.com/vmauth#dropping-request-path-prefix) for more details.
-                type: integer
               externalConfig:
                 description: |-
                   ExternalConfig defines a source of external VMAuth configuration.
@@ -13898,16 +14346,6 @@ spec:
                   - name
                   type: object
                   x-kubernetes-preserve-unknown-fields: true
-                type: array
-              headers:
-                description: |-
-                  Headers represent additional http headers, that vmauth uses
-                  in form of ["header_key: header_value"]
-                  multiple values for header key:
-                  ["header_key: value1,value2"]
-                  it's available since 1.68.0 version of vmauth
-                items:
-                  type: string
                 type: array
               host_aliases:
                 description: |-
@@ -14124,6 +14562,7 @@ spec:
                                                 format: int32
                                                 type: integer
                                             type: object
+                                            x-kubernetes-map-type: atomic
                                         required:
                                         - name
                                         type: object
@@ -14239,26 +14678,15 @@ spec:
                   type: object
                   x-kubernetes-preserve-unknown-fields: true
                 type: array
-              ip_filters:
-                description: |-
-                  IPFilters defines per target src ip filters
-                  supported only with enterprise version of [vmauth](https://docs.victoriametrics.com/vmauth/#ip-filters)
-                properties:
-                  allow_list:
-                    items:
-                      type: string
-                    type: array
-                  deny_list:
-                    items:
-                      type: string
-                    type: array
-                type: object
               license:
                 description: |-
                   License allows to configure license key to be used for enterprise features.
                   Using license key is supported starting from VictoriaMetrics v1.94.0.
                   See [here](https://docs.victoriametrics.com/enterprise)
                 properties:
+                  forceOffline:
+                    description: Enforce offline verification of the license key.
+                    type: boolean
                   key:
                     description: |-
                       Enterprise license key. This flag is available only in [VictoriaMetrics enterprise](https://docs.victoriametrics.com/enterprise).
@@ -14289,20 +14717,15 @@ spec:
                     - key
                     type: object
                     x-kubernetes-map-type: atomic
+                  reloadInterval:
+                    description: Interval to be used for checking for license key
+                      changes. Note that this is only applicable when using KeyRef.
+                    type: string
                 type: object
               livenessProbe:
                 description: LivenessProbe that will be added CRD pod
                 type: object
                 x-kubernetes-preserve-unknown-fields: true
-              load_balancing_policy:
-                description: |-
-                  LoadBalancingPolicy defines load balancing policy to use for backend urls.
-                  Supported policies: least_loaded, first_available.
-                  See [here](https://docs.victoriametrics.com/vmauth#load-balancing) for more details (default "least_loaded")
-                enum:
-                - least_loaded
-                - first_available
-                type: string
               logFormat:
                 description: LogFormat for VMAuth to be configured with.
                 enum:
@@ -14319,14 +14742,32 @@ spec:
                 - FATAL
                 - PANIC
                 type: string
-              max_concurrent_requests:
+              managedMetadata:
                 description: |-
-                  MaxConcurrentRequests defines max concurrent requests per user
-                  300 is default value for vmauth
-                type: integer
+                  ManagedMetadata defines metadata that will be added to the all objects
+                  created by operator for the given CustomResource
+                properties:
+                  annotations:
+                    additionalProperties:
+                      type: string
+                    description: |-
+                      Annotations is an unstructured key value map stored with a resource that may be
+                      set by external tools to store and retrieve arbitrary metadata. They are not
+                      queryable and should be preserved when modifying objects.
+                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations
+                    type: object
+                  labels:
+                    additionalProperties:
+                      type: string
+                    description: |-
+                      Labels Map of string keys and values that can be used to organize and categorize
+                      (scope and select) objects.
+                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels
+                    type: object
+                type: object
               minReadySeconds:
                 description: |-
-                  MinReadySeconds defines a minim number os seconds to wait before starting update next pod
+                  MinReadySeconds defines a minimum number of seconds to wait before starting update next pod
                   if previous in healthy state
                   Has no effect for VLogs and VMSingle
                 format: int32
@@ -14455,6 +14896,12 @@ spec:
                             the Pod where this field is used. It makes that resource available
                             inside a container.
                           type: string
+                        request:
+                          description: |-
+                            Request is the name chosen for a request in the referenced claim.
+                            If empty, everything from the claim is made available, otherwise
+                            only the result of this request.
+                          type: string
                       required:
                       - name
                       type: object
@@ -14487,23 +14934,6 @@ spec:
                       More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
                     type: object
                 type: object
-              response_headers:
-                description: |-
-                  ResponseHeaders represent additional http headers, that vmauth adds for request response
-                  in form of ["header_key: header_value"]
-                  multiple values for header key:
-                  ["header_key: value1,value2"]
-                  it's available since 1.93.0 version of vmauth
-                items:
-                  type: string
-                type: array
-              retry_status_codes:
-                description: |-
-                  RetryStatusCodes defines http status codes in numeric format for request retries
-                  e.g. [429,503]
-                items:
-                  type: integer
-                type: array
               revisionHistoryLimitCount:
                 description: |-
                   The number of old ReplicaSets to retain to allow rollback in deployment or
@@ -14610,154 +15040,6 @@ spec:
                   termination
                 format: int64
                 type: integer
-              tlsConfig:
-                description: TLSConfig specifies TLSConfig configuration parameters.
-                properties:
-                  ca:
-                    description: Stuct containing the CA cert to use for the targets.
-                    properties:
-                      configMap:
-                        description: ConfigMap containing data to use for the targets.
-                        properties:
-                          key:
-                            description: The key to select.
-                            type: string
-                          name:
-                            default: ""
-                            description: |-
-                              Name of the referent.
-                              This field is effectively required, but due to backwards compatibility is
-                              allowed to be empty. Instances of this type with an empty value here are
-                              almost certainly wrong.
-                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                            type: string
-                          optional:
-                            description: Specify whether the ConfigMap or its key
-                              must be defined
-                            type: boolean
-                        required:
-                        - key
-                        type: object
-                        x-kubernetes-map-type: atomic
-                      secret:
-                        description: Secret containing data to use for the targets.
-                        properties:
-                          key:
-                            description: The key of the secret to select from.  Must
-                              be a valid secret key.
-                            type: string
-                          name:
-                            default: ""
-                            description: |-
-                              Name of the referent.
-                              This field is effectively required, but due to backwards compatibility is
-                              allowed to be empty. Instances of this type with an empty value here are
-                              almost certainly wrong.
-                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                            type: string
-                          optional:
-                            description: Specify whether the Secret or its key must
-                              be defined
-                            type: boolean
-                        required:
-                        - key
-                        type: object
-                        x-kubernetes-map-type: atomic
-                    type: object
-                  caFile:
-                    description: Path to the CA cert in the container to use for the
-                      targets.
-                    type: string
-                  cert:
-                    description: Struct containing the client cert file for the targets.
-                    properties:
-                      configMap:
-                        description: ConfigMap containing data to use for the targets.
-                        properties:
-                          key:
-                            description: The key to select.
-                            type: string
-                          name:
-                            default: ""
-                            description: |-
-                              Name of the referent.
-                              This field is effectively required, but due to backwards compatibility is
-                              allowed to be empty. Instances of this type with an empty value here are
-                              almost certainly wrong.
-                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                            type: string
-                          optional:
-                            description: Specify whether the ConfigMap or its key
-                              must be defined
-                            type: boolean
-                        required:
-                        - key
-                        type: object
-                        x-kubernetes-map-type: atomic
-                      secret:
-                        description: Secret containing data to use for the targets.
-                        properties:
-                          key:
-                            description: The key of the secret to select from.  Must
-                              be a valid secret key.
-                            type: string
-                          name:
-                            default: ""
-                            description: |-
-                              Name of the referent.
-                              This field is effectively required, but due to backwards compatibility is
-                              allowed to be empty. Instances of this type with an empty value here are
-                              almost certainly wrong.
-                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                            type: string
-                          optional:
-                            description: Specify whether the Secret or its key must
-                              be defined
-                            type: boolean
-                        required:
-                        - key
-                        type: object
-                        x-kubernetes-map-type: atomic
-                    type: object
-                  certFile:
-                    description: Path to the client cert file in the container for
-                      the targets.
-                    type: string
-                  insecureSkipVerify:
-                    description: Disable target certificate validation.
-                    type: boolean
-                  keyFile:
-                    description: Path to the client key file in the container for
-                      the targets.
-                    type: string
-                  keySecret:
-                    description: Secret containing the client key file for the targets.
-                    properties:
-                      key:
-                        description: The key of the secret to select from.  Must be
-                          a valid secret key.
-                        type: string
-                      name:
-                        default: ""
-                        description: |-
-                          Name of the referent.
-                          This field is effectively required, but due to backwards compatibility is
-                          allowed to be empty. Instances of this type with an empty value here are
-                          almost certainly wrong.
-                          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                        type: string
-                      optional:
-                        description: Specify whether the Secret or its key must be
-                          defined
-                        type: boolean
-                    required:
-                    - key
-                    type: object
-                    x-kubernetes-map-type: atomic
-                  serverName:
-                    description: Used to verify the hostname for the targets.
-                    type: string
-                type: object
               tolerations:
                 description: Tolerations If specified, the pod's tolerations.
                 items:
@@ -14814,88 +15096,341 @@ spec:
                   x-kubernetes-preserve-unknown-fields: true
                 type: array
               unauthorizedAccessConfig:
-                description: UnauthorizedAccessConfig configures access for un authorized
-                  users
-                items:
-                  properties:
-                    discover_backend_ips:
-                      description: DiscoverBackendIPs instructs discovering URLPrefix
-                        backend IPs via DNS.
-                      type: boolean
-                    drop_src_path_prefix_parts:
-                      description: |-
-                        DropSrcPathPrefixParts is the number of `/`-delimited request path prefix parts to drop before proxying the request to backend.
-                        See [here](https://docs.victoriametrics.com/vmauth#dropping-request-path-prefix) for more details.
-                      type: integer
-                    headers:
-                      description: |-
-                        RequestHeaders represent additional http headers, that vmauth uses
-                        in form of ["header_key: header_value"]
-                        multiple values for header key:
-                        ["header_key: value1,value2"]
-                        it's available since 1.68.0 version of vmauth
-                      items:
-                        type: string
-                      type: array
-                    load_balancing_policy:
-                      description: |-
-                        LoadBalancingPolicy defines load balancing policy to use for backend urls.
-                        Supported policies: least_loaded, first_available.
-                        See [here](https://docs.victoriametrics.com/vmauth#load-balancing) for more details (default "least_loaded")
-                      enum:
-                      - least_loaded
-                      - first_available
+                description: |-
+                  UnauthorizedAccessConfig configures access for un authorized users
+
+                  Deprecated, use unauthorizedUserAccessSpec instead
+                  will be removed at v1.0 release
+                x-kubernetes-preserve-unknown-fields: true
+              unauthorizedUserAccessSpec:
+                description: UnauthorizedUserAccessSpec defines unauthorized_user
+                  config section of vmauth config
+                properties:
+                  default_url:
+                    description: |-
+                      DefaultURLs backend url for non-matching paths filter
+                      usually used for default backend with error message
+                    items:
                       type: string
-                    response_headers:
+                    type: array
+                  discover_backend_ips:
+                    description: DiscoverBackendIPs instructs discovering URLPrefix
+                      backend IPs via DNS.
+                    type: boolean
+                  drop_src_path_prefix_parts:
+                    description: |-
+                      DropSrcPathPrefixParts is the number of `/`-delimited request path prefix parts to drop before proxying the request to backend.
+                      See [here](https://docs.victoriametrics.com/vmauth#dropping-request-path-prefix) for more details.
+                    type: integer
+                  dump_request_on_errors:
+                    description: |-
+                      DumpRequestOnErrors instructs vmauth to return detailed request params to the client
+                      if routing rules don't allow to forward request to the backends.
+                      Useful for debugging `src_hosts` and `src_headers` based routing rules
+
+                      available since v1.107.0 vmauth version
+                    type: boolean
+                  headers:
+                    description: |-
+                      Headers represent additional http headers, that vmauth uses
+                      in form of ["header_key: header_value"]
+                      multiple values for header key:
+                      ["header_key: value1,value2"]
+                      it's available since 1.68.0 version of vmauth
+                    items:
+                      type: string
+                    type: array
+                  ip_filters:
+                    description: |-
+                      IPFilters defines per target src ip filters
+                      supported only with enterprise version of [vmauth](https://docs.victoriametrics.com/vmauth/#ip-filters)
+                    properties:
+                      allow_list:
+                        items:
+                          type: string
+                        type: array
+                      deny_list:
+                        items:
+                          type: string
+                        type: array
+                    type: object
+                  load_balancing_policy:
+                    description: |-
+                      LoadBalancingPolicy defines load balancing policy to use for backend urls.
+                      Supported policies: least_loaded, first_available.
+                      See [here](https://docs.victoriametrics.com/vmauth#load-balancing) for more details (default "least_loaded")
+                    enum:
+                    - least_loaded
+                    - first_available
+                    type: string
+                  max_concurrent_requests:
+                    description: |-
+                      MaxConcurrentRequests defines max concurrent requests per user
+                      300 is default value for vmauth
+                    type: integer
+                  metric_labels:
+                    additionalProperties:
+                      type: string
+                    description: MetricLabels - additional labels for metrics exported
+                      by vmauth for given user.
+                    type: object
+                  response_headers:
+                    description: |-
+                      ResponseHeaders represent additional http headers, that vmauth adds for request response
+                      in form of ["header_key: header_value"]
+                      multiple values for header key:
+                      ["header_key: value1,value2"]
+                      it's available since 1.93.0 version of vmauth
+                    items:
+                      type: string
+                    type: array
+                  retry_status_codes:
+                    description: |-
+                      RetryStatusCodes defines http status codes in numeric format for request retries
+                      e.g. [429,503]
+                    items:
+                      type: integer
+                    type: array
+                  tlsConfig:
+                    description: TLSConfig defines tls configuration for the backend
+                      connection
+                    properties:
+                      ca:
+                        description: Stuct containing the CA cert to use for the targets.
+                        properties:
+                          configMap:
+                            description: ConfigMap containing data to use for the
+                              targets.
+                            properties:
+                              key:
+                                description: The key to select.
+                                type: string
+                              name:
+                                default: ""
+                                description: |-
+                                  Name of the referent.
+                                  This field is effectively required, but due to backwards compatibility is
+                                  allowed to be empty. Instances of this type with an empty value here are
+                                  almost certainly wrong.
+                                  More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                type: string
+                              optional:
+                                description: Specify whether the ConfigMap or its
+                                  key must be defined
+                                type: boolean
+                            required:
+                            - key
+                            type: object
+                            x-kubernetes-map-type: atomic
+                          secret:
+                            description: Secret containing data to use for the targets.
+                            properties:
+                              key:
+                                description: The key of the secret to select from.  Must
+                                  be a valid secret key.
+                                type: string
+                              name:
+                                default: ""
+                                description: |-
+                                  Name of the referent.
+                                  This field is effectively required, but due to backwards compatibility is
+                                  allowed to be empty. Instances of this type with an empty value here are
+                                  almost certainly wrong.
+                                  More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                type: string
+                              optional:
+                                description: Specify whether the Secret or its key
+                                  must be defined
+                                type: boolean
+                            required:
+                            - key
+                            type: object
+                            x-kubernetes-map-type: atomic
+                        type: object
+                      caFile:
+                        description: Path to the CA cert in the container to use for
+                          the targets.
+                        type: string
+                      cert:
+                        description: Struct containing the client cert file for the
+                          targets.
+                        properties:
+                          configMap:
+                            description: ConfigMap containing data to use for the
+                              targets.
+                            properties:
+                              key:
+                                description: The key to select.
+                                type: string
+                              name:
+                                default: ""
+                                description: |-
+                                  Name of the referent.
+                                  This field is effectively required, but due to backwards compatibility is
+                                  allowed to be empty. Instances of this type with an empty value here are
+                                  almost certainly wrong.
+                                  More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                type: string
+                              optional:
+                                description: Specify whether the ConfigMap or its
+                                  key must be defined
+                                type: boolean
+                            required:
+                            - key
+                            type: object
+                            x-kubernetes-map-type: atomic
+                          secret:
+                            description: Secret containing data to use for the targets.
+                            properties:
+                              key:
+                                description: The key of the secret to select from.  Must
+                                  be a valid secret key.
+                                type: string
+                              name:
+                                default: ""
+                                description: |-
+                                  Name of the referent.
+                                  This field is effectively required, but due to backwards compatibility is
+                                  allowed to be empty. Instances of this type with an empty value here are
+                                  almost certainly wrong.
+                                  More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                type: string
+                              optional:
+                                description: Specify whether the Secret or its key
+                                  must be defined
+                                type: boolean
+                            required:
+                            - key
+                            type: object
+                            x-kubernetes-map-type: atomic
+                        type: object
+                      certFile:
+                        description: Path to the client cert file in the container
+                          for the targets.
+                        type: string
+                      insecureSkipVerify:
+                        description: Disable target certificate validation.
+                        type: boolean
+                      keyFile:
+                        description: Path to the client key file in the container
+                          for the targets.
+                        type: string
+                      keySecret:
+                        description: Secret containing the client key file for the
+                          targets.
+                        properties:
+                          key:
+                            description: The key of the secret to select from.  Must
+                              be a valid secret key.
+                            type: string
+                          name:
+                            default: ""
+                            description: |-
+                              Name of the referent.
+                              This field is effectively required, but due to backwards compatibility is
+                              allowed to be empty. Instances of this type with an empty value here are
+                              almost certainly wrong.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must
+                              be defined
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                        x-kubernetes-map-type: atomic
+                      serverName:
+                        description: Used to verify the hostname for the targets.
+                        type: string
+                    type: object
+                  url_map:
+                    items:
                       description: |-
-                        ResponseHeaders represent additional http headers, that vmauth adds for request response
-                        in form of ["header_key: header_value"]
-                        multiple values for header key:
-                        ["header_key: value1,value2"]
-                        it's available since 1.93.0 version of vmauth
-                      items:
-                        type: string
-                      type: array
-                    retry_status_codes:
-                      description: |-
-                        RetryStatusCodes defines http status codes in numeric format for request retries
-                        Can be defined per target or at VMUser.spec level
-                        e.g. [429,503]
-                      items:
-                        type: integer
-                      type: array
-                    src_headers:
-                      description: SrcHeaders is an optional list of headers, which
-                        must match request headers.
-                      items:
-                        type: string
-                      type: array
-                    src_hosts:
-                      description: SrcHosts is an optional list of regular expressions,
-                        which must match the request hostname.
-                      items:
-                        type: string
-                      type: array
-                    src_paths:
-                      description: SrcPaths is an optional list of regular expressions,
-                        which must match the request path.
-                      items:
-                        type: string
-                      type: array
-                    src_query_args:
-                      description: SrcQueryArgs is an optional list of query args,
-                        which must match request URL query args.
-                      items:
-                        type: string
-                      type: array
-                    url_prefix:
-                      description: UrlPrefix contains backend url prefixes for the
-                        proxied request url.
-                      items:
-                        type: string
-                      type: array
-                  type: object
-                type: array
+                        UnauthorizedAccessConfigURLMap defines element of url_map routing configuration
+                        For UnauthorizedAccessConfig and VMAuthUnauthorizedUserAccessSpec.URLMap
+                      properties:
+                        discover_backend_ips:
+                          description: DiscoverBackendIPs instructs discovering URLPrefix
+                            backend IPs via DNS.
+                          type: boolean
+                        drop_src_path_prefix_parts:
+                          description: |-
+                            DropSrcPathPrefixParts is the number of `/`-delimited request path prefix parts to drop before proxying the request to backend.
+                            See [here](https://docs.victoriametrics.com/vmauth#dropping-request-path-prefix) for more details.
+                          type: integer
+                        headers:
+                          description: |-
+                            RequestHeaders represent additional http headers, that vmauth uses
+                            in form of ["header_key: header_value"]
+                            multiple values for header key:
+                            ["header_key: value1,value2"]
+                            it's available since 1.68.0 version of vmauth
+                          items:
+                            type: string
+                          type: array
+                        load_balancing_policy:
+                          description: |-
+                            LoadBalancingPolicy defines load balancing policy to use for backend urls.
+                            Supported policies: least_loaded, first_available.
+                            See [here](https://docs.victoriametrics.com/vmauth#load-balancing) for more details (default "least_loaded")
+                          enum:
+                          - least_loaded
+                          - first_available
+                          type: string
+                        response_headers:
+                          description: |-
+                            ResponseHeaders represent additional http headers, that vmauth adds for request response
+                            in form of ["header_key: header_value"]
+                            multiple values for header key:
+                            ["header_key: value1,value2"]
+                            it's available since 1.93.0 version of vmauth
+                          items:
+                            type: string
+                          type: array
+                        retry_status_codes:
+                          description: |-
+                            RetryStatusCodes defines http status codes in numeric format for request retries
+                            Can be defined per target or at VMUser.spec level
+                            e.g. [429,503]
+                          items:
+                            type: integer
+                          type: array
+                        src_headers:
+                          description: SrcHeaders is an optional list of headers,
+                            which must match request headers.
+                          items:
+                            type: string
+                          type: array
+                        src_hosts:
+                          description: SrcHosts is an optional list of regular expressions,
+                            which must match the request hostname.
+                          items:
+                            type: string
+                          type: array
+                        src_paths:
+                          description: SrcPaths is an optional list of regular expressions,
+                            which must match the request path.
+                          items:
+                            type: string
+                          type: array
+                        src_query_args:
+                          description: SrcQueryArgs is an optional list of query args,
+                            which must match request URL query args.
+                          items:
+                            type: string
+                          type: array
+                        url_prefix:
+                          description: |-
+                            UrlPrefix contains backend url prefixes for the proxied request url.
+                            URLPrefix defines prefix prefix for destination
+                          x-kubernetes-preserve-unknown-fields: true
+                      type: object
+                    type: array
+                  url_prefix:
+                    description: URLPrefix defines prefix prefix for destination
+                    x-kubernetes-preserve-unknown-fields: true
+                type: object
               useDefaultResources:
                 description: |-
                   UseDefaultResources controls resource settings
@@ -15095,16 +15630,84 @@ spec:
                   x-kubernetes-preserve-unknown-fields: true
                 type: array
             type: object
+            x-kubernetes-preserve-unknown-fields: true
           status:
             description: VMAuthStatus defines the observed state of VMAuth
             properties:
+              conditions:
+                description: 'Known .status.conditions.type are: "Available", "Progressing",
+                  and "Degraded"'
+                items:
+                  description: Condition defines status condition of the resource
+                  properties:
+                    lastTransitionTime:
+                      description: lastTransitionTime is the last time the condition
+                        transitioned from one status to another.
+                      format: date-time
+                      type: string
+                    lastUpdateTime:
+                      description: |-
+                        LastUpdateTime is the last time of given type update.
+                        This value is used for status TTL update and removal
+                      format: date-time
+                      type: string
+                    message:
+                      description: |-
+                        message is a human readable message indicating details about the transition.
+                        This may be an empty string.
+                      maxLength: 32768
+                      type: string
+                    observedGeneration:
+                      description: |-
+                        observedGeneration represents the .metadata.generation that the condition was set based upon.
+                        For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date
+                        with respect to the current state of the instance.
+                      format: int64
+                      minimum: 0
+                      type: integer
+                    reason:
+                      description: |-
+                        reason contains a programmatic identifier indicating the reason for the condition's last transition.
+                        Producers of specific condition types may define expected values and meanings for this field,
+                        and whether the values are considered a guaranteed API.
+                        The value should be a CamelCase string.
+                        This field may not be empty.
+                      maxLength: 1024
+                      minLength: 1
+                      type: string
+                    status:
+                      description: status of the condition, one of True, False, Unknown.
+                      enum:
+                      - "True"
+                      - "False"
+                      - Unknown
+                      type: string
+                    type:
+                      description: Type of condition in CamelCase or in name.namespace.resource.victoriametrics.com/CamelCase.
+                      maxLength: 316
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - lastUpdateTime
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+                x-kubernetes-list-map-keys:
+                - type
+                x-kubernetes-list-type: map
+              observedGeneration:
+                description: |-
+                  ObservedGeneration defines current generation picked by operator for the
+                  reconcile
+                format: int64
+                type: integer
               reason:
-                description: Reason defines fail reason for update process, effective
-                  only for statefulMode
+                description: Reason defines human readable error reason
                 type: string
               updateStatus:
-                description: UpdateStatus defines a status for update rollout, effective
-                  only for statefulMode
+                description: UpdateStatus defines a status for update rollout
                 type: string
             type: object
         type: object
@@ -15117,19 +15720,9 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.16.4
+    controller-gen.kubebuilder.io/version: v0.16.5
   name: vmclusters.operator.victoriametrics.com
 spec:
-  conversion:
-    strategy: Webhook
-    webhook:
-      clientConfig:
-        service:
-          name: webhook-service
-          namespace: vm
-          path: /convert
-      conversionReviewVersions:
-      - v1
   group: operator.victoriametrics.com
   names:
     kind: VMCluster
@@ -15155,7 +15748,7 @@ spec:
       name: Age
       type: date
     - description: Current status of cluster
-      jsonPath: .status.clusterStatus
+      jsonPath: .status.updateStatus
       name: Status
       type: string
     name: v1beta1
@@ -15224,6 +15817,9 @@ spec:
                   Using license key is supported starting from VictoriaMetrics v1.94.0.
                   See [here](https://docs.victoriametrics.com/enterprise)
                 properties:
+                  forceOffline:
+                    description: Enforce offline verification of the license key.
+                    type: boolean
                   key:
                     description: |-
                       Enterprise license key. This flag is available only in [VictoriaMetrics enterprise](https://docs.victoriametrics.com/enterprise).
@@ -15254,6 +15850,33 @@ spec:
                     - key
                     type: object
                     x-kubernetes-map-type: atomic
+                  reloadInterval:
+                    description: Interval to be used for checking for license key
+                      changes. Note that this is only applicable when using KeyRef.
+                    type: string
+                type: object
+              managedMetadata:
+                description: |-
+                  ManagedMetadata defines metadata that will be added to the all objects
+                  created by operator for the given CustomResource
+                properties:
+                  annotations:
+                    additionalProperties:
+                      type: string
+                    description: |-
+                      Annotations is an unstructured key value map stored with a resource that may be
+                      set by external tools to store and retrieve arbitrary metadata. They are not
+                      queryable and should be preserved when modifying objects.
+                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations
+                    type: object
+                  labels:
+                    additionalProperties:
+                      type: string
+                    description: |-
+                      Labels Map of string keys and values that can be used to organize and categorize
+                      (scope and select) objects.
+                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels
+                    type: object
                 type: object
               paused:
                 description: |-
@@ -15571,7 +16194,7 @@ spec:
                     type: string
                   minReadySeconds:
                     description: |-
-                      MinReadySeconds defines a minim number os seconds to wait before starting update next pod
+                      MinReadySeconds defines a minimum number of seconds to wait before starting update next pod
                       if previous in healthy state
                       Has no effect for VLogs and VMSingle
                     format: int32
@@ -15700,6 +16323,12 @@ spec:
                                 Name must match the name of one entry in pod.spec.resourceClaims of
                                 the Pod where this field is used. It makes that resource available
                                 inside a container.
+                              type: string
+                            request:
+                              description: |-
+                                Request is the name chosen for a request in the referenced claim.
+                                If empty, everything from the claim is made available, otherwise
+                                only the result of this request.
                               type: string
                           required:
                           - name
@@ -16020,6 +16649,8 @@ spec:
                     type: array
                 type: object
               vmselect:
+                description: VMSelect defines configuration section for vmselect components
+                  of the victoria-metrics cluster
                 properties:
                   affinity:
                     description: Affinity If specified, the pod's scheduling constraints.
@@ -16249,7 +16880,7 @@ spec:
                                 set to a Pending state, as reflected by the modifyVolumeStatus field, until such as a resource
                                 exists.
                                 More info: https://kubernetes.io/docs/concepts/storage/volume-attributes-classes/
-                                (Alpha) Using this field requires the VolumeAttributesClass feature gate to be enabled.
+                                (Beta) Using this field requires the VolumeAttributesClass feature gate to be enabled (off by default).
                               type: string
                             volumeMode:
                               description: |-
@@ -16397,8 +17028,16 @@ spec:
                                   status:
                                     type: string
                                   type:
-                                    description: PersistentVolumeClaimConditionType
-                                      is a valid value of PersistentVolumeClaimCondition.Type
+                                    description: |-
+                                      PersistentVolumeClaimConditionType defines the condition of PV claim.
+                                      Valid values are:
+                                        - "Resizing", "FileSystemResizePending"
+
+                                      If RecoverVolumeExpansionFailure feature gate is enabled, then following additional values can be expected:
+                                        - "ControllerResizeError", "NodeResizeError"
+
+                                      If VolumeAttributesClass feature gate is enabled, then following additional values can be expected:
+                                        - "ModifyVolumeError", "ModifyingVolume"
                                     type: string
                                 required:
                                 - status
@@ -16412,13 +17051,13 @@ spec:
                               description: |-
                                 currentVolumeAttributesClassName is the current name of the VolumeAttributesClass the PVC is using.
                                 When unset, there is no VolumeAttributeClass applied to this PersistentVolumeClaim
-                                This is an alpha field and requires enabling VolumeAttributesClass feature.
+                                This is a beta field and requires enabling VolumeAttributesClass feature (off by default).
                               type: string
                             modifyVolumeStatus:
                               description: |-
                                 ModifyVolumeStatus represents the status object of ControllerModifyVolume operation.
                                 When this is unset, there is no ModifyVolume operation being attempted.
-                                This is an alpha field and requires enabling VolumeAttributesClass feature.
+                                This is a beta field and requires enabling VolumeAttributesClass feature (off by default).
                               properties:
                                 status:
                                   description: "status is the status of the ControllerModifyVolume
@@ -16694,7 +17333,7 @@ spec:
                     type: string
                   minReadySeconds:
                     description: |-
-                      MinReadySeconds defines a minim number os seconds to wait before starting update next pod
+                      MinReadySeconds defines a minimum number of seconds to wait before starting update next pod
                       if previous in healthy state
                       Has no effect for VLogs and VMSingle
                     format: int32
@@ -16865,6 +17504,12 @@ spec:
                                 Name must match the name of one entry in pod.spec.resourceClaims of
                                 the Pod where this field is used. It makes that resource available
                                 inside a container.
+                              type: string
+                            request:
+                              description: |-
+                                Request is the name chosen for a request in the referenced claim.
+                                If empty, everything from the claim is made available, otherwise
+                                only the result of this request.
                               type: string
                           required:
                           - name
@@ -17273,7 +17918,7 @@ spec:
                                   set to a Pending state, as reflected by the modifyVolumeStatus field, until such as a resource
                                   exists.
                                   More info: https://kubernetes.io/docs/concepts/storage/volume-attributes-classes/
-                                  (Alpha) Using this field requires the VolumeAttributesClass feature gate to be enabled.
+                                  (Beta) Using this field requires the VolumeAttributesClass feature gate to be enabled (off by default).
                                 type: string
                               volumeMode:
                                 description: |-
@@ -17424,8 +18069,16 @@ spec:
                                     status:
                                       type: string
                                     type:
-                                      description: PersistentVolumeClaimConditionType
-                                        is a valid value of PersistentVolumeClaimCondition.Type
+                                      description: |-
+                                        PersistentVolumeClaimConditionType defines the condition of PV claim.
+                                        Valid values are:
+                                          - "Resizing", "FileSystemResizePending"
+
+                                        If RecoverVolumeExpansionFailure feature gate is enabled, then following additional values can be expected:
+                                          - "ControllerResizeError", "NodeResizeError"
+
+                                        If VolumeAttributesClass feature gate is enabled, then following additional values can be expected:
+                                          - "ModifyVolumeError", "ModifyingVolume"
                                       type: string
                                   required:
                                   - status
@@ -17439,13 +18092,13 @@ spec:
                                 description: |-
                                   currentVolumeAttributesClassName is the current name of the VolumeAttributesClass the PVC is using.
                                   When unset, there is no VolumeAttributeClass applied to this PersistentVolumeClaim
-                                  This is an alpha field and requires enabling VolumeAttributesClass feature.
+                                  This is a beta field and requires enabling VolumeAttributesClass feature (off by default).
                                 type: string
                               modifyVolumeStatus:
                                 description: |-
                                   ModifyVolumeStatus represents the status object of ControllerModifyVolume operation.
                                   When this is unset, there is no ModifyVolume operation being attempted.
-                                  This is an alpha field and requires enabling VolumeAttributesClass feature.
+                                  This is a beta field and requires enabling VolumeAttributesClass feature (off by default).
                                 properties:
                                   status:
                                     description: "status is the status of the ControllerModifyVolume
@@ -17854,7 +18507,7 @@ spec:
                                 set to a Pending state, as reflected by the modifyVolumeStatus field, until such as a resource
                                 exists.
                                 More info: https://kubernetes.io/docs/concepts/storage/volume-attributes-classes/
-                                (Alpha) Using this field requires the VolumeAttributesClass feature gate to be enabled.
+                                (Beta) Using this field requires the VolumeAttributesClass feature gate to be enabled (off by default).
                               type: string
                             volumeMode:
                               description: |-
@@ -18002,8 +18655,16 @@ spec:
                                   status:
                                     type: string
                                   type:
-                                    description: PersistentVolumeClaimConditionType
-                                      is a valid value of PersistentVolumeClaimCondition.Type
+                                    description: |-
+                                      PersistentVolumeClaimConditionType defines the condition of PV claim.
+                                      Valid values are:
+                                        - "Resizing", "FileSystemResizePending"
+
+                                      If RecoverVolumeExpansionFailure feature gate is enabled, then following additional values can be expected:
+                                        - "ControllerResizeError", "NodeResizeError"
+
+                                      If VolumeAttributesClass feature gate is enabled, then following additional values can be expected:
+                                        - "ModifyVolumeError", "ModifyingVolume"
                                     type: string
                                 required:
                                 - status
@@ -18017,13 +18678,13 @@ spec:
                               description: |-
                                 currentVolumeAttributesClassName is the current name of the VolumeAttributesClass the PVC is using.
                                 When unset, there is no VolumeAttributeClass applied to this PersistentVolumeClaim
-                                This is an alpha field and requires enabling VolumeAttributesClass feature.
+                                This is a beta field and requires enabling VolumeAttributesClass feature (off by default).
                               type: string
                             modifyVolumeStatus:
                               description: |-
                                 ModifyVolumeStatus represents the status object of ControllerModifyVolume operation.
                                 When this is unset, there is no ModifyVolume operation being attempted.
-                                This is an alpha field and requires enabling VolumeAttributesClass feature.
+                                This is a beta field and requires enabling VolumeAttributesClass feature (off by default).
                               properties:
                                 status:
                                   description: "status is the status of the ControllerModifyVolume
@@ -18305,7 +18966,7 @@ spec:
                     type: array
                   minReadySeconds:
                     description: |-
-                      MinReadySeconds defines a minim number os seconds to wait before starting update next pod
+                      MinReadySeconds defines a minimum number of seconds to wait before starting update next pod
                       if previous in healthy state
                       Has no effect for VLogs and VMSingle
                     format: int32
@@ -18434,6 +19095,12 @@ spec:
                                 Name must match the name of one entry in pod.spec.resourceClaims of
                                 the Pod where this field is used. It makes that resource available
                                 inside a container.
+                              type: string
+                            request:
+                              description: |-
+                                Request is the name chosen for a request in the referenced claim.
+                                If empty, everything from the claim is made available, otherwise
+                                only the result of this request.
                               type: string
                           required:
                           - name
@@ -18927,6 +19594,12 @@ spec:
                                     the Pod where this field is used. It makes that resource available
                                     inside a container.
                                   type: string
+                                request:
+                                  description: |-
+                                    Request is the name chosen for a request in the referenced claim.
+                                    If empty, everything from the claim is made available, otherwise
+                                    only the result of this request.
+                                  type: string
                               required:
                               - name
                               type: object
@@ -19142,16 +19815,90 @@ spec:
             description: VMClusterStatus defines the observed state of VMCluster
             properties:
               clusterStatus:
-                description: UpdateStatus defines status for application
+                description: LegacyStatus is deprecated and will be removed at v0.52.0
+                  version
                 type: string
+              conditions:
+                description: 'Known .status.conditions.type are: "Available", "Progressing",
+                  and "Degraded"'
+                items:
+                  description: Condition defines status condition of the resource
+                  properties:
+                    lastTransitionTime:
+                      description: lastTransitionTime is the last time the condition
+                        transitioned from one status to another.
+                      format: date-time
+                      type: string
+                    lastUpdateTime:
+                      description: |-
+                        LastUpdateTime is the last time of given type update.
+                        This value is used for status TTL update and removal
+                      format: date-time
+                      type: string
+                    message:
+                      description: |-
+                        message is a human readable message indicating details about the transition.
+                        This may be an empty string.
+                      maxLength: 32768
+                      type: string
+                    observedGeneration:
+                      description: |-
+                        observedGeneration represents the .metadata.generation that the condition was set based upon.
+                        For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date
+                        with respect to the current state of the instance.
+                      format: int64
+                      minimum: 0
+                      type: integer
+                    reason:
+                      description: |-
+                        reason contains a programmatic identifier indicating the reason for the condition's last transition.
+                        Producers of specific condition types may define expected values and meanings for this field,
+                        and whether the values are considered a guaranteed API.
+                        The value should be a CamelCase string.
+                        This field may not be empty.
+                      maxLength: 1024
+                      minLength: 1
+                      type: string
+                    status:
+                      description: status of the condition, one of True, False, Unknown.
+                      enum:
+                      - "True"
+                      - "False"
+                      - Unknown
+                      type: string
+                    type:
+                      description: Type of condition in CamelCase or in name.namespace.resource.victoriametrics.com/CamelCase.
+                      maxLength: 316
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - lastUpdateTime
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+                x-kubernetes-list-map-keys:
+                - type
+                x-kubernetes-list-type: map
               lastSync:
                 description: Deprecated.
                 type: string
+              observedGeneration:
+                description: |-
+                  ObservedGeneration defines current generation picked by operator for the
+                  reconcile
+                format: int64
+                type: integer
               reason:
+                description: Reason defines human readable error reason
                 type: string
               updateFailCount:
                 description: Deprecated.
                 type: integer
+              updateStatus:
+                description: UpdateStatus defines a status for update rollout
+                type: string
             required:
             - updateFailCount
             type: object
@@ -19167,7 +19914,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.16.4
+    controller-gen.kubebuilder.io/version: v0.16.5
   name: vmnodescrapes.operator.victoriametrics.com
 spec:
   group: operator.victoriametrics.com
@@ -19182,10 +19929,10 @@ spec:
     - jsonPath: .metadata.creationTimestamp
       name: Age
       type: date
-    - jsonPath: .status.status
+    - jsonPath: .status.updateStatus
       name: Status
       type: string
-    - jsonPath: .status.lastSyncError
+    - jsonPath: .status.reason
       name: Sync Error
       type: string
     name: v1beta1
@@ -19642,6 +20389,8 @@ spec:
                 enum:
                 - http
                 - https
+                - HTTPS
+                - HTTP
                 type: string
               scrape_interval:
                 description: |-
@@ -20143,12 +20892,80 @@ spec:
           status:
             description: ScrapeObjectStatus defines the observed state of ScrapeObjects
             properties:
-              lastSyncError:
-                description: LastSyncError contains error message for unsuccessful
-                  config generation
+              conditions:
+                description: 'Known .status.conditions.type are: "Available", "Progressing",
+                  and "Degraded"'
+                items:
+                  description: Condition defines status condition of the resource
+                  properties:
+                    lastTransitionTime:
+                      description: lastTransitionTime is the last time the condition
+                        transitioned from one status to another.
+                      format: date-time
+                      type: string
+                    lastUpdateTime:
+                      description: |-
+                        LastUpdateTime is the last time of given type update.
+                        This value is used for status TTL update and removal
+                      format: date-time
+                      type: string
+                    message:
+                      description: |-
+                        message is a human readable message indicating details about the transition.
+                        This may be an empty string.
+                      maxLength: 32768
+                      type: string
+                    observedGeneration:
+                      description: |-
+                        observedGeneration represents the .metadata.generation that the condition was set based upon.
+                        For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date
+                        with respect to the current state of the instance.
+                      format: int64
+                      minimum: 0
+                      type: integer
+                    reason:
+                      description: |-
+                        reason contains a programmatic identifier indicating the reason for the condition's last transition.
+                        Producers of specific condition types may define expected values and meanings for this field,
+                        and whether the values are considered a guaranteed API.
+                        The value should be a CamelCase string.
+                        This field may not be empty.
+                      maxLength: 1024
+                      minLength: 1
+                      type: string
+                    status:
+                      description: status of the condition, one of True, False, Unknown.
+                      enum:
+                      - "True"
+                      - "False"
+                      - Unknown
+                      type: string
+                    type:
+                      description: Type of condition in CamelCase or in name.namespace.resource.victoriametrics.com/CamelCase.
+                      maxLength: 316
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - lastUpdateTime
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+                x-kubernetes-list-map-keys:
+                - type
+                x-kubernetes-list-type: map
+              observedGeneration:
+                description: |-
+                  ObservedGeneration defines current generation picked by operator for the
+                  reconcile
+                format: int64
+                type: integer
+              reason:
+                description: Reason defines human readable error reason
                 type: string
-              status:
-                description: Status defines update status of resource
+              updateStatus:
+                description: UpdateStatus defines a status for update rollout
                 type: string
             type: object
         type: object
@@ -20161,7 +20978,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.16.4
+    controller-gen.kubebuilder.io/version: v0.16.5
   name: vmpodscrapes.operator.victoriametrics.com
 spec:
   group: operator.victoriametrics.com
@@ -20176,10 +20993,10 @@ spec:
     - jsonPath: .metadata.creationTimestamp
       name: Age
       type: date
-    - jsonPath: .status.status
+    - jsonPath: .status.updateStatus
       name: Status
       type: string
-    - jsonPath: .status.lastSyncError
+    - jsonPath: .status.reason
       name: Sync Error
       type: string
     name: v1beta1
@@ -20688,6 +21505,8 @@ spec:
                       enum:
                       - http
                       - https
+                      - HTTPS
+                      - HTTP
                       type: string
                     scrape_interval:
                       description: |-
@@ -21220,12 +22039,80 @@ spec:
           status:
             description: ScrapeObjectStatus defines the observed state of ScrapeObjects
             properties:
-              lastSyncError:
-                description: LastSyncError contains error message for unsuccessful
-                  config generation
+              conditions:
+                description: 'Known .status.conditions.type are: "Available", "Progressing",
+                  and "Degraded"'
+                items:
+                  description: Condition defines status condition of the resource
+                  properties:
+                    lastTransitionTime:
+                      description: lastTransitionTime is the last time the condition
+                        transitioned from one status to another.
+                      format: date-time
+                      type: string
+                    lastUpdateTime:
+                      description: |-
+                        LastUpdateTime is the last time of given type update.
+                        This value is used for status TTL update and removal
+                      format: date-time
+                      type: string
+                    message:
+                      description: |-
+                        message is a human readable message indicating details about the transition.
+                        This may be an empty string.
+                      maxLength: 32768
+                      type: string
+                    observedGeneration:
+                      description: |-
+                        observedGeneration represents the .metadata.generation that the condition was set based upon.
+                        For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date
+                        with respect to the current state of the instance.
+                      format: int64
+                      minimum: 0
+                      type: integer
+                    reason:
+                      description: |-
+                        reason contains a programmatic identifier indicating the reason for the condition's last transition.
+                        Producers of specific condition types may define expected values and meanings for this field,
+                        and whether the values are considered a guaranteed API.
+                        The value should be a CamelCase string.
+                        This field may not be empty.
+                      maxLength: 1024
+                      minLength: 1
+                      type: string
+                    status:
+                      description: status of the condition, one of True, False, Unknown.
+                      enum:
+                      - "True"
+                      - "False"
+                      - Unknown
+                      type: string
+                    type:
+                      description: Type of condition in CamelCase or in name.namespace.resource.victoriametrics.com/CamelCase.
+                      maxLength: 316
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - lastUpdateTime
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+                x-kubernetes-list-map-keys:
+                - type
+                x-kubernetes-list-type: map
+              observedGeneration:
+                description: |-
+                  ObservedGeneration defines current generation picked by operator for the
+                  reconcile
+                format: int64
+                type: integer
+              reason:
+                description: Reason defines human readable error reason
                 type: string
-              status:
-                description: Status defines update status of resource
+              updateStatus:
+                description: UpdateStatus defines a status for update rollout
                 type: string
             type: object
         type: object
@@ -21238,7 +22125,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.16.4
+    controller-gen.kubebuilder.io/version: v0.16.5
   name: vmprobes.operator.victoriametrics.com
 spec:
   group: operator.victoriametrics.com
@@ -21253,10 +22140,10 @@ spec:
     - jsonPath: .metadata.creationTimestamp
       name: Age
       type: date
-    - jsonPath: .status.status
+    - jsonPath: .status.updateStatus
       name: Status
       type: string
-    - jsonPath: .status.lastSyncError
+    - jsonPath: .status.reason
       name: Sync Error
       type: string
     name: v1beta1
@@ -21640,6 +22527,8 @@ spec:
                 enum:
                 - http
                 - https
+                - HTTPS
+                - HTTP
                 type: string
               scrape_interval:
                 description: |-
@@ -22358,12 +23247,80 @@ spec:
           status:
             description: ScrapeObjectStatus defines the observed state of ScrapeObjects
             properties:
-              lastSyncError:
-                description: LastSyncError contains error message for unsuccessful
-                  config generation
+              conditions:
+                description: 'Known .status.conditions.type are: "Available", "Progressing",
+                  and "Degraded"'
+                items:
+                  description: Condition defines status condition of the resource
+                  properties:
+                    lastTransitionTime:
+                      description: lastTransitionTime is the last time the condition
+                        transitioned from one status to another.
+                      format: date-time
+                      type: string
+                    lastUpdateTime:
+                      description: |-
+                        LastUpdateTime is the last time of given type update.
+                        This value is used for status TTL update and removal
+                      format: date-time
+                      type: string
+                    message:
+                      description: |-
+                        message is a human readable message indicating details about the transition.
+                        This may be an empty string.
+                      maxLength: 32768
+                      type: string
+                    observedGeneration:
+                      description: |-
+                        observedGeneration represents the .metadata.generation that the condition was set based upon.
+                        For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date
+                        with respect to the current state of the instance.
+                      format: int64
+                      minimum: 0
+                      type: integer
+                    reason:
+                      description: |-
+                        reason contains a programmatic identifier indicating the reason for the condition's last transition.
+                        Producers of specific condition types may define expected values and meanings for this field,
+                        and whether the values are considered a guaranteed API.
+                        The value should be a CamelCase string.
+                        This field may not be empty.
+                      maxLength: 1024
+                      minLength: 1
+                      type: string
+                    status:
+                      description: status of the condition, one of True, False, Unknown.
+                      enum:
+                      - "True"
+                      - "False"
+                      - Unknown
+                      type: string
+                    type:
+                      description: Type of condition in CamelCase or in name.namespace.resource.victoriametrics.com/CamelCase.
+                      maxLength: 316
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - lastUpdateTime
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+                x-kubernetes-list-map-keys:
+                - type
+                x-kubernetes-list-type: map
+              observedGeneration:
+                description: |-
+                  ObservedGeneration defines current generation picked by operator for the
+                  reconcile
+                format: int64
+                type: integer
+              reason:
+                description: Reason defines human readable error reason
                 type: string
-              status:
-                description: Status defines update status of resource
+              updateStatus:
+                description: UpdateStatus defines a status for update rollout
                 type: string
             type: object
         required:
@@ -22378,19 +23335,9 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.16.4
+    controller-gen.kubebuilder.io/version: v0.16.5
   name: vmrules.operator.victoriametrics.com
 spec:
-  conversion:
-    strategy: Webhook
-    webhook:
-      clientConfig:
-        service:
-          name: webhook-service
-          namespace: vm
-          path: /convert
-      conversionReviewVersions:
-      - v1
   group: operator.victoriametrics.com
   names:
     kind: VMRule
@@ -22403,10 +23350,10 @@ spec:
     - jsonPath: .metadata.creationTimestamp
       name: Age
       type: date
-    - jsonPath: .status.status
+    - jsonPath: .status.updateStatus
       name: Status
       type: string
-    - jsonPath: .status.lastSyncError
+    - jsonPath: .status.reason
       name: Sync Error
       type: string
     name: v1beta1
@@ -22577,7 +23524,7 @@ spec:
                     type:
                       description: |-
                         Type defines datasource type for enterprise version of vmalert
-                        possible values - prometheus,graphite
+                        possible values - prometheus,graphite,vlogs
                       type: string
                   required:
                   - name
@@ -22590,12 +23537,80 @@ spec:
           status:
             description: VMRuleStatus defines the observed state of VMRule
             properties:
-              lastSyncError:
-                description: LastSyncError contains error message for unsuccessful
-                  config generation
+              conditions:
+                description: 'Known .status.conditions.type are: "Available", "Progressing",
+                  and "Degraded"'
+                items:
+                  description: Condition defines status condition of the resource
+                  properties:
+                    lastTransitionTime:
+                      description: lastTransitionTime is the last time the condition
+                        transitioned from one status to another.
+                      format: date-time
+                      type: string
+                    lastUpdateTime:
+                      description: |-
+                        LastUpdateTime is the last time of given type update.
+                        This value is used for status TTL update and removal
+                      format: date-time
+                      type: string
+                    message:
+                      description: |-
+                        message is a human readable message indicating details about the transition.
+                        This may be an empty string.
+                      maxLength: 32768
+                      type: string
+                    observedGeneration:
+                      description: |-
+                        observedGeneration represents the .metadata.generation that the condition was set based upon.
+                        For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date
+                        with respect to the current state of the instance.
+                      format: int64
+                      minimum: 0
+                      type: integer
+                    reason:
+                      description: |-
+                        reason contains a programmatic identifier indicating the reason for the condition's last transition.
+                        Producers of specific condition types may define expected values and meanings for this field,
+                        and whether the values are considered a guaranteed API.
+                        The value should be a CamelCase string.
+                        This field may not be empty.
+                      maxLength: 1024
+                      minLength: 1
+                      type: string
+                    status:
+                      description: status of the condition, one of True, False, Unknown.
+                      enum:
+                      - "True"
+                      - "False"
+                      - Unknown
+                      type: string
+                    type:
+                      description: Type of condition in CamelCase or in name.namespace.resource.victoriametrics.com/CamelCase.
+                      maxLength: 316
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - lastUpdateTime
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+                x-kubernetes-list-map-keys:
+                - type
+                x-kubernetes-list-type: map
+              observedGeneration:
+                description: |-
+                  ObservedGeneration defines current generation picked by operator for the
+                  reconcile
+                format: int64
+                type: integer
+              reason:
+                description: Reason defines human readable error reason
                 type: string
-              status:
-                description: Status defines CRD processing status
+              updateStatus:
+                description: UpdateStatus defines a status for update rollout
                 type: string
             type: object
         required:
@@ -22610,7 +23625,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.16.4
+    controller-gen.kubebuilder.io/version: v0.16.5
   name: vmscrapeconfigs.operator.victoriametrics.com
 spec:
   group: operator.victoriametrics.com
@@ -22625,10 +23640,10 @@ spec:
     - jsonPath: .metadata.creationTimestamp
       name: Age
       type: date
-    - jsonPath: .status.status
+    - jsonPath: .status.updateStatus
       name: Status
       type: string
-    - jsonPath: .status.lastSyncError
+    - jsonPath: .status.reason
       name: Sync Error
       type: string
     name: v1beta1
@@ -22963,6 +23978,11 @@ spec:
                     datacenter:
                       description: Consul Datacenter name, if not provided it will
                         use the local Consul Agent Datacenter.
+                      type: string
+                    filter:
+                      description: |-
+                        Filter defines filter for /v1/catalog/services requests
+                        See https://developer.hashicorp.com/consul/api-docs/features/filtering
                       type: string
                     followRedirects:
                       description: |-
@@ -24291,8 +25311,7 @@ spec:
                     zone:
                       description: The zone of the scrape targets. If you need multiple
                         zones use multiple GCESDConfigs.
-                      minLength: 1
-                      type: string
+                      x-kubernetes-preserve-unknown-fields: true
                   required:
                   - project
                   - zone
@@ -26077,6 +27096,8 @@ spec:
                 enum:
                 - http
                 - https
+                - HTTPS
+                - HTTP
                 type: string
               scrape_interval:
                 description: |-
@@ -26548,12 +27569,80 @@ spec:
           status:
             description: ScrapeObjectStatus defines the observed state of ScrapeObjects
             properties:
-              lastSyncError:
-                description: LastSyncError contains error message for unsuccessful
-                  config generation
+              conditions:
+                description: 'Known .status.conditions.type are: "Available", "Progressing",
+                  and "Degraded"'
+                items:
+                  description: Condition defines status condition of the resource
+                  properties:
+                    lastTransitionTime:
+                      description: lastTransitionTime is the last time the condition
+                        transitioned from one status to another.
+                      format: date-time
+                      type: string
+                    lastUpdateTime:
+                      description: |-
+                        LastUpdateTime is the last time of given type update.
+                        This value is used for status TTL update and removal
+                      format: date-time
+                      type: string
+                    message:
+                      description: |-
+                        message is a human readable message indicating details about the transition.
+                        This may be an empty string.
+                      maxLength: 32768
+                      type: string
+                    observedGeneration:
+                      description: |-
+                        observedGeneration represents the .metadata.generation that the condition was set based upon.
+                        For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date
+                        with respect to the current state of the instance.
+                      format: int64
+                      minimum: 0
+                      type: integer
+                    reason:
+                      description: |-
+                        reason contains a programmatic identifier indicating the reason for the condition's last transition.
+                        Producers of specific condition types may define expected values and meanings for this field,
+                        and whether the values are considered a guaranteed API.
+                        The value should be a CamelCase string.
+                        This field may not be empty.
+                      maxLength: 1024
+                      minLength: 1
+                      type: string
+                    status:
+                      description: status of the condition, one of True, False, Unknown.
+                      enum:
+                      - "True"
+                      - "False"
+                      - Unknown
+                      type: string
+                    type:
+                      description: Type of condition in CamelCase or in name.namespace.resource.victoriametrics.com/CamelCase.
+                      maxLength: 316
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - lastUpdateTime
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+                x-kubernetes-list-map-keys:
+                - type
+                x-kubernetes-list-type: map
+              observedGeneration:
+                description: |-
+                  ObservedGeneration defines current generation picked by operator for the
+                  reconcile
+                format: int64
+                type: integer
+              reason:
+                description: Reason defines human readable error reason
                 type: string
-              status:
-                description: Status defines update status of resource
+              updateStatus:
+                description: UpdateStatus defines a status for update rollout
                 type: string
             type: object
         type: object
@@ -26566,7 +27655,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.16.4
+    controller-gen.kubebuilder.io/version: v0.16.5
   name: vmservicescrapes.operator.victoriametrics.com
 spec:
   group: operator.victoriametrics.com
@@ -26581,10 +27670,10 @@ spec:
     - jsonPath: .metadata.creationTimestamp
       name: Age
       type: date
-    - jsonPath: .status.status
+    - jsonPath: .status.updateStatus
       name: Status
       type: string
-    - jsonPath: .status.lastSyncError
+    - jsonPath: .status.reason
       name: Sync Error
       type: string
     name: v1beta1
@@ -27081,6 +28170,8 @@ spec:
                       enum:
                       - http
                       - https
+                      - HTTPS
+                      - HTTP
                       type: string
                     scrape_interval:
                       description: |-
@@ -27638,12 +28729,80 @@ spec:
           status:
             description: ScrapeObjectStatus defines the observed state of ScrapeObjects
             properties:
-              lastSyncError:
-                description: LastSyncError contains error message for unsuccessful
-                  config generation
+              conditions:
+                description: 'Known .status.conditions.type are: "Available", "Progressing",
+                  and "Degraded"'
+                items:
+                  description: Condition defines status condition of the resource
+                  properties:
+                    lastTransitionTime:
+                      description: lastTransitionTime is the last time the condition
+                        transitioned from one status to another.
+                      format: date-time
+                      type: string
+                    lastUpdateTime:
+                      description: |-
+                        LastUpdateTime is the last time of given type update.
+                        This value is used for status TTL update and removal
+                      format: date-time
+                      type: string
+                    message:
+                      description: |-
+                        message is a human readable message indicating details about the transition.
+                        This may be an empty string.
+                      maxLength: 32768
+                      type: string
+                    observedGeneration:
+                      description: |-
+                        observedGeneration represents the .metadata.generation that the condition was set based upon.
+                        For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date
+                        with respect to the current state of the instance.
+                      format: int64
+                      minimum: 0
+                      type: integer
+                    reason:
+                      description: |-
+                        reason contains a programmatic identifier indicating the reason for the condition's last transition.
+                        Producers of specific condition types may define expected values and meanings for this field,
+                        and whether the values are considered a guaranteed API.
+                        The value should be a CamelCase string.
+                        This field may not be empty.
+                      maxLength: 1024
+                      minLength: 1
+                      type: string
+                    status:
+                      description: status of the condition, one of True, False, Unknown.
+                      enum:
+                      - "True"
+                      - "False"
+                      - Unknown
+                      type: string
+                    type:
+                      description: Type of condition in CamelCase or in name.namespace.resource.victoriametrics.com/CamelCase.
+                      maxLength: 316
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - lastUpdateTime
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+                x-kubernetes-list-map-keys:
+                - type
+                x-kubernetes-list-type: map
+              observedGeneration:
+                description: |-
+                  ObservedGeneration defines current generation picked by operator for the
+                  reconcile
+                format: int64
+                type: integer
+              reason:
+                description: Reason defines human readable error reason
                 type: string
-              status:
-                description: Status defines update status of resource
+              updateStatus:
+                description: UpdateStatus defines a status for update rollout
                 type: string
             type: object
         required:
@@ -27658,19 +28817,9 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.16.4
+    controller-gen.kubebuilder.io/version: v0.16.5
   name: vmsingles.operator.victoriametrics.com
 spec:
-  conversion:
-    strategy: Webhook
-    webhook:
-      clientConfig:
-        service:
-          name: webhook-service
-          namespace: vm
-          path: /convert
-      conversionReviewVersions:
-      - v1
   group: operator.victoriametrics.com
   names:
     kind: VMSingle
@@ -27681,9 +28830,12 @@ spec:
   versions:
   - additionalPrinterColumns:
     - description: Current status of single node update process
-      jsonPath: .status.singleStatus
+      jsonPath: .status.updateStatus
       name: Status
       type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
     name: v1beta1
     schema:
       openAPIV3Schema:
@@ -27944,6 +29096,9 @@ spec:
                   Using license key is supported starting from VictoriaMetrics v1.94.0.
                   See [here](https://docs.victoriametrics.com/enterprise)
                 properties:
+                  forceOffline:
+                    description: Enforce offline verification of the license key.
+                    type: boolean
                   key:
                     description: |-
                       Enterprise license key. This flag is available only in [VictoriaMetrics enterprise](https://docs.victoriametrics.com/enterprise).
@@ -27974,6 +29129,10 @@ spec:
                     - key
                     type: object
                     x-kubernetes-map-type: atomic
+                  reloadInterval:
+                    description: Interval to be used for checking for license key
+                      changes. Note that this is only applicable when using KeyRef.
+                    type: string
                 type: object
               livenessProbe:
                 description: LivenessProbe that will be added CRD pod
@@ -27995,9 +29154,32 @@ spec:
                 - FATAL
                 - PANIC
                 type: string
+              managedMetadata:
+                description: |-
+                  ManagedMetadata defines metadata that will be added to the all objects
+                  created by operator for the given CustomResource
+                properties:
+                  annotations:
+                    additionalProperties:
+                      type: string
+                    description: |-
+                      Annotations is an unstructured key value map stored with a resource that may be
+                      set by external tools to store and retrieve arbitrary metadata. They are not
+                      queryable and should be preserved when modifying objects.
+                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations
+                    type: object
+                  labels:
+                    additionalProperties:
+                      type: string
+                    description: |-
+                      Labels Map of string keys and values that can be used to organize and categorize
+                      (scope and select) objects.
+                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels
+                    type: object
+                type: object
               minReadySeconds:
                 description: |-
-                  MinReadySeconds defines a minim number os seconds to wait before starting update next pod
+                  MinReadySeconds defines a minimum number of seconds to wait before starting update next pod
                   if previous in healthy state
                   Has no effect for VLogs and VMSingle
                 format: int32
@@ -28100,6 +29282,12 @@ spec:
                             Name must match the name of one entry in pod.spec.resourceClaims of
                             the Pod where this field is used. It makes that resource available
                             inside a container.
+                          type: string
+                        request:
+                          description: |-
+                            Request is the name chosen for a request in the referenced claim.
+                            If empty, everything from the claim is made available, otherwise
+                            only the result of this request.
                           type: string
                       required:
                       - name
@@ -28238,6 +29426,7 @@ spec:
                 description: |-
                   Storage is the definition of how storage will be used by the VMSingle
                   by default it`s empty dir
+                  this option is ignored if storageDataPath is set
                 properties:
                   accessModes:
                     description: |-
@@ -28421,7 +29610,7 @@ spec:
                       set to a Pending state, as reflected by the modifyVolumeStatus field, until such as a resource
                       exists.
                       More info: https://kubernetes.io/docs/concepts/storage/volume-attributes-classes/
-                      (Alpha) Using this field requires the VolumeAttributesClass feature gate to be enabled.
+                      (Beta) Using this field requires the VolumeAttributesClass feature gate to be enabled (off by default).
                     type: string
                   volumeMode:
                     description: |-
@@ -28437,6 +29626,7 @@ spec:
                 description: |-
                   StorageDataPath disables spec.storage option and overrides arg for victoria-metrics binary --storageDataPath,
                   its users responsibility to mount proper device into given path.
+                  It requires to provide spec.volumes and spec.volumeMounts with at least 1 value
                 type: string
               storageMetadata:
                 description: StorageMeta defines annotations and labels attached to
@@ -29101,6 +30291,12 @@ spec:
                                 the Pod where this field is used. It makes that resource available
                                 inside a container.
                               type: string
+                            request:
+                              description: |-
+                                Request is the name chosen for a request in the referenced claim.
+                                If empty, everything from the claim is made available, otherwise
+                                only the result of this request.
+                              type: string
                           required:
                           - name
                           type: object
@@ -29307,29 +30503,98 @@ spec:
             description: VMSingleStatus defines the observed state of VMSingle
             properties:
               availableReplicas:
-                description: AvailableReplicas Total number of available pods (ready
-                  for at least minReadySeconds) targeted by this VMSingle.
+                description: deprecated and will be removed at v0.52.0
                 format: int32
                 type: integer
+              conditions:
+                description: 'Known .status.conditions.type are: "Available", "Progressing",
+                  and "Degraded"'
+                items:
+                  description: Condition defines status condition of the resource
+                  properties:
+                    lastTransitionTime:
+                      description: lastTransitionTime is the last time the condition
+                        transitioned from one status to another.
+                      format: date-time
+                      type: string
+                    lastUpdateTime:
+                      description: |-
+                        LastUpdateTime is the last time of given type update.
+                        This value is used for status TTL update and removal
+                      format: date-time
+                      type: string
+                    message:
+                      description: |-
+                        message is a human readable message indicating details about the transition.
+                        This may be an empty string.
+                      maxLength: 32768
+                      type: string
+                    observedGeneration:
+                      description: |-
+                        observedGeneration represents the .metadata.generation that the condition was set based upon.
+                        For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date
+                        with respect to the current state of the instance.
+                      format: int64
+                      minimum: 0
+                      type: integer
+                    reason:
+                      description: |-
+                        reason contains a programmatic identifier indicating the reason for the condition's last transition.
+                        Producers of specific condition types may define expected values and meanings for this field,
+                        and whether the values are considered a guaranteed API.
+                        The value should be a CamelCase string.
+                        This field may not be empty.
+                      maxLength: 1024
+                      minLength: 1
+                      type: string
+                    status:
+                      description: status of the condition, one of True, False, Unknown.
+                      enum:
+                      - "True"
+                      - "False"
+                      - Unknown
+                      type: string
+                    type:
+                      description: Type of condition in CamelCase or in name.namespace.resource.victoriametrics.com/CamelCase.
+                      maxLength: 316
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - lastUpdateTime
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+                x-kubernetes-list-map-keys:
+                - type
+                x-kubernetes-list-type: map
+              observedGeneration:
+                description: |-
+                  ObservedGeneration defines current generation picked by operator for the
+                  reconcile
+                format: int64
+                type: integer
               reason:
-                description: Reason defines a reason in case of update failure
+                description: Reason defines human readable error reason
                 type: string
               replicas:
-                description: ReplicaCount Total number of non-terminated pods targeted
-                  by this VMSingle.
+                description: deprecated and will be removed at v0.52.0
                 format: int32
                 type: integer
               singleStatus:
-                description: UpdateStatus defines a status of single node rollout
+                description: LegacyStatus is deprecated and will be removed at v0.52.0
+                  version
                 type: string
               unavailableReplicas:
-                description: UnavailableReplicas Total number of unavailable pods
-                  targeted by this VMSingle.
+                description: deprecated and will be removed at v0.52.0
                 format: int32
                 type: integer
+              updateStatus:
+                description: UpdateStatus defines a status for update rollout
+                type: string
               updatedReplicas:
-                description: UpdatedReplicas Total number of non-terminated pods targeted
-                  by this VMSingle.
+                description: deprecated and will be removed at v0.52.0
                 format: int32
                 type: integer
             type: object
@@ -29343,7 +30608,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.16.4
+    controller-gen.kubebuilder.io/version: v0.16.5
   name: vmstaticscrapes.operator.victoriametrics.com
 spec:
   group: operator.victoriametrics.com
@@ -29358,10 +30623,10 @@ spec:
     - jsonPath: .metadata.creationTimestamp
       name: Age
       type: date
-    - jsonPath: .status.status
+    - jsonPath: .status.updateStatus
       name: Status
       type: string
-    - jsonPath: .status.lastSyncError
+    - jsonPath: .status.reason
       name: Sync Error
       type: string
     name: v1beta1
@@ -29838,6 +31103,8 @@ spec:
                       enum:
                       - http
                       - https
+                      - HTTPS
+                      - HTTP
                       type: string
                     scrape_interval:
                       description: |-
@@ -30307,12 +31574,80 @@ spec:
           status:
             description: ScrapeObjectStatus defines the observed state of ScrapeObjects
             properties:
-              lastSyncError:
-                description: LastSyncError contains error message for unsuccessful
-                  config generation
+              conditions:
+                description: 'Known .status.conditions.type are: "Available", "Progressing",
+                  and "Degraded"'
+                items:
+                  description: Condition defines status condition of the resource
+                  properties:
+                    lastTransitionTime:
+                      description: lastTransitionTime is the last time the condition
+                        transitioned from one status to another.
+                      format: date-time
+                      type: string
+                    lastUpdateTime:
+                      description: |-
+                        LastUpdateTime is the last time of given type update.
+                        This value is used for status TTL update and removal
+                      format: date-time
+                      type: string
+                    message:
+                      description: |-
+                        message is a human readable message indicating details about the transition.
+                        This may be an empty string.
+                      maxLength: 32768
+                      type: string
+                    observedGeneration:
+                      description: |-
+                        observedGeneration represents the .metadata.generation that the condition was set based upon.
+                        For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date
+                        with respect to the current state of the instance.
+                      format: int64
+                      minimum: 0
+                      type: integer
+                    reason:
+                      description: |-
+                        reason contains a programmatic identifier indicating the reason for the condition's last transition.
+                        Producers of specific condition types may define expected values and meanings for this field,
+                        and whether the values are considered a guaranteed API.
+                        The value should be a CamelCase string.
+                        This field may not be empty.
+                      maxLength: 1024
+                      minLength: 1
+                      type: string
+                    status:
+                      description: status of the condition, one of True, False, Unknown.
+                      enum:
+                      - "True"
+                      - "False"
+                      - Unknown
+                      type: string
+                    type:
+                      description: Type of condition in CamelCase or in name.namespace.resource.victoriametrics.com/CamelCase.
+                      maxLength: 316
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - lastUpdateTime
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+                x-kubernetes-list-map-keys:
+                - type
+                x-kubernetes-list-type: map
+              observedGeneration:
+                description: |-
+                  ObservedGeneration defines current generation picked by operator for the
+                  reconcile
+                format: int64
+                type: integer
+              reason:
+                description: Reason defines human readable error reason
                 type: string
-              status:
-                description: Status defines update status of resource
+              updateStatus:
+                description: UpdateStatus defines a status for update rollout
                 type: string
             type: object
         type: object
@@ -30325,19 +31660,9 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.16.4
+    controller-gen.kubebuilder.io/version: v0.16.5
   name: vmusers.operator.victoriametrics.com
 spec:
-  conversion:
-    strategy: Webhook
-    webhook:
-      clientConfig:
-        service:
-          name: webhook-service
-          namespace: vm
-          path: /convert
-      conversionReviewVersions:
-      - v1
   group: operator.victoriametrics.com
   names:
     kind: VMUser
@@ -30350,10 +31675,10 @@ spec:
     - jsonPath: .metadata.creationTimestamp
       name: Age
       type: date
-    - jsonPath: .status.status
+    - jsonPath: .status.updateStatus
       name: Status
       type: string
-    - jsonPath: .status.lastSyncError
+    - jsonPath: .status.reason
       name: Sync Error
       type: string
     name: v1beta1
@@ -30405,6 +31730,14 @@ spec:
                   DropSrcPathPrefixParts is the number of `/`-delimited request path prefix parts to drop before proxying the request to backend.
                   See [here](https://docs.victoriametrics.com/vmauth#dropping-request-path-prefix) for more details.
                 type: integer
+              dump_request_on_errors:
+                description: |-
+                  DumpRequestOnErrors instructs vmauth to return detailed request params to the client
+                  if routing rules don't allow to forward request to the backends.
+                  Useful for debugging `src_hosts` and `src_headers` based routing rules
+
+                  available since v1.107.0 vmauth version
+                type: boolean
               generatePassword:
                 description: |-
                   GeneratePassword instructs operator to generate password for user
@@ -30524,6 +31857,7 @@ spec:
                           - VMAgent
                           - VMAlert
                           - VMSingle
+                          - VLogs
                           - VMAlertManager
                           - VMAlertmanager
                           - VMCluster/vmselect
@@ -30694,7 +32028,7 @@ spec:
                   type: object
                 type: array
               tlsConfig:
-                description: TLSConfig specifies TLSConfig configuration parameters.
+                description: TLSConfig defines tls configuration for the backend connection
                 properties:
                   ca:
                     description: Stuct containing the CA cert to use for the targets.
@@ -30876,13 +32210,80 @@ spec:
           status:
             description: VMUserStatus defines the observed state of VMUser
             properties:
-              lastSyncError:
+              conditions:
+                description: 'Known .status.conditions.type are: "Available", "Progressing",
+                  and "Degraded"'
+                items:
+                  description: Condition defines status condition of the resource
+                  properties:
+                    lastTransitionTime:
+                      description: lastTransitionTime is the last time the condition
+                        transitioned from one status to another.
+                      format: date-time
+                      type: string
+                    lastUpdateTime:
+                      description: |-
+                        LastUpdateTime is the last time of given type update.
+                        This value is used for status TTL update and removal
+                      format: date-time
+                      type: string
+                    message:
+                      description: |-
+                        message is a human readable message indicating details about the transition.
+                        This may be an empty string.
+                      maxLength: 32768
+                      type: string
+                    observedGeneration:
+                      description: |-
+                        observedGeneration represents the .metadata.generation that the condition was set based upon.
+                        For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date
+                        with respect to the current state of the instance.
+                      format: int64
+                      minimum: 0
+                      type: integer
+                    reason:
+                      description: |-
+                        reason contains a programmatic identifier indicating the reason for the condition's last transition.
+                        Producers of specific condition types may define expected values and meanings for this field,
+                        and whether the values are considered a guaranteed API.
+                        The value should be a CamelCase string.
+                        This field may not be empty.
+                      maxLength: 1024
+                      minLength: 1
+                      type: string
+                    status:
+                      description: status of the condition, one of True, False, Unknown.
+                      enum:
+                      - "True"
+                      - "False"
+                      - Unknown
+                      type: string
+                    type:
+                      description: Type of condition in CamelCase or in name.namespace.resource.victoriametrics.com/CamelCase.
+                      maxLength: 316
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - lastUpdateTime
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+                x-kubernetes-list-map-keys:
+                - type
+                x-kubernetes-list-type: map
+              observedGeneration:
                 description: |-
-                  LastSyncError contains error message for unsuccessful config generation
-                  for given user
+                  ObservedGeneration defines current generation picked by operator for the
+                  reconcile
+                format: int64
+                type: integer
+              reason:
+                description: Reason defines human readable error reason
                 type: string
-              status:
-                description: Status defines update status of resource
+              updateStatus:
+                description: UpdateStatus defines a status for update rollout
                 type: string
             type: object
         type: object

@@ -1,4 +1,4 @@
-{{- if .Values.crds.cleanup.enabled }}
+{{- if and .Values.crds.enabled .Values.crds.cleanup.enabled }}
 {{- $app := .Values.crds.cleanup }}
 {{- if empty ($app.image).tag }}
   {{- $tag := (printf "%s.%s" .Capabilities.KubeVersion.Major .Capabilities.KubeVersion.Minor) | replace "+" "" -}}
@@ -8,12 +8,13 @@
 {{- end }}
 {{- $ctx := dict "helm" . }}
 {{- $fullname := include "vm.plain.fullname" $ctx }}
+{{- $ns := include "vm.namespace" $ctx }}
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ $fullname }}-cleanup-hook
-  namespace: {{ include "vm.namespace" . }}
+  namespace: {{ $ns }}
   labels: {{ include "vm.labels" $ctx | nindent 4 }}
   annotations: {{ include "vm-operator.cleanup.annotations" (dict "hookWeight" "-3") | nindent 4 }}
 spec:
@@ -28,7 +29,8 @@ spec:
       {{- end }}
       containers:
         - name: kubectl
-          image: {{ include "vm.image" (dict "helm" . "app" $app) }}
+          {{- $_ := set $ctx "appKey" (list "crds" "cleanup") }}
+          image: {{ include "vm.image" $ctx }}
           imagePullPolicy: {{ $app.image.pullPolicy }}
           resources: {{ toYaml $app.resources | nindent 12 }}
           args:
