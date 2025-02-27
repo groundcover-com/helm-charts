@@ -398,6 +398,7 @@ data:
     tracesWorkloadFilters: {{ toYaml .Values.tracesWorkloadFilters | nindent 6 }}
     nodelabels: {{ toYaml $sensorValues.nodelabels | nindent 6 }}
     contentTypesToDrop: {{ toYaml $sensorValues.contentTypesToDrop | nindent 6 }}
+    contentTypesWithoutClustering: {{ toYaml $sensorValues.contentTypesWithoutClustering | nindent 6 }}
     hostHeadersToDrop: {{ toYaml $sensorValues.hostHeadersToDrop | nindent 6 }}
     headersForceSampling: {{ toYaml $sensorValues.headersForceSampling | nindent 6 }}
     customEntityTags: {{ toYaml $sensorValues.customEntityTags | nindent 6 }}

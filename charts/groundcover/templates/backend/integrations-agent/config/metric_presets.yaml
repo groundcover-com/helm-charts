@@ -6681,6 +6681,290 @@ data:
     - Name: glue.executorId.s3.filesystem.write_bytes
       Statistics:
       - Average
+    AWS/AmazonMQ:
+    - Name: AckRate
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: BurstBalance
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: ChannelCount
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: ConfirmRate
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: ConnectionCount
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: ConsumerCount
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: CpuCreditBalance
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: CpuUtilization
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: CurrentConnectionsCount
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: DequeueCount
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: DispatchCount
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: EnqueueCount
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: EnqueueTime
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: EstablishedConnectionsCount
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: ExchangeCount
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: ExpiredCount
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: HeapUsage
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: InFlightCount
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: InactiveDurableTopicSubscribersCount
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: JobSchedulerStorePercentageUsage
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: JournalFilesForFastRecovery
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: JournalFilesForFullRecovery
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: MemoryUsage
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: MessageCount
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: MessageReadyCount
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: MessageUnacknowledgedCount
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: NetworkIn
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: NetworkOut
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: OpenTransactionCount
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: ProducerCount
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: PublishRate
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: QueueCount
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: QueueSize
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: RabbitMQDiskFree
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: RabbitMQDiskFreeLimit
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: RabbitMQFDUsed
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: RabbitMQMemLimit
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: RabbitMQMemUsed
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: ReceiveCount
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: StorePercentUsage
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: SystemCpuUtilization
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: TempPercentUsage
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: TotalConsumerCount
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: TotalMessageCount
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: TotalProducerCount
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: VolumeReadOps
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+    - Name: VolumeWriteOps
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+      - Sum
+
 
   azure_presets.yaml: |
     Microsoft.Compute/virtualMachines:
