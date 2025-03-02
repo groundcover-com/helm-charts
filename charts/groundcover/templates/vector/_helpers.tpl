@@ -219,7 +219,7 @@ http
 {{- end -}}
 
 {{- define "vector.incloud.json.table.write.metrics_metadata.url" -}}
-{{- printf "%s%s" .Values.global.ingress.site (include "vector.json.tables.write.metrics_metadata.path" . )  -}}
+{{- printf "https://%s%s" .Values.global.ingress.site (include "vector.json.tables.write.metrics_metadata.path" . )  -}}
 {{- end -}}
 
 {{- define "vector.json.table.write.metrics_metadata.url" -}}
@@ -241,7 +241,7 @@ http
 {{- end -}}
 
 {{- define "vector.incloud.json.table.write.aws_billing_report.url" -}}
-{{- printf "%s%s" .Values.global.ingress.site (include "vector.json.tables.write.aws_billing_report.path" . )  -}}
+{{- printf "https://%s%s" .Values.global.ingress.site (include "vector.json.tables.write.aws_billing_report.path" . )  -}}
 {{- end -}}
 
 {{- define "vector.json.table.write.aws_billing_report.url" -}}

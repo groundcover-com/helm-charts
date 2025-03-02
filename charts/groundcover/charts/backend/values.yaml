@@ -156,6 +156,9 @@ keep:
     ingress:
       enabled: false
   namespace: ""
+  deleteSecretJob:
+    image:
+      repository: public.ecr.aws/groundcovercom/bitnami/kubectl
   backend:
     provisionedProviders:
       victoriametrics:
@@ -171,7 +174,8 @@ keep:
           port: '{{ .Values.global.clickhouse.containerPorts.tcp }}'
           database: '{{ include "clickhouse.database" . }}'
     enabled: true
-    waitForDatabase: false
+    waitForDatabase:
+      enabled: false
     image:
       repository: public.ecr.aws/groundcovercom/keep-api
       tag: "0.36.4"

@@ -4,9 +4,9 @@ dependencies:
   version: 12.6.9
 - name: keep
   repository: https://keephq.github.io/helm-charts
-  version: 0.1.48
+  version: 0.1.67
 - name: victoria-metrics-distributed
   repository: https://victoriametrics.github.io/helm-charts/
   version: 0.4.2
-digest: sha256:86a7fe1dd9162fdea3cb55eb7473b0b28f034de44694d07464456f1a1ba88f0f
-generated: "2024-12-15T21:34:15.059343347Z"
+digest: sha256:0f9d09d9a8e9e36432bdb6b57162f98d63b1ca490fe96a74418536c208f7ce21
+generated: "2025-03-02T09:21:48.398402136Z"

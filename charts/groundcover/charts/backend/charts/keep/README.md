@@ -1,6 +1,6 @@
 # keep
 
-![Version: 0.1.47](https://img.shields.io/badge/Version-0.1.47-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.31.7](https://img.shields.io/badge/AppVersion-0.31.7-informational?style=flat-square)
+![Version: 0.1.66](https://img.shields.io/badge/Version-0.1.66-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.37.10](https://img.shields.io/badge/AppVersion-0.37.10-informational?style=flat-square)
 
 Keep Helm Chart
 
@@ -39,22 +39,30 @@ Keep Helm Chart
 | backend.databaseConnectionStringFromSecret.secretKey | string | `""` |  |
 | backend.databaseConnectionStringFromSecret.secretName | string | `""` |  |
 | backend.enabled | bool | `true` |  |
+| backend.envFromConfigMaps | list | `[]` | configmaps to include. Must include name and can be marked as optional. each entry should contain a name key, and can optionally specify whether the configmap must be defined with an optional key. |
+| backend.envFromSecret | string | `""` | Name of the secret to include |
+| backend.envFromSecrets | list | `[]` | List of secrets to include. Must include name and can be marked as optional. |
+| backend.envRenderSecret | object | `{}` | Sensible environment variables will be rendered as a new secret object; escape {{ in secret values to avoid Helm interpretation. |
 | backend.env[0].name | string | `"DATABASE_CONNECTION_STRING"` |  |
 | backend.env[0].value | string | `"mysql+pymysql://root@keep-database:3306/keep"` |  |
-| backend.env[1].name | string | `"SECRET_MANAGER_TYPE"` |  |
-| backend.env[1].value | string | `"k8s"` |  |
-| backend.env[2].name | string | `"PORT"` |  |
-| backend.env[2].value | string | `"8080"` |  |
-| backend.env[3].name | string | `"PUSHER_APP_ID"` |  |
-| backend.env[3].value | int | `1` |  |
-| backend.env[4].name | string | `"PUSHER_APP_KEY"` |  |
-| backend.env[4].value | string | `"keepappkey"` |  |
-| backend.env[5].name | string | `"PUSHER_APP_SECRET"` |  |
-| backend.env[5].value | string | `"keepappsecret"` |  |
-| backend.env[6].name | string | `"PUSHER_HOST"` |  |
-| backend.env[6].value | string | `"keep-websocket"` |  |
-| backend.env[7].name | string | `"PUSHER_PORT"` |  |
-| backend.env[7].value | int | `6001` |  |
+| backend.env[1].name | string | `"DATABASE_NAME"` |  |
+| backend.env[1].value | string | `"keep-database"` |  |
+| backend.env[2].name | string | `"SECRET_MANAGER_TYPE"` |  |
+| backend.env[2].value | string | `"k8s"` |  |
+| backend.env[3].name | string | `"PORT"` |  |
+| backend.env[3].value | string | `"8080"` |  |
+| backend.env[4].name | string | `"PUSHER_APP_ID"` |  |
+| backend.env[4].value | int | `1` |  |
+| backend.env[5].name | string | `"PUSHER_APP_KEY"` |  |
+| backend.env[5].value | string | `"keepappkey"` |  |
+| backend.env[6].name | string | `"PUSHER_APP_SECRET"` |  |
+| backend.env[6].value | string | `"keepappsecret"` |  |
+| backend.env[7].name | string | `"PUSHER_HOST"` |  |
+| backend.env[7].value | string | `"keep-websocket"` |  |
+| backend.env[8].name | string | `"PUSHER_PORT"` |  |
+| backend.env[8].value | int | `6001` |  |
+| backend.env[9].name | string | `"PROMETHEUS_MULTIPROC_DIR"` |  |
+| backend.env[9].value | string | `"/tmp/prometheus"` |  |
 | backend.extraInitContainers | list | `[]` |  |
 | backend.extraVolumeMounts | list | `[]` |  |
 | backend.extraVolumes | list | `[]` |  |
@@ -69,7 +77,9 @@ Keep Helm Chart
 | backend.nodeSelector | object | `{}` |  |
 | backend.openAiApi.enabled | bool | `false` |  |
 | backend.openAiApi.openAiApiKey | string | `""` |  |
-| backend.podAnnotations | object | `{}` |  |
+| backend.podAnnotations."prometheus.io/path" | string | `"/metrics/processing"` |  |
+| backend.podAnnotations."prometheus.io/port" | string | `"8080"` |  |
+| backend.podAnnotations."prometheus.io/scrape" | string | `"true"` |  |
 | backend.podSecurityContext | object | `{}` |  |
 | backend.replicaCount | int | `1` |  |
 | backend.resources | object | `{}` |  |
@@ -82,7 +92,9 @@ Keep Helm Chart
 | backend.service.port | int | `8080` |  |
 | backend.service.type | string | `"ClusterIP"` |  |
 | backend.tolerations | list | `[]` |  |
-| backend.waitForDatabase | bool | `true` |  |
+| backend.topologySpreadConstraints | list | `[]` |  |
+| backend.waitForDatabase.enabled | bool | `true` |  |
+| backend.waitForDatabase.port | int | `3306` |  |
 | database.affinity | object | `{}` |  |
 | database.autoscaling.enabled | bool | `false` |  |
 | database.enabled | bool | `true` |  |
@@ -118,7 +130,13 @@ Keep Helm Chart
 | database.securityContext | object | `{}` |  |
 | database.service.port | int | `3306` |  |
 | database.service.type | string | `"ClusterIP"` |  |
+| database.strategy.rollingUpdate.maxSurge | int | `0` |  |
+| database.strategy.rollingUpdate.maxUnavailable | int | `1` |  |
+| database.strategy.type | string | `"RollingUpdate"` |  |
 | database.tolerations | list | `[]` |  |
+| deleteSecretJob.image.pullPolicy | string | `"Always"` |  |
+| deleteSecretJob.image.repository | string | `"bitnami/kubectl"` |  |
+| deleteSecretJob.image.tag | string | `"latest"` |  |
 | frontend.affinity | object | `{}` |  |
 | frontend.autoscaling.enabled | bool | `false` |  |
 | frontend.autoscaling.maxReplicas | int | `3` |  |
@@ -133,6 +151,10 @@ Keep Helm Chart
 | frontend.backendConfig.healthCheck.type | string | `"HTTP"` |  |
 | frontend.backendConfig.healthCheck.unhealthyThreshold | int | `3` |  |
 | frontend.enabled | bool | `true` |  |
+| frontend.envFromConfigMaps | list | `[]` | Configmaps to include. Must include name and can be marked as optional. each entry should contain a name key, and can optionally specify whether the configmap must be defined with an optional key. |
+| frontend.envFromSecret | string | `""` | Name of the secret to include |
+| frontend.envFromSecrets | list | `[]` | List of secrets to include. Must include name and can be marked as optional. |
+| frontend.envRenderSecret | object | `{}` | Sensible environment variables will be rendered as a new secret object; escape {{ in secret values to avoid Helm interpretation. |
 | frontend.env[0].name | string | `"NEXTAUTH_SECRET"` |  |
 | frontend.env[0].value | string | `"secret"` |  |
 | frontend.env[1].name | string | `"VERCEL"` |  |
@@ -170,6 +192,7 @@ Keep Helm Chart
 | frontend.serviceAccount.create | bool | `true` |  |
 | frontend.serviceAccount.name | string | `""` |  |
 | frontend.tolerations | list | `[]` |  |
+| frontend.topologySpreadConstraints | list | `[]` |  |
 | fullnameOverride | string | `""` |  |
 | global.ingress.annotations | object | `{}` |  |
 | global.ingress.backendPrefix | string | `"/v2"` |  |
@@ -230,6 +253,7 @@ Keep Helm Chart
 | websocket.serviceAccount.create | bool | `true` |  |
 | websocket.serviceAccount.name | string | `""` |  |
 | websocket.tolerations | list | `[]` |  |
+| websocket.topologySpreadConstraints | list | `[]` |  |
 
 ----------------------------------------------
 Autogenerated from chart metadata using [helm-docs v1.14.2](https://github.com/norwoodj/helm-docs/releases/v1.14.2)
