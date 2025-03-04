@@ -29,6 +29,7 @@ global:
   ingress:
     # set ingress site for inCloud / on-prem sensor only deployments
     site:
+    extraSites: []
 
   airgap: false
 

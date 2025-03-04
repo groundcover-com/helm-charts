@@ -63,9 +63,11 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
 {{- define "incloud-ingress.certificate.dnsNames" -}}
-- {{ .Values.global.ingress.site }}
-- {{ printf "status.%s" .Values.global.ingress.site }}
-- {{ printf "metrics-http.%s" .Values.global.ingress.site }}
-- {{ printf "api-otel-http.%s" .Values.global.ingress.site }}
-- {{ printf "api-otel-grpc.%s" .Values.global.ingress.site }}
+{{- range (append .Values.global.ingress.extraSites .Values.global.ingress.site) }}
+- {{ . }}
+- {{ printf "status.%s" . }}
+- {{ printf "metrics-http.%s" . }}
+- {{ printf "api-otel-http.%s" . }}
+- {{ printf "api-otel-grpc.%s" . }}
 {{- end }}
+{{- end -}}

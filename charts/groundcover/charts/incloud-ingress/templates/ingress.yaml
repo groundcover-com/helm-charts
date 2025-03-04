@@ -3,7 +3,6 @@ kind: Ingress
 metadata:
   name: {{ printf "%s-otel-http" (include "incloud-ingress.name" .) | trunc 63 | trimSuffix "-" }}
   annotations:
-    konghq.com/host-aliases: {{ printf "%s,api-otel-http.*" .Values.global.ingress.site }}
     konghq.com/plugins: {{ printf "%s-auth" .Release.Name }},{{ printf "%s-basic-auth" .Release.Name }}
     konghq.com/protocols: {{ ternary "https" "http" ( eq (tpl .Values.secure . ) "true" )  | quote }}
     {{- with .Values.ingress.annotations }}
@@ -248,7 +247,6 @@ kind: Ingress
 metadata:
   name: {{ printf "%s-metrics-http" (include "incloud-ingress.name" .) | trunc 63 | trimSuffix "-" }}
   annotations:
-    konghq.com/host-aliases: {{ printf "%s,metrics-http.*" .Values.global.ingress.site }}
     konghq.com/plugins: {{ printf "%s-auth" .Release.Name }},{{ printf "%s-basic-auth" .Release.Name }}
     konghq.com/protocols: {{ ternary "https" "http" ( eq (tpl .Values.secure . ) "true" ) | quote }}
     {{- with .Values.ingress.annotations }}
@@ -307,7 +305,6 @@ kind: Ingress
 metadata:
   name: {{ printf "%s-grpc" (include "incloud-ingress.name" .) | trunc 63 | trimSuffix "-" }}
   annotations:
-    konghq.com/host-aliases: {{ printf "%s,api-otel-grpc.*" .Values.global.ingress.site }}
     konghq.com/headers.content-type: application/grpc
     konghq.com/plugins: {{ printf "%s-auth" .Release.Name | quote }}
     konghq.com/protocols: {{ ternary "grpcs" "grpc" ( eq (tpl .Values.secure . ) "true" ) | quote }}
@@ -353,7 +350,6 @@ kind: Ingress
 metadata:
   name: {{ printf "%s-status" (include "incloud-ingress.name" .) | trunc 63 | trimSuffix "-" }}
   annotations:
-    konghq.com/host-aliases: {{ printf "%s,status.*" .Values.global.ingress.site }}
     konghq.com/plugins: {{ printf "%s-auth" .Release.Name | quote }}
     konghq.com/protocols: {{ ternary "https" "http" ( eq (tpl .Values.secure . ) "true" ) | quote }}
     {{- with .Values.ingress.annotations }}
