@@ -183,7 +183,7 @@ kind: Ingress
 metadata:
   name: {{ printf "%s-ingest-v2-json" (include "incloud-ingress.name" .) | trunc 63 | trimSuffix "-" }}
   annotations:
-    konghq.com/plugins: {{ printf "%s-auth,ingest-v2-rewrite-root-path" .Release.Name | quote }}
+    konghq.com/plugins: {{ printf "%s-auth" .Release.Name | quote }}
     konghq.com/protocols: {{ ternary "https" "http" ( eq (tpl .Values.secure . ) "true" ) | quote }}
     {{- with .Values.ingress.annotations }}
       {{- toYaml . | nindent 4 }}

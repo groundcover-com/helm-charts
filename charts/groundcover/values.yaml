@@ -1488,31 +1488,43 @@ vector:
           address: "0.0.0.0:4319"
           decoding:
             codec: json
+          path: ""
+          strict_path: false
         json_events:
           type: http
           address: "0.0.0.0:4359"
           decoding:
             codec: json
+          path: ""
+          strict_path: false
         json_entities:
           type: http
           address: "0.0.0.0:4369"
           decoding:
             codec: json
+          path: ""
+          strict_path: false
         json_measurements:
           type: http
           address: "0.0.0.0:4379"
           decoding:
             codec: json
+          path: ""
+          strict_path: false
         json_monitors:
           type: http
           address: "0.0.0.0:4349"
           decoding:
             codec: json
+          path: ""
+          strict_path: false
         json_traces:
           type: http
           address: "0.0.0.0:4329"
           decoding:
             codec: json
+          path: ""
+          strict_path: false
         json_table_write:
           type: http
           address: "0.0.0.0:4350"
