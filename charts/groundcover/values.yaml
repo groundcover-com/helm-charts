@@ -2030,6 +2030,8 @@ vector:
               max_bytes: 100000000
               max_events: 10000
               timeout_secs: 2
+            healthcheck:
+              enabled: false
           clickhouse_aws_billing_report:
             type: clickhouse
             inputs:
@@ -2055,6 +2057,8 @@ vector:
               max_bytes: 100000000
               max_events: 10000
               timeout_secs: 2
+            healthcheck:
+              enabled: false
       s3:
         logs:
           s3_logs:
