@@ -1197,10 +1197,13 @@ opentelemetry-collector:
     enabled: true
     maxUnavailable: "1%"
   rollout:
-    maxUnavailable: 0
-    maxSurge: 1
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
     strategy: RollingUpdate
   affinity: {}
+  readinessProbe:
+   initialDelaySeconds: 8
   nodeSelector: {}
   tolerations: []
 
