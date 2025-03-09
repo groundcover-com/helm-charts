@@ -68,8 +68,6 @@ spec:
 {{- end -}}
 {{- end -}}
 
----
-
 {{ if and (.Values.global.backend.enabled) (index .Values "statefulset-modifier" "enabled") (.Values.clickhouse.persistence.enabled) (index .Values "clickhouse" "persistence" "dropBeforeCreate") }}
 {{- $shards := .Values.clickhouse.shards | int -}}
 {{- range $shardIndex, $e := until $shards -}}
