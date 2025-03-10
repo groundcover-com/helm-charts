@@ -146,6 +146,10 @@ http
 {{- printf "http://%s:%d/json/logs" (include "opentelemetry-collector.fullname" .) (index .Values.global "opentelemetry-collector" "ports" "http-json" "servicePort" | int ) -}}
 {{- end -}}
 
+{{- define "opentelemetry-collector.rumreceiver.http.url" -}}
+{{- printf "http://%s:%d/json/rum" (include "opentelemetry-collector.fullname" .) (index .Values.global "opentelemetry-collector" "ports" "rum" "servicePort" | int ) -}}
+{{- end -}}
+
 {{- define "opentelemetry-collector.otlp.grpc.url" -}}
 {{- if .Values.global.otlp.overrideGrpcURL -}}
     {{- print .Values.global.otlp.overrideGrpcURL -}}

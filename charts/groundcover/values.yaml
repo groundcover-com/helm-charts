@@ -966,6 +966,12 @@ opentelemetry-collector:
       servicePort: 8016
       hostPort: 8016
       protocol: TCP
+    rum:
+      enabled: true
+      containerPort: 8026
+      servicePort: 8026
+      hostPort: 8026
+      protocol: TCP
   config:
     extensions:
       health_check:
@@ -977,6 +983,15 @@ opentelemetry-collector:
     receivers:
       http:
         endpoint: 0.0.0.0:8016
+      rum/logs:
+        endpoint: 0.0.0.0:8026
+        rum_data_type: logs
+      rum/traces:
+        endpoint: 0.0.0.0:8026
+        rum_data_type: traces
+      rum/events:
+        endpoint: 0.0.0.0:8026
+        rum_data_type: events
       otlp/dummy_receiver:
         protocols:
           http:
@@ -1162,6 +1177,7 @@ opentelemetry-collector:
             - otlp
             - datadog
             - faro
+            - rum/traces
           processors:
             - batch/traces
             - groundcover/traces
@@ -1174,6 +1190,7 @@ opentelemetry-collector:
             - faro
             - awsfirehose
             - http
+            - rum/logs
           processors:
             - filter/dropNoneLogs
             - resource/enrich_headers
@@ -1189,6 +1206,7 @@ opentelemetry-collector:
         logs/custom:
           receivers:
             - otlp
+            - rum/events
           processors:
             - filter/dropNoneCustom
             - batch/custom
