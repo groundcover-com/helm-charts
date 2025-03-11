@@ -133,6 +133,9 @@ spec:
             - containerPort: {{ $sensorValues.apmIngestor.dataDog.tracesPort }}
               name: dd-traces
               protocol: TCP
+            - containerPort: 4040
+              name: dlv-tcp
+              protocol: TCP
             {{- if and $sensorValues.apmIngestor.otel.direct.zipkin.enabled $sensorValues.apmIngestor.otel.direct.zipkin.port}}
             - containerPort: {{ $sensorValues.apmIngestor.otel.direct.zipkin.port }}
               name: zipkin
