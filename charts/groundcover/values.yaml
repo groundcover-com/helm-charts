@@ -229,7 +229,8 @@ logPatternsConfig:
   maxClusters: 2000
   paramString: "<*>"
   maxEvictionRatio: 0.8
-  maxTokens: 128
+  maxTokens: 50
+  MaxContentLength: 1024
   summarizerConfig:
     flushInterval: 30s
     workloadCacheSize: 1000
