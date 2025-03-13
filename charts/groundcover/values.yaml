@@ -838,10 +838,10 @@ clickhouse:
   ##
   resources:
     requests:
-      cpu: 300m
-      memory: 2048Mi
+      cpu: 2
+      memory: 4Gi
     limits:
-      memory: 4096Mi
+      memory: 8Gi
 
   ## @param affinity Affinity for ClickHouse pods assignment
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
