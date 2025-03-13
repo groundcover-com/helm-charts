@@ -230,7 +230,7 @@ logPatternsConfig:
   paramString: "<*>"
   maxEvictionRatio: 0.8
   maxTokens: 50
-  MaxContentLength: 1024
+  maxContentLength: 1024
   summarizerConfig:
     flushInterval: 30s
     workloadCacheSize: 1000
