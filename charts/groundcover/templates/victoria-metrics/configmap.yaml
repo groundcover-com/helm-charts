@@ -38,3 +38,6 @@ data:
         target_label: __name__
         regex: "(.+)"
         replacement: "groundcover_workload_pods_status_phase"
+{{ if (index .Values "victoria-metrics-single" "server" "extraAggregations") }}
+{{- toYaml (index .Values "victoria-metrics-single" "server" "extraAggregations") | nindent 4  -}}
+{{- end }}

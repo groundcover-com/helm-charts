@@ -346,10 +346,18 @@ sinks:
 {{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.logsPipeline "sinks" .Values.vector.customComponents.sinks.s3.logs)) $ -}}
 {{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.tracesPipeline "sinks" .Values.vector.customComponents.sinks.s3.traces)) $ -}}
 {{- tpl (toYaml .Values.vector.customComponents.sinks.s3.custom) $ | nindent 2 }}
+{{ if .Values.vector.objectStorage.backups }}
+{{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.logsPipeline "sinks" .Values.vector.customComponents.sinks.s3Backups.logs)) $ -}}
+{{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.tracesPipeline "sinks" .Values.vector.customComponents.sinks.s3Backups.traces)) $ -}}
+{{- end -}}
 {{ else if and (not (empty .Values.vector.objectStorage.gcsBucket)) .Values.vector.objectStorage.allowed }} {{- /* ingestion using gcs */}}
 {{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.logsPipeline "sinks" .Values.vector.customComponents.sinks.gcs.logs)) $ -}}
 {{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.tracesPipeline "sinks" .Values.vector.customComponents.sinks.gcs.traces )) $ -}}
 {{- tpl (toYaml .Values.vector.customComponents.sinks.gcs.custom) $ | nindent 2 }}
+{{ if .Values.vector.objectStorage.backups }}
+{{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.logsPipeline "sinks" .Values.vector.customComponents.sinks.gcsBackups.logs)) $ -}}
+{{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.tracesPipeline "sinks" .Values.vector.customComponents.sinks.gcsBackups.traces)) $ -}}
+{{- end -}}
 {{ else if .Values.global.backend.enabled }} {{- /* ingestion to local DB */}}
 {{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.logsPipeline "sinks" .Values.vector.customComponents.sinks.local.logs)) $ -}}
 {{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.tracesPipeline "sinks" .Values.vector.customComponents.sinks.local.traces)) $ -}}

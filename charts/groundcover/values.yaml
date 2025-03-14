@@ -1443,6 +1443,7 @@ vector:
       maxSurge: 1
   objectStorage:
     allowed: true
+    backups: false
     s3Bucket:
     region:
   customGlobalConfig:
@@ -2288,7 +2289,76 @@ vector:
               timestamp_format: rfc3339
             healthcheck:
               enabled: false
-
+      s3Backups:
+        logs:
+          s3_logs_backups:
+            type: "aws_s3"
+            bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
+            region: '{{ .Values.vector.objectStorage.region }}'
+            key_prefix: "backup/30d/v2/logs_v3/"
+            encoding:
+              codec: json
+              timestamp_format: rfc3339
+            batch:
+              max_bytes: 250000000
+              max_events: 300000
+              timeout_secs: 10
+            healthcheck:
+              enabled: false
+            filename_time_format: "%Y/%m/%d/%H/%s"
+            storage_class: STANDARD_IA
+        traces:
+          s3_traces_backups:
+            type: "aws_s3"
+            bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
+            region: '{{ .Values.vector.objectStorage.region }}'
+            key_prefix: "backup/30d/v2/traces_v2/"
+            encoding:
+              codec: json
+              timestamp_format: rfc3339
+            batch:
+              max_bytes: 250000000
+              max_events: 300000
+              timeout_secs: 10
+            healthcheck:
+              enabled: false
+            filename_time_format: "%Y/%m/%d/%H/%s"
+            storage_class: STANDARD_IA
+      gcsBackups:
+        logs:
+          gcs_logs_backup:
+            type: gcp_cloud_storage
+            key_prefix: backup/30d/v2/logs_v3/
+            compression: zstd
+            bucket: '{{ .Values.vector.objectStorage.gcsBucket }}'
+            batch:
+              max_bytes: 250000000
+              max_events: 300000
+              timeout_secs: 10
+            encoding:
+              codec: json
+              timestamp_format: rfc3339
+            healthcheck:
+              enabled: false
+            filename_time_format: "%Y/%m/%d/%H/%s"
+            storage_class: NEARLINE
+        traces:
+          gcs_traces_backups:
+            type: gcp_cloud_storage
+            key_prefix: backup/30d/v2/traces_v2/
+            compression: zstd
+            bucket: '{{ .Values.vector.objectStorage.gcsBucket }}'
+            batch:
+              max_bytes: 250000000
+              max_events: 300000
+              timeout_secs: 10
+            encoding:
+              codec: json
+              timestamp_format: rfc3339
+            healthcheck:
+              enabled: false
+            filename_time_format: "%Y/%m/%d/%H/%s"
+            storage_class: NEARLINE
 router:
   # onprem or cloud
   mode: cloud
@@ -2711,6 +2781,8 @@ victoria-metrics-single:
                   values:
                     - SPOT
 
+    extraAggregations: []
+    
 monitors-manager:
   initChownData:
     image:
