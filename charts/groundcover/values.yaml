@@ -364,10 +364,23 @@ agent:
             thriftCompactPort: 6831
     pprof:
       enabled: true
-      interval: 10s
-      exponent: 40
       uploaderType: pyroscope
       cpuSamplingDuration: 60s
+      backoffTicker:
+        interval: 10s
+        exponent: 40
+      memoryTicker:
+        enabled: true
+        interval: 60s
+        jumpSizeInBytes: 100000000
+        windowSize: 12h
+        initialWait: 10m
+      cpuTicker:
+        enabled: true
+        interval: 60s
+        jumpSizeInMCPU: 100
+        windowSize: 12h
+        initialWait: 10m
     httphandler:
       truncationConfig:
         enabled: true

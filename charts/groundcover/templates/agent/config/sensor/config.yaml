@@ -450,8 +450,6 @@ data:
             thriftCompactPort: {{ $sensorValues.apmIngestor.otel.direct.jaeger.thriftCompactPort }}
     pprof:
       enabled: {{ include "telemetry.enabled" . }}
-      interval: {{ $sensorValues.pprof.interval }}
-      exponent: {{ $sensorValues.pprof.exponent }}
       cpuSamplingDuration: {{ $sensorValues.pprof.cpuSamplingDuration }}
       httpUploader:
         enabled: {{ eq $sensorValues.pprof.uploaderType "http" }}
@@ -459,6 +457,21 @@ data:
       pyroscopeUploader:
         enabled: {{ eq $sensorValues.pprof.uploaderType "pyroscope" }}
         pushURL: {{ include "telemetry.metrics.base.url" . }}
+      backoffTicker:
+        interval: {{ $sensorValues.pprof.backoffTicker.interval }}
+        exponent: {{ $sensorValues.pprof.backoffTicker.exponent }}
+      memoryTicker:
+        enabled: {{ $sensorValues.pprof.memoryTicker.enabled }}
+        interval: {{ $sensorValues.pprof.memoryTicker.interval }}
+        jumpSizeInBytes: {{ $sensorValues.pprof.memoryTicker.jumpSizeInBytes }}
+        windowSize: {{ $sensorValues.pprof.memoryTicker.windowSize }}
+        initialWait: {{ $sensorValues.pprof.memoryTicker.initialWait }}
+      cpuTicker:
+        enabled: {{ $sensorValues.pprof.cpuTicker.enabled }}
+        interval: {{ $sensorValues.pprof.cpuTicker.interval }}
+        jumpSizeInMCPU: {{ $sensorValues.pprof.cpuTicker.jumpSizeInMCPU }}
+        windowSize: {{ $sensorValues.pprof.cpuTicker.windowSize }}
+        initialWait: {{ $sensorValues.pprof.cpuTicker.initialWait }}
 
     clusterId: {{ include "groundcover.clusterId" . }}
     region: {{ .Values.region }}
