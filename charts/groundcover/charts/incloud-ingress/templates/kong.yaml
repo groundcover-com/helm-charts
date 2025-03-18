@@ -134,3 +134,20 @@ config:
   replace:
     uri: '/'
 plugin: request-transformer
+---
+{{- if .Values.rum.enabled -}}
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: ingest-rum-cors-allow-all
+config:
+  credentials: false
+  exposed_headers:
+    - '*'
+  headers:
+    - '*'
+  max_age: 3600
+  origins:
+    - '*'
+plugin: cors
+{{- end }}

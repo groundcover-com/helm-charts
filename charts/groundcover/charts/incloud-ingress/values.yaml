@@ -47,6 +47,9 @@ kong:
 datasource:
   enabled: false
 
+## Enabled rum ingress with cors
+rum:
+  enabled: true
 ingress:
   annotations:
   tls:
