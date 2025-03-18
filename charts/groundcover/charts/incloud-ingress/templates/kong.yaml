@@ -135,11 +135,10 @@ config:
     uri: '/'
 plugin: request-transformer
 ---
-{{- if .Values.rum.enabled -}}
 apiVersion: configuration.konghq.com/v1
 kind: KongPlugin
 metadata:
-  name: ingest-rum-cors-allow-all
+  name: cors-allow-all
 config:
   credentials: false
   exposed_headers:
@@ -150,4 +149,3 @@ config:
   origins:
     - '*'
 plugin: cors
-{{- end }}

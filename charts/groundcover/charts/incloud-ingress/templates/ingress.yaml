@@ -3,7 +3,7 @@ kind: Ingress
 metadata:
   name: {{ printf "%s-otel-http" (include "incloud-ingress.name" .) | trunc 63 | trimSuffix "-" }}
   annotations:
-    konghq.com/plugins: {{ printf "%s-auth" .Release.Name }},{{ printf "%s-basic-auth" .Release.Name }}
+    konghq.com/plugins: {{ printf "%s-auth" .Release.Name }},{{ printf "%s-basic-auth" .Release.Name }},cors-allow-all
     konghq.com/protocols: {{ ternary "https" "http" ( eq (tpl .Values.secure . ) "true" )  | quote }}
     {{- with .Values.ingress.annotations }}
       {{- toYaml . | nindent 4 }}
@@ -95,6 +95,13 @@ spec:
                 name: {{ include "opentelemetry-collector.fullname" . }}
                 port:
                   number: {{ index .Values.global "opentelemetry-collector" "ports" "http-json" "servicePort" | int }}
+          - path: {{ get (urlParse (include "opentelemetry-collector.rumreceiver.http.url" .)) "path" }} 
+            pathType: Exact
+            backend:
+              service:
+                name: {{ include "opentelemetry-collector.fullname" . }}
+                port:
+                  number: {{ index .Values.global "opentelemetry-collector" "ports" "rum" "servicePort" | int }}                  
 ---
 
 apiVersion: networking.k8s.io/v1
@@ -372,36 +379,6 @@ spec:
                 port:
                   name: http
 
----
-{{- if .Values.rum.enabled -}}
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: {{ printf "%s-otel-http-rum" (include "incloud-ingress.name" .) | trunc 63 | trimSuffix "-" }}
-  annotations:
-    konghq.com/plugins: {{ printf "%s-auth" .Release.Name }},{{ printf "%s-basic-auth" .Release.Name }},ingest-rum-cors-allow-all
-    konghq.com/protocols: {{ ternary "https" "http" ( eq (tpl .Values.secure . ) "true" )  | quote }}
-    {{- with .Values.ingress.annotations }}
-      {{- toYaml . | nindent 4 }}
-    {{- end }}
-spec:
-  ingressClassName: {{ include "incloud-ingress.ingressClass" .}}
-  {{- if .Values.ingress.tls.enabled }}
-  tls:
-    - secretName: {{ include "incloud-ingress.certificate.name" . }}
-      hosts: {{ include "incloud-ingress.certificate.dnsNames" .  | nindent 8 }}
-  {{- end }}
-  rules:
-    - http:
-        paths:
-          - path: {{ get (urlParse (include "opentelemetry-collector.rumreceiver.http.url" .)) "path" }} 
-            pathType: Exact
-            backend:
-              service:
-                name: {{ include "opentelemetry-collector.fullname" . }}
-                port:
-                  number: {{ index .Values.global "opentelemetry-collector" "ports" "rum" "servicePort" | int }}
-{{- end }}           
 ---
 
 {{- if .Values.datasource.enabled -}}
