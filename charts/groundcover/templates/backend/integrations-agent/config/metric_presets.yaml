@@ -538,6 +538,8 @@ data:
     - Name: MasterCPUUtilization
       Statistics:
       - Average
+      - Maximum
+      - Minimum
     - Name: MasterFreeStorageSpace
       Statistics:
       - Average
@@ -550,6 +552,8 @@ data:
     - Name: MasterSysMemoryUtilization
       Statistics:
       - Average
+      - Maximum
+      - Minimum
     - Name: ModelsCheckpointIndexStatusIndexExists
       Statistics:
       - Average
@@ -670,6 +674,8 @@ data:
     - Name: WarmCPUUtilization
       Statistics:
       - Average
+      - Maximum
+      - Minimum
     - Name: WarmFreeStorageSpace
       Statistics:
       - Average
@@ -691,6 +697,8 @@ data:
     - Name: WarmSysMemoryUtilization
       Statistics:
       - Average
+      - Maximum
+      - Minimum
     - Name: WarmToHotMigrationQueueSize
       Statistics:
       - Average
@@ -991,6 +999,8 @@ data:
     - Name: CPUUtilization
       Statistics:
       - Average
+      - Maximum
+      - Minimum
     - Name: CurrConfig
       Statistics:
       - Average
@@ -1021,6 +1031,8 @@ data:
     - Name: EngineCPUUtilization
       Statistics:
       - Average
+      - Maximum
+      - Minimum
     - Name: EvalBasedCmds
       Statistics:
       - Average
@@ -1176,24 +1188,22 @@ data:
       Statistics:
       - Average
     AWS/ApiGateway:
-    - Name: 4XX
-      Statistics:
-      - Average
     - Name: 4XXError
       Statistics:
       - Average
-    - Name: 5XX
-      Statistics:
-      - Average
+      - Sum
     - Name: 5XXError
       Statistics:
       - Average
+      - Sum
     - Name: CacheHitCount
       Statistics:
       - Average
+      - Sum
     - Name: CacheMissCount
       Statistics:
       - Average
+      - Sum
     - Name: ClientError
       Statistics:
       - Average
@@ -1569,6 +1579,8 @@ data:
     - Name: CPUUtilization
       Statistics:
       - Average
+      - Maximum
+      - Minimum
     - Name: FreeStorageSpace
       Statistics:
       - Average
@@ -2136,6 +2148,8 @@ data:
     - Name: CPUUtilization
       Statistics:
       - Average
+      - Maximum
+      - Minimum
     - Name: EngineUptime
       Statistics:
       - Average
@@ -2561,6 +2575,8 @@ data:
     - Name: CPUUtilization
       Statistics:
       - Average
+      - Maximum
+      - Minimum
     - Name: DatabaseConnections
       Statistics:
       - Average
@@ -3185,9 +3201,13 @@ data:
     - Name: CPUUtilization
       Statistics:
       - Average
+      - Maximum
+      - Minimum
     - Name: MemoryUtilization
       Statistics:
       - Average
+      - Maximum
+      - Minimum
     - Name: RequestLatency
       Statistics:
       - Average
@@ -5520,6 +5540,8 @@ data:
     - Name: CPUUtilization
       Statistics:
       - Average
+      - Maximum
+      - Minimum
     - Name: cpuutilization.guest
       Statistics:
       - Average
@@ -5673,6 +5695,8 @@ data:
     - Name: FreeableMemory
       Statistics:
       - Average
+      - Maximum
+      - Minimum
     - Name: InsertLatency
       Statistics:
       - Average
@@ -5977,6 +6001,8 @@ data:
     - Name: CPUUtilization
       Statistics:
       - Average
+      - Maximum
+      - Minimum
     - Name: CurrConnections
       Statistics:
       - Average
@@ -5992,6 +6018,8 @@ data:
     - Name: EngineCPUUtilization
       Statistics:
       - Average
+      - Maximum
+      - Minimum
     - Name: EvalBasedCmds
       Statistics:
       - Average
