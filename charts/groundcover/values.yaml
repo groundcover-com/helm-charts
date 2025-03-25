@@ -222,7 +222,7 @@ shouldDropRunningNamespaces: false
 commitHashKeyName:
 repositoryUrlKeyName:
 logPatternsConfig:
-  enabled: false
+  enabled: true
   logClusterDepth: 6
   similarityThreshold: 0.6
   maxChildren: 20
