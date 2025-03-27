@@ -4468,6 +4468,8 @@ data:
       Statistics:
       - Average
     - Name: BucketSizeBytes
+      Period: 86400
+      Length: 86400
       Statistics:
       - Average
     - Name: BytesDownloaded
@@ -4501,6 +4503,8 @@ data:
       Statistics:
       - Average
     - Name: NumberOfObjects
+      Period: 86400
+      Length: 86400
       Statistics:
       - Average
     - Name: OperationsFailedReplication

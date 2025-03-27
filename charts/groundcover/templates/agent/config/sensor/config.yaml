@@ -408,6 +408,7 @@ data:
       serverEnabled: {{ $sensorValues.metricIngestor.serverEnabled }}
       serverPort: {{ $sensorValues.metricIngestor.serverPort }}
       scraperEnabled: {{ $sensorValues.metricIngestor.scraperEnabled }}
+      maxScrapeSize: {{ $sensorValues.metricIngestor.maxScrapeSize }}
       remoteURL: {{ include "metrics-ingester.write.http.url" . }}
       usePrometheusCompatibleNaming: {{ $sensorValues.metricIngestor.usePrometheusCompatibleNaming }}
       tlsSkipVerify: true

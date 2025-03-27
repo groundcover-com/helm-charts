@@ -338,6 +338,7 @@ agent:
       serverEnabled: true
       serverPort: 8428
       scraperEnabled: false
+      maxScrapeSize: 67108864
       usePrometheusCompatibleNaming: true
     apmIngestor:
       dataDog:
