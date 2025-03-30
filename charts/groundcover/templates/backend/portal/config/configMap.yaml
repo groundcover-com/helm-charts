@@ -33,11 +33,7 @@ data:
     {{- if .Values.tags.incloud }}
         - Key: X-Portal-InCloud
           Value: "True"
-    {{- end }} 
-    {{- if .Values.global.airgap }}
-        - Key: X-Consumer-Username
-          Value: org.com@org.com
-    {{- end }}    
+    {{- end }}
     {{- with .Values.portal.extraHeaders }}
       {{ toYaml . | nindent 8 }}
     {{- end }}  
