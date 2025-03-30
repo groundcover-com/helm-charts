@@ -1,7 +1,7 @@
 {{- define "vector.useLocalVector" -}}
 {{ if .Values.global.vector.forceLocal }}
 true
-{{ else if (not (.Values.global.ingress.site)) }}
+{{ else if .Values.global.backend.enabled }}
 true
 {{ else if (and (not (empty .Values.vector.objectStorage.s3Bucket)) .Values.vector.objectStorage.allowed) }}
 true
@@ -257,14 +257,12 @@ http
 {{- define "vector.health.http.url" -}}
 {{- if .Values.global.vector.health.overrideHttpURL -}}
     {{- print .Values.global.vector.health.overrideHttpURL -}}
-{{- else if and .Values.global.airgap .Values.global.backend.enabled -}}
+{{- else if .Values.global.backend.enabled -}}
     {{- include "vector.cluster.http.health.url" . -}}
 {{- else if .Values.global.ingress.site -}}
     {{- include "incloud.ingestion.otlp.health.url" . -}}
-{{- else if not .Values.global.backend.enabled -}}
-    {{- fail "A valid global.ingress.site or global.vector.health.overrideHttpURL is required!" -}}
 {{- else -}}
-    {{- include "vector.cluster.http.health.url" . -}}
+    {{- fail "A valid global.ingress.site or global.vector.health.overrideHttpURL is required!" -}}
 {{- end -}}
 {{- end -}}
 
