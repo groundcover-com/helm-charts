@@ -520,6 +520,8 @@ data:
           maxEvictionRatio: {{ .Values.logPatternsConfig.maxEvictionRatio }}
           maxTokens: {{ .Values.logPatternsConfig.maxTokens }}
           maxContentLength : {{ .Values.logPatternsConfig.maxContentLength }}
+          containerIdCacheMaxSize : {{ .Values.logPatternsConfig.containerIdCacheMaxSize }}
+          containerIdCacheTTL : {{ .Values.logPatternsConfig.containerIdCacheTTL }}
           summarizerConfig: {{ toYaml .Values.logPatternsConfig.summarizerConfig | nindent 12 }}
         ottlRules: {{ toYaml .Values.ottlRules | nindent 10 }}
       pipeline:

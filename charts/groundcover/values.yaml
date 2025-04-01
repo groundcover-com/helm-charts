@@ -231,6 +231,8 @@ logPatternsConfig:
   maxEvictionRatio: 0.8
   maxTokens: 50
   maxContentLength: 1024
+  containerIdCacheMaxSize: 500
+  containerIdCacheTTL: 15m
   summarizerConfig:
     flushInterval: 30s
     workloadCacheSize: 1000
