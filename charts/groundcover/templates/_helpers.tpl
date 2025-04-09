@@ -94,7 +94,6 @@ Get cluster_id from values or generate random one
 {{- .Values.env | default "" }}
 {{- end }}
 
-
 {{- define "agent.monitoring.port" -}}
 {{- default 9102 (.Values.agent.monitoring).port -}}
 {{- end -}}

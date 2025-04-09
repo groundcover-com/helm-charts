@@ -2642,7 +2642,7 @@ custom-metrics:
     remoteWrite.maxHourlySeries: '{{ ternary "200000" "1000000" (empty .Values.global.ingress.site) }}'
     remoteWrite.headers: "apikey:%{API_KEY}"
     remoteWrite.tlsInsecureSkipVerify: '{{ ternary "true" "false" .Values.global.ingestion.tls_skip_verify }}'
-    remoteWrite.label: clusterId=$(GC_CLUSTER_ID),cluster=$(GC_CLUSTER_ID)
+    remoteWrite.label: clusterId=$(GC_CLUSTER_ID),cluster=$(GC_CLUSTER_ID),env=$(GC_ENV),env_type=k8s
     promscrape.streamParse: "true"
     promscrape.dropOriginalLabels: "true"
     promscrape.suppressDuplicateScrapeTargetErrors: "true"
@@ -2658,6 +2658,11 @@ custom-metrics:
         secretKeyRef:
           key: '{{ include "groundcover.apikeySecretKey" . }}'
           name: '{{ include "groundcover.apikeySecretName" . }}'
+    - name: GC_ENV
+      valueFrom:
+        secretKeyRef:
+          name: groundcover-config
+          key: GC_ENV
   extraScrapeConfigs: []
   config:
     scrape_configs:

@@ -102,6 +102,11 @@ spec:
                 secretKeyRef:
                     name: groundcover-config
                     key: GC_CLUSTER_ID
+            - name: GC_ENV
+              valueFrom:
+                secretKeyRef:
+                  name: groundcover-config
+                  key: GC_ENV
             - name: GC_REGION
               valueFrom:
                 secretKeyRef:
