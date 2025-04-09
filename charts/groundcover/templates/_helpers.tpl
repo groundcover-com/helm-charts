@@ -155,6 +155,10 @@ Get cluster_id from values or generate random one
 {{- end -}}
 {{- end -}}
 
+{{- define "victoria-metrics-agent.fullname" -}}
+{{- printf "%s-victoria-metrics-agent" .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
 {{- define "telemetry.metrics.url" }}
 {{- if and .Values.metrics .Values.metrics.host -}}
     {{- printf "https://%s/api/v1/write" .Values.metrics.host -}}
@@ -163,9 +167,16 @@ Get cluster_id from values or generate random one
 {{- end -}}
 {{- end -}}
 
+{{- define "sensor.telemetry.metrics.prometheusUrl" -}}
+{{- $scheme := .scheme | default "https" -}}
+{{- printf "%s://%s/api/v1/import/prometheus" $scheme .host -}}
+{{- end -}}
+
 {{- define "sensor.telemetry.metrics.url" }}
 {{- if and .Values.metrics .Values.metrics.host -}}
-    {{- printf "https://%s/api/v1/import/prometheus" .Values.metrics.host -}}
+    {{- include "sensor.telemetry.metrics.prometheusUrl" (dict "host" .Values.metrics.host "scheme" "https") -}}
+{{- else if .Values.isk8s -}}
+    {{- include "sensor.telemetry.metrics.prometheusUrl" (dict "host" (printf "%s:8429" (include "victoria-metrics-agent.fullname" .)) "scheme" "http") -}}
 {{- else -}}
     {{- .Values.global.telemetry.metrics.url -}}
 {{- end -}}

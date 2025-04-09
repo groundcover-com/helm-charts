@@ -130,7 +130,7 @@ global:
       url: https://logs.groundcover.com/v1/logs
     metrics:
       url: https://metrics.groundcover.com/api/v1/write
-      interval: 10s
+      interval: 30s
     traces:
       otlpUrl: https://traces.groundcover.com/v1/traces
       zipkinUrl: https://traces.groundcover.com/api/v2/spans
@@ -2447,6 +2447,8 @@ metrics-ingester:
   podLabels: 
     app.groundcover.com/pipeline: metrics
 victoria-metrics-agent:
+  service:
+    enabled: true
   nodeSelector:
   rbac:
     namespaced: true
@@ -2489,10 +2491,14 @@ victoria-metrics-agent:
   config:
     scrape_configs:
       - job_name: groundcover
+        scrape_interval: 30s
         kubernetes_sd_configs:
           - namespaces:
               own_namespace: true
             role: pod
+            selectors:
+              - role: pod
+                label: app!=sensor
         relabel_configs:
           - action: keep
             source_labels:
