@@ -212,7 +212,7 @@ spec:
             - mountPath: /var/lib/docker/containers
               name: docker
               readOnly: true
-{{- if eq (include "telemetry.enabled" .) "true" }}
+{{- if and (eq (include "telemetry.enabled" .) "true") (eq .Values.agent.flb.enabled true) }}
         - name: fluent-bit
           image: {{ tpl .Values.agent.flb.image.repository . }}:{{ .Values.agent.flb.image.tag }}
           ports:

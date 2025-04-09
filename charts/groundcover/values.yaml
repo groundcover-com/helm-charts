@@ -289,6 +289,7 @@ agent:
             key: '{{ template "groundcover.apikeySecretKey" . }}'
             name: '{{ template "groundcover.apikeySecretName" . }}' 
   flb:
+    enabled: true
     # for ipv6, change to "[::]"
     bindAddress: 0.0.0.0
     image:
@@ -1106,53 +1107,6 @@ opentelemetry-collector:
           insecure: true
         resource_to_telemetry_conversion:
           enabled: true
-      groundcover/monitorState:
-        type: monitorState
-        timeout: 5s
-        password: ${env:CLICKHOUSE_PASSWORD}
-        username: '{{ include "clickhouse.username" . }}'
-        database: '{{ include "clickhouse.database" . }}'
-        endpoint: '{{ include "clickhouse.nativeEndpoint" . }}'
-        retry_on_failure:
-          initial_interval: 5s
-          max_interval: 5s
-          max_elapsed_time: 15s
-      groundcover/logs:
-        type: logs
-        timeout: 5s
-        password: ${env:CLICKHOUSE_PASSWORD}
-        username: '{{ include "clickhouse.username" . }}'
-        database: '{{ include "clickhouse.database" . }}'
-        endpoint: '{{ include "clickhouse.nativeEndpoint" . }}'
-        retry_on_failure:
-          initial_interval: 5s
-          max_interval: 5s
-          max_elapsed_time: 15s
-      groundcover/custom:
-        type: custom
-        timeout: 5s
-        ttl_interval: 5d
-        logs_table_name: k8s_objects
-        password: ${env:CLICKHOUSE_PASSWORD}
-        username: '{{ include "clickhouse.username" . }}'
-        database: '{{ include "clickhouse.database" . }}'
-        endpoint: '{{ include "clickhouse.nativeEndpoint" . }}'
-        retry_on_failure:
-          initial_interval: 5s
-          max_interval: 5s
-          max_elapsed_time: 15s
-      groundcover/traces:
-        type: traces
-        timeout: 5s
-        traces_table_name: traces
-        password: ${env:CLICKHOUSE_PASSWORD}
-        username: '{{ include "clickhouse.username" . }}'
-        database: '{{ include "clickhouse.database" . }}'
-        endpoint: '{{ include "clickhouse.nativeEndpoint" . }}'
-        retry_on_failure:
-          initial_interval: 5s
-          max_interval: 5s
-          max_elapsed_time: 15s
       otlphttp/vector_logs:
         endpoint: '{{ include "vector.cluster.otlp.http.logs.endpoint" . }}'
         tls:
