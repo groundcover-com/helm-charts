@@ -20,6 +20,8 @@ global:
         adminPasswordKey: postgres-password
   monitors:
     enabled: false
+  debug:
+    enabled: false
 enabled: true
 additionalLabels:
 onprem:
@@ -27,7 +29,7 @@ onprem:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.9.271
+  tag: 1.9.272
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/curl'

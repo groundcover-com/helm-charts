@@ -78,6 +78,11 @@ spec:
             - containerPort: 9102
               name: prom-metrics
               protocol: TCP
+            {{- if default false .Values.global.debug.enabled }}
+            - containerPort: 4040
+              name: dlv-tcp
+              protocol: TCP
+            {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           env:

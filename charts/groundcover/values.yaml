@@ -9,7 +9,8 @@ global:
     enabled: true
     victoria-metrics-distributed:
       enabled: false
-
+  debug:
+    enabled: false
   workflows:
     enabled: true
   vector:
