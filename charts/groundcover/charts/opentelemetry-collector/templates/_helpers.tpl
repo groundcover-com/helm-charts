@@ -68,7 +68,9 @@ app.kubernetes.io/component: agent-collector
 {{- if eq .Values.mode "statefulset" }}
 app.kubernetes.io/component: statefulset-collector
 {{- end -}}
-{{ include "opentelemetry-collector.additionalLabels" . }}
+{{- if .Values.additionalLabels }}
+{{ tpl (.Values.additionalLabels | toYaml) . }}
+{{- end }}
 {{- end }}
 
 {{/*
@@ -114,12 +116,6 @@ Create the name of the clusterRoleBinding to use
 {{- define "opentelemetry-collector.podLabels" -}}
 {{- if .Values.podLabels }}
 {{- tpl (.Values.podLabels | toYaml) . }}
-{{- end }}
-{{- end }}
-
-{{- define "opentelemetry-collector.additionalLabels" -}}
-{{- if .Values.additionalLabels }}
-{{- tpl (.Values.additionalLabels | toYaml) . }}
 {{- end }}
 {{- end }}
 
@@ -229,7 +225,7 @@ Get ConfigMap name if existingName is defined, otherwise use default name for ge
 */}}
 {{- define "opentelemetry-collector.configName" -}}
   {{- if .Values.configMap.existingName -}}
-    {{- .Values.configMap.existingName }}
+    {{- tpl (.Values.configMap.existingName | toYaml) . }}
   {{- else }}
     {{- printf "%s%s" (include "opentelemetry-collector.fullname" .) (.configmapSuffix) }}
   {{- end -}}

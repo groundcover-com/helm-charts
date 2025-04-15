@@ -1,9 +1,9 @@
 ---
-# Source: opentelemetry-collector/templates/configmap-agent.yaml
+# Source: opentelemetry-collector/templates/configmap.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: example-opentelemetry-collector-agent
+  name: example-opentelemetry-collector
   namespace: default
   labels:
     helm.sh/chart: opentelemetry-collector-0.120.2
@@ -11,15 +11,11 @@ metadata:
     app.kubernetes.io/instance: example
     app.kubernetes.io/version: "0.122.1"
     app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/component: agent-collector
+    app.kubernetes.io/component: standalone-collector
 data:
   relay: |
     exporters:
       debug: {}
-      otlp:
-        endpoint: example-opentelemetry-collector:4317
-        tls:
-          insecure: true
     extensions:
       health_check:
         endpoint: ${env:MY_POD_IP}:13133
@@ -44,14 +40,6 @@ data:
             endpoint: ${env:MY_POD_IP}:4317
           http:
             endpoint: ${env:MY_POD_IP}:4318
-      prometheus:
-        config:
-          scrape_configs:
-          - job_name: opentelemetry-collector
-            scrape_interval: 10s
-            static_configs:
-            - targets:
-              - ${env:MY_POD_IP}:8888
       zipkin:
         endpoint: ${env:MY_POD_IP}:9411
     service:
@@ -60,7 +48,6 @@ data:
       pipelines:
         logs:
           exporters:
-          - otlp
           - debug
           processors:
           - memory_limiter
@@ -69,17 +56,14 @@ data:
           - otlp
         metrics:
           exporters:
-          - otlp
           - debug
           processors:
           - memory_limiter
           - batch
           receivers:
           - otlp
-          - prometheus
         traces:
           exporters:
-          - otlp
           - debug
           processors:
           - memory_limiter
@@ -89,5 +73,27 @@ data:
           - jaeger
           - zipkin
       telemetry:
+        logs:
+          processors:
+          - batch:
+              exporter:
+                otlp:
+                  endpoint: http://localhost:4318
+                  protocol: http/protobuf
         metrics:
-          address: ${env:MY_POD_IP}:8888
+          readers:
+          - periodic:
+              exporter:
+                otlp:
+                  endpoint: http://localhost:4318
+                  protocol: http/protobuf
+        traces:
+          processors:
+          - batch:
+              exporter:
+                otlp:
+                  endpoint: http://localhost:4318
+                  headers:
+                  - name: x-opentelemetry-customer
+                    value: a value
+                  protocol: http/protobuf

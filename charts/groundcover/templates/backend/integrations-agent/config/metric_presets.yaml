@@ -1215,6 +1215,7 @@ data:
     - Name: Count
       Statistics:
       - Average
+      - Sum
     - Name: ExecutionError
       Statistics:
       - Average
@@ -1261,15 +1262,19 @@ data:
     - Name: NumberOfEmptyReceives
       Statistics:
       - Average
+      - Sum
     - Name: NumberOfMessagesDeleted
       Statistics:
       - Average
+      - Sum
     - Name: NumberOfMessagesReceived
       Statistics:
       - Average
+      - Sum
     - Name: NumberOfMessagesSent
       Statistics:
       - Average
+      - Sum
     - Name: SentMessageSize
       Statistics:
       - Average
@@ -1395,24 +1400,31 @@ data:
     - Name: Connect.AuthError
       Statistics:
       - Average
+      - Sum
     - Name: Connect.ClientError
       Statistics:
       - Average
+      - Sum
     - Name: Connect.ClientIdthrottle
       Statistics:
       - Average
+      - Sum
     - Name: Connect.ServerError
       Statistics:
       - Average
+      - Sum
     - Name: Connect.Success
       Statistics:
       - Average
+      - Sum
     - Name: Connect.Throttle
       Statistics:
       - Average
+      - Sum
     - Name: Connection.AuthNError
       Statistics:
       - Average
+      - Sum
     - Name: CredentialExchangeSuccess
       Statistics:
       - Average
@@ -1446,54 +1458,70 @@ data:
     - Name: ParseError
       Statistics:
       - Average
+      - Sum
     - Name: PingSuccess
       Statistics:
       - Average
     - Name: PublishIn.AuthError
       Statistics:
       - Average
+      - Sum
     - Name: PublishIn.ClientError
       Statistics:
       - Average
+      - Sum
     - Name: PublishIn.ServerError
       Statistics:
       - Average
+      - Sum
     - Name: PublishIn.Success
       Statistics:
       - Average
+      - Sum
     - Name: PublishIn.Throttle
       Statistics:
       - Average
+      - Sum
     - Name: PublishOut.AuthError
       Statistics:
       - Average
+      - Sum
     - Name: PublishOut.ClientError
       Statistics:
       - Average
+      - Sum
     - Name: PublishOut.Success
       Statistics:
       - Average
+      - Sum
     - Name: PublishOut.Throttle
       Statistics:
       - Average
+      - Sum
     - Name: PublishRetained.AuthError
       Statistics:
       - Average
+      - Sum
     - Name: PublishRetained.Success
       Statistics:
       - Average
+      - Sum
     - Name: PublishRetained.Throttle
       Statistics:
       - Average
+      - Sum
     - Name: Queued.ServerError
       Statistics:
       - Average
+      - Sum
     - Name: Queued.Success
       Statistics:
       - Average
+      - Sum
     - Name: Queued.Throttle
       Statistics:
       - Average
+      - Sum
     - Name: RuleMessageThrottled
       Statistics:
       - Average
@@ -1506,18 +1534,23 @@ data:
     - Name: Subscribe.AuthError
       Statistics:
       - Average
+      - Sum
     - Name: Subscribe.ClientError
       Statistics:
       - Average
+      - Sum
     - Name: Subscribe.ServerError
       Statistics:
       - Average
+      - Sum
     - Name: Subscribe.Success
       Statistics:
       - Average
+      - Sum
     - Name: Subscribe.Throttle
       Statistics:
       - Average
+      - Sum
     - Name: Success
       Statistics:
       - Average
@@ -1530,15 +1563,19 @@ data:
     - Name: Unsubscribe.ClientError
       Statistics:
       - Average
+      - Sum
     - Name: Unsubscribe.ServerError
       Statistics:
       - Average
+      - Sum
     - Name: Unsubscribe.Success
       Statistics:
       - Average
+      - Sum
     - Name: Unsubscribe.Throttle
       Statistics:
       - Average
+      - Sum
     - Name: UpdateThingShadow.Accepted
       Statistics:
       - Average
@@ -3078,12 +3115,14 @@ data:
     - Name: DeadLetterErrors
       Statistics:
       - Average
+      - Sum
     - Name: DeletedEventCount
       Statistics:
       - Average
     - Name: DestinationDeliveryFailures
       Statistics:
       - Average
+      - Sum
     - Name: DroppedEventCount
       Statistics:
       - Average
@@ -3100,6 +3139,7 @@ data:
     - Name: Errors
       Statistics:
       - Average
+      - Sum
     - Name: FailedInvokeEventCount
       Statistics:
       - Average
@@ -3109,6 +3149,7 @@ data:
     - Name: Invocations
       Statistics:
       - Average
+      - Sum
     - Name: InvokedEventCount
       Statistics:
       - Average
@@ -3138,9 +3179,11 @@ data:
     - Name: ProvisionedConcurrencyInvocations
       Statistics:
       - Average
+      - Sum
     - Name: ProvisionedConcurrencySpilloverInvocations
       Statistics:
       - Average
+      - Sum
     - Name: ProvisionedConcurrencyUtilization
       Statistics:
       - Average
@@ -3154,6 +3197,7 @@ data:
     - Name: RecursiveInvocationsDropped
       Statistics:
       - Average
+      - Sum
     - Name: SignatureValidationErrors
       Statistics:
       - Average
@@ -3166,6 +3210,7 @@ data:
     - Name: Throttles
       Statistics:
       - Average
+      - Sum
     - Name: Timeout
       Statistics:
       - Average
