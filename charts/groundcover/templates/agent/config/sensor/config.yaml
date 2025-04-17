@@ -393,7 +393,7 @@ data:
     watchOnlyLocalNode: {{ $sensorValues.watchOnlyLocalNode }}
     floraEnabled: true
     runningNamespace: ""
-    shouldDropRunningNamespaces: {{ .Values.shouldDropRunningNamespaces }}
+    shouldDropRunningNamespaces: {{ include "groundcover.shouldDropRunningNamespaces" . }}
     tracesNamespaceFilters: {{ toYaml .Values.tracesNamespaceFilters | nindent 6 }}
     tracesWorkloadFilters: {{ toYaml .Values.tracesWorkloadFilters | nindent 6 }}
     nodelabels: {{ toYaml $sensorValues.nodelabels | nindent 6 }}
@@ -503,7 +503,7 @@ data:
             job: sensor
         timeout: 10s
         useRingBuffer: false
-        dropRunningNamespaceLogs: {{ .Values.dropRunningNamespaceLogs }}
+        dropRunningNamespaceLogs: {{  include "groundcover.dropRunningNamespaceLogs" .}}
         logBatchSendQueueWorkerCount: {{ .Values.logBatchSendQueueWorkerCount }} 
         logBatchSendQueueMaxSize : {{ .Values.logBatchSendQueueMaxSize }}
         otlpExportLimits:
