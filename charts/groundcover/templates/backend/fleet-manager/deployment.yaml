@@ -1,0 +1,126 @@
+{{ if .Values.fleetManager.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+    {{- if .Values.fleetManager.additionalAnnotations }}
+{{ toYaml .Values.fleetManager.additionalAnnotations | indent 4 }}
+    {{- end }}    
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+    app: fleet-manager
+    {{- if .Values.fleetManager.additionalLabels }}
+{{ toYaml .Values.fleetManager.additionalLabels | indent 4 }}
+    {{- end }}
+  name: fleet-manager
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: fleet-manager
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9102"
+        groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+        checksum/config: {{ include (print $.Template.BasePath "/backend/fleet-manager/config/config.yaml") . | sha256sum }}
+        {{- if .Values.fleetManager.additionalAnnotations }}
+{{ toYaml .Values.fleetManager.additionalAnnotations | indent 8 }}
+        {{- end }}
+        {{- if .Values.fleetManager.podAnnotations }}
+{{ toYaml .Values.fleetManager.podAnnotations | indent 8 }}
+        {{- end }}
+      labels:
+        app: fleet-manager
+        app.kubernetes.io/name: fleet-manager
+        {{- include "groundcover.labels" . | nindent 8 }}
+        {{- if .Values.fleetManager.additionalLabels }}
+{{ toYaml .Values.fleetManager.additionalLabels | indent 8 }}
+        {{- end }}
+        {{- if .Values.fleetManager.podLabels }}
+{{ toYaml .Values.fleetManager.podLabels | indent 8 }}
+        {{- end }}
+    spec: 
+{{- if .Values.fleetManager.tolerations }}
+      tolerations:
+{{ toYaml .Values.fleetManager.tolerations | indent 8 }}
+{{- end }}
+{{- if .Values.fleetManager.affinity }}
+      affinity:
+{{ toYaml .Values.fleetManager.affinity | indent 8 }}
+{{- end }}
+{{- if .Values.fleetManager.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.fleetManager.nodeSelector | indent 8 }}
+{{- end }}
+      imagePullSecrets: {{ include "imagePullSecrets" . }}
+      serviceAccountName: {{ default "fleet-manager" .Values.fleetManager.serviceAccount.name }}
+      containers:
+      - env:
+        - name: GC_CLUSTERID
+          valueFrom:
+            secretKeyRef:
+              key: GC_CLUSTER_ID
+              name: groundcover-config
+        - name: GC_REGION
+          valueFrom:
+            secretKeyRef:
+              name: groundcover-config
+              key: GC_REGION   
+        - name: GC_RUNNINGNAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: GC_GROUNDCOVERVERSION
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['groundcover_version']              
+        {{- with .Values.fleetManager.env }}
+          {{ tpl (toYaml .) $ | nindent 8 }}
+        {{- end }}
+        {{- with .Values.fleetManager.builtinEnv }}
+          {{ tpl (toYaml .) $ | nindent 8 }}
+        {{- end }}
+        image: {{ tpl .Values.fleetManager.image.repository . }}:{{ tpl .Values.fleetManager.image.tag . }}
+        imagePullPolicy: Always
+        name: fleet-manager     
+        ports:
+        - containerPort: {{ .Values.fleetManager.clientHttpPort }}
+          name: client-http
+        - containerPort: {{ .Values.fleetManager.manageHttpPort }}
+          name: manage-http
+        - containerPort: {{ .Values.fleetManager.healthProbePort }}
+          name: health-http
+        - containerPort: 9102
+          name: fleet-metrics
+        readinessProbe:
+          httpGet:
+            scheme: HTTP
+            path: /health
+            port: health-http
+          initialDelaySeconds: 45
+          periodSeconds: 15
+          failureThreshold: 20
+        livenessProbe:
+          httpGet:
+            scheme: HTTP
+            path: /health
+            port: health-http
+          initialDelaySeconds: 45
+          periodSeconds: 15
+          failureThreshold: 20
+        resources:
+{{- toYaml .Values.fleetManager.resources | nindent 10 }}
+        volumeMounts:
+        - mountPath: /config
+          name: fleet-manager-config-volume
+{{- if .Values.fleetManager.priorityClassName }}
+      priorityClassName: {{ .Values.fleetManager.priorityClassName }}
+{{- end }}
+      volumes:
+      - configMap:
+          name: fleet-manager-config
+        name: fleet-manager-config-volume
+{{ end -}}

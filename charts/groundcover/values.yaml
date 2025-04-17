@@ -580,6 +580,75 @@ integrationsAgent:
         maxBatchSize: 2000
         maxBatchWait: 10s
 
+fleetManager:
+  enabled: false
+  serviceAccount:
+    name: fleet-manager
+    annotations: {}
+  image:
+    repository: "{{ .Values.global.origin.registry }}/fleet-manager"
+    tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
+  additionalLabels:
+  additionalAnnotations:
+  podLabels:
+  podAnnotations:
+  affinity:
+  nodeSelector:
+  tolerations: []
+  priorityClassName:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  builtinEnv:
+  - name: API_KEY
+    valueFrom:
+      secretKeyRef:
+        key: '{{ template "groundcover.apikeySecretKey" . }}'
+        name: '{{ template "groundcover.apikeySecretName" . }}'  
+  readinessProbe:
+    httpGet:
+      scheme: HTTP
+      path: /health
+      port: health-http
+    initialDelaySeconds: 45
+    periodSeconds: 15
+    failureThreshold: 20
+  livenessProbe:
+    httpGet:
+      scheme: HTTP
+      path: /health
+      port: health-http
+    initialDelaySeconds: 45
+    periodSeconds: 15
+    failureThreshold: 20
+  logLevel: 4
+  clientHttpPort: 8080
+  manageHttpPort: 8081
+  healthProbePort: 8082
+  pprof:
+    enabled: true
+    uploaderType: pyroscope
+    cpuSamplingDuration: 60s
+    backoffTicker:
+      interval: 10s
+      exponent: 40
+    memoryTicker:
+      enabled: true
+      interval: 60s
+      jumpSizeInBytes: 100000000
+      windowSize: 12h
+      initialWait: 10m
+    cpuTicker:
+      enabled: true
+      interval: 60s
+      jumpSizeInMCPU: 100
+      windowSize: 12h
+      initialWait: 10m
+
 k8sWatcher:
   initContainers:
     checkIngestion:
