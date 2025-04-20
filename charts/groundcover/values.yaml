@@ -1049,6 +1049,12 @@ opentelemetry-collector:
       servicePort: 4433
       hostPort: 4433
       protocol: TCP
+    zipkin:
+      enabled: true
+      containerPort: 9411
+      servicePort: 9411
+      hostPort: 9411
+      protocol: TCP
     http-json:
       enabled: true
       containerPort: 8016
@@ -1126,6 +1132,8 @@ opentelemetry-collector:
       awsfirehose:
         endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "awsfirehose" "containerPort" | int ) }}'
         record_type: "cwlogs"
+      zipkin:
+        endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "zipkin" "containerPort" | int ) }}'
     processors:
       batch/monitorState:
         timeout: 5s
@@ -1220,6 +1228,7 @@ opentelemetry-collector:
             - datadog
             - faro
             - rum/traces
+            - zipkin
           processors:
             - batch/traces
             - groundcover/traces
