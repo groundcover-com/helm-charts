@@ -1206,7 +1206,12 @@ opentelemetry-collector:
     service:
       telemetry:
         metrics:
-          address: '{{ printf "0.0.0.0:%d" (index .Values "ports" "metrics" "containerPort" | int ) }}'
+          readers:
+            - pull:
+                exporter:
+                  prometheus:
+                    host: '0.0.0.0'
+                    port: 8888
       extensions: [health_check, pprof]
       pipelines:
         logs/monitorState:
