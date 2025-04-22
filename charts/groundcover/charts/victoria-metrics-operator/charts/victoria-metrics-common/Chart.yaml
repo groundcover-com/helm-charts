@@ -1,7 +1,7 @@
 annotations:
   artifacthub.io/category: monitoring-logging
   artifacthub.io/changes: |
-    - Support custom case for list empty argument.
+    - Fixed minor securityContext template typo
   artifacthub.io/license: Apache-2.0
   artifacthub.io/links: |
     - name: Sources
@@ -25,4 +25,4 @@ name: victoria-metrics-common
 sources:
 - https://github.com/VictoriaMetrics/helm-charts
 type: library
-version: 0.0.42
+version: 0.0.38

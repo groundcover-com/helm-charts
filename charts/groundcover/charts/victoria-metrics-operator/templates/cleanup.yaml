@@ -6,7 +6,7 @@
 {{- else if not (kindIs "string" ($app.image).tag) }}
   {{- fail "`crd.cleanup.image.tag` is not string, most probably you need to enquote provided value" -}}
 {{- end }}
-{{- $ctx := dict "helm" . "noEnterprise" true }}
+{{- $ctx := dict "helm" . }}
 {{- $fullname := include "vm.plain.fullname" $ctx }}
 {{- $ns := include "vm.namespace" $ctx }}
 ---
@@ -24,7 +24,7 @@ spec:
       labels: {{ include "vm.labels" $ctx | nindent 8 }}
     spec:
       serviceAccountName: {{ $fullname }}-cleanup-hook
-      {{- with (.Values.imagePullSecrets | default .Values.global.imagePullSecrets) }}
+      {{- with .Values.imagePullSecrets }}
       imagePullSecrets: {{ toYaml . | nindent 8 }}
       {{- end }}
       containers:
