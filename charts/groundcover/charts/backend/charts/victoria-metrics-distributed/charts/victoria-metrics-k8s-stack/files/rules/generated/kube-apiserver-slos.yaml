@@ -1,17 +1,22 @@
 {{- $Values := (.helm).Values | default .Values }}
-condition: '{{ $Values.kubeApiServer.enabled }}'
+{{- $runbookUrl := ($Values.defaultRules).runbookUrl | default "https://runbooks.prometheus-operator.dev/runbooks" }}
+{{- $clusterLabel := ($Values.global).clusterLabel | default "cluster" }}
+{{- $additionalGroupByLabels := append $Values.defaultRules.additionalGroupByLabels $clusterLabel }}
+{{- $groupLabels := join "," $additionalGroupByLabels }}
+{{- $grafanaHost := ternary (index (($Values.grafana).ingress).hosts 0) (($Values.external).grafana).host ($Values.grafana).enabled }}
+condition: '{{ ($Values.kubeApiServer).enabled }}'
 name: kube-apiserver-slos
 rules:
 - alert: KubeAPIErrorBudgetBurn
   annotations:
-    description: 'The API server is burning too much error budget.'
-    runbook_url: '{{ $Values.defaultRules.runbookUrl }}/kubernetes/kubeapierrorbudgetburn'
+    description: 'The API server is burning too much error budget on cluster {{`{{`}} $labels.{{ $clusterLabel }} {{`}}`}}.'
+    runbook_url: '{{ $runbookUrl }}/kubernetes/kubeapierrorbudgetburn'
     summary: 'The API server is burning too much error budget.'
   condition: '{{ true }}'
   expr: |-
-    sum by ({{ $Values.global.clusterLabel }}) (apiserver_request:burnrate1h) > (14.40 * 0.01000)
-    and on ({{ $Values.global.clusterLabel }})
-    sum by ({{ $Values.global.clusterLabel }}) (apiserver_request:burnrate5m) > (14.40 * 0.01000)
+    sum by ({{ $groupLabels }}) (apiserver_request:burnrate1h) > (14.40 * 0.01000)
+    and on ({{ $groupLabels }})
+    sum by ({{ $groupLabels }}) (apiserver_request:burnrate5m) > (14.40 * 0.01000)
   for: 2m
   labels:
     long: 1h
@@ -19,14 +24,14 @@ rules:
     short: 5m
 - alert: KubeAPIErrorBudgetBurn
   annotations:
-    description: 'The API server is burning too much error budget.'
-    runbook_url: '{{ $Values.defaultRules.runbookUrl }}/kubernetes/kubeapierrorbudgetburn'
+    description: 'The API server is burning too much error budget on cluster {{`{{`}} $labels.{{ $clusterLabel }} {{`}}`}}.'
+    runbook_url: '{{ $runbookUrl }}/kubernetes/kubeapierrorbudgetburn'
     summary: 'The API server is burning too much error budget.'
   condition: '{{ true }}'
   expr: |-
-    sum by ({{ $Values.global.clusterLabel }}) (apiserver_request:burnrate6h) > (6.00 * 0.01000)
-    and on ({{ $Values.global.clusterLabel }})
-    sum by ({{ $Values.global.clusterLabel }}) (apiserver_request:burnrate30m) > (6.00 * 0.01000)
+    sum by ({{ $groupLabels }}) (apiserver_request:burnrate6h) > (6.00 * 0.01000)
+    and on ({{ $groupLabels }})
+    sum by ({{ $groupLabels }}) (apiserver_request:burnrate30m) > (6.00 * 0.01000)
   for: 15m
   labels:
     long: 6h
@@ -34,14 +39,14 @@ rules:
     short: 30m
 - alert: KubeAPIErrorBudgetBurn
   annotations:
-    description: 'The API server is burning too much error budget.'
-    runbook_url: '{{ $Values.defaultRules.runbookUrl }}/kubernetes/kubeapierrorbudgetburn'
+    description: 'The API server is burning too much error budget on cluster {{`{{`}} $labels.{{ $clusterLabel }} {{`}}`}}.'
+    runbook_url: '{{ $runbookUrl }}/kubernetes/kubeapierrorbudgetburn'
     summary: 'The API server is burning too much error budget.'
   condition: '{{ true }}'
   expr: |-
-    sum by ({{ $Values.global.clusterLabel }}) (apiserver_request:burnrate1d) > (3.00 * 0.01000)
-    and on ({{ $Values.global.clusterLabel }})
-    sum by ({{ $Values.global.clusterLabel }}) (apiserver_request:burnrate2h) > (3.00 * 0.01000)
+    sum by ({{ $groupLabels }}) (apiserver_request:burnrate1d) > (3.00 * 0.01000)
+    and on ({{ $groupLabels }})
+    sum by ({{ $groupLabels }}) (apiserver_request:burnrate2h) > (3.00 * 0.01000)
   for: 1h
   labels:
     long: 1d
@@ -49,14 +54,14 @@ rules:
     short: 2h
 - alert: KubeAPIErrorBudgetBurn
   annotations:
-    description: 'The API server is burning too much error budget.'
-    runbook_url: '{{ $Values.defaultRules.runbookUrl }}/kubernetes/kubeapierrorbudgetburn'
+    description: 'The API server is burning too much error budget on cluster {{`{{`}} $labels.{{ $clusterLabel }} {{`}}`}}.'
+    runbook_url: '{{ $runbookUrl }}/kubernetes/kubeapierrorbudgetburn'
     summary: 'The API server is burning too much error budget.'
   condition: '{{ true }}'
   expr: |-
-    sum by ({{ $Values.global.clusterLabel }}) (apiserver_request:burnrate3d) > (1.00 * 0.01000)
-    and on ({{ $Values.global.clusterLabel }})
-    sum by ({{ $Values.global.clusterLabel }}) (apiserver_request:burnrate6h) > (1.00 * 0.01000)
+    sum by ({{ $groupLabels }}) (apiserver_request:burnrate3d) > (1.00 * 0.01000)
+    and on ({{ $groupLabels }})
+    sum by ({{ $groupLabels }}) (apiserver_request:burnrate6h) > (1.00 * 0.01000)
   for: 3h
   labels:
     long: 3d

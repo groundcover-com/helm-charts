@@ -1,10 +1,19 @@
-{{- if .Values.extraVMAgent.enabled }}
+{{- if ((.Values.extra).vmagent).enabled }}
+{{- $ctx := dict "helm" . "appKey" (list "extra" "vmagent" "spec") -}}
+{{- $ns := include "vm.namespace" $ctx }}
 ---
 apiVersion: operator.victoriametrics.com/v1beta1
 kind: VMAgent
 metadata:
-  labels: {{ include "victoria-metrics-distributed.labels" . | nindent 4 }}
-  name: {{ .Values.extraVMAgent.name }}
-  namespace: {{ include "vm.namespace" . }}
-spec: {{ include "victoria-metrics-distributed.extravmagentSpec" . | nindent 2 }}
+  labels: {{ include "vm.labels" $ctx | nindent 4 }}
+  name: {{ include "vm.cr.fullname" $ctx }}
+  namespace: {{ $ns }}
+{{- $spec := (((.Values).extra).vmagent).spec }}
+{{- $write := deepCopy (.Values.write).global  }}
+{{- $_ := set $write.vmauth "spec" (mergeOverwrite (deepCopy $.Values.common.vmauth.spec) $write.vmauth.spec) }}
+{{- $fullname := include "vm.fullname" . }}
+{{- $ctx := dict "helm" . "appKey" (list "globalWrite" "vmauth" "spec") "globalWrite" $write "style" "managed" "fullname" $fullname }}
+{{- $remoteWrites := list (dict "url" (printf "%s/prometheus/api/v1/write" (include "vm.url" $ctx))) }}
+{{- $_ := set $spec "remoteWrite" (concat $remoteWrites ($spec.remoteWrite | default list)) }}
+spec: {{ tpl (toYaml $spec) . | nindent 2 }}
 {{- end }}

@@ -1,31 +1,10 @@
 {{- $Values := (.helm).Values | default .Values }}
-__elements: {}
-__inputs: []
-__requires:
-- id: grafana
-  name: Grafana
-  type: grafana
-  version: 10.4.2
-- id: prometheus
-  name: Prometheus
-  type: datasource
-  version: 1.0.0
-- id: stat
-  name: Stat
-  type: panel
-  version: ''
-- id: table
-  name: Table
-  type: panel
-  version: ''
-- id: text
-  name: Text
-  type: panel
-  version: ''
-- id: timeseries
-  name: Time series
-  type: panel
-  version: ''
+{{- $clusterLabel := ($Values.global).clusterLabel | default "cluster" }}
+{{- $multicluster := ((($Values.grafana).sidecar).dashboards).multicluster | default false }}
+{{- $defaultDatasource := "prometheus" -}}
+{{- range (((($Values.grafana).sidecar).datasources).victoriametrics | default list) }}
+  {{- if and .isDefault .type }}{{ $defaultDatasource = .type }}{{- end }}
+{{- end }}
 annotations:
   list:
   - builtIn: 1
@@ -47,6 +26,7 @@ annotations:
       uid: $ds
     enable: true
     expr: sum(ALERTS{job=~"$job", instance=~"$instance", alertgroup="vmcluster",alertstate="firing",show_at="dashboard"}) by(alertname)
+    hide: false
     iconColor: red
     name: alerts
     titleFormat: '{{`{{`}}alertname{{`}}`}}'
@@ -65,15 +45,16 @@ annotations:
       uid: $ds
     enable: true
     expr: sum(changes(vm_app_start_timestamp{job=~"$job", instance=~"$instance"}[$__interval])) by(job)
+    hide: false
     iconColor: dark-yellow
     name: restarts
     textFormat: '{{`{{`}}job{{`}}`}} restarted'
-condition: {{ $Values.vmcluster.enabled }}
-description: Overview for cluster VictoriaMetrics v1.86.0 or higher
+condition: {{ ($Values.vmcluster).enabled }}
+description: Overview for cluster VictoriaMetrics v1.102.0 or higher
 editable: false
 fiscalYearStartMonth: 0
 graphTooltip: 1
-id: null
+id: 2
 links:
 - icon: doc
   tags: []
@@ -93,12 +74,8 @@ links:
   title: New releases
   type: link
   url: https://github.com/VictoriaMetrics/VictoriaMetrics/releases
-liveNow: false
 panels:
 - collapsed: false
-  datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
-    uid: $ds
   gridPos:
     h: 1
     w: 24
@@ -109,7 +86,7 @@ panels:
   title: Stats
   type: row
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: $ds
   description: How many [data samples](https://docs.victoriametrics.com/keyconcepts/#raw-samples) are in storage
   fieldConfig:
@@ -136,6 +113,7 @@ panels:
     graphMode: area
     justifyMode: auto
     orientation: horizontal
+    percentChangeColorMode: standard
     reduceOptions:
       calcs:
       - lastNotNull
@@ -145,10 +123,10 @@ panels:
     text: {}
     textMode: auto
     wideLayout: true
-  pluginVersion: 10.4.2
+  pluginVersion: 11.5.0
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     exemplar: true
     expr: sum(vm_rows{job=~"$job_storage", type!~"indexdb.*"})
@@ -161,7 +139,7 @@ panels:
   title: Total datapoints
   type: stat
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: $ds
   description: Shows the datapoints ingestion rate, including replication factor.
   fieldConfig:
@@ -188,6 +166,7 @@ panels:
     graphMode: area
     justifyMode: auto
     orientation: horizontal
+    percentChangeColorMode: standard
     reduceOptions:
       calcs:
       - lastNotNull
@@ -197,10 +176,10 @@ panels:
     text: {}
     textMode: auto
     wideLayout: true
-  pluginVersion: 10.4.2
+  pluginVersion: 11.5.0
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     editorMode: code
     exemplar: false
@@ -215,7 +194,7 @@ panels:
   title: Ingestion rate
   type: stat
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: $ds
   description: Shows the rate of HTTP read requests.
   fieldConfig:
@@ -242,6 +221,7 @@ panels:
     graphMode: area
     justifyMode: auto
     orientation: horizontal
+    percentChangeColorMode: standard
     reduceOptions:
       calcs:
       - lastNotNull
@@ -251,10 +231,10 @@ panels:
     text: {}
     textMode: auto
     wideLayout: true
-  pluginVersion: 10.4.2
+  pluginVersion: 11.5.0
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     editorMode: code
     exemplar: true
@@ -268,7 +248,7 @@ panels:
   title: Read requests
   type: stat
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: $ds
   description: 'Total number of available CPUs for all VM components. '
   fieldConfig:
@@ -295,6 +275,7 @@ panels:
     graphMode: area
     justifyMode: auto
     orientation: horizontal
+    percentChangeColorMode: standard
     reduceOptions:
       calcs:
       - lastNotNull
@@ -304,10 +285,10 @@ panels:
     text: {}
     textMode: auto
     wideLayout: true
-  pluginVersion: 10.4.2
+  pluginVersion: 11.5.0
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     editorMode: code
     exemplar: true
@@ -321,7 +302,7 @@ panels:
   title: Available CPU
   type: stat
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: $ds
   description: Shows the number of [active time series](https://docs.victoriametrics.com/faq/#what-is-an-active-time-series) with new data points inserted during the last hour. High value may result in ingestion slowdown.
   fieldConfig:
@@ -348,6 +329,7 @@ panels:
     graphMode: area
     justifyMode: auto
     orientation: horizontal
+    percentChangeColorMode: standard
     reduceOptions:
       calcs:
       - lastNotNull
@@ -357,10 +339,10 @@ panels:
     text: {}
     textMode: auto
     wideLayout: true
-  pluginVersion: 10.4.2
+  pluginVersion: 11.5.0
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     editorMode: code
     exemplar: true
@@ -374,7 +356,7 @@ panels:
   title: Active series
   type: stat
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: $ds
   description: Total amount of used disk space
   fieldConfig:
@@ -401,6 +383,7 @@ panels:
     graphMode: area
     justifyMode: auto
     orientation: horizontal
+    percentChangeColorMode: standard
     reduceOptions:
       calcs:
       - lastNotNull
@@ -410,10 +393,10 @@ panels:
     text: {}
     textMode: auto
     wideLayout: true
-  pluginVersion: 10.4.2
+  pluginVersion: 11.5.0
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     exemplar: false
     expr: sum(vm_data_size_bytes{job=~"$job_storage"})
@@ -426,7 +409,7 @@ panels:
   title: Disk space usage
   type: stat
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: $ds
   description: Average disk usage per datapoint.
   fieldConfig:
@@ -454,6 +437,7 @@ panels:
     graphMode: area
     justifyMode: auto
     orientation: horizontal
+    percentChangeColorMode: standard
     reduceOptions:
       calcs:
       - lastNotNull
@@ -463,10 +447,10 @@ panels:
     text: {}
     textMode: auto
     wideLayout: true
-  pluginVersion: 10.4.2
+  pluginVersion: 11.5.0
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     exemplar: true
     expr: sum(vm_data_size_bytes{job=~"$job_storage"}) / sum(vm_rows{job=~"$job_storage", type!~"indexdb.*"})
@@ -479,7 +463,7 @@ panels:
   title: Bytes per point
   type: stat
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: $ds
   description: Total size of available memory for all VM components.
   fieldConfig:
@@ -506,6 +490,7 @@ panels:
     graphMode: area
     justifyMode: auto
     orientation: horizontal
+    percentChangeColorMode: standard
     reduceOptions:
       calcs:
       - lastNotNull
@@ -515,10 +500,10 @@ panels:
     text: {}
     textMode: auto
     wideLayout: true
-  pluginVersion: 10.4.2
+  pluginVersion: 11.5.0
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     editorMode: code
     exemplar: true
@@ -532,7 +517,7 @@ panels:
   title: Available memory
   type: stat
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: $ds
   fieldConfig:
     defaults:
@@ -583,10 +568,10 @@ panels:
     sortBy:
     - desc: true
       displayName: Count
-  pluginVersion: 10.4.2
+  pluginVersion: 11.5.0
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     editorMode: code
     exemplar: false
@@ -595,9 +580,10 @@ panels:
     instant: true
     range: false
     refId: A
+  title: ''
   type: table
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: $ds
   fieldConfig:
     defaults:
@@ -611,6 +597,7 @@ panels:
         axisPlacement: auto
         axisSoftMin: 0
         barAlignment: 0
+        barWidthFactor: 0.6
         drawStyle: line
         fillOpacity: 0
         gradientMode: none
@@ -659,12 +646,13 @@ panels:
       sortBy: Last *
       sortDesc: true
     tooltip:
+      hideZeros: false
       mode: multi
       sort: desc
-  pluginVersion: 9.1.0
+  pluginVersion: 11.5.0
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     editorMode: code
     expr: sum(min_over_time(up{job=~"$job", instance=~"$instance"}[$__rate_interval])) by (job)
@@ -675,9 +663,6 @@ panels:
   title: Uptime ($job)
   type: timeseries
 - collapsed: false
-  datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
-    uid: $ds
   gridPos:
     h: 1
     w: 24
@@ -688,7 +673,7 @@ panels:
   title: Overview
   type: row
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: $ds
   description: How many [data samples](https://docs.victoriametrics.com/keyconcepts/#raw-samples) are inserted into cluster per second by protocol before the replication. Check vminsert metrics if there are any issues with ingestion.
   fieldConfig:
@@ -702,6 +687,7 @@ panels:
         axisLabel: ''
         axisPlacement: auto
         barAlignment: 0
+        barWidthFactor: 0.6
         drawStyle: line
         fillOpacity: 10
         gradientMode: none
@@ -754,12 +740,13 @@ panels:
       sortBy: Last *
       sortDesc: true
     tooltip:
+      hideZeros: false
       mode: multi
       sort: none
-  pluginVersion: 9.1.0
+  pluginVersion: 11.5.0
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     editorMode: code
     exemplar: true
@@ -771,7 +758,7 @@ panels:
   title: Datapoints ingestion rate ($instance)
   type: timeseries
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: $ds
   description: '* `*` - unsupported query path
 
@@ -797,6 +784,7 @@ panels:
         axisLabel: ''
         axisPlacement: auto
         barAlignment: 0
+        barWidthFactor: 0.6
         drawStyle: line
         fillOpacity: 0
         gradientMode: none
@@ -847,12 +835,13 @@ panels:
       sortBy: Last *
       sortDesc: true
     tooltip:
+      hideZeros: false
       mode: multi
       sort: desc
-  pluginVersion: 9.1.0
+  pluginVersion: 11.5.0
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     editorMode: code
     expr: sum(rate(vm_http_requests_total{job=~"$job", instance=~"$instance"}[$__rate_interval])) by (path) > 0
@@ -864,7 +853,7 @@ panels:
   title: Requests rate ($instance)
   type: timeseries
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: $ds
   description: Shows the number of [active time series](https://docs.victoriametrics.com/faq/#what-is-an-active-time-series) with new data points inserted during the last hour across all storage nodes. High value may result in ingestion slowdown and high memory usage.
   fieldConfig:
@@ -878,6 +867,7 @@ panels:
         axisLabel: ''
         axisPlacement: auto
         barAlignment: 0
+        barWidthFactor: 0.6
         drawStyle: line
         fillOpacity: 10
         gradientMode: none
@@ -928,12 +918,13 @@ panels:
       sortBy: Last *
       sortDesc: true
     tooltip:
+      hideZeros: false
       mode: multi
       sort: none
-  pluginVersion: 9.1.0
+  pluginVersion: 11.5.0
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     expr: sum(vm_cache_entries{job=~"$job", instance=~"$instance", type="storage/hour_metric_ids"})
     format: time_series
@@ -943,7 +934,7 @@ panels:
   title: Active time series ($instance)
   type: timeseries
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: $ds
   description: 'The less time it takes is better.
 
@@ -971,6 +962,7 @@ panels:
         axisLabel: ''
         axisPlacement: auto
         barAlignment: 0
+        barWidthFactor: 0.6
         drawStyle: line
         fillOpacity: 10
         gradientMode: none
@@ -1021,12 +1013,13 @@ panels:
       sortBy: Last *
       sortDesc: true
     tooltip:
+      hideZeros: false
       mode: multi
       sort: desc
-  pluginVersion: 9.1.0
+  pluginVersion: 11.5.0
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     editorMode: code
     expr: max(vm_request_duration_seconds{job=~"$job", instance=~"$instance", quantile="0.99"}) by (path) > 0
@@ -1038,7 +1031,7 @@ panels:
   title: Query duration 0.99 quantile ($instance)
   type: timeseries
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: $ds
   description: '* `*` - unsupported query path
 
@@ -1064,6 +1057,7 @@ panels:
         axisLabel: ''
         axisPlacement: auto
         barAlignment: 0
+        barWidthFactor: 0.6
         drawStyle: line
         fillOpacity: 10
         gradientMode: none
@@ -1114,12 +1108,13 @@ panels:
       sortBy: Last *
       sortDesc: true
     tooltip:
+      hideZeros: false
       mode: multi
       sort: desc
-  pluginVersion: 9.1.0
+  pluginVersion: 11.5.0
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     editorMode: code
     expr: sum(rate(vm_http_request_errors_total{job=~"$job", instance=~"$instance"}[$__rate_interval])) by (job, path) > 0
@@ -1131,7 +1126,7 @@ panels:
   title: Requests error rate ($instance)
   type: timeseries
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: $ds
   description: Shows the rate of logging the messages by their level. Unexpected spike in rate is a good reason to check logs.
   fieldConfig:
@@ -1145,6 +1140,7 @@ panels:
         axisLabel: ''
         axisPlacement: auto
         barAlignment: 0
+        barWidthFactor: 0.6
         drawStyle: bars
         fillOpacity: 100
         gradientMode: none
@@ -1198,12 +1194,13 @@ panels:
       sortBy: Last *
       sortDesc: true
     tooltip:
+      hideZeros: false
       mode: multi
       sort: desc
-  pluginVersion: 9.1.0
+  pluginVersion: 11.5.0
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     editorMode: code
     exemplar: true
@@ -1218,9 +1215,6 @@ panels:
   title: Logging rate
   type: timeseries
 - collapsed: true
-  datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
-    uid: $ds
   gridPos:
     h: 1
     w: 24
@@ -1229,7 +1223,7 @@ panels:
   id: 46
   panels:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: 'Percentage of used RSS memory (resident).
 
@@ -1250,6 +1244,7 @@ panels:
           axisLabel: ''
           axisPlacement: auto
           barAlignment: 0
+          barWidthFactor: 0.6
           drawStyle: line
           fillOpacity: 0
           gradientMode: none
@@ -1289,7 +1284,7 @@ panels:
       h: 8
       w: 12
       x: 0
-      'y': 3
+      'y': 656
     id: 66
     options:
       legend:
@@ -1303,12 +1298,13 @@ panels:
         sortBy: Last *
         sortDesc: true
       tooltip:
+        hideZeros: false
         mode: multi
         sort: desc
-    pluginVersion: 9.1.0
+    pluginVersion: 11.5.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       exemplar: true
@@ -1325,7 +1321,7 @@ panels:
     title: RSS memory % usage ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: 'Share for memory allocated by the process itself. When memory usage reaches 100% it will be likely OOM-killed.
 
@@ -1344,6 +1340,7 @@ panels:
           axisLabel: ''
           axisPlacement: auto
           barAlignment: 0
+          barWidthFactor: 0.6
           drawStyle: line
           fillOpacity: 0
           gradientMode: none
@@ -1374,18 +1371,17 @@ panels:
           mode: absolute
           steps:
           - color: green
+            value: null
           - color: red
             value: 80
         unit: percentunit
-        unitScale: true
       overrides: []
     gridPos:
       h: 8
       w: 12
       x: 12
-      'y': 3
+      'y': 656
     id: 138
-    links: []
     options:
       legend:
         calcs:
@@ -1398,12 +1394,13 @@ panels:
         sortBy: Last *
         sortDesc: true
       tooltip:
+        hideZeros: false
         mode: multi
         sort: desc
-    pluginVersion: 9.1.0
+    pluginVersion: 11.5.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       exemplar: true
@@ -1420,7 +1417,7 @@ panels:
     title: RSS anonymous memory % usage ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     fieldConfig:
       defaults:
@@ -1433,6 +1430,7 @@ panels:
           axisLabel: ''
           axisPlacement: auto
           barAlignment: 0
+          barWidthFactor: 0.6
           drawStyle: line
           fillOpacity: 0
           gradientMode: none
@@ -1463,18 +1461,17 @@ panels:
           mode: absolute
           steps:
           - color: green
+            value: null
           - color: red
             value: 80
         unit: percentunit
-        unitScale: true
       overrides: []
     gridPos:
       h: 8
       w: 12
       x: 0
-      'y': 11
+      'y': 664
     id: 64
-    links: []
     options:
       legend:
         calcs:
@@ -1487,12 +1484,13 @@ panels:
         sortBy: Last *
         sortDesc: true
       tooltip:
+        hideZeros: false
         mode: multi
         sort: none
-    pluginVersion: 9.1.0
+    pluginVersion: 11.5.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       exemplar: true
@@ -1500,7 +1498,7 @@ panels:
         max(
             rate(process_cpu_seconds_total{job=~"$job", instance=~"$instance"}[$__rate_interval])
             /
-            vm_available_cpu_cores{job=~"$job", instance=~"$instance"}
+            process_cpu_cores_available{job=~"$job", instance=~"$instance"}
         ) by(job)
       format: time_series
       interval: ''
@@ -1511,7 +1509,7 @@ panels:
     title: CPU ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: Shows the number of bytes read/write from the storage layer.
     fieldConfig:
@@ -1525,6 +1523,7 @@ panels:
           axisLabel: ''
           axisPlacement: auto
           barAlignment: 0
+          barWidthFactor: 0.6
           drawStyle: line
           fillOpacity: 0
           gradientMode: none
@@ -1551,10 +1550,10 @@ panels:
           mode: absolute
           steps:
           - color: green
+            value: null
           - color: red
             value: 80
         unit: Bps
-        unitScale: true
       overrides:
       - matcher:
           id: byRegexp
@@ -1566,9 +1565,8 @@ panels:
       h: 8
       w: 12
       x: 12
-      'y': 11
+      'y': 664
     id: 122
-    links: []
     options:
       legend:
         calcs:
@@ -1581,12 +1579,13 @@ panels:
         sortBy: Last *
         sortDesc: true
       tooltip:
+        hideZeros: false
         mode: multi
         sort: desc
-    pluginVersion: 9.1.0
+    pluginVersion: 11.5.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       exemplar: true
@@ -1599,7 +1598,7 @@ panels:
       range: true
       refId: A
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       expr: sum(rate(process_io_storage_written_bytes_total{job=~"$job", instance=~"$instance"}[$__rate_interval])) by(job) > 0
@@ -1613,7 +1612,7 @@ panels:
     title: Disk writes/reads ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: 'Shows the percentage of open file descriptors compared to the limit set in the OS.
 
@@ -1632,6 +1631,7 @@ panels:
           axisLabel: ''
           axisPlacement: auto
           barAlignment: 0
+          barWidthFactor: 0.6
           drawStyle: line
           fillOpacity: 0
           gradientMode: none
@@ -1660,10 +1660,10 @@ panels:
           mode: absolute
           steps:
           - color: green
+            value: null
           - color: red
             value: 80
         unit: percentunit
-        unitScale: true
       overrides:
       - matcher:
           id: byRegexp
@@ -1677,9 +1677,8 @@ panels:
       h: 8
       w: 12
       x: 0
-      'y': 19
+      'y': 672
     id: 117
-    links: []
     options:
       legend:
         calcs:
@@ -1692,12 +1691,13 @@ panels:
         sortBy: Last *
         sortDesc: true
       tooltip:
+        hideZeros: false
         mode: multi
         sort: desc
-    pluginVersion: 9.1.0
+    pluginVersion: 11.5.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       exemplar: true
@@ -1716,7 +1716,7 @@ panels:
     title: Open FDs usage % ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: Shows the number of read/write syscalls such as read, pread, write, pwrite.
     fieldConfig:
@@ -1730,6 +1730,7 @@ panels:
           axisLabel: ''
           axisPlacement: auto
           barAlignment: 0
+          barWidthFactor: 0.6
           drawStyle: line
           fillOpacity: 0
           gradientMode: none
@@ -1756,6 +1757,7 @@ panels:
           mode: absolute
           steps:
           - color: green
+            value: null
           - color: red
             value: 80
         unit: short
@@ -1770,7 +1772,7 @@ panels:
       h: 8
       w: 12
       x: 12
-      'y': 19
+      'y': 672
     id: 204
     options:
       legend:
@@ -1784,12 +1786,13 @@ panels:
         sortBy: Last *
         sortDesc: true
       tooltip:
+        hideZeros: false
         mode: multi
         sort: desc
-    pluginVersion: 9.1.0
+    pluginVersion: 11.5.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       exemplar: true
@@ -1802,7 +1805,7 @@ panels:
       range: true
       refId: A
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       expr: sum(rate(process_io_write_syscalls_total{job=~"$job", instance=~"$instance"}[$__rate_interval])) by(job) > 0
@@ -1816,7 +1819,7 @@ panels:
     title: Disk write/read calls ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     fieldConfig:
       defaults:
@@ -1829,6 +1832,7 @@ panels:
           axisLabel: ''
           axisPlacement: auto
           barAlignment: 0
+          barWidthFactor: 0.6
           drawStyle: line
           fillOpacity: 0
           gradientMode: none
@@ -1866,7 +1870,7 @@ panels:
       h: 8
       w: 12
       x: 0
-      'y': 27
+      'y': 680
     id: 68
     options:
       legend:
@@ -1880,12 +1884,13 @@ panels:
         sortBy: Last *
         sortDesc: true
       tooltip:
+        hideZeros: false
         mode: multi
         sort: desc
-    pluginVersion: 9.1.0
+    pluginVersion: 11.5.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       exemplar: true
@@ -1899,7 +1904,7 @@ panels:
     title: Goroutines ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     fieldConfig:
       defaults:
@@ -1912,6 +1917,7 @@ panels:
           axisLabel: ''
           axisPlacement: auto
           barAlignment: 0
+          barWidthFactor: 0.6
           drawStyle: line
           fillOpacity: 0
           gradientMode: none
@@ -1946,7 +1952,7 @@ panels:
       h: 8
       w: 12
       x: 12
-      'y': 27
+      'y': 680
     id: 119
     options:
       legend:
@@ -1960,12 +1966,13 @@ panels:
         sortBy: Last *
         sortDesc: true
       tooltip:
+        hideZeros: false
         mode: multi
         sort: desc
-    pluginVersion: 9.1.0
+    pluginVersion: 11.5.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       exemplar: true
@@ -1977,7 +1984,7 @@ panels:
     title: TCP connections ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     fieldConfig:
       defaults:
@@ -1990,6 +1997,7 @@ panels:
           axisLabel: ''
           axisPlacement: auto
           barAlignment: 0
+          barWidthFactor: 0.6
           drawStyle: line
           fillOpacity: 0
           gradientMode: none
@@ -2027,7 +2035,7 @@ panels:
       h: 8
       w: 12
       x: 0
-      'y': 35
+      'y': 688
     id: 70
     options:
       legend:
@@ -2041,12 +2049,13 @@ panels:
         sortBy: Last *
         sortDesc: true
       tooltip:
+        hideZeros: false
         mode: multi
         sort: desc
-    pluginVersion: 9.1.0
+    pluginVersion: 11.5.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       exemplar: true
@@ -2060,7 +2069,7 @@ panels:
     title: Threads ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     fieldConfig:
       defaults:
@@ -2073,6 +2082,7 @@ panels:
           axisLabel: ''
           axisPlacement: auto
           barAlignment: 0
+          barWidthFactor: 0.6
           drawStyle: line
           fillOpacity: 0
           gradientMode: none
@@ -2107,7 +2117,7 @@ panels:
       h: 8
       w: 12
       x: 12
-      'y': 35
+      'y': 688
     id: 120
     options:
       legend:
@@ -2121,12 +2131,13 @@ panels:
         sortBy: Last *
         sortDesc: true
       tooltip:
+        hideZeros: false
         mode: multi
         sort: desc
-    pluginVersion: 9.1.0
+    pluginVersion: 11.5.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       exemplar: true
@@ -2138,7 +2149,7 @@ panels:
     title: TCP connections rate ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: 'Shows the percent of CPU spent on garbage collection.
 
@@ -2158,6 +2169,7 @@ panels:
           axisLabel: ''
           axisPlacement: auto
           barAlignment: 0
+          barWidthFactor: 0.6
           drawStyle: line
           fillOpacity: 0
           gradientMode: none
@@ -2195,7 +2207,7 @@ panels:
       h: 8
       w: 12
       x: 0
-      'y': 43
+      'y': 696
     id: 210
     options:
       legend:
@@ -2207,12 +2219,13 @@ panels:
         placement: bottom
         showLegend: true
       tooltip:
+        hideZeros: false
         mode: multi
         sort: desc
-    pluginVersion: 9.2.6
+    pluginVersion: 11.5.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       expr: "max(\n  rate(go_gc_cpu_seconds_total{job=~\"$job\", instance=~\"$instance\"}[$__rate_interval]) \n / rate(process_cpu_seconds_total{job=~\"$job\", instance=~\"$instance\"}[$__rate_interval])\n ) by(job)"
@@ -2225,7 +2238,7 @@ panels:
     title: CPU spent on GC ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: "Shows the time goroutines have spent in runnable state before actually running. The lower is better.\n\nHigh values or values exceeding the threshold is usually a sign of            insufficient CPU resources or CPU throttling. \n\nVerify that service has enough CPU resources. Otherwise, the service could work unreliably with delays in processing."
     fieldConfig:
@@ -2239,6 +2252,7 @@ panels:
           axisLabel: ''
           axisPlacement: auto
           barAlignment: 0
+          barWidthFactor: 0.6
           drawStyle: line
           fillOpacity: 0
           gradientMode: none
@@ -2276,7 +2290,7 @@ panels:
       h: 8
       w: 12
       x: 12
-      'y': 43
+      'y': 696
     id: 213
     options:
       legend:
@@ -2288,15 +2302,16 @@ panels:
         placement: bottom
         showLegend: true
       tooltip:
+        hideZeros: false
         mode: multi
         sort: desc
-    pluginVersion: 9.2.6
+    pluginVersion: 11.5.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
-      expr: max(histogram_quantile(0.99, sum(rate(go_sched_latencies_seconds_bucket{job=~"$job"}[$__rate_interval])) by (job, instance, le))) by(job)
+      expr: max(histogram_quantile(0.99, sum(rate(go_sched_latencies_seconds_bucket{job=~"$job", instance=~"$instance"}[$__rate_interval])) by (job, instance, le))) by(job)
       format: time_series
       interval: ''
       intervalFactor: 2
@@ -2305,12 +2320,90 @@ panels:
       refId: A
     title: Go scheduling latency
     type: timeseries
+  - datasource:
+      type: {{ $defaultDatasource }}
+      uid: $ds
+    description: Shows the rate of allocations in memory. Sudden increase in allocations would mean increased pressure on Go Garbage Collector and can saturate CPU resources of the application.
+    fieldConfig:
+      defaults:
+        color:
+          mode: palette-classic
+        custom:
+          axisBorderShow: false
+          axisCenteredZero: false
+          axisColorMode: text
+          axisLabel: ''
+          axisPlacement: auto
+          barAlignment: 0
+          barWidthFactor: 0.6
+          drawStyle: line
+          fillOpacity: 0
+          gradientMode: none
+          hideFrom:
+            legend: false
+            tooltip: false
+            viz: false
+          insertNulls: false
+          lineInterpolation: linear
+          lineWidth: 1
+          pointSize: 5
+          scaleDistribution:
+            type: linear
+          showPoints: never
+          spanNulls: false
+          stacking:
+            group: A
+            mode: none
+          thresholdsStyle:
+            mode: line
+        decimals: 0
+        links: []
+        mappings: []
+        min: 0
+        thresholds:
+          mode: absolute
+          steps:
+          - color: green
+            value: null
+        unit: bytes
+      overrides: []
+    gridPos:
+      h: 8
+      w: 12
+      x: 0
+      'y': 704
+    id: 218
+    options:
+      legend:
+        calcs:
+        - mean
+        - lastNotNull
+        - max
+        displayMode: table
+        placement: bottom
+        showLegend: true
+      tooltip:
+        hideZeros: false
+        mode: multi
+        sort: desc
+    pluginVersion: 11.5.0
+    targets:
+    - datasource:
+        type: {{ $defaultDatasource }}
+        uid: $ds
+      editorMode: code
+      expr: max(rate(go_memstats_alloc_bytes_total{job=~"$job"}[$__rate_interval])) by (job)
+      format: time_series
+      interval: ''
+      intervalFactor: 2
+      legendFormat: __auto
+      range: true
+      refId: A
+    title: Memory allocations rate
+    type: timeseries
   title: Resource usage ($job)
   type: row
 - collapsed: true
-  datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
-    uid: $ds
   gridPos:
     h: 1
     w: 24
@@ -2318,17 +2411,16 @@ panels:
     'y': 38
   id: 106
   panels:
-  - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
-      uid: $ds
-    description: ''
+  - description: ''
+    fieldConfig:
+      defaults: {}
+      overrides: []
     gridPos:
       h: 2
       w: 24
       x: 0
-      'y': 12
+      'y': 1240
     id: 211
-    links: []
     options:
       code:
         language: plaintext
@@ -2336,11 +2428,12 @@ panels:
         showMiniMap: false
       content: See [Troubleshooting](https://docs.victoriametrics.com/troubleshooting/) docs.
       mode: markdown
-    pluginVersion: 10.3.1
+    pluginVersion: 11.5.0
+    title: ''
     transparent: true
     type: text
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: 'Shows the rate and total number of new series created over last 24h.
 
@@ -2364,11 +2457,13 @@ panels:
         color:
           mode: palette-classic
         custom:
+          axisBorderShow: false
           axisCenteredZero: false
           axisColorMode: text
           axisLabel: ''
           axisPlacement: auto
           barAlignment: 0
+          barWidthFactor: 0.6
           drawStyle: line
           fillOpacity: 0
           gradientMode: none
@@ -2376,6 +2471,7 @@ panels:
             legend: false
             tooltip: false
             viz: false
+          insertNulls: false
           lineInterpolation: linear
           lineWidth: 1
           pointSize: 5
@@ -2411,7 +2507,7 @@ panels:
       h: 8
       w: 12
       x: 0
-      'y': 31
+      'y': 1305
     id: 102
     options:
       legend:
@@ -2425,12 +2521,13 @@ panels:
         sortBy: Last *
         sortDesc: true
       tooltip:
+        hideZeros: false
         mode: multi
         sort: none
-    pluginVersion: 9.1.0
+    pluginVersion: 11.5.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       exemplar: true
       expr: sum(rate(vm_new_timeseries_created_total{job=~"$job_storage", instance=~"$instance"}[$__rate_interval]))
@@ -2438,7 +2535,7 @@ panels:
       legendFormat: churn rate
       refId: A
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       exemplar: true
       expr: sum(increase(vm_new_timeseries_created_total{job=~"$job_storage", instance=~"$instance"}[24h]))
@@ -2449,19 +2546,21 @@ panels:
     title: Churn rate ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
-    description: "The percentage of slow inserts comparing to total insertion rate during the last 5 minutes. \n\nThe less value is better. If percentage remains high (>10%) during extended periods of time, then it is likely more RAM is needed for optimal handling of the current number of [active time series](https://docs.victoriametrics.com/faq/#what-is-an-active-time-series). \n\nIn general, VictoriaMetrics requires ~1KB or RAM per active time series, so it should be easy calculating the required amounts of RAM for the current workload according to capacity planning docs. But the resulting number may be far from the real number because the required amounts of memory depends on many other factors such as the number of labels per time series and the length of label values. See also [this issue](https://github.com/VictoriaMetrics/VictoriaMetrics/issues/3976#issuecomment-1476883183) for details."
+    description: 'The percentage of [slow inserts](https://docs.victoriametrics.com/faq/#what-is-a-slow-insert) compared to the total ingestion rate. \n\nThe lower the better. \n\nIn short, slow insert is a cache miss. There are following reasons for slow inserts to go up: \n* Ingestion of completely new, not seen before time series;\n* [Re-routing](https://docs.victoriametrics.com/cluster-victoriametrics/#cluster-availability) of series when one or more vmstorage nodes are unavailable;\n* Not enough memory to maintain big enough caches for the current workload.\n\nIf percentage remains high (>10%) during extended periods of time, then it is likely more RAM is needed for optimal handling of the current number of [active time series](https://docs.victoriametrics.com/faq/#what-is-an-active-time-series). \n\nSee [this issue](https://github.com/VictoriaMetrics/VictoriaMetrics/issues/3976#issuecomment-1476883183) for details.'
     fieldConfig:
       defaults:
         color:
           mode: palette-classic
         custom:
+          axisBorderShow: false
           axisCenteredZero: false
           axisColorMode: text
           axisLabel: ''
           axisPlacement: auto
           barAlignment: 0
+          barWidthFactor: 0.6
           drawStyle: line
           fillOpacity: 10
           gradientMode: none
@@ -2469,6 +2568,7 @@ panels:
             legend: false
             tooltip: false
             viz: false
+          insertNulls: false
           lineInterpolation: linear
           lineWidth: 1
           pointSize: 5
@@ -2496,7 +2596,7 @@ panels:
       h: 8
       w: 12
       x: 12
-      'y': 31
+      'y': 1305
     id: 108
     options:
       legend:
@@ -2508,12 +2608,13 @@ panels:
         placement: bottom
         showLegend: true
       tooltip:
+        hideZeros: false
         mode: multi
         sort: none
-    pluginVersion: 9.1.0
+    pluginVersion: 11.5.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       expr: "max(\n    rate(vm_slow_row_inserts_total{job=~\"$job_storage\"}[$__rate_interval]) \n    / rate(vm_rows_added_to_storage_total{job=~\"$job_storage\"}[$__rate_interval])\n)"
@@ -2524,26 +2625,29 @@ panels:
     title: Slow inserts
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
-    description: The value is above 0 when the vmstorage at the given `addr` communicates to the given vminsert node that it cannot accept new data because it is in the read-only mode.
+    description: Merge assist happens when vmstorage can't keep up with merging parts. This is usually a sign of overload for vmstorage.
     fieldConfig:
       defaults:
         color:
           mode: palette-classic
         custom:
+          axisBorderShow: false
           axisCenteredZero: false
           axisColorMode: text
           axisLabel: ''
           axisPlacement: auto
           barAlignment: 0
-          drawStyle: line
-          fillOpacity: 10
+          barWidthFactor: 0.6
+          drawStyle: bars
+          fillOpacity: 100
           gradientMode: none
           hideFrom:
             legend: false
             tooltip: false
             viz: false
+          insertNulls: false
           lineInterpolation: linear
           lineWidth: 1
           pointSize: 5
@@ -2571,12 +2675,8 @@ panels:
       h: 8
       w: 12
       x: 0
-      'y': 39
-    id: 142
-    links:
-    - targetBlank: true
-      title: Readonly mode
-      url: https://docs.victoriametrics.com/cluster-victoriametrics/#readonly-mode
+      'y': 1313
+    id: 170
     options:
       legend:
         calcs:
@@ -2587,26 +2687,27 @@ panels:
         placement: bottom
         showLegend: true
       tooltip:
+        hideZeros: false
         mode: multi
-        sort: none
-    pluginVersion: 9.1.0
+        sort: desc
+    pluginVersion: 11.5.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       exemplar: true
-      expr: sum(vm_rpc_vmstorage_is_read_only{job=~"$job_insert", instance=~"$instance"}) by(instance, addr) > 0
+      expr: sum(increase(vm_assisted_merges_total{job=~"$job_storage", instance=~"$instance"}[$__rate_interval])) by(type) > 0
       format: time_series
-      interval: ''
+      interval: 5m
       intervalFactor: 1
-      legendFormat: '{{`{{`}}instance{{`}}`}} => {{`{{`}}addr{{`}}`}}'
+      legendFormat: __auto
       range: true
       refId: A
-    title: Storage in readonly status for vminsert ($instance)
+    title: Assisted merges ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: 'Shows % of slow queries according to `search.logSlowQueryDuration` flag, which is `5s` by default.
 
@@ -2617,12 +2718,14 @@ panels:
         color:
           mode: palette-classic
         custom:
+          axisBorderShow: false
           axisCenteredZero: false
           axisColorMode: text
           axisLabel: ''
           axisPlacement: auto
           axisSoftMin: 0
           barAlignment: 0
+          barWidthFactor: 0.6
           drawStyle: line
           fillOpacity: 10
           gradientMode: none
@@ -2630,6 +2733,7 @@ panels:
             legend: false
             tooltip: false
             viz: false
+          insertNulls: false
           lineInterpolation: linear
           lineWidth: 1
           pointSize: 5
@@ -2657,7 +2761,7 @@ panels:
       h: 8
       w: 12
       x: 12
-      'y': 39
+      'y': 1313
     id: 107
     options:
       legend:
@@ -2669,12 +2773,13 @@ panels:
         placement: bottom
         showLegend: true
       tooltip:
+        hideZeros: false
         mode: multi
         sort: none
-    pluginVersion: 9.1.0
+    pluginVersion: 11.5.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       expr: |-
@@ -2688,171 +2793,7 @@ panels:
     title: Slow queries % ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
-      uid: $ds
-    description: Merge assist happens when vmstorage can't keep up with merging parts. This is usually a sign of overload for vmstorage.
-    fieldConfig:
-      defaults:
-        color:
-          mode: palette-classic
-        custom:
-          axisCenteredZero: false
-          axisColorMode: text
-          axisLabel: ''
-          axisPlacement: auto
-          barAlignment: 0
-          drawStyle: bars
-          fillOpacity: 100
-          gradientMode: none
-          hideFrom:
-            legend: false
-            tooltip: false
-            viz: false
-          lineInterpolation: linear
-          lineWidth: 1
-          pointSize: 5
-          scaleDistribution:
-            type: linear
-          showPoints: never
-          spanNulls: false
-          stacking:
-            group: A
-            mode: none
-          thresholdsStyle:
-            mode: 'off'
-        links: []
-        mappings: []
-        min: 0
-        thresholds:
-          mode: absolute
-          steps:
-          - color: green
-          - color: red
-            value: 80
-        unit: short
-      overrides: []
-    gridPos:
-      h: 8
-      w: 12
-      x: 0
-      'y': 47
-    id: 170
-    links: []
-    options:
-      legend:
-        calcs:
-        - mean
-        - lastNotNull
-        - max
-        displayMode: table
-        placement: bottom
-        showLegend: true
-      tooltip:
-        mode: multi
-        sort: desc
-    pluginVersion: 9.1.0
-    targets:
-    - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
-        uid: $ds
-      editorMode: code
-      exemplar: true
-      expr: sum(increase(vm_assisted_merges_total{job=~"$job_storage", instance=~"$instance"}[$__rate_interval])) by(type) > 0
-      format: time_series
-      interval: 5m
-      intervalFactor: 1
-      legendFormat: __auto
-      range: true
-      refId: A
-    title: Assisted merges ($instance)
-    type: timeseries
-  - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
-      uid: $ds
-    description: 'VictoriaMetrics limits the number of labels per each metric with `-maxLabelsPerTimeseries` command-line flag.
-
-
-      This prevents from ingesting metrics with too many labels. The value of `maxLabelsPerTimeseries` must be adjusted for your workload.
-
-
-      When limit is exceeded (graph is > 0) - extra labels are dropped, which could result in unexpected identical time series. See more details about dropped labels in vminsert logs.'
-    fieldConfig:
-      defaults:
-        color:
-          mode: palette-classic
-        custom:
-          axisCenteredZero: false
-          axisColorMode: text
-          axisLabel: ''
-          axisPlacement: auto
-          barAlignment: 0
-          drawStyle: line
-          fillOpacity: 10
-          gradientMode: none
-          hideFrom:
-            legend: false
-            tooltip: false
-            viz: false
-          lineInterpolation: linear
-          lineWidth: 1
-          pointSize: 5
-          scaleDistribution:
-            type: linear
-          showPoints: never
-          spanNulls: false
-          stacking:
-            group: A
-            mode: none
-          thresholdsStyle:
-            mode: 'off'
-        decimals: 2
-        links: []
-        mappings: []
-        min: 0
-        thresholds:
-          mode: absolute
-          steps:
-          - color: green
-          - color: red
-            value: 80
-        unit: short
-      overrides: []
-    gridPos:
-      h: 8
-      w: 12
-      x: 12
-      'y': 47
-    id: 116
-    links: []
-    options:
-      legend:
-        calcs:
-        - mean
-        - lastNotNull
-        - max
-        displayMode: table
-        placement: bottom
-        showLegend: true
-      tooltip:
-        mode: multi
-        sort: none
-    pluginVersion: 9.1.0
-    targets:
-    - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
-        uid: $ds
-      exemplar: true
-      expr: sum(increase(vm_metrics_with_dropped_labels_total{job=~"$job_insert", instance=~"$instance"}[$__rate_interval]))
-      format: time_series
-      hide: false
-      interval: ''
-      intervalFactor: 1
-      legendFormat: metrics with dropped labels
-      refId: A
-    title: Labels limit exceeded ($instance)
-    type: timeseries
-  - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: "Shows the percentage of used cache size from the allowed size by type. \nValues close to 100% show the maximum potential utilization.\nValues close to 0% show that cache is underutilized."
     fieldConfig:
@@ -2860,11 +2801,13 @@ panels:
         color:
           mode: palette-classic
         custom:
+          axisBorderShow: false
           axisCenteredZero: false
           axisColorMode: text
           axisLabel: ''
           axisPlacement: auto
           barAlignment: 0
+          barWidthFactor: 0.6
           drawStyle: line
           fillOpacity: 0
           gradientMode: none
@@ -2872,6 +2815,7 @@ panels:
             legend: false
             tooltip: false
             viz: false
+          insertNulls: false
           lineInterpolation: linear
           lineWidth: 1
           pointSize: 5
@@ -2897,7 +2841,7 @@ panels:
       h: 9
       w: 12
       x: 0
-      'y': 55
+      'y': 1321
     id: 144
     options:
       legend:
@@ -2909,12 +2853,13 @@ panels:
         placement: bottom
         showLegend: true
       tooltip:
+        hideZeros: false
         mode: multi
         sort: desc
-    pluginVersion: 9.1.0
+    pluginVersion: 11.5.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       exemplar: true
@@ -2926,7 +2871,7 @@ panels:
     title: Cache usage % by type ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: Shows cache miss ratio. Lower is better.
     fieldConfig:
@@ -2934,11 +2879,13 @@ panels:
         color:
           mode: palette-classic
         custom:
+          axisBorderShow: false
           axisCenteredZero: false
           axisColorMode: text
           axisLabel: ''
           axisPlacement: auto
           barAlignment: 0
+          barWidthFactor: 0.6
           drawStyle: line
           fillOpacity: 0
           gradientMode: none
@@ -2946,6 +2893,7 @@ panels:
             legend: false
             tooltip: false
             viz: false
+          insertNulls: false
           lineInterpolation: linear
           lineWidth: 1
           pointSize: 5
@@ -2974,9 +2922,8 @@ panels:
       h: 9
       w: 12
       x: 12
-      'y': 55
+      'y': 1321
     id: 58
-    links: []
     options:
       legend:
         calcs:
@@ -2989,12 +2936,13 @@ panels:
         sortBy: Last *
         sortDesc: true
       tooltip:
+        hideZeros: false
         mode: multi
         sort: desc
-    pluginVersion: 9.1.0
+    pluginVersion: 11.5.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       exemplar: true
@@ -3014,7 +2962,376 @@ panels:
     title: Cache miss ratio ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
+      uid: $ds
+    description: The value is above 0 when the vmstorage at the given `addr` communicates to the given vminsert node that it cannot accept new data because it is in the read-only mode.
+    fieldConfig:
+      defaults:
+        color:
+          mode: palette-classic
+        custom:
+          axisBorderShow: false
+          axisCenteredZero: false
+          axisColorMode: text
+          axisLabel: ''
+          axisPlacement: auto
+          barAlignment: 0
+          barWidthFactor: 0.6
+          drawStyle: line
+          fillOpacity: 10
+          gradientMode: none
+          hideFrom:
+            legend: false
+            tooltip: false
+            viz: false
+          insertNulls: false
+          lineInterpolation: linear
+          lineWidth: 1
+          pointSize: 5
+          scaleDistribution:
+            type: linear
+          showPoints: never
+          spanNulls: false
+          stacking:
+            group: A
+            mode: none
+          thresholdsStyle:
+            mode: 'off'
+        links: []
+        mappings: []
+        min: 0
+        thresholds:
+          mode: absolute
+          steps:
+          - color: green
+          - color: red
+            value: 80
+        unit: short
+      overrides: []
+    gridPos:
+      h: 8
+      w: 12
+      x: 0
+      'y': 1330
+    id: 142
+    links:
+    - targetBlank: true
+      title: Readonly mode
+      url: https://docs.victoriametrics.com/cluster-victoriametrics/#readonly-mode
+    options:
+      legend:
+        calcs:
+        - mean
+        - lastNotNull
+        - max
+        displayMode: table
+        placement: bottom
+        showLegend: true
+      tooltip:
+        hideZeros: false
+        mode: multi
+        sort: none
+    pluginVersion: 11.5.0
+    targets:
+    - datasource:
+        type: {{ $defaultDatasource }}
+        uid: $ds
+      editorMode: code
+      exemplar: true
+      expr: sum(vm_rpc_vmstorage_is_read_only{job=~"$job_insert", instance=~"$instance"}) by(instance, addr) > 0
+      format: time_series
+      interval: ''
+      intervalFactor: 1
+      legendFormat: '{{`{{`}}instance{{`}}`}} => {{`{{`}}addr{{`}}`}}'
+      range: true
+      refId: A
+    title: Storage in readonly status for vminsert ($instance)
+    type: timeseries
+  - datasource:
+      type: {{ $defaultDatasource }}
+      uid: $ds
+    description: 'Shows rate of deduplicated samples during [deduplication](https://docs.victoriametrics.com/#deduplication) or [downsampling](https://docs.victoriametrics.com/#downsampling), according to the configured `-dedup.minScrapeInterval` or `-downsampling.period`.
+
+
+      Should be empty if `-dedup.minScrapeInterval` and `-downsampling.period` isn''t set.
+
+
+      Deduplication happens in two places:
+
+      * `type="merge"` - during [background merges](https://docs.victoriametrics.com/#storage) by vmstorages. Deduplication during merges is permanent.
+
+      * `type="select"` - during [read queries](https://docs.victoriametrics.com/keyconcepts/#query-data) by vmselects. Deduplication happens in-flight and has no permanent effect.
+
+
+      The more samples need to be deduplicated, the higher will be resource usage on vmselects or vmstorages.'
+    fieldConfig:
+      defaults:
+        color:
+          mode: palette-classic
+        custom:
+          axisBorderShow: false
+          axisCenteredZero: false
+          axisColorMode: text
+          axisLabel: ''
+          axisPlacement: auto
+          barAlignment: 0
+          barWidthFactor: 0.6
+          drawStyle: line
+          fillOpacity: 10
+          gradientMode: none
+          hideFrom:
+            legend: false
+            tooltip: false
+            viz: false
+          insertNulls: false
+          lineInterpolation: linear
+          lineWidth: 1
+          pointSize: 5
+          scaleDistribution:
+            type: linear
+          showPoints: never
+          spanNulls: false
+          stacking:
+            group: A
+            mode: none
+          thresholdsStyle:
+            mode: 'off'
+        links: []
+        mappings: []
+        min: 0
+        thresholds:
+          mode: absolute
+          steps:
+          - color: green
+          - color: red
+            value: 80
+        unit: short
+      overrides: []
+    gridPos:
+      h: 8
+      w: 12
+      x: 12
+      'y': 1330
+    id: 215
+    options:
+      legend:
+        calcs:
+        - mean
+        - lastNotNull
+        - max
+        displayMode: table
+        placement: bottom
+        showLegend: true
+      tooltip:
+        hideZeros: false
+        mode: multi
+        sort: none
+    pluginVersion: 11.5.0
+    targets:
+    - datasource:
+        type: {{ $defaultDatasource }}
+        uid: $ds
+      editorMode: code
+      exemplar: true
+      expr: sum(rate(vm_deduplicated_samples_total{job=~"$job", instance=~"$instance"}[$__rate_interval])) by(job, type) >0
+      format: time_series
+      interval: ''
+      intervalFactor: 1
+      legendFormat: __auto
+      range: true
+      refId: A
+    title: Deduplication rate ($instance)
+    type: timeseries
+  - datasource:
+      type: {{ $defaultDatasource }}
+      uid: $ds
+    description: 'Shows how many samples were ignored or dropped on insertion due to various reasons:
+
+      * timestamp out of retention period or timestamp in future;
+
+      * invalid metric name;
+
+      * exceeding limit for labels length or number;
+
+      * dropped by [relabeling configuration](https://docs.victoriametrics.com/#relabeling).'
+    fieldConfig:
+      defaults:
+        color:
+          mode: palette-classic
+        custom:
+          axisBorderShow: false
+          axisCenteredZero: false
+          axisColorMode: text
+          axisLabel: ''
+          axisPlacement: auto
+          barAlignment: 0
+          barWidthFactor: 0.6
+          drawStyle: line
+          fillOpacity: 0
+          gradientMode: none
+          hideFrom:
+            legend: false
+            tooltip: false
+            viz: false
+          insertNulls: false
+          lineInterpolation: linear
+          lineWidth: 1
+          pointSize: 5
+          scaleDistribution:
+            type: linear
+          showPoints: never
+          spanNulls: false
+          stacking:
+            group: A
+            mode: none
+          thresholdsStyle:
+            mode: 'off'
+        mappings: []
+        thresholds:
+          mode: absolute
+          steps:
+          - color: green
+          - color: red
+            value: 80
+        unit: short
+      overrides: []
+    gridPos:
+      h: 8
+      w: 12
+      x: 0
+      'y': 1338
+    id: 135
+    options:
+      legend:
+        calcs:
+        - mean
+        - lastNotNull
+        - max
+        displayMode: table
+        placement: bottom
+        showLegend: true
+        sortBy: Last *
+        sortDesc: true
+      tooltip:
+        hideZeros: false
+        mode: multi
+        sort: none
+    pluginVersion: 11.5.0
+    targets:
+    - datasource:
+        type: {{ $defaultDatasource }}
+        uid: $ds
+      editorMode: code
+      exemplar: true
+      expr: sum(increase(vm_rows_ignored_total{job=~"$job", instance=~"$instance"}[1h])) by (reason)
+      hide: false
+      interval: ''
+      legendFormat: __auto
+      range: true
+      refId: A
+    - datasource:
+        type: {{ $defaultDatasource }}
+        uid: $ds
+      editorMode: code
+      expr: sum(increase(vm_relabel_metrics_dropped_total{job=~"$job", instance=~"$instance"}[1h]))
+      hide: false
+      instant: false
+      legendFormat: relabeling
+      range: true
+      refId: B
+    title: Samples dropped for last 1h ($instance)
+    type: timeseries
+  - datasource:
+      type: {{ $defaultDatasource }}
+      uid: $ds
+    description: 'Shows the number of partial results served by `vmselects`.
+
+
+      `vmselect` continues serving queries if at least a single vmstorage nodes is available. It marks responses as `partial` for queries served from the remaining healthy vmstorage nodes.
+
+
+      If you prefer consistency over availability then run vmselect nodes with `-search.denyPartialResponse` cmd-line flag. In this case vmselect returns an error if at least a single vmstorage node is unavailable.
+
+
+      See more at [cluster availability](https://docs.victoriametrics.com/cluster-victoriametrics/#cluster-availability).'
+    fieldConfig:
+      defaults:
+        color:
+          mode: palette-classic
+        custom:
+          axisBorderShow: false
+          axisCenteredZero: false
+          axisColorMode: text
+          axisLabel: ''
+          axisPlacement: auto
+          axisSoftMin: 0
+          barAlignment: 0
+          barWidthFactor: 0.6
+          drawStyle: line
+          fillOpacity: 0
+          gradientMode: none
+          hideFrom:
+            legend: false
+            tooltip: false
+            viz: false
+          insertNulls: false
+          lineInterpolation: stepAfter
+          lineWidth: 1
+          pointSize: 5
+          scaleDistribution:
+            type: linear
+          showPoints: never
+          spanNulls: false
+          stacking:
+            group: A
+            mode: none
+          thresholdsStyle:
+            mode: 'off'
+        decimals: 0
+        links: []
+        mappings: []
+        thresholds:
+          mode: absolute
+          steps:
+          - color: green
+          - color: red
+            value: 80
+        unit: none
+      overrides: []
+    gridPos:
+      h: 8
+      w: 12
+      x: 12
+      'y': 1338
+    id: 217
+    options:
+      legend:
+        calcs:
+        - lastNotNull
+        displayMode: table
+        placement: bottom
+        showLegend: true
+        sortBy: Last *
+        sortDesc: true
+      tooltip:
+        hideZeros: false
+        mode: multi
+        sort: desc
+    pluginVersion: 11.5.0
+    targets:
+    - datasource:
+        type: {{ $defaultDatasource }}
+        uid: $ds
+      editorMode: code
+      expr: sum(increase(vm_partial_results_total{job=~"$job", instance=~"$instance"}[$__rate_interval])) > 0
+      format: time_series
+      instant: false
+      legendFormat: partial results
+      refId: A
+    title: Partial query results ($instance)
+    type: timeseries
+  - datasource:
+      type: {{ $defaultDatasource }}
       uid: $ds
     fieldConfig:
       defaults:
@@ -3046,13 +3363,15 @@ panels:
         - id: custom.hidden
           value: true
     gridPos:
-      h: 6
-      w: 24
+      h: 8
+      w: 12
       x: 0
-      'y': 64
+      'y': 1346
     id: 183
     options:
+      cellHeight: sm
       footer:
+        countRows: false
         fields: ''
         reducer:
         - sum
@@ -3061,10 +3380,10 @@ panels:
       sortBy:
       - desc: true
         displayName: job
-    pluginVersion: 9.2.7
+    pluginVersion: 11.5.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       exemplar: false
@@ -3094,19 +3413,22 @@ panels:
             operation: groupby
     type: table
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
-    description: Shows how many rows were ignored on insertion due to corrupted or out of retention timestamps.
+    description: 'Shows the number of restarts per job. The chart can be useful to identify periodic process restarts and correlate them with potential issues or anomalies. Normally, processes shouldn''t restart unless restart was inited by user. The reason of restarts should be figured out by checking the logs of each specific service. '
     fieldConfig:
       defaults:
         color:
           mode: palette-classic
         custom:
+          axisBorderShow: false
           axisCenteredZero: false
           axisColorMode: text
           axisLabel: ''
           axisPlacement: auto
+          axisSoftMin: 0
           barAlignment: 0
+          barWidthFactor: 0.6
           drawStyle: line
           fillOpacity: 0
           gradientMode: none
@@ -3114,7 +3436,8 @@ panels:
             legend: false
             tooltip: false
             viz: false
-          lineInterpolation: linear
+          insertNulls: false
+          lineInterpolation: stepAfter
           lineWidth: 1
           pointSize: 5
           scaleDistribution:
@@ -3126,6 +3449,8 @@ panels:
             mode: none
           thresholdsStyle:
             mode: 'off'
+        decimals: 0
+        links: []
         mappings: []
         thresholds:
           mode: absolute
@@ -3133,48 +3458,43 @@ panels:
           - color: green
           - color: red
             value: 80
-        unit: short
+        unit: none
       overrides: []
     gridPos:
       h: 8
       w: 12
-      x: 0
-      'y': 70
-    id: 135
+      x: 12
+      'y': 1346
+    id: 214
     options:
       legend:
         calcs:
-        - mean
         - lastNotNull
-        - max
         displayMode: table
         placement: bottom
         showLegend: true
         sortBy: Last *
         sortDesc: true
       tooltip:
+        hideZeros: false
         mode: multi
-        sort: none
-    pluginVersion: 9.1.0
+        sort: desc
+    pluginVersion: 11.5.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
-      exemplar: true
-      expr: sum(increase(vm_rows_ignored_total{job=~"$job_storage", instance=~"$instance"}[1h])) by (reason)
-      interval: ''
-      legendFormat: __auto
-      range: true
+      expr: sum(changes(vm_app_start_timestamp{job=~"$job", instance=~"$instance"}[$__rate_interval])) by(job) > 0
+      format: time_series
+      instant: false
+      legendFormat: '{{`{{`}}job{{`}}`}}'
       refId: A
-    title: Rows ignored for last 1h ($instance)
+    title: Restarts ($job)
     type: timeseries
   title: Troubleshooting
   type: row
 - collapsed: true
-  datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
-    uid: $ds
   gridPos:
     h: 1
     w: 24
@@ -3183,7 +3503,7 @@ panels:
   id: 48
   panels:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: "Shows number of pushed and sent rows. \n* `Pushed rows` - rows added to internal inserter buffers before send\n* `Sent rows` - successfully transmitted rows to storage nodes\n\nPlease note, it could be that `Sent > Pushed` because of the replication factor."
     fieldConfig:
@@ -3230,9 +3550,8 @@ panels:
       h: 9
       w: 12
       x: 0
-      'y': 45
+      'y': 2532
     id: 76
-    links: []
     options:
       legend:
         calcs:
@@ -3248,7 +3567,7 @@ panels:
     pluginVersion: 9.1.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       expr: sum(rate(vm_rpc_rows_pushed_total{job=~"$job",instance=~"$instance"}[$__rate_interval]))
@@ -3258,7 +3577,7 @@ panels:
       range: true
       refId: B
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       expr: sum(rate(vm_rpc_rows_sent_total{job=~"$job",instance=~"$instance"}[$__rate_interval]))
@@ -3270,7 +3589,7 @@ panels:
     title: Rows ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: 'Rate of RPC errors by type:
 
@@ -3325,9 +3644,8 @@ panels:
       h: 9
       w: 12
       x: 12
-      'y': 45
+      'y': 2532
     id: 86
-    links: []
     options:
       legend:
         calcs:
@@ -3343,7 +3661,7 @@ panels:
     pluginVersion: 9.1.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       expr: sum(rate(vm_rpc_connection_errors_total{job=~"$job",instance=~"$instance"}[$__rate_interval]))
@@ -3353,7 +3671,7 @@ panels:
       range: true
       refId: A
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       expr: sum(rate(vm_rpc_dial_errors_total{job=~"$job",instance=~"$instance"}[$__rate_interval]))
       format: time_series
@@ -3361,7 +3679,7 @@ panels:
       legendFormat: Dial
       refId: B
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       expr: sum(rate(vm_rpc_handshake_errors_total{job=~"$job",instance=~"$instance"}[$__rate_interval]))
       format: time_series
@@ -3371,7 +3689,7 @@ panels:
     title: RPC errors ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: The number of rows rerouted to the vmstorage node from other nodes when they were unhealthy.
     fieldConfig:
@@ -3418,9 +3736,8 @@ panels:
       h: 8
       w: 12
       x: 0
-      'y': 54
+      'y': 2541
     id: 80
-    links: []
     options:
       legend:
         calcs:
@@ -3436,7 +3753,7 @@ panels:
     pluginVersion: 9.1.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       exemplar: true
@@ -3450,7 +3767,7 @@ panels:
     title: 'Rows ($instance) rerouted to '
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: The number of rows rerouted from the vmstorage node to healthy nodes when the given node was unhealthy.
     fieldConfig:
@@ -3497,9 +3814,8 @@ panels:
       h: 8
       w: 12
       x: 12
-      'y': 54
+      'y': 2541
     id: 78
-    links: []
     options:
       legend:
         calcs:
@@ -3515,7 +3831,7 @@ panels:
     pluginVersion: 9.1.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       exemplar: true
       expr: sum(rate(vm_rpc_rows_rerouted_from_here_total{job=~"$job", instance=~"$instance"}[$__rate_interval])) by(addr) > 0
@@ -3527,7 +3843,7 @@ panels:
     title: Rows ($instance) rerouted from
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: The number of rows or bytes that vminsert internal buffer contains at the moment.
     fieldConfig:
@@ -3580,7 +3896,7 @@ panels:
       h: 8
       w: 12
       x: 0
-      'y': 62
+      'y': 2549
     id: 82
     options:
       legend:
@@ -3597,13 +3913,13 @@ panels:
     pluginVersion: 9.1.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       expr: sum(vm_rpc_buf_pending_bytes{job=~"$job", instance=~"$instance"})
       legendFormat: bytes
       refId: A
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       expr: sum(vm_rpc_rows_pending{job=~"$job", instance=~"$instance"})
       legendFormat: rows
@@ -3611,7 +3927,7 @@ panels:
     title: Pending
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: Network usage by internal VictoriaMetrics RPC protocol
     fieldConfig:
@@ -3658,7 +3974,7 @@ panels:
       h: 8
       w: 12
       x: 12
-      'y': 62
+      'y': 2549
     id: 74
     options:
       legend:
@@ -3675,7 +3991,7 @@ panels:
     pluginVersion: 9.1.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       expr: sum(rate(vm_tcpdialer_written_bytes_total{job=~"$job", instance=~"$instance"}[$__rate_interval])) * 8
@@ -3687,9 +4003,6 @@ panels:
   title: Interconnection ($job)
   type: row
 - collapsed: true
-  datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
-    uid: $ds
   gridPos:
     h: 1
     w: 24
@@ -3698,7 +4011,7 @@ panels:
   id: 24
   panels:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: Shows the number of datapoints ingested into storage nodes per second. This metric doesn't show all stored datapoints since some of them may be dropped because of wrong timestamps or decode errors.
     fieldConfig:
@@ -3712,6 +4025,7 @@ panels:
           axisLabel: ''
           axisPlacement: auto
           barAlignment: 0
+          barWidthFactor: 0.6
           drawStyle: line
           fillOpacity: 10
           gradientMode: none
@@ -3747,7 +4061,7 @@ panels:
       h: 8
       w: 12
       x: 0
-      'y': 14
+      'y': 1242
     id: 100
     options:
       legend:
@@ -3761,12 +4075,13 @@ panels:
         sortBy: Last *
         sortDesc: true
       tooltip:
+        hideZeros: false
         mode: multi
         sort: desc
-    pluginVersion: 9.1.0
+    pluginVersion: 11.5.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       expr: sum(rate(vm_vminsert_metrics_read_total{job=~"$job_storage", instance=~"$instance"}[$__rate_interval]))
@@ -3778,11 +4093,11 @@ panels:
     title: Ingestion rate ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: 'Shows the approx time needed to reach 100% of disk capacity for at least one vmstorage node based on the following params:
 
-      * free disk space;
+      * free disk space (after -storage.minFreeDiskSpaceBytes);
 
       * row ingestion rate;
 
@@ -3801,6 +4116,7 @@ panels:
           axisLabel: ''
           axisPlacement: auto
           barAlignment: 0
+          barWidthFactor: 0.6
           drawStyle: line
           fillOpacity: 0
           gradientMode: none
@@ -3839,7 +4155,7 @@ panels:
       h: 8
       w: 12
       x: 12
-      'y': 14
+      'y': 1242
     id: 113
     options:
       legend:
@@ -3853,15 +4169,16 @@ panels:
         sortBy: Last *
         sortDesc: true
       tooltip:
+        hideZeros: false
         mode: multi
         sort: none
-    pluginVersion: 9.1.0
+    pluginVersion: 11.5.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
-      expr: "min(vm_free_disk_space_bytes{job=~\"$job_storage\", instance=~\"$instance\"} \n/ \nignoring(path) (\n    rate(vm_rows_added_to_storage_total{job=~\"$job_storage\", instance=~\"$instance\"}[1d])\n    * scalar(\n            sum(vm_data_size_bytes{job=~\"$job_storage\", instance=~\"$instance\", type!~\"indexdb.*\"})\n            / \n            sum(vm_rows{job=~\"$job_storage\", instance=~\"$instance\", type!~\"indexdb.*\"})\n            )\n))"
+      expr: "min((vm_free_disk_space_bytes{job=~\"$job_storage\", instance=~\"$instance\"} - vm_free_disk_space_limit_bytes{job=~\"$job_storage\", instance=~\"$instance\"}) \n/ \nignoring(path) (\n    rate(vm_rows_added_to_storage_total{job=~\"$job_storage\", instance=~\"$instance\"}[1d])\n    * scalar(\n            sum(vm_data_size_bytes{job=~\"$job_storage\", instance=~\"$instance\", type!~\"indexdb.*\"})\n            / \n            sum(vm_rows{job=~\"$job_storage\", instance=~\"$instance\", type!~\"indexdb.*\"})\n            )\n))"
       format: time_series
       interval: ''
       intervalFactor: 1
@@ -3871,7 +4188,7 @@ panels:
     title: Storage full ETA ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: ''
     fieldConfig:
@@ -3885,6 +4202,7 @@ panels:
           axisLabel: ''
           axisPlacement: auto
           barAlignment: 0
+          barWidthFactor: 0.6
           drawStyle: line
           fillOpacity: 0
           gradientMode: none
@@ -3923,7 +4241,7 @@ panels:
       h: 7
       w: 12
       x: 0
-      'y': 22
+      'y': 1250
     id: 151
     options:
       legend:
@@ -3937,12 +4255,13 @@ panels:
         sortBy: Last *
         sortDesc: true
       tooltip:
+        hideZeros: false
         mode: multi
         sort: desc
-    pluginVersion: 9.1.0
+    pluginVersion: 11.5.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       exemplar: false
@@ -3959,7 +4278,7 @@ panels:
       range: true
       refId: A
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       exemplar: false
@@ -3977,7 +4296,7 @@ panels:
       range: true
       refId: B
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       exemplar: false
@@ -3997,7 +4316,7 @@ panels:
     title: CPU usage % ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: 'Percentage of used memory (resident).
 
@@ -4013,6 +4332,7 @@ panels:
           axisLabel: ''
           axisPlacement: auto
           barAlignment: 0
+          barWidthFactor: 0.6
           drawStyle: line
           fillOpacity: 0
           gradientMode: none
@@ -4051,7 +4371,7 @@ panels:
       h: 7
       w: 12
       x: 12
-      'y': 22
+      'y': 1250
     id: 167
     options:
       legend:
@@ -4065,12 +4385,13 @@ panels:
         sortBy: Last *
         sortDesc: true
       tooltip:
+        hideZeros: false
         mode: multi
         sort: desc
-    pluginVersion: 9.1.0
+    pluginVersion: 11.5.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       exemplar: true
@@ -4087,7 +4408,7 @@ panels:
       range: true
       refId: A
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       exemplar: true
@@ -4105,7 +4426,7 @@ panels:
       range: true
       refId: B
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       exemplar: true
@@ -4125,7 +4446,7 @@ panels:
     title: Memory usage % ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: "Shows how many ongoing insertions (not API /write calls) on disk are taking place, where:\n* `max` - equal to number of CPUs;\n* `current` - current number of goroutines busy with inserting rows into underlying storage.\n\nEvery successful API /write call results into flush on disk. The `max` is an internal limit and can't be changed. It is always equal to the number of CPUs. \n\nWhen `current` hits `max` constantly, it means storage is overloaded and requires more CPU (see CPU usage) or disks with more IOPS (see disk writes and reads panels in Resource Usage row)."
     fieldConfig:
@@ -4139,6 +4460,7 @@ panels:
           axisLabel: ''
           axisPlacement: auto
           barAlignment: 0
+          barWidthFactor: 0.6
           drawStyle: line
           fillOpacity: 0
           gradientMode: none
@@ -4180,7 +4502,7 @@ panels:
       h: 8
       w: 12
       x: 0
-      'y': 29
+      'y': 1257
     id: 212
     links:
     - targetBlank: true
@@ -4198,12 +4520,13 @@ panels:
         sortBy: Last *
         sortDesc: true
       tooltip:
+        hideZeros: false
         mode: multi
         sort: none
-    pluginVersion: 9.1.0
+    pluginVersion: 11.5.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       exemplar: true
@@ -4213,7 +4536,7 @@ panels:
       range: true
       refId: A
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       exemplar: true
@@ -4226,7 +4549,7 @@ panels:
     title: Concurrent flushes on disk ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: 'Shows the number of concurrently executed read requests, where:
 
@@ -4253,6 +4576,7 @@ panels:
           axisLabel: ''
           axisPlacement: auto
           barAlignment: 0
+          barWidthFactor: 0.6
           drawStyle: line
           fillOpacity: 0
           gradientMode: none
@@ -4294,7 +4618,7 @@ panels:
       h: 8
       w: 12
       x: 12
-      'y': 29
+      'y': 1257
     id: 133
     options:
       legend:
@@ -4308,12 +4632,13 @@ panels:
         sortBy: Last *
         sortDesc: true
       tooltip:
+        hideZeros: false
         mode: multi
         sort: none
-    pluginVersion: 9.1.0
+    pluginVersion: 11.5.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       exemplar: true
@@ -4323,7 +4648,7 @@ panels:
       range: true
       refId: A
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       exemplar: true
@@ -4336,7 +4661,7 @@ panels:
     title: Concurrent selects ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: "The max number of on-going merges across storage nodes.\n The drastic change in number of merges could be a sign of on-going deduplication/downsampling activity.\n It is expected to have high numbers for `storage/small` metric."
     fieldConfig:
@@ -4350,6 +4675,7 @@ panels:
           axisLabel: ''
           axisPlacement: auto
           barAlignment: 0
+          barWidthFactor: 0.6
           drawStyle: line
           fillOpacity: 0
           gradientMode: none
@@ -4386,7 +4712,7 @@ panels:
       h: 8
       w: 12
       x: 0
-      'y': 37
+      'y': 1265
     id: 54
     options:
       legend:
@@ -4400,12 +4726,13 @@ panels:
         sortBy: Last *
         sortDesc: true
       tooltip:
+        hideZeros: false
         mode: multi
         sort: desc
-    pluginVersion: 9.1.0
+    pluginVersion: 11.5.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       expr: max(max_over_time(vm_active_merges{job=~"$job_storage", instance=~"$instance"}[$__rate_interval])) by(type)
@@ -4415,7 +4742,7 @@ panels:
     title: Active merges ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: The number of rows merged per second by storage nodes. Merge speed depends on available CPU and disk IO bandwidth.
     fieldConfig:
@@ -4429,6 +4756,7 @@ panels:
           axisLabel: ''
           axisPlacement: auto
           barAlignment: 0
+          barWidthFactor: 0.6
           drawStyle: line
           fillOpacity: 0
           gradientMode: none
@@ -4465,7 +4793,7 @@ panels:
       h: 8
       w: 12
       x: 12
-      'y': 37
+      'y': 1265
     id: 55
     options:
       legend:
@@ -4479,12 +4807,13 @@ panels:
         sortBy: Last *
         sortDesc: true
       tooltip:
+        hideZeros: false
         mode: multi
         sort: desc
-    pluginVersion: 9.1.0
+    pluginVersion: 11.5.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       expr: sum(rate(vm_rows_merged_total{job=~"$job_storage", instance=~"$instance"}[$__rate_interval])) by(type)
@@ -4494,7 +4823,7 @@ panels:
     title: Merge speed
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: Shows the percentage of used disk space. It is recommended to have at least 20% of free disk space for the best performance.
     fieldConfig:
@@ -4508,6 +4837,7 @@ panels:
           axisLabel: ''
           axisPlacement: auto
           barAlignment: 0
+          barWidthFactor: 0.6
           drawStyle: line
           fillOpacity: 0
           gradientMode: none
@@ -4546,7 +4876,7 @@ panels:
       h: 8
       w: 12
       x: 0
-      'y': 45
+      'y': 1273
     id: 20
     options:
       legend:
@@ -4560,25 +4890,26 @@ panels:
         sortBy: Last *
         sortDesc: true
       tooltip:
+        hideZeros: false
         mode: multi
         sort: desc
-    pluginVersion: 9.1.0
+    pluginVersion: 11.5.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
-      expr: "max(\n    sum(vm_data_size_bytes{job=~\"$job\", instance=~\"$instance\"}) by(job, instance) /\n    (\n        sum(vm_free_disk_space_bytes{job=~\"$job\", instance=~\"$instance\"}) by(job, instance) +\n        sum(vm_data_size_bytes{job=~\"$job\", instance=~\"$instance\"}) by(job, instance)\n    ) \n)"
+      expr: "max(\n    sum(vm_data_size_bytes{job=~\"$job\", instance=~\"$instance\"}) by(job, instance) /\n    (\n        sum(vm_free_disk_space_bytes{job=~\"$job\", instance=~\"$instance\"}-vm_free_disk_space_limit_bytes{job=~\"$job\", instance=~\"$instance\"}) by(job, instance) +\n        sum(vm_data_size_bytes{job=~\"$job\", instance=~\"$instance\"}) by(job, instance)\n    ) \n)"
       format: time_series
       intervalFactor: 1
       legendFormat: max
       range: true
       refId: A
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
-      expr: "min(\n    sum(vm_data_size_bytes{job=~\"$job\", instance=~\"$instance\"}) by(job, instance) /\n    (\n        sum(vm_free_disk_space_bytes{job=~\"$job\", instance=~\"$instance\"}) by(job, instance) +\n        sum(vm_data_size_bytes{job=~\"$job\", instance=~\"$instance\"}) by(job, instance)\n    ) \n)"
+      expr: "min(\n    sum(vm_data_size_bytes{job=~\"$job\", instance=~\"$instance\"}) by(job, instance) /\n    (\n        sum(vm_free_disk_space_bytes{job=~\"$job\", instance=~\"$instance\"}-vm_free_disk_space_limit_bytes{job=~\"$job\", instance=~\"$instance\"}) by(job, instance) +\n        sum(vm_data_size_bytes{job=~\"$job\", instance=~\"$instance\"}) by(job, instance)\n    ) \n)"
       format: time_series
       hide: false
       intervalFactor: 1
@@ -4586,10 +4917,10 @@ panels:
       range: true
       refId: B
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
-      expr: "quantile(0.5,\n    sum(vm_data_size_bytes{job=~\"$job\", instance=~\"$instance\"}) by(job, instance) /\n    (\n        sum(vm_free_disk_space_bytes{job=~\"$job\", instance=~\"$instance\"}) by(job, instance) +\n        sum(vm_data_size_bytes{job=~\"$job\", instance=~\"$instance\"}) by(job, instance)\n    ) \n)"
+      expr: "quantile(0.5,\n    sum(vm_data_size_bytes{job=~\"$job\", instance=~\"$instance\"}) by(job, instance) /\n    (\n        sum(vm_free_disk_space_bytes{job=~\"$job\", instance=~\"$instance\"}-vm_free_disk_space_limit_bytes{job=~\"$job\", instance=~\"$instance\"}) by(job, instance) +\n        sum(vm_data_size_bytes{job=~\"$job\", instance=~\"$instance\"}) by(job, instance)\n    ) \n)"
       format: time_series
       hide: false
       intervalFactor: 1
@@ -4599,17 +4930,17 @@ panels:
     title: Disk space usage %  ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
-    description: 'The max number of data parts of LSM tree across all storage nodes.
+    description: 'The max number of data parts of LSM tree across all storage nodes in the last [partition](https://docs.victoriametrics.com/#storage).
 
-      High number of parts (the hard limit is 512) is an evidence of slow merge performance - check the resource utilization.
+      Increase in number of parts (the hard limit is 512) is an evidence of slow merge performance - check the resource utilization.
 
       * `indexdb` - inverted index
 
       * `storage/small` - recently added parts of data ingested into storage (hot data)
 
-      * `storage/big` -  small parts gradually merged into big parts (cold data)'
+      * `storage/big` -  small parts gradually merged into bigger parts (cold data)'
     fieldConfig:
       defaults:
         color:
@@ -4621,6 +4952,7 @@ panels:
           axisLabel: ''
           axisPlacement: auto
           barAlignment: 0
+          barWidthFactor: 0.6
           drawStyle: line
           fillOpacity: 0
           gradientMode: none
@@ -4656,7 +4988,7 @@ panels:
       h: 8
       w: 12
       x: 12
-      'y': 45
+      'y': 1273
     id: 22
     options:
       legend:
@@ -4670,25 +5002,38 @@ panels:
         sortBy: Last *
         sortDesc: true
       tooltip:
+        hideZeros: false
         mode: multi
         sort: desc
-    pluginVersion: 9.1.0
+    pluginVersion: 11.5.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
-      expr: max(vm_parts{job=~"$job_storage", instance=~"$instance"}) by(type)
+      expr: max(vm_parts{job=~"$job_storage", instance=~"$instance", type=~"indexdb.*"}) by(type)
       format: time_series
       interval: ''
       intervalFactor: 1
       legendFormat: __auto
       range: true
       refId: A
+    - datasource:
+        type: {{ $defaultDatasource }}
+        uid: $ds
+      editorMode: code
+      expr: max(vm_last_partition_parts{job=~"$job_storage", instance=~"$instance"}) by(type)
+      format: time_series
+      hide: false
+      interval: ''
+      intervalFactor: 1
+      legendFormat: __auto
+      range: true
+      refId: B
     title: LSM parts max by type ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: 'Shows the percentage of used disk space by type: datapoints or indexdb. Normally, indexdb takes much less space comparing to datapoints. But with high [churn rate](https://docs.victoriametrics.com/faq/#what-is-high-churn-rate) the size of the indexdb could grow significantly.
 
@@ -4705,6 +5050,7 @@ panels:
           axisLabel: ''
           axisPlacement: auto
           barAlignment: 0
+          barWidthFactor: 0.6
           drawStyle: line
           fillOpacity: 0
           gradientMode: none
@@ -4741,7 +5087,7 @@ panels:
       h: 8
       w: 12
       x: 0
-      'y': 53
+      'y': 1281
     id: 202
     options:
       legend:
@@ -4755,12 +5101,13 @@ panels:
         sortBy: Last *
         sortDesc: true
       tooltip:
+        hideZeros: false
         mode: multi
         sort: desc
-    pluginVersion: 9.1.0
+    pluginVersion: 11.5.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       expr: "max(\n    sum(vm_data_size_bytes{job=~\"$job\", instance=~\"$instance\", type=~\"indexdb.*\"}) by(job, instance)\n    / \n    sum(vm_data_size_bytes{job=~\"$job\", instance=~\"$instance\"}) by(job, instance)\n)"
@@ -4770,7 +5117,7 @@ panels:
       range: true
       refId: A
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       expr: "max(\n    sum(vm_data_size_bytes{job=~\"$job\", instance=~\"$instance\", type!~\"indexdb.*\"}) by(job, instance)\n    / \n    sum(vm_data_size_bytes{job=~\"$job\", instance=~\"$instance\"}) by(job, instance)\n)"
@@ -4783,9 +5130,9 @@ panels:
     title: Disk space usage % by type  ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
-    description: How many datapoints are in RAM queue waiting to be written into storage. The number of pending data points should be in the range from 0 to `2*<ingestion_rate>`, since VictoriaMetrics pushes pending data to persistent storage every second. The index datapoints value in general is much lower.
+    description: How many datapoints are in RAM queue waiting to be written into storage. The number of pending data points should be in the range from 0 to `3*<ingestion_rate>`, since VictoriaMetrics pushes pending data to persistent storage every two seconds. The index datapoints value in general is much lower.
     fieldConfig:
       defaults:
         color:
@@ -4797,6 +5144,7 @@ panels:
           axisLabel: ''
           axisPlacement: auto
           barAlignment: 0
+          barWidthFactor: 0.6
           drawStyle: line
           fillOpacity: 0
           gradientMode: none
@@ -4840,7 +5188,7 @@ panels:
       h: 8
       w: 12
       x: 12
-      'y': 53
+      'y': 1281
     id: 14
     options:
       legend:
@@ -4854,12 +5202,13 @@ panels:
         sortBy: Last *
         sortDesc: true
       tooltip:
+        hideZeros: false
         mode: multi
         sort: none
-    pluginVersion: 9.1.0
+    pluginVersion: 11.5.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       expr: sum(max_over_time(vm_pending_rows{job=~"$job_storage", instance=~"$instance", type="storage"}[$__rate_interval]))
@@ -4870,7 +5219,7 @@ panels:
       range: true
       refId: A
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       expr: sum(max_over_time(vm_pending_rows{job=~"$job_storage", instance=~"$instance", type="indexdb"}[$__rate_interval]))
@@ -4883,7 +5232,7 @@ panels:
     title: Pending datapoints ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: 'Shows network usage by vmstorage services.
 
@@ -4901,6 +5250,7 @@ panels:
           axisLabel: ''
           axisPlacement: auto
           barAlignment: 0
+          barWidthFactor: 0.6
           drawStyle: line
           fillOpacity: 0
           gradientMode: none
@@ -4941,7 +5291,7 @@ panels:
       h: 8
       w: 12
       x: 0
-      'y': 61
+      'y': 1289
     id: 206
     options:
       legend:
@@ -4954,12 +5304,13 @@ panels:
         sortBy: Last *
         sortDesc: true
       tooltip:
+        hideZeros: false
         mode: multi
         sort: desc
-    pluginVersion: 9.1.0
+    pluginVersion: 11.5.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       expr: sum(rate(vm_tcplistener_read_bytes_total{job=~"$job_storage", instance=~"$instance"}[$__rate_interval])) by(name) * 8 > 0
@@ -4969,7 +5320,7 @@ panels:
       range: true
       refId: A
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       expr: sum(rate(vm_tcplistener_written_bytes_total{job=~"$job_storage", instance=~"$instance"}[$__rate_interval])) by(name) * 8 > 0
@@ -4982,7 +5333,7 @@ panels:
     title: Network usage ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: Value > 0 means vmstorage is in readonly mode.
     fieldConfig:
@@ -4996,6 +5347,7 @@ panels:
           axisLabel: ''
           axisPlacement: auto
           barAlignment: 0
+          barWidthFactor: 0.6
           drawStyle: line
           fillOpacity: 0
           gradientMode: none
@@ -5029,7 +5381,7 @@ panels:
       h: 8
       w: 12
       x: 12
-      'y': 61
+      'y': 1289
     id: 141
     links:
     - targetBlank: true
@@ -5042,12 +5394,13 @@ panels:
         placement: bottom
         showLegend: false
       tooltip:
+        hideZeros: false
         mode: multi
         sort: desc
-    pluginVersion: 9.1.0
+    pluginVersion: 11.5.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       exemplar: true
@@ -5058,12 +5411,90 @@ panels:
       refId: A
     title: Readonly mode
     type: timeseries
+  - datasource:
+      type: {{ $defaultDatasource }}
+      uid: $ds
+    description: 'Shows the max number of existing [snapshots](https://docs.victoriametrics.com/#how-to-work-with-snapshots) across vmstorages.
+
+
+      Recently made snapshots do not occupy disk space. But with time, as snapshots become older, they start to occupy more and more disk space.
+
+
+      It is recommended deleting old snapshots when they are no longer needed to free up disk space.'
+    fieldConfig:
+      defaults:
+        color:
+          mode: palette-classic
+        custom:
+          axisBorderShow: false
+          axisCenteredZero: false
+          axisColorMode: text
+          axisLabel: ''
+          axisPlacement: auto
+          barAlignment: 0
+          barWidthFactor: 0.6
+          drawStyle: line
+          fillOpacity: 0
+          gradientMode: none
+          hideFrom:
+            legend: false
+            tooltip: false
+            viz: false
+          insertNulls: false
+          lineInterpolation: linear
+          lineWidth: 1
+          pointSize: 5
+          scaleDistribution:
+            type: linear
+          showPoints: never
+          spanNulls: false
+          stacking:
+            group: A
+            mode: none
+          thresholdsStyle:
+            mode: 'off'
+        mappings: []
+        thresholds:
+          mode: absolute
+          steps:
+          - color: green
+          - color: red
+            value: 80
+        unit: short
+      overrides: []
+    gridPos:
+      h: 8
+      w: 12
+      x: 0
+      'y': 1297
+    id: 216
+    options:
+      legend:
+        calcs: []
+        displayMode: list
+        placement: bottom
+        showLegend: false
+      tooltip:
+        hideZeros: false
+        mode: multi
+        sort: desc
+    pluginVersion: 11.5.0
+    targets:
+    - datasource:
+        type: {{ $defaultDatasource }}
+        uid: $ds
+      editorMode: code
+      exemplar: true
+      expr: max(vm_snapshots{job=~"$job_storage", instance=~"$instance"})
+      interval: ''
+      legendFormat: snapshots
+      range: true
+      refId: A
+    title: Number of snapshots
+    type: timeseries
   title: vmstorage ($instance)
   type: row
 - collapsed: true
-  datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
-    uid: $ds
   gridPos:
     h: 1
     w: 24
@@ -5072,7 +5503,7 @@ panels:
   id: 42
   panels:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: Request rate accepted by vmselect nodes
     fieldConfig:
@@ -5119,9 +5550,8 @@ panels:
       h: 8
       w: 12
       x: 0
-      'y': 58
+      'y': 2545
     id: 92
-    links: []
     options:
       legend:
         calcs:
@@ -5139,7 +5569,7 @@ panels:
     pluginVersion: 9.1.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       expr: sum(rate(vm_http_requests_total{job=~"$job_select", instance=~"$instance"}[$__rate_interval])) by (path) > 0
@@ -5151,7 +5581,7 @@ panels:
     title: Requests rate ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: 'Shows the max number of concurrent selects across instances.
 
@@ -5216,9 +5646,8 @@ panels:
       h: 8
       w: 12
       x: 12
-      'y': 58
+      'y': 2545
     id: 95
-    links: []
     options:
       legend:
         calcs:
@@ -5236,7 +5665,7 @@ panels:
     pluginVersion: 9.1.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       expr: max(max_over_time(vm_concurrent_select_current{job=~"$job_select", instance=~"$instance"}[$__rate_interval]))
@@ -5247,7 +5676,7 @@ panels:
       range: true
       refId: A
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       expr: min(vm_concurrent_select_capacity{job=~"$job_select", instance=~"$instance"})
       format: time_series
@@ -5257,7 +5686,7 @@ panels:
     title: Concurrent selects ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     fieldConfig:
       defaults:
@@ -5306,9 +5735,8 @@ panels:
       h: 8
       w: 12
       x: 0
-      'y': 66
+      'y': 2553
     id: 163
-    links: []
     options:
       legend:
         calcs:
@@ -5326,7 +5754,7 @@ panels:
     pluginVersion: 9.1.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       exemplar: true
@@ -5343,7 +5771,7 @@ panels:
       range: true
       refId: A
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       exemplar: true
@@ -5361,7 +5789,7 @@ panels:
       range: true
       refId: B
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       exemplar: true
@@ -5381,7 +5809,7 @@ panels:
     title: CPU usage % ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     fieldConfig:
       defaults:
@@ -5430,9 +5858,8 @@ panels:
       h: 8
       w: 12
       x: 12
-      'y': 66
+      'y': 2553
     id: 165
-    links: []
     options:
       legend:
         calcs:
@@ -5450,7 +5877,7 @@ panels:
     pluginVersion: 9.1.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       exemplar: true
@@ -5467,7 +5894,7 @@ panels:
       range: true
       refId: A
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       exemplar: true
@@ -5485,7 +5912,7 @@ panels:
       range: true
       refId: B
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       exemplar: true
@@ -5505,7 +5932,7 @@ panels:
     title: Memory usage % ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: 99th percentile of the number of time series read per query.
     fieldConfig:
@@ -5553,9 +5980,8 @@ panels:
       h: 8
       w: 12
       x: 0
-      'y': 74
+      'y': 2561
     id: 178
-    links: []
     options:
       legend:
         calcs:
@@ -5573,7 +5999,7 @@ panels:
     pluginVersion: 9.1.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       expr: sum(histogram_quantile(0.99, sum(rate(vm_series_read_per_query_bucket{job=~"$job_select", instance=~"$instance"}[$__rate_interval])) by (instance, vmrange)))
@@ -5586,7 +6012,7 @@ panels:
     title: Series read per query ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: 99th percentile of number of [data samples](https://docs.victoriametrics.com/keyconcepts/#raw-samples) read per queried time series.
     fieldConfig:
@@ -5634,9 +6060,8 @@ panels:
       h: 8
       w: 12
       x: 12
-      'y': 74
+      'y': 2561
     id: 180
-    links: []
     options:
       legend:
         calcs:
@@ -5654,7 +6079,7 @@ panels:
     pluginVersion: 9.1.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       expr: sum(histogram_quantile(0.99, sum(rate(vm_rows_read_per_series_bucket{job=~"$job_select", instance=~"$instance"}[$__rate_interval])) by (instance, vmrange)))
@@ -5667,7 +6092,7 @@ panels:
     title: Datapoints read per series ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: 99th percentile of number of [data samples](https://docs.victoriametrics.com/keyconcepts/#raw-samples) read per query.
     fieldConfig:
@@ -5715,9 +6140,8 @@ panels:
       h: 8
       w: 12
       x: 0
-      'y': 82
+      'y': 2569
     id: 179
-    links: []
     options:
       legend:
         calcs:
@@ -5735,7 +6159,7 @@ panels:
     pluginVersion: 9.1.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       expr: sum(histogram_quantile(0.99, sum(rate(vm_rows_read_per_query_bucket{job=~"$job_select", instance=~"$instance"}[$__rate_interval])) by (instance, vmrange)))
@@ -5748,7 +6172,7 @@ panels:
     title: Datapoints read per query ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: '99th percentile of number of [data samples](https://docs.victoriametrics.com/keyconcepts/#raw-samples) scanner per query.
 
@@ -5799,9 +6223,8 @@ panels:
       h: 8
       w: 12
       x: 12
-      'y': 82
+      'y': 2569
     id: 181
-    links: []
     options:
       legend:
         calcs:
@@ -5819,7 +6242,7 @@ panels:
     pluginVersion: 9.1.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       expr: sum(histogram_quantile(0.99, sum(rate(vm_rows_scanned_per_query_bucket{job=~"$job_select", instance=~"$instance"}[$__rate_interval])) by (instance, vmrange)))
@@ -5832,7 +6255,7 @@ panels:
     title: Datapoints scanned per query ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: Shows network usage between vmselects and clients, such as vmalert, Grafana, vmui, etc.
     fieldConfig:
@@ -5884,9 +6307,8 @@ panels:
       h: 8
       w: 12
       x: 0
-      'y': 90
+      'y': 2577
     id: 93
-    links: []
     options:
       legend:
         calcs:
@@ -5903,7 +6325,7 @@ panels:
     pluginVersion: 9.1.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       expr: sum(rate(vm_tcplistener_read_bytes_total{job=~"$job_select", instance=~"$instance"}[$__rate_interval])) * 8 > 0
@@ -5913,7 +6335,7 @@ panels:
       range: true
       refId: A
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       expr: sum(rate(vm_tcplistener_written_bytes_total{job=~"$job_select", instance=~"$instance"}[$__rate_interval])) * 8 > 0
@@ -5926,7 +6348,7 @@ panels:
     title: 'Network usage: clients ($instance)'
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: Shows network usage between vmselects and vmstorages.
     fieldConfig:
@@ -5978,9 +6400,8 @@ panels:
       h: 8
       w: 12
       x: 12
-      'y': 90
+      'y': 2577
     id: 207
-    links: []
     options:
       legend:
         calcs:
@@ -5997,7 +6418,7 @@ panels:
     pluginVersion: 9.1.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       expr: sum(rate(vm_tcpdialer_read_bytes_total{job=~"$job_select", instance=~"$instance"}[$__rate_interval])) * 8 > 0
@@ -6007,7 +6428,7 @@ panels:
       range: true
       refId: A
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       expr: sum(rate(vm_tcpdialer_written_bytes_total{job=~"$job_select", instance=~"$instance"}[$__rate_interval])) * 8 > 0
@@ -6022,9 +6443,6 @@ panels:
   title: vmselect ($instance)
   type: row
 - collapsed: true
-  datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
-    uid: $ds
   gridPos:
     h: 1
     w: 24
@@ -6033,7 +6451,7 @@ panels:
   id: 40
   panels:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: '* `*` - unsupported query path
 
@@ -6092,9 +6510,8 @@ panels:
       h: 8
       w: 12
       x: 0
-      'y': 59
+      'y': 2546
     id: 97
-    links: []
     options:
       legend:
         calcs:
@@ -6112,7 +6529,7 @@ panels:
     pluginVersion: 9.1.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       expr: sum(rate(vm_http_requests_total{job=~"$job_insert", instance=~"$instance"}[$__rate_interval])) by (path) > 0
@@ -6124,7 +6541,7 @@ panels:
     title: Requests rate ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: 'Shows the max number of ongoing insertions.
 
@@ -6192,9 +6609,8 @@ panels:
       h: 8
       w: 12
       x: 12
-      'y': 59
+      'y': 2546
     id: 99
-    links: []
     options:
       legend:
         calcs:
@@ -6212,7 +6628,7 @@ panels:
     pluginVersion: 9.1.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       expr: max(max_over_time(vm_concurrent_insert_current{job=~"$job_insert", instance=~"$instance"}[$__rate_interval]))
@@ -6223,7 +6639,7 @@ panels:
       range: true
       refId: A
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       exemplar: true
       expr: min(vm_concurrent_insert_capacity{job=~"$job_insert", instance=~"$instance"})
@@ -6235,7 +6651,7 @@ panels:
     title: Concurrent inserts ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     fieldConfig:
       defaults:
@@ -6284,9 +6700,8 @@ panels:
       h: 8
       w: 12
       x: 0
-      'y': 67
+      'y': 2554
     id: 185
-    links: []
     options:
       legend:
         calcs:
@@ -6304,7 +6719,7 @@ panels:
     pluginVersion: 9.1.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       exemplar: true
@@ -6321,7 +6736,7 @@ panels:
       range: true
       refId: A
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       exemplar: true
@@ -6339,7 +6754,7 @@ panels:
       range: true
       refId: B
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       exemplar: true
@@ -6359,7 +6774,7 @@ panels:
     title: CPU usage % ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     fieldConfig:
       defaults:
@@ -6408,9 +6823,8 @@ panels:
       h: 8
       w: 12
       x: 12
-      'y': 67
+      'y': 2554
     id: 187
-    links: []
     options:
       legend:
         calcs:
@@ -6428,7 +6842,7 @@ panels:
     pluginVersion: 9.1.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       exemplar: true
@@ -6445,7 +6859,7 @@ panels:
       range: true
       refId: A
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       exemplar: true
@@ -6463,7 +6877,7 @@ panels:
       range: true
       refId: B
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       exemplar: true
@@ -6483,7 +6897,7 @@ panels:
     title: Memory usage % ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: "Shows the saturation level of connection between vminsert and vmstorage components. \n\nIf the threshold of 0.9sec is reached, then the connection is saturated by more than 90% and vminsert won't be able to keep up. This usually means that either vminsert or vmstorage nodes are struggling with the load. Verify CPU/mem saturation of both components and network saturation between them.\nIf vminsert resources are saturated - consider adding more resources or scale vminserts horizontally.\n\nIf vminsert resources and network are fine, check vmstorage metrics for anomalies."
     fieldConfig:
@@ -6531,9 +6945,8 @@ panels:
       h: 8
       w: 12
       x: 0
-      'y': 75
+      'y': 2562
     id: 139
-    links: []
     options:
       legend:
         calcs:
@@ -6550,7 +6963,7 @@ panels:
     pluginVersion: 9.1.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       exemplar: true
@@ -6564,7 +6977,7 @@ panels:
     title: Storage connection saturation ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: Shows when vmstorage node is unreachable for vminsert.
     fieldConfig:
@@ -6612,9 +7025,8 @@ panels:
       h: 8
       w: 12
       x: 12
-      'y': 75
+      'y': 2562
     id: 114
-    links: []
     options:
       legend:
         calcs:
@@ -6629,7 +7041,7 @@ panels:
     pluginVersion: 9.1.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       expr: vm_rpc_vmstorage_is_reachable{job=~"$job", instance=~"$instance"} != 1
@@ -6642,7 +7054,7 @@ panels:
     title: Storage reachability ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: Shows network usage between vminserts and clients, such as vmagent, Prometheus, or any other client pushing metrics to vminsert.
     fieldConfig:
@@ -6694,9 +7106,8 @@ panels:
       h: 8
       w: 12
       x: 0
-      'y': 83
+      'y': 2570
     id: 208
-    links: []
     options:
       legend:
         calcs:
@@ -6713,7 +7124,7 @@ panels:
     pluginVersion: 9.1.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       expr: sum(rate(vm_tcplistener_read_bytes_total{job=~"$job_insert", instance=~"$instance"}[$__rate_interval])) * 8 > 0
@@ -6723,7 +7134,7 @@ panels:
       range: true
       refId: A
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       expr: sum(rate(vm_tcplistener_written_bytes_total{job=~"$job_insert", instance=~"$instance"}[$__rate_interval])) * 8 > 0
@@ -6736,7 +7147,7 @@ panels:
     title: 'Network usage: clients ($instance)'
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: Shows network usage between vminserts and vmstorages.
     fieldConfig:
@@ -6788,9 +7199,8 @@ panels:
       h: 8
       w: 12
       x: 12
-      'y': 83
+      'y': 2570
     id: 209
-    links: []
     options:
       legend:
         calcs:
@@ -6807,7 +7217,7 @@ panels:
     pluginVersion: 9.1.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       expr: sum(rate(vm_tcpdialer_read_bytes_total{job=~"$job_insert", instance=~"$instance"}[$__rate_interval])) * 8 > 0
@@ -6817,7 +7227,7 @@ panels:
       range: true
       refId: A
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       expr: sum(rate(vm_tcpdialer_written_bytes_total{job=~"$job_insert", instance=~"$instance"}[$__rate_interval])) * 8 > 0
@@ -6830,7 +7240,7 @@ panels:
     title: 'Network usage: vmstorage ($instance)'
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: ''
     fieldConfig:
@@ -6878,9 +7288,8 @@ panels:
       h: 8
       w: 12
       x: 12
-      'y': 91
+      'y': 2578
     id: 88
-    links: []
     options:
       legend:
         calcs:
@@ -6898,7 +7307,7 @@ panels:
     pluginVersion: 9.1.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       expr: max(histogram_quantile(0.99, sum(increase(vm_rows_per_insert_bucket{job=~"$job", instance=~"$instance"}[$__rate_interval])) by (instance, vmrange)))
@@ -6920,14 +7329,14 @@ panels:
     'y': 43
   id: 194
   panels:
-  - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
-      uid: $ds
+  - fieldConfig:
+      defaults: {}
+      overrides: []
     gridPos:
       h: 2
       w: 24
       x: 0
-      'y': 108
+      'y': 2595
     id: 198
     options:
       code:
@@ -6937,10 +7346,11 @@ panels:
       content: Drilldown row is used by other panels on the dashboard to show more detailed metrics per-instance.
       mode: markdown
     pluginVersion: 9.2.7
+    title: ''
     transparent: true
     type: text
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: 'Shows the used memory (resident).
 
@@ -6987,9 +7397,8 @@ panels:
       h: 8
       w: 12
       x: 0
-      'y': 110
+      'y': 2597
     id: 189
-    links: []
     options:
       legend:
         calcs:
@@ -7007,7 +7416,7 @@ panels:
     pluginVersion: 9.1.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       exemplar: true
@@ -7019,7 +7428,7 @@ panels:
     title: RSS memory usage ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: RSS share for memory allocated by the process itself. This share cannot be freed by the OS, so it must be taken into account by OOM killer.
     fieldConfig:
@@ -7064,9 +7473,8 @@ panels:
       h: 8
       w: 12
       x: 12
-      'y': 110
+      'y': 2597
     id: 190
-    links: []
     options:
       legend:
         calcs:
@@ -7084,7 +7492,7 @@ panels:
     pluginVersion: 9.1.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       exemplar: true
@@ -7096,7 +7504,7 @@ panels:
     title: RSS anonymous memory usage ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: ''
     fieldConfig:
@@ -7141,9 +7549,8 @@ panels:
       h: 7
       w: 12
       x: 0
-      'y': 118
+      'y': 2605
     id: 192
-    links: []
     options:
       legend:
         calcs:
@@ -7161,7 +7568,7 @@ panels:
     pluginVersion: 9.1.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       exemplar: false
@@ -7175,11 +7582,11 @@ panels:
     title: CPU usage ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: 'Shows the approx time needed to reach 100% of disk capacity based on the following params:
 
-      * free disk space;
+      * free disk space (after -storage.minFreeDiskSpaceBytes);
 
       * row ingestion rate;
 
@@ -7231,9 +7638,8 @@ panels:
       h: 7
       w: 12
       x: 12
-      'y': 118
+      'y': 2605
     id: 196
-    links: []
     options:
       legend:
         calcs:
@@ -7251,10 +7657,10 @@ panels:
     pluginVersion: 9.1.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
-      expr: "vm_free_disk_space_bytes{job=~\"$job_storage\", instance=~\"$instance\"} \n/ \nignoring(path) (\n    rate(vm_rows_added_to_storage_total{job=~\"$job_storage\", instance=~\"$instance\"}[1d])\n    * scalar(\n            sum(vm_data_size_bytes{job=~\"$job_storage\", instance=~\"$instance\", type!~\"indexdb.*\"})\n            / \n            sum(vm_rows{job=~\"$job_storage\", instance=~\"$instance\", type!~\"indexdb.*\"})\n            )\n)"
+      expr: "(vm_free_disk_space_bytes{job=~\"$job_storage\", instance=~\"$instance\"}-vm_free_disk_space_limit_bytes{job=~\"$job_storage\", instance=~\"$instance\"}) \n/ \nignoring(path) (\n    rate(vm_rows_added_to_storage_total{job=~\"$job_storage\", instance=~\"$instance\"}[1d])\n    * scalar(\n            sum(vm_data_size_bytes{job=~\"$job_storage\", instance=~\"$instance\", type!~\"indexdb.*\"})\n            / \n            sum(vm_rows{job=~\"$job_storage\", instance=~\"$instance\", type!~\"indexdb.*\"})\n            )\n)"
       format: time_series
       interval: ''
       intervalFactor: 1
@@ -7264,7 +7670,7 @@ panels:
     title: Storage full ETA ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: Shows the percentage of used disk space. It is recommended to have at least 20% of free disk space for the best performance.
     fieldConfig:
@@ -7309,9 +7715,8 @@ panels:
       h: 8
       w: 12
       x: 0
-      'y': 125
+      'y': 2612
     id: 200
-    links: []
     options:
       legend:
         calcs:
@@ -7329,7 +7734,7 @@ panels:
     pluginVersion: 9.1.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       expr: sum(vm_data_size_bytes{job=~"$job", instance=~"$instance"}) by(job, instance)
@@ -7341,7 +7746,7 @@ panels:
     title: Disk space usage ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: ''
     fieldConfig:
@@ -7386,9 +7791,8 @@ panels:
       h: 8
       w: 12
       x: 12
-      'y': 125
+      'y': 2612
     id: 201
-    links: []
     options:
       legend:
         calcs:
@@ -7406,7 +7810,7 @@ panels:
     pluginVersion: 9.1.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       expr: sum(vm_data_size_bytes{job=~"$job", instance=~"$instance", type=~"indexdb.*"}) by(job, instance)
@@ -7416,7 +7820,7 @@ panels:
       range: true
       refId: A
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       expr: sum(vm_data_size_bytes{job=~"$job", instance=~"$instance", type!~"indexdb.*"}) by(job, instance)
@@ -7429,7 +7833,7 @@ panels:
     title: Disk space usage by type ($instance)
     type: timeseries
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: $ds
     description: Shows the rate of logging the messages by their level. Unexpected spike in rate is a good reason to check logs.
     fieldConfig:
@@ -7476,9 +7880,8 @@ panels:
       h: 8
       w: 12
       x: 0
-      'y': 133
+      'y': 2620
     id: 203
-    links: []
     options:
       legend:
         calcs:
@@ -7496,7 +7899,7 @@ panels:
     pluginVersion: 9.1.0
     targets:
     - datasource:
-        type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+        type: {{ $defaultDatasource }}
         uid: $ds
       editorMode: code
       exemplar: true
@@ -7512,33 +7915,28 @@ panels:
     type: timeseries
   title: Drilldown
   type: row
+preload: false
 refresh: ''
-schemaVersion: 39
+schemaVersion: 40
 tags:
 - vm-k8s-stack
 templating:
   list:
   - current:
-      selected: false
       text: VictoriaMetrics - cluster
       value: PAF93674D0B4E9963
-    hide: 0
     includeAll: false
-    multi: false
     name: ds
     options: []
-    query: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
-    queryValue: ''
+    query: {{ $defaultDatasource }}
     refresh: 1
     regex: ''
-    skipUrlSync: false
     type: datasource
   - current: {}
     datasource:
       type: prometheus
       uid: $ds
     definition: label_values(vm_app_version{version=~"^vm(insert|select|storage).*"}, job)
-    hide: 0
     includeAll: true
     multi: true
     name: job
@@ -7548,12 +7946,7 @@ templating:
       refId: VictoriaMetrics-job-Variable-Query
     refresh: 1
     regex: ''
-    skipUrlSync: false
-    sort: 0
-    tagValuesQuery: ''
-    tagsQuery: ''
     type: query
-    useTags: false
   - current: {}
     datasource:
       type: prometheus
@@ -7569,12 +7962,7 @@ templating:
       refId: StandardVariableQuery
     refresh: 1
     regex: ''
-    skipUrlSync: false
-    sort: 0
-    tagValuesQuery: ''
-    tagsQuery: ''
     type: query
-    useTags: false
   - current: {}
     datasource:
       type: prometheus
@@ -7590,12 +7978,7 @@ templating:
       refId: StandardVariableQuery
     refresh: 1
     regex: ''
-    skipUrlSync: false
-    sort: 0
-    tagValuesQuery: ''
-    tagsQuery: ''
     type: query
-    useTags: false
   - current: {}
     datasource:
       type: prometheus
@@ -7611,19 +7994,13 @@ templating:
       refId: StandardVariableQuery
     refresh: 1
     regex: ''
-    skipUrlSync: false
-    sort: 0
-    tagValuesQuery: ''
-    tagsQuery: ''
     type: query
-    useTags: false
   - allValue: .*
     current: {}
     datasource:
       type: prometheus
       uid: $ds
     definition: label_values(vm_app_version{job=~"$job"}, instance)
-    hide: 0
     includeAll: true
     multi: true
     name: instance
@@ -7633,16 +8010,13 @@ templating:
       refId: VictoriaMetrics-instance-Variable-Query
     refresh: 1
     regex: ''
-    skipUrlSync: false
-    sort: 0
     type: query
-  - datasource:
+  - baseFilters: []
+    datasource:
       type: prometheus
       uid: $ds
     filters: []
-    hide: 0
     name: adhoc
-    skipUrlSync: false
     type: adhoc
 time:
   from: now-3h
@@ -7658,7 +8032,7 @@ timepicker:
   - 1h
   - 2h
   - 1d
-timezone: {{ $Values.grafana.defaultDashboardsTimezone }}
+timezone: {{ default "utc" ($Values.defaultDashboards).defaultTimezone }}
 title: VictoriaMetrics - cluster
 uid: oS7Bi_0Wz
 version: 1

@@ -302,11 +302,156 @@ keep:
 
 victoria-metrics-distributed:
   nameOverride: "victoriametrics"
-  extraVMAgent:
-    enabled: false
+  extra:
+    vmagent:
+      enabled: false
   enableMultitenancy: false
   victoria-metrics-k8s-stack:
     enabled: false
     grafana:
       enabled: false
   availabilityZones: []
+  common:
+    vmauth:
+      spec:
+        replicaCount: 2
+        resources:
+          limits:
+            cpu: 500m
+          requests:
+            cpu: 100m
+        extraArgs:
+          httpAuthHeader: "rnd-header-efe9c0e5-auth-disabled"
+        podMetadata:
+          annotations:
+            prometheus.io/port: "8427"
+            prometheus.io/scrape: "true"
+          labels:
+            app.groundcover.com/pipeline: metrics
+            app.kubernetes.io/part-of: groundcover
+  zoneTpl:
+    common:
+      spec:
+        topologySpreadConstraints: []
+    vmagent:
+      spec:
+        containers:
+        - env:
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          name: vmagent
+        extraArgs:
+          remoteWrite.maxDiskUsagePerURL: 50GB
+        podMetadata:
+          annotations:
+            prometheus.io/port: "8429"
+            prometheus.io/scrape: "true"
+          labels:
+            app.groundcover.com/pipeline: metrics
+            app.kubernetes.io/part-of: "groundcover"
+        statefulMode: true
+        statefulStorage:
+          volumeClaimTemplate:
+            spec:
+              resources:
+                requests:
+                  storage: 50Gi
+        streamAggrConfig:
+          configmap:
+            key: aggregation_config.yaml
+            name: victoria-metrics-aggregation-config
+        replicaCount: 1
+        resources:
+          limits:
+            cpu: 15
+            memory: 6Gi
+          requests:
+            cpu: 1
+            memory: 6Gi
+    vmcluster:
+      enabled: true
+      spec:
+        replicationFactor: 2
+        retentionPeriod: 30d
+        vminsert:
+          extraArgs:
+            maxConcurrentInserts: "1000"
+            maxLabelsPerTimeseries: "50"
+          podMetadata:
+            annotations:
+              prometheus.io/port: "8480"
+              prometheus.io/scrape: "true"
+            labels:
+              app.groundcover.com/pipeline: metrics
+              app.kubernetes.io/part-of: groundcover
+          replicaCount: 2
+          resources:
+            limits:
+              cpu: 10
+              memory: 3Gi
+            requests:
+              cpu: 500m
+              memory: 2Gi
+        vmselect:
+          extraArgs:
+            search.maxQueryLen: "100000"
+            search.maxSeries: "30000"
+            search.maxUniqueTimeseries: "2000000"
+          podMetadata:
+            annotations:
+              prometheus.io/port: "8481"
+              prometheus.io/scrape: "true"
+            labels:
+              app.groundcover.com/pipeline: metrics
+              app.kubernetes.io/part-of: groundcover
+          replicaCount: 2
+          resources:
+            limits:
+              cpu: 10
+              memory: 3Gi
+            requests:
+              cpu: 400m
+              memory: 1Gi
+          storage:
+            volumeClaimTemplate:
+              spec:
+                resources:
+                  requests:
+                    storage: 10Gi
+        vmstorage:
+          extraArgs:
+            search.maxConcurrentRequests: "8"
+            search.maxTagKeys: "200000"
+            search.maxTagValues: "500000"
+          podMetadata:
+            annotations:
+              prometheus.io/port: "8482"
+              prometheus.io/scrape: "true"
+            labels:
+              app.groundcover.com/pipeline: metrics
+              app.kubernetes.io/part-of: groundcover
+          storageDataPath: /vm-data                    
+          replicaCount: 3
+          resources:
+            limits:
+              cpu: 10
+              memory: 5Gi
+            requests:
+              cpu: 600m
+              memory: 5Gi
+          storage:
+            volumeClaimTemplate:
+              spec:
+                resources:
+                  requests:
+                    storage: 10Gi
+  read:
+    global:
+      vmauth:
+        name: "read-global-groundcover"             
+  write:
+    global:
+      vmauth:
+        name: "write-global-groundcover"         

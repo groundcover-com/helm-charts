@@ -1,4 +1,10 @@
 {{- $Values := (.helm).Values | default .Values }}
+{{- $clusterLabel := ($Values.global).clusterLabel | default "cluster" }}
+{{- $multicluster := ((($Values.grafana).sidecar).dashboards).multicluster | default false }}
+{{- $defaultDatasource := "prometheus" -}}
+{{- range (((($Values.grafana).sidecar).datasources).victoriametrics | default list) }}
+  {{- if and .isDefault .type }}{{ $defaultDatasource = .type }}{{- end }}
+{{- end }}
 __elements: {}
 __inputs:
 - description: ''
@@ -48,7 +54,33 @@ annotations:
       tags: []
       type: dashboard
     type: dashboard
-condition: {{ $Values.kubelet.enabled }}
+  - datasource:
+      type: datasource
+      uid: grafana
+    enable: true
+    hide: false
+    iconColor: '#5c4ee5'
+    name: terraform
+    target:
+      limit: 100
+      matchAny: false
+      tags:
+      - terraform
+      type: tags
+  - datasource:
+      type: datasource
+      uid: grafana
+    enable: true
+    hide: false
+    iconColor: red
+    name: oncall
+    target:
+      limit: 100
+      matchAny: false
+      tags:
+      - oncall
+      type: tags
+condition: {{ ($Values.kubelet).enabled }}
 description: 'This is a modern ''Nodes View'' dashboard for your Kubernetes cluster(s). Made for kube-prometheus-stack and take advantage of the latest Grafana features. GitHub repository: https://github.com/dotdc/grafana-dashboards-kubernetes'
 editable: false
 fiscalYearStartMonth: 0
@@ -58,7 +90,7 @@ liveNow: false
 panels:
 - collapsed: false
   datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: ${datasource}
   gridPos:
     h: 1
@@ -70,7 +102,7 @@ panels:
   title: Overview
   type: row
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: ${datasource}
   fieldConfig:
     defaults:
@@ -111,10 +143,10 @@ panels:
   pluginVersion: 11.2.0
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     exemplar: false
-    expr: avg(sum by (cpu) (rate(node_cpu_seconds_total{mode!~"idle|iowait|steal", instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"}[$__rate_interval])))
+    expr: avg(sum by (cpu) (rate(node_cpu_seconds_total{mode!~"idle|iowait|steal", instance="$instance", {{ $clusterLabel }}=~"$cluster"}[$__rate_interval])))
     instant: true
     interval: $resolution
     legendFormat: ''
@@ -122,7 +154,7 @@ panels:
   title: CPU  Usage
   type: gauge
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: ${datasource}
   fieldConfig:
     defaults:
@@ -163,10 +195,10 @@ panels:
   pluginVersion: 11.2.0
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     exemplar: false
-    expr: sum(node_memory_MemTotal_bytes{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"} - node_memory_MemAvailable_bytes{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"}) / sum(node_memory_MemTotal_bytes{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"})
+    expr: sum(node_memory_MemTotal_bytes{instance="$instance", {{ $clusterLabel }}=~"$cluster"} - node_memory_MemAvailable_bytes{instance="$instance", {{ $clusterLabel }}=~"$cluster"}) / sum(node_memory_MemTotal_bytes{instance="$instance", {{ $clusterLabel }}=~"$cluster"})
     instant: true
     interval: $resolution
     legendFormat: ''
@@ -174,7 +206,7 @@ panels:
   title: RAM Usage
   type: gauge
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: ${datasource}
   fieldConfig:
     defaults:
@@ -210,17 +242,17 @@ panels:
   pluginVersion: 11.2.0
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     exemplar: true
-    expr: sum(kube_pod_info{node="$node", {{ $Values.global.clusterLabel }}=~"$cluster"})
+    expr: sum(kube_pod_info{node="$node", {{ $clusterLabel }}=~"$cluster"})
     interval: ''
     legendFormat: ''
     refId: A
   title: Pods on node
   type: stat
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: ${datasource}
   fieldConfig:
     defaults:
@@ -234,7 +266,7 @@ panels:
       links:
       - targetBlank: true
         title: Pod details
-        url: /d/k8s_views_pods/kubernetes-views-pods?${datasource:queryparam}&var-namespace=${__data.fields.namespace}&var-pod=${__data.fields.pod}&${resolution:queryparam}&${__url_time_range}
+        url: /d/k8s_views_pods/kubernetes-views-pods?${datasource:queryparam}&var-namespace=${__data.fields.namespace}&${cluster:queryparam}&var-pod=${__data.fields.pod}&${resolution:queryparam}&${__url_time_range}
       mappings: []
       thresholds:
         mode: absolute
@@ -293,10 +325,10 @@ panels:
   pluginVersion: 11.2.0
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     exemplar: true
-    expr: kube_pod_info{node="$node", {{ $Values.global.clusterLabel }}=~"$cluster"}
+    expr: kube_pod_info{node="$node", {{ $clusterLabel }}=~"$cluster"}
     format: table
     interval: ''
     legendFormat: ''
@@ -370,7 +402,7 @@ panels:
           operation: groupby
   type: table
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: ${datasource}
   fieldConfig:
     defaults:
@@ -408,10 +440,10 @@ panels:
   pluginVersion: 11.2.0
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     exemplar: false
-    expr: sum(rate(node_cpu_seconds_total{mode!~"idle|iowait|steal", instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"}[$__rate_interval]))
+    expr: sum(rate(node_cpu_seconds_total{mode!~"idle|iowait|steal", instance="$instance", {{ $clusterLabel }}=~"$cluster"}[$__rate_interval]))
     instant: true
     interval: $resolution
     legendFormat: ''
@@ -419,7 +451,7 @@ panels:
   title: CPU Used
   type: stat
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: ${datasource}
   fieldConfig:
     defaults:
@@ -456,17 +488,17 @@ panels:
   pluginVersion: 11.2.0
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     exemplar: true
-    expr: sum(machine_cpu_cores{node="$node", {{ $Values.global.clusterLabel }}=~"$cluster"})
+    expr: sum(machine_cpu_cores{node="$node", {{ $clusterLabel }}=~"$cluster"})
     interval: $resolution
     legendFormat: ''
     refId: A
   title: CPU Total
   type: stat
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: ${datasource}
   fieldConfig:
     defaults:
@@ -503,10 +535,10 @@ panels:
   pluginVersion: 11.2.0
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     exemplar: false
-    expr: sum(node_memory_MemTotal_bytes{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"} - node_memory_MemAvailable_bytes{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"})
+    expr: sum(node_memory_MemTotal_bytes{instance="$instance", {{ $clusterLabel }}=~"$cluster"} - node_memory_MemAvailable_bytes{instance="$instance", {{ $clusterLabel }}=~"$cluster"})
     instant: true
     interval: ''
     legendFormat: ''
@@ -514,7 +546,7 @@ panels:
   title: RAM Used
   type: stat
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: ${datasource}
   fieldConfig:
     defaults:
@@ -551,10 +583,10 @@ panels:
   pluginVersion: 11.2.0
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     exemplar: true
-    expr: machine_memory_bytes{node="$node", {{ $Values.global.clusterLabel }}=~"$cluster"}
+    expr: machine_memory_bytes{node="$node", {{ $clusterLabel }}=~"$cluster"}
     instant: false
     interval: ''
     legendFormat: ''
@@ -562,7 +594,7 @@ panels:
   title: RAM Total
   type: stat
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: ${datasource}
   fieldConfig:
     defaults:
@@ -603,10 +635,10 @@ panels:
   pluginVersion: 11.2.0
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     exemplar: true
-    expr: node_time_seconds{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"} - node_boot_time_seconds{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"}
+    expr: node_time_seconds{instance="$instance", {{ $clusterLabel }}=~"$cluster"} - node_boot_time_seconds{instance="$instance", {{ $clusterLabel }}=~"$cluster"}
     instant: false
     interval: ''
     legendFormat: ''
@@ -615,7 +647,7 @@ panels:
   type: stat
 - collapsed: false
   datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: ${datasource}
   gridPos:
     h: 1
@@ -627,7 +659,7 @@ panels:
   title: Resources
   type: row
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: ${datasource}
   fieldConfig:
     defaults:
@@ -691,10 +723,10 @@ panels:
       sort: none
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     exemplar: true
-    expr: avg(rate(node_cpu_seconds_total{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"}[$__rate_interval]) * 100) by (mode)
+    expr: avg(rate(node_cpu_seconds_total{instance="$instance", {{ $clusterLabel }}=~"$cluster"}[$__rate_interval]) * 100) by (mode)
     hide: false
     instant: false
     interval: $resolution
@@ -703,7 +735,7 @@ panels:
   title: CPU Usage
   type: timeseries
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: ${datasource}
   fieldConfig:
     defaults:
@@ -766,64 +798,64 @@ panels:
       sort: desc
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     exemplar: true
-    expr: node_memory_MemTotal_bytes{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"} - node_memory_MemFree_bytes{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"} - (node_memory_Cached_bytes{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"} + node_memory_Buffers_bytes{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"})
+    expr: node_memory_MemTotal_bytes{instance="$instance", {{ $clusterLabel }}=~"$cluster"} - node_memory_MemFree_bytes{instance="$instance", {{ $clusterLabel }}=~"$cluster"} - (node_memory_Cached_bytes{instance="$instance", {{ $clusterLabel }}=~"$cluster"} + node_memory_Buffers_bytes{instance="$instance", {{ $clusterLabel }}=~"$cluster"})
     instant: false
     interval: $resolution
     legendFormat: RAM Used
     refId: A
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     exemplar: true
-    expr: node_memory_MemTotal_bytes{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"}
+    expr: node_memory_MemTotal_bytes{instance="$instance", {{ $clusterLabel }}=~"$cluster"}
     hide: false
     interval: $resolution
     legendFormat: RAM Total
     refId: B
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     exemplar: true
-    expr: node_memory_Cached_bytes{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"}
+    expr: node_memory_Cached_bytes{instance="$instance", {{ $clusterLabel }}=~"$cluster"}
     hide: false
     interval: $resolution
     legendFormat: RAM Cache
     refId: C
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     exemplar: true
-    expr: node_memory_Buffers_bytes{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"}
+    expr: node_memory_Buffers_bytes{instance="$instance", {{ $clusterLabel }}=~"$cluster"}
     hide: false
     interval: $resolution
     legendFormat: RAM Buffer
     refId: D
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     exemplar: true
-    expr: node_memory_MemFree_bytes{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"}
+    expr: node_memory_MemFree_bytes{instance="$instance", {{ $clusterLabel }}=~"$cluster"}
     hide: false
     interval: $resolution
     legendFormat: RAM Free
     refId: E
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     exemplar: true
-    expr: node_memory_SwapTotal_bytes{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"} - node_memory_SwapFree_bytes{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"}
+    expr: node_memory_SwapTotal_bytes{instance="$instance", {{ $clusterLabel }}=~"$cluster"} - node_memory_SwapFree_bytes{instance="$instance", {{ $clusterLabel }}=~"$cluster"}
     hide: false
     interval: $resolution
     legendFormat: SWAP Used
     refId: F
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     exemplar: true
-    expr: node_memory_SwapTotal_bytes{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"}
+    expr: node_memory_SwapTotal_bytes{instance="$instance", {{ $clusterLabel }}=~"$cluster"}
     hide: false
     interval: $resolution
     legendFormat: SWAP Total
@@ -831,7 +863,7 @@ panels:
   title: Memory Usage
   type: timeseries
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: ${datasource}
   fieldConfig:
     defaults:
@@ -893,17 +925,17 @@ panels:
   pluginVersion: 8.3.3
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     exemplar: true
-    expr: sum(rate(container_cpu_usage_seconds_total{node="$node", image!="", {{ $Values.global.clusterLabel }}=~"$cluster"}[$__rate_interval])) by (pod)
+    expr: sum(rate(container_cpu_usage_seconds_total{node="$node", image!="", {{ $clusterLabel }}=~"$cluster"}[$__rate_interval])) by (pod)
     interval: $resolution
     legendFormat: '{{`{{`}} pod {{`}}`}}'
     refId: A
   title: CPU usage by Pod
   type: timeseries
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: ${datasource}
   fieldConfig:
     defaults:
@@ -965,17 +997,17 @@ panels:
   pluginVersion: 8.3.3
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     exemplar: true
-    expr: sum(container_memory_working_set_bytes{node="$node", image!="", {{ $Values.global.clusterLabel }}=~"$cluster"}) by (pod)
+    expr: sum(container_memory_working_set_bytes{node="$node", image!="", {{ $clusterLabel }}=~"$cluster"}) by (pod)
     interval: $resolution
     legendFormat: '{{`{{`}} pod {{`}}`}}'
     refId: A
   title: Memory usage by Pod
   type: timeseries
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: ${datasource}
   description: Number of times a CPU core has been throttled on an instance.
   fieldConfig:
@@ -1046,11 +1078,11 @@ panels:
   pluginVersion: 8.3.3
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     editorMode: code
     exemplar: true
-    expr: sum(rate(node_cpu_core_throttles_total{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"}[$__rate_interval]))
+    expr: sum(rate(node_cpu_core_throttles_total{instance="$instance", {{ $clusterLabel }}=~"$cluster"}[$__rate_interval]))
     interval: $resolution
     legendFormat: Nb of cpu core throttles
     range: true
@@ -1059,7 +1091,7 @@ panels:
   type: timeseries
 - collapsed: false
   datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: ${datasource}
   gridPos:
     h: 1
@@ -1071,7 +1103,7 @@ panels:
   title: System
   type: row
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: ${datasource}
   fieldConfig:
     defaults:
@@ -1133,32 +1165,32 @@ panels:
       sort: desc
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     editorMode: code
     exemplar: true
-    expr: node_load1{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"}
+    expr: node_load1{instance="$instance", {{ $clusterLabel }}=~"$cluster"}
     interval: $resolution
     legendFormat: 1m
     range: true
     refId: A
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     editorMode: code
     exemplar: true
-    expr: node_load5{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"}
+    expr: node_load5{instance="$instance", {{ $clusterLabel }}=~"$cluster"}
     hide: false
     interval: $resolution
     legendFormat: 5m
     range: true
     refId: B
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     editorMode: code
     exemplar: true
-    expr: node_load15{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"}
+    expr: node_load15{instance="$instance", {{ $clusterLabel }}=~"$cluster"}
     hide: false
     interval: $resolution
     legendFormat: 15m
@@ -1167,7 +1199,7 @@ panels:
   title: System Load
   type: timeseries
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: ${datasource}
   fieldConfig:
     defaults:
@@ -1227,22 +1259,22 @@ panels:
       sort: desc
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     editorMode: code
     exemplar: true
-    expr: rate(node_context_switches_total{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"}[$__rate_interval])
+    expr: rate(node_context_switches_total{instance="$instance", {{ $clusterLabel }}=~"$cluster"}[$__rate_interval])
     interval: $resolution
     intervalFactor: 1
     legendFormat: Context switches
     range: true
     refId: A
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     editorMode: code
     exemplar: true
-    expr: rate(node_intr_total{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"}[$__rate_interval])
+    expr: rate(node_intr_total{instance="$instance", {{ $clusterLabel }}=~"$cluster"}[$__rate_interval])
     hide: false
     interval: $resolution
     legendFormat: Interrupts
@@ -1251,7 +1283,7 @@ panels:
   title: Context Switches & Interrupts
   type: timeseries
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: ${datasource}
   fieldConfig:
     defaults:
@@ -1313,21 +1345,21 @@ panels:
       sort: none
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     editorMode: code
     exemplar: true
-    expr: node_filefd_maximum{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"}
+    expr: node_filefd_maximum{instance="$instance", {{ $clusterLabel }}=~"$cluster"}
     instant: false
     interval: $resolution
     legendFormat: Maximum file descriptors
     refId: A
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     editorMode: code
     exemplar: true
-    expr: node_filefd_allocated{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"}
+    expr: node_filefd_allocated{instance="$instance", {{ $clusterLabel }}=~"$cluster"}
     hide: false
     instant: false
     interval: $resolution
@@ -1336,7 +1368,7 @@ panels:
   title: File Descriptors
   type: timeseries
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: ${datasource}
   fieldConfig:
     defaults:
@@ -1399,22 +1431,22 @@ panels:
       sort: desc
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     editorMode: code
     exemplar: true
-    expr: node_timex_estimated_error_seconds{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"}
+    expr: node_timex_estimated_error_seconds{instance="$instance", {{ $clusterLabel }}=~"$cluster"}
     instant: false
     interval: $resolution
     intervalFactor: 1
     legendFormat: Estimated error in seconds
     refId: A
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     editorMode: code
     exemplar: true
-    expr: node_timex_maxerror_seconds{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"}
+    expr: node_timex_maxerror_seconds{instance="$instance", {{ $clusterLabel }}=~"$cluster"}
     hide: false
     interval: $resolution
     intervalFactor: 1
@@ -1425,7 +1457,7 @@ panels:
   type: timeseries
 - collapsed: false
   datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: ${datasource}
   gridPos:
     h: 1
@@ -1437,7 +1469,7 @@ panels:
   title: Network
   type: row
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: ${datasource}
   fieldConfig:
     defaults:
@@ -1499,21 +1531,21 @@ panels:
   pluginVersion: 8.3.3
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     editorMode: code
     exemplar: true
-    expr: sum(rate(node_network_receive_bytes_total{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"}[$__rate_interval]))
+    expr: sum(rate(node_network_receive_bytes_total{instance="$instance", {{ $clusterLabel }}=~"$cluster"}[$__rate_interval]))
     interval: $resolution
     legendFormat: In
     range: true
     refId: A
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     editorMode: code
     exemplar: true
-    expr: '- sum(rate(node_network_transmit_bytes_total{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"}[$__rate_interval]))'
+    expr: '- sum(rate(node_network_transmit_bytes_total{instance="$instance", {{ $clusterLabel }}=~"$cluster"}[$__rate_interval]))'
     interval: $resolution
     legendFormat: Out
     range: true
@@ -1521,7 +1553,7 @@ panels:
   title: Network usage (bytes/s)
   type: timeseries
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: ${datasource}
   fieldConfig:
     defaults:
@@ -1583,19 +1615,19 @@ panels:
   pluginVersion: 8.3.3
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     exemplar: true
-    expr: sum(rate(node_network_receive_errs_total{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"}[$__rate_interval]))
+    expr: sum(rate(node_network_receive_errs_total{instance="$instance", {{ $clusterLabel }}=~"$cluster"}[$__rate_interval]))
     interval: $resolution
     legendFormat: In
     refId: A
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     editorMode: code
     exemplar: true
-    expr: '- sum(rate(node_network_transmit_errs_total{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"}[$__rate_interval]))'
+    expr: '- sum(rate(node_network_transmit_errs_total{instance="$instance", {{ $clusterLabel }}=~"$cluster"}[$__rate_interval]))'
     interval: $resolution
     legendFormat: Out
     range: true
@@ -1603,7 +1635,7 @@ panels:
   title: Network errors
   type: timeseries
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: ${datasource}
   fieldConfig:
     defaults:
@@ -1665,21 +1697,21 @@ panels:
   pluginVersion: 8.3.3
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     editorMode: code
     exemplar: true
-    expr: sum(rate(node_network_receive_packets_total{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"}[$__rate_interval]))
+    expr: sum(rate(node_network_receive_packets_total{instance="$instance", {{ $clusterLabel }}=~"$cluster"}[$__rate_interval]))
     interval: $resolution
     legendFormat: In
     range: true
     refId: A
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     editorMode: code
     exemplar: true
-    expr: '- sum(rate(node_network_transmit_packets_total{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"}[$__rate_interval]))'
+    expr: '- sum(rate(node_network_transmit_packets_total{instance="$instance", {{ $clusterLabel }}=~"$cluster"}[$__rate_interval]))'
     interval: $resolution
     legendFormat: Out
     range: true
@@ -1687,7 +1719,7 @@ panels:
   title: Network usage (packet/s)
   type: timeseries
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: ${datasource}
   fieldConfig:
     defaults:
@@ -1749,19 +1781,19 @@ panels:
   pluginVersion: 8.3.3
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     exemplar: true
-    expr: sum(rate(node_network_receive_drop_total{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"}[$__rate_interval]))
+    expr: sum(rate(node_network_receive_drop_total{instance="$instance", {{ $clusterLabel }}=~"$cluster"}[$__rate_interval]))
     hide: false
     interval: $resolution
     legendFormat: In
     refId: A
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     exemplar: true
-    expr: '- sum(rate(node_network_transmit_drop_total{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"}[$__rate_interval]))'
+    expr: '- sum(rate(node_network_transmit_drop_total{instance="$instance", {{ $clusterLabel }}=~"$cluster"}[$__rate_interval]))'
     hide: false
     interval: $resolution
     legendFormat: Out
@@ -1769,7 +1801,7 @@ panels:
   title: Network total drops
   type: timeseries
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: ${datasource}
   fieldConfig:
     defaults:
@@ -1831,11 +1863,11 @@ panels:
   pluginVersion: 8.3.3
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     editorMode: code
     exemplar: true
-    expr: node_netstat_Tcp_CurrEstab{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"}
+    expr: node_netstat_Tcp_CurrEstab{instance="$instance", {{ $clusterLabel }}=~"$cluster"}
     instant: false
     interval: $resolution
     legendFormat: TCP Currently Established
@@ -1843,7 +1875,7 @@ panels:
   title: TCP Currently Established
   type: timeseries
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: ${datasource}
   fieldConfig:
     defaults:
@@ -1913,21 +1945,21 @@ panels:
   pluginVersion: 8.3.3
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     editorMode: code
     exemplar: true
-    expr: node_nf_conntrack_entries{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"}
+    expr: node_nf_conntrack_entries{instance="$instance", {{ $clusterLabel }}=~"$cluster"}
     instant: false
     interval: $resolution
     legendFormat: NF Conntrack entries
     refId: A
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     editorMode: code
     exemplar: true
-    expr: node_nf_conntrack_entries_limit{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"}
+    expr: node_nf_conntrack_entries_limit{instance="$instance", {{ $clusterLabel }}=~"$cluster"}
     hide: false
     interval: $resolution
     legendFormat: NF Conntrack limit
@@ -1937,7 +1969,7 @@ panels:
   type: timeseries
 - collapsed: false
   datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: ${datasource}
   gridPos:
     h: 1
@@ -1949,7 +1981,7 @@ panels:
   title: Kubernetes Storage
   type: row
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: ${datasource}
   fieldConfig:
     defaults:
@@ -2012,11 +2044,11 @@ panels:
   pluginVersion: 8.3.3
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     editorMode: code
     exemplar: true
-    expr: sum(kubelet_volume_stats_used_bytes{node="$node", {{ $Values.global.clusterLabel }}=~"$cluster"}) by (persistentvolumeclaim) / sum(kubelet_volume_stats_capacity_bytes{node="$node", {{ $Values.global.clusterLabel }}=~"$cluster"}) by (persistentvolumeclaim)
+    expr: sum(kubelet_volume_stats_used_bytes{node="$node", {{ $clusterLabel }}=~"$cluster"}) by (persistentvolumeclaim) / sum(kubelet_volume_stats_capacity_bytes{node="$node", {{ $clusterLabel }}=~"$cluster"}) by (persistentvolumeclaim)
     interval: $resolution
     legendFormat: '{{`{{`}} persistentvolumeclaim {{`}}`}}'
     range: true
@@ -2024,7 +2056,7 @@ panels:
   title: Persistent Volumes - Usage in %
   type: timeseries
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: ${datasource}
   fieldConfig:
     defaults:
@@ -2077,20 +2109,20 @@ panels:
   pluginVersion: 11.2.0
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     exemplar: true
-    expr: sum(kubelet_volume_stats_used_bytes{node="$node", {{ $Values.global.clusterLabel }}=~"$cluster"}) by (persistentvolumeclaim)
+    expr: sum(kubelet_volume_stats_used_bytes{node="$node", {{ $clusterLabel }}=~"$cluster"}) by (persistentvolumeclaim)
     format: table
     hide: false
     interval: ''
     legendFormat: ''
     refId: A
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     exemplar: true
-    expr: sum(kubelet_volume_stats_capacity_bytes{node="$node", {{ $Values.global.clusterLabel }}=~"$cluster"}) by (persistentvolumeclaim)
+    expr: sum(kubelet_volume_stats_capacity_bytes{node="$node", {{ $clusterLabel }}=~"$cluster"}) by (persistentvolumeclaim)
     format: table
     hide: false
     interval: ''
@@ -2129,7 +2161,7 @@ panels:
         persistentvolumeclaim: Persistent Volume Claim
   type: table
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: ${datasource}
   fieldConfig:
     defaults:
@@ -2192,11 +2224,11 @@ panels:
   pluginVersion: 8.3.3
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     editorMode: code
     exemplar: true
-    expr: sum(kubelet_volume_stats_inodes_used{node="$node", {{ $Values.global.clusterLabel }}=~"$cluster"}) by (persistentvolumeclaim) / sum(kubelet_volume_stats_inodes{node="$node", {{ $Values.global.clusterLabel }}=~"$cluster"}) by (persistentvolumeclaim) * 100
+    expr: sum(kubelet_volume_stats_inodes_used{node="$node", {{ $clusterLabel }}=~"$cluster"}) by (persistentvolumeclaim) / sum(kubelet_volume_stats_inodes{node="$node", {{ $clusterLabel }}=~"$cluster"}) by (persistentvolumeclaim) * 100
     interval: $resolution
     legendFormat: '{{`{{`}} persistentvolumeclaim {{`}}`}}'
     range: true
@@ -2205,7 +2237,7 @@ panels:
   type: timeseries
 - collapsed: false
   datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: ${datasource}
   gridPos:
     h: 1
@@ -2217,7 +2249,7 @@ panels:
   title: Node Storage
   type: row
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: ${datasource}
   fieldConfig:
     defaults:
@@ -2280,11 +2312,11 @@ panels:
   pluginVersion: 8.3.3
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     editorMode: code
     exemplar: true
-    expr: 100 - ((node_filesystem_avail_bytes{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"} * 100) / node_filesystem_size_bytes{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"})
+    expr: 100 - ((node_filesystem_avail_bytes{instance="$instance", {{ $clusterLabel }}=~"$cluster"} * 100) / node_filesystem_size_bytes{instance="$instance", {{ $clusterLabel }}=~"$cluster"})
     hide: false
     interval: $resolution
     legendFormat: '{{`{{`}} mountpoint {{`}}`}}'
@@ -2293,7 +2325,7 @@ panels:
   title: FS usage in %
   type: timeseries
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: ${datasource}
   fieldConfig:
     defaults:
@@ -2356,11 +2388,11 @@ panels:
   pluginVersion: 8.3.3
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     editorMode: code
     exemplar: true
-    expr: 100 - (node_filesystem_files_free{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"} / node_filesystem_files{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"} * 100)
+    expr: 100 - (node_filesystem_files_free{instance="$instance", {{ $clusterLabel }}=~"$cluster"} / node_filesystem_files{instance="$instance", {{ $clusterLabel }}=~"$cluster"} * 100)
     hide: false
     interval: $resolution
     legendFormat: '{{`{{`}} mountpoint {{`}}`}}'
@@ -2369,7 +2401,7 @@ panels:
   title: FS inode usage in %
   type: timeseries
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: ${datasource}
   fieldConfig:
     defaults:
@@ -2432,11 +2464,11 @@ panels:
   pluginVersion: 8.3.3
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     editorMode: code
     exemplar: true
-    expr: rate(node_disk_read_bytes_total{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"}[$__rate_interval])
+    expr: rate(node_disk_read_bytes_total{instance="$instance", {{ $clusterLabel }}=~"$cluster"}[$__rate_interval])
     interval: $resolution
     legendFormat: '{{`{{`}}device{{`}}`}}'
     range: true
@@ -2444,7 +2476,7 @@ panels:
   title: Reads by disk (bytes)
   type: timeseries
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: ${datasource}
   fieldConfig:
     defaults:
@@ -2507,11 +2539,11 @@ panels:
   pluginVersion: 8.3.3
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     editorMode: code
     exemplar: true
-    expr: rate(node_disk_written_bytes_total{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"}[$__rate_interval])
+    expr: rate(node_disk_written_bytes_total{instance="$instance", {{ $clusterLabel }}=~"$cluster"}[$__rate_interval])
     hide: false
     interval: $resolution
     legendFormat: '{{`{{`}}device{{`}}`}}'
@@ -2520,7 +2552,7 @@ panels:
   title: Writes by disk (bytes)
   type: timeseries
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: ${datasource}
   fieldConfig:
     defaults:
@@ -2583,11 +2615,11 @@ panels:
   pluginVersion: 8.3.3
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     editorMode: code
     exemplar: true
-    expr: rate(node_disk_reads_completed_total{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"}[$__rate_interval])
+    expr: rate(node_disk_reads_completed_total{instance="$instance", {{ $clusterLabel }}=~"$cluster"}[$__rate_interval])
     interval: $resolution
     legendFormat: '{{`{{`}}device{{`}}`}}'
     range: true
@@ -2595,7 +2627,7 @@ panels:
   title: Completed reads by disk
   type: timeseries
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: ${datasource}
   fieldConfig:
     defaults:
@@ -2658,11 +2690,11 @@ panels:
   pluginVersion: 8.3.3
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     editorMode: code
     exemplar: true
-    expr: rate(node_disk_writes_completed_total{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"}[$__rate_interval])
+    expr: rate(node_disk_writes_completed_total{instance="$instance", {{ $clusterLabel }}=~"$cluster"}[$__rate_interval])
     hide: false
     interval: $resolution
     legendFormat: '{{`{{`}}device{{`}}`}}'
@@ -2671,7 +2703,7 @@ panels:
   title: Completed writes by disk
   type: timeseries
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: ${datasource}
   fieldConfig:
     defaults:
@@ -2734,11 +2766,11 @@ panels:
   pluginVersion: 8.3.3
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     editorMode: code
     exemplar: true
-    expr: rate(node_disk_io_now{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"}[$__rate_interval])
+    expr: rate(node_disk_io_now{instance="$instance", {{ $clusterLabel }}=~"$cluster"}[$__rate_interval])
     interval: $resolution
     legendFormat: '{{`{{`}}device{{`}}`}}'
     range: true
@@ -2746,7 +2778,7 @@ panels:
   title: Disk(s) io/s
   type: timeseries
 - datasource:
-    type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    type: {{ $defaultDatasource }}
     uid: ${datasource}
   fieldConfig:
     defaults:
@@ -2809,11 +2841,11 @@ panels:
   pluginVersion: 8.3.3
   targets:
   - datasource:
-      type: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+      type: {{ $defaultDatasource }}
       uid: ${datasource}
     editorMode: code
     exemplar: true
-    expr: sum(node_filesystem_device_error{instance="$instance", {{ $Values.global.clusterLabel }}=~"$cluster"}) by (mountpoint)
+    expr: sum(node_filesystem_device_error{instance="$instance", {{ $clusterLabel }}=~"$cluster"}) by (mountpoint)
     interval: $resolution
     legendFormat: '{{`{{`}} mountpoint {{`}}`}}'
     range: true
@@ -2834,7 +2866,7 @@ templating:
     multi: false
     name: datasource
     options: []
-    query: {{ default "prometheus" $Values.grafana.defaultDatasourceType }}
+    query: {{ $defaultDatasource }}
     queryValue: ''
     refresh: 1
     regex: ''
@@ -2844,18 +2876,18 @@ templating:
     datasource:
       type: prometheus
       uid: ${datasource}
-    definition: label_values(kube_node_info,{{ $Values.global.clusterLabel }})
-    hide: {{ ternary 0 2 $Values.grafana.sidecar.dashboards.multicluster }}
+    definition: label_values(kube_node_info,{{ $clusterLabel }})
+    hide: {{ ternary 0 2 $multicluster }}
     includeAll: false
     multi: false
     name: cluster
     options: []
-    query: {{ ternary (b64dec "eyJxcnlUeXBlIjogMSwgInF1ZXJ5IjogImxhYmVsX3ZhbHVlcyhrdWJlX25vZGVfaW5mbyxjbHVzdGVyKSIsICJyZWZJZCI6ICJQcm9tZXRoZXVzVmFyaWFibGVRdWVyeUVkaXRvci1WYXJpYWJsZVF1ZXJ5In0=" | replace "cluster" $Values.global.clusterLabel) ".*" $Values.grafana.sidecar.dashboards.multicluster }}
+    query: {{ ternary (b64dec "eyJxcnlUeXBlIjogMSwgInF1ZXJ5IjogImxhYmVsX3ZhbHVlcyhrdWJlX25vZGVfaW5mbyxjbHVzdGVyKSIsICJyZWZJZCI6ICJQcm9tZXRoZXVzVmFyaWFibGVRdWVyeUVkaXRvci1WYXJpYWJsZVF1ZXJ5In0=" | replace "cluster" $clusterLabel) ".*" $multicluster }}
     refresh: 1
     regex: ''
     skipUrlSync: false
     sort: 1
-    type: {{ ternary "query" "constant" $Values.grafana.sidecar.dashboards.multicluster }}
+    type: {{ ternary "query" "constant" $multicluster }}
   - current:
       selected: false
       text: 30s
@@ -2891,14 +2923,14 @@ templating:
     datasource:
       type: prometheus
       uid: ${datasource}
-    definition: label_values(kube_node_info{ {{ $Values.global.clusterLabel }}=~"$cluster"}, node)
+    definition: label_values(kube_node_info{ {{ $clusterLabel }}=~"$cluster"}, node)
     hide: 0
     includeAll: false
     multi: false
     name: node
     options: []
     query:
-      query: label_values(kube_node_info{ {{ $Values.global.clusterLabel }}=~"$cluster"}, node)
+      query: label_values(kube_node_info{ {{ $clusterLabel }}=~"$cluster"}, node)
       refId: StandardVariableQuery
     refresh: 2
     regex: ''
@@ -2909,14 +2941,14 @@ templating:
     datasource:
       type: prometheus
       uid: ${datasource}
-    definition: label_values(node_uname_info{nodename=~"(?i:($node))"}, instance)
+    definition: label_values(node_uname_info{nodename=~"(?i:($node)(\.[a-z0-9.]+)?)"}, instance)
     hide: 2
     includeAll: false
     multi: false
     name: instance
     options: []
     query:
-      query: label_values(node_uname_info{nodename=~"(?i:($node))"}, instance)
+      query: label_values(node_uname_info{nodename=~"(?i:($node)(\.[a-z0-9.]+)?)"}, instance)
       refId: StandardVariableQuery
     refresh: 2
     regex: ''
@@ -2927,8 +2959,8 @@ time:
   from: now-1h
   to: now
 timepicker: {}
-timezone: {{ $Values.grafana.defaultDashboardsTimezone }}
+timezone: {{ default "utc" ($Values.defaultDashboards).defaultTimezone }}
 title: Kubernetes / Views / Nodes
 uid: k8s_views_nodes
-version: 32
+version: 35
 weekStart: ''

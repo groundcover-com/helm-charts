@@ -1,14 +1,17 @@
-{{- if .Values.vmauth.enabled }}
+{{- $app := .Values.vmauth }}
+{{- if $app.enabled }}
+{{- $ctx := dict "helm" . "appKey" (list "vmauth" "spec") }}
+{{- $fullname := include "vm.cr.fullname" $ctx }}
+{{- $ns := include "vm.namespace" $ctx }}
 ---
 apiVersion: operator.victoriametrics.com/v1beta1
 kind: VMAuth
 metadata:
-  {{- with .Values.vmauth.annotations }}
+  {{- with $app.annotations }}
   annotations: {{ toYaml . | nindent 4 }}
   {{- end  }}
-  {{- $ctx := dict "helm" . "appKey" "vmauth" }}
-  name: {{ include "victoria-metrics-k8s-stack.fullname" $ctx }}
-  namespace: {{ include "vm.namespace" . }}
-  labels: {{ include "victoria-metrics-k8s-stack.labels" . | nindent 4 }}
-spec: {{ include "vm.auth.spec" . | nindent 2 }}
+  name: {{ $fullname }}
+  namespace: {{ $ns }}
+  labels: {{ include "vm.labels" $ctx | nindent 4 }}
+spec: {{ include "vm.auth.spec" $ctx | nindent 2 }}
 {{- end }}

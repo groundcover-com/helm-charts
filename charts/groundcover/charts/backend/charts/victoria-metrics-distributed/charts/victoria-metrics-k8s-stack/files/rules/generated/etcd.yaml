@@ -1,5 +1,10 @@
 {{- $Values := (.helm).Values | default .Values }}
-condition: '{{ $Values.kubeEtcd.enabled }}'
+{{- $runbookUrl := ($Values.defaultRules).runbookUrl | default "https://runbooks.prometheus-operator.dev/runbooks" }}
+{{- $clusterLabel := ($Values.global).clusterLabel | default "cluster" }}
+{{- $additionalGroupByLabels := append $Values.defaultRules.additionalGroupByLabels $clusterLabel }}
+{{- $groupLabels := join "," $additionalGroupByLabels }}
+{{- $grafanaHost := ternary (index (($Values.grafana).ingress).hosts 0) (($Values.external).grafana).host ($Values.grafana).enabled }}
+condition: '{{ ($Values.kubeEtcd).enabled }}'
 name: etcd
 rules:
 - alert: etcdMembersDown
@@ -16,9 +21,9 @@ rules:
       )
     )
     > 0
-  for: 10m
+  for: 20m
   labels:
-    severity: critical
+    severity: warning
 - alert: etcdInsufficientMembers
   annotations:
     description: 'etcd cluster "{{`{{`}} $labels.job {{`}}`}}": insufficient members ({{`{{`}} $value {{`}}`}}).'

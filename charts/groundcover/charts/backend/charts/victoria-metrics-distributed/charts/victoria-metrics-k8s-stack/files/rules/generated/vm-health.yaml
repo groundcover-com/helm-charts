@@ -1,4 +1,9 @@
 {{- $Values := (.helm).Values | default .Values }}
+{{- $runbookUrl := ($Values.defaultRules).runbookUrl | default "https://runbooks.prometheus-operator.dev/runbooks" }}
+{{- $clusterLabel := ($Values.global).clusterLabel | default "cluster" }}
+{{- $additionalGroupByLabels := append $Values.defaultRules.additionalGroupByLabels $clusterLabel }}
+{{- $groupLabels := join "," $additionalGroupByLabels }}
+{{- $grafanaHost := ternary (index (($Values.grafana).ingress).hosts 0) (($Values.external).grafana).host ($Values.grafana).enabled }}
 condition: '{{ true }}'
 name: vm-health
 rules:
@@ -65,7 +70,7 @@ rules:
       '
     summary: '"{{`{{`}} $labels.job {{`}}`}}"("{{`{{`}} $labels.instance {{`}}`}}") has insufficient CPU resources for >15m'
   condition: '{{ true }}'
-  expr: histogram_quantile(0.99, sum(rate(go_sched_latencies_seconds_bucket[5m])) by (le,job,instance,{{ $Values.global.clusterLabel }})) > 0.1
+  expr: histogram_quantile(0.99, sum(rate(go_sched_latencies_seconds_bucket[5m])) by (le,job,instance,{{ $groupLabels }})) > 0.1
   for: 15m
   labels:
     severity: critical
@@ -112,19 +117,37 @@ rules:
   expr: increase(vm_indexdb_items_dropped_total[5m]) > 0
   labels:
     severity: critical
-- alert: TooLongLabelValues
+- alert: RowsRejectedOnIngestion
   annotations:
-    description: "The maximum length of a label value is limited via `-maxLabelValueLen` cmd-line flag. \nLonger label values are truncated and may result into time series overlapping.\nPlease, check your logs to find which labels were truncated and  \neither reduce the size of label values or increase `-maxLabelValueLen`.\n"
-    summary: 'VictoriaMetrics truncates too long label values'
+    description: 'Ingested rows on instance "{{`{{`}} $labels.instance {{`}}`}}" are rejected due to the following reason: "{{`{{`}} $labels.reason {{`}}`}}"'
+    summary: 'Some rows are rejected on "{{`{{`}} $labels.instance {{`}}`}}" on ingestion attempt'
   condition: '{{ true }}'
-  expr: increase(vm_too_long_label_values_total[5m]) > 0
+  expr: rate(vm_rows_ignored_total[5m]) > 0
+  for: 15m
   labels:
-    severity: critical
-- alert: TooLongLabelNames
+    severity: warning
+- alert: TooHighQueryLoad
   annotations:
-    description: 'The maximum length of a label name is limited by 256 bytes.  Longer label names are truncated and may result into time series overlapping.'
-    summary: 'VictoriaMetrics truncates too long label names'
+    description: 'Instance {{`{{`}} $labels.instance {{`}}`}} ({{`{{`}} $labels.job {{`}}`}}) is failing to serve read queries during last 15m.
+
+      Concurrency limit `-search.maxConcurrentRequests` was reached on this instance and extra queries were
+
+      put into the queue for `-search.maxQueueDuration` interval. But even after waiting in the queue these queries weren''t served.
+
+      This happens if instance is overloaded with the current workload, or datasource is too slow to respond.
+
+      Possible solutions are the following:
+
+      * reduce the query load;
+
+      * increase compute resources or number of replicas;
+
+      * adjust limits `-search.maxConcurrentRequests` and `-search.maxQueueDuration`.
+
+      See more at https://docs.victoriametrics.com/troubleshooting/#slow-queries.'
+    summary: 'Read queries fail with timeout for {{`{{`}} $labels.job {{`}}`}} on instance {{`{{`}} $labels.instance {{`}}`}}'
   condition: '{{ true }}'
-  expr: increase(vm_too_long_label_names_total[5m]) > 0
+  expr: increase(vm_concurrent_select_limit_timeout_total[5m]) > 0
+  for: 15m
   labels:
-    severity: critical
+    severity: warning

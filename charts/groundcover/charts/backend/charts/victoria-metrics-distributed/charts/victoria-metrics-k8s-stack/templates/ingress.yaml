@@ -4,18 +4,18 @@
     {{- $ingresses := ternary (dict $name $config.ingress) $config.ingress (hasKey $config.ingress "enabled") }}
     {{- range $ingName, $ingress := $ingresses }}
       {{- if $ingress.enabled }}
-        {{- $appKey := ternary $name (list $name $ingName) (eq $name $ingName) -}}
+        {{- $ingName = ternary $ingName (printf "vm%s" $ingName) (or (hasPrefix "vm" $ingName) (not (hasPrefix "vm" $name))) }}
+        {{- $appKey := ternary $name (list $name "spec" $ingName) (eq $name $ingName) -}}
         {{- $ctx := dict "helm" $ "appKey" $appKey -}}
-        {{- $serviceName := include "vm.service" $ctx }}
+        {{- $fullname := include "vm.managed.fullname" $ctx }}
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ $serviceName }}
+  name: {{ $fullname }}
   namespace: {{ $ns }}
-  {{- $extraLabels := dict "app.kubernetes.io/component" (printf "%s-%s" (include "victoria-metrics-k8s-stack.name" $) $name) }}
-  {{- $_ := set $ctx "extraLabels" (merge $extraLabels $ingress.labels) }}
-  labels: {{ include "victoria-metrics-k8s-stack.labels" $ctx | nindent 4 }}
+  {{- $_ := set $ctx "extraLabels" $ingress.labels }}
+  labels: {{ include "vm.labels" $ctx | nindent 4 }}
   {{- with $ingress.annotations }}
   annotations: {{ toYaml . | nindent 4 }}
   {{- end }}
@@ -36,9 +36,9 @@ spec:
           {{- end }}
           - backend:
               service:
-                name: {{ $serviceName }}
+                name: {{ $fullname }}
                 port:
-                  name: {{ $ingress.serviceName | default "http" }}
+                  name: {{ $ingress.portName | default "http" }}
             {{- with ($ingress.path | default (dig "spec" "extraArgs" "http.pathPrefix" "/" $config)) }}
             path: {{ tpl . $ }}
             {{- end }}

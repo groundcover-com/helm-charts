@@ -1,13 +1,12 @@
-{{- $global := dict "Values" (deepCopy .Values) "Release" (deepCopy .Release) "Chart" (deepCopy .Chart) "Template" (deepCopy .Template) -}}
-{{- $scrapeLabels := (include "victoria-metrics-k8s-stack.labels" .) }}
-{{- $prefix := include "victoria-metrics-k8s-stack.fullname" . }}
-{{- $namespace := include "vm.namespace" . }}
+{{- $ctx := dict "helm" . }}
+{{- $scrapeLabels := include "vm.labels" $ctx }}
+{{- $prefix := include "vm.fullname" $ctx }}
+{{- $ns := include "vm.namespace" $ctx }}
 {{- range $name, $config := .Values }}
   {{- if and (kindIs "map" $config) $config.enabled (hasKey $config "vmScrape") }}
     {{- $svc := kebabcase $name }}
-    {{- $fullname := (printf "%s-%s" $prefix $svc) }}
+    {{- $fullname := printf "%s-%s" $prefix $svc }}
     {{- $fullnameLabel := $fullname | trunc 63 | trimSuffix "-" }}
-    {{- $ctx := deepCopy $global }}
     {{- $ports := ($config.service).ports | default dict }}
     {{- if ($config.service).port }}
       {{- $_ := set $ports "" $config.service }}
@@ -18,10 +17,10 @@ apiVersion: v1
 kind: Endpoints
 metadata:
   name: {{ $fullname }}
-  namespace: kube-system
+  namespace: {{ $config.service.namespace | default "kube-system" }}
   {{- $extraLabels := dict "app" $fullnameLabel "k8s-app" $svc }}
   {{- $_ := set $ctx "extraLabels" $extraLabels }}
-  labels: {{ include "victoria-metrics-k8s-stack.labels" $ctx | nindent 4 }}
+  labels: {{ include "vm.labels" $ctx | nindent 4 }}
 subsets:
   - addresses:
       {{- range . }}
@@ -40,20 +39,19 @@ subsets:
     {{- end }}
     {{- end }}
 
-
     {{- end }}
     {{- $selector := default dict }}
     {{- if and ($config.service).enabled (empty (index $.Subcharts $name)) }}
       {{- $extraLabels := dict "app" $fullnameLabel "jobLabel" $svc }}
       {{- $_ := set $ctx "extraLabels" $extraLabels }}
-      {{- $selector = dict "matchLabels" (fromYaml (include "victoria-metrics-k8s-stack.selectorLabels" $ctx)) }}
+      {{- $selector = dict "matchLabels" (fromYaml (include "vm.selectorLabels" $ctx)) }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ $fullname }}
   namespace: {{ $config.service.namespace | default "kube-system" }}
-  labels: {{ include "victoria-metrics-k8s-stack.labels" $ctx | nindent 4 }}
+  labels: {{ include "vm.labels" $ctx | nindent 4 }}
 spec:
   clusterIP: None
   {{- if $ports }}
@@ -81,7 +79,7 @@ spec:
     {{- if $config.vmScrape }}
       {{- if index $.Subcharts $name }}
         {{- $_ := set $ctx "extraLabels" (default dict) }}
-        {{- $selector = dict "matchLabels" (fromYaml (include "victoria-metrics-k8s-stack.selectorLabels" $ctx)) }}
+        {{- $selector = dict "matchLabels" (fromYaml (include "vm.selectorLabels" $ctx)) }}
       {{- end }}
       {{- $spec := dict "selector" $selector }}
       {{- $scrapes := $config.vmScrapes | default (dict $svc $config.vmScrape) }}
@@ -89,13 +87,13 @@ spec:
       {{- range $scrapeName, $scrapeConfig := $scrapes }}
         {{- $sc := mergeOverwrite (deepCopy $defaultScrape) (deepCopy $scrapeConfig) }}
         {{- if or (not (hasKey $sc "enabled")) $sc.enabled }}
-          {{- $fullname = (printf "%s-%s" $prefix $scrapeName) }}
+          {{- $fullname = printf "%s-%s" $prefix $scrapeName }}
 ---
 apiVersion: operator.victoriametrics.com/v1beta1
 kind: {{ ternary "VMServiceScrape" $sc.kind (empty $sc.kind) }}
 metadata:
   name: {{ $fullname }}
-  namespace: {{ $namespace }}
+  namespace: {{ $ns }}
   labels: {{ $scrapeLabels | nindent 4 }}
 {{- $emptyParamsToDrop := list "endpoints" }}
 {{- $scrapeSpec := mergeOverwrite (deepCopy $spec) (deepCopy $sc.spec) }}

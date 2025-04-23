@@ -1,19 +1,20 @@
 annotations:
   artifacthub.io/category: monitoring-logging
   artifacthub.io/changes: |
-    - Add an explicit fail in case both Grafana dashboard via sidecar and `grafana.dashboards` are enabled. Previously, this configuration would be accepted and sidecar configuration would silently override `.grafana.dashboards` configuration. See [these docs](https://docs.victoriametrics.com/helm/victoriametrics-k8s-stack/#adding-external-dashboards) for information about adding external dashboards.
-    - bump version of VM components to [v1.105.0](https://github.com/VictoriaMetrics/VictoriaMetrics/releases/tag/v1.105.0)
+    - updates operator to [v0.55.0](https://github.com/VictoriaMetrics/operator/releases/tag/v0.55.0) version
   artifacthub.io/license: Apache-2.0
   artifacthub.io/links: |
     - name: Sources
-      url: https://docs.victoriametrics.com/vmgateway
+      url: https://github.com/VictoriaMetrics/helm-charts/tree/master/charts/victoria-metrics-k8s-stack
     - name: Charts repo
       url: https://victoriametrics.github.io/helm-charts/
     - name: Docs
       url: https://docs.victoriametrics.com
+    - name: Changelog
+      url: https://docs.victoriametrics.com/changelog
   artifacthub.io/operator: "true"
 apiVersion: v2
-appVersion: v1.105.0
+appVersion: v1.114.0
 dependencies:
 - name: victoria-metrics-common
   repository: https://victoriametrics.github.io/helm-charts
@@ -21,27 +22,19 @@ dependencies:
 - condition: victoria-metrics-operator.enabled
   name: victoria-metrics-operator
   repository: https://victoriametrics.github.io/helm-charts
-  version: 0.35.*
+  version: 0.44.*
 - condition: kube-state-metrics.enabled
   name: kube-state-metrics
   repository: https://prometheus-community.github.io/helm-charts
-  version: 5.25.*
+  version: 5.31.*
 - condition: prometheus-node-exporter.enabled
   name: prometheus-node-exporter
   repository: https://prometheus-community.github.io/helm-charts
-  version: 4.39.*
+  version: 4.44.*
 - condition: grafana.enabled
   name: grafana
   repository: https://grafana.github.io/helm-charts
-  version: 8.5.*
-- condition: crds.enabled
-  name: crds
-  repository: ""
-  version: 0.0.0
-- condition: prometheus-operator-crds.enabled
-  name: prometheus-operator-crds
-  repository: https://prometheus-community.github.io/helm-charts
-  version: 15.0.*
+  version: 8.9.*
 description: Kubernetes monitoring on VictoriaMetrics stack. Includes VictoriaMetrics
   Operator, Grafana dashboards, ServiceScrapes and VMRules
 home: https://github.com/VictoriaMetrics/helm-charts
@@ -61,4 +54,4 @@ name: victoria-metrics-k8s-stack
 sources:
 - https://github.com/VictoriaMetrics/helm-charts
 type: application
-version: 0.27.6
+version: 0.41.0

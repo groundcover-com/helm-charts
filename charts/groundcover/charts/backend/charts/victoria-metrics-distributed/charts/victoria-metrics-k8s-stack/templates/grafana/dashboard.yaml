@@ -19,12 +19,15 @@ Get dashboard name
 {{- /*
 Get dashboard data from file
 */}}
-{{- $dashboardData := fromYaml (tpl ($.Files.Get $dashboardFile) $ctx) -}}
+{{- $dashboardData := fromYaml (tpl ($.Files.Get $dashboardFile) $) -}}
 
 {{- /*
 Save condition for a dashboard from file
 */}}
-{{- $dashboardCondition := or $dashboardData.condition (dig $dashboardName "enabled" false $.Values.defaultDashboards.dashboards) -}}
+{{- $dashboardCondition := $dashboardData.condition }}
+{{- if hasKey (index ((($.Values).defaultDashboards).dashboards) $dashboardName) "enabled" }}
+  {{- $dashboardCondition = index $.Values.defaultDashboards.dashboards $dashboardName "enabled" }}
+{{- end }}
 
 {{- /*
 Delete condition from dashboard
@@ -42,47 +45,46 @@ Check if dashboard is enabled
 {{- if $dashboardCondition }}
 
 {{- $dashboardResult := toRawJson $dashboardData -}}
-{{- $app := ((printf "%s-grafana" (include "victoria-metrics-k8s-stack.name" $)) | trunc 63 | trimSuffix "-") }}
+{{- $app := ((printf "%s-grafana" (include "vm.name" $)) | trunc 63 | trimSuffix "-") }}
+{{- $_ := set $ctx "extraLabels" (dict "app" $app) }}
 {{- if $.Values.defaultDashboards.grafanaOperator.enabled }}
 ---
 apiVersion: grafana.integreatly.org/v1beta1
 kind: GrafanaDashboard
 metadata:
   namespace: {{ include "vm.namespace" $ }}
-  name: {{ printf "%s-%s" (include "victoria-metrics-k8s-stack.fullname" $) $dashboardName | replace "_" "" }}
-  labels:
-    app: {{ $app }}
-    {{- include "victoria-metrics-k8s-stack.labels" $ | nindent 4 }}
-spec:
-  {{- with $.Values.defaultDashboards.grafanaOperator.instanceSelector }}
-  instanceSelector: {{ toYaml . | nindent 4 }}
+  name: {{ printf "%s-%s" (include "vm.fullname" $ctx) $dashboardName | replace "_" "" }}
+  labels: {{ include "vm.labels" $ctx | nindent 4 }}
+  {{- with $.Values.defaultDashboards.annotations }}
+  annotations:
+    {{- range $key, $val := . }}
+    {{ $key }}: {{ $val | quote }}
+    {{- end }}
   {{- end }}
-  allowCrossNamespaceImport: {{ $.Values.defaultDashboards.grafanaOperator.allowCrossNamespaceImport }}
+spec:
   json: | {{ $dashboardResult | nindent 4 }}
+  {{- toYaml $.Values.defaultDashboards.grafanaOperator.spec | nindent 2 }}
 {{- else }}
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   namespace: {{ include "vm.namespace" $ }}
-  name: {{ printf "%s-%s" (include "victoria-metrics-k8s-stack.fullname" $) $dashboardName }}
+  name: {{ printf "%s-%s" (include "vm.fullname" $) $dashboardName }}
   labels:
     {{- if $.Values.grafana.sidecar.dashboards.label }}
     {{ $.Values.grafana.sidecar.dashboards.label }}: "1"
     {{- end }}
-    {{- if $.Values.grafana.sidecar.dashboards.additionalDashboardLabels }}
-    {{- range $key, $val := $.Values.grafana.sidecar.dashboards.additionalDashboardLabels }}
+    {{- range $key, $val := $.Values.defaultDashboards.labels }}
     {{ $key }}: {{ $val | quote }}
     {{- end }}
-    {{- end }}
-    app: {{ $app }}
-    {{- include "victoria-metrics-k8s-stack.labels" $ | nindent 4 }}
-    {{- if $.Values.grafana.sidecar.dashboards.additionalDashboardAnnotations }}
+    {{- include "vm.labels" $ctx | nindent 4 }}
+  {{- with $.Values.defaultDashboards.annotations }}
   annotations:
-    {{- range $key, $val := $.Values.grafana.sidecar.dashboards.additionalDashboardAnnotations }}
+    {{- range $key, $val := . }}
     {{ $key }}: {{ $val | quote }}
     {{- end }}
-    {{- end }}
+  {{- end }}
 data:
   {{ $dashboardName }}.json: | {{ $dashboardResult | nindent 4 }}
 {{- end }}

@@ -1,11 +1,17 @@
-{{ if and .Values.vmauthQueryGlobal.enabled (index .Values "victoria-metrics-k8s-stack" "grafana" "enabled") }}
+{{ if and (((.Values.read).global).vmauth).enabled (index .Values "victoria-metrics-k8s-stack" "grafana" "enabled") }}
+{{- $read := deepCopy (.Values.read).global  }}
+{{- $fullname := include "vm.fullname" . }}
+{{- $_ := set $read.vmauth "spec" (mergeOverwrite (deepCopy $.Values.common.vmauth.spec) $read.vmauth.spec) }}
+{{- $ctx := dict "helm" . "appKey" (list "globalRead" "vmauth" "spec") "globalRead" $read "style" "managed" "fullname" $fullname }}
+{{- $url := (printf "%s/select/0/prometheus/" (include "vm.url" $ctx)) }}
+{{- $ns := include "vm.namespace" $ctx }}
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "victoria-metrics-distributed.fullname" . }}-grafana-ds
-  namespace: {{ include "vm.namespace" . }}
-  labels: {{ include "victoria-metrics-distributed.labels" . | nindent 4 }}
+  name: {{ include "vm.fullname" . }}-grafana-ds
+  namespace: {{ $ns }}
+  labels: {{ include "vm.labels" . | nindent 4 }}
     {{ index .Values "victoria-metrics-k8s-stack" "grafana" "sidecar" "datasources" "label" }}: "1"
 data:
   datasource.yaml: |-
@@ -13,8 +19,7 @@ data:
     datasources:
     - name: VictoriaMetrics
       type: prometheus
-      {{- $readEndpoint:= (include "victoria-metrics-distributed.globalQueryAddr" . | fromYaml) }}
-      url: {{ $readEndpoint.url }}
+      url: {{ $url }}
       access: proxy
       isDefault: true
       jsonData: {}
