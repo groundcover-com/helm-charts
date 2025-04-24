@@ -2,9 +2,8 @@
 apiVersion: v1
 data:
   config.yaml: |-
-    logs:
-      ottlRules:
-        []
+    ottlRules:
+      []
               
 kind: ConfigMap
 metadata:

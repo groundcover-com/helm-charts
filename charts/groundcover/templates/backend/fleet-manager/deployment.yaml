@@ -56,7 +56,6 @@ spec:
 {{ toYaml .Values.fleetManager.nodeSelector | indent 8 }}
 {{- end }}
       imagePullSecrets: {{ include "imagePullSecrets" . }}
-      serviceAccountName: {{ default "fleet-manager" .Values.fleetManager.serviceAccount.name }}
       containers:
       - env:
         - name: GC_CLUSTERID
@@ -76,7 +75,12 @@ spec:
         - name: GC_GROUNDCOVERVERSION
           valueFrom:
             fieldRef:
-              fieldPath: metadata.annotations['groundcover_version']              
+              fieldPath: metadata.annotations['groundcover_version']    
+        - name: GC_CONFIGMANAGER_DB_PASS
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "postgresql.secretName" . }}
+              key: {{ include "postgresql.adminPasswordKey" . }}          
         {{- with .Values.fleetManager.env }}
           {{ tpl (toYaml .) $ | nindent 8 }}
         {{- end }}
@@ -87,8 +91,6 @@ spec:
         imagePullPolicy: Always
         name: fleet-manager     
         ports:
-        - containerPort: {{ .Values.fleetManager.clientHttpPort }}
-          name: client-http
         - containerPort: {{ .Values.fleetManager.manageHttpPort }}
           name: manage-http
         - containerPort: {{ .Values.fleetManager.healthProbePort }}
@@ -100,7 +102,7 @@ spec:
             scheme: HTTP
             path: /health
             port: health-http
-          initialDelaySeconds: 45
+          initialDelaySeconds: 10
           periodSeconds: 15
           failureThreshold: 20
         livenessProbe:
@@ -108,7 +110,7 @@ spec:
             scheme: HTTP
             path: /health
             port: health-http
-          initialDelaySeconds: 45
+          initialDelaySeconds: 10
           periodSeconds: 15
           failureThreshold: 20
         resources:

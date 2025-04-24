@@ -4,7 +4,6 @@ kind: ConfigMap
 data:
   config.yaml: |
     LogLevel: {{ .Values.fleetManager.logLevel }}
-    ClientHttpPort: {{ .Values.fleetManager.clientHttpPort }}
     ManageHttpPort: {{ .Values.fleetManager.manageHttpPort }}
     HealthProbePort: {{ .Values.fleetManager.healthProbePort }}
     Pprof:
@@ -30,7 +29,20 @@ data:
         interval: {{ .Values.fleetManager.pprof.cpuTicker.interval }}
         jumpSizeInMCPU: {{ .Values.fleetManager.pprof.cpuTicker.jumpSizeInMCPU }}
         windowSize: {{ .Values.fleetManager.pprof.cpuTicker.windowSize }}
-        initialWait: {{ .Values.fleetManager.pprof.cpuTicker.initialWait }}
+        initialWait: {{ .Values.fleetManager.pprof.cpuTicker.initialWait }}    
+    configManager:
+      db: 
+        host: {{ tpl .Values.fleetManager.configManager.db.host . }}
+        port: {{ tpl .Values.fleetManager.configManager.db.port . }}
+        name: {{ .Values.fleetManager.configManager.db.name }}
+        user: {{ .Values.fleetManager.configManager.db.user }}
+        pass: {{ tpl .Values.fleetManager.configManager.db.pass . }}
+        timeout: {{ .Values.fleetManager.configManager.db.timeout }}
+        interval: {{ .Values.fleetManager.configManager.db.interval }}
+        sslmode: {{ .Values.fleetManager.configManager.db.sslmode }}
+      skipMigrations: {{ .Values.fleetManager.configManager.skipMigrations }}
+      migrationsPath: {{ .Values.fleetManager.configManager.migrationsPath }}
+      cacheRefreshInterval: {{ .Values.fleetManager.configManager.cacheRefreshInterval }}
 metadata:
   labels:
     {{- include "groundcover.labels" . | nindent 4 }}

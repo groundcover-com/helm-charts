@@ -582,9 +582,6 @@ integrationsAgent:
 
 fleetManager:
   enabled: false
-  serviceAccount:
-    name: fleet-manager
-    annotations: {}
   image:
     repository: "{{ .Values.global.origin.registry }}/fleet-manager"
     tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
@@ -609,28 +606,11 @@ fleetManager:
       secretKeyRef:
         key: '{{ template "groundcover.apikeySecretKey" . }}'
         name: '{{ template "groundcover.apikeySecretName" . }}'  
-  readinessProbe:
-    httpGet:
-      scheme: HTTP
-      path: /health
-      port: health-http
-    initialDelaySeconds: 45
-    periodSeconds: 15
-    failureThreshold: 20
-  livenessProbe:
-    httpGet:
-      scheme: HTTP
-      path: /health
-      port: health-http
-    initialDelaySeconds: 45
-    periodSeconds: 15
-    failureThreshold: 20
   logLevel: 4
-  clientHttpPort: 8080
-  manageHttpPort: 8081
-  healthProbePort: 8082
+  manageHttpPort: 8080
+  healthProbePort: 8081
   pprof:
-    enabled: true
+    enabled: '{{ include ".telemetry.enabled" . }}'
     uploaderType: pyroscope
     cpuSamplingDuration: 60s
     backoffTicker:
@@ -648,6 +628,20 @@ fleetManager:
       jumpSizeInMCPU: 100
       windowSize: 12h
       initialWait: 10m
+  configManager:
+    db:
+      host: '{{ splitList ":" (include "postgresql.base.url" .) | first }}'
+      port: '{{ splitList ":" (include "postgresql.base.url" .) | last }}'
+      name: "fleetmanager"
+      user: "postgres"
+      pass: ""
+      timeout: 150s
+      interval: 5s
+      sslmode: "require"
+    skipMigrations: false
+    migrationsPath: "/migrations"
+    cacheRefreshInterval: 10s
+    
 
 k8sWatcher:
   initContainers:
