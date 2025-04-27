@@ -480,6 +480,13 @@ data:
     env: {{ include "groundcover.env" . }}
     envType: {{ .Values.env_type }}
 
+    fleetClientConfig:
+      enabled: {{ .Values.global.fleetmanager.enabled }}
+      url: {{ .Values.fleetClientConfig.url }}
+      requestIntervalEnabled: {{ .Values.fleetClientConfig.requestIntervalEnabled }}
+      maximumInitialJitter: {{ .Values.fleetClientConfig.maximumInitialJitter }}
+      requestInterval: {{ .Values.fleetClientConfig.requestInterval }}
+
     logs:
       scraper:
         positionsFile: {{ .Values.positionsFile }}

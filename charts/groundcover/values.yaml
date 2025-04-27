@@ -26,6 +26,8 @@ global:
         overrideHttpURL:
     health:
       overrideHttpURL:
+  fleetmanager:
+    enabled: false
 
   ingress:
     # set ingress site for inCloud / on-prem sensor only deployments
@@ -238,6 +240,12 @@ logPatternsConfig:
     flushInterval: 30s
     workloadCacheSize: 1000
     patternsTopCount: 20
+
+fleetClientConfig:
+  url: "http://fleet-manager:8080/api/client/config"
+  requestIntervalEnabled: true
+  maximumInitialJitter: 30s
+  requestInterval: 30s
 
 priorityClass:
   create: false
@@ -581,7 +589,6 @@ integrationsAgent:
         maxBatchWait: 10s
 
 fleetManager:
-  enabled: false
   image:
     repository: "{{ .Values.global.origin.registry }}/fleet-manager"
     tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"

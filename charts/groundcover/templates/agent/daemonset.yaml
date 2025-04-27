@@ -203,9 +203,6 @@ spec:
             - mountPath: /scrape-config
               name: sensor-scrape-configuration
               readOnly: false
-            - mountPath: /dynamic-config
-              name: sensor-dynamic-configuration
-              readOnly: false
             - mountPath: /comm
               name: comm
               readOnly: false
@@ -360,10 +357,6 @@ spec:
             defaultMode: 420
             name: sensor-scrape-configuration
           name: sensor-scrape-configuration
-        - configMap:
-            defaultMode: 420
-            name: sensor-dynamic-configuration
-          name: sensor-dynamic-configuration
         - emptyDir: {}
           name: comm
         - hostPath:

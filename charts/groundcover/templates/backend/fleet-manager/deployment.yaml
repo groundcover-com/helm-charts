@@ -1,4 +1,4 @@
-{{ if .Values.fleetManager.enabled }}
+{{ if .Values.global.fleetmanager.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
