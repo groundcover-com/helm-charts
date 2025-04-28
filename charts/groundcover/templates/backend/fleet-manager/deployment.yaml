@@ -121,6 +121,25 @@ spec:
 {{- if .Values.fleetManager.priorityClassName }}
       priorityClassName: {{ .Values.fleetManager.priorityClassName }}
 {{- end }}
+      initContainers:
+      - name: wait-for-db
+        image: {{ include "postgresql.image" . }}
+        env:
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "postgresql.secretName" . }}
+              key: {{ include "postgresql.adminPasswordKey" . }}
+        command:
+        - /bin/sh
+        - -c
+        args:
+        - |
+          pg_isready \
+            -U "postgres" \
+            -d "dbname=postgres" \
+            -h {{ splitList ":" (include "postgresql.base.url" .) | first }} \
+            -p {{ splitList ":" (include "postgresql.base.url" .) | last }}
       volumes:
       - configMap:
           name: fleet-manager-config
