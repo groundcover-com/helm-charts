@@ -36,6 +36,8 @@ crds:
   # with this option set to `false`, all CRDs will be rendered from templates.
   # with this option set to `true`, all CRDs are immutable and require manual upgrade.
   plain: false
+  # -- additional CRD annotations, when `.Values.crds.plain: false`
+  annotations: {}
   cleanup:
     # -- Tells helm to clean up all the vm resources under this release's namespace when uninstalling
     enabled: false
@@ -272,10 +274,14 @@ admissionWebhooks:
     issuer: {}
     # -- Certificate Authority parameters
     ca:
+      secretTemplate: {}
+      subject: {}
       duration: 63800h0m0s
       commonName: ca.validation.victoriametrics
     # -- Certificate parameters
     cert:
+      secretTemplate: {}
+      subject: {}
       duration: 45800h0m0s
       commonName: ""
   keepTLSSecret: true
@@ -285,9 +291,11 @@ admissionWebhooks:
     cert:
     key:
 
-# -- Configures monitoring with serviceScrape. VMServiceScrape must be pre-installed
+# -- Configures monitoring with serviceScrape using either `VMServiceScrape` or `ServiceMonitor`. For latter [Prometheus Operator CRDs](https://artifacthub.io/packages/helm/prometheus-community/prometheus-operator-crds) should be preinstalled
 serviceMonitor:
   enabled: false
+  # -- Creates `VMServiceScrape` if `true` and `ServiceMonitor` otherwise. Make sure [Prometheus Operator CRDs](https://artifacthub.io/packages/helm/prometheus-community/prometheus-operator-crds) are installed if it's set to `false`
+  vm: true
   extraLabels: {}
   annotations: {}
   relabelings: []
