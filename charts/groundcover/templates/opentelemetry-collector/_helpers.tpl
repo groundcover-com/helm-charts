@@ -150,6 +150,10 @@ http
 {{- printf "http://%s:%d/json/rum" (include "opentelemetry-collector.fullname" .) (index .Values.global "opentelemetry-collector" "ports" "rum" "servicePort" | int ) -}}
 {{- end -}}
 
+{{- define "opentelemetry-collector.zipkin.http.url" -}}
+{{- printf "%s/api/v2/spans" (include "opentelemetry-collector.otlp.http.url" .) -}}
+{{- end -}}
+
 {{- define "opentelemetry-collector.otlp.grpc.url" -}}
 {{- if .Values.global.otlp.overrideGrpcURL -}}
     {{- print .Values.global.otlp.overrideGrpcURL -}}

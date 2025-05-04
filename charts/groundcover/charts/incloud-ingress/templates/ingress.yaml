@@ -95,13 +95,20 @@ spec:
                 name: {{ include "opentelemetry-collector.fullname" . }}
                 port:
                   number: {{ index .Values.global "opentelemetry-collector" "ports" "http-json" "servicePort" | int }}
-          - path: {{ get (urlParse (include "opentelemetry-collector.rumreceiver.http.url" .)) "path" }} 
+          - path: {{ get (urlParse (include "opentelemetry-collector.rumreceiver.http.url" .)) "path" }}
             pathType: Exact
             backend:
               service:
                 name: {{ include "opentelemetry-collector.fullname" . }}
                 port:
-                  number: {{ index .Values.global "opentelemetry-collector" "ports" "rum" "servicePort" | int }}                  
+                  number: {{ index .Values.global "opentelemetry-collector" "ports" "rum" "servicePort" | int }}          
+          - path: {{ get (urlParse (include "opentelemetry-collector.zipkin.http.url" .)) "path" }}
+            pathType: Exact
+            backend:
+              service:
+                name: {{ include "opentelemetry-collector.fullname" . }}
+                port:
+                  number: {{ index .Values.global "opentelemetry-collector" "ports" "zipkin" "servicePort" | int }}            
 ---
 
 apiVersion: networking.k8s.io/v1
