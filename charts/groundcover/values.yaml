@@ -376,6 +376,9 @@ agent:
             thriftHttpPort: 14268
             thriftBinaryPort: 6832
             thriftCompactPort: 6831
+          httpjson:
+            enabled: true
+            port: 8016
     pprof:
       enabled: true
       uploaderType: pyroscope
@@ -1148,19 +1151,6 @@ opentelemetry-collector:
       batch/traces:
         timeout: 1s
         send_batch_size: 5000
-      filter/dropNoneCustom:
-        error_mode: ignore
-        logs:
-          log_record:
-            # custom logs have explicit log_type or type so log is excluded
-            - attributes["log_type"] == "log"
-            - attributes["type"] == nil
-      filter/dropNoneLogs:
-        logs:
-          log_record:
-            # logs can have either explicit 'log' log_type or no log_type at all and no type (reserved for custom logs)
-            - attributes["log_type"] != nil and attributes["log_type"] != "log"
-            - attributes["type"] != nil
       resource/enrich_headers:
         attributes:
         - key: env_name
@@ -1249,7 +1239,6 @@ opentelemetry-collector:
             - http
             - rum/logs
           processors:
-            - filter/dropNoneLogs
             - resource/enrich_headers
             - batch/logs
             - groundcover/logs
@@ -1265,7 +1254,6 @@ opentelemetry-collector:
             - otlp
             - rum/events
           processors:
-            - filter/dropNoneCustom
             - batch/custom
             - groundcover/custom
           exporters:

@@ -71,6 +71,12 @@ spec:
     port: {{ $sensorValues.apmIngestor.otel.direct.jaeger.thriftCompactPort }}
     targetPort: {{ $sensorValues.apmIngestor.otel.direct.jaeger.thriftCompactPort }}
   {{- end }}
+  {{- if and $sensorValues.apmIngestor.otel.direct.httpjson.enabled $sensorValues.apmIngestor.otel.direct.httpjson.port }}
+  - protocol: TCP
+    name: http-json
+    port: {{ $sensorValues.apmIngestor.otel.direct.httpjson.port }}
+    targetPort: {{ $sensorValues.apmIngestor.otel.direct.httpjson.port }}
+  {{- end }}
   internalTrafficPolicy: Local
 ---
 apiVersion: v1

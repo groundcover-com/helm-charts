@@ -178,6 +178,11 @@ spec:
               name: metric-ingestor
               protocol: TCP     
             {{- end }}
+            {{- if and $sensorValues.apmIngestor.otel.direct.httpjson.enabled $sensorValues.apmIngestor.otel.direct.httpjson.port}}
+            - containerPort: {{ $sensorValues.apmIngestor.otel.direct.httpjson.port }}
+              name: http-json
+              protocol: TCP
+            {{- end }}
           securityContext:
             capabilities:
               add:

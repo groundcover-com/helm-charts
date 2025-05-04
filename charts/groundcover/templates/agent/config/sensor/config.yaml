@@ -450,6 +450,9 @@ data:
             thriftHttpPort: {{ $sensorValues.apmIngestor.otel.direct.jaeger.thriftHttpPort }}
             thriftBinaryPort: {{ $sensorValues.apmIngestor.otel.direct.jaeger.thriftBinaryPort }}
             thriftCompactPort: {{ $sensorValues.apmIngestor.otel.direct.jaeger.thriftCompactPort }}
+          httpjson:
+            enabled: {{ $sensorValues.apmIngestor.otel.direct.httpjson.enabled }}
+            port: {{ $sensorValues.apmIngestor.otel.direct.httpjson.port }}
     pprof:
       enabled: {{ include "telemetry.enabled" . }}
       cpuSamplingDuration: {{ $sensorValues.pprof.cpuSamplingDuration }}
