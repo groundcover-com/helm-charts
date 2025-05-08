@@ -116,3 +116,27 @@ Create the name of the service account to use
     {{- genPrivateKey "rsa" | b64enc -}}
 {{- end -}}
 {{- end -}}
+
+{{- define "backendConfig.namespace" -}}
+{{- if .Values.global.airgap -}}
+{{- .Release.Namespace -}}
+{{- else -}}
+{{ print "groundcover-incloud" }}
+{{- end -}}
+{{- end -}}
+
+{{- define "backendConfig.kongIngressClass" -}}
+{{- if .Values.global.airgap -}}
+{{ print "groundcover-kong" }}
+{{- else -}}
+{{ print "kong" }}
+{{- end -}}
+{{- end -}}
+
+{{- define "backendConfig.shouldUpdateKongRouter" -}}
+{{- if .Values.global.airgap -}}
+{{ false }}
+{{- else -}}
+{{ true }}
+{{- end -}}
+{{- end -}}
