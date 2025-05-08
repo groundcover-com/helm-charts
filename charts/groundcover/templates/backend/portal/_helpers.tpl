@@ -55,3 +55,23 @@
 {{- printf "false"  -}}
 {{- end -}}
 {{- end -}}
+
+{{- define "backend.kong.endpoint" -}}
+{{- if eq .Values.portal.kong.endpointOverride nil }}
+{{- printf "https://%s-kong-admin:8444" .Release.Name -}} 
+{{- else -}}
+{{- .Values.portal.kong.endpointOverride -}} 
+{{- end -}}
+{{- end -}}
+
+{{- define "backend.kong.enabled" -}}
+{{- if eq .Values.portal.kong.enabled nil }}
+{{- if .Values.tags.incloud -}}
+    {{- true -}}
+{{- else -}}
+    {{- false -}}
+{{- end -}}
+{{- else -}}
+{{- .Values.portal.kong.enabled -}}
+{{- end -}}
+{{- end -}}

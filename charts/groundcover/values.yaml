@@ -767,6 +767,9 @@ portal:
     exponent: 40
     uploaderType: pyroscope
     cpuSamplingDuration: 60s
+  kong:
+    endpointOverride:
+    enabled:
   autodiscovery: false
   maxResponseSizeBytes: 33554432
 

@@ -29,7 +29,7 @@ onprem:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.9.310
+  tag: 1.9.311
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/curl'
@@ -115,6 +115,10 @@ configuration:
     Logs:
       Enabled: true
   UseStaticAssets: false
+  BackendConfig:
+    Namespace: '{{ include "backendConfig.namespace" . }}'
+    KongIngressClass: '{{ include "backendConfig.kongIngressClass" . }}'
+    ShouldUpdateKongRouter: '{{ include "backendConfig.shouldUpdateKongRouter" . }}'
 strategy:
   type: RollingUpdate
   rollingUpdate:

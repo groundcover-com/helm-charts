@@ -20,6 +20,9 @@ kong:
     nginx_http_client_body_buffer_size: "10m"
     nginx_mem_cache_size: "256m"
   proxy:
+    admin:
+      enabled: true
+      type: ClusterIP    
     http:
       enabled: false
     tls:

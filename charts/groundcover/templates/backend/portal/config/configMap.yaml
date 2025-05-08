@@ -87,6 +87,10 @@ data:
         enabled: {{ eq .Values.portal.pprof.uploaderType "pyroscope" }}
         pushURL: {{ include "telemetry.metrics.base.url" . }}
 
+    Kong:
+      Enabled: {{ include "backend.kong.enabled" . }}
+      Endpoint: {{ include "backend.kong.endpoint" . }}
+
 kind: ConfigMap
 metadata:
   labels:
