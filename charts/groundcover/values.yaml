@@ -242,7 +242,7 @@ logPatternsConfig:
     patternsTopCount: 20
 
 fleetClientConfig:
-  url: "http://fleet-manager:8080/api/client/config"
+  overrideURL: ""
   requestIntervalEnabled: true
   maximumInitialJitter: 30s
   requestInterval: 30s

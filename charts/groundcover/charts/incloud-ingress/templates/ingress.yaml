@@ -385,7 +385,37 @@ spec:
                 name: {{ include "portal.fullname" . }}
                 port:
                   name: http
-
+{{- if .Values.global.fleetmanager.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ printf "%s-remote-config" (include "incloud-ingress.name" .) | trunc 63 | trimSuffix "-" }}
+  annotations:
+    konghq.com/protocols: {{ ternary "https" "http" ( eq (tpl .Values.secure . ) "true" ) | quote }}
+    konghq.com/strip-path: "true"
+    konghq.com/plugins: {{ printf "%s-auth" .Release.Name }},allow-ingestion-token-remoteconfig,fleet-manager-rewrite-api
+    {{- with .Values.ingress.annotations }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  ingressClassName: {{ include "incloud-ingress.ingressClass" .}}
+  {{- if .Values.ingress.tls.enabled }}
+  tls:
+    - secretName: {{ include "incloud-ingress.certificate.name" . }}
+      hosts: {{ include "incloud-ingress.certificate.dnsNames" .  | nindent 8 }}
+  {{- end }}
+  rules:
+    - http:
+        paths:
+          - path: /fleet-manager/api/client/config
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: fleet-manager
+                port:
+                  name: manage-http
+{{- end }}
 ---
 
 {{- if .Values.datasource.enabled -}}

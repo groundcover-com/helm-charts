@@ -149,3 +149,35 @@ config:
   origins:
     - '*'
 plugin: cors
+---
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: allow-ingestion-token-remoteconfig
+  annotations:
+    kubernetes.io/ingress.class: kong
+config:
+  access:
+  - |
+    local credential = kong.client.get_credential()
+    local allow_remote_config = false
+
+    for _, tag in ipairs(credential.tags or {}) do
+      if tag == 'remoteConfig:true' then
+        allow_remote_config = true
+        break
+      end
+    end
+
+    if not allow_remote_config then return
+    kong.response.exit(403, "No read permissions") end
+plugin: post-function
+---
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: fleet-manager-rewrite-api
+config:
+  replace:
+    uri: '/api/client/config'
+plugin: request-transformer

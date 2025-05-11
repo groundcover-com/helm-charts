@@ -1,4 +1,4 @@
-{{ .Values.fleetManager.config }}
+{{ if and .Values.global.fleetmanager.enabled .Values.global.backend.enabled }}
 apiVersion: v1
 kind: ConfigMap
 data:
@@ -56,3 +56,4 @@ metadata:
     {{- end }}
   name: fleet-manager-config
   namespace: {{ .Release.Namespace }}
+{{ end }}

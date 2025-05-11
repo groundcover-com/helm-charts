@@ -241,6 +241,17 @@ Get cluster_id from values or generate random one
 {{- print "http://db-manager:8888/writer-ready" -}}
 {{- end -}}
 
+{{- define "fleet-manager.url" -}}
+{{- if .Values.fleetClientConfig.overrideURL -}}
+    {{- .Values.fleetClientConfig.overrideURL -}}
+{{- else if not .Values.global.backend.enabled -}}
+    {{- printf "https://%s/fleet-manager/api/client/config" .Values.global.ingress.site -}}
+{{- else -}}
+    {{- print "http://fleet-manager:8080/api/client/config" -}}
+{{- end -}}
+{{- end -}}
+
+
 {{- define "ingestion.traces.otlp.http.url" -}}
 {{- if (include  "vector.useLocalVector" .) -}}
     {{ include "vector.tracesAsLogs.otlp.http.url" . }}

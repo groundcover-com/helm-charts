@@ -485,7 +485,7 @@ data:
 
     fleetClientConfig:
       enabled: {{ .Values.global.fleetmanager.enabled }}
-      url: {{ .Values.fleetClientConfig.url }}
+      url: {{ include "fleet-manager.url" . }}
       requestIntervalEnabled: {{ .Values.fleetClientConfig.requestIntervalEnabled }}
       maximumInitialJitter: {{ .Values.fleetClientConfig.maximumInitialJitter }}
       requestInterval: {{ .Values.fleetClientConfig.requestInterval }}
