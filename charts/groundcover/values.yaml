@@ -595,6 +595,7 @@ fleetManager:
   image:
     repository: "{{ .Values.global.origin.registry }}/fleet-manager"
     tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
+  serviceName: "fleet-manager"
   additionalLabels:
   additionalAnnotations:
   podLabels:

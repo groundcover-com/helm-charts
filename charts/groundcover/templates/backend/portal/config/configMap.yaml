@@ -62,6 +62,10 @@ data:
       URL: "OVERRIDEN"
       APIKey: "OVERRIDEN"
     
+    FleetManager:
+      Enabled: false
+      URL: "OVERRIDEN"
+    
     {{- if eq (include "telemetry.enabled" .) "true" }}
     Tracing:
       Enabled: true
