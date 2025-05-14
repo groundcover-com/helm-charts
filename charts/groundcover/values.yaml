@@ -257,6 +257,7 @@ priorityClass:
 
 statefulset-modifier:
   enabled: true
+  sizePatches: true
   image:
     tag: latest
     repository: "{{ .Values.global.origin.registry }}/bitnami/kubectl"

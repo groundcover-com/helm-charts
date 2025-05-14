@@ -2,6 +2,30 @@
 {{- printf "%s-statefulset-modifier" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
+{{- define "volume-expansion.annotations-patches" -}}
+sts:
+- op: add
+  value: {{ .annotations | toJson }}
+  path: /spec/volumeClaimTemplates/0/metadata/annotations
+pvc:
+- op: add
+  value: {{ .annotations | toJson }}
+  path: /metadata/annotations
+{{- end -}}
+
+
+{{- define "volume-expansion.size-patches" -}}
+sts:
+- op: replace
+  value: {{ .size }}
+  path: /spec/volumeClaimTemplates/0/spec/resources/requests/storage
+pvc:
+- op: replace
+  value: {{ .size }}
+  path: /spec/resources/requests/storage
+{{- end -}}
+
+
 {{- define "volume-expansion.patches" -}}
 sts:
 - op: add
@@ -11,12 +35,12 @@ sts:
   value: {{ .size }}
   path: /spec/volumeClaimTemplates/0/spec/resources/requests/storage
 pvc:
-- op: add
-  value: {{ .annotations | toJson }}
-  path: /metadata/annotations
 - op: replace
   value: {{ .size }}
   path: /spec/resources/requests/storage
+- op: add
+  value: {{ .annotations | toJson }}
+  path: /metadata/annotations
 {{- end -}}
 
 {{- define "statefulset-modifier.job.image" -}}

@@ -4,9 +4,16 @@
 {{- $shouldPatchAnnotations := true -}}
 {{- $shards := .Values.clickhouse.shards | int -}}
 {{- $annotations := $.Values.clickhouse.persistence.annotations | toJson -}}
+{{- $shouldPatchSize := (index .Values "statefulset-modifier" "sizePatches") -}}
 {{- range $shardIndex, $e := until $shards -}}
 {{- $pvcSize := (eq $shardIndex 0) | ternary $.Values.clickhouse.persistence.size (default $.Values.clickhouse.persistence.size $.Values.clickhouse.persistence.extraShardsSize) -}}
 {{- $patches := (include "volume-expansion.patches" (merge (dict "size" $pvcSize) $.Values.clickhouse.persistence) ) | fromYaml -}}
+{{- $sizePatches := (include "volume-expansion.size-patches" (merge (dict "size" $pvcSize) $.Values.clickhouse.persistence) ) | fromYaml -}}
+{{- $annotationsPatches := (include "volume-expansion.annotations-patches"  $.Values.clickhouse.persistence) | fromYaml -}}
+{{- $sizePvcPatch := (get $sizePatches "pvc") | toJson -}}
+{{- $sizeStsPatch := (get $sizePatches "sts") | toJson -}}
+{{- $annotationsPvcPatch := (get $annotationsPatches "pvc") | toJson -}}
+{{- $annotationsStsPatch := (get $annotationsPatches "sts") | toJson -}}
 {{- $pvcPatch := (get $patches "pvc") | toJson -}}
 {{- $stsPatch := (get $patches "sts") | toJson -}}
 {{- $stsName := (printf "%s-shard%d" (include "clickhouse.fullname" $) $shardIndex) -}}
@@ -41,7 +48,6 @@ spec:
       imagePullSecrets: {{ include "imagePullSecrets" $ }}
       serviceAccountName: {{ include "statefulset-modifier.fullname" $ }}
       containers:
-{{ if or $shouldDeleteSts $shouldPatchAnnotations }}
       - name: sts-delete
         imagePullPolicy: IfNotPresent
         image: {{ include "statefulset-modifier.job.image" $ }}
@@ -50,10 +56,9 @@ spec:
           - -c
           - |
             set -e
-            kubectl patch sts {{ $stsName | quote }} --type json --patch {{ $stsPatch | quote }} || \
+            kubectl patch sts {{ $stsName | quote }} --type json --patch {{ $annotationsStsPatch | quote }} || \
             kubectl delete sts {{ $stsName | quote }} --ignore-not-found --cascade=orphan
-{{- end -}}
-{{ if or $shouldPatchPvc $shouldPatchAnnotations }}
+{{ if and $shouldPatchSize $shouldPatchPvc }}
       - name: pvc-patch
         imagePullPolicy: IfNotPresent
         image: {{ include "statefulset-modifier.job.image" $ }}
@@ -63,6 +68,16 @@ spec:
           - |
             set -e
             kubectl patch pvc {{ $pvcName | quote }} --type json --patch {{ $pvcPatch | quote }} || exit 0
+{{ else if $shouldPatchAnnotations }}
+      - name: pvc-patch
+        imagePullPolicy: IfNotPresent
+        image: {{ include "statefulset-modifier.job.image" $ }}
+        command:
+          - /bin/sh
+          - -c
+          - |
+            set -e
+            kubectl patch pvc {{ $pvcName | quote }} --type json --patch {{ $annotationsPvcPatch | quote }} || exit 0
 {{- end -}}
 {{- end -}}
 {{- end -}}

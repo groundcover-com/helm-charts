@@ -11,6 +11,12 @@ kong:
   image:
     tag: 3.4.2
     repository: public.ecr.aws/groundcovercom/kong
+  deployment:
+    minReadySeconds: 15
+  updateStrategy:
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1  
   env:
     anonymous_reports: "off"
     dump_config: "true"

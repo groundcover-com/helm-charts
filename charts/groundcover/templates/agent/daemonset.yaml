@@ -130,9 +130,11 @@ spec:
             - containerPort: {{ (include "agent.monitoring.port" .) | int }}
               name: prom-metrics
               protocol: TCP
+            {{- if and $sensorValues.apmIngestor.dataDog.enabled $sensorValues.apmIngestor.dataDog.tracesPort}}
             - containerPort: {{ $sensorValues.apmIngestor.dataDog.tracesPort }}
               name: dd-traces
               protocol: TCP
+            {{- end }}
             {{- if .Values.global.debug.enabled }}
             - containerPort: 4040
               name: dlv-tcp
