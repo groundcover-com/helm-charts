@@ -58,6 +58,7 @@ config:
   key_names:
     - token
     - apikey
+    - api_key
     - dd-api-key
     - X-Amz-Firehose-Access-Key
     - Authorization
