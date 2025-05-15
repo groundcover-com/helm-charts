@@ -489,6 +489,7 @@ data:
       requestIntervalEnabled: {{ .Values.fleetClientConfig.requestIntervalEnabled }}
       maximumInitialJitter: {{ .Values.fleetClientConfig.maximumInitialJitter }}
       requestInterval: {{ .Values.fleetClientConfig.requestInterval }}
+      initialUpdateTimeout: {{ .Values.fleetClientConfig.initialUpdateTimeout }}
 
     logs:
       scraper:

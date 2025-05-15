@@ -246,7 +246,7 @@ fleetClientConfig:
   requestIntervalEnabled: true
   maximumInitialJitter: 30s
   requestInterval: 30s
-
+  initialUpdateTimeout: 60s # setting value to 0 means sensor will not wait for initial update
 priorityClass:
   create: false
   name:
@@ -857,6 +857,18 @@ clickhouse:
       <metric_log>
         <ttl>event_date + INTERVAL 3 DAY</ttl>
       </metric_log>
+      <processors_profile_log>
+        <ttl>event_date + INTERVAL 1 DAY</ttl>
+      </processors_profile_log>
+      <part_log>
+        <ttl>event_date + INTERVAL 1 DAY</ttl>
+      </part_log>
+      <query_views_log>
+        <ttl>event_date + INTERVAL 1 DAY</ttl>
+      </query_views_log>
+      <text_log>
+        <ttl>event_date + INTERVAL 2 DAY</ttl>
+      </text_log>
     </clickhouse>
   usersExtraOverrides: |
     <clickhouse>
