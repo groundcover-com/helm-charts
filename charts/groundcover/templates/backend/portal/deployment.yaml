@@ -66,11 +66,6 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.annotations['groundcover_version']
-        - name: GC_CLUSTERID
-          valueFrom:
-            secretKeyRef:
-              key: GC_CLUSTER_ID
-              name: groundcover-config
         - name: GC_MONITORSMANAGER_ENABLED
           value: "true"
         - name: GC_MONITORSMANAGER_URL
@@ -121,6 +116,9 @@ spec:
 {{ with .Values.portal.env }}
             {{- tpl (toYaml .) $ | nindent 8 }}
 {{ end }}
+        envFrom:
+          - secretRef:
+              name: {{include "groundcover.config.secretName" .}}
         image: {{ tpl .Values.portal.image.repository . }}:{{ tpl .Values.portal.image.tag . }}
         imagePullPolicy: Always
         name: {{ include "portal.fullname" . }}

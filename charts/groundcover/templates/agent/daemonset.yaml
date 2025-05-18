@@ -97,16 +97,6 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
-            - name: GC_CLUSTERID
-              valueFrom:
-                secretKeyRef:
-                    name: groundcover-config
-                    key: GC_CLUSTER_ID
-            - name: GC_REGION
-              valueFrom:
-                secretKeyRef:
-                    name: groundcover-config
-                    key: GC_REGION
             - name: GC_GROUNDCOVERVERSION
               valueFrom:
                 fieldRef:
@@ -121,6 +111,9 @@ spec:
             {{- with $sensorValues.builtinEnv }}
               {{ tpl (toYaml .) $ | nindent 12 }}
             {{- end }}                              
+          envFrom:
+            - secretRef:
+                name: {{include "groundcover.config.secretName" .}}
           image: {{ tpl $sensorValues.image.repository . }}:{{ tpl $sensorValues.image.tag .}}
           resources:
 {{- toYaml $sensorValues.resources | nindent 12 }}
@@ -265,17 +258,15 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
-            - name: GC_CLUSTERID
-              valueFrom:
-                secretKeyRef:
-                    name: groundcover-config
-                    key: GC_CLUSTER_ID
         {{- with .Values.agent.flb.env }}
           {{ tpl (toYaml .) $ | nindent 12 }}
         {{- end }}
         {{- with .Values.agent.flb.builtinEnv }}
           {{ tpl (toYaml .) $ | nindent 12 }}
         {{- end }}
+          envFrom:
+          - secretRef:
+              name: {{include "groundcover.config.secretName" .}}
           resources:
             {{- toYaml .Values.agent.flb.resources | nindent 12 }}
 {{- end }}              

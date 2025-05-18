@@ -77,7 +77,9 @@ spec:
     port: {{ $sensorValues.apmIngestor.otel.direct.httpjson.port }}
     targetPort: {{ $sensorValues.apmIngestor.otel.direct.httpjson.port }}
   {{- end }}
+  {{- if $sensorValues.setLocalTrafficPolicy }}
   internalTrafficPolicy: Local
+  {{- end }}
 ---
 apiVersion: v1
 kind: Service

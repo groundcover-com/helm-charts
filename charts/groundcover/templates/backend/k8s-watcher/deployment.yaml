@@ -58,17 +58,7 @@ spec:
 {{- end }}
       imagePullSecrets: {{ include "imagePullSecrets" . }}
       containers:
-      - env:
-        - name: GC_CLUSTERID
-          valueFrom:
-            secretKeyRef:
-              key: GC_CLUSTER_ID
-              name: groundcover-config
-        - name: GC_REGION
-          valueFrom:
-            secretKeyRef:
-              name: groundcover-config
-              key: GC_REGION   
+      - env: 
         - name: GC_RUNNINGNAMESPACE
           valueFrom:
             fieldRef:
@@ -83,6 +73,9 @@ spec:
         {{- with .Values.k8sWatcher.builtinEnv }}
           {{ tpl (toYaml .) $ | nindent 8 }}
         {{- end }}
+        envFrom:
+          - secretRef:
+              name: {{include "groundcover.config.secretName" .}}
         image: {{ tpl .Values.k8sWatcher.image.repository . }}:{{ tpl .Values.k8sWatcher.image.tag . }}
         imagePullPolicy: Always
         name: k8s-watcher

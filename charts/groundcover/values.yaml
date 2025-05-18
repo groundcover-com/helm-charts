@@ -341,6 +341,7 @@ agent:
       b3ForceSample: false
       datadogForceSample: false
     watchOnlyLocalNode: false
+    setLocalTrafficPolicy: true
     customEntityTags:
       labels:
         keys: []
@@ -997,7 +998,7 @@ opentelemetry-collector:
     - name: CLUSTER_ID
       valueFrom:
         secretKeyRef:
-          name: groundcover-config
+          name: '{{ include "groundcover.config.secretName" .}}'
           key: GC_CLUSTER_ID
   extraVolumes:
     - name: persistent-queues
@@ -2521,12 +2522,12 @@ victoria-metrics-agent:
     - name: GC_CLUSTER_ID
       valueFrom:
         secretKeyRef:
-          name: groundcover-config
+          name: '{{ include "groundcover.config.secretName" .}}'
           key: GC_CLUSTER_ID
     - name: GC_VERSION
       valueFrom:
         secretKeyRef:
-          name: groundcover-config
+          name: '{{ include "groundcover.config.secretName" .}}'
           key: GC_VERSION
     - name: API_KEY
       valueFrom:
@@ -2687,7 +2688,7 @@ custom-metrics:
     remoteWrite.maxHourlySeries: '{{ ternary "200000" "1000000" (empty .Values.global.ingress.site) }}'
     remoteWrite.headers: "apikey:%{API_KEY}"
     remoteWrite.tlsInsecureSkipVerify: '{{ ternary "true" "false" .Values.global.ingestion.tls_skip_verify }}'
-    remoteWrite.label: clusterId=$(GC_CLUSTER_ID),cluster=$(GC_CLUSTER_ID)
+    remoteWrite.label: clusterId=$(GC_CLUSTER_ID),cluster=$(GC_CLUSTER_ID),env=$(GC_ENV),env_type=k8s
     promscrape.streamParse: "true"
     promscrape.dropOriginalLabels: "true"
     promscrape.suppressDuplicateScrapeTargetErrors: "true"
@@ -2696,13 +2697,18 @@ custom-metrics:
     - name: GC_CLUSTER_ID
       valueFrom:
         secretKeyRef:
-          name: groundcover-config
+          name: '{{ include "groundcover.config.secretName" .}}'
           key: GC_CLUSTER_ID
     - name: API_KEY
       valueFrom:
         secretKeyRef:
           key: '{{ include "groundcover.apikeySecretKey" . }}'
           name: '{{ include "groundcover.apikeySecretName" . }}'
+    - name: GC_ENV
+      valueFrom:
+        secretKeyRef:
+          name: '{{ include "groundcover.config.secretName" .}}'
+          key: GC_ENV
   extraScrapeConfigs: []
   config:
     scrape_configs:

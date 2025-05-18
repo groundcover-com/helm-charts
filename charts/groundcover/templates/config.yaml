@@ -17,4 +17,5 @@ stringData:
   GC_CLUSTER_ID: {{ include "groundcover.clusterId" . }}
   GC_REGION: {{ include "groundcover.region" . }}
   GC_VERSION: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+  GC_ENV: {{ include "groundcover.env" . }}
 type: Opaque

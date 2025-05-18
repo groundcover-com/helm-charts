@@ -59,16 +59,6 @@ spec:
       imagePullSecrets: {{ include "imagePullSecrets" . }}
       containers:
       - env:
-        - name: GC_CLUSTERID
-          valueFrom:
-            secretKeyRef:
-              key: GC_CLUSTER_ID
-              name: groundcover-config
-        - name: GC_REGION
-          valueFrom:
-            secretKeyRef:
-              name: groundcover-config
-              key: GC_REGION   
         - name: GC_RUNNINGNAMESPACE
           valueFrom:
             fieldRef:
@@ -83,6 +73,9 @@ spec:
         {{- with .Values.integrationsAgent.builtinEnv }}
           {{ tpl (toYaml .) $ | nindent 8 }}
         {{- end }}
+        envFrom:
+          - secretRef:
+              name: {{include "groundcover.config.secretName" .}}
         image: {{ tpl .Values.integrationsAgent.image.repository . }}:{{ tpl .Values.integrationsAgent.image.tag . }}
         imagePullPolicy: Always
         name: integrations-agent
