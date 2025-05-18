@@ -62,7 +62,7 @@ data:
     [FILTER]
         Name record_modifier
         Match *
-        Record clusterId ${GC_CLUSTERID}
+        Record clusterId ${GC_CLUSTER_ID}
         Record version ${GC_GROUNDCOVERVERSION}
 
     [OUTPUT]
