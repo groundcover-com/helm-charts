@@ -38,7 +38,8 @@ global:
 
   ingestion:
     tls_skip_verify: true
-
+    pdbs:
+      enabled: true
   groundcover_token:
   # groundcover_token is preceding groundcoverPredefinedTokenSecret, make sure its empty if using existing secret
   # if the secret is preloaded in the namespace, you can refer it here instead
@@ -3017,13 +3018,3 @@ backend:
 groundcover:
   extraObjects: {}
   podDisruptionBudget:
-    metrics-ingestion-pipeline:
-      maxUnavailable: "1%"
-      selector:
-        matchLabels:
-          app.groundcover.com/pipeline: metrics
-    vector:
-      maxUnavailable: "1%"
-      selector:
-        matchLabels:
-          app.groundcover.com/component: vector
