@@ -2596,6 +2596,9 @@ victoria-metrics-agent:
           insecure_skip_verify: true
 
 kube-state-metrics:
+  resources:
+    requests:
+      cpu: 200m
   nodeSelector:
   nameOverride: kube-state-metrics
   customLabels:
