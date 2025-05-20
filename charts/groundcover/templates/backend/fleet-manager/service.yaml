@@ -20,7 +20,7 @@ metadata:
 spec:
   ports:
   - name: manage-http
-    port: 8080
+    port: {{ .Values.fleetManager.manageHttpPort }}
     protocol: TCP
     targetPort: manage-http
   selector:

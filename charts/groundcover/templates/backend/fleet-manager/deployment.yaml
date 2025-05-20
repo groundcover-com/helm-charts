@@ -16,9 +16,14 @@ metadata:
   name: fleet-manager
   namespace: {{ .Release.Namespace }}
 spec:
+  replicas: {{ default 2 .Values.fleetManager.replicas }}
   selector:
     matchLabels:
       app: fleet-manager
+  updateStrategy:
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
   template:
     metadata:
       annotations:
@@ -56,6 +61,13 @@ spec:
 {{ toYaml .Values.fleetManager.nodeSelector | indent 8 }}
 {{- end }}
       imagePullSecrets: {{ include "imagePullSecrets" . }}
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: fleet-manager
       containers:
       - env:
         - name: GC_RUNNINGNAMESPACE

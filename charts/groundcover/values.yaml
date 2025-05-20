@@ -599,6 +599,7 @@ fleetManager:
     repository: "{{ .Values.global.origin.registry }}/fleet-manager"
     tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
   serviceName: "fleet-manager"
+  replicas: 2
   additionalLabels:
   additionalAnnotations:
   podLabels:
@@ -654,7 +655,7 @@ fleetManager:
       sslmode: "require"
     skipMigrations: false
     migrationsPath: "/migrations"
-    cacheRefreshInterval: 10s
+    cacheRefreshInterval: 2s
     
 
 k8sWatcher:

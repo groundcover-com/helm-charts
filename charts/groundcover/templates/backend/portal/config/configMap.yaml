@@ -63,8 +63,8 @@ data:
       APIKey: "OVERRIDEN"
     
     FleetManager:
-      Enabled: false
-      URL: "OVERRIDEN"
+      Enabled: {{ .Values.global.fleetmanager.enabled}}
+      URL: {{ printf "http://%s:%d" (.Values.fleetManager.serviceName) (int .Values.fleetManager.manageHttpPort) }}
     
     {{- if eq (include "telemetry.enabled" .) "true" }}
     Tracing:
