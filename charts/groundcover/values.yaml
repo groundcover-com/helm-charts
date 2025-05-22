@@ -692,6 +692,7 @@ k8sWatcher:
   nodeSelector:
   tolerations: []
   priorityClassName:
+  clusterDiscoveryInterval: 5m
   resources:
     limits:
       cpu: 2000m
@@ -2640,6 +2641,8 @@ kube-state-metrics:
 victoria-metrics-operator:
   enabled: false
   # https://github.com/VictoriaMetrics/operator/blob/master/docs/vars.md
+  image:
+    registry: us-docker.pkg.dev/groundcovercom/repo
   env:
     - name: VM_DISABLESELFSERVICESCRAPECREATION
       value: "true"
@@ -2864,6 +2867,7 @@ victoria-metrics-single:
 monitors-manager:
   initChownData:
     image:
+      registry: 'us-docker.pkg.dev/groundcovercom/repo'  
       tag: "1.36.1"
   image:
     registry: public.ecr.aws

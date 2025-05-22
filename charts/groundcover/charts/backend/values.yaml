@@ -314,6 +314,9 @@ victoria-metrics-distributed:
   common:
     vmauth:
       spec:
+        configReloaderImageTag: public.ecr.aws/groundcovercom/victoriametrics/operator:config-reloader-v0.48.4
+        image: 
+          repository: public.ecr.aws/groundcovercom/victoriametrics/vmauth
         replicaCount: 2
         resources:
           limits:
@@ -335,6 +338,10 @@ victoria-metrics-distributed:
         topologySpreadConstraints: []
     vmagent:
       spec:
+        configReloaderImageTag: public.ecr.aws/groundcovercom/victoriametrics/operator:config-reloader-v0.48.4
+        image: 
+          repository: public.ecr.aws/groundcovercom/vmagent
+          tag: v1.115.0
         containers:
         - env:
           - name: POD_NAME
@@ -376,6 +383,8 @@ victoria-metrics-distributed:
         replicationFactor: 2
         retentionPeriod: 30d
         vminsert:
+          image:
+            repository: public.ecr.aws/groundcovercom/victoriametrics/vminsert
           extraArgs:
             maxConcurrentInserts: "1000"
             maxLabelsPerTimeseries: "50"
@@ -395,6 +404,8 @@ victoria-metrics-distributed:
               cpu: 500m
               memory: 2Gi
         vmselect:
+          image:
+            repository: public.ecr.aws/groundcovercom/victoriametrics/vmselect
           extraArgs:
             search.maxQueryLen: "100000"
             search.maxSeries: "30000"
@@ -421,6 +432,8 @@ victoria-metrics-distributed:
                   requests:
                     storage: 10Gi
         vmstorage:
+          image:
+            repository: public.ecr.aws/groundcovercom/victoriametrics/vmstorage
           extraArgs:
             search.maxConcurrentRequests: "8"
             search.maxTagKeys: "200000"

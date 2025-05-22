@@ -41,6 +41,7 @@ data:
       scrapeTimeout: 10s
 
     runningNamespace: ""
+    clusterDiscoveryInterval: {{ .Values.k8sWatcher.clusterDiscoveryInterval }}
     clusterId: {{ include "groundcover.clusterId" . }}
     region: {{ .Values.region }}
     env: {{ include "groundcover.env" . }}
