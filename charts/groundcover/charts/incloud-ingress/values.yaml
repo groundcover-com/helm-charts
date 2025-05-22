@@ -7,9 +7,6 @@ kong-crds:
     repository: public.ecr.aws/groundcovercom/bitnami/kubectl
 
 kong:
-  ingressController:
-    image:
-      repository: public.ecr.aws/groundcovercom/kong/kubernetes-ingress-controller
   replicaCount: 2
   image:
     tag: 3.4.2
