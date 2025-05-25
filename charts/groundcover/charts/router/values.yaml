@@ -29,7 +29,7 @@ onprem:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.9.345
+  tag: 1.9.346
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/curl'
@@ -247,7 +247,7 @@ grafana:
       auto_sign_up: false
       skip_org_role_sync: true
     unified_alerting:
-      max_attempts: 3
+      max_attempts: "3"
   extraSecretMounts:
     - name: certs
       mountPath: /certs
