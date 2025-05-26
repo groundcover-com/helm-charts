@@ -29,7 +29,7 @@ onprem:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.9.346
+  tag: 1.9.347
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/curl'
@@ -74,6 +74,7 @@ configuration:
     Issuer: "https://auth.groundcover.com/"
     TenantURL: "https://auth.groundcover.com/"
     JWKSPath: ".well-known/jwks.json"
+    MCPOAuthClientId: "groundcover-mcp-client-id"
   RBAC:
     DB:
       Host: '{{ splitList ":" (include "postgresql.base.url" .) | first }}'
