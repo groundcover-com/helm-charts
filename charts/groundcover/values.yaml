@@ -604,6 +604,16 @@ fleetManager:
   additionalAnnotations:
   podLabels:
   podAnnotations:
+  pdb:
+    enabled: true
+    maxUnavailable: 1
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/name: fleet-manager
   affinity:
   nodeSelector:
   tolerations: []
@@ -680,6 +690,8 @@ k8sWatcher:
     configmap:
       enabled: true
     secret:
+      enabled: false
+    verticalPodAutoscaler:
       enabled: false
   image:
     repository: "{{ .Values.global.origin.registry }}/k8s-watcher"

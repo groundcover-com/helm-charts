@@ -62,13 +62,10 @@ spec:
 {{ toYaml .Values.fleetManager.nodeSelector | indent 8 }}
 {{- end }}
       imagePullSecrets: {{ include "imagePullSecrets" . }}
+{{- if .Values.fleetManager.topologySpreadConstraints }}
       topologySpreadConstraints:
-        - maxSkew: 1
-          topologyKey: kubernetes.io/hostname
-          whenUnsatisfiable: ScheduleAnyway
-          labelSelector:
-            matchLabels:
-              app.kubernetes.io/name: fleet-manager
+{{ toYaml .Values.fleetManager.topologySpreadConstraints | indent 8 }}
+{{- end }}
       containers:
       - env:
         - name: GC_RUNNINGNAMESPACE

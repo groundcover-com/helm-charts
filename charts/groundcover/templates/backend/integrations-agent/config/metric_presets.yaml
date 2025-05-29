@@ -5547,6 +5547,9 @@ data:
     - Name: AuroraReplicaLag
       Statistics:
       - Average
+    - Name: ACUUtilization
+      Statistics:
+      - Average      
     - Name: AuroraReplicaLagMaximum
       Statistics:
       - Average
