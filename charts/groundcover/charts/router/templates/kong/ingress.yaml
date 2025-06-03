@@ -1,5 +1,6 @@
 {{- if .Values.onprem.enabled -}}
 ---
+{{- if .Values.deployedIngresses.ui }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -20,6 +21,7 @@ spec:
                 name: {{ include "router.service.name" . }}
                 port:
                   name: frontend
+{{- end }}
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -73,6 +75,7 @@ spec:
                 port:
                   name: frontend
 ---
+{{- if .Values.deployedIngresses.grafana }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -95,4 +98,5 @@ spec:
                 name: {{ include "router.service.name" . }}
                 port:
                   name: frontend
+{{- end }}                  
 {{- end -}}
