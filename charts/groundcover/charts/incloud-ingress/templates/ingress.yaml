@@ -310,6 +310,13 @@ spec:
                 name: {{ include "metrics-ingester.fullname" . }}
                 port:
                   name: http
+          - path: {{ get (urlParse (include "metrics-ingester.datadog.http.beta.sketches.url" .)) "path" }} 
+            pathType: Exact
+            backend:
+              service:
+                name: {{ include "metrics-ingester.fullname" . }}
+                port:
+                  name: http
 
 ---
 
