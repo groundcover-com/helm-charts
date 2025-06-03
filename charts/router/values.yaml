@@ -29,13 +29,16 @@ onprem:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.9.372
+  tag: 1.9.373
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/curl'
     tag: 8.6.0
 serviceAccount:
   annotations:
+deployedIngresses:
+  ui: true
+  grafana: true
 ingress:
   enabled: false
 ingresses:
