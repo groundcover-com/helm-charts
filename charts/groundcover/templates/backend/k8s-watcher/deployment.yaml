@@ -52,6 +52,10 @@ spec:
       affinity:
 {{ toYaml .Values.k8sWatcher.affinity | indent 8 }}
 {{- end }}
+{{- if .Values.k8sWatcher.topologySpreadConstraints }}
+      topologySpreadConstraints:
+{{ toYaml .Values.k8sWatcher.topologySpreadConstraints | indent 8 }}
+{{- end }}
 {{- if .Values.k8sWatcher.nodeSelector }}
       nodeSelector:
 {{ toYaml .Values.k8sWatcher.nodeSelector | indent 8 }}

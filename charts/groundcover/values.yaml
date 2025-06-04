@@ -701,6 +701,7 @@ k8sWatcher:
   additionalAnnotations:
   podAnnotations:
   affinity:
+  topologySpreadConstraints:
   nodeSelector:
   tolerations: []
   priorityClassName:
