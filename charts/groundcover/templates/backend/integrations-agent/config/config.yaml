@@ -200,6 +200,46 @@ data:
     {{- end }}
     {{- end }}
     {{- end }}
+    {{- if .Values.integrationsAgent.targets.dynamodb }}
+    {{- range .Values.integrationsAgent.targets.dynamodb }}
+    - Type: dynamodb
+      Name: "{{ .name }}"
+      {{- if .interval }}
+      Interval: "{{ .interval }}"
+      {{- end }}
+      {{- if .extraLabels }}
+      ExtraLabels:
+      {{- range $key, $value := .extraLabels }}
+        {{ $key }}: "{{ $value }}"
+      {{- end }}
+      {{- end }}
+      {{- if .dropLabels }}
+      DropLabels:
+      {{- range $label := .dropLabels }}
+        - "{{ $label }}"
+      {{- end }}
+      {{- end }}
+      {{- if eq .enabled false }}
+      Enabled: {{ .enabled }}
+      {{- end }}
+      Region: "{{ .region }}"
+      {{- if .roleArn }}
+      AwsRoleArn: "{{ .roleArn }}"
+      {{- end }}
+      {{- if .tableNames }}
+      AwsDynamoDBTableNames:
+      {{- range .tableNames }}
+        - "{{ . }}"
+      {{- end }}
+      {{- end }}
+      Exporters:
+        - "prometheus"
+        - "prometheus_internal"
+    {{- range .additionalExporters }}
+        - "{{ . }}"
+    {{- end }}
+    {{- end }}
+    {{- end }}
     {{- end }}
     {{- end }}
 
