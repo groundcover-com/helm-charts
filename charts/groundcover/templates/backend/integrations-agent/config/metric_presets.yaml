@@ -717,6 +717,87 @@ data:
       - Average
       - Maximum
       - Minimum
+    - Name: CoordinatorCPUUtilization
+      Statistics:
+      - Maximum
+    - Name: CoordinatorJVMMemoryPressure
+      Statistics:
+      - Maximum
+    - Name: CoordinatorOldGenJVMMemoryPressure
+      Statistics:
+      - Maximum
+    - Name: CoordinatorSysMemoryUtilization
+      Statistics:
+      - Maximum
+    - Name: CoordinatorFreeStorageSpace
+      Statistics:
+      - Average
+
+    - Name: ReadLatency
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum      
+    - Name: WriteLatency
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum      
+    - Name: ReadThroughput
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum      
+    - Name: ReadThroughputMicroBursting
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum      
+    - Name: WriteThroughput
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum      
+    - Name: WriteThroughputMicroBursting
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum      
+    - Name: DiskQueueDepth
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum      
+    - Name: ReadIOPS
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum      
+    - Name: ReadIOPSMicroBursting
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum      
+    - Name: WriteIOPS
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum      
+    - Name: WriteIOPSMicroBursting
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum      
+    - Name: BurstBalance
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum      
+    - Name: VolumeStalledIOcheck
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum      
     AWS/Athena:
     - Name: EngineExecutionTime
       Statistics:
@@ -3399,6 +3480,8 @@ data:
         Statistics:
         - Average
         - Maximum
+        - p50
+        - p90        
         - p95
         - p99
       - Name: UnhealthyHostCount
