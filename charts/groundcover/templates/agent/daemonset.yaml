@@ -123,7 +123,7 @@ spec:
             - containerPort: {{ (include "agent.monitoring.port" .) | int }}
               name: prom-metrics
               protocol: TCP
-            {{- if and $sensorValues.apmIngestor.dataDog.enabled $sensorValues.apmIngestor.dataDog.tracesPort}}
+            {{- if and $sensorValues.apmIngestor.dataDog.enabled $sensorValues.apmIngestor.dataDog.tracesPort $sensorValues.ingestionEnabled}}
             - containerPort: {{ $sensorValues.apmIngestor.dataDog.tracesPort }}
               name: dd-traces
               protocol: TCP
@@ -133,47 +133,47 @@ spec:
               name: dlv-tcp
               protocol: TCP
             {{- end }}
-            {{- if and $sensorValues.apmIngestor.otel.direct.zipkin.enabled $sensorValues.apmIngestor.otel.direct.zipkin.port}}
+            {{- if and $sensorValues.apmIngestor.otel.direct.zipkin.enabled $sensorValues.apmIngestor.otel.direct.zipkin.port $sensorValues.ingestionEnabled}}
             - containerPort: {{ $sensorValues.apmIngestor.otel.direct.zipkin.port }}
               name: zipkin
               protocol: TCP
             {{- end }}
-            {{- if and $sensorValues.apmIngestor.otel.direct.otlp.enabled $sensorValues.apmIngestor.otel.direct.otlp.grpcPort}}
+            {{- if and $sensorValues.apmIngestor.otel.direct.otlp.enabled $sensorValues.apmIngestor.otel.direct.otlp.grpcPort $sensorValues.ingestionEnabled}}
             - containerPort: {{ $sensorValues.apmIngestor.otel.direct.otlp.grpcPort }}
               name: otlp-grpc
               protocol: TCP
             {{- end }}
-            {{- if and $sensorValues.apmIngestor.otel.direct.otlp.enabled $sensorValues.apmIngestor.otel.direct.otlp.httpPort}}
+            {{- if and $sensorValues.apmIngestor.otel.direct.otlp.enabled $sensorValues.apmIngestor.otel.direct.otlp.httpPort $sensorValues.ingestionEnabled}}
             - containerPort: {{ $sensorValues.apmIngestor.otel.direct.otlp.httpPort }}
               name: otlp-http
               protocol: TCP
             {{- end }}
-            {{- if and $sensorValues.apmIngestor.otel.direct.jaeger.enabled $sensorValues.apmIngestor.otel.direct.jaeger.grpcPort}}
+            {{- if and $sensorValues.apmIngestor.otel.direct.jaeger.enabled $sensorValues.apmIngestor.otel.direct.jaeger.grpcPort $sensorValues.ingestionEnabled}}
             - containerPort: {{ $sensorValues.apmIngestor.otel.direct.jaeger.grpcPort }}
               name: jaeger-grpc
               protocol: TCP     
             {{- end }}
-            {{- if and $sensorValues.apmIngestor.otel.direct.jaeger.enabled $sensorValues.apmIngestor.otel.direct.jaeger.thriftHttpPort}}
+            {{- if and $sensorValues.apmIngestor.otel.direct.jaeger.enabled $sensorValues.apmIngestor.otel.direct.jaeger.thriftHttpPort $sensorValues.ingestionEnabled}}
             - containerPort: {{ $sensorValues.apmIngestor.otel.direct.jaeger.thriftHttpPort }}
               name: jaeger-th-http
               protocol: TCP     
             {{- end }}
-            {{- if and $sensorValues.apmIngestor.otel.direct.jaeger.enabled $sensorValues.apmIngestor.otel.direct.jaeger.thriftBinaryPort}}
+            {{- if and $sensorValues.apmIngestor.otel.direct.jaeger.enabled $sensorValues.apmIngestor.otel.direct.jaeger.thriftBinaryPort $sensorValues.ingestionEnabled}}
             - containerPort: {{ $sensorValues.apmIngestor.otel.direct.jaeger.thriftBinaryPort }}
               name: jaeger-th-bin
               protocol: UDP     
             {{- end }}
-            {{- if and $sensorValues.apmIngestor.otel.direct.jaeger.enabled $sensorValues.apmIngestor.otel.direct.jaeger.thriftCompactPort}}
+            {{- if and $sensorValues.apmIngestor.otel.direct.jaeger.enabled $sensorValues.apmIngestor.otel.direct.jaeger.thriftCompactPort $sensorValues.ingestionEnabled}}
             - containerPort: {{ $sensorValues.apmIngestor.otel.direct.jaeger.thriftCompactPort }}
               name: jaeger-th-comp
               protocol: UDP     
             {{- end }}
-            {{- if and $sensorValues.metricIngestor.serverEnabled $sensorValues.metricIngestor.serverPort}}
+            {{- if and $sensorValues.metricIngestor.serverEnabled $sensorValues.metricIngestor.serverPort $sensorValues.ingestionEnabled}}
             - containerPort: {{ $sensorValues.metricIngestor.serverPort }}
               name: metric-ingestor
               protocol: TCP     
             {{- end }}
-            {{- if and $sensorValues.apmIngestor.otel.direct.httpjson.enabled $sensorValues.apmIngestor.otel.direct.httpjson.port}}
+            {{- if and $sensorValues.apmIngestor.otel.direct.httpjson.enabled $sensorValues.apmIngestor.otel.direct.httpjson.port $sensorValues.ingestionEnabled}}
             - containerPort: {{ $sensorValues.apmIngestor.otel.direct.httpjson.port }}
               name: http-json
               protocol: TCP

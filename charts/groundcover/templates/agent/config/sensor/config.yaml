@@ -380,6 +380,8 @@ data:
 
     watchOnlyLocalNode: {{ $sensorValues.watchOnlyLocalNode }}
     floraEnabled: true
+    collectionEnabled: {{ $sensorValues.collectionEnabled }}
+    ingestionEnabled: {{ $sensorValues.ingestionEnabled }}
     runningNamespace: ""
     shouldDropRunningNamespaces: {{ include "groundcover.shouldDropRunningNamespaces" . }}
     tracesNamespaceFilters: {{ toYaml .Values.tracesNamespaceFilters | nindent 6 }}

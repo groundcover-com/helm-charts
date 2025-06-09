@@ -342,6 +342,8 @@ agent:
       datadogForceSample: false
     watchOnlyLocalNode: false
     setLocalTrafficPolicy: true
+    collectionEnabled: true
+    ingestionEnabled: true
     customEntityTags:
       labels:
         keys: []
