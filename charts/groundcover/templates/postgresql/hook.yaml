@@ -1,10 +1,9 @@
 {{ if and .Values.global.backend.enabled .Values.global.postgresql.enabled (index .Values "statefulset-modifier" "enabled")}}
 {{- $shouldPatchPvc := true -}}
-{{- $shouldDeleteSts := true -}}
 {{- $shouldPatchAnnotations := true -}}
+{{- $shouldPatchSize := (index .Values "statefulset-modifier" "sizePatches") -}}
 {{- $pvcSize := index .Values "backend" "postgresql" "primary" "persistence" "size" -}}
 {{- $annotations := (index .Values "backend" "postgresql" "primary" "persistence" "annotations") | toJson -}}
-{{- $shouldPatchSize := (index .Values "statefulset-modifier" "sizePatches") -}}
 {{- $patches := (include "volume-expansion.patches" (index .Values "backend" "postgresql" "primary" "persistence")) | fromYaml -}}
 {{- $sizePatches := (include "volume-expansion.size-patches" (merge (dict "size" $pvcSize) $.Values.backend.postgresql.primary.persistence) ) | fromYaml -}}
 {{- $annotationsPatches := (include "volume-expansion.annotations-patches"  $.Values.backend.postgresql.primary.persistence) | fromYaml -}}
@@ -24,10 +23,9 @@
 {{- $stsPvcSize := ($sts | dig "spec" "volumeClaimTemplates" (list dict) | first | dig "spec" "resources" "requests" "storage" $pvcSize) -}}
 {{- $stsPvcAnnotations := ($sts | dig "spec" "volumeClaimTemplates" (list dict) | first | dig "metadata" "annotations" dict) | toJson -}}
 {{- $shouldPatchPvc = (not (eq $pvcSize $pvcCapacitySize)) -}}
-{{- $shouldDeleteSts = (not (eq $pvcSize $stsPvcSize)) -}}
 {{- $shouldPatchAnnotations = (not (eq $stsPvcAnnotations $annotations)) -}}
 {{- end -}}
-{{ if or $shouldPatchPvc $shouldDeleteSts $shouldPatchAnnotations }}
+{{ if or (and $shouldPatchPvc $shouldPatchSize) $shouldPatchAnnotations }}
 ---
 apiVersion: batch/v1
 kind: Job
@@ -54,9 +52,8 @@ spec:
           - -c
           - |
             set -e
-            kubectl patch sts {{ $stsName | quote }} --type json --patch {{ $stsPatch | quote }} || \
             kubectl delete sts {{ $stsName | quote }} --ignore-not-found --cascade=orphan
-{{ if and $shouldPatchSize $shouldPatchPvc }}
+{{ if and $shouldPatchPvc $shouldPatchSize }}
       - name: pvc-patch
         imagePullPolicy: IfNotPresent
         image: {{ include "statefulset-modifier.job.image" $ }}
