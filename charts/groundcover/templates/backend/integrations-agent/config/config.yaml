@@ -8,6 +8,45 @@ data:
     {{- if .Values.integrationsAgent }}
     {{- if .Values.integrationsAgent.targets }}
     Targets:
+    {{- if .Values.integrationsAgent.targets.rdsEnhanced }}
+    {{- range .Values.integrationsAgent.targets.rdsEnhanced }}
+    - Type: "rds_enhanced"
+      Name: "{{ .name }}"
+      {{- if .interval }}
+      Interval: "{{ .interval }}"
+      {{- end }}
+      {{- if .extraLabels }}
+      ExtraLabels:
+      {{- range $key, $value := .extraLabels }}
+        {{ $key }}: "{{ $value }}"
+      {{- end }}
+      {{- end }}
+      {{- if .dropLabels }}
+      DropLabels:
+      {{- range $label := .dropLabels }}
+        - "{{ $label }}"
+      {{- end }}
+      {{- end }}
+      {{- if eq .enabled false }}
+      Enabled: {{ .enabled }}
+      {{- end }}
+      Region: "{{ .region }}"
+      {{- if .roleArn }}
+      AwsRoleArn: "{{ .roleArn }}"
+      {{- end }}
+      {{- if .dbInstanceIdentifiers }}
+      AwsRdsDBInstanceIdentifiers:
+      {{- range .dbInstanceIdentifiers }}
+        - "{{ . }}"
+      {{- end }}
+      {{- end }}
+      Exporters:
+        - "prometheus"
+     {{- range .additionalExporters }}
+        - "{{ . }}"
+    {{- end }}
+    {{- end }}
+    {{- end }}
     {{- if .Values.integrationsAgent.targets.awsBillingSQS }}
     {{- range .Values.integrationsAgent.targets.awsBillingSQS }}
     - Type: "awsbilling_sqs"
