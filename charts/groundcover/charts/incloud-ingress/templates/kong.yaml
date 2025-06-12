@@ -26,6 +26,7 @@ config:
   anonymous: anonymous
 plugin: basic-auth
 ---
+{{- if .Values.global.groundcover_token -}}
 apiVersion: v1
 kind: Secret
 metadata:
@@ -36,6 +37,7 @@ stringData:
   username: groundcover
   password: {{ .Values.global.groundcover_token }}
 ---
+{{- end }}
 apiVersion: configuration.konghq.com/v1
 kind: KongConsumer
 metadata:
@@ -66,7 +68,7 @@ config:
 plugin: key-auth
 
 ---
-
+{{- if .Values.global.groundcover_token -}}
 apiVersion: v1
 kind: Secret
 metadata:
@@ -76,9 +78,8 @@ metadata:
 type: Opaque
 stringData:
   key: {{ .Values.global.groundcover_token }}
-
 ---
-
+{{- end }}
 apiVersion: configuration.konghq.com/v1
 kind: KongConsumer
 metadata:
