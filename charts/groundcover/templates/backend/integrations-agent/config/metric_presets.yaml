@@ -7127,8 +7127,10 @@ data:
       - Maximum
       - Minimum
       - Sum
-
-
+    AWS/Usage:
+    - Name: CallCount
+      Statistics:
+      - Sum
   azure_presets.yaml: |
     Microsoft.Compute/virtualMachines:
       Metrics:
