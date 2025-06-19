@@ -695,6 +695,8 @@ k8sWatcher:
       enabled: false
     verticalPodAutoscaler:
       enabled: false
+    crd:
+      enabled: false
   image:
     repository: "{{ .Values.global.origin.registry }}/k8s-watcher"
     tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"

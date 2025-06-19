@@ -58,6 +58,26 @@ rules:
   - get
   - watch
 {{- end }}
+{{- if .Values.k8sWatcher.watch.crd.enabled }}
+- apiGroups:
+  - "*"
+  resources:
+  - customresourcedefinitions
+  verbs:
+  - list
+  - watch
+  - get
+{{- range $key, $value := .Values.k8sWatcher.watch.crd.allowedKinds }}
+- apiGroups:
+  - "{{ $value.group }}"
+  resources:
+  - {{ $value.kindPlural }}
+  verbs:
+  - list
+  - watch
+  - get
+{{- end }}
+{{- end }}
 {{- if and .Values.rbac.pspEnabled (.Capabilities.APIVersions.Has "policy/v1beta1") }}
 - apiGroups:      ['extensions']
   resources:      ['podsecuritypolicies']
