@@ -126,6 +126,15 @@ data:
             {{- range .statistics }}
             - "{{ . }}"
           {{- end }}
+          {{- if .allowInactive }}
+            AllowInactive: {{ .allowInactive }}
+          {{- end }}
+          {{- if .exclude }}
+            Exclude: {{ .exclude }}
+          {{- end }}
+          {{- if .nullAsZero }}
+            NullAsZero: {{ .nullAsZero }}
+          {{- end }}
         {{- end }}
       {{- end }}
       {{- end }}
