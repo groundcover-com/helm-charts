@@ -1391,6 +1391,13 @@ vector:
     #         .float_attributes.random_number = to_int!(res.number)
   image:
     repository: public.ecr.aws/groundcovercom/vector
+    tag: 0.42.0-alpine
+  lifecycle: 
+    preStop:
+      exec:
+        command:
+        - /bin/sleep
+        - "3"    
   service:
     ports:
       - name: api
