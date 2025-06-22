@@ -453,6 +453,13 @@ agent:
         keyValueConfig:
         unstructuredConfig:
     noPayloadsMode: false
+    k8sEntitiesWatch:
+      crd:
+        enabled: true
+        allowedKinds:
+          workflow:
+            group: "argoproj.io"
+            kindPlural: "workflows"
     sensitiveHeadersObfuscationConfig:
       enabled: true
       mode: "ObfuscateSpecificValues"
@@ -696,7 +703,11 @@ k8sWatcher:
     verticalPodAutoscaler:
       enabled: false
     crd:
-      enabled: false
+      enabled: true
+      allowedKinds:
+        workflow:
+          group: "argoproj.io"
+          kindPlural: "workflows"
   image:
     repository: "{{ .Values.global.origin.registry }}/k8s-watcher"
     tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"

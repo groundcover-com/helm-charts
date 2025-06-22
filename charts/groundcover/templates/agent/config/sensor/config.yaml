@@ -568,6 +568,10 @@ data:
         url: {{ include "sensor.telemetry.metrics.url" . }}
         interval: {{ include "telemetry.metrics.interval" . }}
 
+    k8sEntitiesWatch:
+    {{- $sensorValues.k8sEntitiesWatch | toYaml | nindent 6 }}
+
+
     {{ if $sensorValues.sensitiveHeadersObfuscationConfig }}
     sensitiveHeadersObfuscationConfig: 
       enabled: {{ coalesce $sensorValues.obfuscateData $sensorValues.sensitiveHeadersObfuscationConfig.enabled }}
