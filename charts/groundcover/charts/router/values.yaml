@@ -29,7 +29,7 @@ onprem:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.9.438
+  tag: 1.9.439
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/curl'
@@ -133,6 +133,12 @@ strategy:
   rollingUpdate:
     maxSurge: 1
     maxUnavailable: 0
+lifecycle:
+# preStop:
+#   exec:
+#     command:
+#     - /bin/sleep
+#     - "5"
 resources:
   requests:
     cpu: 1000m
