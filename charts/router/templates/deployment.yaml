@@ -83,6 +83,10 @@ spec:
               name: dlv-tcp
               protocol: TCP
             {{- end }}
+{{- if .Values.lifecycle }}
+          lifecycle:
+            {{- toYaml .Values.lifecycle | nindent 12 }}
+{{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           env:
