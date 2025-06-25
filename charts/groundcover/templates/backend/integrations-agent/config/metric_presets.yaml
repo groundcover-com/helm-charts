@@ -1014,6 +1014,22 @@ data:
       Statistics:
       - Average
     AWS/ElastiCache:
+    - Name: NetworkPacketsPerSecondAllowanceExceeded
+      Statistics:
+      - Average
+      - Sum
+    - Name: NetworkBandwidthInAllowanceExceeded
+      Statistics:
+      - Average
+      - Sum
+    - Name: NetworkConntrackAllowanceExceeded
+      Statistics:
+      - Average
+      - Sum
+    - Name: NetworkBandwidthOutAllowanceExceeded
+      Statistics:
+      - Average
+      - Sum
     - Name: ActiveDefragHits
       Statistics:
       - Average
@@ -2793,6 +2809,15 @@ data:
       Statistics:
       - Average
     - Name: RstPacketsSent
+      Statistics:
+      - Average
+    AWS/IPAM:
+    - Name: VpcIPUsage
+      Statistics:
+      - Average
+      - Maximum
+      - Minimum
+    - Name: SubnetIPUsage
       Statistics:
       - Average
     AWS/Cassandra:
@@ -5850,7 +5875,7 @@ data:
     - Name: LoginFailures
       Statistics:
       - Average
-    - Name: MaximumUsedTransactionIds
+    - Name: MaximumUsedTransactionIDs
       Statistics:
       - Average
     - Name: memory.active
