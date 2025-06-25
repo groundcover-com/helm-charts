@@ -2904,7 +2904,7 @@ monitors-manager:
   image:
     registry: public.ecr.aws
     repository: groundcovercom/grafana-groundcover
-    tag: v0.0.33-grafana11.3.2
+    tag: v0.0.35-grafana11.3.7
   nameOverride: monitors-manager
   persistence:
     enabled: true
