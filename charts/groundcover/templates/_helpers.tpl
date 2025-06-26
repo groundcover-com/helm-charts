@@ -247,7 +247,7 @@ Get cluster_id from values or generate random one
 {{- else if not .Values.global.backend.enabled -}}
     {{- printf "https://%s/fleet-manager/api/client/config" .Values.global.ingress.site -}}
 {{- else -}}
-    {{- print "http://fleet-manager:8080/api/client/config" -}}
+    {{- printf "http://%s:8080/api/client/config" (include "fleet-manager.fullname" .) -}}
 {{- end -}}
 {{- end -}}
 

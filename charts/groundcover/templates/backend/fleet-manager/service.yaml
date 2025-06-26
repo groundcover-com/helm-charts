@@ -15,7 +15,7 @@ metadata:
     {{ toYaml .Values.fleetManager.additionalAnnotations | indent 4 }}
     {{- end }}
 
-  name: {{ .Values.fleetManager.serviceName }}
+  name: {{ include "fleet-manager.fullname" . }}
   namespace: {{ .Release.Namespace }}
 spec:
   ports:

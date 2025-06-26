@@ -28,6 +28,8 @@ global:
       overrideHttpURL:
   fleetmanager:
     enabled: false
+  ingestor:
+    enabled: false
 
   ingress:
     # set ingress site for inCloud / on-prem sensor only deployments
@@ -351,6 +353,9 @@ agent:
       annotations:
         keys: []
         collectAll: false
+    healthProbe:
+      enabled: true
+      port: 2021
     metricIngestor:
       serverEnabled: true
       serverPort: 8428
@@ -602,12 +607,108 @@ integrationsAgent:
         writeInterval: 10s
         maxBatchSize: 2000
         maxBatchWait: 10s
+ingestor:
+  image:
+    repository: "{{ .Values.global.origin.registry }}/sensor"
+    tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
+  replicas: 2
+  additionalLabels:
+  additionalAnnotations:
+  podLabels:
+  podAnnotations:
+  pdb:
+    enabled: true
+    maxUnavailable: 1
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/name: ingestor
+  affinity:
+  nodeSelector:
+  tolerations: []
+  priorityClassName:
+  monitoring:
+    port: 9102
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  builtinEnv:
+  - name: API_KEY
+    valueFrom:
+      secretKeyRef:
+        key: '{{ template "groundcover.apikeySecretKey" . }}'
+        name: '{{ template "groundcover.apikeySecretName" . }}'  
+  logLevel: 4
+  healthProbe:
+    enabled: true
+    port: 2021
+  pprof:
+    enabled: '{{ include ".telemetry.enabled" . }}'
+    uploaderType: pyroscope
+    cpuSamplingDuration: 60s
+    backoffTicker:
+      interval: 10s
+      exponent: 40
+    memoryTicker:
+      enabled: true
+      interval: 60s
+      jumpSizeInBytes: 100000000
+      windowSize: 12h
+      initialWait: 10m
+    cpuTicker:
+      enabled: true
+      interval: 60s
+      jumpSizeInMCPU: 100
+      windowSize: 12h
+      initialWait: 10m
+  metricIngestor:
+    serverEnabled: true
+    serverPort: 8428
+    scraperEnabled: false
+    maxScrapeSize: 67108864
+    usePrometheusCompatibleNaming: true
+  collectionEnabled: false
+  ingestionEnabled: true
+  setLocalTrafficPolicy: false
+  apmIngestor:
+    dataDog:
+      enabled: true
+      proxyEnabled: false
+      tracesPort: 8126
+      samplingRatio: 0.05
+    otel:
+      proxyEnabled: false
+      direct:
+        enabled: true
+        samplingRatio: 0.05
+        zipkin:
+          enabled: true
+          port: 9411
+        otlp:
+          enabled: true
+          grpcPort: 4317
+          httpPort: 4318
+        jaeger:
+          enabled: true
+          grpcPort: 14250
+          thriftHttpPort: 14268
+          thriftBinaryPort: 6832
+          thriftCompactPort: 6831
+        httpjson:
+          enabled: true
+          port: 8016
 
 fleetManager:
   image:
     repository: "{{ .Values.global.origin.registry }}/fleet-manager"
     tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
-  serviceName: "fleet-manager"
   replicas: 2
   additionalLabels:
   additionalAnnotations:

@@ -24,59 +24,7 @@ spec:
   selector:
     app.kubernetes.io/name: sensor
     app.kubernetes.io/part-of: '{{ include "groundcover.labels.partOf" . }}'
-  ports:
-  - protocol: TCP
-    name: dd-traces
-    port: {{ $sensorValues.apmIngestor.dataDog.tracesPort }}
-    targetPort: {{ $sensorValues.apmIngestor.dataDog.tracesPort }}
-  {{- if and $sensorValues.apmIngestor.otel.direct.zipkin.enabled $sensorValues.apmIngestor.otel.direct.zipkin.port $sensorValues.ingestionEnabled }}
-  - protocol: TCP
-    name: zipkin
-    port: {{ $sensorValues.apmIngestor.otel.direct.zipkin.port }}
-    targetPort: {{ $sensorValues.apmIngestor.otel.direct.zipkin.port }}
-  {{- end }}
-  {{- if and $sensorValues.apmIngestor.otel.direct.otlp.enabled $sensorValues.apmIngestor.otel.direct.otlp.grpcPort $sensorValues.ingestionEnabled }}
-  - protocol: TCP
-    name: otlp-grpc
-    port: {{ $sensorValues.apmIngestor.otel.direct.otlp.grpcPort }}
-    targetPort: {{ $sensorValues.apmIngestor.otel.direct.grpcPort }}
-  {{- end }}
-  {{- if and $sensorValues.apmIngestor.otel.direct.otlp.enabled $sensorValues.apmIngestor.otel.direct.otlp.httpPort $sensorValues.ingestionEnabled }}
-  - protocol: TCP
-    name: otlp-http
-    port: {{ $sensorValues.apmIngestor.otel.direct.otlp.httpPort }}
-    targetPort: {{ $sensorValues.apmIngestor.otel.direct.httpPort }}
-  {{- end }}
-  {{- if and $sensorValues.apmIngestor.otel.direct.jaeger.enabled $sensorValues.apmIngestor.otel.direct.jaeger.grpcPort $sensorValues.ingestionEnabled}}
-  - protocol: TCP
-    name: jeager-grpc
-    port: {{ $sensorValues.apmIngestor.otel.direct.jaeger.grpcPort }}
-    targetPort: {{ $sensorValues.apmIngestor.otel.direct.jaeger.grpcPort }}
-  {{- end }}
-  {{- if and $sensorValues.apmIngestor.otel.direct.jaeger.enabled $sensorValues.apmIngestor.otel.direct.jaeger.thriftHttpPort $sensorValues.ingestionEnabled}}
-  - protocol: TCP
-    name: jeager-thrift-http
-    port: {{ $sensorValues.apmIngestor.otel.direct.jaeger.thriftHttpPort }}
-    targetPort: {{ $sensorValues.apmIngestor.otel.direct.jaeger.thriftHttpPort }}
-  {{- end }}
-  {{- if and $sensorValues.apmIngestor.otel.direct.jaeger.enabled $sensorValues.apmIngestor.otel.direct.jaeger.thriftBinaryPort $sensorValues.ingestionEnabled}}
-  - protocol: UDP
-    name: jeager-thrift-binary
-    port: {{ $sensorValues.apmIngestor.otel.direct.jaeger.thriftBinaryPort }}
-    targetPort: {{ $sensorValues.apmIngestor.otel.direct.jaeger.thriftBinaryPort }}
-  {{- end }}
-  {{- if and $sensorValues.apmIngestor.otel.direct.jaeger.enabled $sensorValues.apmIngestor.otel.direct.jaeger.thriftCompactPort $sensorValues.ingestionEnabled}}
-  - protocol: UDP
-    name: jeager-thrift-compact
-    port: {{ $sensorValues.apmIngestor.otel.direct.jaeger.thriftCompactPort }}
-    targetPort: {{ $sensorValues.apmIngestor.otel.direct.jaeger.thriftCompactPort }}
-  {{- end }}
-  {{- if and $sensorValues.apmIngestor.otel.direct.httpjson.enabled $sensorValues.apmIngestor.otel.direct.httpjson.port $sensorValues.ingestionEnabled}}
-  - protocol: TCP
-    name: http-json
-    port: {{ $sensorValues.apmIngestor.otel.direct.httpjson.port }}
-    targetPort: {{ $sensorValues.apmIngestor.otel.direct.httpjson.port }}
-  {{- end }}
+  ports: {{ include "groundcover.sensor.service.ingestion-ports" (merge (dict "sensorValues" $sensorValues) .) | nindent 2 }}
   {{- if $sensorValues.setLocalTrafficPolicy }}
   internalTrafficPolicy: Local
   {{- end }}

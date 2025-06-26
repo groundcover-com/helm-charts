@@ -13,7 +13,7 @@ metadata:
     {{- if .Values.fleetManager.additionalLabels }}
 {{ toYaml .Values.fleetManager.additionalLabels | indent 4 }}
     {{- end }}
-  name: fleet-manager
+  name: {{ include "fleet-manager.fullname" . }}
   namespace: {{ .Release.Namespace }}
 spec:
   replicas: {{ default 2 .Values.fleetManager.replicas }}

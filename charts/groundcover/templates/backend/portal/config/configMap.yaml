@@ -64,7 +64,7 @@ data:
     
     FleetManager:
       Enabled: {{ .Values.global.fleetmanager.enabled}}
-      URL: {{ printf "http://%s:%d" (.Values.fleetManager.serviceName) (int .Values.fleetManager.manageHttpPort) }}
+      URL: {{ printf "http://%s:%d" (include "fleet-manager.fullname" .) (int .Values.fleetManager.manageHttpPort) }}
     
     {{- if eq (include "telemetry.enabled" .) "true" }}
     Tracing:
