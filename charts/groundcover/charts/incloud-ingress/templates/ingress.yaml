@@ -419,7 +419,7 @@ spec:
             pathType: ImplementationSpecific
             backend:
               service:
-                name: fleet-manager
+                name: {{ include "fleet-manager.fullname" . }}
                 port:
                   name: manage-http
 {{- end }}
