@@ -64,21 +64,21 @@ spec:
             pathType: Exact
             backend:
               service:
-                name: {{ include "opentelemetry-collector.fullname" . }}
+                name: {{ .Values.global.ingestor.enabled | ternary (include "ingestor.fullname" .) (include "opentelemetry-collector.fullname" .) }}
                 port:
                   number: {{ index .Values.global "opentelemetry-collector" "ports" "otlp-http" "servicePort" | int }}
           - path: {{ get (urlParse (include "opentelemetry-collector.otlplogs.http.url" .)) "path" }} 
             pathType: Exact
             backend:
               service:
-                name: {{ include "opentelemetry-collector.fullname" . }}
+                name: {{ .Values.global.ingestor.enabled | ternary (include "ingestor.fullname" .) (include "opentelemetry-collector.fullname" .) }}
                 port:
                   number: {{ index .Values.global "opentelemetry-collector" "ports" "otlp-http" "servicePort" | int }}
           - path: {{ get (urlParse (include "opentelemetry-collector.otlpmetrics.http.url" .)) "path" }} 
             pathType: Exact
             backend:
               service:
-                name: {{ include "opentelemetry-collector.fullname" . }}
+                name: {{ .Values.global.ingestor.enabled | ternary (include "ingestor.fullname" .) (include "opentelemetry-collector.fullname" .) }}
                 port:
                   number: {{ index .Values.global "opentelemetry-collector" "ports" "otlp-http" "servicePort" | int }}
           - path: {{ get (urlParse (include "opentelemetry-collector.awsfirehose.http.url" .)) "path" }} 
@@ -345,21 +345,21 @@ spec:
             pathType: Exact
             backend:
               service:
-                name: {{ printf "%s-grpc" (include "opentelemetry-collector.fullname" .) }}
+                name: {{ .Values.global.ingestor.enabled | ternary (include "ingestor.fullname" .) (printf "%s-grpc" (include "opentelemetry-collector.fullname" .)) }}
                 port:
                   number: {{ index .Values.global "opentelemetry-collector" "ports" "otlp" "servicePort" | int }}
           - path: /opentelemetry.proto.collector.metrics.v1.MetricsService/Export
             pathType: Exact
             backend:
               service:
-                name: {{ printf "%s-grpc" (include "opentelemetry-collector.fullname" .) }}
+                name: {{ .Values.global.ingestor.enabled | ternary (include "ingestor.fullname" .) (printf "%s-grpc" (include "opentelemetry-collector.fullname" .)) }}
                 port:
                   number: {{ index .Values.global "opentelemetry-collector" "ports" "otlp" "servicePort" | int }}
           - path: /opentelemetry.proto.collector.trace.v1.TraceService/Export
             pathType: Exact
             backend:
               service:
-                name: {{ printf "%s-grpc" (include "opentelemetry-collector.fullname" .) }}
+                name: {{ .Values.global.ingestor.enabled | ternary (include "ingestor.fullname" .) (printf "%s-grpc" (include "opentelemetry-collector.fullname" .)) }}
                 port:
                   number: {{ index .Values.global "opentelemetry-collector" "ports" "otlp" "servicePort" | int }}
 
