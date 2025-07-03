@@ -380,6 +380,7 @@ agent:
             enabled: true
             grpcPort: 4317
             httpPort: 4318
+            maxRecvMsgSizeMiB: 50
           jaeger:
             enabled: true
             grpcPort: 14250
@@ -695,6 +696,7 @@ ingestor:
           enabled: true
           grpcPort: 4317
           httpPort: 4318
+          maxRecvMsgSizeMiB: 50
         jaeger:
           enabled: true
           grpcPort: 14250

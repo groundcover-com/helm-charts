@@ -442,6 +442,7 @@ apmIngestor:
         enabled: {{ $sensorValues.apmIngestor.otel.direct.otlp.enabled }}
         grpcPort: {{ $sensorValues.apmIngestor.otel.direct.otlp.grpcPort }}
         httpPort: {{ $sensorValues.apmIngestor.otel.direct.otlp.httpPort }}
+        maxRecvMsgSizeMiB: {{ $sensorValues.apmIngestor.otel.direct.otlp.maxRecvMsgSizeMiB }}
       jaeger:
         enabled: {{ $sensorValues.apmIngestor.otel.direct.jaeger.enabled }}
         grpcPort: {{ $sensorValues.apmIngestor.otel.direct.jaeger.grpcPort }}
