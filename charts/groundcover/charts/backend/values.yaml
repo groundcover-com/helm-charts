@@ -1,4 +1,14 @@
 postgresql:
+  jobs:
+    createKeepUser:
+      enabled: true
+      annotations:
+    createDbs:
+      enabled: true
+      annotations:
+        helm.sh/hook-weight: "-1"
+        helm.sh/hook: "pre-upgrade,pre-install"
+        helm.sh/hook-delete-policy: "before-hook-creation"
   dbs: {}
   nameOverride: postgresql
   image:
@@ -100,9 +110,11 @@ postgresql:
             echo "10-create-dbs.sh: CREATE DATABASE IF NOT EXISTS ${target_db}"
             echo "SELECT 'CREATE DATABASE ${target_db}' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '${target_db}')\gexec" | psql -U postgres
           }
-
-          {{ range $service, $db := .Values.dbs }}
+          
+          {{- range $db := (include "postgresql.create.dbs" . | split "\n") }}
+          {{- if $db }}
           create_database_if_not_exists "{{ $db }}"
+          {{- end }}
           {{- end }}
         11-create-keep-user.sh: |
           #!/bin/sh
