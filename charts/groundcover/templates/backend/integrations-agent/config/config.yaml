@@ -79,6 +79,56 @@ data:
     {{- end }}
     {{- end }}
     {{- end }}
+    {{- if .Values.integrationsAgent.targets.awsInventory }}
+    {{- range .Values.integrationsAgent.targets.awsInventory }}
+    - Type: "aws_inventory"
+      Name: "{{ .name }}"
+      {{- if .stsRegion }}
+      AwsStsRegion: "{{ .stsRegion }}"
+      {{- end }}
+      {{- if .regions }}
+      Regions:
+      {{- range .regions }}
+        - "{{ . }}"
+      {{- end }}
+      {{- end }}
+      {{- if .interval }}
+      Interval: "{{ .interval }}"
+      {{- end }}
+      {{- if .roleArn }}
+      AwsRoleArn: "{{ .roleArn }}"
+      {{- end }}
+      {{- if .roleArns }}
+      AwsRoleArns:
+      {{- range .roleArns }}
+        - "{{ . }}"
+      {{- end }}
+      {{- end }}
+      {{- if .namespaces }}
+      AwsNamespaces:
+      {{- range .namespaces }}
+        - "{{ . }}"
+      {{- end }}
+      {{- end }}
+      {{- if .extraLabels }}
+      ExtraLabels:
+      {{- range $key, $value := .extraLabels }}
+        {{ $key }}: "{{ $value }}"
+      {{- end }}
+      {{- end }}
+      {{- if .dropLabels }}
+      DropLabels:
+      {{- range $label := .dropLabels }}
+        - "{{ $label }}"
+      {{- end }}
+      {{- end }}
+      Exporters:
+        - "prometheus"
+    {{- range .additionalExporters }}
+        - "{{ . }}"
+    {{- end }}
+    {{- end }}
+    {{- end }}
     {{- if .Values.integrationsAgent.targets.cloudwatch }}
     {{- range .Values.integrationsAgent.targets.cloudwatch }}
     - Type: "cloudwatch"
@@ -107,9 +157,14 @@ data:
       {{- range .regions }}
         - "{{ . }}"
       {{- end }}
+      {{- if .apiConcurrencyLimits }}
       AwsAPIConcurrencyLimits: {{ toYaml .apiConcurrencyLimits | nindent 8 }}
+      {{- end }}
       {{- if .withContextTagsOnInfoMetrics }}
       AwsWithContextTagsOnInfoMetrics: {{ .withContextTagsOnInfoMetrics }}
+      {{- end }}
+      {{- if .withInventoryDiscovery }}
+      AwsWithInventoryDiscovery: {{ .withInventoryDiscovery }}
       {{- end }}
       AwsNamespaces:
       {{- range .namespaces }}
@@ -373,6 +428,15 @@ data:
       {{- end }}
       {{- end }}
       {{- end }}
+
+    {{- if .Values.integrationsAgent.inventory }}
+    {{- if .Values.integrationsAgent.inventory.aws }}
+    Inventory:
+      AWS:
+        CacheTTL: {{ .Values.integrationsAgent.inventory.aws.cacheTTL }}
+        APIConcurrencyLimit: {{ .Values.integrationsAgent.inventory.aws.apiConcurrencyLimit }}
+    {{- end }}
+    {{- end }}
 
     Pprof:
       enabled: {{ include "telemetry.enabled" . }}
