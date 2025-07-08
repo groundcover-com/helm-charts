@@ -64,8 +64,6 @@ data:
       writeTimeout: 10s
     Pprof:
       enabled: {{ include "telemetry.enabled" . }}
-      interval: {{ .Values.k8sWatcher.pprof.interval }}
-      exponent: {{ .Values.k8sWatcher.pprof.exponent }}
       cpuSamplingDuration: {{ .Values.k8sWatcher.pprof.cpuSamplingDuration }}
       httpUploader:
         enabled: {{ eq .Values.k8sWatcher.pprof.uploaderType "http" }}
@@ -73,6 +71,21 @@ data:
       pyroscopeUploader:
         enabled: {{ eq .Values.k8sWatcher.pprof.uploaderType "pyroscope" }}
         pushURL: {{ include "telemetry.metrics.base.url" . }}
+      backoffTicker:
+        interval: {{ .Values.k8sWatcher.pprof.backoffTicker.interval }}
+        exponent: {{ .Values.k8sWatcher.pprof.backoffTicker.exponent }}
+      memoryTicker:
+        enabled: {{ .Values.k8sWatcher.pprof.memoryTicker.enabled }}
+        interval: {{ .Values.k8sWatcher.pprof.memoryTicker.interval }}
+        jumpSizeInBytes: {{ .Values.k8sWatcher.pprof.memoryTicker.jumpSizeInBytes }}
+        windowSize: {{ .Values.k8sWatcher.pprof.memoryTicker.windowSize }}
+        initialWait: {{ .Values.k8sWatcher.pprof.memoryTicker.initialWait }}
+      cpuTicker:
+        enabled: {{ .Values.k8sWatcher.pprof.cpuTicker.enabled }}
+        interval: {{ .Values.k8sWatcher.pprof.cpuTicker.interval }}
+        jumpSizeInMCPU: {{ .Values.k8sWatcher.pprof.cpuTicker.jumpSizeInMCPU }}
+        windowSize: {{ .Values.k8sWatcher.pprof.cpuTicker.windowSize }}
+        initialWait: {{ .Values.k8sWatcher.pprof.cpuTicker.initialWait }}    
     Watch:
     {{- .Values.k8sWatcher.watch | toYaml | nindent 6 }}
 

@@ -562,10 +562,23 @@ integrationsAgent:
       memory: 256Mi
   pprof:
     enabled: true
-    interval: 10s
-    exponent: 40
     uploaderType: pyroscope
     cpuSamplingDuration: 60s
+    backoffTicker:
+      interval: 10s
+      exponent: 40
+    memoryTicker:
+      enabled: true
+      interval: 60s
+      jumpSizeInBytes: 100000000
+      windowSize: 12h
+      initialWait: 10m
+    cpuTicker:
+      enabled: true
+      interval: 60s
+      jumpSizeInMCPU: 100
+      windowSize: 12h
+      initialWait: 10m
   env: []
   builtinEnv:
   - name: API_KEY
@@ -833,10 +846,23 @@ k8sWatcher:
       memory: 256Mi
   pprof:
     enabled: true
-    interval: 10s
-    exponent: 40
     uploaderType: pyroscope
     cpuSamplingDuration: 60s
+    backoffTicker:
+      interval: 10s
+      exponent: 40
+    memoryTicker:
+      enabled: true
+      interval: 60s
+      jumpSizeInBytes: 100000000
+      windowSize: 12h
+      initialWait: 10m
+    cpuTicker:
+      enabled: true
+      interval: 60s
+      jumpSizeInMCPU: 100
+      windowSize: 12h
+      initialWait: 10m
   env: []
   builtinEnv:
   - name: API_KEY
@@ -900,10 +926,23 @@ portal:
       memory: 256Mi
   pprof:
     enabled: true
-    interval: 10s
-    exponent: 40
     uploaderType: pyroscope
     cpuSamplingDuration: 60s
+    backoffTicker:
+      interval: 10s
+      exponent: 40
+    memoryTicker:
+      enabled: true
+      interval: 60s
+      jumpSizeInBytes: 100000000
+      windowSize: 12h
+      initialWait: 10m
+    cpuTicker:
+      enabled: true
+      interval: 60s
+      jumpSizeInMCPU: 100
+      windowSize: 12h
+      initialWait: 10m
   kong:
     endpointOverride:
     enabled:

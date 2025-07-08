@@ -440,8 +440,6 @@ data:
 
     Pprof:
       enabled: {{ include "telemetry.enabled" . }}
-      interval: {{ .Values.integrationsAgent.pprof.interval }}
-      exponent: {{ .Values.integrationsAgent.pprof.exponent }}
       cpuSamplingDuration: {{ .Values.integrationsAgent.pprof.cpuSamplingDuration }}
       httpUploader:
         enabled: {{ eq .Values.integrationsAgent.pprof.uploaderType "http" }}
@@ -449,6 +447,21 @@ data:
       pyroscopeUploader:
         enabled: {{ eq .Values.integrationsAgent.pprof.uploaderType "pyroscope" }}
         pushURL: {{ include "telemetry.metrics.base.url" . }}
+      backoffTicker:
+        interval: {{ .Values.integrationsAgent.pprof.backoffTicker.interval }}
+        exponent: {{ .Values.integrationsAgent.pprof.backoffTicker.exponent }}
+      memoryTicker:
+        enabled: {{ .Values.integrationsAgent.pprof.memoryTicker.enabled }}
+        interval: {{ .Values.integrationsAgent.pprof.memoryTicker.interval }}
+        jumpSizeInBytes: {{ .Values.integrationsAgent.pprof.memoryTicker.jumpSizeInBytes }}
+        windowSize: {{ .Values.integrationsAgent.pprof.memoryTicker.windowSize }}
+        initialWait: {{ .Values.integrationsAgent.pprof.memoryTicker.initialWait }}
+      cpuTicker:
+        enabled: {{ .Values.integrationsAgent.pprof.cpuTicker.enabled }}
+        interval: {{ .Values.integrationsAgent.pprof.cpuTicker.interval }}
+        jumpSizeInMCPU: {{ .Values.integrationsAgent.pprof.cpuTicker.jumpSizeInMCPU }}
+        windowSize: {{ .Values.integrationsAgent.pprof.cpuTicker.windowSize }}
+        initialWait: {{ .Values.integrationsAgent.pprof.cpuTicker.initialWait }}    
       
 kind: ConfigMap
 metadata:

@@ -7156,6 +7156,104 @@ data:
     - Name: CallCount
       Statistics:
       - Sum
+    AWS/WAFV2:
+    - Name: AllowedRequests
+      Statistics:
+      - Sum
+    - Name: BlockedRequests
+      Statistics:
+      - Sum
+    - Name: CountedRequests
+      Statistics:
+      - Sum
+    - Name: CaptchaRequests
+      Statistics:
+      - Sum
+    - Name: RequestsWithValidCaptchaToken
+      Statistics:
+      - Sum
+    - Name: CaptchasAttempted
+      Statistics:
+      - Sum
+    - Name: CaptchasSolved
+      Statistics:
+      - Sum
+    - Name: ChallengeRequests
+      Statistics:
+      - Sum
+    - Name: ChallengesAttempted
+      Statistics:
+      - Sum
+    - Name: ChallengesSolved
+      Statistics:
+      - Sum
+    - Name: PassedRequests
+      Statistics:
+      - Sum
+    - Name: RequestsWithValidChallengeToken
+      Statistics:
+      - Sum
+    - Name: LowReputationPacketsDropped
+      Statistics:
+      - Sum
+    - Name: LowReputationRequestsDenied
+      Statistics:
+      - Sum
+    - Name: AllowRuleMatch
+      Statistics:
+      - Sum
+    - Name: BlockRuleMatch
+      Statistics:
+      - Sum
+    - Name: CaptchaRuleMatch
+      Statistics:
+      - Sum
+    - Name: CaptchaRuleMatchWithValidToken
+      Statistics:
+      - Sum
+    - Name: CaptchasAttemptedSdk
+      Statistics:
+      - Sum
+    - Name: CaptchasSolvedSdk
+      Statistics:
+      - Sum
+    - Name: ChallengeRuleMatch
+      Statistics:
+      - Sum
+    - Name: ChallengeRuleMatchWithValidToken
+      Statistics:
+      - Sum
+    - Name: CountRuleMatch
+      Statistics:
+      - Sum
+    - Name: SampleAllowedRequest
+      Statistics:
+      - Sum
+    - Name: SampleBlockedRequest
+      Statistics:
+      - Sum
+    - Name: SampleCaptchaRequest
+      Statistics:
+      - Sum
+    - Name: SampleChallengeRequest
+      Statistics:
+      - Sum
+    - Name: SampleCountRequest
+      Statistics:
+      - Sum
+    AWS/WAF:
+    - Name: AllowedRequests
+      Statistics:
+      - Sum
+    - Name: BlockedRequests
+      Statistics:
+      - Sum
+    - Name: CountedRequests
+      Statistics:
+      - Sum
+    - Name: PassedRequests
+      Statistics:
+      - Sum
   azure_presets.yaml: |
     Microsoft.Compute/virtualMachines:
       Metrics:

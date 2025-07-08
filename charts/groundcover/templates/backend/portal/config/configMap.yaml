@@ -81,8 +81,6 @@ data:
 
     Pprof:
       enabled: {{ include "telemetry.enabled" . }}
-      interval: {{ .Values.portal.pprof.interval }}
-      exponent: {{ .Values.portal.pprof.exponent }}
       cpuSamplingDuration: {{ .Values.portal.pprof.cpuSamplingDuration }}
       httpUploader:
         enabled: {{ eq .Values.portal.pprof.uploaderType "http" }}
@@ -90,6 +88,21 @@ data:
       pyroscopeUploader:
         enabled: {{ eq .Values.portal.pprof.uploaderType "pyroscope" }}
         pushURL: {{ include "telemetry.metrics.base.url" . }}
+      backoffTicker:
+        interval: {{ .Values.portal.pprof.backoffTicker.interval }}
+        exponent: {{ .Values.portal.pprof.backoffTicker.exponent }}
+      memoryTicker:
+        enabled: {{ .Values.portal.pprof.memoryTicker.enabled }}
+        interval: {{ .Values.portal.pprof.memoryTicker.interval }}
+        jumpSizeInBytes: {{ .Values.portal.pprof.memoryTicker.jumpSizeInBytes }}
+        windowSize: {{ .Values.portal.pprof.memoryTicker.windowSize }}
+        initialWait: {{ .Values.portal.pprof.memoryTicker.initialWait }}
+      cpuTicker:
+        enabled: {{ .Values.portal.pprof.cpuTicker.enabled }}
+        interval: {{ .Values.portal.pprof.cpuTicker.interval }}
+        jumpSizeInMCPU: {{ .Values.portal.pprof.cpuTicker.jumpSizeInMCPU }}
+        windowSize: {{ .Values.portal.pprof.cpuTicker.windowSize }}
+        initialWait: {{ .Values.portal.pprof.cpuTicker.initialWait }}    
 
     Kong:
       Enabled: {{ include "backend.kong.enabled" . }}
