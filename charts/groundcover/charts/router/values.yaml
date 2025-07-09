@@ -29,7 +29,7 @@ onprem:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.9.501
+  tag: 1.9.502
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/curl'
@@ -58,6 +58,7 @@ configuration:
     User: "X-WEBAUTH-USER"
     Org: "X-WEBAUTH-ORG"
     Roles: "X-WEBAUTH-ROLES"
+    RolesDelimiter: ","
   requestTimeout: 1m
   slowRequestThreshold: 3s
   Activity:
