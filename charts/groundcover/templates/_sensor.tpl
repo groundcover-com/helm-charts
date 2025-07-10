@@ -577,7 +577,7 @@ postgreSqlConfig:
 {{ end }}
 
 telemetry:
-  enabled: {{ and (include "telemetry.enabled" .) .Values.global.agent.enabled }}
+  enabled: {{ and (eq "true" (include "telemetry.enabled" .)) .Values.global.agent.enabled }}
   metrics:
     url: {{ include "sensor.telemetry.metrics.url" . }}
     interval: {{ include "telemetry.metrics.interval" . }}
