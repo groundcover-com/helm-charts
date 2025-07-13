@@ -266,6 +266,7 @@ statefulset-modifier:
     repository: "{{ .Values.global.origin.registry }}/bitnami/kubectl"
 
 agent:
+  randomSuffixName: false
   additionalLabels:
   podLabels:
   additionalAnnotations:

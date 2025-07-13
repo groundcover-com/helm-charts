@@ -11,7 +11,7 @@ metadata:
     {{- if .Values.agent.additionalAnnotations }}
 {{ toYaml .Values.agent.additionalAnnotations | indent 4 }}
     {{- end }}
-  name: {{ include "sensor.fullname" . }}
+  name: {{ include "sensorDaemonSet.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "groundcover.labels" . | nindent 4 }}
