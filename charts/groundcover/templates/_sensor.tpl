@@ -452,6 +452,9 @@ apmIngestor:
       httpjson:
         enabled: {{ $sensorValues.apmIngestor.otel.direct.httpjson.enabled }}
         port: {{ $sensorValues.apmIngestor.otel.direct.httpjson.port }}
+      firehose:
+        enabled: {{ $sensorValues.apmIngestor.otel.direct.firehose.enabled }}
+        port: {{ $sensorValues.apmIngestor.otel.direct.firehose.port }}
 {{ end }}
 pprof:
   enabled: {{ include "telemetry.enabled" . }}
@@ -655,6 +658,12 @@ sensitiveHeadersObfuscationConfig:
   port: {{ $sensorValues.apmIngestor.otel.direct.httpjson.port }}
   targetPort: {{ $sensorValues.apmIngestor.otel.direct.httpjson.port }}
 {{- end }}
+{{- if and $sensorValues.apmIngestor.otel.direct.firehose.enabled $sensorValues.apmIngestor.otel.direct.firehose.port }}
+- protocol: TCP
+  name: firehose
+  port: {{ $sensorValues.apmIngestor.otel.direct.firehose.port }}
+  targetPort: {{ $sensorValues.apmIngestor.otel.direct.firehose.port }}
+{{- end }}
 {{- if and $sensorValues.metricIngestor.serverEnabled $sensorValues.metricIngestor.serverPort }}
 - protocol: TCP
   name: prometheus-remote-write
@@ -710,6 +719,11 @@ sensitiveHeadersObfuscationConfig:
 {{- if and $sensorValues.apmIngestor.otel.direct.httpjson.enabled $sensorValues.apmIngestor.otel.direct.httpjson.port }}
 - containerPort: {{ $sensorValues.apmIngestor.otel.direct.httpjson.port }}
   name: http-json
+  protocol: TCP
+{{- end }}
+{{- if and $sensorValues.apmIngestor.otel.direct.firehose.enabled $sensorValues.apmIngestor.otel.direct.firehose.port }}
+- containerPort: {{ $sensorValues.apmIngestor.otel.direct.firehose.port }}
+  name: firehose
   protocol: TCP
 {{- end }}
 {{- if and $sensorValues.metricIngestor.serverEnabled $sensorValues.metricIngestor.serverPort }}

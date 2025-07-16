@@ -10,6 +10,7 @@ metadata:
   labels:
     {{- include "groundcover.labels" . | nindent 4 }}
     app: ingestor
+    app.kubernetes.io/name: ingestor
     {{- if .Values.ingestor.additionalLabels }}
 {{ toYaml .Values.ingestor.additionalLabels | indent 4 }}
     {{- end }}

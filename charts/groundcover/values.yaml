@@ -391,6 +391,9 @@ agent:
           httpjson:
             enabled: true
             port: 8016
+          firehose:
+            enabled: false
+            port: 4433
     pprof:
       enabled: true
       uploaderType: pyroscope
@@ -719,6 +722,9 @@ ingestor:
         httpjson:
           enabled: true
           port: 8016
+        firehose:
+          enabled: true
+          port: 4433
 
 fleetManager:
   image:
