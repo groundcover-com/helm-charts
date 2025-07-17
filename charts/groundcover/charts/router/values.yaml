@@ -29,7 +29,7 @@ onprem:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.9.534
+  tag: 1.9.535
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/curl'
@@ -149,6 +149,7 @@ resources:
 nodeSelector: {}
 tolerations: []
 extraEnv: []
+extraContainers: []
 kong-crds:
   upgradeCRDs: true
   image:
