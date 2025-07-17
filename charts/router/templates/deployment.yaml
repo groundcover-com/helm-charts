@@ -136,6 +136,9 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 15
             timeoutSeconds: 5     
+{{- if .Values.extraContainers }}
+        {{- toYaml .Values.extraContainers | nindent 8 }}
+{{- end }}
 {{- if .Values.tolerations }}
       tolerations:
 {{ toYaml .Values.tolerations | indent 8 }}
