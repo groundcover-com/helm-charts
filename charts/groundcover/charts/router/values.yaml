@@ -29,7 +29,7 @@ onprem:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.9.537
+  tag: 1.9.538
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/curl'
@@ -175,6 +175,8 @@ kong:
     database: postgres
     pg_user: postgres
     pg_database: kong
+    nginx_proxy_proxy_buffer_size: "32k"
+    nginx_proxy_proxy_buffers: "4 32k"
   proxy:
     type: ClusterIP
     http:
