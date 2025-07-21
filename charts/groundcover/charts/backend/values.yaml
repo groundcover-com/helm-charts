@@ -323,6 +323,11 @@ victoria-metrics-distributed:
     grafana:
       enabled: false
   availabilityZones: []
+  pvcAnnotationsJob:
+    image: "{{ .Values.global.origin.registry }}/bitnami/kubectl:latest"
+    vmstorage:
+      enabled: false
+      annotations:
   common:
     vmauth:
       spec:
