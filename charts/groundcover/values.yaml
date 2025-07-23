@@ -480,6 +480,13 @@ agent:
           "X-Amz-Security-Token",
           "X-Amz-Credential",
           "X-Amz-Firehose-Access-Key",
+          "Cookie",
+          "Set-Cookie",
+          "X-Api-Key",
+          "X-Csrf-Token",
+          "X-XSRF-TOKEN",
+          "X-Google-Api-Key",
+          "X-Firebase-Auth"
         ]
     env:
     builtinEnv:
