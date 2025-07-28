@@ -3,8 +3,10 @@ apiVersion: v1
 data:
   config.yaml: |
     LogLevel: 4
+    ClusterId: {{ include "groundcover.clusterId" . }}
     ApiKey: 
-    ClusterId: 
+    Env:
+    RunningNamespace:
     {{- if .Values.integrationsAgent }}
     {{- if .Values.integrationsAgent.targets }}
     Targets:
@@ -343,6 +345,81 @@ data:
     {{- end }}
     {{- end }}
     {{- end }}
+
+    {{- if .Values.integrationsAgent.targets.clickhouseQueryLog }}
+    {{- range .Values.integrationsAgent.targets.clickhouseQueryLog }}
+    - Type: "clickhouse_query_log"
+      Name: "{{ .name }}"
+      {{- if .interval }}
+      Interval: "{{ .interval }}"
+      {{- end }}
+      {{- if .extraLabels }}
+      ExtraLabels:
+      {{- range $key, $value := .extraLabels }}
+        {{ $key }}: "{{ $value }}"
+      {{- end }}
+      {{- end }}
+      {{- if .dropLabels }}
+      DropLabels:
+      {{- range $label := .dropLabels }}
+        - "{{ $label }}"
+      {{- end }}
+      {{- end }}
+      {{- if eq .enabled false }}
+      Enabled: {{ .enabled }}
+      {{- end }}
+      {{- if .connectionString }}
+      ConnectionString: "{{ .connectionString }}"
+      {{- end }}
+      {{- if .host }}
+      Host: "{{ .host }}"
+      {{- end }}
+      {{- if .port }}
+      Port: {{ .port }}
+      {{- end }}
+      {{- if .username }}
+      Username: "{{ .username }}"
+      {{- end }}
+      {{- if hasKey . "password" }}
+      Password: "{{ .password }}"
+      {{- end }}
+      {{- if .passwordFromSecret }}
+      PasswordFromSecret: 
+        {{- toYaml .passwordFromSecret | nindent 8 }}
+      {{- end }}
+      {{- if .secure }}
+      Secure: {{ .secure }}
+      {{- end }}
+      {{- if .skipVerify }}
+      SkipVerify: {{ .skipVerify }}
+      {{- end }}
+      {{- if .dialTimeout }}
+      DialTimeout: "{{ .dialTimeout }}"
+      {{- end }}
+      {{- if .database }}
+      Database: "{{ .database }}"
+      {{- end }}
+      {{- if hasKey . "clusterMode" }}
+      ClusterMode: {{ .clusterMode }}
+      {{- end }}
+      {{- if .clusterName }}
+      ClusterName: "{{ .clusterName }}"
+      {{- end }}
+      {{- if .queryFilters }}
+      QueryFilters:
+      {{- range .queryFilters }}
+        - "{{ . }}"
+      {{- end }}
+      {{- end }}
+      {{- if .queryLimit }}
+      QueryLimit: {{ .queryLimit }}
+      {{- end }}
+      Exporters:
+      - "otlp_http_traces"
+      {{- range .additionalExporters }}
+        - "{{ . }}"
+      {{- end }}
+    {{- end }}
     {{- end }}
     {{- end }}
 
@@ -365,6 +442,7 @@ data:
       {{- end }}
       {{- if .Values.integrationsAgent.exporters.prometheus.baseDelay }}
       BaseDelay: {{ .Values.integrationsAgent.exporters.prometheus.baseDelay }}
+      {{- end }}
       {{- end }}
       {{- end }}
       {{- end }}
@@ -429,6 +507,17 @@ data:
       {{- end }}
       {{- end }}
 
+    - Type: "otlp_http_traces"
+      Name: "otlp_http_traces"
+      TlsSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
+      Url: {{ include "opentelemetry-collector.otlptraces.http.url" . }} 
+      {{- if .Values.integrationsAgent.exporters.clickhouseQueryLog }}
+      {{- if .Values.integrationsAgent.exporters.clickhouseQueryLog.requestTimeout }}
+      RequestTimeout: {{ .Values.integrationsAgent.exporters.clickhouseQueryLog.requestTimeout }}
+      {{- end }}
+    {{- end }}
+
+
     {{- if .Values.integrationsAgent.inventory }}
     {{- if .Values.integrationsAgent.inventory.aws }}
     Inventory:
@@ -477,4 +566,4 @@ metadata:
     {{- end }}
   name: integrations-agent-config
   namespace: {{ .Release.Namespace }}
-{{ end }}
+{{- end }}
