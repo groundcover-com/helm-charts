@@ -733,3 +733,11 @@ sensitiveHeadersObfuscationConfig:
 {{- end }}
 {{- end }}
 {{- end -}}
+
+{{- define "groundcover.sensor.tracefs.mount.path" -}}
+  {{- if .sensorValues.useOldTracefsMountPath -}}
+    /sys/kernel/debug/tracing
+  {{- else -}}
+    /sys/kernel/tracing
+  {{- end -}}
+{{- end -}}

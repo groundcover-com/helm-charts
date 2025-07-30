@@ -165,7 +165,7 @@ spec:
             - mountPath: /sys/kernel/debug
               name: sys-kernel-debug
               readOnly: false
-            - mountPath: /sys/kernel/tracing
+            - mountPath: {{ include "groundcover.sensor.tracefs.mount.path" (dict "sensorValues" $sensorValues) }}
               name: sys-kernel-tracing
               readOnly: false
             - mountPath: /config
@@ -315,7 +315,7 @@ spec:
             type: Directory
           name: sys-kernel-debug
         - hostPath:
-            path: /sys/kernel/tracing
+            path: {{ include "groundcover.sensor.tracefs.mount.path" (dict "sensorValues" $sensorValues) }}
             type: Directory
           name: sys-kernel-tracing
         - configMap:

@@ -347,6 +347,7 @@ agent:
     setLocalTrafficPolicy: true
     collectionEnabled: true
     ingestionEnabled: true
+    useOldTracefsMountPath: false
     customEntityTags:
       labels:
         keys: []
