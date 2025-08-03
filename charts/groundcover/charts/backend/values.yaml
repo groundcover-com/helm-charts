@@ -368,13 +368,7 @@ victoria-metrics-distributed:
           labels:
             app.groundcover.com/pipeline: metrics
             app.kubernetes.io/part-of: "groundcover"
-        statefulMode: true
-        statefulStorage:
-          volumeClaimTemplate:
-            spec:
-              resources:
-                requests:
-                  storage: 50Gi
+        statefulMode: false
         streamAggrConfig:
           configmap:
             key: aggregation_config.yaml

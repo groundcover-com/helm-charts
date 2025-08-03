@@ -27,7 +27,7 @@ global:
     health:
       overrideHttpURL:
   fleetmanager:
-    enabled: false
+    enabled: true
   ingestor:
     enabled: false
 
