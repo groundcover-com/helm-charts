@@ -2146,7 +2146,7 @@ vector:
             type: clickhouse
             endpoint: '{{ include "clickhouse.shard0HttpEndpoint" . }}'
             database: "groundcover"
-            table: "logs_v4"
+            table: "logs_v5"
             request:
               retry_attempts: 5
             auth:
