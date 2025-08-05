@@ -22,7 +22,7 @@ spec:
             pathType: Exact
             backend:
               service:
-                name: {{ include "opentelemetry-collector.fullname" . }}
+                name: {{ .Values.global.ingestor.enabled | ternary (include "ingestor.fullname" .) (include "opentelemetry-collector.fullname" .) }}
                 port:
                   number: {{ index .Values.global "opentelemetry-collector" "ports" "loki-http" "servicePort" | int }}
           - path: {{ get (urlParse (include "opentelemetry-collector.health.http.url" .)) "path" }} 

@@ -395,6 +395,9 @@ agent:
           firehose:
             enabled: false
             port: 4433
+          loki:
+            enabled: true
+            port: 3100
     pprof:
       enabled: true
       uploaderType: pyroscope
@@ -733,6 +736,9 @@ ingestor:
         firehose:
           enabled: true
           port: 4433
+        loki:
+          enabled: true
+          port: 3100
 
 fleetManager:
   image:
