@@ -434,6 +434,10 @@ apmIngestor:
     proxyEnabled: {{ $sensorValues.apmIngestor.otel.proxyEnabled }}
     direct:
       enabled: {{ $sensorValues.apmIngestor.otel.direct.enabled }}
+      {{- if $sensorValues.apmIngestor.otel.direct.resourceProcessor }}
+      resourceProcessor:
+{{ toYaml $sensorValues.apmIngestor.otel.direct.resourceProcessor | indent 8 }}
+      {{- end }}
       samplingRatio: {{ $sensorValues.apmIngestor.otel.direct.samplingRatio }}
       zipkin:
         enabled: {{ $sensorValues.apmIngestor.otel.direct.zipkin.enabled }}

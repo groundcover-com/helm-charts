@@ -374,6 +374,17 @@ agent:
         proxyEnabled: false
         direct:
           enabled: true
+          resourceProcessor:
+            attributes:
+            - key: env_name
+              from_context: x-groundcover-env-name
+              action: upsert
+            - key: service.name
+              from_context: x-groundcover-service-name
+              action: upsert
+            - key: gc_env_type
+              from_context: x-groundcover-env-type
+              action: upsert
           samplingRatio: 0.05
           zipkin:
             enabled: true
@@ -715,6 +726,17 @@ ingestor:
       proxyEnabled: false
       direct:
         enabled: true
+        resourceProcessor:
+          attributes:
+          - key: env_name
+            from_context: x-groundcover-env-name
+            action: upsert
+          - key: service.name
+            from_context: x-groundcover-service-name
+            action: upsert
+          - key: gc_env_type
+            from_context: x-groundcover-env-type
+            action: upsert
         samplingRatio: 0.05
         zipkin:
           enabled: true
