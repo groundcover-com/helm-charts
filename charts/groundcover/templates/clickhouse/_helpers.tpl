@@ -46,6 +46,9 @@
 {{- end -}}
 
 {{- define "clickhouse.extraShardsList" -}}
+{{- if kindIs "slice" .Values.dbManager.extraShardsOverride }}
+{{- .Values.dbManager.extraShardsOverride | toYaml | nindent 2 }}
+{{- else }}
 {{- $shards := $.Values.clickhouse.shards | int }}
 {{- $list := list -}}
 {{- range $shard, $e := until $shards }}
@@ -55,6 +58,7 @@
 {{- end -}}
 {{- end -}}
 {{- $list | toYaml | nindent 2 }}
+{{- end -}}
 {{- end -}}
 
 {{- define "clickhouse.opentelemetrySpanLogSetting" -}}

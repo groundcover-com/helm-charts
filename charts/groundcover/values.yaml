@@ -521,6 +521,8 @@ agent:
     value: 1000000000
     preemptionPolicy: PreemptLowerPriority
 dbManager:
+  replicas: 1
+  extraShardsOverride: 
   additionalLabels:
   podLabels:
   additionalAnnotations: {}
@@ -2168,7 +2170,7 @@ vector:
             type: clickhouse
             endpoint: '{{ include "clickhouse.shard0HttpEndpoint" . }}'
             database: "groundcover"
-            table: "logs_v5"
+            table: "logs_v6"
             request:
               retry_attempts: 5
             auth:
