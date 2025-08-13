@@ -462,6 +462,9 @@ apmIngestor:
       loki:
         enabled: {{ $sensorValues.apmIngestor.otel.direct.loki.enabled }}
         port: {{ $sensorValues.apmIngestor.otel.direct.loki.port }}
+      rum:
+        enabled: {{ $sensorValues.apmIngestor.otel.direct.rum.enabled }}
+        port: {{ $sensorValues.apmIngestor.otel.direct.rum.port }}
 {{ end }}
 pprof:
   enabled: {{ include "telemetry.enabled" . }}
@@ -677,6 +680,12 @@ sensitiveHeadersObfuscationConfig:
   port: {{ $sensorValues.apmIngestor.otel.direct.loki.port }}
   targetPort: {{ $sensorValues.apmIngestor.otel.direct.loki.port }}
 {{- end }}
+{{- if and $sensorValues.apmIngestor.otel.direct.rum.enabled $sensorValues.apmIngestor.otel.direct.rum.port }}
+- protocol: TCP
+  name: rum
+  port: {{ $sensorValues.apmIngestor.otel.direct.rum.port }}
+  targetPort: {{ $sensorValues.apmIngestor.otel.direct.rum.port }}
+{{- end }}
 {{- if and $sensorValues.metricIngestor.serverEnabled $sensorValues.metricIngestor.serverPort }}
 - protocol: TCP
   name: prometheus-remote-write
@@ -742,6 +751,11 @@ sensitiveHeadersObfuscationConfig:
 {{- if and $sensorValues.apmIngestor.otel.direct.loki.enabled $sensorValues.apmIngestor.otel.direct.loki.port }}
 - containerPort: {{ $sensorValues.apmIngestor.otel.direct.loki.port }}
   name: loki-http
+  protocol: TCP
+{{- end }}
+{{- if and $sensorValues.apmIngestor.otel.direct.rum.enabled $sensorValues.apmIngestor.otel.direct.rum.port }}
+- containerPort: {{ $sensorValues.apmIngestor.otel.direct.rum.port }}
+  name: rum
   protocol: TCP
 {{- end }}
 {{- if and $sensorValues.metricIngestor.serverEnabled $sensorValues.metricIngestor.serverPort }}

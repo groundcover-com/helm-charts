@@ -409,6 +409,9 @@ agent:
           loki:
             enabled: true
             port: 3100
+          rum:
+            enabled: false
+            port: 8026
     pprof:
       enabled: true
       uploaderType: pyroscope
@@ -763,6 +766,9 @@ ingestor:
         loki:
           enabled: true
           port: 3100
+        rum:
+          enabled: true
+          port: 8026
 
 fleetManager:
   image:
