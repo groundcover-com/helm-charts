@@ -6136,6 +6136,12 @@ data:
     - Name: WriteThroughput
       Statistics:
       - Average
+    - Name: EBSByteBalance%
+      Statistics:
+      - Average
+    - Name: EBSIOBalance%
+      Statistics:
+      - Average
     AWS/MemoryDB:
     - Name: ActiveDefragHits
       Statistics:
