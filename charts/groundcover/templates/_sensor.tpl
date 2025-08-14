@@ -430,6 +430,8 @@ apmIngestor:
     endpoint: {{ include "opentelemetry-collector.datadogapm.base.http.url" . }}
     tracesPort: {{ $sensorValues.apmIngestor.dataDog.tracesPort }}
     samplingRatio: {{ $sensorValues.apmIngestor.dataDog.samplingRatio }}
+    handleTraces: {{ $sensorValues.apmIngestor.dataDog.handleTraces }}
+    handleStats: {{ $sensorValues.apmIngestor.dataDog.handleStats }}
   otel:
     proxyEnabled: {{ $sensorValues.apmIngestor.otel.proxyEnabled }}
     direct:

@@ -340,9 +340,9 @@ agent:
     hostHeadersToDrop: []
     headersForceSampling:
       gcForceSample: true
-      w3cForceSample: false
-      b3ForceSample: false
-      datadogForceSample: false
+      w3cForceSample: true
+      b3ForceSample: true
+      datadogForceSample: true
     watchOnlyLocalNode: false
     setLocalTrafficPolicy: true
     collectionEnabled: true
@@ -370,6 +370,8 @@ agent:
         proxyEnabled: false
         tracesPort: 8126
         samplingRatio: 0.05
+        handleTraces: true
+        handleStats: false
       otel:
         proxyEnabled: false
         direct:
@@ -727,6 +729,8 @@ ingestor:
       proxyEnabled: false
       tracesPort: 8126
       samplingRatio: 0.05
+      handleTraces: true
+      handleStats: false
     otel:
       proxyEnabled: false
       direct:
