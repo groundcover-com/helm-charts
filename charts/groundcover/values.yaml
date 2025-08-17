@@ -2953,6 +2953,8 @@ custom-metrics:
         honor_labels: true
         kubernetes_sd_configs:
           - role: pod
+        tls_config:
+          insecure_skip_verify: true
         relabel_configs:
           - action: drop
             source_labels:
