@@ -358,12 +358,19 @@ agent:
     healthProbe:
       enabled: true
       port: 2021
-    metricIngestor:
-      serverEnabled: true
-      serverPort: 8428
-      scraperEnabled: false
-      maxScrapeSize: 67108864
-      usePrometheusCompatibleNaming: true
+    receivers:
+      remotewrite:
+        enabled: true
+        port: 8428
+      metricsscraper:
+        enabled: false
+        maxScrapeSize: 67108864
+    exporters:
+      remotewrite:
+        usePrometheusCompatibleNaming: true
+    pipelines:
+      metrics:
+        enricherEnabled: true
     apmIngestor:
       dataDog:
         enabled: true
@@ -695,6 +702,16 @@ ingestor:
   healthProbe:
     enabled: true
     port: 2021
+  receivers:
+    remotewrite:
+      enabled: true
+      port: 8428
+  exporters:
+    remotewrite:
+      usePrometheusCompatibleNaming: true
+  pipelines:
+    metrics:
+      enricherEnabled: true
   pprof:
     enabled: '{{ include ".telemetry.enabled" . }}'
     uploaderType: pyroscope
@@ -714,12 +731,6 @@ ingestor:
       jumpSizeInMCPU: 100
       windowSize: 12h
       initialWait: 10m
-  metricIngestor:
-    serverEnabled: true
-    serverPort: 8428
-    scraperEnabled: false
-    maxScrapeSize: 67108864
-    usePrometheusCompatibleNaming: true
   collectionEnabled: false
   ingestionEnabled: true
   setLocalTrafficPolicy: false

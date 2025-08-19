@@ -1,10 +1,64 @@
+{{- define "groundcover.sensor.receivers.remotewrite.enabled" -}}
+  {{- if .sensorValues.metricIngestor -}}
+    {{- .sensorValues.metricIngestor.serverEnabled -}}
+  {{- else -}}
+    {{- .sensorValues.receivers.remotewrite.enabled -}}
+  {{- end -}}
+{{- end -}}
+
+{{- define "groundcover.sensor.receivers.remotewrite.port" -}}
+  {{- if .sensorValues.metricIngestor -}}
+    {{- .sensorValues.metricIngestor.serverPort -}}
+  {{- else -}}
+    {{- .sensorValues.receivers.remotewrite.port -}}
+  {{- end -}}
+{{- end -}}
+
+{{- define "groundcover.sensor.config.deprecated" -}}
+{{- if .sensorValues.metricIngestor -}}
+metricIngestor:
+  {{ if .sensorValues.ingestionEnabled }}
+  serverEnabled: {{ .sensorValues.metricIngestor.serverEnabled }}
+  serverPort: {{ .sensorValues.metricIngestor.serverPort }}
+  {{ end }}
+  {{ if .sensorValues.collectionEnabled }}
+  scraperEnabled: {{ .sensorValues.metricIngestor.scraperEnabled }}
+  maxScrapeSize: {{ .sensorValues.metricIngestor.maxScrapeSize }}
+  {{ end }}
+  usePrometheusCompatibleNaming: {{ .sensorValues.metricIngestor.usePrometheusCompatibleNaming }}
+{{- end -}}
+{{- end -}}
+
 {{- define "groundcover.sensor.config" -}}
 {{- $sensorValues := .sensorValues -}}
+
+# Include the deprecated configuration to make sensor log and metricate when deprecated config is used
+{{ include "groundcover.sensor.config.deprecated" . }}
+
 serviceName: {{ $sensorValues.serviceName }}
 alligatorConfigurationExists: {{ or $sensorValues.alligatorConfigurationExists false }} 
 healthProbe:
   enabled: {{ $sensorValues.healthProbe.enabled }}
   port: {{ $sensorValues.healthProbe.port }}
+receivers:
+  {{ if $sensorValues.ingestionEnabled }}
+  remotewrite:
+    enabled: {{ $sensorValues.receivers.remotewrite.enabled }}
+    port: {{ $sensorValues.receivers.remotewrite.port }}
+  {{ end }}
+  {{ if $sensorValues.collectionEnabled }}
+  metricsscraper:
+    enabled: {{ $sensorValues.receivers.metricsscraper.enabled }}
+    maxScrapeSize: {{ $sensorValues.receivers.metricsscraper.maxScrapeSize }}
+  {{ end }}
+exporters:
+  remotewrite:
+    url: {{ include "metrics-ingester.write.http.url" . }}
+    usePrometheusCompatibleNaming: {{ $sensorValues.exporters.remotewrite.usePrometheusCompatibleNaming }}
+    tlsSkipVerify: true
+pipelines:
+  metrics:
+    enricherEnabled: {{ $sensorValues.pipelines.metrics.enricherEnabled }}
 startuptimeout: 120s
 {{ if $sensorValues.collectionEnabled }}
 productchansize: 512
@@ -397,19 +451,6 @@ customEntityTags: {{ toYaml $sensorValues.customEntityTags | nindent 2 }}
 sendKubeletInfraMetrics: {{ .Values.sendKubeletInfraMetrics }}
 {{ end }}
 
-metricIngestor:
-  {{ if $sensorValues.ingestionEnabled }}
-  serverEnabled: {{ $sensorValues.metricIngestor.serverEnabled }}
-  serverPort: {{ $sensorValues.metricIngestor.serverPort }}
-  {{ end }}
-  {{ if $sensorValues.collectionEnabled }}
-  scraperEnabled: {{ $sensorValues.metricIngestor.scraperEnabled }}
-  maxScrapeSize: {{ $sensorValues.metricIngestor.maxScrapeSize }}
-  {{ end }}
-  remoteURL: {{ include "metrics-ingester.write.http.url" . }}
-  usePrometheusCompatibleNaming: {{ $sensorValues.metricIngestor.usePrometheusCompatibleNaming }}
-  tlsSkipVerify: true
-
 {{ if $sensorValues.ingestionEnabled }}
 apmIngestor: 
   tracesOtlpEndpoint:
@@ -688,11 +729,11 @@ sensitiveHeadersObfuscationConfig:
   port: {{ $sensorValues.apmIngestor.otel.direct.rum.port }}
   targetPort: {{ $sensorValues.apmIngestor.otel.direct.rum.port }}
 {{- end }}
-{{- if and $sensorValues.metricIngestor.serverEnabled $sensorValues.metricIngestor.serverPort }}
+{{- if and (eq "true" (include "groundcover.sensor.receivers.remotewrite.enabled" .)) (include "groundcover.sensor.receivers.remotewrite.port" .) }}
 - protocol: TCP
   name: prometheus-remote-write
-  port: {{ $sensorValues.metricIngestor.serverPort }}
-  targetPort: {{ $sensorValues.metricIngestor.serverPort }}
+  port: {{ include "groundcover.sensor.receivers.remotewrite.port" . }}
+  targetPort: {{ include "groundcover.sensor.receivers.remotewrite.port" . }}
 {{- end }}
 {{- end }}
 {{- end -}}
@@ -760,8 +801,8 @@ sensitiveHeadersObfuscationConfig:
   name: rum
   protocol: TCP
 {{- end }}
-{{- if and $sensorValues.metricIngestor.serverEnabled $sensorValues.metricIngestor.serverPort }}
-- containerPort: {{ $sensorValues.metricIngestor.serverPort }}
+{{- if and (eq "true" (include "groundcover.sensor.receivers.remotewrite.enabled" .)) (include "groundcover.sensor.receivers.remotewrite.port" .) }}
+- containerPort: {{ include "groundcover.sensor.receivers.remotewrite.port" . }}
   name: remote-write
   protocol: TCP     
 {{- end }}

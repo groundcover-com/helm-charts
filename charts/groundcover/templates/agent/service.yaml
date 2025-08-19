@@ -49,7 +49,7 @@ metadata:
 spec:
   type: ExternalName
   externalName: {{ include "sensor.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
-{{- if and $sensorValues.metricIngestor.serverEnabled $sensorValues.metricIngestor.serverPort $sensorValues.ingestionEnabled}}
+{{- if and (eq "true" (include "groundcover.sensor.receivers.remotewrite.enabled" (dict "sensorValues" $sensorValues))) (include "groundcover.sensor.receivers.remotewrite.port" (dict "sensorValues" $sensorValues)) $sensorValues.ingestionEnabled}}
 ---
 kind: Service
 apiVersion: v1
@@ -75,7 +75,7 @@ spec:
   ports:
   - protocol: TCP
     name: metric-ingestor
-    port: {{ $sensorValues.metricIngestor.serverPort }}
-    targetPort: {{ $sensorValues.metricIngestor.serverPort }}
+    port: {{ include "groundcover.sensor.receivers.remotewrite.port" (dict "sensorValues" $sensorValues) }}
+    targetPort: {{ include "groundcover.sensor.receivers.remotewrite.port" (dict "sensorValues" $sensorValues) }}
 {{- end }}
 {{- end }}
