@@ -22,6 +22,9 @@ global:
     enabled: false
   debug:
     enabled: false
+  ingress:
+    enableTLS: false
+    customDomains: []
 enabled: true
 additionalLabels:
 onprem:
@@ -29,7 +32,7 @@ onprem:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.9.684
+  tag: 1.9.686
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/curl'
