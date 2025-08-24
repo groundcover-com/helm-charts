@@ -11,6 +11,15 @@ metadata:
     {{- include "router.labels" . | nindent 4 }}
 spec:
   ingressClassName: {{ .Values.kong.ingressController.ingressClass }}
+  {{- if .Values.global.ingress.enableTLS }}
+  tls:
+    - secretName: {{ include "incloud-ingress.certificate.name" . }}
+      hosts: {{ include "incloud-ingress.certificate.dnsNames" .  | nindent 8 }}
+    {{- if not (empty .Values.global.ingress.customDomains) }}
+    - secretName: {{ include "incloud-ingress.customCertificate.name" . }}
+      hosts: {{ include "incloud-ingress.customCertificate.dnsNames" .  | nindent 8 }}
+    {{- end }}
+  {{- end }}
   rules:
     - http:
         paths:
@@ -34,6 +43,15 @@ metadata:
     {{- include "router.labels" . | nindent 4 }}
 spec:
   ingressClassName: {{ .Values.kong.ingressController.ingressClass }}
+  {{- if .Values.global.ingress.enableTLS }}
+  tls:
+    - secretName: {{ include "incloud-ingress.certificate.name" . }}
+      hosts: {{ include "incloud-ingress.certificate.dnsNames" .  | nindent 8 }}
+    {{- if not (empty .Values.global.ingress.customDomains) }}
+    - secretName: {{ include "incloud-ingress.customCertificate.name" . }}
+      hosts: {{ include "incloud-ingress.customCertificate.dnsNames" .  | nindent 8 }}
+    {{- end }}
+  {{- end }}
   rules:
     - http:
         paths:
@@ -64,6 +82,15 @@ metadata:
     {{- include "router.labels" . | nindent 4 }}
 spec:
   ingressClassName: {{ .Values.kong.ingressController.ingressClass }}
+  {{- if .Values.global.ingress.enableTLS }}
+  tls:
+    - secretName: {{ include "incloud-ingress.certificate.name" . }}
+      hosts: {{ include "incloud-ingress.certificate.dnsNames" .  | nindent 8 }}
+    {{- if not (empty .Values.global.ingress.customDomains) }}
+    - secretName: {{ include "incloud-ingress.customCertificate.name" . }}
+      hosts: {{ include "incloud-ingress.customCertificate.dnsNames" .  | nindent 8 }}
+    {{- end }}
+  {{- end }}
   rules:
     - http:
         paths:
@@ -88,6 +115,15 @@ metadata:
     {{- include "router.labels" . | nindent 4 }}
 spec:
   ingressClassName: {{ .Values.kong.ingressController.ingressClass }}
+  {{- if .Values.global.ingress.enableTLS }}
+  tls:
+    - secretName: {{ include "incloud-ingress.certificate.name" . }}
+      hosts: {{ include "incloud-ingress.certificate.dnsNames" .  | nindent 8 }}
+    {{- if not (empty .Values.global.ingress.customDomains) }}
+    - secretName: {{ include "incloud-ingress.customCertificate.name" . }}
+      hosts: {{ include "incloud-ingress.customCertificate.dnsNames" .  | nindent 8 }}
+    {{- end }}
+  {{- end }}
   rules:
     - http:
         paths:

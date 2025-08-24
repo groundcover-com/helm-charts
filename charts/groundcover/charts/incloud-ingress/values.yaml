@@ -58,14 +58,7 @@ datasource:
 
 ingress:
   annotations:
-  tls:
-    enabled: false
-    certificate:
-      name: site-certificate
-      renewBefore: 600h # only s (seconds), m (minutes), and h (hours) are supported 
-      acme:
-        server: https://acme-v02.api.letsencrypt.org/directory
-
+  
 cert-manager:
   enabled: false
   crds:

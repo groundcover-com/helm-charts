@@ -1,4 +1,4 @@
-{{- if .Values.ingress.tls.enabled }}
+{{- if .Values.global.ingress.enableTLS }}
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
@@ -10,5 +10,20 @@ spec:
         name: letsencrypt
         kind: ClusterIssuer
     dnsNames: {{ include "incloud-ingress.certificate.dnsNames" .  | nindent 8 }}
-    renewBefore: {{ .Values.ingress.tls.certificate.renewBefore }}
+    renewBefore: {{ .Values.global.ingress.certs.certificate.renewBefore }}
+{{- end }}
+
+{{- if not (empty .Values.global.ingress.customDomains) }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+    name: {{ include "incloud-ingress.customCertificate.name" . }}
+spec:
+    secretName: {{ include "incloud-ingress.customCertificate.name" . }}
+    issuerRef:
+        name: letsencrypt
+        kind: ClusterIssuer
+    dnsNames: {{ include "incloud-ingress.customCertificate.dnsNames" .  | nindent 8 }}
+    renewBefore: {{ .Values.global.ingress.certs.customCertificate.renewBefore }}
 {{- end }}

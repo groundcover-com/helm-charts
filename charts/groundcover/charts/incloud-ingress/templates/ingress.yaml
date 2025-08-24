@@ -10,10 +10,15 @@ metadata:
     {{- end }}
 spec:
   ingressClassName: {{ include "incloud-ingress.ingressClass" .}}
-  {{- if .Values.ingress.tls.enabled }}
+  {{- if .Values.global.ingress.enableTLS }}
   tls:
     - secretName: {{ include "incloud-ingress.certificate.name" . }}
       hosts: {{ include "incloud-ingress.certificate.dnsNames" .  | nindent 8 }}
+    {{- if not (empty .Values.global.ingress.customDomains) }}
+    - secretName: {{ include "incloud-ingress.customCertificate.name" . }}
+      hosts: {{ include "incloud-ingress.customCertificate.dnsNames" .  | nindent 8 }}
+    {{- end }}
+
   {{- end }}
   rules:
     - http:
@@ -123,10 +128,15 @@ metadata:
     {{- end }}
 spec:
   ingressClassName: {{ include "incloud-ingress.ingressClass" .}}
-  {{- if .Values.ingress.tls.enabled }}
+  {{- if .Values.global.ingress.enableTLS }}
   tls:
     - secretName: {{ include "incloud-ingress.certificate.name" . }}
       hosts: {{ include "incloud-ingress.certificate.dnsNames" .  | nindent 8 }}
+    {{- if not (empty .Values.global.ingress.customDomains) }}
+    - secretName: {{ include "incloud-ingress.customCertificate.name" . }}
+      hosts: {{ include "incloud-ingress.customCertificate.dnsNames" .  | nindent 8 }}
+    {{- end }}
+    
   {{- end }}
   rules:
     - http:
@@ -153,10 +163,15 @@ metadata:
     {{- end }}
 spec:
   ingressClassName: {{ include "incloud-ingress.ingressClass" .}}
-  {{- if .Values.ingress.tls.enabled }}
+  {{- if .Values.global.ingress.enableTLS }}
   tls:
     - secretName: {{ include "incloud-ingress.certificate.name" . }}
       hosts: {{ include "incloud-ingress.certificate.dnsNames" .  | nindent 8 }}
+    {{- if not (empty .Values.global.ingress.customDomains) }}
+    - secretName: {{ include "incloud-ingress.customCertificate.name" . }}
+      hosts: {{ include "incloud-ingress.customCertificate.dnsNames" .  | nindent 8 }}
+    {{- end }}
+
   {{- end }}
   rules:
     - http:
@@ -203,10 +218,14 @@ metadata:
     {{- end }}
 spec:
   ingressClassName: {{ include "incloud-ingress.ingressClass" .}}
-  {{- if .Values.ingress.tls.enabled }}
+  {{- if .Values.global.ingress.enableTLS }}
   tls:
     - secretName: {{ include "incloud-ingress.certificate.name" . }}
       hosts: {{ include "incloud-ingress.certificate.dnsNames" .  | nindent 8 }}
+    {{- if not (empty .Values.global.ingress.customDomains) }}
+    - secretName: {{ include "incloud-ingress.customCertificate.name" . }}
+      hosts: {{ include "incloud-ingress.customCertificate.dnsNames" .  | nindent 8 }}
+    {{- end }}
   {{- end }}
   rules:
     - http:
@@ -267,10 +286,14 @@ metadata:
     {{- end }}
 spec:
   ingressClassName: {{ include "incloud-ingress.ingressClass" .}}
-  {{- if .Values.ingress.tls.enabled }}
+  {{- if .Values.global.ingress.enableTLS }}
   tls:
     - secretName: {{ include "incloud-ingress.certificate.name" . }}
       hosts: {{ include "incloud-ingress.certificate.dnsNames" .  | nindent 8 }}
+    {{- if not (empty .Values.global.ingress.customDomains) }}
+    - secretName: {{ include "incloud-ingress.customCertificate.name" . }}
+      hosts: {{ include "incloud-ingress.customCertificate.dnsNames" .  | nindent 8 }}
+    {{- end }}
   {{- end }}
   rules:
     - http:
@@ -333,10 +356,15 @@ metadata:
     {{- end }}
 spec:
   ingressClassName: {{ include "incloud-ingress.ingressClass" .}}
-  {{- if .Values.ingress.tls.enabled }}
+  {{- if .Values.global.ingress.enableTLS }}
   tls:
     - secretName: {{ include "incloud-ingress.certificate.name" . }}
       hosts: {{ include "incloud-ingress.certificate.dnsNames" .  | nindent 8 }}
+    {{- if not (empty .Values.global.ingress.customDomains) }}
+    - secretName: {{ include "incloud-ingress.customCertificate.name" . }}
+      hosts: {{ include "incloud-ingress.customCertificate.dnsNames" .  | nindent 8 }}
+    {{- end }}
+
   {{- end }}
   rules:
     - http:
@@ -377,10 +405,15 @@ metadata:
     {{- end }}
 spec:
   ingressClassName: {{ include "incloud-ingress.ingressClass" .}}
-  {{- if .Values.ingress.tls.enabled }}
+  {{- if .Values.global.ingress.enableTLS }}
   tls:
     - secretName: {{ include "incloud-ingress.certificate.name" . }}
       hosts: {{ include "incloud-ingress.certificate.dnsNames" .  | nindent 8 }}
+    {{- if not (empty .Values.global.ingress.customDomains) }}
+    - secretName: {{ include "incloud-ingress.customCertificate.name" . }}
+      hosts: {{ include "incloud-ingress.customCertificate.dnsNames" .  | nindent 8 }}
+    {{- end }}
+
   {{- end }}
   rules:
     - http:
@@ -407,10 +440,15 @@ metadata:
     {{- end }}
 spec:
   ingressClassName: {{ include "incloud-ingress.ingressClass" .}}
-  {{- if .Values.ingress.tls.enabled }}
+  {{- if .Values.global.ingress.enableTLS }}
   tls:
     - secretName: {{ include "incloud-ingress.certificate.name" . }}
       hosts: {{ include "incloud-ingress.certificate.dnsNames" .  | nindent 8 }}
+    {{- if not (empty .Values.global.ingress.customDomains) }}
+    - secretName: {{ include "incloud-ingress.customCertificate.name" . }}
+      hosts: {{ include "incloud-ingress.customCertificate.dnsNames" .  | nindent 8 }}
+    {{- end }}
+
   {{- end }}
   rules:
     - http:
@@ -439,10 +477,15 @@ metadata:
     {{- end }}
 spec:
   ingressClassName: {{ include "incloud-ingress.ingressClass" .}}
-  {{- if .Values.ingress.tls.enabled }}
+  {{- if .Values.global.ingress.enableTLS }}
   tls:
     - secretName: {{ include "incloud-ingress.certificate.name" . }}
       hosts: {{ include "incloud-ingress.certificate.dnsNames" .  | nindent 8 }}
+    {{- if not (empty .Values.global.ingress.customDomains) }}
+    - secretName: {{ include "incloud-ingress.customCertificate.name" . }}
+      hosts: {{ include "incloud-ingress.customCertificate.dnsNames" .  | nindent 8 }}
+    {{- end }}
+
   {{- end }}
   rules:
     - http:
@@ -470,10 +513,15 @@ metadata:
     {{- end }}
 spec:
   ingressClassName: {{ include "incloud-ingress.ingressClass" .}}
-  {{- if .Values.ingress.tls.enabled }}
+  {{- if .Values.global.ingress.enableTLS }}
   tls:
     - secretName: {{ include "incloud-ingress.certificate.name" . }}
       hosts: {{ include "incloud-ingress.certificate.dnsNames" .  | nindent 8 }}
+    {{- if not (empty .Values.global.ingress.customDomains) }}
+    - secretName: {{ include "incloud-ingress.customCertificate.name" . }}
+      hosts: {{ include "incloud-ingress.customCertificate.dnsNames" .  | nindent 8 }}
+    {{- end }}
+
   {{- end }}
   rules:
     - http:

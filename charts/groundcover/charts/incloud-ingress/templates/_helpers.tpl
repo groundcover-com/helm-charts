@@ -57,17 +57,3 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
-
-{{- define "incloud-ingress.certificate.name" -}}
-{{ printf "%s-%s" .Release.Name .Values.ingress.tls.certificate.name }}
-{{- end }}
-
-{{- define "incloud-ingress.certificate.dnsNames" -}}
-{{- range (append .Values.global.ingress.extraSites .Values.global.ingress.site) }}
-- {{ . }}
-- {{ printf "status.%s" . }}
-- {{ printf "metrics-http.%s" . }}
-- {{ printf "api-otel-http.%s" . }}
-- {{ printf "api-otel-grpc.%s" . }}
-{{- end }}
-{{- end -}}

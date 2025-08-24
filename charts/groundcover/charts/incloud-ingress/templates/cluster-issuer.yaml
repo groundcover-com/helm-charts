@@ -1,4 +1,4 @@
-{{- if .Values.ingress.tls.enabled }}
+{{- if .Values.global.ingress.enableTLS }}
 ---
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
@@ -6,7 +6,7 @@ metadata:
     name: letsencrypt
 spec:
     acme:
-        server: {{ .Values.ingress.tls.certificate.acme.server }}
+        server: {{ .Values.global.ingress.certs.certificate.acme.server }}
         privateKeySecretRef:
             name: private-key-issuer
         solvers:

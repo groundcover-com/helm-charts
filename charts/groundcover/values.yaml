@@ -35,6 +35,19 @@ global:
     # set ingress site for inCloud / on-prem sensor only deployments
     site:
     extraSites: []
+    customDomains: []
+    enableTLS: false
+    certs:
+      certificate:
+        name: site-certificate
+        renewBefore: 600h # only s (seconds), m (minutes), and h (hours) are supported 
+        acme:
+          server: https://acme-v02.api.letsencrypt.org/directory
+      customCertificate:
+        name: custom-certificate
+        renewBefore: 600h # only s (seconds), m (minutes), and h (hours) are supported 
+        acme:
+          server: https://acme-v02.api.letsencrypt.org/directory
 
   airgap: false
 

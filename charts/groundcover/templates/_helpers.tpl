@@ -321,3 +321,29 @@ Create the name of the agent priority class to use
 {{- include "groundcover.fullname" . }}-sensor-high-priority
 {{- end }}
 {{- end }}
+
+{{- define "incloud-ingress.certificate.name" -}}
+{{ printf "%s-%s" .Release.Name .Values.global.ingress.certs.certificate.name }}
+{{- end }}
+
+{{- define "incloud-ingress.certificate.dnsNames" -}}
+{{- range (append .Values.global.ingress.extraSites .Values.global.ingress.site) }}
+- {{ . }}
+- {{ printf "status.%s" . }}
+- {{ printf "metrics-http.%s" . }}
+- {{ printf "api-otel-http.%s" . }}
+- {{ printf "api-otel-grpc.%s" . }}
+{{- end }}
+{{- end -}}
+
+{{- define "incloud-ingress.customCertificate.name" -}}
+{{ printf "%s-%s" .Release.Name .Values.global.ingress.certs.customCertificate.name }}
+{{- end }}
+
+{{- define "incloud-ingress.customCertificate.dnsNames" -}}
+{{- if not (empty .Values.global.ingress.customDomains) }}
+{{- range .Values.global.ingress.customDomains }}
+- {{ . }}
+{{- end }}
+{{- end }}
+{{- end -}}
