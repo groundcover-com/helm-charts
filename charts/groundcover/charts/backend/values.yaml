@@ -190,7 +190,7 @@ keep:
       enabled: false
     image:
       repository: public.ecr.aws/groundcovercom/keep-api
-      tag: "0.38.10"
+      tag: "0.40.6.2"
     databaseConnectionStringFromSecret:
       enabled: true
       secretName: keep-postgres
@@ -212,7 +212,7 @@ keep:
       - name: KEEP_STORE_WORKFLOW_LOGS
         value: "false"
       - name: KEEP_ENRICHMENT_DISABLED
-        value: "true"
+        value: "false"
       - name: KEEP_MAINTENANCE_WINDOWS_ENABLED
         value: "false"
       - name: KEEP_CORRELATION_ENABLED
