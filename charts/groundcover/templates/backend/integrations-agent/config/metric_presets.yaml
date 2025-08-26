@@ -5500,11 +5500,61 @@ data:
       - Name: ProcessedBytes
         Statistics:
         - Sum
+      - Name: ProcessedBytes_UDP
+        Statistics:
+        - Sum
+      - Name: ProcessedBytes_TCP
+        Statistics:
+        - Sum
+      - Name: ProcessedBytes_TLS
+        Statistics:
+        - Sum
       - Name: UnhealthyHostCount
         Statistics:
         - Average
         - Maximum
         - Minimum
+      - Name: ProcessedPackets
+        Statistics:
+        - Sum
+      - Name: TCP_Target_Reset_Count
+        Statistics:
+        - Sum
+      - Name: PortAllocationErrorCount
+        Statistics:
+        - Sum
+      - Name: ActiveFlowCount
+        Statistics:
+        - Average
+        - Maximum
+        - Minimum
+      - Name: ActiveFlowCount_UDP
+        Statistics:
+        - Average
+        - Maximum
+        - Minimum
+      - Name: ActiveFlowCount_TCP
+        Statistics:
+        - Average
+        - Maximum
+        - Minimum
+      - Name: ActiveFlowCount_TLS
+        Statistics:
+        - Average
+        - Maximum
+        - Minimum
+      - Name: NewFlowCount
+        Statistics:
+        - Sum
+      - Name: NewFlowCount_UDP
+        Statistics:
+        - Sum
+      - Name: NewFlowCount_TCP
+        Statistics:
+        - Sum
+      - Name: NewFlowCount_TLS
+        Statistics:
+        - Sum
     AWS/AppSync:
     - Name: 4XXError
       Statistics:
