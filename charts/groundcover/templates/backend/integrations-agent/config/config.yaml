@@ -421,6 +421,91 @@ data:
       {{- end }}
     {{- end }}
     {{- end }}
+
+    {{- if .Values.integrationsAgent.targets.clickhouseQueryToTraceLog }}
+    {{- range .Values.integrationsAgent.targets.clickhouseQueryToTraceLog }}
+    - Type: "clickhouse_query_to_trace"
+      {{- if .queryName }}
+      QueryName: "{{ .queryName }}"
+      {{- end }}
+      {{- if .query }}
+      Query: "{{ .query }}"
+      {{- end }}
+      {{- if .table }}
+      Table: "{{ .table }}"
+      {{- end }}
+      Name: "{{ .name }}"
+      {{- if .interval }}
+      Interval: "{{ .interval }}"
+      {{- end }}
+      {{- if .extraLabels }}
+      ExtraLabels:
+      {{- range $key, $value := .extraLabels }}
+        {{ $key }}: "{{ $value }}"
+      {{- end }}
+      {{- end }}
+      {{- if .dropLabels }}
+      DropLabels:
+      {{- range $label := .dropLabels }}
+        - "{{ $label }}"
+      {{- end }}
+      {{- end }}
+      {{- if eq .enabled false }}
+      Enabled: {{ .enabled }}
+      {{- end }}
+      {{- if .connectionString }}
+      ConnectionString: "{{ .connectionString }}"
+      {{- end }}
+      {{- if .host }}
+      Host: "{{ .host }}"
+      {{- end }}
+      {{- if .port }}
+      Port: {{ .port }}
+      {{- end }}
+      {{- if .username }}
+      Username: "{{ .username }}"
+      {{- end }}
+      {{- if hasKey . "password" }}
+      Password: "{{ .password }}"
+      {{- end }}
+      {{- if .passwordFromSecret }}
+      PasswordFromSecret: 
+        {{- toYaml .passwordFromSecret | nindent 8 }}
+      {{- end }}
+      {{- if .secure }}
+      Secure: {{ .secure }}
+      {{- end }}
+      {{- if .skipVerify }}
+      SkipVerify: {{ .skipVerify }}
+      {{- end }}
+      {{- if .dialTimeout }}
+      DialTimeout: "{{ .dialTimeout }}"
+      {{- end }}
+      {{- if .database }}
+      Database: "{{ .database }}"
+      {{- end }}
+      {{- if hasKey . "clusterMode" }}
+      ClusterMode: {{ .clusterMode }}
+      {{- end }}
+      {{- if .clusterName }}
+      ClusterName: "{{ .clusterName }}"
+      {{- end }}
+      {{- if .queryFilters }}
+      QueryFilters:
+      {{- range .queryFilters }}
+        - "{{ . }}"
+      {{- end }}
+      {{- end }}
+      {{- if .queryLimit }}
+      QueryLimit: {{ .queryLimit }}
+      {{- end }}
+      Exporters:
+      - "otlp_http_traces"
+      {{- range .additionalExporters }}
+        - "{{ . }}"
+      {{- end }}
+    {{- end }}
+    {{- end }}
     {{- end }}
 
     Exporters:
