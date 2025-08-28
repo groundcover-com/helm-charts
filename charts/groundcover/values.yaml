@@ -1259,7 +1259,7 @@ opentelemetry-collector:
       mountPath: /persistent_queues
   image:
     repository: public.ecr.aws/groundcovercom/otel/opentelemetry-collector-contrib
-    tag: ""
+    tag: "1.9.700"
   podLabels:
     app.kubernetes.io/part-of: '{{ include "groundcover.labels.partOf" . }}'
   podAnnotations:
