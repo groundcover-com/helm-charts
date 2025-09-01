@@ -34,35 +34,39 @@ spec:
             pathType: Exact
             backend:
               service:
-                name: {{ include "opentelemetry-collector.fullname" . }}
+                name: {{ .Values.global.ingestor.enabled | ternary (include "ingestor.fullname" .) (include "opentelemetry-collector.fullname" .) }}
                 port:
+          {{- if .Values.global.ingestor.enabled }}
+                  number: {{ index .Values "ingestor" "healthProbe" "port" | int }}
+          {{- else }}
                   number: {{ index .Values.global "opentelemetry-collector" "ports" "health" "servicePort" | int }}
+          {{- end }}
           - path: {{ get (urlParse (include "opentelemetry-collector.datadogapm.tracesv03.http.url" .)) "path" }} 
             pathType: Exact
             backend:
               service:
-                name: {{ include "opentelemetry-collector.fullname" . }}
+                name: {{ .Values.global.ingestor.enabled | ternary (include "ingestor.fullname" .) (include "opentelemetry-collector.fullname" .) }}
                 port:
                   number: {{ index .Values.global "opentelemetry-collector" "ports" "datadogapm" "servicePort" | int }}
           - path: {{ get (urlParse (include "opentelemetry-collector.datadogapm.tracesv04.http.url" .)) "path" }} 
             pathType: Exact
             backend:
               service:
-                name: {{ include "opentelemetry-collector.fullname" . }}
+                name: {{ .Values.global.ingestor.enabled | ternary (include "ingestor.fullname" .) (include "opentelemetry-collector.fullname" .) }}
                 port:
                   number: {{ index .Values.global "opentelemetry-collector" "ports" "datadogapm" "servicePort" | int }}
           - path: {{ get (urlParse (include "opentelemetry-collector.datadogapm.tracesv05.http.url" .)) "path" }} 
             pathType: Exact
             backend:
               service:
-                name: {{ include "opentelemetry-collector.fullname" . }}
+                name: {{ .Values.global.ingestor.enabled | ternary (include "ingestor.fullname" .) (include "opentelemetry-collector.fullname" .) }}
                 port:
                   number: {{ index .Values.global "opentelemetry-collector" "ports" "datadogapm" "servicePort" | int }}
           - path: {{ get (urlParse (include "opentelemetry-collector.datadogapm.tracesv07.http.url" .)) "path" }} 
             pathType: Exact
             backend:
               service:
-                name: {{ include "opentelemetry-collector.fullname" . }}
+                name: {{ .Values.global.ingestor.enabled | ternary (include "ingestor.fullname" .) (include "opentelemetry-collector.fullname" .)  }}
                 port:
                   number: {{ index .Values.global "opentelemetry-collector" "ports" "datadogapm" "servicePort" | int }}
           - path: {{ get (urlParse (include "opentelemetry-collector.otlptraces.http.url" .)) "path" }} 
@@ -104,14 +108,14 @@ spec:
             pathType: Exact
             backend:
               service:
-                name: {{ include "opentelemetry-collector.fullname" . }}
+                name: {{ .Values.global.ingestor.enabled | ternary (include "ingestor.fullname" .) (include "opentelemetry-collector.fullname" .) }}
                 port:
                   number: {{ index .Values.global "opentelemetry-collector" "ports" "rum" "servicePort" | int }}          
           - path: {{ get (urlParse (include "opentelemetry-collector.zipkin.http.url" .)) "path" }}
             pathType: Exact
             backend:
               service:
-                name: {{ include "opentelemetry-collector.fullname" . }}
+                name: {{ .Values.global.ingestor.enabled | ternary (include "ingestor.fullname" .) (include "opentelemetry-collector.fullname" .) }}
                 port:
                   number: {{ index .Values.global "opentelemetry-collector" "ports" "zipkin" "servicePort" | int }}            
 ---
