@@ -117,7 +117,7 @@ spec:
           image: {{ tpl $sensorValues.image.repository . }}:{{ tpl $sensorValues.image.tag .}}
           resources:
 {{- toYaml $sensorValues.resources | nindent 12 }}
-          imagePullPolicy: Always
+          imagePullPolicy: {{ default "Always" .Values.agent.imagePullPolicy }}
           name: "sensor"
           ports:
           - containerPort: {{ (include "agent.monitoring.port" .) | int }}
@@ -185,6 +185,7 @@ spec:
 {{- if and (eq (include "telemetry.enabled" .) "true") (eq .Values.agent.flb.enabled true) }}
         - name: fluent-bit
           image: {{ tpl .Values.agent.flb.image.repository . }}:{{ .Values.agent.flb.image.tag }}
+          imagePullPolicy: {{ default "Always" .Values.agent.imagePullPolicy }}
           ports:
             - name: http
               containerPort: 2020
