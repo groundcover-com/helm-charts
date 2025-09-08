@@ -431,8 +431,8 @@ data:
       {{- if .query }}
       Query: "{{ .query }}"
       {{- end }}
-      {{- if .table }}
-      Table: "{{ .table }}"
+      {{- if .tableName }}
+      TableName: "{{ .tableName }}"
       {{- end }}
       Name: "{{ .name }}"
       {{- if .interval }}
