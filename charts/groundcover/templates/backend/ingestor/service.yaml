@@ -1,5 +1,6 @@
 {{ if and .Values.global.ingestor.enabled .Values.global.backend.enabled }}
 {{- $sensorValues := deepCopy .Values.ingestor -}}
+{{- $sensorValues = mergeOverwrite $sensorValues (default (dict) .Values.global.ingestor) -}}
 kind: Service
 apiVersion: v1
 metadata:
@@ -25,11 +26,8 @@ spec:
   {{- if $sensorValues.setLocalTrafficPolicy }}
   internalTrafficPolicy: Local
   {{- end }}
-{{ end -}}
 
 ---
-{{ if and .Values.global.ingestor.enabled .Values.global.backend.enabled }}
-{{- $sensorValues := deepCopy .Values.ingestor -}}
 kind: Service
 apiVersion: v1
 metadata:

@@ -130,8 +130,6 @@ spec:
             protocol: TCP
           {{- end }}
           {{- if $sensorValues.healthProbe.enabled }}
-          - containerPort: {{ $sensorValues.healthProbe.port }}
-            name: health-http
           readinessProbe:
             httpGet:
               scheme: HTTP

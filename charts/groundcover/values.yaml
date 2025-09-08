@@ -30,6 +30,8 @@ global:
     enabled: true
   ingestor:
     enabled: false
+    healthProbe:
+      port: 2021
 
   ingress:
     # set ingress site for inCloud / on-prem sensor only deployments
@@ -715,7 +717,6 @@ ingestor:
   logLevel: 4
   healthProbe:
     enabled: true
-    port: 2021
   receivers:
     remotewrite:
       enabled: true

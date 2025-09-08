@@ -735,6 +735,12 @@ sensitiveHeadersObfuscationConfig:
   port: {{ include "groundcover.sensor.receivers.remotewrite.port" . }}
   targetPort: {{ include "groundcover.sensor.receivers.remotewrite.port" . }}
 {{- end }}
+{{- if and $sensorValues.healthProbe.enabled $sensorValues.healthProbe.port }}
+- protocol: TCP
+  name: health-http
+  port: {{ $sensorValues.healthProbe.port }}
+  targetPort: {{ $sensorValues.healthProbe.port }}
+{{- end }}
 {{- end }}
 {{- end -}}
 
@@ -805,6 +811,10 @@ sensitiveHeadersObfuscationConfig:
 - containerPort: {{ include "groundcover.sensor.receivers.remotewrite.port" . }}
   name: remote-write
   protocol: TCP     
+{{- end }}
+{{- if $sensorValues.healthProbe.enabled }}
+- containerPort: {{ $sensorValues.healthProbe.port }}
+  name: health-http
 {{- end }}
 {{- end }}
 {{- end -}}

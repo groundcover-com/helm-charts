@@ -1,4 +1,6 @@
 {{ if and .Values.global.ingestor.enabled .Values.global.backend.enabled }}
+{{- $sensorValues := deepCopy .Values.ingestor -}}
+{{- $sensorValues = mergeOverwrite $sensorValues (default (dict) .Values.global.ingestor) -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -92,15 +94,13 @@ spec:
         ports:
         - containerPort: {{ (include "ingestor.monitoring.port" .) | int }}
           name: prom-metrics
-        {{- include "groundcover.sensor.deployment.ingestion-ports" (merge (dict "sensorValues" .Values.ingestor) .) | nindent 8 }}
+        {{- include "groundcover.sensor.deployment.ingestion-ports" (merge (dict "sensorValues" $sensorValues) .) | nindent 8 }}
         {{- if .Values.global.debug.enabled }}
         - containerPort: 4040
           name: dlv-tcp
           protocol: TCP
         {{- end }}
         {{- if .Values.ingestor.healthProbe.enabled }}
-        - containerPort: {{ .Values.ingestor.healthProbe.port }}
-          name: health-http
         readinessProbe:
           httpGet:
             scheme: HTTP

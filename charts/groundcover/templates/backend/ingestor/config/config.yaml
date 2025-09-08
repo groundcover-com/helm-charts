@@ -1,5 +1,6 @@
 {{ if and .Values.global.ingestor.enabled .Values.global.backend.enabled }}
 {{- $sensorValues := deepCopy .Values.ingestor -}}
+{{- $sensorValues = mergeOverwrite $sensorValues (default (dict) .Values.global.ingestor) -}}
 {{- $sensorValues = set $sensorValues "serviceName" "ingestor" -}}
 apiVersion: v1
 kind: ConfigMap
