@@ -1,4 +1,4 @@
-{{ if and "custom-metrics.enabled" (index .Values "victoria-metrics-operator" "enabled") (index .Values "victoria-metrics-operator" "builtinVMAgent" "enabled") }}
+{{ if (index .Values "victoria-metrics-operator" "builtinVMAgent" "enabled") }}
 apiVersion: operator.victoriametrics.com/v1beta1
 kind: VMAgent
 metadata:

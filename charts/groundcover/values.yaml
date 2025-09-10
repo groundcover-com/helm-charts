@@ -2911,14 +2911,48 @@ victoria-metrics-operator:
   builtinVMAgent:
     enabled: false
     spec:
+      selectAllByDefault: true
+      serviceScrapeNamespaceSelector: {}
+      podScrapeNamespaceSelector: {}
       podScrapeSelector: {}
       serviceScrapeSelector: {}
       nodeScrapeSelector: {}
+      nodeScrapeNamespaceSelector: {}
       staticScrapeSelector: {}
-      probeSelector: {}
+      staticScrapeNamespaceSelector: {}
       replicaCount: 1
       remoteWrite:
-        - url: '{{ include "custom-metrics.write.http.url" . }}'
+        - url: '{{ include "ingester.buildRemoteWriteURLTargets" . }}'
+          label: clusterId=$(GC_CLUSTER_ID),cluster=$(GC_CLUSTER_ID),env=$(GC_ENV),env_type=k8s
+          headers: 
+          - "apikey:%{API_KEY}"
+          tlsInsecureSkipVerify: '{{ ternary "true" "false" .Values.global.ingestion.tls_skip_verify }}'
+          rateLimit: '{{ include "ingester.buildRemoteWriteRateLimit" . }}'
+          maxDiskUsagePerURL: '{{ include "ingester.buildRemoteWriteMaxDiskUsagePerURL" . }}'
+          disableOnDiskQueue: '{{ include "ingester.buildRemoteWriteDisableOnDiskQueue" . }}'
+      extraArgs:
+        remoteWrite.forceVMProto: '{{ include "ingester.buildRemoteWriteForceVMProto" . }}'
+        remoteWrite.forcePromProto: '{{ include "ingester.buildRemoteWriteForcePromProto" . }}'
+        promscrape.streamParse: "true"
+        promscrape.dropOriginalLabels: "true"
+        promscrape.suppressDuplicateScrapeTargetErrors: "true"
+        promscrape.maxScrapeSize: "64MiB"
+      extraEnvs:
+        - name: GC_CLUSTER_ID
+          valueFrom:
+            secretKeyRef:
+              name: '{{ include "groundcover.config.secretName" .}}'
+              key: GC_CLUSTER_ID
+        - name: API_KEY
+          valueFrom:
+            secretKeyRef:
+              key: '{{ include "groundcover.apikeySecretKey" . }}'
+              name: '{{ include "groundcover.apikeySecretName" . }}'
+        - name: GC_ENV
+          valueFrom:
+            secretKeyRef:
+              name: '{{ include "groundcover.config.secretName" .}}'
+              key: GC_ENV
 
 custom-metrics:
   enabled: false
