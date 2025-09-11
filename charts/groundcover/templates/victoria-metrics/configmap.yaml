@@ -38,6 +38,15 @@ data:
         target_label: __name__
         regex: "(.+)"
         replacement: "groundcover_workload_pods_status_phase"
+    - match: '{__name__=~"trace_.+", host!="", gc_source="ddstats"}'
+      without: [host]
+      interval: 10s
+      outputs: [total_prometheus]
+      output_relabel_configs:
+      - source_labels: [__name__]
+        target_label: __name__
+        regex: "(.+):.*"
+        replacement: "$1"
 {{ if (index .Values "victoria-metrics-single" "server" "extraAggregations") }}
 {{- toYaml (index .Values "victoria-metrics-single" "server" "extraAggregations") | nindent 4  -}}
 {{- end }}

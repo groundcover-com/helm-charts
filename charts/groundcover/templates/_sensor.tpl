@@ -599,9 +599,9 @@ logs:
     grokParserConfig: {{ toYaml .Values.grokParserConfig | nindent 6}}
     decolorize: {{ .Values.decolorizeLogs }}
     maxLogSize: {{ .Values.maxLogSize }}
-    oldLogDropThreshold: {{ .Values.oldLogDropThreshold }} 
-    oldLogDropAlwaysThreshold: {{ .Values.oldLogDropAlwaysThreshold }}
-    oldLogDelayStart: {{ .Values.oldLogDelayStart }} 
+    oldLogDropThreshold: {{ .sensorValues.logs.pipeline.dropOldLogs.dropThreshold }} 
+    oldLogDropAlwaysThreshold: {{ .sensorValues.logs.pipeline.dropOldLogs.dropAlwaysThreshold }}
+    oldLogDelayStart: {{ .sensorValues.logs.pipeline.dropOldLogs.delayStart }} 
 otelTracesAsLogs: true
 otelPreprocess: true
 tracesOtlpEndpoint:

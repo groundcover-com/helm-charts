@@ -234,9 +234,6 @@ maxLogSize: 102400 # 100KB
 maxLogContentSize: 5120 # 5KB
 logBatchSendQueueWorkerCount: 3
 logBatchSendQueueMaxSize: 10
-oldLogDropThreshold: 180s
-oldLogDropAlwaysThreshold: 60m
-oldLogDelayStart: 60s
 jsonFlattenMaxDepth: 6
 jsonFlattenMaxAttributes: 300
 shouldDropRunningNamespaces: 
@@ -387,6 +384,12 @@ agent:
     pipelines:
       metrics:
         enricherEnabled: true
+    logs:
+      pipeline:
+        dropOldLogs:
+          dropThreshold: 3h
+          dropAlwaysThreshold: 12h
+          delayStart: 2m
     apmIngestor:
       dataDog:
         enabled: true
@@ -727,6 +730,12 @@ ingestor:
   pipelines:
     metrics:
       enricherEnabled: true
+  logs:
+    pipeline:
+      dropOldLogs:
+        dropThreshold: 12h
+        dropAlwaysThreshold: 12h
+        delayStart: 2m
   pprof:
     enabled: '{{ include ".telemetry.enabled" . }}'
     uploaderType: pyroscope
