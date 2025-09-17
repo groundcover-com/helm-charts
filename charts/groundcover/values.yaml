@@ -3174,7 +3174,7 @@ monitors-manager:
   image:
     registry: public.ecr.aws
     repository: groundcovercom/grafana-groundcover
-    tag: v0.0.36-grafana11.3.7
+    tag: v0.0.37-grafana11.3.7
   nameOverride: monitors-manager
   persistence:
     enabled: true
@@ -3246,6 +3246,8 @@ monitors-manager:
         group_interval: 1m
         repeat_interval: 4h
   grafana.ini:
+    alerting:
+      evaluation_timeout_seconds: 120
     groundcover:
       alerting_overrides_checksum: '{{ .Values.alertingOverrides | quote | sha256sum }}'
       workflows_enabled: '{{ .Values.global.workflows.enabled }}'
