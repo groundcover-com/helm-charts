@@ -1570,7 +1570,7 @@ vector:
       transform:
         type: "filter"
         condition: |
-          to_unix_timestamp!(now()) - 12*3600 < to_unix_timestamp!(parse_timestamp!(.timestamp, "%+"))
+          to_unix_timestamp(now()) - 12*3600 < to_unix_timestamp(parse_timestamp(.timestamp, "%+") ?? from_unix_timestamp!(0))
     extraSteps: []
   # List of steps to perform as part of the pipeline. Will be executed sequentially. Examples:
   # - name: renameAttribute
