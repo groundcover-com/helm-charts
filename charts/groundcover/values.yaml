@@ -1570,7 +1570,7 @@ vector:
       transform:
         type: "filter"
         condition: |
-          to_unix_timestamp(now()) - 12*3600 < to_unix_timestamp(parse_timestamp!(.timestamp, "%+"))
+          to_unix_timestamp!(now()) - 12*3600 < to_unix_timestamp!(parse_timestamp!(.timestamp, "%+"))
     extraSteps: []
   # List of steps to perform as part of the pipeline. Will be executed sequentially. Examples:
   # - name: renameAttribute
@@ -1623,7 +1623,7 @@ vector:
     #         .float_attributes.random_number = to_int!(res.number)
   image:
     repository: public.ecr.aws/groundcovercom/vector
-    tag: 0.42.0-alpine
+    tag: 0.49.0-alpine
   lifecycle: 
     preStop:
       exec:
