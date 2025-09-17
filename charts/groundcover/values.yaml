@@ -1990,6 +1990,8 @@ vector:
             del(.error)
             .evaluation_duration_seconds = .evaluationDurationSeconds
             del(.evaluationDurationSeconds)
+            .silence_ids = .silenceIds
+            del(.silenceIds)
             .previous_state, err = to_string(del(.previous))
             if err == null {
               .previous_state = to_string(split(.previous_state, "(", 2)[0])
@@ -3172,7 +3174,7 @@ monitors-manager:
   image:
     registry: public.ecr.aws
     repository: groundcovercom/grafana-groundcover
-    tag: v0.0.35-grafana11.3.7
+    tag: v0.0.36-grafana11.3.7
   nameOverride: monitors-manager
   persistence:
     enabled: true
