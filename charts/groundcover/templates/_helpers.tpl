@@ -43,7 +43,7 @@ groundcover
 
 {{- define "groundcover.labels" -}}
 app.kubernetes.io/part-of: '{{ include "groundcover.labels.partOf" . }}'
-{{ with .Values.global.groundcoverLabels }} 
+{{ with .Values.global.groundcoverLabels }}
 {{- toYaml . }}
 {{- end }}
 {{- end }}
@@ -241,7 +241,7 @@ Get cluster_id from values or generate random one
 {{- print "http://db-manager:8888/writer-ready" -}}
 {{- end -}}
 
-{{- define "fleet-manager.url" -}}
+{{- define "fleet-manager.url.legacy" -}}
 {{- if .Values.fleetClientConfig.overrideURL -}}
     {{- .Values.fleetClientConfig.overrideURL -}}
 {{- else if not .Values.global.backend.enabled -}}
@@ -251,6 +251,15 @@ Get cluster_id from values or generate random one
 {{- end -}}
 {{- end -}}
 
+{{- define "fleet-manager.url" -}}
+{{- if .Values.fleetClientConfig.overrideURL -}}
+    {{- .Values.fleetClientConfig.overrideURL -}}
+{{- else if not .Values.global.backend.enabled -}}
+    {{- printf "https://%s/fleet-manager/api/client/v2/config" .Values.global.ingress.site -}}
+{{- else -}}
+    {{- printf "http://%s:8080/api/client/v2/config" (include "fleet-manager.fullname" .) -}}
+{{- end -}}
+{{- end -}}
 
 {{- define "ingestion.traces.otlp.http.url" -}}
 {{- if (include  "vector.useLocalVector" .) -}}

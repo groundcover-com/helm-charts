@@ -637,6 +637,14 @@ data:
         windowSize: {{ .Values.integrationsAgent.pprof.cpuTicker.windowSize }}
         initialWait: {{ .Values.integrationsAgent.pprof.cpuTicker.initialWait }}    
       
+    dynamicConfiguration:
+      enabled: {{ .Values.global.fleetmanager.enabled }}
+      url: {{ include "fleet-manager.url" . }}
+      requestIntervalEnabled: {{ .Values.fleetClientConfig.requestIntervalEnabled }}
+      maximumInitialJitter: {{ .Values.fleetClientConfig.maximumInitialJitter }}
+      requestInterval: {{ .Values.fleetClientConfig.requestInterval }}
+      initialUpdateTimeout: {{ .Values.fleetClientConfig.initialUpdateTimeout }}
+      
 kind: ConfigMap
 metadata:
   labels:

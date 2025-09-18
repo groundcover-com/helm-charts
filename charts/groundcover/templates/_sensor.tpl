@@ -541,7 +541,7 @@ envType: {{ .Values.env_type }}
 
 fleetClientConfig:
   enabled: {{ .Values.global.fleetmanager.enabled }}
-  url: {{ include "fleet-manager.url" . }}
+  url: {{ include "fleet-manager.url.legacy" . }}
   requestIntervalEnabled: {{ .Values.fleetClientConfig.requestIntervalEnabled }}
   maximumInitialJitter: {{ .Values.fleetClientConfig.maximumInitialJitter }}
   requestInterval: {{ .Values.fleetClientConfig.requestInterval }}
