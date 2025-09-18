@@ -356,28 +356,6 @@ containerStateHandler:
   summarizerActiveTtl: 45s
   aggregationCacheSize: 4096
 
-nodeinfohandler:
-  samplesthreshold: 20
-  issuesthreshold: 20
-  sampling:
-    samplingmode: 0 # DontSample
-    samplingLimitMaxQueue: 0
-    samplingLimitAgeOut: 0s
-  interval: 1m0s
-  summarizerActiveTtl: 45s
-  aggregationCacheSize: 1024
-
-hostinfohandler:
-  samplesthreshold: 20
-  issuesthreshold: 20
-  sampling:
-    samplingmode: 0 # DontSample
-    samplingLimitMaxQueue: 0
-    samplingLimitAgeOut: 0s
-  interval: 30s
-  summarizerActiveTtl: 45s
-  aggregationCacheSize: 128
-
 containercrashhandler:
   sampling:
     samplingmode: 0 # DontSample
