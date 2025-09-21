@@ -6,6 +6,7 @@ data:
     ClusterId: {{ include "groundcover.clusterId" . }}
     ApiKey: 
     Env:
+    IsBackend: {{ .Values.global.backend.enabled }}
     RunningNamespace:
     {{- if .Values.integrationsAgent }}
     {{- if .Values.integrationsAgent.targets }}
