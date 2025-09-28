@@ -1,4 +1,5 @@
 {{- $hasClickhouseSecrets := false }}
+{{- $hasAuthorizedSecrets := false }}
 {{- if .Values.integrationsAgent.targets }}
 {{- if .Values.integrationsAgent.targets.clickhouseQueryLog }}
   {{- range .Values.integrationsAgent.targets.clickhouseQueryLog }}
@@ -10,7 +11,10 @@
   {{- end }}
 {{- end }}
 {{- end }}
-{{ if $hasClickhouseSecrets }}
+{{- if .Values.integrationsAgent.authorizedSecrets }}
+  {{- $hasAuthorizedSecrets = true }}
+{{- end }}
+{{ if or $hasClickhouseSecrets $hasAuthorizedSecrets }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -45,6 +49,13 @@ rules:
       {{- end }}
     {{- end }}
   {{- end }}
+  {{- end }}
+  {{- if .Values.integrationsAgent.authorizedSecrets }}
+    {{- range .Values.integrationsAgent.authorizedSecrets }}
+      {{- if .name }}
+        {{- $resourceNames = append $resourceNames .name }}
+      {{- end }}
+    {{- end }}
   {{- end }}
   {{- if $resourceNames }}
   resourceNames:
