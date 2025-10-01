@@ -13,6 +13,10 @@ global:
     enabled: false
   workflows:
     enabled: true
+  temporal:
+    enabled: false
+    nodeSelector: {}
+    tolerations: []
   vector:
     forceLocal: false
     tracesAsLogs:
@@ -3332,6 +3336,212 @@ backend:
         requests:
           cpu: 500m
           memory: 1Gi
+
+  # Temporal configuration for production
+  # Uses external PostgreSQL via managed-postgres-credentials secret
+  temporalConfig:
+    postgres:
+      host: "NONE"  # Read from secret
+      port: 5432
+      database: temporal
+      username: postgres
+      secret:
+        name: "managed-postgres-credentials"
+        passwordKey: "password"
+        hostKey: "host"
+        portKey: "port"
+        usernameKey: "username"
+    tls:
+      enabled: true
+
+  # Temporal subchart configuration
+  # The additionalEnv must be provided to inject database credentials
+  temporal:
+    server:
+      frontend:
+        additionalEnv:
+          - name: TEMPORAL_STORE_HOST
+            valueFrom:
+              secretKeyRef:
+                name: "managed-postgres-credentials"
+                key: "host"
+          - name: TEMPORAL_VISIBILITY_HOST
+            valueFrom:
+              secretKeyRef:
+                name: "managed-postgres-credentials"
+                key: "host"
+          - name: TEMPORAL_STORE_PORT
+            valueFrom:
+              secretKeyRef:
+                name: "managed-postgres-credentials"
+                key: "port"
+          - name: TEMPORAL_VISIBILITY_PORT
+            valueFrom:
+              secretKeyRef:
+                name: "managed-postgres-credentials"
+                key: "port"
+          - name: TEMPORAL_STORE_DATABASE
+            value: "temporal"
+          - name: TEMPORAL_VISIBILITY_DATABASE
+            value: "temporal_visibility"
+          - name: TEMPORAL_STORE_USER
+            valueFrom:
+              secretKeyRef:
+                name: "managed-postgres-credentials"
+                key: "username"
+          - name: TEMPORAL_VISIBILITY_USER
+            valueFrom:
+              secretKeyRef:
+                name: "managed-postgres-credentials"
+                key: "username"
+          - name: TEMPORAL_STORE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: "managed-postgres-credentials"
+                key: "password"
+          - name: TEMPORAL_VISIBILITY_STORE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: "managed-postgres-credentials"
+                key: "password"
+      history:
+        additionalEnv:
+          - name: TEMPORAL_STORE_HOST
+            valueFrom:
+              secretKeyRef:
+                name: "managed-postgres-credentials"
+                key: "host"
+          - name: TEMPORAL_VISIBILITY_HOST
+            valueFrom:
+              secretKeyRef:
+                name: "managed-postgres-credentials"
+                key: "host"
+          - name: TEMPORAL_STORE_PORT
+            valueFrom:
+              secretKeyRef:
+                name: "managed-postgres-credentials"
+                key: "port"
+          - name: TEMPORAL_VISIBILITY_PORT
+            valueFrom:
+              secretKeyRef:
+                name: "managed-postgres-credentials"
+                key: "port"
+          - name: TEMPORAL_STORE_DATABASE
+            value: "temporal"
+          - name: TEMPORAL_VISIBILITY_DATABASE
+            value: "temporal_visibility"
+          - name: TEMPORAL_STORE_USER
+            valueFrom:
+              secretKeyRef:
+                name: "managed-postgres-credentials"
+                key: "username"
+          - name: TEMPORAL_VISIBILITY_USER
+            valueFrom:
+              secretKeyRef:
+                name: "managed-postgres-credentials"
+                key: "username"
+          - name: TEMPORAL_STORE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: "managed-postgres-credentials"
+                key: "password"
+          - name: TEMPORAL_VISIBILITY_STORE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: "managed-postgres-credentials"
+                key: "password"
+      matching:
+        additionalEnv:
+          - name: TEMPORAL_STORE_HOST
+            valueFrom:
+              secretKeyRef:
+                name: "managed-postgres-credentials"
+                key: "host"
+          - name: TEMPORAL_VISIBILITY_HOST
+            valueFrom:
+              secretKeyRef:
+                name: "managed-postgres-credentials"
+                key: "host"
+          - name: TEMPORAL_STORE_PORT
+            valueFrom:
+              secretKeyRef:
+                name: "managed-postgres-credentials"
+                key: "port"
+          - name: TEMPORAL_VISIBILITY_PORT
+            valueFrom:
+              secretKeyRef:
+                name: "managed-postgres-credentials"
+                key: "port"
+          - name: TEMPORAL_STORE_DATABASE
+            value: "temporal"
+          - name: TEMPORAL_VISIBILITY_DATABASE
+            value: "temporal_visibility"
+          - name: TEMPORAL_STORE_USER
+            valueFrom:
+              secretKeyRef:
+                name: "managed-postgres-credentials"
+                key: "username"
+          - name: TEMPORAL_VISIBILITY_USER
+            valueFrom:
+              secretKeyRef:
+                name: "managed-postgres-credentials"
+                key: "username"
+          - name: TEMPORAL_STORE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: "managed-postgres-credentials"
+                key: "password"
+          - name: TEMPORAL_VISIBILITY_STORE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: "managed-postgres-credentials"
+                key: "password"
+      worker:
+        additionalEnv:
+          - name: TEMPORAL_STORE_HOST
+            valueFrom:
+              secretKeyRef:
+                name: "managed-postgres-credentials"
+                key: "host"
+          - name: TEMPORAL_VISIBILITY_HOST
+            valueFrom:
+              secretKeyRef:
+                name: "managed-postgres-credentials"
+                key: "host"
+          - name: TEMPORAL_STORE_PORT
+            valueFrom:
+              secretKeyRef:
+                name: "managed-postgres-credentials"
+                key: "port"
+          - name: TEMPORAL_VISIBILITY_PORT
+            valueFrom:
+              secretKeyRef:
+                name: "managed-postgres-credentials"
+                key: "port"
+          - name: TEMPORAL_STORE_DATABASE
+            value: "temporal"
+          - name: TEMPORAL_VISIBILITY_DATABASE
+            value: "temporal_visibility"
+          - name: TEMPORAL_STORE_USER
+            valueFrom:
+              secretKeyRef:
+                name: "managed-postgres-credentials"
+                key: "username"
+          - name: TEMPORAL_VISIBILITY_USER
+            valueFrom:
+              secretKeyRef:
+                name: "managed-postgres-credentials"
+                key: "username"
+          - name: TEMPORAL_STORE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: "managed-postgres-credentials"
+                key: "password"
+          - name: TEMPORAL_VISIBILITY_STORE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: "managed-postgres-credentials"
+                key: "password"
 
 groundcover:
   extraObjects: {}
