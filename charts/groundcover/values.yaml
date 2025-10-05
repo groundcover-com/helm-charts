@@ -36,6 +36,8 @@ global:
     enabled: false
     healthProbe:
       port: 2021
+  metricsAggregator:
+    enabled: false
 
   ingress:
     # set ingress site for inCloud / on-prem sensor only deployments
@@ -813,6 +815,104 @@ ingestor:
           enabled: true
           port: 8026
 
+metricsAggregator:
+  image:
+    repository: "{{ .Values.global.origin.registry }}/sensor"
+    tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
+  additionalLabels:
+  additionalAnnotations:
+  podLabels:
+  podAnnotations:
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/name: metrics-aggregator
+  affinity:
+  nodeSelector:
+  tolerations: []
+  priorityClassName:
+  monitoring:
+    port: 9102
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      memory: 2048Mi
+  builtinEnv:
+  - name: API_KEY
+    valueFrom:
+      secretKeyRef:
+        key: '{{ template "groundcover.apikeySecretKey" . }}'
+        name: '{{ template "groundcover.apikeySecretName" . }}'  
+  logLevel: 4
+  healthProbe:
+    port: 2021
+    enabled: true
+  receivers:
+    remotewrite:
+      enabled: true
+      port: 8428
+  exporters:
+    remotewrite:
+      usePrometheusCompatibleNaming: true
+      url: '{{ template "metrics-aggregator.write.url" . }}'
+  pipelines:
+    metrics:
+      enricherEnabled: false
+  logs:
+    pipeline:
+      dropOldLogs:
+        dropThreshold: 12h
+        dropAlwaysThreshold: 12h
+        delayStart: 2m
+  pprof:
+    enabled: '{{ include ".telemetry.enabled" . }}'
+    uploaderType: pyroscope
+    cpuSamplingDuration: 60s
+    backoffTicker:
+      interval: 10s
+      exponent: 40
+    memoryTicker:
+      enabled: true
+      interval: 60s
+      jumpSizeInBytes: 100000000
+      windowSize: 12h
+      initialWait: 10m
+    cpuTicker:
+      enabled: true
+      interval: 60s
+      jumpSizeInMCPU: 100
+      windowSize: 12h
+      initialWait: 10m
+  collectionEnabled: false
+  ingestionEnabled: true
+  setLocalTrafficPolicy: false
+  apmIngestor:
+    dataDog:
+      enabled: false
+      proxyEnabled: false
+    otel:
+      proxyEnabled: false
+      direct:
+        enabled: false
+        zipkin:
+          enabled: false
+        otlp:
+          enabled: false
+        jaeger:
+          enabled: false
+        httpjson:
+          enabled: false
+        firehose:
+          enabled: false
+        loki:
+          enabled: false
+        rum:
+          enabled: false
 fleetManager:
   image:
     repository: "{{ .Values.global.origin.registry }}/fleet-manager"

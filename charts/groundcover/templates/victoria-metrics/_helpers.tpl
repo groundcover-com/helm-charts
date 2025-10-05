@@ -182,7 +182,9 @@ WRITE: Used by metrics-ingestor and custom-metrics
 {{- end -}}
 
 {{- define "victoria-metrics.write.http.url" -}}
-{{- if or .Values.global.backend.enabled .Values.global.metrics.overrideUrl -}}
+{{- if and .Values.global.backend.enabled .Values.global.metricsAggregator.enabled -}}
+    {{- printf "http://%s:8428/api/v1/write" (include "metrics-aggregator.fullname" .) -}}
+{{- else if or .Values.global.backend.enabled .Values.global.metrics.overrideUrl -}}
     {{- (printf "%s://%s/%s" (include "victoria-metrics.write.http.scheme" .) (include "victoria-metrics.write.http.hostport" .) (include "victoria-metrics.write.http.path" .)) | trimSuffix "/" -}}
 {{- else if .Values.global.ingress.site -}}
     {{- printf "%s/api/v1/write" (include "incloud.metrics.http.url" .) -}}

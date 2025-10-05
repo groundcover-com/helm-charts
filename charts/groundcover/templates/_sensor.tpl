@@ -53,7 +53,7 @@ receivers:
   {{ end }}
 exporters:
   remotewrite:
-    url: {{ include "metrics-ingester.write.http.url" . }}
+    url: {{ if $sensorValues.exporters.remotewrite.url }}{{ tpl $sensorValues.exporters.remotewrite.url . }}{{ else }}{{ include "metrics-ingester.write.http.url" . }}{{ end }}
     usePrometheusCompatibleNaming: {{ $sensorValues.exporters.remotewrite.usePrometheusCompatibleNaming }}
     tlsSkipVerify: true
 pipelines:
