@@ -69,6 +69,13 @@ spec:
                 name: {{ .Values.global.ingestor.enabled | ternary (include "ingestor.fullname" .) (include "opentelemetry-collector.fullname" .)  }}
                 port:
                   number: {{ index .Values.global "opentelemetry-collector" "ports" "datadogapm" "servicePort" | int }}
+          - path: {{ get (urlParse (include "opentelemetry-collector.datadogapm.tracesapiv02.http.url" .)) "path" }}
+            pathType: Exact
+            backend:
+              service:
+                name: {{ .Values.global.ingestor.enabled | ternary (include "ingestor.fullname" .) (include "opentelemetry-collector.fullname" .) }}
+                port:
+                  number: {{ index .Values.global "opentelemetry-collector" "ports" "datadogapm" "servicePort" | int }}
           - path: {{ get (urlParse (include "opentelemetry-collector.otlptraces.http.url" .)) "path" }} 
             pathType: Exact
             backend:
