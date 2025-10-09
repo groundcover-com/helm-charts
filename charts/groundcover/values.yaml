@@ -534,6 +534,7 @@ agent:
           "X-Amz-Firehose-Access-Key",
           "Cookie",
           "Set-Cookie",
+          "Api-Key",
           "X-Api-Key",
           "X-Csrf-Token",
           "X-XSRF-TOKEN",
