@@ -3474,7 +3474,7 @@ data:
       - Name: HTTPCode_Target_4XX_Count
         Statistics:
         - Sum
-      - Name: HTTPCode_Target_xXX_Count
+      - Name: HTTPCode_Target_5XX_Count
         Statistics:
         - Sum
       - Name: IPv6ProcessedBytes
