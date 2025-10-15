@@ -5,6 +5,10 @@ SPDX-License-Identifier: APACHE-2.0
 
 {{- $shards := .Values.shards | int }}
 {{- range $i, $e := until $shards }}
+{{ $shardResourceKey := "none" }}
+{{- if hasKey $.Values "perShardResources" }}
+  {{ $shardResourceKey = printf "shard%v" $i }}
+{{- end }}
 apiVersion: {{ include "common.capabilities.statefulset.apiVersion" $ }}
 kind: StatefulSet
 metadata:
@@ -250,7 +254,25 @@ spec:
             - secretRef:
                 name: {{ include "common.tplvalues.render" (dict "value" $.Values.extraEnvVarsSecret "context" $) }}
             {{- end }}
-          {{- if $.Values.resources }}
+          {{- if and (ne $shardResourceKey "none") (hasKey $.Values.perShardResources $shardResourceKey) (index $.Values "perShardResources" $shardResourceKey )}}
+          {{- $shardResources := index $.Values "perShardResources" $shardResourceKey }}
+          {{- if not (hasKey $shardResources "requests") }}
+          {{- fail (printf "perShardResources.%s must contain 'requests' field" $shardResourceKey) }}
+          {{- end }}
+          {{- if not (hasKey $shardResources.requests "cpu") }}
+          {{- fail (printf "perShardResources.%s.requests must contain 'cpu' field" $shardResourceKey) }}
+          {{- end }}
+          {{- if not (hasKey $shardResources.requests "memory") }}
+          {{- fail (printf "perShardResources.%s.requests must contain 'memory' field" $shardResourceKey) }}
+          {{- end }}
+          {{- if not (hasKey $shardResources "limits") }}
+          {{- fail (printf "perShardResources.%s must contain 'limits' field" $shardResourceKey) }}
+          {{- end }}
+          {{- if not (hasKey $shardResources.limits "memory") }}
+          {{- fail (printf "perShardResources.%s.limits must contain 'memory' field" $shardResourceKey) }}
+          {{- end }}
+          resources: {{- $shardResources | toYaml | nindent 12 }}
+          {{- else if $.Values.resources }}
           resources: {{- toYaml $.Values.resources | nindent 12 }}
           {{- else if ne $.Values.resourcesPreset "none" }}
           resources: {{- include "common.resources.preset" (dict "type" $.Values.resourcesPreset) | nindent 12 }}

@@ -211,6 +211,28 @@ resourcesPreset: "small"
 ##     memory: 1024Mi
 ##
 resources: {}
+## @param perShardResources Set container requests and limits for a specific shard in the clickhouse deployment
+## If no perShardResources is provided, then .Values.resources or common.resources.preset will take effect.
+## Individual keys must follow the shard<index> pattern as shown below
+## must contain all of requests.cpu, limits.cpu, limits.memory to pass validation
+## Example:
+## perShardResources
+##   shard0:
+##     requests:
+##       cpu: 2
+##       memory: 512Mi
+##     limits:
+##       cpu: 3
+##       memory: 1024Mi
+##   shard1:
+##     requests:
+##       cpu: 1
+##       memory: 128Mi
+##     limits:
+##       cpu: 2
+##       memory: 512Mi
+perShardResources: {}
+
 ## Configure Pods Security Context
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
 ## @param podSecurityContext.enabled Enabled ClickHouse pods' Security Context
