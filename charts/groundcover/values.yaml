@@ -1243,7 +1243,7 @@ clickhouse:
     <clickhouse>
       <profiles>
         <reader_profile>
-          <readonly>0</readonly>
+          <readonly>2</readonly>
         </reader_profile>
         <writer_profile>
           <readonly>0</readonly>
@@ -3331,7 +3331,7 @@ monitors-manager:
             defaultDatabase: '{{ include "clickhouse.database" . }}'
             port: "{{ .Values.global.clickhouse.containerPorts.tcp | int }}"
             server: '{{ include "clickhouse.shard0Name" . }}'
-            username: '{{ include "clickhouse.username" . }}'
+            username: '{{ include "clickhouse.readerUsername" . }}'
           access: proxy
           secureJsonData:
             password: $CLICKHOUSE_PASSWORD
