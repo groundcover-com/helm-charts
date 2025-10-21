@@ -14,11 +14,10 @@ data:
   CLICKHOUSE_USER: {{ include "clickhouse.username" . | quote }}
 
   # ClickHouse Table Configuration
-  SOURCE_TABLE: {{ .Values.chip.sourceTable | default "logs_v6" | quote }}
+  CHIP_TABLES: {{ join "," .Values.chip.tables | quote }}
 
   # S3 Destination Configuration
   DEST_BUCKET: {{ required "A valid .Values.chip.storage.s3.bucket is required when chip is enabled" .Values.chip.storage.s3.bucket | quote }}
-  DEST_PREFIX: {{ .Values.chip.storage.s3.prefix | default "logs_v6" | quote }}
   AWS_REGION: {{ required "A valid .Values.chip.storage.s3.region is required when chip is enabled" .Values.chip.storage.s3.region | quote }}
 
   # Processing Configuration

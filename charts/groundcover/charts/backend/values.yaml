@@ -607,7 +607,7 @@ chip:
   image:
     registry: public.ecr.aws/groundcovercom
     repository: chip
-    tag: "0.0.4"
+    tag: "0.0.5"
     pullPolicy: Always
 
   serviceAccount:
@@ -615,10 +615,7 @@ chip:
     name: ""
     annotations: {}
 
-  # Source configuration
-  sourceTable: "logs_v6"
-
-  # Tables to process (used by trigger job to start multiple workflows)
+  # Tables to process - worker will automatically manage workflows for these tables
   tables:
     - logs_v6
     - traces_v2
@@ -628,7 +625,6 @@ chip:
     s3:
       bucket: ""
       region: ""
-      prefix: "logs_v6"
 
   # Processing configuration
   processing:
@@ -643,12 +639,6 @@ chip:
     host: ""
     taskQueue: "clickhouse-log-processing"
     namespace: "default"
-
-  # Trigger job configuration
-  trigger:
-    enabled: false
-    # Timestamp defaults to yesterday at 00:00:00 if not set
-    timestamp: ""
 
   # Log level
   logLevel: "INFO"
