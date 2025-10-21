@@ -1,0 +1,39 @@
+{{- if .Values.chip.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "chip.configMapName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "chip.labels" . | nindent 4 }}
+data:
+  # ClickHouse Configuration
+  CLICKHOUSE_HOST: {{ include "clickhouse.fullname" . | quote }}
+  CLICKHOUSE_PORT: {{ .Values.global.clickhouse.containerPorts.http | default "8123" | quote }}
+  CLICKHOUSE_DATABASE: {{ include "clickhouse.database" . | quote }}
+  CLICKHOUSE_USER: {{ include "clickhouse.username" . | quote }}
+
+  # ClickHouse Table Configuration
+  SOURCE_TABLE: {{ .Values.chip.sourceTable | default "logs_v6" | quote }}
+
+  # S3 Destination Configuration
+  DEST_BUCKET: {{ required "A valid .Values.chip.storage.s3.bucket is required when chip is enabled" .Values.chip.storage.s3.bucket | quote }}
+  DEST_PREFIX: {{ .Values.chip.storage.s3.prefix | default "logs_v6" | quote }}
+  AWS_REGION: {{ required "A valid .Values.chip.storage.s3.region is required when chip is enabled" .Values.chip.storage.s3.region | quote }}
+
+  # Processing Configuration
+  OPTIMAL_FILE_SIZE_ROWS: {{ .Values.chip.processing.optimalFileSizeRows | default "7900000" | quote }}
+  TARGET_FILE_SIZE_MB: {{ .Values.chip.processing.targetFileSizeMB | default "256" | quote }}
+
+  # Workload Bucketing Configuration
+  WORKLOAD_BUCKETS: {{ .Values.chip.processing.workloadBuckets | default "16" | quote }}
+  HASH_FUNCTION: {{ .Values.chip.processing.hashFunction | default "xxh3" | quote }}
+
+  # Temporal Configuration
+  TEMPORAL_HOST: {{ .Values.chip.temporal.host | default (printf "%s-temporal-frontend:7233" .Release.Name) | quote }}
+  TEMPORAL_TASK_QUEUE: {{ .Values.chip.temporal.taskQueue | default "clickhouse-log-processing" | quote }}
+  TEMPORAL_NAMESPACE: {{ .Values.chip.temporal.namespace | default "default" | quote }}
+
+  # Logging
+  LOG_LEVEL: {{ .Values.chip.logLevel | default "INFO" | quote }}
+{{- end }}

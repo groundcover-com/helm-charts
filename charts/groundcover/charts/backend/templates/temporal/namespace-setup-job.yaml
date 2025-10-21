@@ -3,8 +3,12 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ .Release.Name }}-temporal-namespace-setup-{{ .Release.Revision }}
+  name: {{ .Release.Name }}-temporal-namespace-setup
   namespace: {{ .Release.Namespace }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": before-hook-creation
   labels:
     app.kubernetes.io/name: temporal-namespace-setup
     app.kubernetes.io/instance: {{ .Release.Name }}

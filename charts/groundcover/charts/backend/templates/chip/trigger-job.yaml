@@ -1,0 +1,66 @@
+{{- if .Values.chip.enabled }}
+{{- if .Values.chip.trigger.enabled }}
+{{- $yesterday := mustDateModify "-24h" now | date "2006-01-02T00:00:00Z07:00" }}
+{{- $timestamp := "" }}
+{{- if .Values.chip.trigger.timestamp }}
+{{- $timestamp = .Values.chip.trigger.timestamp }}
+{{- else }}
+{{- $timestamp = $yesterday }}
+{{- end }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "chip.workerName" . }}-trigger
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "5"
+    "helm.sh/hook-delete-policy": before-hook-creation
+  labels:
+    {{- include "chip.labels" . | nindent 4 }}
+    component: trigger
+spec:
+  template:
+    metadata:
+      labels:
+        app: {{ include "chip.workerName" . }}
+        component: trigger
+    spec:
+      serviceAccountName: {{ include "chip.serviceAccountName" . }}
+      restartPolicy: Never
+      {{- with .Values.chip.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.chip.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: trigger
+          image: {{ include "chip.image" . }}
+          imagePullPolicy: {{ .Values.chip.image.pullPolicy | default "Always" }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              echo "Starting CHIP workflows for timestamp: {{ $timestamp }}"
+              {{- range .Values.chip.tables }}
+              echo "Triggering workflow for table: {{ . }}"
+              python temporal_client.py start-bucketed {{ $timestamp | quote }} "" {{ . }} {{ . }}
+              {{- end }}
+              echo "All workflows started successfully"
+          envFrom:
+            - configMapRef:
+                name: {{ include "chip.configMapName" . }}
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+  backoffLimit: 3
+{{- end }}
+{{- end }}
