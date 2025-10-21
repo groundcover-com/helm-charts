@@ -134,6 +134,10 @@ spec:
             {{- tpl (toYaml .) $ | nindent 12 }}
             {{- end }}
           {{- end }}
+          {{- if .Values.lifecycleHooks }}
+          lifecycle:
+            {{- toYaml .Values.lifecycleHooks | nindent 12 }}
+          {{- end }}
           readinessProbe:
             httpGet:
             {{- if and .Values.extraArgs.tls (eq (tpl .Values.extraArgs.tls .) "true") }}

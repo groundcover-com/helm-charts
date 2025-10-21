@@ -118,6 +118,10 @@ spec:
           periodSeconds: 15
           failureThreshold: 20
         {{- end }}
+        {{- if .Values.ingestor.lifecycleHooks }}
+        lifecycle:
+{{- toYaml .Values.ingestor.lifecycleHooks | nindent 10 }}
+        {{- end }}
         resources:
 {{- toYaml .Values.ingestor.resources | nindent 10 }}
         volumeMounts:

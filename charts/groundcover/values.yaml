@@ -815,6 +815,12 @@ ingestor:
         rum:
           enabled: true
           port: 8026
+  lifecycleHooks: 
+    preStop:
+      exec:
+        command:
+        - /bin/sleep
+        - "10"
 
 metricsAggregator:
   image:
@@ -1734,7 +1740,7 @@ vector:
       exec:
         command:
         - /bin/sleep
-        - "3"    
+        - "10"    
   service:
     ports:
       - name: api
@@ -2868,6 +2874,12 @@ metrics-ingester:
     scrape_configs: []
   podLabels: 
     app.groundcover.com/pipeline: metrics
+  lifecycleHooks:
+    preStop:
+      exec:
+        command:
+        - /bin/sleep
+        - "10"
 victoria-metrics-agent:
   service:
     enabled: true
