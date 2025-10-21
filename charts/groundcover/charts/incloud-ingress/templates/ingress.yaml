@@ -3,7 +3,7 @@ kind: Ingress
 metadata:
   name: {{ printf "%s-otel-http" (include "incloud-ingress.name" .) | trunc 63 | trimSuffix "-" }}
   annotations:
-    konghq.com/plugins: {{ printf "%s-auth" .Release.Name }},{{ printf "%s-basic-auth" .Release.Name }},cors-allow-all
+    konghq.com/plugins: {{ printf "%s-auth" .Release.Name }},{{ printf "%s-basic-auth" .Release.Name }}{{printf ",cors-allow-all"}}
     konghq.com/protocols: {{ ternary "https" "http" ( eq (tpl .Values.secure . ) "true" )  | quote }}
     {{- with .Values.ingress.annotations }}
       {{- toYaml . | nindent 4 }}
@@ -132,7 +132,7 @@ kind: Ingress
 metadata:
   name: {{ printf "%s-ingest-v2-health" (include "incloud-ingress.name" .) | trunc 63 | trimSuffix "-" }}
   annotations:
-    konghq.com/plugins: {{ printf "%s-auth,ingest-v2-rewrite-to-health" .Release.Name | quote }}
+    konghq.com/plugins: {{ printf "%s-auth,ingest-v2-rewrite-to-health" .Release.Name }}
     konghq.com/protocols: {{ ternary "https" "http" ( eq (tpl .Values.secure . ) "true" ) | quote }}
     {{- with .Values.ingress.annotations }}
       {{- toYaml . | nindent 4 }}
@@ -167,7 +167,7 @@ kind: Ingress
 metadata:
   name: {{ printf "%s-ingest-v2-otlp" (include "incloud-ingress.name" .) | trunc 63 | trimSuffix "-" }}
   annotations:
-    konghq.com/plugins: {{ printf "%s-auth,ingest-v2-rewrite-to-v1-logs" .Release.Name | quote }}
+    konghq.com/plugins: {{ printf "%s-auth,ingest-v2-rewrite-to-v1-logs" .Release.Name }}
     konghq.com/protocols: {{ ternary "https" "http" ( eq (tpl .Values.secure . ) "true" ) | quote }}
     {{- with .Values.ingress.annotations }}
       {{- toYaml . | nindent 4 }}
@@ -222,7 +222,7 @@ kind: Ingress
 metadata:
   name: {{ printf "%s-ingest-v2-json" (include "incloud-ingress.name" .) | trunc 63 | trimSuffix "-" }}
   annotations:
-    konghq.com/plugins: {{ printf "%s-auth" .Release.Name | quote }}
+    konghq.com/plugins: {{ printf "%s-auth" .Release.Name }}
     konghq.com/protocols: {{ ternary "https" "http" ( eq (tpl .Values.secure . ) "true" ) | quote }}
     {{- with .Values.ingress.annotations }}
       {{- toYaml . | nindent 4 }}
@@ -290,7 +290,7 @@ kind: Ingress
 metadata:
   name: {{ printf "%s-metrics-http" (include "incloud-ingress.name" .) | trunc 63 | trimSuffix "-" }}
   annotations:
-    konghq.com/plugins: {{ printf "%s-auth" .Release.Name }},{{ printf "%s-basic-auth" .Release.Name }}
+    konghq.com/plugins: {{ printf "%s-auth" .Release.Name }},{{ printf "%s-basic-auth" .Release.Name }}{{- if .Values.global.ingress.useIngestionTag }}{{ ",tag-ingestion-key" }}{{- end }}
     konghq.com/protocols: {{ ternary "https" "http" ( eq (tpl .Values.secure . ) "true" ) | quote }}
     {{- with .Values.ingress.annotations }}
       {{- toYaml . | nindent 4 }}
@@ -360,7 +360,7 @@ metadata:
   name: {{ printf "%s-grpc" (include "incloud-ingress.name" .) | trunc 63 | trimSuffix "-" }}
   annotations:
     konghq.com/headers.content-type: application/grpc
-    konghq.com/plugins: {{ printf "%s-auth" .Release.Name | quote }}
+    konghq.com/plugins: {{ printf "%s-auth" .Release.Name }}
     konghq.com/protocols: {{ ternary "grpcs" "grpc" ( eq (tpl .Values.secure . ) "true" ) | quote }}
     {{- with .Values.ingress.annotations }}
       {{- toYaml . | nindent 4 }}
@@ -409,7 +409,7 @@ kind: Ingress
 metadata:
   name: {{ printf "%s-status" (include "incloud-ingress.name" .) | trunc 63 | trimSuffix "-" }}
   annotations:
-    konghq.com/plugins: {{ printf "%s-auth" .Release.Name | quote }}
+    konghq.com/plugins: {{ printf "%s-auth" .Release.Name }}
     konghq.com/protocols: {{ ternary "https" "http" ( eq (tpl .Values.secure . ) "true" ) | quote }}
     {{- with .Values.ingress.annotations }}
       {{- toYaml . | nindent 4 }}
@@ -445,7 +445,7 @@ metadata:
   annotations:
     konghq.com/protocols: {{ ternary "https" "http" ( eq (tpl .Values.secure . ) "true" ) | quote }}
     konghq.com/strip-path: "true"
-    konghq.com/plugins: {{ printf "%s-auth" .Release.Name }},allow-ingestion-token-remoteconfig,fleet-manager-rewrite-api
+    konghq.com/plugins: {{ printf "%s-auth" .Release.Name }}{{printf ",allow-ingestion-token-remoteconfig,fleet-manager-rewrite-api"}}
     {{- with .Values.ingress.annotations }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
@@ -482,7 +482,7 @@ metadata:
   annotations:
     konghq.com/protocols: {{ ternary "https" "http" ( eq (tpl .Values.secure . ) "true" ) | quote }}
     konghq.com/headers.X-Clickhouse-User: default
-    konghq.com/plugins: {{ printf "%s-auth,clickhouse-ds-rewrite" .Release.Name | quote }}
+    konghq.com/plugins: {{ printf "%s-auth,clickhouse-ds-rewrite" .Release.Name }}
     {{- with .Values.ingress.annotations }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
@@ -518,7 +518,7 @@ metadata:
   annotations:
     konghq.com/protocols: {{ ternary "https" "http" ( eq (tpl .Values.secure . ) "true" ) | quote }}
     konghq.com/strip-path: "true"
-    konghq.com/plugins: {{ printf "%s-auth" .Release.Name | quote }}
+    konghq.com/plugins: {{ printf "%s-auth" .Release.Name }}
     {{- with .Values.ingress.annotations }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
