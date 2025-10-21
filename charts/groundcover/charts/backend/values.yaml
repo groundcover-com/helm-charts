@@ -147,7 +147,7 @@ postgresql:
 
             grand_all_privileges_on_schema_public_to_user() {
               echo "11-create-keep-user.sh: GRANT ALL PRIVILEGES ON SCHEMA public TO ${PGKEEPUSER}"
-              echo "GRANT ALL PRIVILEGES ON SCHEMA public TO ${PGKEEPUSER}" | psql -U postgres
+              echo "GRANT ALL PRIVILEGES ON SCHEMA public TO ${PGKEEPUSER}" | psql -U postgres -d ${PGKEEPDB}
             }
 
             override_user_password() {
