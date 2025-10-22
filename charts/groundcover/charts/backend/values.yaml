@@ -607,7 +607,7 @@ chip:
   image:
     registry: public.ecr.aws/groundcovercom
     repository: chip
-    tag: "0.0.8"
+    tag: "0.0.9"
     pullPolicy: Always
 
   serviceAccount:
@@ -617,8 +617,8 @@ chip:
 
   # Tables to process - worker will automatically manage workflows for these tables
   tables:
-    - logs_v6_dist
-    - traces_v2_dist
+    - logs_v6
+    - traces_v2
 
   # S3 storage configuration - will be populated by terraform
   storage:
