@@ -59,6 +59,23 @@ exporters:
 pipelines:
   metrics:
     enricherEnabled: {{ $sensorValues.pipelines.metrics.enricherEnabled }}
+    {{- if $sensorValues.pipelines.metrics.aggregation }}
+    aggregation:
+      enabled: {{ $sensorValues.pipelines.metrics.aggregation.enabled }}
+      {{- if $sensorValues.pipelines.metrics.aggregation.configuration }}
+      configuration:
+        dedupInterval: {{ $sensorValues.pipelines.metrics.aggregation.configuration.dedupInterval }}
+        dropInput: {{ $sensorValues.pipelines.metrics.aggregation.configuration.dropInput }}
+        {{- if $sensorValues.pipelines.metrics.aggregation.configuration.dropInputLabels }}
+        dropInputLabels: {{ toYaml $sensorValues.pipelines.metrics.aggregation.configuration.dropInputLabels | nindent 10 }}
+        {{- end }}
+        ignoreOldSamples: {{ $sensorValues.pipelines.metrics.aggregation.configuration.ignoreOldSamples }}
+        ignoreFirstIntervals: {{ $sensorValues.pipelines.metrics.aggregation.configuration.ignoreFirstIntervals }}
+        keepInput: {{ $sensorValues.pipelines.metrics.aggregation.configuration.keepInput }}
+        enableWindows: {{ $sensorValues.pipelines.metrics.aggregation.configuration.enableWindows }}
+        content: {{ $sensorValues.pipelines.metrics.aggregation.configuration.content | quote }}
+      {{- end }}
+    {{- end }}
 startuptimeout: 120s
 {{ if $sensorValues.collectionEnabled }}
 productchansize: 512
