@@ -12,8 +12,9 @@ data:
   CLICKHOUSE_PORT: {{ .Values.global.clickhouse.containerPorts.http | default "8123" | quote }}
   CLICKHOUSE_DATABASE: {{ include "clickhouse.database" . | quote }}
   CLICKHOUSE_USER: {{ include "clickhouse.username" . | quote }}
-  CLICKHOUSE_SHARDS: {{ .Values.global.clickhouse.shards | default 1 | quote }}
+  CLICKHOUSE_SHARDS: {{ .Values.clickhouse.shards | default 1 | quote }}
   CLICKHOUSE_HEADLESS_SERVICE: {{ printf "%s-headless" (include "clickhouse.fullname" .) | quote }}
+  CLICKHOUSE_NAMESPACE: {{ .Release.Namespace | quote }}
 
   # ClickHouse Table Configuration
   CHIP_TABLES: {{ join "," .Values.chip.tables | quote }}

@@ -589,10 +589,48 @@ dbManager:
           key: '{{ include "clickhouse.secretKey" . }}'
           name: '{{ include "clickhouse.secretName" . }}'
   objectStorageQueues: {}
-  cloudPricing: 
+  cloudPricing:
     enabled: true
     pricingFileURL: "https://groundcover-public-assets.s3.amazonaws.com/cloud_pricing_v1.csv"
     refreshInterval: 6h # {amount}[h(ours), d(ays), w(eeks), y(ears)]
+
+chip:
+  enabled: false
+  replicaCount: 1
+  image:
+    registry: public.ecr.aws/groundcovercom
+    repository: chip
+    tag: "0.0.12"
+    pullPolicy: Always
+  serviceAccount:
+    name: ""
+    annotations: {}
+  tables:
+    - logs_v6
+    - traces_v2
+  storage:
+    s3:
+      bucket: ""
+      region: ""
+  processing:
+    optimalFileSizeRows: "1316666"
+    targetFileSizeMB: "128"
+    workloadBuckets: "16"
+    hashFunction: "xxh3"
+  temporal:
+    host: ""
+    taskQueue: "clickhouse-log-processing"
+    namespace: "default"
+  logLevel: "INFO"
+  nodeSelector: {}
+  tolerations: []
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "2Gi"
+      cpu: "2000m"
 
 integrationsAgent:
   initContainers:
