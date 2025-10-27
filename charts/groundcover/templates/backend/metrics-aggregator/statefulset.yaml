@@ -2,7 +2,7 @@
 {{- $sensorValues := deepCopy .Values.metricsAggregator -}}
 {{- $sensorValues = mergeOverwrite $sensorValues (default (dict) .Values.global.metricsAggregator) -}}
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   annotations:
     groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
@@ -19,15 +19,13 @@ metadata:
   name: {{ include "metrics-aggregator.fullname" . }}
   namespace: {{ .Release.Namespace }}
 spec:
-  replicas: 1
+  replicas: {{ default 1 $sensorValues.replicas }}
+  serviceName: {{ include "metrics-aggregator.fullname" . }}-headless
   selector:
     matchLabels:
       app: metrics-aggregator
-  strategy:
+  updateStrategy:
     type: RollingUpdate
-    rollingUpdate:
-      maxUnavailable: 0
-      maxSurge: 1
   template:
     metadata:
       annotations:
@@ -123,6 +121,8 @@ spec:
         volumeMounts:
         - mountPath: /config
           name: metrics-aggregator-config-volume
+        - mountPath: {{default "/vmagent_pq/vmagent-remotewrite-data" $sensorValues.exporters.remotewrite.tmpDataPath}}
+          name: persistent-queue-data
 {{- if $sensorValues.priorityClassName }}
       priorityClassName: {{ $sensorValues.priorityClassName }}
 {{- end }}
@@ -130,4 +130,17 @@ spec:
       - configMap:
           name: {{ include "metrics-aggregator.fullname" . }}-config
         name: metrics-aggregator-config-volume
+  volumeClaimTemplates:
+  - metadata:
+      name: persistent-queue-data
+      labels:
+        {{- include "groundcover.labels" . | nindent 8 }}
+        app: metrics-aggregator
+        app.kubernetes.io/name: metrics-aggregator
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: {{ default "50Gi" $sensorValues.exporters.remotewrite.maxDiskUsagePerURL }}
 {{ end -}}

@@ -56,6 +56,8 @@ exporters:
     url: {{ if $sensorValues.exporters.remotewrite.url }}{{ tpl $sensorValues.exporters.remotewrite.url . }}{{ else }}{{ include "metrics-ingester.write.http.url" . }}{{ end }}
     usePrometheusCompatibleNaming: {{ $sensorValues.exporters.remotewrite.usePrometheusCompatibleNaming }}
     tlsSkipVerify: true
+    maxDiskUsagePerURL: {{ $sensorValues.exporters.remotewrite.maxDiskUsagePerURL }}
+    tmpDataPath: {{ $sensorValues.exporters.remotewrite.tmpDataPath }}
 pipelines:
   metrics:
     enricherEnabled: {{ $sensorValues.pipelines.metrics.enricherEnabled }}
