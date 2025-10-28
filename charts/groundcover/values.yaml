@@ -176,8 +176,13 @@ global:
     overrideUrl: ""
 
   # customerConfigOverrides
-  customerConfigOverrides:
-    configSecretName:
+  customerConfigKeysOverrides:
+    enabled: false
+    mapping:
+      gc_cluster_id:
+      gc_region:
+      gc_version:
+      gc_env:
 
 tags:
   # InCloud - Enterprise Setup. groundcover's control-plane reconciled observability infrastructure deployment.

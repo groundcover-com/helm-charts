@@ -69,7 +69,7 @@ Create the name of the service account to use
 
 
 {{- define "groundcover.config.secretName" -}}
-{{- printf "%s" (default "groundcover-config" .Values.global.customerConfigOverrides.configSecretName) -}}
+{{- print "groundcover-config" -}}
 {{- end -}}
 
 {{/*
@@ -79,6 +79,9 @@ Get cluster_id from values or generate random one
 {{- $secret := (lookup "v1" "Secret" .Release.Namespace (include "groundcover.config.secretName" .) | default dict) -}}
 {{- if .Values.clusterId -}}
     {{- .Values.clusterId -}}
+{{- else if .Values.global.customerConfigKeysOverrides.enabled -}}
+    {{- $keyName := .Values.global.customerConfigKeysOverrides.mapping.gc_cluster_id -}}
+    {{- index .Values $keyName -}}
 {{- else if $secret -}}
     {{- index $secret "data" "GC_CLUSTER_ID" | b64dec -}}
 {{- else -}}
