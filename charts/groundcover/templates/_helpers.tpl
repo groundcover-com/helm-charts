@@ -69,7 +69,7 @@ Create the name of the service account to use
 
 
 {{- define "groundcover.config.secretName" -}}
-{{- print "groundcover-config" -}}
+{{- printf "%s" (default "groundcover-config" .Values.global.customerConfigOverrides.configSecretName) -}}
 {{- end -}}
 
 {{/*
