@@ -612,6 +612,14 @@ data:
         APIConcurrencyLimit: {{ .Values.integrationsAgent.inventory.aws.apiConcurrencyLimit }}
     {{- end }}
     {{- end }}
+    {{- if .Values.integrationsAgent.rateLimits }}
+    RateLimits:
+      {{- if .Values.integrationsAgent.rateLimits.cloudwatchListMetrics }}
+      CloudwatchListMetrics:
+        Count: {{ .Values.integrationsAgent.rateLimits.cloudwatchListMetrics.count }}
+        Duration: {{ .Values.integrationsAgent.rateLimits.cloudwatchListMetrics.duration }}
+      {{- end }}
+    {{- end }}
 
     Pprof:
       enabled: {{ include "telemetry.enabled" . }}

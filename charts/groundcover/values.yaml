@@ -709,6 +709,10 @@ integrationsAgent:
     failureThreshold: 20
   extraVolumes: []
   extraVolumeMounts: []
+  rateLimits:
+    cloudwatchListMetrics:
+      count: 20
+      duration: 1s
   exporters:
     prometheus:
       requestTimeout: 30s
