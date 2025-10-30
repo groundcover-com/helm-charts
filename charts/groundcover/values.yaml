@@ -159,6 +159,9 @@ global:
     metrics:
       url: https://metrics.groundcover.com/api/v1/write
       interval: 30s
+      customerHosting:
+        enabled: true
+        interval: 5m
     traces:
       otlpUrl: https://traces.groundcover.com/v1/traces
       zipkinUrl: https://traces.groundcover.com/api/v2/spans

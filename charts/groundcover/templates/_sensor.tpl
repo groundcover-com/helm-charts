@@ -630,10 +630,16 @@ postgreSqlConfig:
 {{ end }}
 
 telemetry:
-  enabled: {{ and (eq "true" (include "telemetry.enabled" .)) .Values.global.agent.enabled }}
+  enabled: {{ include "telemetry.enabled" . }}
   metrics:
-    url: {{ include "sensor.telemetry.metrics.url" . }}
-    interval: {{ include "telemetry.metrics.interval" . }}
+    globalHosting:
+      enabled: {{ not .Values.tags.incloud }}
+      url: {{ include "sensor.telemetry.metrics.url" . }}
+      interval: {{ include "telemetry.metrics.interval" . }}
+    customerHosting:
+      enabled: {{ .Values.global.telemetry.metrics.customerHosting.enabled }}
+      url: {{ default (include "metrics-ingester.promethues-exposition.http.url" .) .Values.global.telemetry.metrics.customerHosting.url }}
+      interval: {{ .Values.global.telemetry.metrics.customerHosting.interval }}
 
 {{ if $sensorValues.collectionEnabled }}
 k8sEntitiesWatch:
