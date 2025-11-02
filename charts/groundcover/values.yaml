@@ -603,7 +603,7 @@ chip:
   image:
     registry: public.ecr.aws/groundcovercom
     repository: chip
-    tag: "0.0.12"
+    tag: "0.0.14"
     pullPolicy: Always
   serviceAccount:
     name: ""
