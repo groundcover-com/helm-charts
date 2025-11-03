@@ -3116,6 +3116,8 @@ kube-state-metrics:
   # - volumeattachments
 
 victoria-metrics-operator:
+  image:
+    registry: public.ecr.aws/groundcovercom  
   enabled: false
   # https://github.com/VictoriaMetrics/operator/blob/master/docs/vars.md
   extraArgs:
