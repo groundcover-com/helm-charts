@@ -159,7 +159,7 @@ global:
     metrics:
       url: https://metrics.groundcover.com/api/v1/write
       interval: 30s
-      customerHosting:
+      localStorage:
         enabled: true
         interval: 5m
     traces:

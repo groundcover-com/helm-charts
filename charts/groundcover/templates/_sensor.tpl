@@ -632,14 +632,14 @@ postgreSqlConfig:
 telemetry:
   enabled: {{ include "telemetry.enabled" . }}
   metrics:
-    globalHosting:
+    remoteStorage:
       enabled: {{ not .Values.tags.incloud }}
       url: {{ include "sensor.telemetry.metrics.url" . }}
       interval: {{ include "telemetry.metrics.interval" . }}
-    customerHosting:
-      enabled: {{ .Values.global.telemetry.metrics.customerHosting.enabled }}
-      url: {{ default (include "metrics-ingester.promethues-exposition.http.url" .) .Values.global.telemetry.metrics.customerHosting.url }}
-      interval: {{ .Values.global.telemetry.metrics.customerHosting.interval }}
+    localStorage:
+      enabled: {{ .Values.global.telemetry.metrics.localStorage.enabled }}
+      url: {{ default (include "metrics-ingester.promethues-exposition.http.url" .) .Values.global.telemetry.metrics.localStorage.url }}
+      interval: {{ .Values.global.telemetry.metrics.localStorage.interval }}
 
 {{ if $sensorValues.collectionEnabled }}
 k8sEntitiesWatch:
