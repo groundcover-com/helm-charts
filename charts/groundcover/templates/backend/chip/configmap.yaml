@@ -9,7 +9,7 @@ metadata:
 data:
   # ClickHouse Configuration
   CLICKHOUSE_HOST: {{ include "clickhouse.fullname" . | quote }}
-  CLICKHOUSE_PORT: {{ .Values.global.clickhouse.containerPorts.http | default "8123" | quote }}
+  CLICKHOUSE_PORT: {{ .Values.global.clickhouse.containerPorts.tcp | default "9000" | quote }}
   CLICKHOUSE_DATABASE: {{ include "clickhouse.database" . | quote }}
   CLICKHOUSE_USER: {{ include "clickhouse.username" . | quote }}
   CLICKHOUSE_SHARDS: {{ .Values.clickhouse.shards | default 1 | quote }}
