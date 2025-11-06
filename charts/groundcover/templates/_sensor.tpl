@@ -676,13 +676,13 @@ sensitiveHeadersObfuscationConfig:
 - protocol: TCP
   name: otlp-grpc
   port: {{ $sensorValues.apmIngestor.otel.direct.otlp.grpcPort }}
-  targetPort: {{ $sensorValues.apmIngestor.otel.direct.grpcPort }}
+  targetPort: {{ $sensorValues.apmIngestor.otel.direct.otlp.grpcPort }}
 {{- end }}
 {{- if and $sensorValues.apmIngestor.otel.direct.otlp.enabled $sensorValues.apmIngestor.otel.direct.otlp.httpPort }}
 - protocol: TCP
   name: otlp-http
   port: {{ $sensorValues.apmIngestor.otel.direct.otlp.httpPort }}
-  targetPort: {{ $sensorValues.apmIngestor.otel.direct.httpPort }}
+  targetPort: {{ $sensorValues.apmIngestor.otel.direct.otlp.httpPort }}
 {{- end }}
 {{- if and $sensorValues.apmIngestor.otel.direct.jaeger.enabled $sensorValues.apmIngestor.otel.direct.jaeger.grpcPort }}
 - protocol: TCP
