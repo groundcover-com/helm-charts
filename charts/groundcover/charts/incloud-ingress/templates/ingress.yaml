@@ -471,6 +471,20 @@ spec:
                 name: {{ include "fleet-manager.fullname" . }}
                 port:
                   name: manage-http
+          - path: /fleet-manager/api/client/v1/config
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ include "fleet-manager.fullname" . }}
+                port:
+                  name: manage-http
+          - path: /fleet-manager/api/client/v2/config
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ include "fleet-manager.fullname" . }}
+                port:
+                  name: manage-http                                    
 {{- end }}
 ---
 
