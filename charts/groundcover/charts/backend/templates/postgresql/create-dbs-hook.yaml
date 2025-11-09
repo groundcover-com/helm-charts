@@ -1,4 +1,4 @@
-{{- if and .Values.global.postgresql.enabled .Values.postgresql.jobs.createDbs.enabled .Values.global.postgresql.overrideUrl }}
+{{- if and .Values.postgresql.jobs.createDbs.enabled .Values.global.postgresql.overrideUrl }}
 {{- $name := (printf "%s-create-dbs" (include "postgresql.primary.fullname" $)) -}}
 apiVersion: batch/v1
 kind: Job
