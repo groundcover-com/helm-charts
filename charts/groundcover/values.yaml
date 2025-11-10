@@ -834,6 +834,9 @@ ingestor:
           - key: gc_env_type
             from_context: x-groundcover-env-type
             action: upsert
+          - key: gc_ingestion_key
+            from_context: x-groundcover-ingestion-key
+            action: upsert
         samplingRatio: 0.05
         zipkin:
           enabled: true
