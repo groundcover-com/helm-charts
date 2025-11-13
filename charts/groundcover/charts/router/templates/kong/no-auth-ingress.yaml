@@ -1,0 +1,40 @@
+{{- if and (eq .Values.global.auth.type "no-auth") (eq .Values.global.auth.enabled true) -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    konghq.com/protocols: http,https
+  name: router-no-auth-ingress
+  namespace: {{ .Release.Namespace }}
+spec:
+  ingressClassName: {{ .Values.kong.ingressController.ingressClass }}
+  rules:
+  - host: {{ .Values.frontendDomain }}
+    http:
+      paths:
+      - backend:
+          service:
+            name: {{ .Values.auth.proxyService }}
+            port:
+              number: {{ .Values.auth.proxyPort }}
+        path: /
+        pathType: Prefix
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: router-no-auth-api-ingress
+  namespace: {{ .Release.Namespace }}
+spec:
+  ingressClassName: {{ .Values.kong.ingressController.ingressClass }}
+  rules:
+  - http:
+      paths:
+      - backend:
+          service:
+            name: router
+            port:
+              number: 8080
+        path: /api
+        pathType: Prefix
+{{- end -}}

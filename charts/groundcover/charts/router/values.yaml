@@ -7,6 +7,7 @@
 global:
   auth:
     type: auth0
+    enabled: false
   postgresql:
     enabled: true
     overrideUrl: ""
@@ -26,13 +27,17 @@ global:
     enableTLS: false
     customDomains: []
 enabled: true
+auth:
+  proxyService: "oauth2proxy-oauth2-proxy"
+  proxyPort: 80
+frontendDomain: ""
 additionalLabels:
 onprem:
   enabled: true
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.11.108
+  tag: 1.11.109
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/curl'
