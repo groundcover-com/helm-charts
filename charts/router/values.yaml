@@ -32,7 +32,7 @@ onprem:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.11.105
+  tag: 1.11.106
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/curl'
