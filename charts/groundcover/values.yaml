@@ -579,6 +579,10 @@ dbManager:
   image:
     repository: "{{ .Values.global.origin.registry }}/db-manager"
     tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
+  # Minimum ClickHouse major.minor version required for db-manager to start
+  # Set to empty string to disable version checking
+  # Format: "major.minor" (e.g., "25.8")
+  minClickhouseVersion: "25.8"
   resources:
     limits:
       memory: 1Gi
@@ -1248,8 +1252,9 @@ clickhouse:
   shards: 1
   replicaCount: 1
   image:
-    tag: 25.4.5-debian-12-r0
+    tag: 25.8.11-debian-12-r0
     registry: public.ecr.aws/groundcovercom
+    repository: clickhouse
   coldVolume: ""
   containerSecurityContext:
     enabled: false

@@ -88,14 +88,69 @@ spec:
         - mountPath: /config
           name: db-manager-config-volume
       initContainers:
-      - args:
-          - while [ $(curl -sw '%{http_code}' {{ printf "%s/ping" (include "clickhouse.httpEndpoint" .) }}
-            -o /dev/null) -ne 200 ]; do echo 'Waiting for Clickhouse...'; sleep 2; done; echo Clickhouse is up
+      - name: check-ch-ready
+        image: '{{ tpl .Values.curl.image.repository . }}:{{ tpl .Values.curl.image.tag . }}'
+{{- if .Values.dbManager.minClickhouseVersion }}
+        env:
+        - name: CLICKHOUSE_USER
+          value: "manager"
+        - name: CLICKHOUSE_PASS
+          valueFrom:
+            secretKeyRef:
+              key: '{{ include "clickhouse.secretKey" . }}'
+              name: '{{ include "clickhouse.secretName" . }}'
+{{- end }}
         command:
           - /bin/sh
           - -c
-        image: '{{ tpl .Values.curl.image.repository . }}:{{ tpl .Values.curl.image.tag . }}'
-        name: check-ch-ready
+        args:
+          - |
+            set -e
+            CLICKHOUSE_URL="{{ include "clickhouse.httpEndpoint" . }}"
+            
+            # Wait for ClickHouse to be ready
+            while [ $(curl -sw '%{http_code}' "${CLICKHOUSE_URL}/ping" -o /dev/null) -ne 200 ]; do
+              echo 'Waiting for ClickHouse...'
+              sleep 2
+            done
+            echo 'ClickHouse is up'
+{{- if .Values.dbManager.minClickhouseVersion }}
+            
+            # Check ClickHouse version
+            MIN_VERSION="{{ .Values.dbManager.minClickhouseVersion }}"
+            echo "Checking ClickHouse version (minimum required: $MIN_VERSION)..."
+            
+            while true; do
+              # Query ClickHouse version using manager user (which has 'default' as default database)
+              ACTUAL_VERSION=$(curl -s -u "${CLICKHOUSE_USER}:${CLICKHOUSE_PASS}" "$CLICKHOUSE_URL/?query=SELECT+version()" 2>&1 | tr -d '\n' | tr -d ' ')
+              
+              # Check if we got a valid response (not empty and not an error message)
+              if [ -n "$ACTUAL_VERSION" ] && ! echo "$ACTUAL_VERSION" | grep -q "Exception\|Error\|error"; then
+                echo "ClickHouse version: $ACTUAL_VERSION"
+                
+                # Extract major.minor version for comparison
+                ACTUAL_MAJOR_MINOR=$(echo "$ACTUAL_VERSION" | cut -d'.' -f1,2)
+                MIN_MAJOR_MINOR=$(echo "$MIN_VERSION" | cut -d'.' -f1,2)
+                
+                # Convert versions to comparable numbers (e.g., 25.8 -> 2508, 25.10 -> 2510)
+                ACTUAL_NUM=$(echo "$ACTUAL_MAJOR_MINOR" | awk -F. '{printf "%d%02d", $1, $2}')
+                MIN_NUM=$(echo "$MIN_MAJOR_MINOR" | awk -F. '{printf "%d%02d", $1, $2}')
+                
+                if [ "$ACTUAL_NUM" -lt "$MIN_NUM" ]; then
+                  echo "ERROR: ClickHouse version $ACTUAL_VERSION is below minimum required version $MIN_VERSION"
+                  echo "  Required: >= $MIN_VERSION"
+                  echo "  Got: $ACTUAL_MAJOR_MINOR (full version: $ACTUAL_VERSION)"
+                  exit 1
+                fi
+                
+                echo "ClickHouse version check passed"
+                break
+              fi
+              
+              echo "Waiting for ClickHouse version info..."
+              sleep 2
+            done
+{{- end }}
 {{- if .Values.dbManager.priorityClassName }}
       priorityClassName: {{ .Values.dbManager.priorityClassName }}
 {{- end }}
