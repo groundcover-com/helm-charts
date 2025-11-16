@@ -241,7 +241,7 @@ sendKubeletInfraMetrics: true
 positionsFile: "/var/run/positions/positions.yaml"
 decolorizeLogs: false
 maxLogSize: 102400 # 100KB
-maxLogContentSize: 5120 # 5KB
+maxLogContentSize: 15360 # 15KB
 logBatchSendQueueWorkerCount: 3
 logBatchSendQueueMaxSize: 10
 jsonFlattenMaxDepth: 6
