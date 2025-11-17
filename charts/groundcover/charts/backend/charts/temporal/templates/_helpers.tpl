@@ -35,16 +35,18 @@ Create chart name and version as used by the chart label.
 Create the name of the service account
 */}}
 {{- define "temporal.serviceAccountName" -}}
+{{- if .Values.serviceAccount.create -}}
 {{ default (include "temporal.fullname" .) .Values.serviceAccount.name }}
+{{- else -}}
+{{ default "default" .Values.serviceAccount.name }}
+{{- end -}}
 {{- end -}}
 
 {{/*
 Define the service account as needed
 */}}
 {{- define "temporal.serviceAccount" -}}
-{{- if .Values.serviceAccount.create -}}
 serviceAccountName: {{ include "temporal.serviceAccountName" . }}
-{{- end -}}
 {{- end -}}
 
 {{/*
@@ -59,6 +61,82 @@ and we want to make sure that the component is included in the name.
 {{- end -}}
 
 {{/*
+Define the AppVersion
+*/}}
+{{- define "temporal.appVersion" -}}
+{{- if .Chart.AppVersion -}}
+{{ .Chart.AppVersion | replace "+" "_" | quote }}
+{{- else -}}
+{{ include "temporal.chart" $ }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Create the annotations for all resources
+*/}}
+{{- define "temporal.resourceAnnotations" -}}
+{{- $global := index . 0 -}}
+{{- $scope := index . 1 -}}
+{{- $resourceType := index . 2 -}}
+{{- $component := "server" -}}
+{{- if (or (eq $scope "admintools") (eq $scope "web")) -}}
+{{- $component = $scope -}}
+{{- end -}}
+{{- with $resourceType -}}
+{{- $resourceTypeKey := printf "%sAnnotations" . -}}
+{{- $componentAnnotations := (index $global.Values $component $resourceTypeKey) -}}
+{{- $scopeAnnotations := dict -}}
+{{- if hasKey (index $global.Values $component) $scope -}}
+{{- $scopeAnnotations = (index $global.Values $component $scope $resourceTypeKey) -}}
+{{- end -}}
+{{- $resourceAnnotations := merge $scopeAnnotations $componentAnnotations -}}
+{{- range $annotation_name, $annotation_value := $resourceAnnotations }}
+{{ $annotation_name }}: {{ $annotation_value | quote }}
+{{- end -}}
+{{- end -}}
+{{- range $annotation_name, $annotation_value := $global.Values.additionalAnnotations }}
+{{ $annotation_name }}: {{ $annotation_value | quote }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Create the labels for all resources
+*/}}
+{{- define "temporal.resourceLabels" -}}
+{{- $global := index . 0 -}}
+{{- $scope := index . 1 -}}
+{{- $resourceType := index . 2 -}}
+{{- $component := "server" -}}
+{{- if (or (eq $scope "admintools") (eq $scope "web")) -}}
+{{- $component = $scope -}}
+{{- end -}}
+{{- with $scope -}}
+app.kubernetes.io/component: {{ . }}
+{{ end -}}
+app.kubernetes.io/name: {{ include "temporal.name" $global }}
+helm.sh/chart: {{ include "temporal.chart" $global }}
+app.kubernetes.io/managed-by: {{ index $global "Release" "Service" }}
+app.kubernetes.io/instance: {{ index $global "Release" "Name" }}
+app.kubernetes.io/version: {{ include "temporal.appVersion" $global }}
+app.kubernetes.io/part-of: {{ $global.Chart.Name }}
+{{- with $resourceType -}}
+{{- $resourceTypeKey := printf "%sLabels" . -}}
+{{- $componentLabels := (index $global.Values $component $resourceTypeKey) -}}
+{{- $scopeLabels := dict -}}
+{{- if hasKey (index $global.Values $component) $scope -}}
+{{- $scopeLabels = (index $global.Values $component $scope $resourceTypeKey) -}}
+{{- end -}}
+{{- $resourceLabels := merge $scopeLabels $componentLabels -}}
+{{- range $label_name, $label_value := $resourceLabels }}
+{{ $label_name}}: {{ $label_value | quote }}
+{{- end -}}
+{{- end -}}
+{{- range $label_name, $label_value := $global.Values.additionalLabels }}
+{{ $label_name }}: {{ $label_value | quote }}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Call nested templates.
 Source: https://stackoverflow.com/a/52024583/3027614
 */}}
@@ -68,70 +146,6 @@ Source: https://stackoverflow.com/a/52024583/3027614
 {{- $template := index . 2 }}
 {{- include $template (dict "Chart" (dict "Name" $subchart) "Values" (index $dot.Values $subchart) "Release" $dot.Release "Capabilities" $dot.Capabilities) }}
 {{- end }}
-
-{{- define "temporal.frontend.grpcPort" -}}
-{{- if $.Values.server.frontend.service.port -}}
-{{- $.Values.server.frontend.service.port -}}
-{{- else -}}
-{{- 7233 -}}
-{{- end -}}
-{{- end -}}
-
-{{- define "temporal.frontend.membershipPort" -}}
-{{- if $.Values.server.frontend.service.membershipPort -}}
-{{- $.Values.server.frontend.service.membershipPort -}}
-{{- else -}}
-{{- 6933 -}}
-{{- end -}}
-{{- end -}}
-
-{{- define "temporal.history.grpcPort" -}}
-{{- if $.Values.server.history.service.port -}}
-{{- $.Values.server.history.service.port -}}
-{{- else -}}
-{{- 7234 -}}
-{{- end -}}
-{{- end -}}
-
-{{- define "temporal.history.membershipPort" -}}
-{{- if $.Values.server.history.service.membershipPort -}}
-{{- $.Values.server.history.service.membershipPort -}}
-{{- else -}}
-{{- 6934 -}}
-{{- end -}}
-{{- end -}}
-
-{{- define "temporal.matching.grpcPort" -}}
-{{- if $.Values.server.matching.service.port -}}
-{{- $.Values.server.matching.service.port -}}
-{{- else -}}
-{{- 7235 -}}
-{{- end -}}
-{{- end -}}
-
-{{- define "temporal.matching.membershipPort" -}}
-{{- if $.Values.server.matching.service.membershipPort -}}
-{{- $.Values.server.matching.service.membershipPort -}}
-{{- else -}}
-{{- 6935 -}}
-{{- end -}}
-{{- end -}}
-
-{{- define "temporal.worker.grpcPort" -}}
-{{- if $.Values.server.worker.service.port -}}
-{{- $.Values.server.worker.service.port -}}
-{{- else -}}
-{{- 7239 -}}
-{{- end -}}
-{{- end -}}
-
-{{- define "temporal.worker.membershipPort" -}}
-{{- if $.Values.server.worker.service.membershipPort -}}
-{{- $.Values.server.worker.service.membershipPort -}}
-{{- else -}}
-{{- 6939 -}}
-{{- end -}}
-{{- end -}}
 
 {{- define "temporal.persistence.schema" -}}
 {{- if eq . "default" -}}
@@ -145,10 +159,12 @@ Source: https://stackoverflow.com/a/52024583/3027614
 {{- $global := index . 0 -}}
 {{- $store := index . 1 -}}
 {{- $storeConfig := index $global.Values.server.config.persistence $store -}}
-{{- if $storeConfig.driver -}}
-{{- $storeConfig.driver -}}
-{{- else if $global.Values.cassandra.enabled -}}
+{{- if and (eq $store "default") $global.Values.cassandra.enabled -}}
 {{- print "cassandra" -}}
+{{- else if and (eq $store "visibility") (or $global.Values.elasticsearch.enabled $global.Values.elasticsearch.external) -}}
+{{- print "elasticsearch" -}}
+{{- else if $storeConfig.driver -}}
+{{- $storeConfig.driver -}}
 {{- else if $global.Values.mysql.enabled -}}
 {{- print "sql" -}}
 {{- else if $global.Values.postgresql.enabled -}}
@@ -188,9 +204,10 @@ Source: https://stackoverflow.com/a/52024583/3027614
 {{- $global := index . 0 -}}
 {{- $store := index . 1 -}}
 {{- $storeConfig := index $global.Values.server.config.persistence $store -}}
-{{- if $storeConfig.cassandra.existingSecret -}}
-{{- $storeConfig.cassandra.existingSecret -}}
-{{- else if $storeConfig.cassandra.password -}}
+{{- $driverConfig := $storeConfig.cassandra -}}
+{{- if $driverConfig.existingSecret -}}
+{{- $driverConfig.existingSecret -}}
+{{- else if $driverConfig.password -}}
 {{- include "temporal.componentname" (list $global (printf "%s-store" $store)) -}}
 {{- else -}}
 {{/* Cassandra password is optional, but we will create an empty secret for it */}}
@@ -202,8 +219,13 @@ Source: https://stackoverflow.com/a/52024583/3027614
 {{- $global := index . 0 -}}
 {{- $store := index . 1 -}}
 {{- $storeConfig := index $global.Values.server.config.persistence $store -}}
+{{- $driverConfig := $storeConfig.cassandra -}}
+{{- with $driverConfig.secretKey -}}
+{{- print . -}}
+{{- else -}}
 {{/* Cassandra password is optional, but we will create an empty secret for it */}}
 {{- print "password" -}}
+{{- end -}}
 {{- end -}}
 
 {{- define "temporal.persistence.sql.database" -}}
@@ -304,8 +326,11 @@ Source: https://stackoverflow.com/a/52024583/3027614
 {{- $global := index . 0 -}}
 {{- $store := index . 1 -}}
 {{- $storeConfig := index $global.Values.server.config.persistence $store -}}
-{{- if $storeConfig.sql.existingSecret -}}
-{{- $storeConfig.sql.existingSecret -}}
+{{- $driverConfig := $storeConfig.sql -}}
+{{- if $driverConfig.existingSecret -}}
+{{- $driverConfig.existingSecret -}}
+{{- else if $driverConfig.secretName -}}
+{{- print $driverConfig.secretName -}}
 {{- else if $storeConfig.sql.password -}}
 {{- include "temporal.componentname" (list $global (printf "%s-store" $store)) -}}
 {{- else if and $global.Values.mysql.enabled (and (eq (include "temporal.persistence.driver" (list $global $store)) "sql") (eq (include "temporal.persistence.sql.driver" (list $global $store)) "mysql8")) -}}
@@ -321,7 +346,10 @@ Source: https://stackoverflow.com/a/52024583/3027614
 {{- $global := index . 0 -}}
 {{- $store := index . 1 -}}
 {{- $storeConfig := index $global.Values.server.config.persistence $store -}}
-{{- if or $storeConfig.sql.existingSecret $storeConfig.sql.password -}}
+{{- $driverConfig := $storeConfig.sql -}}
+{{- if $driverConfig.secretKey -}}
+{{- print $driverConfig.secretKey -}}
+{{- else if or $driverConfig.existingSecret $driverConfig.password -}}
 {{- print "password" -}}
 {{- else if and $global.Values.mysql.enabled (and (eq (include "temporal.persistence.driver" (list $global $store)) "sql") (eq (include "temporal.persistence.sql.driver" (list $global $store)) "mysql8")) -}}
 {{- print "mysql-password" -}}
@@ -329,6 +357,42 @@ Source: https://stackoverflow.com/a/52024583/3027614
 {{- print "postgresql-password" -}}
 {{- else -}}
 {{- fail (printf "Please specify sql password or existing secret for %s store" $store) -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "temporal.persistence.sql.connectAttributes" -}}
+{{- $global := index . 0 -}}
+{{- $store := index . 1 -}}
+{{- $storeConfig := index $global.Values.server.config.persistence $store -}}
+{{- $driverConfig := $storeConfig.sql -}}
+{{- $result := list -}}
+{{- range $key, $value := $driverConfig.connectAttributes -}}
+  {{- $result = append $result (printf "%s=%v" $key $value) -}}
+{{- end -}}
+{{- join "&" $result -}}
+{{- end -}}
+
+{{- define "temporal.persistence.elasticsearch.secretName" -}}
+{{- $global := index . 0 -}}
+{{- $store := index . 1 -}}
+{{- $driverConfig := $global.Values.elasticsearch -}}
+{{- if $driverConfig.existingSecret -}}
+{{- print $driverConfig.existingSecret -}}
+{{- else if $driverConfig.secretName -}}
+{{- print $driverConfig.secretName -}}
+{{- else -}}
+{{- include "temporal.componentname" (list $global (printf "%s-store" $store)) -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "temporal.persistence.elasticsearch.secretKey" -}}
+{{- $global := index . 0 -}}
+{{- $store := index . 1 -}}
+{{- $driverConfig := $global.Values.elasticsearch -}}
+{{- if $driverConfig.secretKey -}}
+{{- print $driverConfig.secretKey -}}
+{{- else -}}
+{{- "password" -}}
 {{- end -}}
 {{- end -}}
 
@@ -350,7 +414,7 @@ All Cassandra hosts.
 {{- define "cassandra.hosts" -}}
 {{- range $i := (until (int .Values.cassandra.config.cluster_size)) }}
 {{- $cassandraName := include "call-nested" (list $ "cassandra" "cassandra.fullname") -}}
-{{- printf "%s.%s.svc.cluster.local," $cassandraName $.Release.Namespace -}}
+{{- printf "%s.%s," $cassandraName $.Release.Namespace -}}
 {{- end }}
 {{- end -}}
 
@@ -359,7 +423,7 @@ The first Cassandra host in the stateful set.
 */}}
 {{- define "cassandra.host" -}}
 {{- $cassandraName := include "call-nested" (list . "cassandra" "cassandra.fullname") -}}
-{{- printf "%s.%s.svc.cluster.local" $cassandraName .Release.Namespace -}}
+{{- printf "%s.%s" $cassandraName .Release.Namespace -}}
 {{- end -}}
 
 {{/*
@@ -373,5 +437,17 @@ Usage:
         {{- tpl .value .context }}
     {{- else }}
         {{- tpl (.value | toYaml) .context }}
+    {{- end }}
+{{- end -}}
+
+{{/*
+To modify camelCase to hyphenated internal-frontend service name
+*/}}
+{{- define "serviceName" -}}
+    {{- $service := index . 0 -}}
+    {{- if eq $service "internalFrontend" }}
+        {{- print "internal-frontend" }}
+    {{- else }}
+        {{- print $service }}
     {{- end }}
 {{- end -}}

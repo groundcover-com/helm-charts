@@ -502,7 +502,7 @@ temporal:
     replicaCount: 2
     image:
       repository: us-docker.pkg.dev/groundcovercom/repo/temporalio/server
-      tag: 1.22.4
+      tag: 1.29.1
     config:
       persistence:
         defaultStore: default
@@ -566,13 +566,13 @@ temporal:
     replicaCount: 1
     image:
       repository: us-docker.pkg.dev/groundcovercom/repo/temporalio/ui
-      tag: 2.16.2
+      tag: 2.42.1
 
   admintools:
     enabled: true
     image:
       repository: us-docker.pkg.dev/groundcovercom/repo/temporalio/admin-tools
-      tag: 1.22.4
+      tag: 1.29.1-tctl-1.18.4-cli-1.5.0
 
   # Disable schema management - handled by our job
   schema:

@@ -2,57 +2,55 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "temporal.componentname" (list . "admintools") }}
+  name: {{ include "temporal.componentname" (list $ "admintools") }}
+  annotations:
+    {{- include "temporal.resourceAnnotations" (list $ "admintools" "deployment") | nindent 4 }}
   labels:
-    app.kubernetes.io/name: {{ include "temporal.name" . }}
-    helm.sh/chart: {{ include "temporal.chart" . }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/version: {{ .Chart.AppVersion | replace "+" "_" }}
-    app.kubernetes.io/component: admintools
-    app.kubernetes.io/part-of: {{ .Chart.Name }}
+    {{- include "temporal.resourceLabels" (list $ "admintools" "deployment") | nindent 4 }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "temporal.name" . }}
+      app.kubernetes.io/name: {{ include "temporal.name" $ }}
       app.kubernetes.io/instance: {{ .Release.Name }}
       app.kubernetes.io/component: admintools
   template:
     metadata:
-      labels:
-        app.kubernetes.io/name: {{ include "temporal.name" . }}
-        helm.sh/chart: {{ include "temporal.chart" . }}
-        app.kubernetes.io/managed-by: {{ .Release.Service }}
-        app.kubernetes.io/instance: {{ .Release.Name }}
-        app.kubernetes.io/version: {{ .Chart.AppVersion | replace "+" "_" }}
-        app.kubernetes.io/component: admintools
-        app.kubernetes.io/part-of: {{ .Chart.Name }}
-        {{- with $.Values.admintools.podLabels }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
-      {{- with $.Values.admintools.podAnnotations }}
       annotations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- include "temporal.resourceAnnotations" (list $ "admintools" "pod") | nindent 8 }}
+      labels:
+        {{- include "temporal.resourceLabels" (list $ "admintools" "pod") | nindent 8 }}
     spec:
-      {{ include "temporal.serviceAccount" . }}
+      {{ include "temporal.serviceAccount" $ }}
+      {{- with $.Values.admintools.additionalInitContainers }}
+      initContainers:
+        {{- toYaml .| nindent 8 }}
+      {{- end }}
       containers:
         - name: admin-tools
           image: "{{ .Values.admintools.image.repository }}:{{ .Values.admintools.image.tag }}"
           imagePullPolicy: {{ .Values.admintools.image.pullPolicy }}
-          ports:
-            - name: http
-              containerPort: 22
-              protocol: TCP
           env:
             # TEMPORAL_CLI_ADDRESS is deprecated, use TEMPORAL_ADDRESS instead
             - name: TEMPORAL_CLI_ADDRESS
-              value: {{ include "temporal.fullname" . }}-frontend:{{ include "temporal.frontend.grpcPort" . }}
+              {{- if and (hasKey .Values.server "internalFrontend") .Values.server.internalFrontend.enabled }}
+              value: {{ include "temporal.fullname" $ }}-internal-frontend:{{ .Values.server.internalFrontend.service.port }}
+              {{- else }}
+              value: {{ include "temporal.fullname" $ }}-frontend:{{ .Values.server.frontend.service.port }}
+              {{- end }}
             - name: TEMPORAL_ADDRESS
-              value: {{ include "temporal.fullname" . }}-frontend:{{ include "temporal.frontend.grpcPort" . }}
-          {{- if .Values.admintools.additionalEnv }}
-          {{- toYaml .Values.admintools.additionalEnv | nindent 12 }}
+              {{- if and (hasKey .Values.server "internalFrontend") .Values.server.internalFrontend.enabled }}
+              value: {{ include "temporal.fullname" $ }}-internal-frontend:{{ .Values.server.internalFrontend.service.port }}
+              {{- else }}
+              value: {{ include "temporal.fullname" $ }}-frontend:{{ .Values.server.frontend.service.port }}
+              {{- end }}
+          {{- with .Values.admintools.additionalEnv }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.admintools.additionalEnvSecretName }}
+          envFrom:
+            - secretRef:
+                name: {{ . }}
           {{- end }}
           livenessProbe:
               exec:
@@ -61,6 +59,10 @@ spec:
                 - /
               initialDelaySeconds: 5
               periodSeconds: 5
+          {{- with $.Values.admintools.additionalVolumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12}}
+          {{- end }}
           {{- with .Values.admintools.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
@@ -76,6 +78,10 @@ spec:
       {{- with $.Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $.Values.admintools.additionalVolumes }}
+      volumes:
+        {{- toYaml . | nindent 8}}
       {{- end }}
       {{- with .Values.admintools.nodeSelector }}
       nodeSelector:
