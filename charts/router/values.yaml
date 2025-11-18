@@ -37,11 +37,11 @@ onprem:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.11.121
+  tag: 1.11.122
 curl:
   image:
-    repository: '{{ .Values.origin.registry }}/curl'
-    tag: 8.6.0
+    repository: '{{ .Values.origin.registry }}/alpine/curl'
+    tag: 8.14.1
 serviceAccount:
   annotations:
 deployedIngresses:
@@ -161,7 +161,8 @@ extraContainers: []
 kong-crds:
   upgradeCRDs: true
   image:
-    repository: public.ecr.aws/groundcovercom/bitnami/kubectl
+    repository: public.ecr.aws/groundcovercom/alpine/kubectl
+    tag: 1.34.2
 kong:
   replicaCount: 1
   image:
