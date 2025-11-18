@@ -170,7 +170,8 @@ keep:
   namespace: ""
   deleteSecretJob:
     image:
-      repository: public.ecr.aws/groundcovercom/bitnami/kubectl
+      repository: public.ecr.aws/groundcovercom/alpine/kubectl
+      tag: 1.34.2
   backend:
     provisionedProviders:
       victoriametrics:
@@ -324,7 +325,7 @@ victoria-metrics-distributed:
       enabled: false
   availabilityZones: []
   pvcAnnotationsJob:
-    image: "{{ .Values.global.origin.registry }}/bitnami/kubectl:latest"
+    image: "{{ .Values.global.origin.registry }}/alpine/kubectl:1.34.2"
     vmstorage:
       enabled: false
       annotations:

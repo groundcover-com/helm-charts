@@ -285,7 +285,7 @@ statefulset-modifier:
   sizePatches: true
   image:
     tag: latest
-    repository: "{{ .Values.global.origin.registry }}/bitnami/kubectl"
+    repository: "{{ .Values.global.origin.registry }}/alpine/kubectl:1.34.2"
 
 agent:
   imagePullPolicy: 
@@ -3527,8 +3527,8 @@ monitors-manager:
 
 curl:
   image:
-    repository: '{{ .Values.global.origin.registry }}/curl' 
-    tag: 8.6.0
+    repository: '{{ .Values.global.origin.registry }}/alpine/curl' 
+    tag: 8.14.1
 
 rbac:
   pspEnabled: false

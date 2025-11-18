@@ -4,7 +4,8 @@ secure: '{{ include "incloud-ingress.secure" .}}'
 kong-crds:
   upgradeCRDs: true
   image:
-    repository: public.ecr.aws/groundcovercom/bitnami/kubectl
+    repository: public.ecr.aws/groundcovercom/alpine/kubectl
+    tag: 1.34.2
 
 kong:
   replicaCount: 2
