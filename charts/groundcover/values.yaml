@@ -3453,6 +3453,27 @@ monitors-manager:
           secureJsonData:
             password: $CLICKHOUSE_PASSWORD
   alertingOverrides:
+      # List of repeat intervals for alerting routes
+      # Each interval will generate a route that matches alerts with _gc_repeat_interval = <interval>
+      repeatIntervals:
+        - 1m
+        - 5m
+        - 10m
+        - 30m
+        - 1h
+        - 2h
+        - 4h
+        - 8h
+        - 12h
+        - 24h
+        - 48h
+      # Common route configuration applied to all interval-based routes
+      routeDefaults:
+        receiver: workflows-webhook
+        group_by:
+          - '...'
+        group_wait: 30s
+        group_interval: 1m
       contactPoints:
         - name: workflows-webhook
           receivers:

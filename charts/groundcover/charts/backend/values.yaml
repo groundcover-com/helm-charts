@@ -233,7 +233,7 @@ keep:
       - name: KEEP_DEDUPLICATION_DISTRIBUTION_ENABLED
         value: "false"
       - name: KEEP_CUSTOM_DEDUPLICATION_ENABLED
-        value: "false"
+        value: "true"
       - name: POSTHOG_DISABLED
         value: "true"
       - name: PROMETHEUS_MULTIPROC_DIR

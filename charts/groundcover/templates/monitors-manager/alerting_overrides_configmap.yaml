@@ -25,12 +25,33 @@ data:
 {{- range .group_by }}
           - '{{ . }}'
 {{- end }}
+{{- if .matchers }}
+        matchers:
+{{- range .matchers }}
+          - {{ . }}
+{{- end }}
+{{- end }}
         group_wait: {{ .group_wait }}
         group_interval: {{ .group_interval }}
         repeat_interval: {{ .repeat_interval }}
+{{- $routeDefaults := (index $.Values "monitors-manager" "alertingOverrides" "routeDefaults") }}
+{{- $repeatIntervals := (index $.Values "monitors-manager" "alertingOverrides" "repeatIntervals") }}
+        routes:
+{{- range $repeatIntervals }}
+          - receiver: {{ $routeDefaults.receiver }}
+            matchers:
+              - _gc_repeat_interval = {{ . }}
+            group_by:
+{{- range $routeDefaults.group_by }}
+              - '{{ . }}'
+{{- end }}
+            group_wait: {{ $routeDefaults.group_wait }}
+            group_interval: {{ $routeDefaults.group_interval }}
+            repeat_interval: {{ . }}
+{{- end }}
 {{- end }}
 {{ else }}
-    policies: 
+    policies:
       - receiver: grafana-default-email
         group_by: ["grafana_folder","alertname"]
         group_wait: 30s

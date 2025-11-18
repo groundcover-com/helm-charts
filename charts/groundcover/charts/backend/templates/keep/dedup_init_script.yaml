@@ -1,0 +1,108 @@
+{{ if .Values.global.workflows.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keep-dedup-init-script
+  namespace: {{ .Release.Namespace }}
+data:
+  provision-dedup.sh: |
+    #!/bin/sh
+    set -e
+
+    # Constants
+    KEEP_URL="{{ include "keep.base.url" . }}"
+    WEBHOOK_URL="{{ include "keep.event.alert.url" . }}"
+    PROVIDER_TYPE="grafana"
+    RULE_NAME="Grafana Webhook No Dedup"
+    RULE_DESCRIPTION="Allow all Grafana webhook alerts to trigger workflows without deduplication"
+    API_TIMEOUT_RETRIES=30
+    API_RETRY_SLEEP=10
+    ALERT_PROCESSING_SLEEP=5
+
+    # Extract admin API key from composite key
+    API_KEY=$(echo "${KEEP_API_KEY}" | grep -o 'admin:[^:]*:[^,]*' | awk -F':' '{print $3}')
+
+    # Validate API key extraction
+    if [ -z "$API_KEY" ]; then
+      echo "ERROR: Failed to extract admin API key. Expected format: 'admin:user:token'" >&2
+      exit 1
+    fi
+
+    # Wait for Keep API to be ready
+    echo "Waiting for Keep API at ${KEEP_URL}..."
+    RETRIES=$API_TIMEOUT_RETRIES
+    until curl -sf "${KEEP_URL}/" >/dev/null 2>&1 || [ $RETRIES -eq 0 ]; do
+      sleep $API_RETRY_SLEEP
+      RETRIES=$((RETRIES-1))
+    done
+    [ $RETRIES -eq 0 ] && { echo "API timeout after $API_TIMEOUT_RETRIES retries"; exit 1; }
+    echo "Keep API is ready"
+
+    # Check if deduplication rule already exists
+    echo "Checking for existing deduplication rule..."
+    EXISTING_RULE=$(curl -s "${KEEP_URL}/deduplications" -H "X-API-KEY: ${API_KEY}" | \
+      jq -r ".[] | select(.provider_type == \"${PROVIDER_TYPE}\" and .provider_id == null and .name == \"${RULE_NAME}\") | .id" 2>/dev/null || echo "")
+
+    if [ -n "$EXISTING_RULE" ]; then
+      echo "Deduplication rule already exists (ID: ${EXISTING_RULE})"
+      exit 0
+    fi
+    echo "No existing rule found, will create new rule"
+
+    # Check if linked provider exists
+    echo "Checking for linked provider..."
+    LINKED_PROVIDER=$(curl -s "${KEEP_URL}/providers" -H "X-API-KEY: ${API_KEY}" | \
+      jq -r ".linked_providers[] | select(.type == \"${PROVIDER_TYPE}\" and .id == null) | .type" 2>/dev/null || echo "")
+
+    # Create linked provider if it doesn't exist by sending a test webhook
+    if [ -z "$LINKED_PROVIDER" ]; then
+      echo "Linked provider not found, sending bootstrap webhook..."
+      curl -sf -X POST "${WEBHOOK_URL}" \
+        -H "Content-Type: application/json" \
+        -H "X-API-KEY: ${API_KEY}" \
+        -d '{
+          "title": "Keep Init",
+          "status": "resolved",
+          "alerts": [{
+            "labels": {
+              "alertname": "KeepInit",
+              "keep_internal": "true"
+            },
+            "fingerprint": "keep-init-bootstrap"
+          }]
+        }' >/dev/null || { echo "Failed to send bootstrap webhook"; exit 1; }
+
+      echo "Bootstrap webhook sent, waiting ${ALERT_PROCESSING_SLEEP}s for processing..."
+      sleep $ALERT_PROCESSING_SLEEP
+    else
+      echo "Linked provider already exists"
+    fi
+
+    # Create deduplication rule
+    # Note: ignore_fields is empty so lastReceived changes make each alert unique
+    # This ensures every webhook triggers the workflow without deduplication
+    echo "Creating deduplication rule '${RULE_NAME}'..."
+    RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "${KEEP_URL}/deduplications" \
+      -H "Content-Type: application/json" \
+      -H "X-API-KEY: ${API_KEY}" \
+      -d "{
+        \"name\": \"${RULE_NAME}\",
+        \"description\": \"${RULE_DESCRIPTION}\",
+        \"provider_type\": \"${PROVIDER_TYPE}\",
+        \"provider_id\": null,
+        \"fingerprint_fields\": [\"fingerprint\"],
+        \"full_deduplication\": true,
+        \"ignore_fields\": []
+      }")
+
+    HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+    BODY=$(echo "$RESPONSE" | sed '$d')
+
+    if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
+      echo "Successfully created deduplication rule"
+      exit 0
+    else
+      echo "Failed to create rule (HTTP $HTTP_CODE): $BODY"
+      exit 1
+    fi
+{{ end }}

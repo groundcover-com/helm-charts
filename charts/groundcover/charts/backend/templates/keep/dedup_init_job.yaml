@@ -1,0 +1,48 @@
+{{ if .Values.global.workflows.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-keep-dedup-init
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "5"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  template:
+    metadata:
+      name: keep-dedup-init
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: provision-dedup
+        image: alpine:3.22
+        command: ["/bin/sh", "-c", "apk add --no-cache curl jq && /scripts/provision-dedup.sh"]
+        env:
+        - name: KEEP_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: keep-credentials
+              key: api-keys
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "200m"
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: script
+          mountPath: /scripts
+      volumes:
+      - name: script
+        configMap:
+          name: keep-dedup-init-script
+          defaultMode: 0755
+{{ end }}
