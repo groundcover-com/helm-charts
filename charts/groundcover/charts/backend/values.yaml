@@ -474,7 +474,7 @@ temporalConfig:
   adminTools:
     image:
       repository: us-docker.pkg.dev/groundcovercom/repo/temporalio/admin-tools
-      tag: "1.22.6"
+      tag: "1.29.1-tctl-1.18.4-cli-1.5.0"
       pullPolicy: IfNotPresent
   postgres:
     host: "NONE"  # Set to "NONE" to read from secret, or specify host directly

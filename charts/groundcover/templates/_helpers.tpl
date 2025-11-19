@@ -241,16 +241,6 @@ Get cluster_id from values or generate random one
 {{- print "http://db-manager:8888/writer-ready" -}}
 {{- end -}}
 
-{{- define "fleet-manager.url.legacy" -}}
-{{- if .Values.fleetClientConfig.overrideURL -}}
-    {{- .Values.fleetClientConfig.overrideURL -}}
-{{- else if not .Values.global.backend.enabled -}}
-    {{- printf "https://%s/fleet-manager/api/client/config" .Values.global.ingress.site -}}
-{{- else -}}
-    {{- printf "http://%s:8080/api/client/config" (include "fleet-manager.fullname" .) -}}
-{{- end -}}
-{{- end -}}
-
 {{- define "fleet-manager.url" -}}
 {{- if .Values.fleetClientConfig.overrideURL -}}
     {{- .Values.fleetClientConfig.overrideURL -}}

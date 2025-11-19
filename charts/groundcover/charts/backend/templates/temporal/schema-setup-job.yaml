@@ -40,7 +40,7 @@ spec:
         imagePullPolicy: {{ .Values.temporalConfig.adminTools.image.pullPolicy | default "IfNotPresent" }}
         env:
         - name: SQL_PLUGIN
-          value: "postgres"
+          value: "postgres12"
         - name: SQL_HOST
           {{- if eq .Values.temporalConfig.postgres.host "NONE" }}
           valueFrom:
