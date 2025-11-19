@@ -180,3 +180,12 @@ config:
   replace:
     uri: '/api/client/config'
 plugin: request-transformer
+---
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: fleet-manager-rewrite-api-v2
+config:
+  replace:
+    uri: '/api/client/v2/config'
+plugin: request-transformer

@@ -477,14 +477,41 @@ spec:
               service:
                 name: {{ include "fleet-manager.fullname" . }}
                 port:
-                  name: manage-http
+                  name: manage-http       
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ printf "%s-remote-config-v2" (include "incloud-ingress.name" .) | trunc 63 | trimSuffix "-" }}
+  annotations:
+    konghq.com/protocols: {{ ternary "https" "http" ( eq (tpl .Values.secure . ) "true" ) | quote }}
+    konghq.com/strip-path: "true"
+    konghq.com/plugins: {{ printf "%s-auth" .Release.Name }}{{printf ",allow-ingestion-token-remoteconfig,fleet-manager-rewrite-api-v2"}}
+    {{- with .Values.ingress.annotations }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  ingressClassName: {{ include "incloud-ingress.ingressClass" .}}
+  {{- if .Values.global.ingress.enableTLS }}
+  tls:
+    - secretName: {{ include "incloud-ingress.certificate.name" . }}
+      hosts: {{ include "incloud-ingress.certificate.dnsNames" .  | nindent 8 }}
+    {{- if not (empty .Values.global.ingress.customDomains) }}
+    - secretName: {{ include "incloud-ingress.customCertificate.name" . }}
+      hosts: {{ include "incloud-ingress.customCertificate.dnsNames" .  | nindent 8 }}
+    {{- end }}
+
+  {{- end }}
+  rules:
+    - http:
+        paths:
           - path: /fleet-manager/api/client/v2/config
             pathType: ImplementationSpecific
             backend:
               service:
                 name: {{ include "fleet-manager.fullname" . }}
                 port:
-                  name: manage-http                                    
+                  name: manage-http        
 {{- end }}
 ---
 
