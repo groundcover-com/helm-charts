@@ -12,7 +12,6 @@ metadata:
     app.kubernetes.io/name: temporal
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/component: schema-setup
-    {{- include "groundcover.labels" . | nindent 4 }}
 spec:
   template:
     metadata:

@@ -9,7 +9,7 @@ dependencies:
   repository: https://victoriametrics.github.io/helm-charts/
   version: 0.11.0
 - name: temporal
-  repository: https://go.temporal.io/helm-charts
-  version: 0.72.0
-digest: sha256:69c3cb7a508ad5f7bdf550bf03e2b8c63ffbd051a2df57ccb8d8f8ea0ed55ad8
-generated: "2025-11-17T09:17:26.579346927Z"
+  repository: ""
+  version: '>=0.0.0'
+digest: sha256:34625709c56d8ccb740d3709edc75aaea591d90ed4f548c387e24ed5e1bad0cf
+generated: "2025-11-18T00:17:18.387413354Z"

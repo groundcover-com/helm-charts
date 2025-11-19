@@ -13,7 +13,6 @@ metadata:
     app.kubernetes.io/name: temporal-namespace-setup
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/component: temporal
-    {{- include "groundcover.labels" . | nindent 4 }}
 spec:
   backoffLimit: 10
   activeDeadlineSeconds: 600
