@@ -6,9 +6,6 @@
 {{- $sensorValues = set $sensorValues "alligatorConfigurationExists" true -}}
 {{- end -}}
 {{- $sensorValues = set $sensorValues "serviceName" "sensor" -}}
-{{- if or (index $sensorValues "receivers" "metricsscraper" "enabled") (index .Values "custom-metrics" "enabled") -}}
-{{- $_ := set $sensorValues.receivers.metricsscraper "enabled" true -}}
-{{- end -}}
 apiVersion: v1
 data:
   config.yaml: |-
