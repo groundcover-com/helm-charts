@@ -387,7 +387,7 @@ agent:
         enabled: true
         port: 8428
       metricsscraper:
-        enabled: true
+        enabled: false
         maxScrapeSize: 67108864
     exporters:
       remotewrite:
