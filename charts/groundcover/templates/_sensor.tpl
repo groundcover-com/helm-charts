@@ -543,6 +543,7 @@ fleetClientConfig:
   maximumInitialJitter: {{ .Values.fleetClientConfig.maximumInitialJitter }}
   requestInterval: {{ .Values.fleetClientConfig.requestInterval }}
   initialUpdateTimeout: {{ .Values.fleetClientConfig.initialUpdateTimeout }}
+  insecureSkipVerify: {{ .Values.fleetClientConfig.insecureSkipVerify }}
 
 logs:
   {{ if $sensorValues.collectionEnabled }}

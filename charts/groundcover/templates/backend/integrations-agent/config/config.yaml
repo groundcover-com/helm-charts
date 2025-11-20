@@ -653,6 +653,7 @@ data:
       maximumInitialJitter: {{ .Values.fleetClientConfig.maximumInitialJitter }}
       requestInterval: {{ .Values.fleetClientConfig.requestInterval }}
       initialUpdateTimeout: {{ .Values.fleetClientConfig.initialUpdateTimeout }}
+      insecureSkipVerify: {{ .Values.fleetClientConfig.tlsSkipVerify }}
       
 kind: ConfigMap
 metadata:
