@@ -58,6 +58,7 @@ exporters:
     tlsSkipVerify: true
     maxDiskUsagePerURL: {{ $sensorValues.exporters.remotewrite.maxDiskUsagePerURL }}
     tmpDataPath: {{ $sensorValues.exporters.remotewrite.tmpDataPath }}
+    numberOfConcurrentQueues: {{ $sensorValues.exporters.remotewrite.numberOfConcurrentQueues }}
 pipelines:
   metrics:
     enricherEnabled: {{ $sensorValues.pipelines.metrics.enricherEnabled }}
