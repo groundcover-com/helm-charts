@@ -1,0 +1,29 @@
+{{ if .Values.global.syntheticsWorker.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+    {{- if .Values.syntheticsWorker.additionalAnnotations }}
+{{ toYaml .Values.syntheticsWorker.additionalAnnotations | indent 4 }}
+    {{- end }}
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+    app: synthetics-worker
+    app.kubernetes.io/name: synthetics-worker
+    {{- if .Values.syntheticsWorker.additionalLabels }}
+{{ toYaml .Values.syntheticsWorker.additionalLabels | indent 4 }}
+    {{- end }}
+  name: synthetics-worker
+  namespace: {{ .Release.Namespace }}
+spec:
+  ports:
+  - name: http
+    port: 3000
+    protocol: TCP
+    targetPort: http
+  selector:
+    app: synthetics-worker
+  type: ClusterIP
+{{ end -}}
+

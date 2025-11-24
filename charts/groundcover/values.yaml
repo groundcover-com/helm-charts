@@ -38,6 +38,8 @@ global:
       port: 2021
   metricsAggregator:
     enabled: false
+  syntheticsWorker:
+    enabled: false
 
   ingress:
     # set ingress site for inCloud / on-prem sensor only deployments
@@ -744,6 +746,47 @@ integrationsAgent:
         writeInterval: 10s
         maxBatchSize: 2000
         maxBatchWait: 10s
+syntheticsWorker:
+  replicaCount: 2
+  image:
+    repository: "{{ .Values.global.origin.registry }}/synthetics-worker"
+    tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
+  additionalLabels:
+  podLabels:
+  podAnnotations:
+  affinity:
+  nodeSelector:
+  tolerations: []
+  priorityClassName:
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  env: []
+  builtinEnv: []
+  readinessProbe:
+    httpGet:
+      scheme: HTTP
+      path: /
+      port: http
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  livenessProbe:
+    httpGet:
+      scheme: HTTP
+      path: /
+      port: http
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  pdb:
+    enabled: false
 ingestor:
   image:
     repository: "{{ .Values.global.origin.registry }}/sensor"

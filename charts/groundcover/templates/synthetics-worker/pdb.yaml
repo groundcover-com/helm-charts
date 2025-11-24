@@ -1,0 +1,18 @@
+{{ if and .Values.global.syntheticsWorker.enabled .Values.syntheticsWorker.pdb.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: synthetics-worker
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "groundcover.labels" $ | nindent 4 }}
+    app: synthetics-worker
+    app.kubernetes.io/name: synthetics-worker
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: synthetics-worker
+---
+{{- end }}
+
