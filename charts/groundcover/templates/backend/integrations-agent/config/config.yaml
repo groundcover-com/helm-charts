@@ -654,6 +654,8 @@ data:
       requestInterval: {{ .Values.fleetClientConfig.requestInterval }}
       initialUpdateTimeout: {{ .Values.fleetClientConfig.initialUpdateTimeout }}
       insecureSkipVerify: {{ .Values.fleetClientConfig.tlsSkipVerify }}
+
+    SyntheticsWorkerUrl: {{ include "synthetics-worker.url" . }}
       
 kind: ConfigMap
 metadata:

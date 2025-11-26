@@ -14,7 +14,7 @@ metadata:
     {{- if .Values.syntheticsWorker.additionalLabels }}
 {{ toYaml .Values.syntheticsWorker.additionalLabels | indent 4 }}
     {{- end }}
-  name: synthetics-worker
+  name: {{ include "synthetics-worker.fullname" . }}
   namespace: {{ .Release.Namespace }}
 spec:
   replicas: {{ .Values.syntheticsWorker.replicaCount | default 1 }}
@@ -24,8 +24,6 @@ spec:
   template:
     metadata:
       annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "3000"
         groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
         {{- if .Values.syntheticsWorker.additionalAnnotations }}
 {{ toYaml .Values.syntheticsWorker.additionalAnnotations | indent 8 }}
@@ -70,7 +68,7 @@ spec:
         - name: NODE_ENV
           value: "production"
         - name: PORT
-          value: "3000"
+          value: "{{ include "synthetics-worker.port" . }}"
         {{- with .Values.syntheticsWorker.env }}
           {{ tpl (toYaml .) $ | nindent 8 }}
         {{- end }}
@@ -84,7 +82,7 @@ spec:
         imagePullPolicy: Always
         name: synthetics-worker
         ports:
-        - containerPort: 3000
+        - containerPort: {{ include "synthetics-worker.port" . }}
           name: http
         readinessProbe:
           {{ toYaml .Values.syntheticsWorker.readinessProbe | nindent 10 }}

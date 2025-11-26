@@ -14,12 +14,12 @@ metadata:
     {{- if .Values.syntheticsWorker.additionalLabels }}
 {{ toYaml .Values.syntheticsWorker.additionalLabels | indent 4 }}
     {{- end }}
-  name: synthetics-worker
+  name: {{ include "synthetics-worker.fullname" . }}
   namespace: {{ .Release.Namespace }}
 spec:
   ports:
   - name: http
-    port: 3000
+    port: {{ include "synthetics-worker.port" . }}
     protocol: TCP
     targetPort: http
   selector:
