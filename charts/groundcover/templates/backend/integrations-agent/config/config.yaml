@@ -621,6 +621,9 @@ data:
       {{- end }}
     {{- end }}
 
+    SecretStore:
+      FleetmanagerURL: {{ include "fleet-manager.base.url" . }}
+
     Pprof:
       enabled: {{ include "telemetry.enabled" . }}
       cpuSamplingDuration: {{ .Values.integrationsAgent.pprof.cpuSamplingDuration }}
