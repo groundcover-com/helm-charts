@@ -29,6 +29,9 @@ spec:
         prometheus.io/port: "9102"
         groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
         checksum/config: {{ include (print $.Template.BasePath "/backend/portal/config/configMap.yaml") . | sha256sum }}
+        {{- if .Values.portal.backendSettings.enabled }}
+        checksum/backend-settings: {{ include (print $.Template.BasePath "/backend/portal/config/backend-settings-configMap.yaml") . | sha256sum }}
+        {{- end }}
         {{- if .Values.portal.additionalAnnotations }}
 {{ toYaml .Values.portal.additionalAnnotations | indent 8 }}
         {{- end }}
@@ -146,6 +149,10 @@ spec:
         volumeMounts:
         - mountPath: /config
           name: portal-config-volume
+        {{- if .Values.portal.backendSettings.enabled }}
+        - mountPath: /backend-settings
+          name: backend-settings-volume
+        {{- end }}
 {{- if .Values.portal.priorityClassName }}
       priorityClassName: {{ .Values.portal.priorityClassName }}
 {{- end }}
@@ -153,4 +160,9 @@ spec:
       - configMap:
           name: {{ include "portal.fullname" . }}-config
         name: portal-config-volume
+      {{- if .Values.portal.backendSettings.enabled }}
+      - configMap:
+          name: {{ include "portal.fullname" . }}-backend-settings
+        name: backend-settings-volume
+      {{- end }}
 {{ end -}}

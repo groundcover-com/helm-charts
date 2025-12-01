@@ -1300,6 +1300,9 @@ portal:
   kong:
     endpointOverride:
     enabled:
+  backendSettings:
+    enabled: false
+    config:
   autodiscovery: false
   maxResponseSizeBytes: 33554432
 
