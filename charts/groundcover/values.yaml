@@ -2915,7 +2915,7 @@ vector:
             type: "aws_s3"
             bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
             region: '{{ .Values.vector.objectStorage.region }}'
-            key_prefix: "backup/30d/v2/traces_v2/"
+            key_prefix: "backup/7d/v2/traces_v2/"
             encoding:
               codec: json
               timestamp_format: rfc3339
@@ -2926,7 +2926,7 @@ vector:
             healthcheck:
               enabled: false
             filename_time_format: "%Y/%m/%d/%H/%s"
-            storage_class: STANDARD_IA
+            storage_class: STANDARD
       gcsBackups:
         logs:
           gcs_logs_backup:
