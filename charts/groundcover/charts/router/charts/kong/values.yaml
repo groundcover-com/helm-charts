@@ -19,6 +19,9 @@ deployment:
     # Setting this to false with ingressController.enabled=true will create a
     # controller-only release.
     enabled: true
+  # The number of old `ReplicaSet`s to retain.
+  revisionHistoryLimit: 10
+
   ## Minimum number of seconds for which a newly created pod should be ready without any of its container crashing,
   ## for it to be considered available.
   # minReadySeconds: 60
@@ -120,16 +123,20 @@ env:
 #         name: api_key
 #   client_name: testClient
 
+# Load all ConfigMap or Secret keys as environment variables:
+# https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#configure-all-key-value-pairs-in-a-configmap-as-container-environment-variables
+envFrom: []
+
 # This section can be used to configure some extra labels that will be added to each Kubernetes object generated.
 extraLabels: {}
 
 # Specify Kong's Docker image and repository details here
 image:
   repository: kong
-  tag: "3.4"
+  tag: "3.9"
   # Kong Enterprise
   # repository: kong/kong-gateway
-  # tag: "3.4"
+  # tag: "3.9"
 
   # Specify a semver version if your image tag is not one (e.g. "nightly")
   effectiveSemver:
@@ -275,7 +282,9 @@ proxy:
   # Enable creating a Kubernetes service for the proxy
   enabled: true
   type: LoadBalancer
-  loadBalancerClass:
+  loadBalancerClass: ""
+  # Configures optional firewall rules and in the VPC network to only allow certain source ranges.
+  loadBalancerSourceRanges: []
   # Override proxy Service name
   nameOverride: ""
   # To specify annotations or labels for the proxy service, add them to the respective
@@ -293,6 +302,9 @@ proxy:
   http:
     # Enable plaintext HTTP listen for the proxy
     enabled: true
+    # Set the servicePort: 0 to skip exposing in the service but still
+    # let the port open in container to allow https to http mapping for
+    # tls terminated at LB.
     servicePort: 80
     containerPort: 8000
     # Set a nodePort which is available if service type is NodePort
@@ -312,6 +324,10 @@ proxy:
     # Additional listen parameters, e.g. "reuseport", "backlog=16384"
     parameters:
     - http2
+
+    # Specify the Service's TLS port's appProtocol. This can be useful when integrating with
+    # external load balancers that require the `appProtocol` field to be set (e.g. GCP).
+    appProtocol: ""
 
   # Define stream (TCP) listen
   # To enable, remove "[]", uncomment the section below, and select your desired
@@ -440,6 +456,8 @@ plugins: {}
   # secrets:
   # - pluginName: rewriter
   #   name: kong-plugin-rewriter
+  # If your development cycle preinstalls the plugin as part of the image, this appends them to the plugins env var
+  # preInstalled: sweet-plugin,another-sweet-plugin
 # Inject specified secrets as a volume in Kong Container at path /etc/secrets/{secret-name}/
 # This can be used to override default SSL certificates.
 # Be aware that the secret name will be used verbatim, and that certain types
@@ -467,6 +485,8 @@ migrations:
   jobAnnotations: {}
   # Optionally set a backoffLimit. If none is set, Jobs will use the cluster default
   backoffLimit:
+  # Optionally set to specify the time-to-live (TTL) for a pod after it has completed its execution before automatic deletion. If left unset, pod lifetime is indefinite.
+  ttlSecondsAfterFinished:
   resources: {}
   # Example reasonable setting for "resources":
   # resources:
@@ -483,6 +503,16 @@ migrations:
   # sidecarContainers:
   #   - name: sidecar
   #     image: sidecar:latest
+  ## Optionally set securitycontext for the wait-for-postgres migrations init container
+  # waitContainer:
+  #   securityContext:
+  #     allowPrivilegeEscalation: false
+  #     capabilities:
+  #       drop:
+  #       - ALL
+  #     readOnlyRootFilesystem: true
+  #     runAsNonRoot: true
+  #     runAsUser: 1000
 
 # Kong's configuration for DB-less mode
 # Note: Use this section only if you are deploying Kong in DB-less mode
@@ -521,7 +551,7 @@ ingressController:
   enabled: true
   image:
     repository: kong/kubernetes-ingress-controller
-    tag: "3.0"
+    tag: "3.5"
     # Optionally set a semantic version for version-gated features. This can normally
     # be left unset. You only need to set this if your tag is not a semver string,
     # such as when you are using a "next" tag. Set this to the effective semantic
@@ -565,13 +595,37 @@ ingressController:
   # customEnv:
   #   TZ: "Europe/Berlin"
 
+  # Load all ConfigMap or Secret keys as environment variables:
+  # https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#configure-all-key-value-pairs-in-a-configmap-as-container-environment-variables
+  envFrom: []
+
   admissionWebhook:
+    matchPolicy: Equivalent
     enabled: true
+    # Limit the `secrets.plugins.validation.ingress-controller.konghq.com` webhook
+    # to only Secrets with the appropriate KIC "konghq.com/validate" label.
+    filterSecrets: false
     failurePolicy: Ignore
     port: 8080
     certificate:
       provided: false
+    #  namespaceSelector specifies namespaces in which the resources are validated by the `*.validations.kong.konghq.com` webhooks.
+    #  For example, the `kube-system` namespace contains objects created by the Kubernetes system, like `kube-dns` service.
+    #  You can exclude the kube-system namespace from being intercepted using below namespaceSelector:
+    #  namespaceSelector:
+    #    matchExpressions:
+    #      - key: kubernetes.io/metadata.name
+    #        operator: NotIn
+    #        values:
+    #          - kube-system
     namespaceSelector: {}
+    # ObjectSelector specifies which objects to match against validations.kong.konghq.com webhook webhook
+    objectSelector:
+      matchExpressions:
+      - key: owner
+        operator: NotIn
+        values:
+        - helm
     # Specifiy the secretName when the certificate is provided via a TLS secret
     # secretName: ""
     # Specifiy the CA bundle of the provided certificate.
@@ -585,6 +639,9 @@ ingressController:
     # timeoutSeconds: 10
 
   ingressClass: kong
+  # Check existence and create the `IngressClass` with given name in the cluster.
+  # You can set it to `false` to disable the creation of `IngressClass` if your user to run helm does not have the permission to create `IngressClass`es.
+  createIngressClass: true
   # annotations for IngressClass resource (Kubernetes 1.18+)
   ingressClassAnnotations: {}
 
@@ -597,6 +654,22 @@ ingressController:
   rbac:
     # Specifies whether RBAC resources should be created
     create: true
+    # Set to `false` to disable creating ClusterRole and ClusterRoleBinding, for the use cases where using ClusterRoles is not allowed.
+    # Warning: Reconciliation of some resources requires a ClusterRole because the controllers needs to watch cluster scoped resources.
+    # Disabling ClusterRoles causes them fail, so you need to disable the controllers when setting it to `false`.
+    # The resources includes:
+    # - All gateway API resources
+    # - `IngressClass`
+    # - `KNative/Ingress` (KIC 2.x only)
+    # - `KongClusterPlugin`
+    # - `KongVault`, `KongLicense` (KIC 3.1 and above)
+    enableClusterRoles: true
+    gatewayAPI:
+      # Specifies whether RBAC policy rules for Gateway API resources should
+      # be generated regardless of the presence of Gateway API CRDs in the cluster.
+      # If this is disabled then RBAC policy rules for Gateway API resources will
+      # only be generated if the Gateway API CRDs are present in the cluster.
+      enabled: true
 
   # general properties
   livenessProbe:
@@ -631,9 +704,10 @@ ingressController:
 
   konnect:
     enabled: false
-
-    # Specifies a Konnect Runtime Group's ID that the controller will push its data-plane config to.
+    # Deprecated: Specifies a Konnect Runtime Group's ID that the controller will push its data-plane config to.
     runtimeGroupID: ""
+    # Specifies a Konnect Control Plane's ID that the controller will push its data-plane config to.
+    controlPlaneID: ""
 
     # Specifies a Konnect API hostname that the controller will use to push its data-plane config to.
     # By default, this is set to US region's production API hostname.
@@ -705,6 +779,21 @@ postgresql:
   service:
     ports:
       postgresql: "5432"
+  primary:
+    annotations:
+      "ignore-check.kube-linter.io/no-read-only-root-fs": "writable fs is required"
+    podSecurityContext:
+      runAsNonRoot: true
+      seccompProfile:
+        type: RuntimeDefault
+    containerSecurityContext:
+      runAsNonRoot: true
+      seccompProfile:
+        type: RuntimeDefault
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
 
 # -----------------------------------------------------------------------------
 # Configure cert-manager integration
@@ -713,6 +802,11 @@ postgresql:
 certificates:
   enabled: false
 
+  # Set the certificate timers or leave on the default value
+  # Default is 15 days
+  renewBefore: "360h0m0s"
+  # Default is 90d days
+  duration: "2160h0m0s"
   # Set either `issuer` or `clusterIssuer` to the name of the desired cert manager issuer
   # If left blank a built in self-signed issuer will be created and utilized
   issuer: ""
@@ -734,7 +828,7 @@ certificates:
     # - "*.apps.example"
     # - "*.kong.example"
 
-  # Set admin.enabled true to issue kong admin api and manager certificate with cert-manager
+  # Set admin.enabled true to issue kong admin api certificate with cert-manager
   admin:
     enabled: true
     # Set `issuer` or `clusterIssuer` to name of alternate cert-manager clusterIssuer to override default
@@ -744,6 +838,20 @@ certificates:
     # Use commonName and dnsNames to set the common name and dns alt names which this
     # certificate is valid for. Wildcard records are supported by the included self-signed issuer.
     commonName: "kong.example"
+    # Remove the "[]" and uncomment/change the examples to add SANs
+    dnsNames: []
+    # - "admin.kong.example"
+
+  # Set manager.enabled true to issue a dedicated Kong Manager (admin GUI) certificate with cert-manager
+  # If disabled, Kong Manager will fall back to using the admin certificate (backward compatible behavior).
+  manager:
+    enabled: false
+    # Set `issuer` or `clusterIssuer` to name of alternate cert-manager issuer to override default
+    issuer: ""
+    clusterIssuer: ""
+    # Use commonName and dnsNames to set the common name and dns alt names which this
+    # certificate is valid for. Wildcard records are supported by the included self-signed issuer.
+    commonName: "manager.kong.example"
     # Remove the "[]" and uncomment/change the examples to add SANs
     dnsNames: []
     # - "manager.kong.example"
@@ -896,6 +1004,7 @@ autoscaling:
   enabled: false
   minReplicas: 2
   maxReplicas: 5
+  annotations: {}
   behavior: {}
   ## targetCPUUtilizationPercentage only used if the cluster doesn't support autoscaling/v2 or autoscaling/v2beta
   targetCPUUtilizationPercentage:
@@ -914,6 +1023,7 @@ podDisruptionBudget:
   # Uncomment only one of the following when enabled is set to true
   # maxUnavailable: "50%"
   # minAvailable: "50%"
+  unhealthyPodEvictionPolicy: IfHealthyBudget
 
 podSecurityPolicy:
   enabled: false
@@ -948,13 +1058,16 @@ podSecurityPolicy:
 priorityClassName: ""
 
 # securityContext for Kong pods.
-securityContext: {}
+securityContext:
+  seccompProfile:
+    type: RuntimeDefault
 
 # securityContext for containers.
 containerSecurityContext:
   readOnlyRootFilesystem: true
   allowPrivilegeEscalation: false
   runAsUser: 1000
+  runAsGroup: 1000
   runAsNonRoot: true
   seccompProfile:
     type: RuntimeDefault
@@ -981,6 +1094,7 @@ serviceMonitor:
   # If you wish to gather metrics from a Kong instance with the proxy disabled (such as a hybrid control plane), see:
   # https://github.com/Kong/charts/blob/main/charts/kong/README.md#prometheus-operator-integration
   enabled: false
+  trustCRDsExist: false
   # interval: 30s
   # Specifies namespace, where ServiceMonitor should be installed
   # namespace: monitoring
@@ -991,6 +1105,7 @@ serviceMonitor:
 
   # honorLabels: false
   # metricRelabelings: []
+  # relabelings: []
 
 # -----------------------------------------------------------------------------
 # Kong Enterprise parameters
@@ -1016,7 +1131,9 @@ enterprise:
     # If RBAC is enabled, this Secret must contain an admin_gui_session_conf key
     # The key value must be a secret configuration, following the example at
     # https://docs.konghq.com/enterprise/latest/kong-manager/authentication/sessions
-    session_conf_secret: kong-session-config
+    # If using 3.6+ and OIDC, session configuration is instead handled in the auth configuration,
+    # and this field can be left empty.
+    session_conf_secret: "kong-session-config"  # CHANGEME
     # If admin_gui_auth is not set to basic-auth, provide a secret name which
     # has an admin_gui_auth_conf key containing the plugin config JSON
     admin_gui_auth_conf_secret: CHANGEME-admin-gui-auth-conf-secret

@@ -19,6 +19,9 @@ helm install kong/kong --generate-name
 
 ## Table of contents
 
+- [Kong for Kubernetes](#kong-for-kubernetes)
+- [TL;DR;](#tldr)
+- [Table of contents](#table-of-contents)
 - [Prerequisites](#prerequisites)
 - [Install](#install)
 - [Uninstall](#uninstall)
@@ -57,6 +60,8 @@ helm install kong/kong --generate-name
   - [Ingress Controller Parameters](#ingress-controller-parameters)
     - [The `env` section](#the-env-section)
     - [The `customEnv` section](#the-customenv-section)
+    - [The `gatewayDiscovery` section](#the-gatewaydiscovery-section)
+      - [Configuration](#configuration-1)
   - [General Parameters](#general-parameters)
     - [The `env` section](#the-env-section-1)
     - [The `customEnv` section](#the-customenv-section-1)
@@ -71,9 +76,7 @@ helm install kong/kong --generate-name
   - [Sessions](#sessions)
   - [Email/SMTP](#emailsmtp)
 - [Prometheus Operator integration](#prometheus-operator-integration)
-- [Argo CD considerations](#argo-cd-considerations)
-- [Changelog](https://github.com/Kong/charts/blob/main/charts/kong/CHANGELOG.md)
-- [Upgrading](https://github.com/Kong/charts/blob/main/charts/kong/UPGRADE.md)
+- [Argo CD Considerations](#argo-cd-considerations)
 - [Seeking help](#seeking-help)
 
 ## Prerequisites
@@ -464,17 +467,22 @@ listens if you do not provide your own. The chart can create
 configure them for you. To use this integration, install cert-manager, create
 an issuer, set `certificates.enabled: true` in values.yaml, and set your issuer
 name in `certificates.issuer` or `certificates.clusterIssuer` depending on the
-issuer type. 
+issuer type.
 
 If you do not have an issuer available, you can install the example [self-signed ClusterIssuer](https://cert-manager.io/docs/configuration/selfsigned/#bootstrapping-ca-issuers)
 and set `certificates.clusterIssuer: selfsigned-issuer` for testing. You
 should, however, migrate to an issuer using a CA your clients trust for actual
 usage.
 
-The `proxy`, `admin`, `portal`, and `cluster` subsections under `certificates`
+The `proxy`, `admin`, `manager`, `portal`, and `cluster` subsections under `certificates`
 let you choose hostnames, override issuers, set `subject` or set `privateKey` on a per-certificate basis for the
-proxy, admin API and Manager, Portal and Portal API, and hybrid mode mTLS
+proxy, admin API, Kong Manager (Enterprise only), Portal and Portal API, and hybrid mode mTLS
 services, respectively.
+
+For Kong Enterprise deployments, the `manager` certificate configuration allows you to generate a dedicated
+certificate for Kong Manager (the admin GUI) separate from the admin API certificate. This improves security
+by allowing different hostnames and access patterns for the GUI versus the API. If `certificates.manager.enabled`
+is not set, Kong Manager will fall back to using the admin certificate for backward compatibility.
 
 To use hybrid mode, the control and data plane releases must use the same
 issuer for their cluster certificates.
@@ -609,19 +617,22 @@ directory.
 | Parameter                          | Description                                                                           | Default             |
 | ---------------------------------- | ------------------------------------------------------------------------------------- | ------------------- |
 | image.repository                   | Kong image                                                                            | `kong`              |
-| image.tag                          | Kong image version                                                                    | `3.4`               |
+| image.tag                          | Kong image version                                                                    | `3.5`               |
 | image.effectiveSemver              | Semantic version to use for version-dependent features (if `tag` is not a semver)     |                     |
 | image.pullPolicy                   | Image pull policy                                                                     | `IfNotPresent`      |
 | image.pullSecrets                  | Image pull secrets                                                                    | `null`              |
-| replicaCount                       | Kong instance count. It has no effect when `autoscaling.enabled` is set to true         | `1`                 |
-| plugins                            | Install custom plugins into Kong via ConfigMaps or Secrets                            | `{}`                |
+| replicaCount                       | Kong instance count. It has no effect when `autoscaling.enabled` is set to true       | `1`                 |
+| plugins                            | Install custom plugins into Kong via ConfigMaps, Secrets or preInstalled                            | `{}`                |
 | env                                | Additional [Kong configurations](https://getkong.org/docs/latest/configuration/)      |                     |
-| customEnv                          | Custom Environment variables without `KONG_` prefix      |                                |
+| customEnv                          | Custom Environment variables without `KONG_` prefix                                   |                     |
+| envFrom                            | Populate environment variables from ConfigMap or Secret keys                          |                     |
 | migrations.preUpgrade              | Run "kong migrations up" jobs                                                         | `true`              |
 | migrations.postUpgrade             | Run "kong migrations finish" jobs                                                     | `true`              |
 | migrations.annotations             | Annotations for migration job pods                                                    | `{"sidecar.istio.io/inject": "false" |
+| migrations.ttlSecondsAfterFinished | Automatically deletes completed pods after a specified time to clean up resources     |                     |
 | migrations.jobAnnotations          | Additional annotations for migration jobs                                             | `{}`                |
 | migrations.backoffLimit            | Override the system backoffLimit                                                      | `{}`                |
+| migrations.waitContainer.securityContext | Security context configurations for wait-for-postgres migrations init container |                     |
 | waitImage.enabled                  | Spawn init containers that wait for the database before starting Kong                 | `true`              |
 | waitImage.repository               | Image used to wait for database to become ready. Uses the Kong image if none set      |                     |
 | waitImage.tag                      | Tag for image used to wait for database to become ready                               |                     |
@@ -665,44 +676,46 @@ nodes.
 mixed TCP/UDP LoadBalancer Services). It _does not_ support the `http`, `tls`,
 or `ingress` sections, as it is used only for stream listens.
 
-| Parameter                          | Description                                                                           | Default                  |
-|------------------------------------|---------------------------------------------------------------------------------------|--------------------------|
-| SVC.enabled                        | Create Service resource for SVC (admin, proxy, manager, etc.)                         |                          |
-| SVC.http.enabled                   | Enables http on the service                                                           |                          |
-| SVC.http.servicePort               | Service port to use for http                                                          |                          |
-| SVC.http.containerPort             | Container port to use for http                                                        |                          |
-| SVC.http.nodePort                  | Node port to use for http                                                             |                          |
-| SVC.http.hostPort                  | Host port to use for http                                                             |                          |
-| SVC.http.parameters                | Array of additional listen parameters                                                 | `[]`                     |
-| SVC.tls.enabled                    | Enables TLS on the service                                                            |                          |
-| SVC.tls.containerPort              | Container port to use for TLS                                                         |                          |
-| SVC.tls.servicePort                | Service port to use for TLS                                                           |                          |
-| SVC.tls.nodePort                   | Node port to use for TLS                                                              |                          |
-| SVC.tls.hostPort                   | Host port to use for TLS                                                              |                          |
-| SVC.tls.overrideServiceTargetPort  | Override service port to use for TLS without touching Kong containerPort              |                          |
-| SVC.tls.parameters                 | Array of additional listen parameters                                                 | `["http2"]`              |
-| SVC.type                           | k8s service type. Options: NodePort, ClusterIP, LoadBalancer                          |                          |
-| SVC.clusterIP                      | k8s service clusterIP                                                                 |                          |
-| SVC.loadBalancerClass              | loadBalancerClass to use for LoadBalancer provisionning                               |                          |
-| SVC.loadBalancerSourceRanges       | Limit service access to CIDRs if set and service type is `LoadBalancer`               | `[]`                     |
-| SVC.loadBalancerIP                 | Reuse an existing ingress static IP for the service                                   |                          |
-| SVC.externalIPs                    | IPs for which nodes in the cluster will also accept traffic for the servic            | `[]`                     |
-| SVC.externalTrafficPolicy          | k8s service's externalTrafficPolicy. Options: Cluster, Local                          |                          |
-| SVC.ingress.enabled                | Enable ingress resource creation (works with SVC.type=ClusterIP)                      | `false`                  |
-| SVC.ingress.ingressClassName       | Set the ingressClassName to associate this Ingress with an IngressClass               |                          |
-| SVC.ingress.hostname               | Ingress hostname                                                                      | `""`                     |
-| SVC.ingress.path                   | Ingress path.                                                                         | `/`                      |
-| SVC.ingress.pathType               | Ingress pathType. One of `ImplementationSpecific`, `Exact` or `Prefix`                | `ImplementationSpecific` |
-| SVC.ingress.hosts                  | Slice of hosts configurations, including `hostname`, `path` and `pathType` keys       | `[]`                     |
-| SVC.ingress.tls                    | Name of secret resource or slice of `secretName` and `hosts` keys                     |                          |
-| SVC.ingress.annotations            | Ingress annotations. See documentation for your ingress controller for details        | `{}`                     |
-| SVC.ingress.labels                 | Ingress labels. Additional custom labels to add to the ingress.                       | `{}`                     |
-| SVC.annotations                    | Service annotations                                                                   | `{}`                     |
-| SVC.labels                         | Service labels                                                                        | `{}`                     |
+| Parameter                         | Description                                                                               | Default                  |
+|-----------------------------------|-------------------------------------------------------------------------------------------|--------------------------|
+| SVC.enabled                       | Create Service resource for SVC (admin, proxy, manager, etc.)                             |                          |
+| SVC.http.enabled                  | Enables http on the service                                                               |                          |
+| SVC.http.servicePort              | Service port to use for http                                                              |                          |
+| SVC.http.containerPort            | Container port to use for http                                                            |                          |
+| SVC.http.nodePort                 | Node port to use for http                                                                 |                          |
+| SVC.http.hostPort                 | Host port to use for http                                                                 |                          |
+| SVC.http.parameters               | Array of additional listen parameters                                                     | `[]`                     |
+| SVC.http.appProtocol              | `appProtocol` to be set in a Service's port. If left empty, no `appProtocol` will be set. |                          |
+| SVC.tls.enabled                   | Enables TLS on the service                                                                |                          |
+| SVC.tls.containerPort             | Container port to use for TLS                                                             |                          |
+| SVC.tls.servicePort               | Service port to use for TLS                                                               |                          |
+| SVC.tls.nodePort                  | Node port to use for TLS                                                                  |                          |
+| SVC.tls.hostPort                  | Host port to use for TLS                                                                  |                          |
+| SVC.tls.overrideServiceTargetPort | Override service port to use for TLS without touching Kong containerPort                  |                          |
+| SVC.tls.parameters                | Array of additional listen parameters                                                     | `["http2"]`              |
+| SVC.tls.appProtocol               | `appProtocol` to be set in a Service's port. If left empty, no `appProtocol` will be set. |                          |
+| SVC.type                          | k8s service type. Options: NodePort, ClusterIP, LoadBalancer                              |                          |
+| SVC.clusterIP                     | k8s service clusterIP                                                                     |                          |
+| SVC.loadBalancerClass             | loadBalancerClass to use for LoadBalancer provisionning                                   |                          |
+| SVC.loadBalancerSourceRanges      | Limit service access to CIDRs if set and service type is `LoadBalancer`                   | `[]`                     |
+| SVC.loadBalancerIP                | Reuse an existing ingress static IP for the service                                       |                          |
+| SVC.externalIPs                   | IPs for which nodes in the cluster will also accept traffic for the servic                | `[]`                     |
+| SVC.externalTrafficPolicy         | k8s service's externalTrafficPolicy. Options: Cluster, Local                              |                          |
+| SVC.ingress.enabled               | Enable ingress resource creation (works with SVC.type=ClusterIP)                          | `false`                  |
+| SVC.ingress.ingressClassName      | Set the ingressClassName to associate this Ingress with an IngressClass                   |                          |
+| SVC.ingress.hostname              | Ingress hostname                                                                          | `""`                     |
+| SVC.ingress.path                  | Ingress path.                                                                             | `/`                      |
+| SVC.ingress.pathType              | Ingress pathType. One of `ImplementationSpecific`, `Exact` or `Prefix`                    | `ImplementationSpecific` |
+| SVC.ingress.hosts                 | Slice of hosts configurations, including `hostname`, `path` and `pathType` keys           | `[]`                     |
+| SVC.ingress.tls                   | Name of secret resource or slice of `secretName` and `hosts` keys                         |                          |
+| SVC.ingress.annotations           | Ingress annotations. See documentation for your ingress controller for details            | `{}`                     |
+| SVC.ingress.labels                | Ingress labels. Additional custom labels to add to the ingress.                           | `{}`                     |
+| SVC.annotations                   | Service annotations                                                                       | `{}`                     |
+| SVC.labels                        | Service labels                                                                            | `{}`                     |
 
 #### Admin Service mTLS
 
-On top of the common parameters listed above, the `admin` service supports parameters for mTLS client verification. 
+On top of the common parameters listed above, the `admin` service supports parameters for mTLS client verification.
 If any of `admin.tls.client.caBundle` or `admin.tls.client.secretName` are set, the admin service will be configured to
 require mTLS client verification. If both are set, `admin.tls.client.caBundle` will take precedence.
 
@@ -734,19 +747,24 @@ section of `values.yaml` file:
 |--------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------|
 | enabled                                    | Deploy the ingress controller, rbac and crd                                                                                                              | true                               |
 | image.repository                           | Docker image with the ingress controller                                                                                                                 | kong/kubernetes-ingress-controller |
-| image.tag                                  | Version of the ingress controller                                                                                                                        | `3.0`                              |
+| image.tag                                  | Version of the ingress controller                                                                                                                        | `3.4`                              |
 | image.effectiveSemver                      | Version of the ingress controller used for version-specific features when image.tag is not a valid semantic version                                      |                                    |
+| image.pullSecrets                          | Pull secrets for the ingress controller deployment. The value is not effective when top level image.pullSecret is present.                                  |                                    |
 | readinessProbe                             | Kong ingress controllers readiness probe                                                                                                                 |                                    |
 | livenessProbe                              | Kong ingress controllers liveness probe                                                                                                                  |                                    |
 | installCRDs                                | Legacy toggle for Helm 2-style CRD management. Should not be set [unless necessary due to cluster permissions](#removing-cluster-scoped-permissions).    | false                              |
 | env                                        | Specify Kong Ingress Controller configuration via environment variables                                                                                  |                                    |
 | customEnv                                  | Specify custom environment variables (without the CONTROLLER_ prefix)                                                                                    |                                    |
+| envFrom                                    | Populate environment variables from ConfigMap or Secret keys                                                                                             |                                    |
 | ingressClass                               | The name of this controller's ingressClass                                                                                                               | kong                               |
+| createIngressClass               | Create the `IngressClass` with the name as specified in `ingressClass` if not exist                                                                                | true                               |
 | ingressClassAnnotations                    | The ingress-class value for controller                                                                                                                   | kong                               |
 | args                                       | List of ingress-controller cli arguments                                                                                                                 | []                                 |
 | watchNamespaces                            | List of namespaces to watch. Watches all namespaces if empty                                                                                             | []                                 |
+| rbac.enableClusterRoles                    | Create ClusterRoles and ClusterRoleBindings required for watching cluster scoped resources. Set it to `false` and add at least one namespace in `watchNamespaces` to disable creating of ClusterRoles and ClusterRoleBindings. | true                                 |
 | admissionWebhook.enabled                   | Whether to enable the validating admission webhook                                                                                                       | true                               |
 | admissionWebhook.failurePolicy             | How unrecognized errors from the admission endpoint are handled (Ignore or Fail)                                                                         | Ignore                             |
+| admissionWebhook.filterSecrets             | Limit the webhook to only Secrets with the appropriate KIC validation labels.                                                                            | false                              |
 | admissionWebhook.port                      | The port the ingress controller will listen on for admission webhooks                                                                                    | 8080                               |
 | admissionWebhook.address                   | The address the ingress controller will listen on for admission webhooks, if not 0.0.0.0                                                                 |                                    |
 | admissionWebhook.annotations               | Annotations for the Validation Webhook Configuration                                                                                                     |                                    |
@@ -763,7 +781,8 @@ section of `values.yaml` file:
 | gatewayDiscovery.adminApiService.namespace | The namespace of the Kong admin API service (for more details see [gatewayDiscovery section][gd_section])                                                | `.Release.Namespace`               |
 | gatewayDiscovery.adminApiService.name      | The name of the Kong admin API service (for more details see [gatewayDiscovery section][gd_section])                                                     | ""                                 |
 | konnect.enabled                            | Enable synchronisation of data plane configuration with Konnect Runtime Group                                                                            | false                              |
-| konnect.runtimeGroupID                     | Konnect Runtime Group's unique identifier.                                                                                                               |                                    |
+| konnect.runtimeGroupID                     | Deprecated: Konnect Runtime Group's unique identifier.                                                                                                   |                                    |
+| konnect.controlPlaneID                     | Konnect Control Plane's unique identifier.                                                                                                               |                                    |
 | konnect.apiHostname                        | Konnect API hostname. Defaults to a production US-region.                                                                                                | us.kic.api.konghq.com              |
 | konnect.tlsClientCertSecretName            | Name of the secret that contains Konnect Runtime Group's client TLS certificate.                                                                         | konnect-client-tls                 |
 | konnect.license.enabled                    | Enable automatic license provisioning for Gateways managed by Ingress Controller in Konnect mode.                                                        | false                              |
@@ -777,7 +796,7 @@ section of `values.yaml` file:
 #### The `env` section
 For a complete list of all configuration values you can set in the
 `env` section, please read the Kong Ingress Controller's
-[configuration document](https://github.com/Kong/docs.konghq.com/blob/main/src/kubernetes-ingress-controller/references/cli-arguments.md).
+[configuration document](https://docs.konghq.com/kubernetes-ingress-controller/latest/reference/cli-arguments/).
 
 #### The `customEnv` section
 
@@ -855,6 +874,7 @@ On the Gateway release side, set either `admin.tls.client.secretName` to the nam
 | ---------------------------------- | ------------------------------------------------------------------------------------- | ------------------- |
 | namespace                          | Namespace to deploy chart resources                                                   |                     |
 | deployment.kong.enabled            | Enable or disable deploying Kong                                                      | `true`              |
+| deployment.revisionHistoryLimit    | The number of `ReplicaSet`s to retain.                                              | `10`                |
 | deployment.minReadySeconds         | Minimum number of seconds for which newly created pods should be ready without any of its container crashing, for it to be considered available. |                     |
 | deployment.initContainers          | Create initContainers. Please go to Kubernetes doc for the spec of the initContainers |                     |
 | deployment.daemonset               | Use a DaemonSet instead of a Deployment                                               | `false`             |
@@ -870,6 +890,7 @@ On the Gateway release side, set either `admin.tls.client.secretName` to the nam
 | autoscaling.enabled                | Set this to `true` to enable autoscaling                                              | `false`             |
 | autoscaling.minReplicas            | Set minimum number of replicas                                                        | `2`                 |
 | autoscaling.maxReplicas            | Set maximum number of replicas                                                        | `5`                 |
+| autoscaling.annotations            | Annotations for autoscaling                                                           | {}                  |
 | autoscaling.behavior               | Sets the [behavior for scaling up and down](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#configurable-scaling-behavior) | `{}`                |
 | autoscaling.targetCPUUtilizationPercentage | Target Percentage for when autoscaling takes affect. Only used if cluster does not support `autoscaling/v2` or `autoscaling/v2beta2` | `80`  |
 | autoscaling.metrics                | metrics used for autoscaling for clusters that supports `autoscaling/v2` or `autoscaling/v2beta2`           | See [values.yaml](values.yaml) |
@@ -892,21 +913,24 @@ On the Gateway release side, set either `admin.tls.client.secretName` to the nam
 | podDisruptionBudget.enabled        | Enable PodDisruptionBudget for Kong                                                   | `false`             |
 | podDisruptionBudget.maxUnavailable | Represents the minimum number of Pods that can be unavailable (integer or percentage) | `50%`               |
 | podDisruptionBudget.minAvailable   | Represents the number of Pods that must be available (integer or percentage)          |                     |
+| podDisruptionBudget.unhealthyPodEvictionPolicy | Controls the criteria when unhealthy Pods should be considered for eviction. Either `AlwaysAllow` or `IfHealthyBudget` | `IfHealthyBudget`   |
 | podSecurityPolicy.enabled          | Enable podSecurityPolicy for Kong                                                     | `false`             |
 | podSecurityPolicy.labels           | Labels to add to podSecurityPolicy for Kong                                           | `{}`             |
 | podSecurityPolicy.annotations      | Annotations to add to podSecurityPolicy for Kong                                      | `{}`             |
 | podSecurityPolicy.spec             | Collection of [PodSecurityPolicy settings](https://kubernetes.io/docs/concepts/policy/pod-security-policy/#what-is-a-pod-security-policy) | |
 | priorityClassName                  | Set pod scheduling priority class for Kong pods                                       | `""`                |
 | secretVolumes                      | Mount given secrets as a volume in Kong container to override default certs and keys. | `[]`                |
-| securityContext                    | Set the securityContext for Kong Pods                                                 | `{}`                |
+| securityContext                    | Set the securityContext for Kong Pods                                                 | See values.yaml     |
 | containerSecurityContext           | Set the securityContext for Containers                                                | See values.yaml     |
 | serviceMonitor.enabled             | Create ServiceMonitor for Prometheus Operator                                         | `false`             |
+| serviceMonitor.trustCRDsExist      | Do not check for the Prometheus Operator CRDs, just try to deploy                     | `false`             |
 | serviceMonitor.interval            | Scraping interval                                                                     | `30s`               |
 | serviceMonitor.namespace           | Where to create ServiceMonitor                                                        |                     |
 | serviceMonitor.labels              | ServiceMonitor labels                                                                 | `{}`                |
 | serviceMonitor.targetLabels        | ServiceMonitor targetLabels                                                           | `{}`                |
 | serviceMonitor.honorLabels         | ServiceMonitor honorLabels                                                            | `{}`                |
 | serviceMonitor.metricRelabelings   | ServiceMonitor metricRelabelings                                                      | `{}`                |
+| serviceMonitor.relabelings         | ServiceMonitor relabelings                                                            | `[]`                |
 | extraConfigMaps                    | ConfigMaps to add to mounted volumes                                                  | `[]`                |
 | extraSecrets                       | Secrets to add to mounted volumes                                                     | `[]`                |
 | nameOverride                       | Replaces "kong" in resource names, like "RELEASENAME-nameOverride" instead of "RELEASENAME-kong" | `""`                |
@@ -924,11 +948,11 @@ containerSecurityContext: # run as root to bind to lower ports
   runAsUser: 0
 ```
 
-**Note:** The default `podAnnotations` values disable inbound proxying for Kuma 
-and Istio. This is appropriate when using Kong as a gateway for external 
+**Note:** The default `podAnnotations` values disable inbound proxying for Kuma
+and Istio. This is appropriate when using Kong as a gateway for external
 traffic inbound into the cluster.
 
-If you want to use Kong as an internal proxy within the cluster network, you 
+If you want to use Kong as an internal proxy within the cluster network, you
 should enable inbound the inbound mesh proxies:
 
 ```yaml

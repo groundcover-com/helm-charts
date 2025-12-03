@@ -1,4 +1,3 @@
-
 {{- if .Values.upgradeCRDs }}
 apiVersion: batch/v1
 kind: Job

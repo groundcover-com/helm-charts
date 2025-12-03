@@ -9,7 +9,7 @@
 {{- define "cert-manager-crds.job.annotations" -}}
 helm.sh/hook-weight: "0"
 helm.sh/hook: "pre-upgrade"
-helm.sh/hook-delete-policy: "before-hook-creation,hook-succeeded"
+helm.sh/hook-delete-policy: "before-hook-creation"
 argocd.argoproj.io/hook: Sync
 argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
 {{- end -}}
@@ -17,5 +17,5 @@ argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
 {{- define "cert-manager-crds.rbac.annotations" -}}
 helm.sh/hook-weight: "-1"
 helm.sh/hook: "pre-upgrade"
-helm.sh/hook-delete-policy: "before-hook-creation,hook-succeeded"
+helm.sh/hook-delete-policy: "before-hook-creation"
 {{- end -}}
