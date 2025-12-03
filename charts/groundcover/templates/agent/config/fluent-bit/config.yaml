@@ -75,4 +75,6 @@ data:
         Tls.verify Off
         Header apikey ${API_KEY}
         Log_response_payload Off
+        Logs_body_key message
+        Logs_body_key_attributes On
 {{ end }}

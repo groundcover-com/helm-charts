@@ -333,7 +333,7 @@ agent:
     # for ipv6, change to "[::]"
     bindAddress: 0.0.0.0
     image:
-      tag: 2.2.3
+      tag: 4.2.0
       repository: "{{ .Values.global.origin.registry }}/fluent/fluent-bit"
     resources:
       requests:
