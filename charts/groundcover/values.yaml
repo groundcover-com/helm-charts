@@ -605,6 +605,8 @@ dbManager:
           key: '{{ include "clickhouse.secretKey" . }}'
           name: '{{ include "clickhouse.secretName" . }}'
   objectStorageQueues: {}
+  objectStorageDestTables:
+    logs: "logs_v6"
   cloudPricing:
     enabled: true
     pricingFileURL: "https://groundcover-public-assets.s3.amazonaws.com/cloud_pricing_v1.csv"

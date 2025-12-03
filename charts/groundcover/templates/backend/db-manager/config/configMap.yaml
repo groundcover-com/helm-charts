@@ -104,6 +104,8 @@ data:
       {{- (include "clickhouse.extraShardsList" .) | nindent 6  }}
     ObjectStorageQueues:
       {{- toYaml .Values.dbManager.objectStorageQueues | nindent 6 }}
+    ObjectStorageDestTables:
+      {{- toYaml .Values.dbManager.objectStorageDestTables | nindent 6 }}
     CloudPricing:
       Enabled: {{ .Values.dbManager.cloudPricing.enabled }}
       PricingFileURL: {{ .Values.dbManager.cloudPricing.pricingFileURL }}
