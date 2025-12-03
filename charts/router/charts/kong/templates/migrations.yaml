@@ -28,6 +28,9 @@ metadata:
   {{- end }}
 spec:
   backoffLimit: {{ .Values.migrations.backoffLimit }}
+  {{- if .Values.migrations.ttlSecondsAfterFinished }}
+  ttlSecondsAfterFinished: {{ .Values.migrations.ttlSecondsAfterFinished }}
+  {{- end }}
   template:
     metadata:
       name: {{ template "kong.name" . }}-init-migrations
@@ -78,6 +81,7 @@ spec:
         {{ toYaml .Values.containerSecurityContext | nindent 10 }} 
         env:
         {{- include "kong.no_daemon_env" . | nindent 8 }}
+        {{- include "kong.envFrom" .Values.envFrom | nindent 8 }}
         args: [ "kong", "migrations", "bootstrap" ]
         volumeMounts:
         {{- include "kong.volumeMounts" . | nindent 8 }}
@@ -86,6 +90,10 @@ spec:
         {{- toYaml .Values.migrations.resources | nindent 10 }}
       securityContext:
       {{- include "kong.podsecuritycontext" . | nindent 8 }}
+      {{- if .Values.affinity }}
+      affinity:
+      {{- toYaml .Values.affinity | nindent 8 }}
+      {{- end }}
       {{- if .Values.nodeSelector }}
       nodeSelector:
       {{- toYaml .Values.nodeSelector | nindent 8 }}

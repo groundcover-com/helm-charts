@@ -37,7 +37,7 @@ onprem:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.11.193
+  tag: 1.11.194
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/alpine/curl'
@@ -166,7 +166,7 @@ kong-crds:
 kong:
   replicaCount: 1
   image:
-    tag: 3.4.2
+    tag: 3.9.1
     repository: public.ecr.aws/groundcovercom/kong
   admin:
     enabled: true
@@ -186,6 +186,8 @@ kong:
     pg_database: kong
     nginx_proxy_proxy_buffer_size: "32k"
     nginx_proxy_proxy_buffers: "4 32k"
+    proxy_access_log: "/dev/stdout custom_fmt"
+    nginx_http_log_format: "custom_fmt '$remote_addr - $remote_user [$time_local] \"$request\" $status $body_bytes_sent \"$http_referer\" \"$http_user_agent\"'    \n"
   proxy:
     type: ClusterIP
     http:
@@ -198,7 +200,7 @@ kong:
     admissionWebhook:
       enabled: false
     image:
-      tag: 2.9.4
+      tag: "3.5"
       repository: public.ecr.aws/groundcovercom/kong/kubernetes-ingress-controller
     ingressClass: groundcover-kong
     # annotations for IngressClass resource (Kubernetes 1.18+)
