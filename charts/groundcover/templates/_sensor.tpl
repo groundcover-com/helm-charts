@@ -430,6 +430,7 @@ globallimiter:
   sampleeverything: false
 
 watchOnlyLocalNode: {{ $sensorValues.watchOnlyLocalNode }}
+resolveRemoteFromEndpoint: {{ $sensorValues.resolveRemoteFromEndpoint }}
 {{ if $sensorValues.collectionEnabled }}
 floraEnabled: true
 {{ end }}

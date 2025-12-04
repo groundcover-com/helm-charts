@@ -370,6 +370,7 @@ agent:
       b3ForceSample: true
       datadogForceSample: true
     watchOnlyLocalNode: false
+    resolveRemoteFromEndpoint: false
     setLocalTrafficPolicy: true
     collectionEnabled: true
     ingestionEnabled: true

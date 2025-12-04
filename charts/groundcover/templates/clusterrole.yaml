@@ -18,6 +18,9 @@ rules:
   - "apps"
   - ""
   - batch
+  {{- if .Values.agent.sensor.resolveRemoteFromEndpoint }}
+  - discovery.k8s.io
+  {{- end }}
   resources:
   - jobs
   - cronjobs
@@ -38,6 +41,9 @@ rules:
   - replicationcontrollers
   - persistentvolumeclaims
   - persistentvolumes
+  {{- if .Values.agent.sensor.resolveRemoteFromEndpoint }}
+  - endpointslices
+  {{- end }}
   {{- if .Values.k8sWatcher.watch.configmap.enabled }}
   - configmaps
   {{- end }}
