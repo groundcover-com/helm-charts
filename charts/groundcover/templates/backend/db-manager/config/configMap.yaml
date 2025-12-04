@@ -110,4 +110,13 @@ data:
       Enabled: {{ .Values.dbManager.cloudPricing.enabled }}
       PricingFileURL: {{ .Values.dbManager.cloudPricing.pricingFileURL }}
       RefreshInterval: {{ .Values.dbManager.cloudPricing.refreshInterval }}
+    CustomAttributesIndexes:
+      InvertedIndexLogsKeys:
+        {{- toYaml .Values.dbManager.customAttributesIndexes.invertedIndexLogsKeys | nindent 8 }}
+      InvertedIndexTracesKeys:
+        {{- toYaml .Values.dbManager.customAttributesIndexes.invertedIndexTracesKeys | nindent 8 }}
+      FavoriteAttributesLogsKeys:
+        {{- toYaml .Values.dbManager.customAttributesIndexes.favoriteAttributesLogsKeys | nindent 8 }}
+      FavoriteAttributesTracesKeys:
+        {{- toYaml .Values.dbManager.customAttributesIndexes.favoriteAttributesTracesKeys | nindent 8 }}
 {{- end -}}

@@ -612,6 +612,15 @@ dbManager:
     enabled: true
     pricingFileURL: "https://groundcover-public-assets.s3.amazonaws.com/cloud_pricing_v1.csv"
     refreshInterval: 6h # {amount}[h(ours), d(ays), w(eeks), y(ears)]
+  customAttributesIndexes:
+    # List of keys to use for inverted index on logs table
+    invertedIndexLogsKeys: []
+    # List of keys to use for inverted index on traces table
+    invertedIndexTracesKeys: []
+    # List of keys to use for favorite attributes on logs table
+    favoriteAttributesLogsKeys: []
+    # List of keys to use for favorite attributes on traces table
+    favoriteAttributesTracesKeys: []
 
 chip:
   enabled: false
