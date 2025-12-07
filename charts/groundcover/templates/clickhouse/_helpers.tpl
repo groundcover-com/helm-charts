@@ -3,7 +3,7 @@
 {{- end -}}
 
 {{- define "clickhouse.headlessServiceName" -}}
-{{-  printf "%s-headless" (include "clickhouse.fullname" .) -}}
+{{- printf "%s-headless" (include "clickhouse.fullname" .) -}}
 {{- end -}}
 
 {{- define "clickhouse.database" -}}
@@ -18,6 +18,10 @@
 {{-  print "reader" -}}
 {{- end -}}
 
+{{- define "clickhouse.nativePort" -}}
+{{- .Values.global.clickhouse.containerPorts.tcp | default "9000" -}}
+{{- end -}}
+
 {{- define "clickhouse.password" -}}
 {{- $secret := (lookup "v1" "Secret" .Release.Namespace (include "clickhouse.secretName" .) | default dict) -}}
 {{- if .Values.global.clickhouse.auth.password -}}
@@ -30,7 +34,7 @@
 {{- end -}}
 
 {{- define "clickhouse.nativeEndpoint" -}}
-{{-  printf "clickhouse://%s:%d" (include "clickhouse.fullname" .) (.Values.global.clickhouse.containerPorts.tcp | int ) -}}
+{{-  printf "clickhouse://%s:%d" (include "clickhouse.fullname" .) (include "clickhouse.nativePort" . | int ) -}}
 {{- end -}}
 
 {{- define "clickhouse.httpEndpoint" -}}

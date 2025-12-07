@@ -38,6 +38,8 @@ global:
       port: 2021
   metricsAggregator:
     enabled: false
+  dispatchCenter:
+    enabled: false
   syntheticsWorker:
     enabled: false
 
@@ -856,7 +858,7 @@ ingestor:
         dropAlwaysThreshold: 12h
         delayStart: 2m
   pprof:
-    enabled: '{{ include ".telemetry.enabled" . }}'
+    enabled: '{{ include "telemetry.enabled" . }}'
     uploaderType: pyroscope
     cpuSamplingDuration: 60s
     backoffTicker:
@@ -1000,7 +1002,7 @@ metricsAggregator:
         dropAlwaysThreshold: 12h
         delayStart: 2m
   pprof:
-    enabled: '{{ include ".telemetry.enabled" . }}'
+    enabled: '{{ include "telemetry.enabled" . }}'
     uploaderType: pyroscope
     cpuSamplingDuration: 60s
     backoffTicker:
@@ -1083,7 +1085,7 @@ fleetManager:
   manageHttpPort: 8080
   healthProbePort: 8081
   pprof:
-    enabled: '{{ include ".telemetry.enabled" . }}'
+    enabled: '{{ include "telemetry.enabled" . }}'
     uploaderType: pyroscope
     cpuSamplingDuration: 60s
     backoffTicker:
@@ -1274,6 +1276,55 @@ portal:
     config:
   autodiscovery: false
   maxResponseSizeBytes: 33554432
+
+dispatchCenter:
+  additionalLabels:
+  podLabels:
+  additionalAnnotations:
+  podAnnotations:
+  affinity:
+  nodeSelector:
+  tolerations: []
+  priorityClassName:
+  env: []
+  image:
+    repository: "{{ .Values.global.origin.registry }}/dispatch-center"
+    tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
+  resources:
+    limits:
+      memory: 256Mi
+    requests:
+      cpu: 50m
+      memory: 128Mi
+  healthProbe:
+    enabled: true
+    port: 8089
+  temporal:
+    host: ""
+  tracing:
+    enabled: false
+    writeTimeout: "5s"
+    flushInterval: "5s"
+    batchSize: 50
+  pprof:
+    enabled: '{{ include "telemetry.enabled" . }}'
+    uploaderType: pyroscope
+    cpuSamplingDuration: 60s
+    backoffTicker:
+      interval: 10s
+      exponent: 40
+    memoryTicker:
+      enabled: true
+      interval: 60s
+      jumpSizeInBytes: 100000000
+      windowSize: 12h
+      initialWait: 10m
+    cpuTicker:
+      enabled: true
+      interval: 60s
+      jumpSizeInMCPU: 100
+      windowSize: 12h
+      initialWait: 10m
 
 clickhouse:
   enabled: true

@@ -1,0 +1,181 @@
+{{ if and .Values.global.backend.enabled .Values.global.dispatchCenter.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+    {{- if .Values.dispatchCenter.additionalAnnotations }}
+{{ toYaml .Values.dispatchCenter.additionalAnnotations | indent 4 }}
+    {{- end }}    
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+    app: dispatch-center
+    app.kubernetes.io/name: dispatch-center
+    {{- if .Values.dispatchCenter.additionalLabels }}
+{{ toYaml .Values.dispatchCenter.additionalLabels | indent 4 }}
+    {{- end }}
+  name: {{ include "dispatch-center.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: dispatch-center
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9102"
+        groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+        {{- if .Values.dispatchCenter.additionalAnnotations }}
+{{ toYaml .Values.dispatchCenter.additionalAnnotations | indent 8 }}
+        {{- end }}
+        {{- if .Values.dispatchCenter.podAnnotations }}
+{{ toYaml .Values.dispatchCenter.podAnnotations | indent 8 }}
+        {{- end }}
+      labels:
+        app: dispatch-center
+        app.kubernetes.io/name: dispatch-center
+        {{- include "groundcover.labels" . | nindent 8 }}
+        {{- if .Values.dispatchCenter.additionalLabels }}
+{{ toYaml .Values.dispatchCenter.additionalLabels | indent 8 }}
+        {{- end }}
+        {{- if .Values.dispatchCenter.podLabels }}
+{{ toYaml .Values.dispatchCenter.podLabels | indent 8 }}
+        {{- end }}
+    spec:
+{{- if .Values.dispatchCenter.tolerations }}
+      tolerations:
+{{ toYaml .Values.dispatchCenter.tolerations | indent 8 }}
+{{- end }}
+{{- if .Values.dispatchCenter.affinity }}
+      affinity:
+{{ toYaml .Values.dispatchCenter.affinity | indent 8 }}
+{{- end }}
+{{- if .Values.dispatchCenter.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.dispatchCenter.nodeSelector | indent 8 }}
+{{- end }}
+      imagePullSecrets: {{ include "imagePullSecrets" . }}
+      initContainers:
+      - name: wait-for-temporal
+        image: '{{ tpl .Values.curl.image.repository . }}:{{ tpl .Values.curl.image.tag . }}'
+        command:
+          - /bin/sh
+          - -c
+        args:
+          - |
+            TEMPORAL_HOST="{{ .Values.dispatchCenter.temporal.host | default (printf "%s-temporal-frontend" .Release.Name) }}"
+            TEMPORAL_PORT="7233"
+            
+            echo "Waiting for Temporal at ${TEMPORAL_HOST}:${TEMPORAL_PORT}..."
+            while ! nc -z ${TEMPORAL_HOST} ${TEMPORAL_PORT}; do
+              echo "Temporal is unavailable - sleeping"
+              sleep 2
+            done
+            echo "Temporal is up"
+      - name: wait-for-clickhouse
+        image: '{{ tpl .Values.curl.image.repository . }}:{{ tpl .Values.curl.image.tag . }}'
+        command:
+          - /bin/sh
+          - -c
+        args:
+          - |
+            CLICKHOUSE_HOST="{{ include "clickhouse.fullname" . }}"
+            CLICKHOUSE_PORT="{{ include "clickhouse.nativePort" . }}"
+            
+            echo "Waiting for ClickHouse at ${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}..."
+            while ! nc -z ${CLICKHOUSE_HOST} ${CLICKHOUSE_PORT}; do
+              echo "ClickHouse is unavailable - sleeping"
+              sleep 2
+            done
+            echo "ClickHouse is up"
+      - name: wait-for-db
+        image: {{ include "postgresql.image" . }}
+        env:
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "postgresql.secretName" . }}
+              key: {{ include "postgresql.adminPasswordKey" . }}
+        command:
+        - /bin/sh
+        - -c
+        args:
+        - |
+          pg_isready \
+            -U "postgres" \
+            -d "dbname=postgres" \
+            -h {{ splitList ":" (include "postgresql.base.url" .) | first }} \
+            -p {{ splitList ":" (include "postgresql.base.url" .) | last }}
+      containers:
+      - env:
+        - name: GC_GROUNDCOVERVERSION
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['groundcover_version']
+        {{- if eq (include "telemetry.enabled" .) "true" }}
+        - name: API_KEY
+          valueFrom:
+            secretKeyRef:
+              key: {{ template "groundcover.apikeySecretKey" . }}
+              name: {{ template "groundcover.apikeySecretName" . }}
+        {{- end }}
+        - name: CLICKHOUSE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "clickhouse.secretName" . }}
+              key: {{ include "clickhouse.secretKey" . }}
+{{ with .Values.dispatchCenter.env }}
+            {{- tpl (toYaml .) $ | nindent 8 }}
+{{ end }}
+        envFrom:
+          - secretRef:
+              name: {{ include "groundcover.config.secretName" .}}
+        volumeMounts:
+        - name: config
+          mountPath: /etc/dispatch-center
+          readOnly: true
+        image: {{ tpl .Values.dispatchCenter.image.repository . }}:{{ tpl .Values.dispatchCenter.image.tag . }}
+        imagePullPolicy: Always
+        name: {{ include "dispatch-center.fullname" . }}
+        ports:
+        - containerPort: 9102
+          name: metrics
+          protocol: TCP
+        {{- if .Values.dispatchCenter.healthProbe.enabled }}
+        - containerPort: {{ .Values.dispatchCenter.healthProbe.port }}
+          name: health-http
+          protocol: TCP
+        {{- end }}
+        {{- if .Values.dispatchCenter.healthProbe.enabled }}
+        readinessProbe:
+          httpGet:
+            scheme: HTTP
+            path: /health
+            port: health-http
+          initialDelaySeconds: 5
+          periodSeconds: 15
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            scheme: HTTP
+            path: /health
+            port: health-http
+          initialDelaySeconds: 10
+          periodSeconds: 15
+          timeoutSeconds: 5
+          failureThreshold: 3
+        {{- end }}  
+        resources:
+{{- toYaml .Values.dispatchCenter.resources | nindent 10 }}
+      volumes:
+      - name: config
+        configMap:
+          name: {{ include "dispatch-center.configMapName" . }}
+{{- if .Values.dispatchCenter.priorityClassName }}
+      priorityClassName: {{ .Values.dispatchCenter.priorityClassName }}
+{{- end }}
+{{ end -}}
+

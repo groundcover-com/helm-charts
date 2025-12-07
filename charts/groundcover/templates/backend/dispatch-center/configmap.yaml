@@ -1,0 +1,76 @@
+{{- if and .Values.global.backend.enabled .Values.global.dispatchCenter.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "dispatch-center.configMapName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+    app: dispatch-center
+    app.kubernetes.io/name: dispatch-center
+data:
+  config.yaml: |
+    temporal:
+      address: {{ .Values.dispatchCenter.temporal.host | default (printf "%s-temporal-frontend:7233" .Release.Name) | quote }}
+    
+    clickhouse:
+      host: {{ include "clickhouse.fullname" . | quote }}
+      port: {{ include "clickhouse.nativePort" . | quote }}
+      database: {{ include "clickhouse.database" . | quote }}
+      user: {{ include "clickhouse.username" . | quote }}
+    
+    healthProbe:
+      enabled: {{ .Values.dispatchCenter.healthProbe.enabled | default true }}
+      port: {{ .Values.dispatchCenter.healthProbe.port | default 8089 }}
+    
+    telemetry:
+      enabled: {{ include "telemetry.enabled" . }}
+      traces:
+        enabled: true
+        endpoint: {{ include "telemetry.traces.otlpUrl" . | quote }}
+        writeTimeout: {{ .Values.dispatchCenter.tracing.writeTimeout | default "5s" }}
+        flushInterval: {{ .Values.dispatchCenter.tracing.flushInterval | default "5s" }}
+        batchSize: {{ .Values.dispatchCenter.tracing.batchSize | default 50 }}
+      pprof:
+        enabled: true
+        cpuSamplingDuration: {{ .Values.dispatchCenter.pprof.cpuSamplingDuration | default "60s" }}
+        httpUploader:
+          enabled: {{ eq (.Values.dispatchCenter.pprof.uploaderType | default "pyroscope") "http" }}
+          pushURL: {{ printf "%s/upload/pprof" (include "telemetry.metrics.base.url" .) | quote }}
+        pyroscopeUploader:
+          enabled: {{ eq (.Values.dispatchCenter.pprof.uploaderType | default "pyroscope") "pyroscope" }}
+          pushURL: {{ include "telemetry.metrics.base.url" . | quote }}
+        backoffTicker:
+          interval: {{ .Values.dispatchCenter.pprof.backoffTicker.interval | default "10s" }}
+          exponent: {{ .Values.dispatchCenter.pprof.backoffTicker.exponent | default 40 }}
+        memoryTicker:
+          enabled: {{ .Values.dispatchCenter.pprof.memoryTicker.enabled | default true }}
+          interval: {{ .Values.dispatchCenter.pprof.memoryTicker.interval | default "60s" }}
+          jumpSizeInBytes: {{ .Values.dispatchCenter.pprof.memoryTicker.jumpSizeInBytes | default 100000000 }}
+          windowSize: {{ .Values.dispatchCenter.pprof.memoryTicker.windowSize | default "12h" }}
+          initialWait: {{ .Values.dispatchCenter.pprof.memoryTicker.initialWait | default "10m" }}
+        cpuTicker:
+          enabled: {{ .Values.dispatchCenter.pprof.cpuTicker.enabled | default true }}
+          interval: {{ .Values.dispatchCenter.pprof.cpuTicker.interval | default "60s" }}
+          jumpSizeInMCPU: {{ .Values.dispatchCenter.pprof.cpuTicker.jumpSizeInMCPU | default 100 }}
+          windowSize: {{ .Values.dispatchCenter.pprof.cpuTicker.windowSize | default "12h" }}
+          initialWait: {{ .Values.dispatchCenter.pprof.cpuTicker.initialWait | default "10m" }}
+    
+    dynconf:
+      enabled: {{ .Values.global.fleetmanager.enabled }}
+      url: {{ include "fleet-manager.url" . }}
+      maximumInitialJitter: {{ .Values.fleetClientConfig.maximumInitialJitter }}
+      requestInterval: {{ .Values.fleetClientConfig.requestInterval }}
+      initialUpdateTimeout: {{ .Values.fleetClientConfig.initialUpdateTimeout }}
+      insecureSkipVerify: {{ .Values.fleetClientConfig.tlsSkipVerify }}
+    
+    secretStore:
+      url: {{ include "fleet-manager.base.url" . }}
+    
+    policies:
+      - conditions: ""
+        actions:
+          - type: "slack"
+            secret: "secretRef::store::8ff68d577968ee1b"
+{{- end }}
+
