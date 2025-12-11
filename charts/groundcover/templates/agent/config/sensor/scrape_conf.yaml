@@ -123,6 +123,9 @@ data:
           - source_labels: [__meta_kubernetes_pod_node_name]
             action: replace
             target_label: node
+{{- if .Values.agent.sensor.receivers.metricsscraper.customRelabelConfigs }}
+{{ toYaml .Values.agent.sensor.receivers.metricsscraper.customRelabelConfigs | indent 10 }}
+{{- end }}
 kind: ConfigMap
 metadata:
   labels:

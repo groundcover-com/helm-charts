@@ -394,6 +394,17 @@ agent:
       metricsscraper:
         enabled: false
         maxScrapeSize: 67108864
+        # Custom relabel configs that will be appended to the default kubernetes-pods job relabel_configs
+        # This allows you to add filtering/labeling without creating a new scrape job
+        # Example usage:
+        # customRelabelConfigs:
+        #   - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+        #     action: keep
+        #     regex: true
+        #   - source_labels: [__meta_kubernetes_pod_label_app]
+        #     target_label: application
+        #     action: replace
+        customRelabelConfigs: []
     exporters:
       remotewrite:
         usePrometheusCompatibleNaming: true
