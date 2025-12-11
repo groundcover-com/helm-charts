@@ -411,6 +411,7 @@ agent:
     pipelines:
       metrics:
         enricherEnabled: true
+        additionalMetricLabels: {}
     logs:
       pipeline:
         dropOldLogs:

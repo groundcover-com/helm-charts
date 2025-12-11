@@ -62,6 +62,9 @@ exporters:
 pipelines:
   metrics:
     enricherEnabled: {{ $sensorValues.pipelines.metrics.enricherEnabled }}
+    {{- if $sensorValues.pipelines.metrics.additionalMetricLabels }}
+    additionalMetricLabels: {{ toYaml $sensorValues.pipelines.metrics.additionalMetricLabels | nindent 6 }}
+    {{- end }}
     {{- if $sensorValues.pipelines.metrics.aggregation }}
     aggregation:
       enabled: {{ $sensorValues.pipelines.metrics.aggregation.enabled }}
