@@ -635,6 +635,18 @@ dbManager:
     favoriteAttributesLogsKeys: []
     # List of keys to use for favorite attributes on traces table
     favoriteAttributesTracesKeys: []
+  indexTiers: {}
+    # Map of table types to index tier configurations
+    # Currently supports: logs (future: traces, etc.)
+    # Uses LogSQL syntax for filters
+    # Example:
+    # logs:
+    #   - name: "hot"
+    #     filters: "cluster:prod AND namespace:critical"
+    #   - name: "warm"
+    #     filters: "cluster:prod"
+    #   - name: "archived"
+    #     filters: "namespace:*-archive AND NOT level:debug"
 
 chip:
   enabled: false
