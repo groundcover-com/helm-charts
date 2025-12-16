@@ -1,0 +1,99 @@
+{{- if and .Values.global.workflows.enabled .Values.global.workflows.alertCleanup.enabled -}}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Release.Name }}-keep-alert-cleanup
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+    app.kubernetes.io/component: keep-database
+spec:
+  schedule: {{ .Values.global.workflows.alertCleanup.schedule | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            {{- include "groundcover.labels" . | nindent 12 }}
+            app.kubernetes.io/component: keep-database
+        spec:
+          restartPolicy: OnFailure
+          imagePullSecrets: {{ include "imagePullSecrets" . }}
+          containers:
+          - name: postgres-cleanup
+            image: '{{ include "postgresql.image" . }}'
+            env:
+              - name: PGUSER
+                valueFrom:
+                  secretKeyRef:
+                    name: keep-postgres
+                    key: username
+              - name: PGPASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: keep-postgres
+                    key: password
+              - name: PGDATABASE
+                valueFrom:
+                  secretKeyRef:
+                    name: keep-postgres
+                    key: database
+              - name: PGHOST
+                value: '{{ splitList ":" (include "postgresql.base.url" .) | first }}'
+              - name: PGPORT
+                value: '{{ splitList ":" (include "postgresql.base.url" .) | last }}'
+            command:
+              - /bin/bash
+              - -c
+              - |
+                set -e
+                TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
+                echo "[${TIMESTAMP}] Alert cleanup job started - truncating alert tables"
+
+                psql <<EOSQL
+                -- Get counts before cleanup for reporting
+                SELECT 'Alerts before truncate: ' || COUNT(*) FROM alert;
+                SELECT 'LastAlerts before truncate: ' || COUNT(*) FROM lastalert;
+                SELECT 'WorkflowExecutions before truncate: ' || COUNT(*) FROM workflowexecution;
+
+                -- Truncate alert table and all dependent tables via CASCADE
+                TRUNCATE TABLE alert CASCADE;
+
+                -- Truncate workflow execution table and all dependent tables via CASCADE
+                TRUNCATE TABLE workflowexecution CASCADE;
+
+                -- Truncate related audit/event tables
+                TRUNCATE TABLE alertaudit CASCADE;
+                TRUNCATE TABLE alertdeduplicationevent CASCADE;
+                TRUNCATE TABLE alertraw CASCADE;
+                TRUNCATE TABLE alertfield CASCADE;
+
+                SELECT 'Truncation completed successfully';
+                EOSQL
+
+                RESULT=$?
+                TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
+
+                if [ $RESULT -eq 0 ]; then
+                  echo "[${TIMESTAMP}] Alert cleanup job completed successfully"
+                else
+                  echo "[${TIMESTAMP}] Alert cleanup job failed with exit code: $RESULT"
+                  exit $RESULT
+                fi
+            resources:
+              requests:
+                memory: "64Mi"
+                cpu: "100m"
+              limits:
+                memory: "128Mi"
+                cpu: "200m"
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities:
+                drop:
+                - ALL
+{{- end }}

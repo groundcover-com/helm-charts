@@ -13,6 +13,9 @@ global:
     enabled: false
   workflows:
     enabled: true
+    alertCleanup:
+      enabled: false
+      schedule: "0 2 * * *"
   temporal:
     enabled: false
     nodeSelector: {}
