@@ -34,10 +34,12 @@ frontendDomain: ""
 additionalLabels:
 onprem:
   enabled: true
+service:
+  annotations: {}
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.11.247
+  tag: 1.11.248
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/alpine/curl'
