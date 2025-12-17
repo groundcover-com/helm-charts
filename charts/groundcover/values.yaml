@@ -408,6 +408,17 @@ agent:
         #     target_label: application
         #     action: replace
         customRelabelConfigs: []
+        # Custom metric relabel configs that will be appended to the default kubernetes-pods job metric_relabel_configs
+        # This allows you to drop/filter/relabel metrics after scraping without creating a new scrape job
+        # Example usage:
+        # customMetricRelabelConfigs:
+        #   - source_labels: [__name__]
+        #     regex: 'up|process_cpu_seconds_total'
+        #     action: keep
+        #   - source_labels: [namespace]
+        #     regex: 'kube-system'
+        #     action: drop
+        customMetricRelabelConfigs: []
     exporters:
       remotewrite:
         usePrometheusCompatibleNaming: true
