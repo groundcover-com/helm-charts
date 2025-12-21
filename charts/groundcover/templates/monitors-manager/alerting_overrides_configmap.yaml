@@ -12,10 +12,13 @@ data:
           - uid: {{ .uid }}
             type: {{ .type }}
             settings:
-              url: {{ tpl (.settings.url | toString) $ | quote }}
-              httpMethod: {{ .settings.httpMethod | quote }}
-              authorization_scheme: {{ .settings.authorization_scheme }}
-              authorization_credentials: {{ .settings.authorization_credentials }}
+{{- range $key, $value := .settings }}
+{{- if contains "{{" (toString $value) }}
+              {{ $key }}: {{ tpl $value $ }}
+{{- else }}
+              {{ $key }}: {{ $value }}
+{{- end }}
+{{- end }}
 {{- end }}
 {{- end }}
     policies:
@@ -37,17 +40,25 @@ data:
 {{- $routeDefaults := (index $.Values "monitors-manager" "alertingOverrides" "routeDefaults") }}
 {{- $repeatIntervals := (index $.Values "monitors-manager" "alertingOverrides" "repeatIntervals") }}
         routes:
-{{- range $repeatIntervals }}
-          - receiver: {{ $routeDefaults.receiver }}
+{{- range $route := $routeDefaults }}
+{{- range $repeatInterval := $repeatIntervals }}
+          - receiver: {{ $route.receiver }}
             matchers:
-              - _gc_repeat_interval = {{ . }}
+            {{- range $route.matchers }}
+              - {{ . }}
+            {{- end }}
+              - _gc_repeat_interval = {{ $repeatInterval }}
             group_by:
-{{- range $routeDefaults.group_by }}
+{{- range $route.group_by }}
               - '{{ . }}'
 {{- end }}
-            group_wait: {{ $routeDefaults.group_wait }}
-            group_interval: {{ $routeDefaults.group_interval }}
-            repeat_interval: {{ . }}
+            group_wait: {{ $route.group_wait }}
+            group_interval: {{ $route.group_interval }}
+            repeat_interval: {{ $repeatInterval }}
+            {{- if $route.continue }}
+            continue: {{ $route.continue }}
+            {{- end }}
+{{- end }}
 {{- end }}
 {{- end }}
 {{ else }}

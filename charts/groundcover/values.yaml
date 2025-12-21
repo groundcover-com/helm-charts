@@ -14,7 +14,7 @@ global:
   workflows:
     enabled: true
     alertCleanup:
-      enabled: false
+      enabled: true
       schedule: "0 2 * * *"
   temporal:
     enabled: false
@@ -3586,7 +3586,7 @@ monitors-manager:
         - 48h
       # Common route configuration applied to all interval-based routes
       routeDefaults:
-        receiver: workflows-webhook
+      - receiver: workflows-webhook
         group_by:
           - '...'
         group_wait: 30s
@@ -3906,5 +3906,3 @@ backend:
 groundcover:
   extraObjects: {}
   podDisruptionBudget:
-
-
