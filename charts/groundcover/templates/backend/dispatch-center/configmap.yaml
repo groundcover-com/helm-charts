@@ -66,11 +66,18 @@ data:
     
     secretStore:
       url: {{ include "fleet-manager.base.url" . }}
-    
+
+    worker:
+      taskQueue: "dispatch-center-worker"
+      interval: {{ if and .Values.dispatchCenter .Values.dispatchCenter.worker .Values.dispatchCenter.worker.interval }}{{ .Values.dispatchCenter.worker.interval }}{{ else }}15s{{ end }}
+      maxChildWorkflowsPerBatch: {{ if and .Values.dispatchCenter .Values.dispatchCenter.worker .Values.dispatchCenter.worker.maxChildWorkflowsPerBatch }}{{ .Values.dispatchCenter.worker.maxChildWorkflowsPerBatch }}{{ else }}5000{{ end }}
+      maxActivityRetryAttempts: {{ if and .Values.dispatchCenter .Values.dispatchCenter.worker .Values.dispatchCenter.worker.maxActivityRetryAttempts }}{{ .Values.dispatchCenter.worker.maxActivityRetryAttempts }}{{ else }}1000{{ end }}
+
     policies:
-      - conditions: ""
-        actions:
-          - type: "slack"
-            secret: "secretRef::store::8ff68d577968ee1b"
+{{- if .Values.dispatchCenter.policies }}
+{{ .Values.dispatchCenter.policies | toYaml | indent 6 }}
+{{- else }}
+      []
+{{- end }}
 {{- end }}
 

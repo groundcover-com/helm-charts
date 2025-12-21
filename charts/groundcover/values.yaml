@@ -1330,10 +1330,10 @@ dispatchCenter:
     tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
   resources:
     limits:
-      memory: 256Mi
+      memory: 4Gi
     requests:
-      cpu: 50m
-      memory: 128Mi
+      cpu: 1
+      memory: 4Gi
   healthProbe:
     enabled: true
     port: 8089
