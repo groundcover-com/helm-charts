@@ -661,6 +661,17 @@ dbManager:
     #     filters: "cluster:prod"
     #   - name: "archived"
     #     filters: "namespace:*-archive AND NOT level:debug"
+  popularAttributes:
+    # Enable automatic discovery of popular attribute keys from query patterns
+    enabled: false
+    # Number of days to look back in system.query_log
+    lookbackDays: 1
+    # Minimum frequency for a key to be considered popular
+    minThreshold: 10
+    # Maximum total keys per domain (logs/traces) including existing keys
+    maxKeysPerDomain: 50
+    # How often to run the sync (e.g., "1h", "30m", "6h")
+    syncInterval: "1h"
 
 chip:
   enabled: false
