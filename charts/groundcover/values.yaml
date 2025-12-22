@@ -664,8 +664,8 @@ dbManager:
   popularAttributes:
     # Enable automatic discovery of popular attribute keys from query patterns
     enabled: false
-    # Number of days to look back in system.query_log
-    lookbackDays: 1
+    # How far back to look in system.query_log (e.g., "24h", "30m", "6h")
+    lookbackDuration: "24h"
     # Minimum frequency for a key to be considered popular
     minThreshold: 10
     # Maximum total keys per domain (logs/traces) including existing keys

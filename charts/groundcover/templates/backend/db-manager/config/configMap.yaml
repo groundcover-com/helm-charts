@@ -123,7 +123,7 @@ data:
       {{- toYaml .Values.dbManager.indexTiers | nindent 6 }}
     PopularAttributesConfig:
       Enabled: {{ .Values.dbManager.popularAttributes.enabled | default false }}
-      LookbackDays: {{ .Values.dbManager.popularAttributes.lookbackDays | default 1 }}
+      LookbackDuration: {{ .Values.dbManager.popularAttributes.lookbackDuration | default "24h" }}
       MinThreshold: {{ .Values.dbManager.popularAttributes.minThreshold | default 10 }}
       MaxKeysPerDomain: {{ .Values.dbManager.popularAttributes.maxKeysPerDomain | default 50 }}
       SyncInterval: {{ .Values.dbManager.popularAttributes.syncInterval | default "1h" }}
