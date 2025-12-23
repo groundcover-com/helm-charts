@@ -35,7 +35,8 @@ data:
         host: {{ tpl .Values.fleetManager.configManager.db.host . }}
         port: {{ tpl .Values.fleetManager.configManager.db.port . }}
         name: {{ .Values.fleetManager.configManager.db.name }}
-        user: {{ .Values.fleetManager.configManager.db.user }}
+        user: {{ tpl .Values.fleetManager.configManager.db.user . }}
+        admindbname: {{ .Values.fleetManager.configManager.db.admindbname }}
         pass: {{ tpl .Values.fleetManager.configManager.db.pass . }}
         timeout: {{ .Values.fleetManager.configManager.db.timeout }}
         interval: {{ .Values.fleetManager.configManager.db.interval }}

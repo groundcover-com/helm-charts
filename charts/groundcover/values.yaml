@@ -1157,11 +1157,12 @@ fleetManager:
       host: '{{ splitList ":" (include "postgresql.base.url" .) | first }}'
       port: '{{ splitList ":" (include "postgresql.base.url" .) | last }}'
       name: "fleetmanager"
-      user: "postgres"
+      user: '{{ include "postgresql.username" . }}'
       pass: ""
       timeout: 150s
       interval: 5s
       sslmode: "require"
+      admindbname: ""
     skipMigrations: false
     migrationsPath: "/migrations"
     cacheRefreshInterval: 2s
@@ -3650,7 +3651,7 @@ monitors-manager:
       type: postgres
       host: '{{ (include "postgresql.base.url" .) }}'
       name: monitors_manager
-      user: postgres
+      user: '{{ include "postgresql.username" . }}'
       ssl_mode: require
   extraInitContainers:
     - name: wait-for-db
@@ -3661,14 +3662,18 @@ monitors-manager:
             secretKeyRef:
               name: '{{ include "postgresql.secretName" . }}'
               key: '{{ include "postgresql.adminPasswordKey" . }}'
+        - name: POSTGRES_USER
+          value: '{{ include "postgresql.username" . }}'
+        - name: POSTGRES_DATABASE
+          value: '{{ include "postgresql.database" . }}'
       command:
         - /bin/sh
         - -c
       args:
         - |
           pg_isready \
-            -U "postgres" \
-            -d "dbname=postgres" \
+            -U "$POSTGRES_USER" \
+            -d "dbname=$POSTGRES_DATABASE" \
             -h {{ splitList ":" (include "postgresql.base.url" .) | first }} \
             -p {{ splitList ":" (include "postgresql.base.url" .) | last }}
   command:

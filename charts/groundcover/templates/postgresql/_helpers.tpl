@@ -8,3 +8,18 @@
 {{- end -}}
 {{- end -}}
 
+{{- define "postgresql.username" -}}
+{{- if .Values.global.postgresql.auth.username -}}
+    {{- .Values.global.postgresql.auth.username -}}
+{{- else -}}
+    {{- "postgres" -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "postgresql.database" -}}
+{{- if .Values.global.postgresql.auth.database -}}
+    {{- .Values.global.postgresql.auth.database -}}
+{{- else -}}
+    {{- "postgres" -}}
+{{- end -}}
+{{- end -}}

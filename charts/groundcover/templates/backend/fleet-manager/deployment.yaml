@@ -133,14 +133,18 @@ spec:
             secretKeyRef:
               name: {{ include "postgresql.secretName" . }}
               key: {{ include "postgresql.adminPasswordKey" . }}
+        - name: POSTGRES_USER
+          value: '{{ include "postgresql.username" . }}'
+        - name: POSTGRES_DATABASE
+          value: '{{ include "postgresql.database" . }}'
         command:
         - /bin/sh
         - -c
         args:
         - |
           pg_isready \
-            -U "postgres" \
-            -d "dbname=postgres" \
+            -U "$POSTGRES_USER" \
+            -d "dbname=$POSTGRES_DATABASE" \
             -h {{ splitList ":" (include "postgresql.base.url" .) | first }} \
             -p {{ splitList ":" (include "postgresql.base.url" .) | last }}
       volumes:

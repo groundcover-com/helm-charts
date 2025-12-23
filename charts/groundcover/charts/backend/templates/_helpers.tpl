@@ -47,3 +47,4 @@ PostgreSQL helpers
 {{- define "postgresql.base.url" -}}
 {{- printf "%s-postgresql:5432" .Release.Name -}}
 {{- end -}}
+

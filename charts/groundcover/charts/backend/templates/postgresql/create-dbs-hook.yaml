@@ -24,17 +24,21 @@ spec:
               secretKeyRef:
                 name: '{{ include "postgresql.secretName" . }}'
                 key: '{{ include "postgresql.adminPasswordKey" . }}'
+          - name: POSTGRES_USER
+            value: '{{ include "postgresql.username" . }}'
           - name: PGHOST
             value: '{{ splitList ":" (include "postgresql.base.url" .) | first }}'
           - name: PGPORT
             value: '{{ splitList ":" (include "postgresql.base.url" .) | last }}'
+          - name: POSTGRES_DATABASE
+            value: '{{ include "postgresql.database" . }}'
         command:
           - /bin/bash
           - -c
           - |
             set -eu
             . /opt/bitnami/scripts/libautoctl.sh
-            wait_until_can_connect "postgres://postgres:${PGPASSWORD}@${PGHOST}:${PGPORT}/postgres"
+            wait_until_can_connect "postgres://${POSTGRES_USER}:${PGPASSWORD}@${PGHOST}:${PGPORT}/${POSTGRES_DATABASE}"
       containers:
       - name: psql
         image: '{{ include "postgresql.image" . }}'
@@ -60,4 +64,8 @@ spec:
             value: '{{ splitList ":" (include "postgresql.base.url" .) | first }}'
           - name: INITDB_PGPORT
             value: '{{ splitList ":" (include "postgresql.base.url" .) | last }}'
+          - name: POSTGRES_USER
+            value: '{{ include "postgresql.username" . }}'
+          - name: POSTGRES_DATABASE
+            value: '{{ include "postgresql.database" . }}'
 {{ end -}}
