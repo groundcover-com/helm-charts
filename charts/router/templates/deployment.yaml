@@ -48,8 +48,8 @@ spec:
           args:
             - |
               pg_isready \
-                -U "postgres" \
-                -d "dbname=postgres" \
+                -U {{ include "postgresql.username" . }} \
+                -d "dbname={{ include "postgresql.database" . }}" \
                 -h {{ splitList ":" (include "postgresql.base.url" .) | first }} \
                 -p {{ splitList ":" (include "postgresql.base.url" .) | last }}
         - name: check-grafana-is-up   
