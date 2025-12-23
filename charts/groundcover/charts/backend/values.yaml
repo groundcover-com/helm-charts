@@ -38,10 +38,6 @@ postgresql:
         value: localhost
       - name: INITDB_PGPORT
         value: '{{ splitList ":" (include "postgresql.base.url" .) | last }}'
-      - name: POSTGRES_USER
-        value: '{{ include "postgresql.username" . }}'
-      - name: POSTGRES_DATABASE
-        value: '{{ include "postgresql.database" . }}'
       - name: POSTGRES_KEEP_USER
         valueFrom:
           secretKeyRef:
