@@ -3521,6 +3521,8 @@ victoria-metrics-single:
     extraAggregations: []
     
 monitors-manager:
+  testFramework:
+    enabled: false
   initChownData:
     image:
       tag: "1.36.1"
