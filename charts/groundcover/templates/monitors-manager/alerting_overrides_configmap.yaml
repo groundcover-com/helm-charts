@@ -4,6 +4,9 @@ data:
   alerting_overrides.yaml: |
     apiVersion: 1
 {{ if .Values.global.workflows.enabled }}
+{{- if ne (len (index .Values "monitors-manager" "alertingOverrides" "policies")) (len (index .Values "monitors-manager" "alertingOverrides" "routeDefaults")) }}
+{{- fail "policies and routeDefaults arrays must have equal length" }}
+{{- end }}
     contactPoints:
 {{- range (index .Values "monitors-manager" "alertingOverrides" "contactPoints") }}
       - name: {{ .name }}
@@ -22,25 +25,35 @@ data:
 {{- end }}
 {{- end }}
     policies:
-{{- range (index .Values "monitors-manager" "alertingOverrides" "policies") }}
-      - receiver: {{ .receiver }}
+    - receiver: grafana-default-email
+      group_by: ["grafana_folder","alertname"]
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 4h
+      routes:
+{{- range $policyIndex, $policy := (index .Values "monitors-manager" "alertingOverrides" "policies") }}
+      - receiver: {{ $policy.receiver }}
         group_by:
-{{- range .group_by }}
+{{- range $policy.group_by }}
           - '{{ . }}'
 {{- end }}
-{{- if .matchers }}
+{{- if $policy.matchers }}
         matchers:
-{{- range .matchers }}
+{{- range $policy.matchers }}
           - {{ . }}
 {{- end }}
 {{- end }}
-        group_wait: {{ .group_wait }}
-        group_interval: {{ .group_interval }}
-        repeat_interval: {{ .repeat_interval }}
+        group_wait: {{ $policy.group_wait }}
+        group_interval: {{ $policy.group_interval }}
+        repeat_interval: {{ $policy.repeat_interval }}
+        {{ if $policy.continue}}
+        continue: {{ $policy.continue }}
+        {{ end }}
 {{- $routeDefaults := (index $.Values "monitors-manager" "alertingOverrides" "routeDefaults") }}
 {{- $repeatIntervals := (index $.Values "monitors-manager" "alertingOverrides" "repeatIntervals") }}
         routes:
-{{- range $route := $routeDefaults }}
+{{- range $routeIndex, $route := $routeDefaults }}
+{{- if eq $policyIndex $routeIndex}}
 {{- range $repeatInterval := $repeatIntervals }}
           - receiver: {{ $route.receiver }}
             matchers:
@@ -58,6 +71,7 @@ data:
             {{- if $route.continue }}
             continue: {{ $route.continue }}
             {{- end }}
+{{- end }}
 {{- end }}
 {{- end }}
 {{- end }}
