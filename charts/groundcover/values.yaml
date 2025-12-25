@@ -3596,8 +3596,8 @@ monitors-manager:
         - 4h
         - 8h
         - 12h
-        - 24h
-        - 48h
+        - 1d
+        - 2d
       # Common route configuration applied to all interval-based routes
       routeDefaults:
       - receiver: workflows-webhook
