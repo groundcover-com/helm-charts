@@ -635,7 +635,7 @@ dbManager:
           name: '{{ include "clickhouse.secretName" . }}'
   objectStorageQueues: {}
   objectStorageDestTables:
-    logs: "logs_v6"
+    logs: "logs_v8"
   cloudPricing:
     enabled: true
     pricingFileURL: "https://groundcover-public-assets.s3.amazonaws.com/cloud_pricing_v1.csv"
@@ -685,7 +685,7 @@ chip:
     name: ""
     annotations: {}
   tables:
-    - logs_v6
+    - logs_v8
     - traces_v2
   storage:
     s3:
@@ -2556,7 +2556,7 @@ vector:
             type: clickhouse
             endpoint: '{{ include "clickhouse.shard0HttpEndpoint" . }}'
             database: "groundcover"
-            table: "logs_v6"
+            table: "logs_v8"
             request:
               retry_attempts: 5
             auth:
