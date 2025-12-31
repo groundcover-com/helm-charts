@@ -619,6 +619,14 @@ data:
         Count: {{ .Values.integrationsAgent.rateLimits.cloudwatchListMetrics.count }}
         Duration: {{ .Values.integrationsAgent.rateLimits.cloudwatchListMetrics.duration }}
       {{- end }}
+      {{- if .Values.integrationsAgent.rateLimits.integrationTypes }}
+      IntegrationTypes:
+        {{- range $type, $config := .Values.integrationsAgent.rateLimits.integrationTypes }}
+        {{ $type }}:
+          Requests: {{ $config.requests }}
+          Interval: {{ $config.interval }}
+        {{- end }}
+      {{- end }}
     {{- end }}
 
     SecretStore:

@@ -792,6 +792,10 @@ integrationsAgent:
     cloudwatchListMetrics:
       count: 20
       duration: 1s
+    integrationTypes:
+      synthetics:
+        requests: 1
+        interval: 2s
   exporters:
     prometheus:
       requestTimeout: 30s
