@@ -131,48 +131,22 @@ spec:
       priorityClassName: {{ .Values.ingestor.priorityClassName }}
 {{- end }}
       initContainers:
-      - name: check-metrics-ingestor-ready
-        env:
-        {{- with .Values.agent.initContainers.checkMetrics.builtinEnv }}
-          {{ tpl (toYaml .) $ | nindent 12 }}
-        {{- end }}      
-        args:
-        - |
-            while [ $(curl -H "apikey:$API_KEY" \
-            {{- if .Values.global.ingestion.tls_skip_verify }}
-              -k \
-            {{- end }}
-              -sw '%{http_code}' {{ include "metrics-ingester.write.http.url" . }} -o /dev/null) -ne 204 ];
-            do 
-              echo 'Waiting for metrics ingestion endpoint...'; 
-              sleep 2; 
-            done; 
-            echo metrics ingestion endpoint is up
-        command:
-          - /bin/sh
-          - -c
-        image: '{{ tpl .Values.curl.image.repository . }}:{{ tpl .Values.curl.image.tag . }}'
-      - name: check-ingestion-endpoint-ready
-        env:
-        {{- with .Values.agent.initContainers.checkIngestion.builtinEnv }}
-          {{ tpl (toYaml .) $ | nindent 12 }}
-        {{- end }}    
-        args:
-        - | 
-            while [ $(curl -H "apikey:$API_KEY" \
-            {{- if .Values.global.ingestion.tls_skip_verify }}
-              -k \
-            {{- end }}
-              -sw '%{http_code}' {{ include "ingestion.health.http.url" . }} -o /dev/null) -ne 200 ]
-            do
-              echo 'Waiting for ingestion endpoint...';
-              sleep 2;
-            done;
-            echo ingestion endpoint is up
-        command:
-          - /bin/sh
-          - -c
-        image: '{{ tpl .Values.curl.image.repository . }}:{{ tpl .Values.curl.image.tag . }}'
+      {{- include "groundcover.initContainer.waitForEndpoint" (dict 
+          "root" $ 
+          "name" "check-metrics-ingestor-ready"
+          "env" .Values.agent.initContainers.checkMetrics.builtinEnv
+          "url" (include "metrics-ingester.write.http.url" .)
+          "expectedCode" "204"
+          "serviceName" "metrics ingestion endpoint"
+      ) | nindent 6 }}
+      {{- include "groundcover.initContainer.waitForEndpoint" (dict 
+          "root" $ 
+          "name" "check-ingestion-endpoint-ready"
+          "env" .Values.agent.initContainers.checkIngestion.builtinEnv
+          "url" (include "ingestion.health.http.url" .)
+          "expectedCode" "200"
+          "serviceName" "ingestion endpoint"
+      ) | nindent 6 }}
       volumes:
       - configMap:
           name: ingestor-config

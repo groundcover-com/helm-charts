@@ -244,48 +244,22 @@ spec:
       hostNetwork: {{ default false .Values.agent.hostNetwork }}
       hostPID: true
       initContainers:
-        - name: check-ingestion-endpoint-ready
-          env:
-          {{- with .Values.agent.initContainers.checkIngestion.builtinEnv }}
-            {{ tpl (toYaml .) $ | nindent 12 }}
-          {{- end }}    
-          args:
-          - | 
-              while [ $(curl -H "apikey:$API_KEY" \
-              {{- if .Values.global.ingestion.tls_skip_verify }}
-                -k \
-              {{- end }}
-                -sw '%{http_code}' {{ include "ingestion.health.http.url" . }} -o /dev/null) -ne 200 ]
-              do
-                echo 'Waiting for ingestion endpoint...';
-                sleep 2;
-              done;
-              echo ingestion endpoint is up
-          command:
-            - /bin/sh
-            - -c
-          image: '{{ tpl .Values.curl.image.repository . }}:{{ tpl .Values.curl.image.tag . }}'
-        - name: check-metrics-ingestor-ready
-          env:
-          {{- with .Values.agent.initContainers.checkMetrics.builtinEnv }}
-            {{ tpl (toYaml .) $ | nindent 12 }}
-          {{- end }}      
-          args:
-          - |
-              while [ $(curl -H "apikey:$API_KEY" \
-              {{- if .Values.global.ingestion.tls_skip_verify }}
-                -k \
-              {{- end }}
-                -sw '%{http_code}' {{ include "metrics-ingester.write.http.url" . }} -o /dev/null) -ne 204 ];
-              do 
-                echo 'Waiting for VictoriaMetrics Agent...'; 
-                sleep 2; 
-              done; 
-              echo VictoriaMetrics Agent is up
-          command:
-            - /bin/sh
-            - -c
-          image: '{{ tpl .Values.curl.image.repository . }}:{{ tpl .Values.curl.image.tag . }}'
+        {{- include "groundcover.initContainer.waitForEndpoint" (dict 
+            "root" $ 
+            "name" "check-ingestion-endpoint-ready"
+            "env" .Values.agent.initContainers.checkIngestion.builtinEnv
+            "url" (include "ingestion.health.http.url" .)
+            "expectedCode" "200"
+            "serviceName" "ingestion endpoint"
+        ) | nindent 8 }}
+        {{- include "groundcover.initContainer.waitForEndpoint" (dict 
+            "root" $ 
+            "name" "check-metrics-ingestor-ready"
+            "env" .Values.agent.initContainers.checkMetrics.builtinEnv
+            "url" (include "metrics-ingester.write.http.url" .)
+            "expectedCode" "204"
+            "serviceName" "VictoriaMetrics Agent"
+        ) | nindent 8 }}
       serviceAccountName: {{ include "sensor.fullname" . }}
 {{- if or (.Values.agent.priorityClassName) (.Values.agent.priorityClass.create) }}
   {{- if .Values.agent.priorityClassName }}
