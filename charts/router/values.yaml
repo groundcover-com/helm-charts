@@ -39,7 +39,7 @@ service:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.11.317
+  tag: 1.11.318
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/alpine/curl'
@@ -63,6 +63,9 @@ ingresses:
 #           port: 8080
 imagePullSecrets: []
 configuration:
+  # AI agent service URL (empty = disabled)
+  # Example: 'http://{{ .Release.Name }}-agent-service:8080'
+  AgentServiceURL: ''
   authProxy: false
   authProxyHeaders:
     User: "X-WEBAUTH-USER"
@@ -311,3 +314,43 @@ dbs:
   router-monitors: monitors
   grafana: grafana
   kong: kong
+agent-service:
+  enabled: false
+  image:
+    repository: quay.io/groundcover/agent-service
+    tag: '{{ default .Chart.AppVersion .Values.origin.tag }}'
+    pullPolicy: Always
+  initImage:
+    repository: quay.io/groundcover/postgres
+    tag: "15"
+  replicas: 2
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+  service:
+    port: 8080
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  postgres:
+    database: "agent_service"
+    secretName: "managed-postgres-credentials"
+    hostKey: "host"
+    portKey: "port"
+    usernameKey: "username"
+    passwordKey: "password"
+  config:
+    routerUrl: "http://router:8080"
+    awsRegion: ""
+    bedrockModelId: ""
+    otelTracingEnabled: "true"
+    otelServiceName: "agent-service"

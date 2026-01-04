@@ -1,0 +1,14 @@
+{{- if index .Values "agent-service" "enabled" }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ .Release.Name }}-agent-service
+  labels:
+    app: {{ .Release.Name }}-agent-service
+    {{- include "groundcover.labels" . | nindent 4 }}
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-agent-service
+{{- end }}
