@@ -470,7 +470,7 @@ victoria-metrics-distributed:
   read:
     global:
       vmauth:
-        name: "read-global-groundcover"             
+        name: "read-global-groundcover"
   write:
     global:
       vmauth:
