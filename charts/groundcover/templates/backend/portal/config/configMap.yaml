@@ -110,6 +110,10 @@ data:
       Enabled: {{ include "backend.kong.enabled" . }}
       Endpoint: {{ include "backend.kong.endpoint" . }}
 
+    IntegrationAgent:
+      Enabled: {{ .Values.global.integrations.agent.enabled }}
+      Endpoint: {{ include "integrations-agent.url" . }}
+
 kind: ConfigMap
 metadata:
   labels:

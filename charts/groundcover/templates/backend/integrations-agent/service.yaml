@@ -1,0 +1,30 @@
+{{ if .Values.global.integrations.agent.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: integrations-agent
+    app.kubernetes.io/name: integrations-agent
+    {{- include "groundcover.labels" . | nindent 4 }}
+    {{- if .Values.integrationsAgent.additionalLabels }}
+    {{ toYaml .Values.integrationsAgent.additionalLabels | indent 4 }}
+    {{- end }}
+  annotations:
+    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+    {{- if .Values.integrationsAgent.additionalAnnotations }}
+    {{ toYaml .Values.integrationsAgent.additionalAnnotations | indent 4 }}
+    {{- end }}
+  name: {{ include "integrations-agent.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  ports:
+  - name: agent-http
+    port: {{ include "integrations-agent.port" . }}
+    protocol: TCP
+    targetPort: agent-http
+  selector:
+    app: integrations-agent
+  type: ClusterIP
+{{ end }}
+
+
