@@ -110,6 +110,10 @@ spec:
               value: {{ $agentService.config.otelTracingEnabled | quote }}
             - name: OTEL_SERVICE_NAME
               value: {{ $agentService.config.otelServiceName | quote }}
+            {{- if $agentService.config.otelExporterOtlpEndpoint }}
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: {{ $agentService.config.otelExporterOtlpEndpoint | quote }}
+            {{- end }}
             - name: POSTGRES_HOST
               valueFrom:
                 secretKeyRef:
