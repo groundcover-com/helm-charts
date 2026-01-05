@@ -652,7 +652,7 @@ dbManager:
   indexTiers: {}
     # Map of table types to index tier configurations
     # Currently supports: logs (future: traces, etc.)
-    # Uses LogSQL syntax for filters
+    # Uses GCQL syntax for filters
     # Example:
     # logs:
     #   - name: "hot"
