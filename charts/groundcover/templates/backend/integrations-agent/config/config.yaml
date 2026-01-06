@@ -58,9 +58,6 @@ data:
       AwsStsRegion: "{{ .stsRegion }}"
       {{- end }}
       Region: "{{ .region }}"
-      {{- if .outChannelSize }}
-      OutChanSize: {{ .outChannelSize }}
-      {{- end }}
       {{- if .rowsBatchSize }}
       AwsBillingRowsBatchSize: {{ .rowsBatchSize }}
       {{- end }}
