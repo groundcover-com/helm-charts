@@ -1,6 +1,6 @@
 {{- if and .Values.postgresql.jobs.createKeepUser.enabled .Values.global.postgresql.overrideUrl }}
 
-{{- $name := (printf "%s-keep-user" (include "postgresql.primary.fullname" $)) -}}
+{{- $name := (printf "%s-create-keep-user-%s" (include "postgresql.primary.fullname" $) (randAlphaNum 6 | lower)) -}}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -11,6 +11,7 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}  
 spec:
+  ttlSecondsAfterFinished: 300
   template:
     spec:
       restartPolicy: OnFailure
