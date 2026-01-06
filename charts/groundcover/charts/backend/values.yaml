@@ -3,9 +3,6 @@ postgresql:
     createKeepUser:
       enabled: true
       annotations:
-        helm.sh/hook-weight: "-1"
-        helm.sh/hook: "pre-upgrade"
-        helm.sh/hook-delete-policy: "before-hook-creation"
     createDbs:
       enabled: true
       annotations:
