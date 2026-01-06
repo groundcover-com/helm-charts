@@ -439,7 +439,7 @@ agent:
         tracesPort: 8126
         samplingRatio: 0.05
         handleTraces: true
-        handleStats: false
+        handleStats: true
       otel:
         proxyEnabled: false
         direct:
@@ -939,7 +939,7 @@ ingestor:
       tracesPort: 8126
       samplingRatio: 0.05
       handleTraces: true
-      handleStats: false
+      handleStats: true
     otel:
       proxyEnabled: false
       direct:
