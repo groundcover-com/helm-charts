@@ -7,7 +7,7 @@ metadata:
   name: {{ .Release.Name }}-agent-service
   labels:
     app: {{ .Release.Name }}-agent-service
-    {{- include "groundcover.labels" . | nindent 4 }}
+    {{- include "router.labels" . | nindent 4 }}
 spec:
   replicas: {{ $agentService.replicas }}
   selector:
