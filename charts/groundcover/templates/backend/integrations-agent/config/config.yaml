@@ -664,6 +664,28 @@ data:
       insecureSkipVerify: {{ .Values.fleetClientConfig.tlsSkipVerify }}
 
     SyntheticsWorkerUrl: {{ include "synthetics-worker.url" . }}
+
+    Instrumentation:
+      TracingTargets:
+        # Send to defined ingestion point
+        - Endpoint: {{ include "ingestor.otlptraces.http.url" . }}
+          TlsSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
+          Insecure: false
+        
+        # If incloud - send to customer ingestor as well
+        {{- if .Values.tags.incloud }}
+        - Endpoint: {{ include "ingestor.otlptraces.cluster.http.url" . }} 
+          TlsSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
+        {{- end }}
+
+      BatchSize: {{ .Values.integrationsAgent.instrumentation.batchSize }}
+      BatchTimeout: {{ .Values.integrationsAgent.instrumentation.batchTimeout }}
+      ExportTimeout: {{ .Values.integrationsAgent.instrumentation.exportTimeout }}
+      MaxQueueSize: {{ .Values.integrationsAgent.instrumentation.maxQueueSize }}
+      MetricsTargets:
+        # Send to incluster customer metrics ingester
+        - Endpoint: {{ include "metrics-ingester.cluster.http.base.url" . }}/api/v1/import/prometheus
+      MetricsPushInterval: {{ .Values.integrationsAgent.instrumentation.metricsPushInterval }}
       
 kind: ConfigMap
 metadata:

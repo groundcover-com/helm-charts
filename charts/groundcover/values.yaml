@@ -813,6 +813,15 @@ integrationsAgent:
         writeInterval: 10s
         maxBatchSize: 2000
         maxBatchWait: 10s
+  instrumentation:
+    # Tracing batch processor settings
+    batchSize: 512
+    batchTimeout: 5s
+    exportTimeout: 30s
+    maxQueueSize: 2048
+    # Metrics push settings
+    metricsPushInterval: 30s
+    
 syntheticsWorker:
   replicaCount: 2
   image:

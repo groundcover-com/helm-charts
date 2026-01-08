@@ -1,6 +1,7 @@
 {{- if index .Values "agent-service" "enabled" }}
 {{- $agentService := index .Values "agent-service" }}
 {{- $postgres := $agentService.postgres }}
+{{- $gitbook := $agentService.gitbook }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -96,6 +97,26 @@ spec:
             - containerPort: 8080
               name: http
           env:
+            - name: GITBOOK_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $gitbook.secretName | default "gitbook-credentials" }}
+                  key: {{ $gitbook.apiTokenKey | default "api-token" }}
+            - name: GITBOOK_ORGANIZATION_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $gitbook.secretName | default "gitbook-credentials" }}
+                  key: {{ $gitbook.organizationIdKey | default "organization-id" }}
+            - name: GITBOOK_SITE_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $gitbook.secretName | default "gitbook-credentials" }}
+                  key: {{ $gitbook.siteIdKey | default "site-id" }}
+            - name: GITBOOK_SPACE_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $gitbook.secretName | default "gitbook-credentials" }}
+                  key: {{ $gitbook.spacesIdKey | default "space-id" }}
             - name: ROUTER_URL
               value: {{ $agentService.config.routerUrl | quote }}
             {{- if $agentService.config.awsRegion }}
