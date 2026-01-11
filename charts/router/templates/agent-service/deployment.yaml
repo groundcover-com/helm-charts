@@ -2,6 +2,7 @@
 {{- $agentService := index .Values "agent-service" }}
 {{- $postgres := $agentService.postgres }}
 {{- $gitbook := $agentService.gitbook }}
+{{- $longTermMemory := $agentService.longTermMemory }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -157,6 +158,26 @@ spec:
                   key: {{ $postgres.passwordKey | default "password" }}
             - name: POSTGRES_DATABASE
               value: {{ $postgres.database | default "agent_service" | quote }}
+            {{- if $longTermMemory }}
+            - name: LONG_TERM_MEMORY_ENABLED
+              value: {{ $longTermMemory.enabled | default false | quote }}
+            {{- if $longTermMemory.enabled }}
+            - name: LONG_TERM_MEMORY_EMBEDDING_DIMS
+              value: {{ $longTermMemory.embeddingDims | default 1024 | quote }}
+            - name: LONG_TERM_MEMORY_EMBEDDING_MODEL
+              value: {{ $longTermMemory.embeddingModel | default "bedrock:amazon.titan-embed-text-v2:0" | quote }}
+            - name: LONG_TERM_MEMORY_NAMESPACE
+              value: {{ $longTermMemory.namespace | default "sre_agent_memories" | quote }}
+            - name: LONG_TERM_MEMORY_NAMESPACE_PER_DEPLOYMENT
+              value: {{ $longTermMemory.namespacePerDeployment | default false | quote }}
+            {{- if $longTermMemory.namespacePerDeployment }}
+            - name: LONG_TERM_MEMORY_DEV_USER
+              value: {{ required "agent-service.longTermMemory.devUser is required when namespacePerDeployment=true" $longTermMemory.devUser | quote }}
+            {{- end }}
+            - name: ENABLE_DIRECT_MEMORY_MANAGEMENT_TOOLS
+              value: {{ $longTermMemory.enableDirectMemoryManagementTools | default false | quote }}
+            {{- end }}
+            {{- end }}
           resources:
             {{- toYaml $agentService.resources | nindent 12 }}
           readinessProbe:
