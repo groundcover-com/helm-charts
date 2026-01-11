@@ -39,7 +39,7 @@ service:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.11.340
+  tag: 1.11.341
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/alpine/curl'
@@ -361,3 +361,11 @@ agent-service:
     organizationIdKey: "organization-id"
     siteIdKey: "site-id"
     spacesIdKey: "space-id"
+  longTermMemory:
+    enabled: false
+    embeddingDims: 1024
+    embeddingModel: "bedrock:amazon.titan-embed-text-v2:0"
+    namespace: "sre_agent_memories"
+    namespacePerDeployment: false
+    devUser: ""
+    enableDirectMemoryManagementTools: false
