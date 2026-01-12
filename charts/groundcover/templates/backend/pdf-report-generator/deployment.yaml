@@ -1,0 +1,102 @@
+{{ if and .Values.global.backend.enabled .Values.global.pdfReportGenerator.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+    {{- if .Values.pdfReportGenerator.additionalAnnotations }}
+{{ toYaml .Values.pdfReportGenerator.additionalAnnotations | indent 4 }}
+    {{- end }}
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+    app: pdf-report-generator
+    app.kubernetes.io/name: pdf-report-generator
+    {{- if .Values.pdfReportGenerator.additionalLabels }}
+{{ toYaml .Values.pdfReportGenerator.additionalLabels | indent 4 }}
+    {{- end }}
+  name: {{ include "pdf-report-generator.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pdf-report-generator
+  template:
+    metadata:
+      annotations:
+        groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+        {{- if .Values.pdfReportGenerator.additionalAnnotations }}
+{{ toYaml .Values.pdfReportGenerator.additionalAnnotations | indent 8 }}
+        {{- end }}
+        {{- if .Values.pdfReportGenerator.podAnnotations }}
+{{ toYaml .Values.pdfReportGenerator.podAnnotations | indent 8 }}
+        {{- end }}
+      labels:
+        app: pdf-report-generator
+        app.kubernetes.io/name: pdf-report-generator
+        {{- include "groundcover.labels" . | nindent 8 }}
+        {{- if .Values.pdfReportGenerator.additionalLabels }}
+{{ toYaml .Values.pdfReportGenerator.additionalLabels | indent 8 }}
+        {{- end }}
+        {{- if .Values.pdfReportGenerator.podLabels }}
+{{ toYaml .Values.pdfReportGenerator.podLabels | indent 8 }}
+        {{- end }}
+    spec:
+{{- if .Values.pdfReportGenerator.tolerations }}
+      tolerations:
+{{ toYaml .Values.pdfReportGenerator.tolerations | indent 8 }}
+{{- end }}
+{{- if .Values.pdfReportGenerator.affinity }}
+      affinity:
+{{ toYaml .Values.pdfReportGenerator.affinity | indent 8 }}
+{{- end }}
+{{- if .Values.pdfReportGenerator.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.pdfReportGenerator.nodeSelector | indent 8 }}
+{{- end }}
+      imagePullSecrets: {{ include "imagePullSecrets" . }}
+      containers:
+      - name: pdf-report-generator
+        image: {{ tpl .Values.pdfReportGenerator.image.repository . }}:{{ tpl .Values.pdfReportGenerator.image.tag . }}
+        imagePullPolicy: Always
+        env:
+        - name: PORT
+          value: "3001"
+        - name: NODE_ENV
+          value: "production"
+        - name: FRONTEND_URL
+          value: {{ tpl (required "pdfReportGenerator.frontendUrl is required" .Values.pdfReportGenerator.frontendUrl) . | quote }}
+        - name: LOG_LEVEL
+          value: {{ .Values.pdfReportGenerator.logLevel | default "info" | quote }}
+        - name: PDF_TIMEOUT
+          value: {{ .Values.pdfReportGenerator.pdfTimeout | default "60000" | quote }}
+{{ with .Values.pdfReportGenerator.env }}
+            {{- tpl (toYaml .) $ | nindent 8 }}
+{{ end }}
+        ports:
+        - containerPort: 3001
+          name: http
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            scheme: HTTP
+            path: /health
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            scheme: HTTP
+            path: /health
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 15
+          timeoutSeconds: 5
+          failureThreshold: 3
+        resources:
+{{- toYaml .Values.pdfReportGenerator.resources | nindent 10 }}
+{{- if .Values.pdfReportGenerator.priorityClassName }}
+      priorityClassName: {{ .Values.pdfReportGenerator.priorityClassName }}
+{{- end }}
+{{ end -}}

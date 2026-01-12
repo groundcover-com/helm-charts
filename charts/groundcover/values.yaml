@@ -43,6 +43,10 @@ global:
     enabled: false
   dispatchCenter:
     enabled: false
+  pdfReportGenerator:
+    enabled: false
+  pdfReportWorker:
+    enabled: false
   syntheticsWorker:
     enabled: false
 
@@ -338,7 +342,7 @@ agent:
     # for ipv6, change to "[::]"
     bindAddress: 0.0.0.0
     image:
-      tag: 4.2.0
+      tag: 4.2.2
       repository: "{{ .Values.global.origin.registry }}/fluent/fluent-bit"
     resources:
       requests:
@@ -1394,6 +1398,60 @@ dispatchCenter:
       jumpSizeInMCPU: 100
       windowSize: 12h
       initialWait: 10m
+
+pdfReportGenerator:
+  additionalLabels:
+  podLabels:
+  additionalAnnotations:
+  podAnnotations:
+  affinity:
+  nodeSelector:
+  tolerations: []
+  priorityClassName:
+  env: []
+  image:
+    repository: "{{ .Values.global.origin.registry }}/pdf-report-generator"
+    tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
+  resources:
+    limits:
+      memory: 2Gi
+    requests:
+      cpu: 500m
+      memory: 1Gi
+  frontendUrl: '{{ printf "https://%s" (required "pdfReportGenerator.frontendUrl requires .Values.global.ingress.site to be set" .Values.global.ingress.site) }}'
+  logLevel: "info"
+  pdfTimeout: "60000"
+
+pdfReportWorker:
+  additionalLabels:
+  podLabels:
+  additionalAnnotations:
+  podAnnotations:
+  affinity:
+  nodeSelector:
+  tolerations: []
+  priorityClassName:
+  env: []
+  image:
+    repository: "{{ .Values.global.origin.registry }}/pdf-report-worker"
+    tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
+  resources:
+    limits:
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  healthProbe:
+    enabled: true
+    port: 8090
+  temporal:
+    host: ""
+  tracing:
+    enabled: false
+    writeTimeout: "5s"
+    flushInterval: "5s"
+    batchSize: 50
+  webhookTimeout: "30s"
 
 clickhouse:
   enabled: true

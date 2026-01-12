@@ -1,0 +1,35 @@
+{{- if and .Values.global.backend.enabled .Values.global.pdfReportWorker.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "pdf-report-worker.configMapName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+    app: pdf-report-worker
+    app.kubernetes.io/name: pdf-report-worker
+data:
+  config.yaml: |
+    temporal:
+      address: {{ .Values.pdfReportWorker.temporal.host | default (printf "%s-temporal-frontend:7233" .Release.Name) | quote }}
+
+    healthProbe:
+      enabled: {{ .Values.pdfReportWorker.healthProbe.enabled | default true }}
+      port: {{ .Values.pdfReportWorker.healthProbe.port | default 8090 }}
+
+    telemetry:
+      enabled: {{ include "telemetry.enabled" . }}
+      traces:
+        enabled: true
+        endpoint: {{ include "telemetry.traces.otlpUrl" . | quote }}
+        writeTimeout: {{ .Values.pdfReportWorker.tracing.writeTimeout | default "5s" }}
+        flushInterval: {{ .Values.pdfReportWorker.tracing.flushInterval | default "5s" }}
+        batchSize: {{ .Values.pdfReportWorker.tracing.batchSize | default 50 }}
+
+    worker:
+      taskQueue: "pdf-report-worker"
+
+    pdfReport:
+      pdfGeneratorUrl: "http://{{ include "pdf-report-generator.fullname" . }}:3001"
+      webhookTimeout: {{ .Values.pdfReportWorker.webhookTimeout | default "30s" }}
+{{- end }}

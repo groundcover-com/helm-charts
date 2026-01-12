@@ -1,0 +1,27 @@
+{{ if and .Values.global.backend.enabled .Values.global.pdfReportGenerator.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    {{- if .Values.pdfReportGenerator.additionalAnnotations }}
+{{ toYaml .Values.pdfReportGenerator.additionalAnnotations | indent 4 }}
+    {{- end }}
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+    app: pdf-report-generator
+    app.kubernetes.io/name: pdf-report-generator
+    {{- if .Values.pdfReportGenerator.additionalLabels }}
+{{ toYaml .Values.pdfReportGenerator.additionalLabels | indent 4 }}
+    {{- end }}
+  name: {{ include "pdf-report-generator.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  ports:
+  - name: http
+    port: 3001
+    protocol: TCP
+    targetPort: 3001
+  selector:
+    app: pdf-report-generator
+  type: ClusterIP
+{{ end -}}

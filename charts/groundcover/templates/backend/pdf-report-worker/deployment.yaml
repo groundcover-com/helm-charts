@@ -1,0 +1,154 @@
+{{- if and .Values.global.backend.enabled .Values.global.pdfReportWorker.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+    {{- if .Values.pdfReportWorker.additionalAnnotations }}
+{{ toYaml .Values.pdfReportWorker.additionalAnnotations | indent 4 }}
+    {{- end }}
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+    app: pdf-report-worker
+    app.kubernetes.io/name: pdf-report-worker
+    {{- if .Values.pdfReportWorker.additionalLabels }}
+{{ toYaml .Values.pdfReportWorker.additionalLabels | indent 4 }}
+    {{- end }}
+  name: {{ include "pdf-report-worker.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: pdf-report-worker
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9102"
+        groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+        {{- if .Values.pdfReportWorker.additionalAnnotations }}
+{{ toYaml .Values.pdfReportWorker.additionalAnnotations | indent 8 }}
+        {{- end }}
+        {{- if .Values.pdfReportWorker.podAnnotations }}
+{{ toYaml .Values.pdfReportWorker.podAnnotations | indent 8 }}
+        {{- end }}
+      labels:
+        app: pdf-report-worker
+        app.kubernetes.io/name: pdf-report-worker
+        {{- include "groundcover.labels" . | nindent 8 }}
+        {{- if .Values.pdfReportWorker.additionalLabels }}
+{{ toYaml .Values.pdfReportWorker.additionalLabels | indent 8 }}
+        {{- end }}
+        {{- if .Values.pdfReportWorker.podLabels }}
+{{ toYaml .Values.pdfReportWorker.podLabels | indent 8 }}
+        {{- end }}
+    spec:
+{{- if .Values.pdfReportWorker.tolerations }}
+      tolerations:
+{{ toYaml .Values.pdfReportWorker.tolerations | indent 8 }}
+{{- end }}
+{{- if .Values.pdfReportWorker.affinity }}
+      affinity:
+{{ toYaml .Values.pdfReportWorker.affinity | indent 8 }}
+{{- end }}
+{{- if .Values.pdfReportWorker.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.pdfReportWorker.nodeSelector | indent 8 }}
+{{- end }}
+      imagePullSecrets: {{ include "imagePullSecrets" . }}
+      initContainers:
+      - name: wait-for-temporal
+        image: '{{ tpl .Values.curl.image.repository . }}:{{ tpl .Values.curl.image.tag . }}'
+        command:
+          - /bin/sh
+          - -c
+        args:
+          - |
+            TEMPORAL_HOST="{{ .Values.pdfReportWorker.temporal.host | default (printf "%s-temporal-frontend" .Release.Name) }}"
+            TEMPORAL_PORT="7233"
+
+            echo "Waiting for Temporal at ${TEMPORAL_HOST}:${TEMPORAL_PORT}..."
+            while ! nc -z ${TEMPORAL_HOST} ${TEMPORAL_PORT}; do
+              echo "Temporal is unavailable - sleeping"
+              sleep 2
+            done
+            echo "Temporal is up"
+      - name: wait-for-pdf-generator
+        image: '{{ tpl .Values.curl.image.repository . }}:{{ tpl .Values.curl.image.tag . }}'
+        command:
+          - /bin/sh
+          - -c
+        args:
+          - |
+            PDF_GENERATOR_HOST="{{ include "pdf-report-generator.fullname" . }}"
+            PDF_GENERATOR_PORT="3001"
+
+            echo "Waiting for PDF Generator at ${PDF_GENERATOR_HOST}:${PDF_GENERATOR_PORT}..."
+            while ! nc -z ${PDF_GENERATOR_HOST} ${PDF_GENERATOR_PORT}; do
+              echo "PDF Generator is unavailable - sleeping"
+              sleep 2
+            done
+            echo "PDF Generator is up"
+      containers:
+      - env:
+        - name: GC_GROUNDCOVERVERSION
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['groundcover_version']
+        {{- if eq (include "telemetry.enabled" .) "true" }}
+        - name: API_KEY
+          valueFrom:
+            secretKeyRef:
+              key: {{ template "groundcover.apikeySecretKey" . }}
+              name: {{ template "groundcover.apikeySecretName" . }}
+        {{- end }}
+        {{- with .Values.pdfReportWorker.env }}
+        {{- tpl (toYaml .) $ | nindent 8 }}
+        {{- end }}
+        volumeMounts:
+        - name: config
+          mountPath: /etc/pdf-report-worker
+          readOnly: true
+        image: {{ tpl .Values.pdfReportWorker.image.repository . }}:{{ tpl .Values.pdfReportWorker.image.tag . }}
+        imagePullPolicy: Always
+        name: {{ include "pdf-report-worker.fullname" . }}
+        ports:
+        - containerPort: 9102
+          name: metrics
+          protocol: TCP
+        {{- if .Values.pdfReportWorker.healthProbe.enabled }}
+        - containerPort: {{ .Values.pdfReportWorker.healthProbe.port | default 8090 }}
+          name: health-http
+          protocol: TCP
+        {{- end }}
+        {{- if .Values.pdfReportWorker.healthProbe.enabled }}
+        readinessProbe:
+          httpGet:
+            scheme: HTTP
+            path: /health
+            port: health-http
+          initialDelaySeconds: 5
+          periodSeconds: 15
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            scheme: HTTP
+            path: /health
+            port: health-http
+          initialDelaySeconds: 10
+          periodSeconds: 15
+          timeoutSeconds: 5
+          failureThreshold: 3
+        {{- end }}
+        resources:
+{{- toYaml .Values.pdfReportWorker.resources | nindent 10 }}
+      volumes:
+      - name: config
+        configMap:
+          name: {{ include "pdf-report-worker.configMapName" . }}
+{{- if .Values.pdfReportWorker.priorityClassName }}
+      priorityClassName: {{ .Values.pdfReportWorker.priorityClassName }}
+{{- end }}
+{{- end }}
