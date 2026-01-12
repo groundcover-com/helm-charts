@@ -821,7 +821,13 @@ integrationsAgent:
     maxQueueSize: 2048
     # Metrics push settings
     metricsPushInterval: 30s
-    
+
+    additionalTraceTargets: []
+    # - Endpoint: "https://example-trace-target:4318/v1/traces"
+    #   Headers:
+    #     apikey: "KEY"
+    #   TlsSkipVerify: true
+      
 syntheticsWorker:
   replicaCount: 2
   image:

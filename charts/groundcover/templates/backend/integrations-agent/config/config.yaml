@@ -670,12 +670,12 @@ data:
         # Send to defined ingestion point
         - Endpoint: {{ include "ingestor.otlptraces.http.url" . }}
           TlsSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
-          Insecure: false
+          Headers:
+            apikey : "GC_API_KEY"
         
-        # If incloud - send to customer ingestor as well
-        {{- if .Values.tags.incloud }}
-        - Endpoint: {{ include "ingestor.otlptraces.cluster.http.url" . }} 
-          TlsSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
+        # Additional trace targets
+        {{- if .Values.integrationsAgent.instrumentation.additionalTraceTargets }}
+        {{- toYaml .Values.integrationsAgent.instrumentation.additionalTraceTargets | nindent 8 }}
         {{- end }}
 
       BatchSize: {{ .Values.integrationsAgent.instrumentation.batchSize }}
@@ -684,7 +684,9 @@ data:
       MaxQueueSize: {{ .Values.integrationsAgent.instrumentation.maxQueueSize }}
       MetricsTargets:
         # Send to incluster customer metrics ingester
-        - Endpoint: {{ include "metrics-ingester.cluster.http.base.url" . }}/api/v1/import/prometheus
+        - Endpoint: {{ include "metrics-ingester.promethues-exposition.http.url" . }}
+          Headers:
+            apikey : "GC_API_KEY"
       MetricsPushInterval: {{ .Values.integrationsAgent.instrumentation.metricsPushInterval }}
       
 kind: ConfigMap
