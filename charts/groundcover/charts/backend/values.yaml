@@ -196,7 +196,7 @@ keep:
       enabled: false
     image:
       repository: public.ecr.aws/groundcovercom/keep-api
-      tag: "0.40.6.6"
+      tag: "0.40.6.6-secure"
     databaseConnectionStringFromSecret:
       enabled: true
       secretName: keep-postgres
