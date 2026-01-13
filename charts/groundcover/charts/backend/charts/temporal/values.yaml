@@ -5,13 +5,24 @@ global:
 temporalConfig:
   adminTools:
     image:
-      repository: us-docker.pkg.dev/groundcovercom/repo/temporalio/admin-tools
-      tag: "1.29.1-tctl-1.18.4-cli-1.5.0"
+      repository: public.ecr.aws/groundcovercom/temporalio/admin-tools
+      tag: "1.29.2"
       pullPolicy: IfNotPresent
+  schemaConfigMaps:
+    annotations: 
+      # "helm.sh/hook": "pre-install,pre-upgrade"
+      # "helm.sh/hook-weight": "-10"
+      # "helm.sh/hook-delete-policy": "before-hook-creation"
   schemaSetup:
-    hook: "post-install,pre-upgrade"
+    annotations:
+      # "helm.sh/hook": "pre-install,pre-upgrade"
+      # "helm.sh/hook-weight": "-5"
+      # "helm.sh/hook-delete-policy": "before-hook-creation"
   namespaceSetup:
-    hook: "post-install,pre-upgrade"
+    annotations:
+      # "helm.sh/hook": "post-install,post-upgrade"
+      # "helm.sh/hook-weight": "0"
+      # "helm.sh/hook-delete-policy": "before-hook-creation"
   postgres:
     host: "NONE"  # Set to "NONE" to read from secret, or specify host directly
     port: 5432
@@ -34,8 +45,8 @@ temporal:
   server:
     replicaCount: 2
     image:
-      repository: us-docker.pkg.dev/groundcovercom/repo/temporalio/server
-      tag: 1.29.1
+      repository: public.ecr.aws/groundcovercom/temporalio/server
+      tag: 1.29.2
     config:
       persistence:
         defaultStore: default
@@ -104,8 +115,8 @@ temporal:
   admintools:
     enabled: true
     image:
-      repository: us-docker.pkg.dev/groundcovercom/repo/temporalio/admin-tools
-      tag: 1.29.1-tctl-1.18.4-cli-1.5.0
+      repository: public.ecr.aws/groundcovercom/temporalio/admin-tools
+      tag: 1.29.2
 
   # Disable schema management - handled by our job
   schema:

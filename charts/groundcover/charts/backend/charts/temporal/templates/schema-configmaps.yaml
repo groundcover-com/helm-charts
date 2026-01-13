@@ -5,6 +5,10 @@ kind: ConfigMap
 metadata:
   name: temporal-schema-files
   namespace: {{ .Release.Namespace }}
+  {{- with .Values.temporalConfig.schemaConfigMaps.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   labels:
     app.kubernetes.io/name: temporal
     app.kubernetes.io/instance: {{ .Release.Name }}
@@ -28,6 +32,10 @@ kind: ConfigMap
 metadata:
   name: temporal-visibility-schema-files
   namespace: {{ .Release.Namespace }}
+  {{- with .Values.temporalConfig.schemaConfigMaps.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   labels:
     app.kubernetes.io/name: temporal
     app.kubernetes.io/instance: {{ .Release.Name }}
