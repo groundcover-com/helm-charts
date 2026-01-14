@@ -19,6 +19,19 @@ data:
       database: {{ include "clickhouse.database" . | quote }}
       user: {{ include "clickhouse.username" . | quote }}
     
+    postgresql:
+      enabled: {{ .Values.dispatchCenter.postgresql.enabled | default true }}
+      host: {{ splitList ":" (include "postgresql.base.url" .) | first | quote }}
+      port: {{ splitList ":" (include "postgresql.base.url" .) | last | quote }}
+      database: {{ .Values.dispatchCenter.postgresql.database | default "dispatch_center" | quote }}
+      user: {{ include "postgresql.username" . | quote }}
+      sslMode: {{ .Values.dispatchCenter.postgresql.sslMode | default "disable" | quote }}
+      timeout: {{ .Values.dispatchCenter.postgresql.timeout | default "30s" }}
+      interval: {{ .Values.dispatchCenter.postgresql.interval | default "2s" }}
+      enableTracing: {{ .Values.dispatchCenter.postgresql.enableTracing | default false }}
+      migrationsPath: {{ .Values.dispatchCenter.postgresql.migrationsPath | default "/migrations" | quote }}
+      skipMigrations: {{ .Values.dispatchCenter.postgresql.skipMigrations | default false }}
+    
     healthProbe:
       enabled: {{ .Values.dispatchCenter.healthProbe.enabled | default true }}
       port: {{ .Values.dispatchCenter.healthProbe.port | default 8089 }}

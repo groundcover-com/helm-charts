@@ -131,6 +131,11 @@ spec:
             secretKeyRef:
               name: {{ include "clickhouse.secretName" . }}
               key: {{ include "clickhouse.secretKey" . }}
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "postgresql.secretName" . }}
+              key: {{ include "postgresql.adminPasswordKey" . }}
 {{ with .Values.dispatchCenter.env }}
             {{- tpl (toYaml .) $ | nindent 8 }}
 {{ end }}

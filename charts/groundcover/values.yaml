@@ -1374,6 +1374,15 @@ dispatchCenter:
     port: 8089
   temporal:
     host: ""
+  postgresql:
+    enabled: true
+    database: "dispatch_center"
+    sslMode: "require"
+    timeout: "30s"
+    interval: "2s"
+    enableTracing: false
+    migrationsPath: "/migrations"
+    skipMigrations: false
   tracing:
     enabled: false
     writeTimeout: "5s"
