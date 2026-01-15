@@ -25,8 +25,12 @@ spec:
     app.kubernetes.io/name: sensor
     app.kubernetes.io/part-of: '{{ include "groundcover.labels.partOf" . }}'
   ports: {{ include "groundcover.sensor.service.ingestion-ports" (merge (dict "sensorValues" $sensorValues) .) | nindent 2 }}
-  {{- if $sensorValues.setLocalTrafficPolicy }}
+  {{- if and $sensorValues.setLocalTrafficPolicy (not $sensorValues.trafficDistribution) }}
   internalTrafficPolicy: Local
+  {{- end }}
+
+  {{- if $sensorValues.trafficDistribution }}
+  trafficDistribution: {{ $sensorValues.trafficDistribution }}
   {{- end }}
 ---
 apiVersion: v1
