@@ -215,3 +215,7 @@ http
 {{- define "opentelemetry-collector.datadogapm.tracesapiv02.http.url" -}}
 {{- printf "%s/api/v0.2/traces" (include "opentelemetry-collector.datadogapm.base.http.url" .) -}}
 {{- end -}}
+
+{{- define "opentelemetry-collector.datadogapm.statsapiv02.http.url" -}}
+{{- printf "%s/api/v0.2/stats" (include "opentelemetry-collector.datadogapm.base.http.url" .) -}}
+{{- end -}}
