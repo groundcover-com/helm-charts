@@ -124,7 +124,7 @@ data:
     PopularAttributesConfig:
       Enabled: {{ .Values.dbManager.popularAttributes.enabled | default false }}
       LookbackDuration: {{ .Values.dbManager.popularAttributes.lookbackDuration | default "24h" }}
-      MinThreshold: {{ .Values.dbManager.popularAttributes.minThreshold | default 10 }}
+      MinThreshold: {{ .Values.dbManager.popularAttributes.minThreshold | default 2 }}
       MaxKeysPerDomain: {{ .Values.dbManager.popularAttributes.maxKeysPerDomain | default 50 }}
       SyncInterval: {{ .Values.dbManager.popularAttributes.syncInterval | default "1h" }}
 {{- end -}}

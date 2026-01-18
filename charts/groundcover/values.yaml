@@ -672,7 +672,7 @@ dbManager:
     # How far back to look in system.query_log (e.g., "24h", "30m", "6h")
     lookbackDuration: "24h"
     # Minimum frequency for a key to be considered popular
-    minThreshold: 10
+    minThreshold: 2
     # Maximum total keys per domain (logs/traces) including existing keys
     maxKeysPerDomain: 50
     # How often to run the sync (e.g., "1h", "30m", "6h")
