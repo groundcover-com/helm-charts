@@ -1068,6 +1068,15 @@ metricsAggregator:
       enricherEnabled: false
       aggregation:
         enabled: true
+      summarizer:
+        interval: 30s
+        writer:
+          url: '{{ include "vector.json.table.write.metrics_metadata.url" . }}'
+          compress: true
+          tlsSkipVerify: true
+          maxRetries: 3
+          maxDelay: 15s
+          baseDelay: 5s
   logs:
     pipeline:
       dropOldLogs:

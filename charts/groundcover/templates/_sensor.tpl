@@ -82,6 +82,17 @@ pipelines:
         content: {{ $sensorValues.pipelines.metrics.aggregation.configuration.content | quote }}
       {{- end }}
     {{- end }}
+    {{- if $sensorValues.pipelines.metrics.summarizer }}
+    summarizer:
+      interval: {{ $sensorValues.pipelines.metrics.summarizer.interval }}
+      writer:
+        url: {{ tpl $sensorValues.pipelines.metrics.summarizer.writer.url . }}
+        compress: {{ $sensorValues.pipelines.metrics.summarizer.writer.compress }}
+        tlsSkipVerify: {{ $sensorValues.pipelines.metrics.summarizer.writer.tlsSkipVerify }}
+        maxRetries: {{ $sensorValues.pipelines.metrics.summarizer.writer.maxRetries }}
+        maxDelay: {{ $sensorValues.pipelines.metrics.summarizer.writer.maxDelay }}
+        baseDelay: {{ $sensorValues.pipelines.metrics.summarizer.writer.baseDelay }}
+    {{- end }}
 startuptimeout: 120s
 {{ if $sensorValues.collectionEnabled }}
 productchansize: 512
