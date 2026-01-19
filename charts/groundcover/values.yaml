@@ -1157,6 +1157,10 @@ fleetManager:
   logLevel: 4
   manageHttpPort: 8080
   healthProbePort: 8081
+  tracing:
+    writeTimeout: 5s
+    flushInterval: 5s
+    batchSize: 50
   pprof:
     enabled: '{{ include "telemetry.enabled" . }}'
     uploaderType: pyroscope

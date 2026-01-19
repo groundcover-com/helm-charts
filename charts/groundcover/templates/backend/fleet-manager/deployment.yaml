@@ -80,7 +80,14 @@ spec:
           valueFrom:
             secretKeyRef:
               name: {{ include "postgresql.secretName" . }}
-              key: {{ include "postgresql.adminPasswordKey" . }}          
+              key: {{ include "postgresql.adminPasswordKey" . }}
+        {{- if eq (include "telemetry.enabled" .) "true" }}
+        - name: GC_TRACING_HEADERS_APIKEY
+          valueFrom:
+            secretKeyRef:
+              key: {{ template "groundcover.apikeySecretKey" . }}
+              name: {{ template "groundcover.apikeySecretName" . }}
+        {{- end }}
         {{- with .Values.fleetManager.env }}
           {{ tpl (toYaml .) $ | nindent 8 }}
         {{- end }}

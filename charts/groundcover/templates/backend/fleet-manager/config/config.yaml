@@ -6,6 +6,17 @@ data:
     LogLevel: {{ .Values.fleetManager.logLevel }}
     ManageHttpPort: {{ .Values.fleetManager.manageHttpPort }}
     HealthProbePort: {{ .Values.fleetManager.healthProbePort }}
+    GroundcoverVersion: "OVERRIDDEN"
+    {{- if eq (include "telemetry.enabled" .) "true" }}
+    Tracing:
+      Enabled: true
+      Endpoint: {{ include "telemetry.traces.otlpUrl" . | quote }}
+      WriteTimeout: {{ .Values.fleetManager.tracing.writeTimeout | default "5s" }}
+      FlushInterval: {{ .Values.fleetManager.tracing.flushInterval | default "5s" }}
+      BatchSize: {{ .Values.fleetManager.tracing.batchSize | default 50 }}
+      Headers:
+        apikey: "OVERRIDDEN"
+    {{- end }}
     Pprof:
       enabled: {{ include "telemetry.enabled" . }}
       cpuSamplingDuration: {{ .Values.fleetManager.pprof.cpuSamplingDuration }}
