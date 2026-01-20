@@ -43,11 +43,6 @@ data:
         - "{{ . }}"
       {{- end }}
       {{- end }}
-      Exporters:
-        - "prometheus"
-     {{- range .additionalExporters }}
-        - "{{ . }}"
-    {{- end }}
     {{- end }}
     {{- end }}
     {{- if .Values.integrationsAgent.targets.awsBillingSQS }}
@@ -72,11 +67,6 @@ data:
       {{- if eq .enabled false }}
       Enabled: {{ .enabled }}
       {{- end }}
-      Exporters:
-        - "awsbilling_http_json"
-    {{- range .additionalExporters }}
-        - "{{ . }}"
-    {{- end }}
     {{- end }}
     {{- end }}
     {{- if .Values.integrationsAgent.targets.awsInventory }}
@@ -122,11 +112,6 @@ data:
         - "{{ $label }}"
       {{- end }}
       {{- end }}
-      Exporters:
-        - "prometheus"
-    {{- range .additionalExporters }}
-        - "{{ . }}"
-    {{- end }}
     {{- end }}
     {{- end }}
     {{- if .Values.integrationsAgent.targets.cloudwatch }}
@@ -193,11 +178,6 @@ data:
         {{- end }}
       {{- end }}
       {{- end }}
-      Exporters:
-        - "prometheus"
-    {{- range .additionalExporters }}
-        - "{{ . }}"
-    {{- end }}
     {{- end }}
     {{- end }}
     {{- if .Values.integrationsAgent.targets.gcpmetrics }}
@@ -237,11 +217,6 @@ data:
       {{- range .metricPrefixes }}
         - "{{ . }}"
       {{- end }}
-      Exporters:
-        - "prometheus"
-    {{- range .additionalExporters }}
-        - "{{ . }}"
-    {{- end }}
     {{- end }}
     {{- end }}
     {{- if .Values.integrationsAgent.targets.azuremetrics }}
@@ -296,11 +271,6 @@ data:
           {{- end }}
         {{- end }}
       {{- end }}
-      Exporters:
-        - "prometheus"
-    {{- range .additionalExporters }}
-        - "{{ . }}"
-    {{- end }}
     {{- end }}
     {{- end }}
     {{- if .Values.integrationsAgent.targets.dynamodb }}
@@ -335,176 +305,11 @@ data:
         - "{{ . }}"
       {{- end }}
       {{- end }}
-      Exporters:
-        - "prometheus"
-        - "prometheus_internal"
-    {{- range .additionalExporters }}
-        - "{{ . }}"
     {{- end }}
     {{- end }}
     {{- end }}
 
-    {{- if .Values.integrationsAgent.targets.clickhouseQueryLog }}
-    {{- range .Values.integrationsAgent.targets.clickhouseQueryLog }}
-    - Type: "clickhouse_query_log"
-      Name: "{{ .name }}"
-      {{- if .interval }}
-      Interval: "{{ .interval }}"
-      {{- end }}
-      {{- if .extraLabels }}
-      ExtraLabels:
-      {{- range $key, $value := .extraLabels }}
-        {{ $key }}: "{{ $value }}"
-      {{- end }}
-      {{- end }}
-      {{- if .dropLabels }}
-      DropLabels:
-      {{- range $label := .dropLabels }}
-        - "{{ $label }}"
-      {{- end }}
-      {{- end }}
-      {{- if eq .enabled false }}
-      Enabled: {{ .enabled }}
-      {{- end }}
-      {{- if .connectionString }}
-      ConnectionString: "{{ .connectionString }}"
-      {{- end }}
-      {{- if .host }}
-      Host: "{{ .host }}"
-      {{- end }}
-      {{- if .port }}
-      Port: {{ .port }}
-      {{- end }}
-      {{- if .username }}
-      Username: "{{ .username }}"
-      {{- end }}
-      {{- if hasKey . "password" }}
-      Password: "{{ .password }}"
-      {{- end }}
-      {{- if .passwordFromSecret }}
-      PasswordFromSecret: 
-        {{- toYaml .passwordFromSecret | nindent 8 }}
-      {{- end }}
-      {{- if .secure }}
-      Secure: {{ .secure }}
-      {{- end }}
-      {{- if .skipVerify }}
-      SkipVerify: {{ .skipVerify }}
-      {{- end }}
-      {{- if .dialTimeout }}
-      DialTimeout: "{{ .dialTimeout }}"
-      {{- end }}
-      {{- if .database }}
-      Database: "{{ .database }}"
-      {{- end }}
-      {{- if hasKey . "clusterMode" }}
-      ClusterMode: {{ .clusterMode }}
-      {{- end }}
-      {{- if .clusterName }}
-      ClusterName: "{{ .clusterName }}"
-      {{- end }}
-      {{- if .queryFilters }}
-      QueryFilters:
-      {{- range .queryFilters }}
-        - "{{ . }}"
-      {{- end }}
-      {{- end }}
-      {{- if .queryLimit }}
-      QueryLimit: {{ .queryLimit }}
-      {{- end }}
-      Exporters:
-      - "otlp_http_traces"
-      {{- range .additionalExporters }}
-        - "{{ . }}"
-      {{- end }}
-    {{- end }}
-    {{- end }}
-
-    {{- if .Values.integrationsAgent.targets.clickhouseQueryToTraceLog }}
-    {{- range .Values.integrationsAgent.targets.clickhouseQueryToTraceLog }}
-    - Type: "clickhouse_query_to_trace"
-      {{- if .queryName }}
-      QueryName: "{{ .queryName }}"
-      {{- end }}
-      {{- if .query }}
-      Query: "{{ .query }}"
-      {{- end }}
-      {{- if .tableName }}
-      TableName: "{{ .tableName }}"
-      {{- end }}
-      Name: "{{ .name }}"
-      {{- if .interval }}
-      Interval: "{{ .interval }}"
-      {{- end }}
-      {{- if .extraLabels }}
-      ExtraLabels:
-      {{- range $key, $value := .extraLabels }}
-        {{ $key }}: "{{ $value }}"
-      {{- end }}
-      {{- end }}
-      {{- if .dropLabels }}
-      DropLabels:
-      {{- range $label := .dropLabels }}
-        - "{{ $label }}"
-      {{- end }}
-      {{- end }}
-      {{- if eq .enabled false }}
-      Enabled: {{ .enabled }}
-      {{- end }}
-      {{- if .connectionString }}
-      ConnectionString: "{{ .connectionString }}"
-      {{- end }}
-      {{- if .host }}
-      Host: "{{ .host }}"
-      {{- end }}
-      {{- if .port }}
-      Port: {{ .port }}
-      {{- end }}
-      {{- if .username }}
-      Username: "{{ .username }}"
-      {{- end }}
-      {{- if hasKey . "password" }}
-      Password: "{{ .password }}"
-      {{- end }}
-      {{- if .passwordFromSecret }}
-      PasswordFromSecret: 
-        {{- toYaml .passwordFromSecret | nindent 8 }}
-      {{- end }}
-      {{- if .secure }}
-      Secure: {{ .secure }}
-      {{- end }}
-      {{- if .skipVerify }}
-      SkipVerify: {{ .skipVerify }}
-      {{- end }}
-      {{- if .dialTimeout }}
-      DialTimeout: "{{ .dialTimeout }}"
-      {{- end }}
-      {{- if .database }}
-      Database: "{{ .database }}"
-      {{- end }}
-      {{- if hasKey . "clusterMode" }}
-      ClusterMode: {{ .clusterMode }}
-      {{- end }}
-      {{- if .clusterName }}
-      ClusterName: "{{ .clusterName }}"
-      {{- end }}
-      {{- if .queryFilters }}
-      QueryFilters:
-      {{- range .queryFilters }}
-        - "{{ . }}"
-      {{- end }}
-      {{- end }}
-      {{- if .queryLimit }}
-      QueryLimit: {{ .queryLimit }}
-      {{- end }}
-      Exporters:
-      - "otlp_http_traces"
-      {{- range .additionalExporters }}
-        - "{{ . }}"
-      {{- end }}
-    {{- end }}
-    {{- end }}
-    {{- end }}
+    DebugExporters: {{ .Values.integrationsAgent.debugExporters | default false }}
 
     Exporters:
     - Type: "prometheus"
