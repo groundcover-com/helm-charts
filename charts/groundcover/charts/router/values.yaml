@@ -39,7 +39,7 @@ service:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.11.384
+  tag: 1.11.385
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/alpine/curl'
@@ -352,6 +352,7 @@ agent-service:
     routerUrl: "http://router:8080"
     awsRegion: ""
     bedrockModelId: ""
+    bedrockLargeModelId: ""
     otelTracingEnabled: "true"
     otelServiceName: "agent-service"
     otelExporterOtlpEndpoint: ""
