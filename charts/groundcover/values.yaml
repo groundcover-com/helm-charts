@@ -1073,7 +1073,7 @@ metricsAggregator:
         interval: 30s
         writer:
           url: '{{ include "vector.json.table.write.metrics_metadata.url" . }}'
-          compress: true
+          compress: false
           tlsSkipVerify: true
           maxRetries: 3
           maxDelay: 15s
