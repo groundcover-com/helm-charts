@@ -586,7 +586,8 @@ agent:
           "X-Csrf-Token",
           "X-XSRF-TOKEN",
           "X-Google-Api-Key",
-          "X-Firebase-Auth"
+          "X-Firebase-Auth",
+          "X-Vault-Token"
         ]
     env:
     builtinEnv:
