@@ -92,14 +92,19 @@ pipelines:
         maxRetries: {{ $sensorValues.pipelines.metrics.summarizer.writer.maxRetries }}
         maxDelay: {{ $sensorValues.pipelines.metrics.summarizer.writer.maxDelay }}
         baseDelay: {{ $sensorValues.pipelines.metrics.summarizer.writer.baseDelay }}
-      budget:
-        initialBudget: {{ $sensorValues.pipelines.metrics.summarizer.budget.initialBudget }}
-        multiplicativeDecrease: {{ $sensorValues.pipelines.metrics.summarizer.budget.multiplicativeDecrease }}
-        additiveIncrease: {{ $sensorValues.pipelines.metrics.summarizer.budget.additiveIncrease }}
-        minBudget: {{ $sensorValues.pipelines.metrics.summarizer.budget.minBudget }}
-        maxBudget: {{ $sensorValues.pipelines.metrics.summarizer.budget.maxBudget }}
-        highUtilization: {{ $sensorValues.pipelines.metrics.summarizer.budget.highUtilization }}
-        lowUtilization: {{ $sensorValues.pipelines.metrics.summarizer.budget.lowUtilization }}
+      rotator:
+        handleSummaryTimeout: {{ $sensorValues.pipelines.metrics.summarizer.rotator.handleSummaryTimeout }}
+        cache:
+          ttl: {{ $sensorValues.pipelines.metrics.summarizer.rotator.cache.ttl }}
+          capacity: {{ $sensorValues.pipelines.metrics.summarizer.rotator.cache.capacity }}
+        budget:
+          initialBudget: {{ $sensorValues.pipelines.metrics.summarizer.rotator.budget.initialBudget }}
+          multiplicativeDecrease: {{ $sensorValues.pipelines.metrics.summarizer.rotator.budget.multiplicativeDecrease }}
+          additiveIncrease: {{ $sensorValues.pipelines.metrics.summarizer.rotator.budget.additiveIncrease }}
+          minBudget: {{ $sensorValues.pipelines.metrics.summarizer.rotator.budget.minBudget }}
+          maxBudget: {{ $sensorValues.pipelines.metrics.summarizer.rotator.budget.maxBudget }}
+          highUtilization: {{ $sensorValues.pipelines.metrics.summarizer.rotator.budget.highUtilization }}
+          lowUtilization: {{ $sensorValues.pipelines.metrics.summarizer.rotator.budget.lowUtilization }}
     {{- end }}
 startuptimeout: 120s
 {{ if $sensorValues.collectionEnabled }}

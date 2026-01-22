@@ -1079,14 +1079,19 @@ metricsAggregator:
           maxRetries: 3
           maxDelay: 15s
           baseDelay: 5s
-        budget:
-          initialBudget: 16777216       # 16 * 1024 * 1024
-          multiplicativeDecrease: 0.90
-          additiveIncrease: 8388608     # 8 * 1024 * 1024
-          minBudget: 2097152            # 2 * 1024 * 1024
-          maxBudget: 67108864           # 64 * 1024 * 1024
-          highUtilization: 0.95
-          lowUtilization: 0.70
+        rotator:
+          handleSummaryTimeout: 5s
+          cache:
+            ttl: 10m
+            capacity: 100000000
+          budget:
+            initialBudget: 16777216       # 16 * 1024 * 1024
+            multiplicativeDecrease: 0.90
+            additiveIncrease: 8388608     # 8 * 1024 * 1024
+            minBudget: 2097152            # 2 * 1024 * 1024
+            maxBudget: 67108864           # 64 * 1024 * 1024
+            highUtilization: 0.95
+            lowUtilization: 0.70
   logs:
     pipeline:
       dropOldLogs:
