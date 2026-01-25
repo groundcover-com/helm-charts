@@ -68,6 +68,13 @@ data:
           jumpSizeInMCPU: {{ .Values.dispatchCenter.pprof.cpuTicker.jumpSizeInMCPU | default 100 }}
           windowSize: {{ .Values.dispatchCenter.pprof.cpuTicker.windowSize | default "12h" }}
           initialWait: {{ .Values.dispatchCenter.pprof.cpuTicker.initialWait | default "10m" }}
+      instrumentation:
+        serviceName: "dispatch-center"
+        originCluster: {{ include "groundcover.clusterId" . | quote }}
+        tracingTargets:
+          - endpoint: {{ include "ingestor.otlptraces.cluster.http.url" . | quote }}
+        metricsTargets:
+          - endpoint: {{ include "metrics-ingester.promethues-exposition.http.url" . | quote }}
     
     dynconf:
       enabled: {{ .Values.global.fleetmanager.enabled }}

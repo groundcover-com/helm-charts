@@ -1078,7 +1078,8 @@ metricsAggregator:
         rotator:
           handleSummaryTimeout: 5s
           cache:
-            ttl: 10m
+            numWindows: 10
+            rollInterval: 1m
             capacity: 100000000
           budget:
             initialBudget: 16777216       # 16 * 1024 * 1024

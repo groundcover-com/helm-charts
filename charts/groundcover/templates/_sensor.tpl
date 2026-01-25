@@ -95,7 +95,8 @@ pipelines:
       rotator:
         handleSummaryTimeout: {{ $sensorValues.pipelines.metrics.summarizer.rotator.handleSummaryTimeout }}
         cache:
-          ttl: {{ $sensorValues.pipelines.metrics.summarizer.rotator.cache.ttl }}
+          numWindows: {{ $sensorValues.pipelines.metrics.summarizer.rotator.cache.numWindows }}
+          rollInterval: {{ $sensorValues.pipelines.metrics.summarizer.rotator.cache.rollInterval }}
           capacity: {{ $sensorValues.pipelines.metrics.summarizer.rotator.cache.capacity }}
         budget:
           initialBudget: {{ $sensorValues.pipelines.metrics.summarizer.rotator.budget.initialBudget }}
