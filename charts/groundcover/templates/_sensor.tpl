@@ -492,15 +492,12 @@ apmIngestor:
     batchSize: 100
     flushInterval: 30s
   dataDog:
-    proxyEnabled: {{ $sensorValues.apmIngestor.dataDog.proxyEnabled }}
     enabled: {{ $sensorValues.apmIngestor.dataDog.enabled }}
-    endpoint: {{ include "opentelemetry-collector.datadogapm.base.http.url" . }}
     tracesPort: {{ $sensorValues.apmIngestor.dataDog.tracesPort }}
     samplingRatio: {{ $sensorValues.apmIngestor.dataDog.samplingRatio }}
     handleTraces: {{ $sensorValues.apmIngestor.dataDog.handleTraces }}
     handleStats: {{ $sensorValues.apmIngestor.dataDog.handleStats }}
   otel:
-    proxyEnabled: {{ $sensorValues.apmIngestor.otel.proxyEnabled }}
     direct:
       enabled: {{ $sensorValues.apmIngestor.otel.direct.enabled }}
       {{- if $sensorValues.apmIngestor.otel.direct.resourceProcessor }}

@@ -440,13 +440,11 @@ agent:
     apmIngestor:
       dataDog:
         enabled: true
-        proxyEnabled: false
         tracesPort: 8126
         samplingRatio: 0.05
         handleTraces: true
         handleStats: true
       otel:
-        proxyEnabled: false
         direct:
           enabled: true
           resourceProcessor:
@@ -957,13 +955,11 @@ ingestor:
   apmIngestor:
     dataDog:
       enabled: true
-      proxyEnabled: false
       tracesPort: 8126
       samplingRatio: 0.05
       handleTraces: true
       handleStats: true
     otel:
-      proxyEnabled: false
       direct:
         enabled: true
         resourceProcessor:
@@ -1123,9 +1119,7 @@ metricsAggregator:
   apmIngestor:
     dataDog:
       enabled: false
-      proxyEnabled: false
     otel:
-      proxyEnabled: false
       direct:
         enabled: false
         zipkin:
@@ -1701,30 +1695,16 @@ opentelemetry-collector:
   mode: deployment
   command:
     name: otelcol-contrib
+  # Required endpoints for OTLP exporters - defaults to ingestor service.
+  # Override these in production if using external collectors.
   extraEnvs:
-    - name: GC_GROUNDCOVERVERSION
-      value: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
-    - name: DB_MANAGER_ADDRESS
-      value: '{{ include "db-manager.ready.http.url" .}}'
-    - name: CLICKHOUSE_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          key: '{{ include "clickhouse.secretKey" . }}'
-          name: '{{ include "clickhouse.secretName" . }}'
-    - name: CLUSTER_ID
-      valueFrom:
-        secretKeyRef:
-          name: '{{ include "groundcover.config.secretName" .}}'
-          key: GC_CLUSTER_ID
-  extraVolumes:
-    - name: persistent-queues
-      emptyDir: {}
-  extraVolumeMounts:
-    - name: persistent-queues
-      mountPath: /persistent_queues
+    - name: INGESTOR_OTLP_ENDPOINT
+      value: '{{ include "ingestor.fullname" . }}:4317'
+    - name: INGESTOR_OTLP_HTTP_ENDPOINT
+      value: '{{ include "ingestor.fullname" . }}:4318'
   image:
-    repository: public.ecr.aws/groundcovercom/otel/opentelemetry-collector-contrib
-    tag: "1.9.700"
+    repository: otel/opentelemetry-collector-contrib
+    tag: "0.139.0"
   podLabels:
     app.kubernetes.io/part-of: '{{ include "groundcover.labels.partOf" . }}'
   podAnnotations:
@@ -1815,32 +1795,11 @@ opentelemetry-collector:
       pprof:
         endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "pprof" "containerPort" | int ) }}'
     receivers:
-      http:
-        endpoint: 0.0.0.0:8016
-      rum/logs:
-        endpoint: 0.0.0.0:8026
-        rum_data_type: logs
-      rum/traces:
-        endpoint: 0.0.0.0:8026
-        rum_data_type: traces
-      rum/events:
-        endpoint: 0.0.0.0:8026
-        rum_data_type: events
-      otlp/dummy_receiver:
-        protocols:
-          http:
-            endpoint: "localhost:9999"
       loki/historian:
         protocols:
           http:
             tls: ${env:TLS_CONFIG}
             endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "loki-historian" "containerPort" | int ) }}'
-        use_incoming_timestamp: true
-      loki:
-        protocols:
-          http:
-            tls: ${env:TLS_CONFIG}
-            endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "loki-http" "containerPort" | int ) }}'
         use_incoming_timestamp: true
       otlp:
         protocols:
@@ -1848,6 +1807,7 @@ opentelemetry-collector:
             max_recv_msg_size_mib: 50
             tls: ${env:TLS_CONFIG}
             endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "otlp" "containerPort" | int ) }}'
+
           http:
             tls: ${env:TLS_CONFIG}
             include_metadata: true
@@ -1857,35 +1817,19 @@ opentelemetry-collector:
               allowed_headers:
                 - "*"
             endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "otlp-http" "containerPort" | int ) }}'
-      faro:
-        http:
-          tls: ${env:TLS_CONFIG}
-          cors:
-            allowed_origins:
-              - "*"
-            allowed_headers:
-              - "*"
-          endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "faro" "containerPort" | int ) }}'
-      datadog:
-        endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "datadogapm" "containerPort" | int ) }}'
-      awsfirehose:
-        endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "awsfirehose" "containerPort" | int ) }}'
-        record_type: "cwlogs"
-      zipkin:
-        endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "zipkin" "containerPort" | int ) }}'
+
     processors:
-      batch/monitorState:
-        timeout: 5s
-        send_batch_size: 1000
       batch/logs:
         timeout: 1s
-        send_batch_size: 20000
+        send_batch_size: 2500
+        send_batch_max_size: 5000
       batch/custom:
         timeout: 5s
         send_batch_size: 1000
       batch/traces:
         timeout: 1s
-        send_batch_size: 5000
+        send_batch_size: 2500
+        send_batch_max_size: 5000
       resource/enrich_headers:
         attributes:
         - key: env_name
@@ -1897,102 +1841,33 @@ opentelemetry-collector:
         - key: gc_env_type
           from_context: x-groundcover-env-type
           action: upsert
-      groundcover/logs:
-        type: logs
-      groundcover/custom:
-        type: custom
-      groundcover/monitorState:
-        type: monitorState
-      groundcover/traces: {}
     exporters:
-      prometheusremotewrite:
-        endpoint: '{{ include "metrics-ingester.cluster.http.write.url" . }}'
+      otlp:
+        endpoint: ${env:INGESTOR_OTLP_ENDPOINT}
         tls:
           insecure: true
-        resource_to_telemetry_conversion:
-          enabled: true
-      otlphttp/vector_logs:
-        endpoint: '{{ include "vector.cluster.otlp.http.logs.endpoint" . }}'
+      otlphttp:
+        endpoint: ${env:INGESTOR_OTLP_HTTP_ENDPOINT}
         tls:
           insecure: true
-      otlphttp/vector_traces:
-        endpoint: '{{ include "vector.cluster.otlp.http.traces.endpoint" . }}'
-        tls:
-          insecure: true
-      otlphttp/vector_custom:
-        endpoint: '{{ include "vector.cluster.otlp.http.custom.endpoint" . }}'
-        tls:
-          insecure: true
-      otlphttp/vector_monitors:
-        endpoint: '{{ include "vector.cluster.otlp.http.monitors.endpoint" . }}'
-        tls:
-          insecure: true
-    connectors:
-      groundcover/traces2logs: {}
     service:
       telemetry:
         metrics:
-          readers:
-            - pull:
-                exporter:
-                  prometheus:
-                    host: '0.0.0.0'
-                    port: 8888
-      extensions: [health_check, pprof]
+          address: 0.0.0.0:8888
+      extensions: [health_check]
       pipelines:
-        logs/monitorState:
-          receivers:
-            - loki/historian
-          processors:
-            - batch/monitorState
-            - groundcover/monitorState
-          exporters:
-            - otlphttp/vector_monitors
-        metrics:
-          receivers:
-            - otlp
-          exporters:
-            - prometheusremotewrite
         traces:
-          receivers:
-            - otlp
-            - datadog
-            - faro
-            - rum/traces
-            - zipkin
-          processors:
-            - batch/traces
-            - groundcover/traces
-          exporters:
-            -  groundcover/traces2logs
+          receivers: [otlp]
+          processors: [resource/enrich_headers, batch/traces]
+          exporters: [otlp]
+        metrics:
+          receivers: [otlp]
+          processors: [resource/enrich_headers, batch/traces]
+          exporters: [otlp]
         logs:
-          receivers:
-            - loki
-            - otlp
-            - faro
-            - awsfirehose
-            - http
-            - rum/logs
-          processors:
-            - resource/enrich_headers
-            - batch/logs
-            - groundcover/logs
-          exporters:
-            - otlphttp/vector_logs
-        logs/traces:
-          receivers:
-            - groundcover/traces2logs
-          exporters:
-            - otlphttp/vector_traces
-        logs/custom:
-          receivers:
-            - otlp
-            - rum/events
-          processors:
-            - batch/custom
-            - groundcover/custom
-          exporters:
-            - otlphttp/vector_custom
+          receivers: [otlp]
+          processors: [resource/enrich_headers, batch/logs]
+          exporters: [otlp]
   resources:
     requests:
       cpu: 100m
