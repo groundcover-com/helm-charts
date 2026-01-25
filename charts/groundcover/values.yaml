@@ -1704,8 +1704,8 @@ opentelemetry-collector:
     - name: INGESTOR_OTLP_HTTP_ENDPOINT
       value: '{{ include "ingestor.fullname" . }}:4318'
   image:
-    repository: otel/opentelemetry-collector-contrib
-    tag: "0.139.0"
+    repository: public.ecr.aws/groundcovercom/otel/opentelemetry-collector-contrib
+    tag: "0.131.0"
   podLabels:
     app.kubernetes.io/part-of: '{{ include "groundcover.labels.partOf" . }}'
   podAnnotations:
@@ -2349,6 +2349,18 @@ vector:
             .category = get!(value: .labels, path: ["category"])
             .severity = get!(value: .labels, path: ["_gc_severity"])
             .measurement_type = get!(value: .annotations, path: ["_gc_measurement_type"])
+            template_lang, err = get(value: .annotations, path: ["_gc_template_language"])
+            if err == null && template_lang != null {
+              .labels._gc_template_language = template_lang
+            }
+            creator, err = get(value: .annotations, path: ["_gc_creator"])
+            if err == null && creator != null {
+              .labels._gc_creator = creator
+            }
+            description, err = get(value: .annotations, path: ["_gc_description"])
+            if err == null && description != null {
+              .labels._gc_description = description
+            }
             del(.annotations)
         metrics_metadata_to_logs:
           inputs:
@@ -3521,7 +3533,7 @@ monitors-manager:
   image:
     registry: public.ecr.aws
     repository: groundcovercom/grafana-groundcover
-    tag: v0.0.40-grafana11.3.7
+    tag: v0.0.41-grafana11.3.7
   nameOverride: monitors-manager
   persistence:
     enabled: true
