@@ -469,7 +469,17 @@ spec:
         {{- end }}
         resources:
           requests:
-            storage: {{ (eq $i 0) | ternary $.Values.persistence.size (default $.Values.persistence.size $.Values.persistence.extraShardsSize) | quote }}
+            {{- $shardSizes := $.Values.persistence.shardSizes | default dict -}}
+            {{- $shardKey := printf "shard%d" $i -}}
+            {{- $pvcSize := "" -}}
+            {{- if and (hasKey $shardSizes $shardKey) (index $shardSizes $shardKey) -}}
+              {{- $pvcSize = index $shardSizes $shardKey -}}
+            {{- else if eq $i 0 -}}
+              {{- $pvcSize = $.Values.persistence.size -}}
+            {{- else -}}
+              {{- $pvcSize = default $.Values.persistence.size $.Values.persistence.extraShardsSize -}}
+            {{- end }}
+            storage: {{ $pvcSize | quote }}
         {{- if $.Values.persistence.selector }}
         selector: {{- include "common.tplvalues.render" (dict "value" $.Values.persistence.selector "context" $) | nindent 10 }}
         {{- end }}

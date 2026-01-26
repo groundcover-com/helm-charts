@@ -5,7 +5,17 @@
 {{- $shards := .Values.clickhouse.shards | int -}}
 {{- $annotations := $.Values.clickhouse.persistence.annotations | toJson -}}
 {{- range $shardIndex, $e := until $shards -}}
-{{- $pvcSize := (eq $shardIndex 0) | ternary $.Values.clickhouse.persistence.size (default $.Values.clickhouse.persistence.size $.Values.clickhouse.persistence.extraShardsSize) -}}
+{{- /* Per-shard PVC sizing: shardSizes takes precedence, then extraShardsSize for non-zero shards, then default size */ -}}
+{{- $shardSizes := $.Values.clickhouse.persistence.shardSizes | default dict -}}
+{{- $shardKey := printf "shard%d" $shardIndex -}}
+{{- $pvcSize := "" -}}
+{{- if hasKey $shardSizes $shardKey -}}
+  {{- $pvcSize = index $shardSizes $shardKey -}}
+{{- else if eq $shardIndex 0 -}}
+  {{- $pvcSize = $.Values.clickhouse.persistence.size -}}
+{{- else -}}
+  {{- $pvcSize = default $.Values.clickhouse.persistence.size $.Values.clickhouse.persistence.extraShardsSize -}}
+{{- end -}}
 {{- $patches := (include "volume-expansion.patches" (merge (dict "size" $pvcSize) $.Values.clickhouse.persistence) ) | fromYaml -}}
 {{- $sizePatches := (include "volume-expansion.size-patches" (merge (dict "size" $pvcSize) $.Values.clickhouse.persistence) ) | fromYaml -}}
 {{- $annotationsPatches := (include "volume-expansion.annotations-patches"  $.Values.clickhouse.persistence) | fromYaml -}}
