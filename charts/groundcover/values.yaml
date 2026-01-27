@@ -246,6 +246,7 @@ ottlRules:
   #   statements:
   #     - set(attributes["test"], "test_value")
 
+
 isk8s: true
 fetchKubeletInfraMetrics: false
 sendKubeletInfraMetrics: true
@@ -257,6 +258,7 @@ logBatchSendQueueWorkerCount: 3
 logBatchSendQueueMaxSize: 10
 jsonFlattenMaxDepth: 6
 jsonFlattenMaxAttributes: 300
+dropRawBody: false
 shouldDropRunningNamespaces: 
 commitHashKeyName:
 repositoryUrlKeyName:

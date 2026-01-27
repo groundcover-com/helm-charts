@@ -604,6 +604,7 @@ logs:
       jsonFlattenMaxDepth: {{ .Values.jsonFlattenMaxDepth }}
       jsonFlattenMaxAttributes: {{ .Values.jsonFlattenMaxAttributes }}
       maxLogContentSize: {{ .Values.maxLogContentSize }}
+      dropRawBody: {{ .Values.dropRawBody | default false }}
     logPatternsConfig:
       enabled: {{ .Values.logPatternsConfig.enabled }}
       logClusterDepth: {{ .Values.logPatternsConfig.logClusterDepth }}
