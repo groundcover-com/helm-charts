@@ -1,4 +1,12 @@
 global:
+  # Shared K8s metric labels configuration for both sensor and k8s-watcher
+  metricLabels:
+    pod:
+      keys: []
+      annotationPatterns: []
+    workload:
+      keys: []
+      annotationPatterns: []
   agent:
     enabled: true
   integrations:
