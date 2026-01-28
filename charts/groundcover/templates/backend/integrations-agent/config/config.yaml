@@ -311,6 +311,13 @@ data:
 
     DebugExporters: {{ .Values.integrationsAgent.debugExporters | default false }}
 
+    Integrations:
+      Clickhouse:
+        DefaultQuerySettings:
+          {{- if and .Values.integrationsAgent.integrations .Values.integrationsAgent.integrations.clickhouse .Values.integrationsAgent.integrations.clickhouse.defaultQuerySettings }}
+          {{- toYaml .Values.integrationsAgent.integrations.clickhouse.defaultQuerySettings | nindent 10 }}
+          {{- end }}
+
     Exporters:
     - Type: "prometheus"
       Name: "prometheus"
