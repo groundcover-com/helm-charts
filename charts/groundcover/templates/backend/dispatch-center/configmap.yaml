@@ -73,6 +73,12 @@ data:
         originCluster: {{ include "groundcover.clusterId" . | quote }}
         tracingTargets:
           - endpoint: {{ include "ingestor.otlptraces.cluster.http.url" . | quote }}
+
+          # Additional trace targets
+          {{- if and .Values.dispatchCenter.instrumentation .Values.dispatchCenter.instrumentation.additionalTraceTargets }}
+          {{- toYaml .Values.dispatchCenter.instrumentation.additionalTraceTargets | nindent 10 }}
+          {{- end }}
+
         metricsTargets:
           - endpoint: {{ include "metrics-ingester.promethues-exposition.http.url" . | quote }}
     
