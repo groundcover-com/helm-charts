@@ -140,6 +140,12 @@ spec:
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
               value: {{ $agentService.config.otelExporterOtlpEndpoint | quote }}
             {{- end }}
+            - name: LANGSMITH_OTEL_ENABLED
+              value: {{ $agentService.config.langsmithOtelEnabled | default "true" | quote }}
+            - name: LANGSMITH_TRACING
+              value: {{ $agentService.config.langsmithTracing | default "true" | quote }}
+            - name: LANGSMITH_PROJECT_NAME
+              value: {{ $agentService.config.langsmithProjectName | default "agent-service" | quote }}
             - name: POSTGRES_HOST
               valueFrom:
                 secretKeyRef:
