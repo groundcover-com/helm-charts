@@ -58,6 +58,7 @@ nodePools:
       consolidateAfter: 
       consolidationPolicy: 
       budgets:
+    # limits omitted by default so Karpenter can provision as much as needed; set cpu and/or memory to cap
     limits:
       cpu: 
       memory: 

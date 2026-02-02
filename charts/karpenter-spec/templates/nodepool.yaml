@@ -23,15 +23,16 @@ spec:
       - Drifted
       - Underutilized
   {{- end }}
+  {{- if and $value.limits (or $value.limits.cpu $value.limits.memory) }}
   limits:
-  {{- if $value.limits }}
   {{- with $value.limits }}
-    cpu: {{ default "1000" .cpu }}
-    memory: {{ default "3000Gi" .memory }}
+  {{- if .cpu }}
+    cpu: {{ .cpu | quote }}
   {{- end }}
-  {{- else }}
-    cpu: "1000" 
-    memory: "3000Gi"
+  {{- if .memory }}
+    memory: {{ .memory | quote }}
+  {{- end }}
+  {{- end }}
   {{- end }}
   {{- if $value.weight }}
   weight: {{ $value.weight }}
