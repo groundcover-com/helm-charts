@@ -1,6 +1,15 @@
 apiVersion: configuration.konghq.com/v1
 kind: KongPlugin
 metadata:
+  name: {{ printf "%s-strip-authorization-prefix" .Release.Name }}
+config:
+  access:
+  - if kong.request.get_header('Authorization') then kong.service.request.set_header('Authorization', kong.request.get_header('Authorization'):gsub("Bearer ","")) end
+plugin: pre-function
+---
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
   name: {{ printf "%s-request-termination" .Release.Name }}
 plugin: request-termination
 config:
