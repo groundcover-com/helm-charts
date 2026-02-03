@@ -39,7 +39,7 @@ service:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.11.458
+  tag: 1.11.459
 curl:
   image:
     repository: "{{ .Values.origin.registry }}/alpine/curl"
@@ -358,7 +358,8 @@ agent-service:
     otelServiceName: "agent-service"
     otelExporterOtlpEndpoint: ""
     langsmithOtelEnabled: "true"
-    langsmithTracing: "true"
+    langsmithOtelOnly: "true" # Avoids API key check, uses OTEL only
+    langsmithTracing: "false" # Disables native LangSmith client
     langsmithProjectName: "agent-service"
   gitbook:
     secretName: "gitbook-credentials"
