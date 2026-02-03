@@ -30,6 +30,7 @@ global:
     tolerations: []
   vector:
     forceLocal: false
+    forceRemote: false
     tracesAsLogs:
       otlp:
         overrideHttpURL:

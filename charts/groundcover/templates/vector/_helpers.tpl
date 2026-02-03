@@ -1,5 +1,7 @@
 {{- define "vector.useLocalVector" -}}
-{{ if .Values.global.vector.forceLocal }}
+{{ if .Values.global.vector.forceRemote }}
+false
+{{ else if .Values.global.vector.forceLocal }}
 true
 {{ else if .Values.global.backend.enabled }}
 true
