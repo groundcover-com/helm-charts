@@ -478,6 +478,7 @@ contentTypesToDrop: {{ toYaml $sensorValues.contentTypesToDrop | nindent 2 }}
 contentTypesWithoutClustering: {{ toYaml $sensorValues.contentTypesWithoutClustering | nindent 2 }}
 hostHeadersToDrop: {{ toYaml $sensorValues.hostHeadersToDrop | nindent 2 }}
 headersForceSampling: {{ toYaml $sensorValues.headersForceSampling | nindent 2 }}
+forceSamplingByProductType: {{ toYaml $sensorValues.forceSamplingByProductType | nindent 2 }}
 customEntityTags: {{ toYaml $sensorValues.customEntityTags | nindent 2 }}
 sendKubeletInfraMetrics: {{ .Values.sendKubeletInfraMetrics }}
 {{ end }}

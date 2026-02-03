@@ -388,6 +388,12 @@ agent:
       w3cForceSample: true
       b3ForceSample: true
       datadogForceSample: true
+    forceSamplingByProductType:
+      enabled: true
+      products:
+        - openai
+        - anthropic
+        - bedrock
     watchOnlyLocalNode: false
     resolveRemoteFromEndpoint: false
     setLocalTrafficPolicy: true
@@ -604,8 +610,8 @@ agent:
         secretKeyRef:
           key: '{{ template "groundcover.apikeySecretKey" . }}'
           name: '{{ template "groundcover.apikeySecretName" . }}' 
-    httpUnlimitedEndpoints: "/api/v0.2/traces"
-    http2UnlimitedEndpoints: "/api/v0.2/traces"
+    httpUnlimitedEndpoints: "/v1/chat/completions,/v1/responses,/v1/messages,/model/"
+    http2UnlimitedEndpoints: "/v1/chat/completions,/v1/responses,/v1/messages,/model/"
     childcountruleoverrides:
     - depth: 0
       maxChildren: 100
