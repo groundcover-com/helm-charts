@@ -711,6 +711,7 @@ sensitiveHeadersObfuscationConfig:
   name: otlp-grpc
   port: {{ $sensorValues.apmIngestor.otel.direct.otlp.grpcPort }}
   targetPort: {{ $sensorValues.apmIngestor.otel.direct.otlp.grpcPort }}
+  appProtocol: grpc
 {{- end }}
 {{- if and $sensorValues.apmIngestor.otel.direct.otlp.enabled $sensorValues.apmIngestor.otel.direct.otlp.httpPort }}
 - protocol: TCP
@@ -723,6 +724,7 @@ sensitiveHeadersObfuscationConfig:
   name: jeager-grpc
   port: {{ $sensorValues.apmIngestor.otel.direct.jaeger.grpcPort }}
   targetPort: {{ $sensorValues.apmIngestor.otel.direct.jaeger.grpcPort }}
+  appProtocol: grpc
 {{- end }}
 {{- if and $sensorValues.apmIngestor.otel.direct.jaeger.enabled $sensorValues.apmIngestor.otel.direct.jaeger.thriftHttpPort }}
 - protocol: TCP
