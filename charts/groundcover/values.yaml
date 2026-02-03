@@ -443,6 +443,8 @@ agent:
     exporters:
       remotewrite:
         usePrometheusCompatibleNaming: true
+        forcePrometheusProtocol: true
+        memoryAllowedBytes: "50MB"
     pipelines:
       metrics:
         enricherEnabled: true
@@ -937,6 +939,8 @@ ingestor:
   exporters:
     remotewrite:
       usePrometheusCompatibleNaming: true
+      forcePrometheusProtocol: true
+      memoryAllowedBytes: "50MB"
   pipelines:
     metrics:
       enricherEnabled: true
@@ -1075,7 +1079,8 @@ metricsAggregator:
       port: 8428
   exporters:
     remotewrite:
-      usePrometheusCompatibleNaming: true
+      usePrometheusCompatibleNaming: false
+      forcePrometheusProtocol: false
       url: '{{ template "metrics-aggregator.write.url" . }}'
   pipelines:
     metrics:

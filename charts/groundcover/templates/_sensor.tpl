@@ -59,6 +59,8 @@ exporters:
     maxDiskUsagePerURL: {{ $sensorValues.exporters.remotewrite.maxDiskUsagePerURL }}
     tmpDataPath: {{ $sensorValues.exporters.remotewrite.tmpDataPath }}
     numberOfConcurrentQueues: {{ $sensorValues.exporters.remotewrite.numberOfConcurrentQueues }}
+    forcePrometheusProtocol: {{ $sensorValues.exporters.remotewrite.forcePrometheusProtocol }}
+    memoryAllowedBytes: {{ $sensorValues.exporters.remotewrite.memoryAllowedBytes }}
 pipelines:
   metrics:
     enricherEnabled: {{ $sensorValues.pipelines.metrics.enricherEnabled }}
