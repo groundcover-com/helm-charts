@@ -145,7 +145,7 @@ spec:
             - name: LANGSMITH_OTEL_ONLY
               value: {{ $agentService.config.langsmithOtelOnly | default "true" | quote }}
             - name: LANGSMITH_TRACING
-              value: {{ $agentService.config.langsmithTracing | default "false" | quote }}
+              value: {{ $agentService.config.langsmithTracing | default "true" | quote }}
             - name: LANGSMITH_PROJECT_NAME
               value: {{ $agentService.config.langsmithProjectName | default "agent-service" | quote }}
             - name: POSTGRES_HOST
