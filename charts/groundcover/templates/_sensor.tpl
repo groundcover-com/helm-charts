@@ -81,6 +81,8 @@ pipelines:
         ignoreFirstIntervals: {{ $sensorValues.pipelines.metrics.aggregation.configuration.ignoreFirstIntervals }}
         keepInput: {{ $sensorValues.pipelines.metrics.aggregation.configuration.keepInput }}
         enableWindows: {{ $sensorValues.pipelines.metrics.aggregation.configuration.enableWindows }}
+        noAlignFlushToInterval: {{ $sensorValues.pipelines.metrics.aggregation.configuration.noAlignFlushToInterval }}
+        flushOnShutdown: {{ $sensorValues.pipelines.metrics.aggregation.configuration.flushOnShutdown }}
         content: {{ $sensorValues.pipelines.metrics.aggregation.configuration.content | quote }}
       {{- end }}
     {{- end }}
