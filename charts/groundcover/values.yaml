@@ -2384,6 +2384,7 @@ vector:
               .labels._gc_description = description
             }
             del(.annotations)
+            .insert_time = now()
         metrics_metadata_to_logs:
           inputs:
             - "vm_metrics"
