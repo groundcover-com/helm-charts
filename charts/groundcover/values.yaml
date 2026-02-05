@@ -2877,7 +2877,7 @@ vector:
             - json_monitors
             bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
             region: '{{ .Values.vector.objectStorage.region }}'
-            key_prefix: "v2/monitors_v3/"
+            key_prefix: "v2/monitors_v4/"
             encoding:
               codec: json
               timestamp_format: rfc3339
@@ -2976,7 +2976,7 @@ vector:
             inputs:
               - monitors
               - json_monitors
-            key_prefix: v2/monitors_v3/
+            key_prefix: v2/monitors_v4/
             compression: zstd
             bucket: '{{ .Values.vector.objectStorage.gcsBucket }}'
             batch:
