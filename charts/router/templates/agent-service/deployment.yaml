@@ -190,6 +190,9 @@ spec:
               value: {{ $longTermMemory.enableDirectMemoryManagementTools | default false | quote }}
             {{- end }}
             {{- end }}
+            {{- with $agentService.env }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
           resources:
             {{- toYaml $agentService.resources | nindent 12 }}
           readinessProbe:
