@@ -3709,8 +3709,8 @@ monitors-manager:
 
 curl:
   image:
-    repository: '{{ .Values.global.origin.registry }}/alpine/curl' 
-    tag: 8.14.1
+    repository: '{{ .Values.global.origin.registry }}/tools' 
+    tag: '20260206'
 
 rbac:
   pspEnabled: false
