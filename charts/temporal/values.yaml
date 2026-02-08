@@ -6,7 +6,7 @@ temporalConfig:
   adminTools:
     image:
       repository: public.ecr.aws/groundcovercom/temporalio/admin-tools
-      tag: "1.29.2"
+      tag: "1.29.2-20260204"
       pullPolicy: IfNotPresent
   schemaConfigMaps:
     annotations: 
@@ -109,14 +109,14 @@ temporal:
     enabled: true
     replicaCount: 1
     image:
-      repository: us-docker.pkg.dev/groundcovercom/repo/temporalio/ui
-      tag: 2.42.1
+      repository: public.ecr.aws/groundcovercom/temporalio/ui
+      tag: 2.45.1
 
   admintools:
     enabled: true
     image:
       repository: public.ecr.aws/groundcovercom/temporalio/admin-tools
-      tag: 1.29.2
+      tag: 1.29.2-20260204
 
   # Disable schema management - handled by our job
   schema:
