@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ .Release.Name }}-temporal-schema-setup
+  name: {{ .Release.Name }}-temporal-schema-setup-{{ randAlphaNum 6 | lower }}
   namespace: {{ .Release.Namespace }}
   {{- with .Values.temporalConfig.schemaSetup.annotations }}
   annotations:
@@ -13,6 +13,7 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/component: schema-setup
 spec:
+  ttlSecondsAfterFinished: 300
   template:
     metadata:
       labels:

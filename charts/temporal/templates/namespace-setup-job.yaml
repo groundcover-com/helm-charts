@@ -3,7 +3,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ .Release.Name }}-temporal-namespace-setup
+  name: {{ .Release.Name }}-temporal-namespace-setup-{{ randAlphaNum 6 | lower }}
   namespace: {{ .Release.Namespace }}
   {{- with .Values.temporalConfig.namespaceSetup.annotations }}
   annotations:
@@ -16,6 +16,7 @@ metadata:
 spec:
   backoffLimit: 10
   activeDeadlineSeconds: 600
+  ttlSecondsAfterFinished: 300
   template:
     metadata:
       labels:
