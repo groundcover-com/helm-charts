@@ -50,5 +50,10 @@ Usage:
     - /bin/sh
     - -c
   image: '{{ tpl .root.Values.curl.image.repository .root }}:{{ tpl .root.Values.curl.image.tag .root }}'
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
 {{- end -}}
 

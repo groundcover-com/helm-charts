@@ -1280,6 +1280,17 @@ k8sWatcher:
   nodeSelector:
   tolerations: []
   priorityClassName:
+  # Pod-level security context (applies to all containers)
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    fsGroup: 1000
+  # Container-level security context (applies to main container)
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
   clusterDiscoveryInterval: 5m
   resources:
     limits:
@@ -1912,6 +1923,10 @@ opentelemetry-collector:
   tolerations: []
 
 vector:
+  podSecurityContext:
+    runAsUser: 1000
+    runAsNonRoot: true
+    fsGroup: 1000
   rollWorkload: false
   logsPipeline:
     inputs:
@@ -2071,6 +2086,12 @@ vector:
       memory: 2048Mi
     limits:
       memory: 4096Mi
+  extraVolumes:
+    - name: vector-data
+      emptyDir: {}
+  extraVolumeMounts:
+    - name: vector-data
+      mountPath: /var/lib/vector
   # backendEnv will only be created if backend is enabled
   backendEnv:
     - name: CLICKHOUSE_PASSWORD
@@ -3066,6 +3087,10 @@ router:
   additionalAnnotations:
 
 metrics-ingester:
+  podSecurityContext:
+    runAsUser: 1000
+    runAsNonRoot: true
+    fsGroup: 1000
   nodeSelector:
   rbac:
     enabled: false
@@ -3135,6 +3160,10 @@ metrics-ingester:
         - /bin/sleep
         - "10"
 victoria-metrics-agent:
+  podSecurityContext:
+    runAsUser: 1000
+    runAsNonRoot: true
+    fsGroup: 1000
   service:
     enabled: true
   nodeSelector:

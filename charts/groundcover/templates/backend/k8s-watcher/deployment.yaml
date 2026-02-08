@@ -61,6 +61,10 @@ spec:
 {{ toYaml .Values.k8sWatcher.nodeSelector | indent 8 }}
 {{- end }}
       imagePullSecrets: {{ include "imagePullSecrets" . }}
+{{- with .Values.k8sWatcher.podSecurityContext }}
+      securityContext:
+{{ toYaml . | indent 8 }}
+{{- end }}
       containers:
       - env: 
         - name: GC_RUNNINGNAMESPACE
@@ -83,6 +87,10 @@ spec:
         image: {{ tpl .Values.k8sWatcher.image.repository . }}:{{ tpl .Values.k8sWatcher.image.tag . }}
         imagePullPolicy: Always
         name: k8s-watcher
+{{- with .Values.k8sWatcher.containerSecurityContext }}
+        securityContext:
+{{ toYaml . | indent 10 }}
+{{- end }}
         ports:
         - containerPort: 9102
           name: watcher-metrics
