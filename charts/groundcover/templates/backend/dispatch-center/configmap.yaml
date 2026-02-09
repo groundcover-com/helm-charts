@@ -24,6 +24,7 @@ data:
       host: {{ splitList ":" (include "postgresql.base.url" .) | first | quote }}
       port: {{ splitList ":" (include "postgresql.base.url" .) | last | quote }}
       database: {{ .Values.dispatchCenter.postgresql.database | default "dispatch_center" | quote }}
+      adminDatabase: {{ include "postgresql.database" . | quote }}
       user: {{ include "postgresql.username" . | quote }}
       sslMode: {{ .Values.dispatchCenter.postgresql.sslMode | default "disable" | quote }}
       timeout: {{ .Values.dispatchCenter.postgresql.timeout | default "30s" }}

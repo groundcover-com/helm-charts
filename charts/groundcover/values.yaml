@@ -197,6 +197,8 @@ global:
   postgresql:
     enabled: true
     overrideUrl: ""
+    auth:
+      database: "postgres"  # Default admin database for connections (use "defaultdb" for Akamai)
 
 tags:
   # InCloud - Enterprise Setup. groundcover's control-plane reconciled observability infrastructure deployment.
