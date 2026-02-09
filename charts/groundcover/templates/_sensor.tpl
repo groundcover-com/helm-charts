@@ -45,6 +45,7 @@ receivers:
   remotewrite:
     enabled: {{ $sensorValues.receivers.remotewrite.enabled }}
     port: {{ $sensorValues.receivers.remotewrite.port }}
+    maxConcurrentInserts: {{ $sensorValues.receivers.remotewrite.maxConcurrentInserts }}
   {{ end }}
   {{ if $sensorValues.collectionEnabled }}
   metricsscraper:
