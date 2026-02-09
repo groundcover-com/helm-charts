@@ -70,6 +70,8 @@ spec:
           value: {{ .Values.temporalConfig.postgres.database | quote }}
         - name: VISIBILITY_DB
           value: {{ printf "%s_visibility" .Values.temporalConfig.postgres.database | quote }}
+        - name: ADMIN_DB
+          value: {{ .Values.temporalConfig.postgres.adminDatabase | default "postgres" | quote }}
         volumeMounts:
         - name: temporal-schema-volume
           mountPath: /schema/temporal
@@ -86,12 +88,12 @@ spec:
           export PGPASSWORD=$SQL_PASSWORD
 
           echo "Creating database $TEMPORAL_DB if it doesn't exist..."
-          psql -h $SQL_HOST -p $SQL_PORT -U $SQL_USER -d postgres -tc "SELECT 1 FROM pg_database WHERE datname = '$TEMPORAL_DB'" | grep -q 1 || \
-          psql -h $SQL_HOST -p $SQL_PORT -U $SQL_USER -d postgres -c "CREATE DATABASE \"$TEMPORAL_DB\""
+          psql -h $SQL_HOST -p $SQL_PORT -U $SQL_USER -d $ADMIN_DB -tc "SELECT 1 FROM pg_database WHERE datname = '$TEMPORAL_DB'" | grep -q 1 || \
+          psql -h $SQL_HOST -p $SQL_PORT -U $SQL_USER -d $ADMIN_DB -c "CREATE DATABASE \"$TEMPORAL_DB\""
 
           echo "Creating database $VISIBILITY_DB if it doesn't exist..."
-          psql -h $SQL_HOST -p $SQL_PORT -U $SQL_USER -d postgres -tc "SELECT 1 FROM pg_database WHERE datname = '$VISIBILITY_DB'" | grep -q 1 || \
-          psql -h $SQL_HOST -p $SQL_PORT -U $SQL_USER -d postgres -c "CREATE DATABASE \"$VISIBILITY_DB\""
+          psql -h $SQL_HOST -p $SQL_PORT -U $SQL_USER -d $ADMIN_DB -tc "SELECT 1 FROM pg_database WHERE datname = '$VISIBILITY_DB'" | grep -q 1 || \
+          psql -h $SQL_HOST -p $SQL_PORT -U $SQL_USER -d $ADMIN_DB -c "CREATE DATABASE \"$VISIBILITY_DB\""
 
           echo "Setting up Temporal schema..."
 
