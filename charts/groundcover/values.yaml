@@ -408,9 +408,15 @@ agent:
       labels:
         keys: []
         collectAll: false
+        promoteToMetrics:
+          keys: []
+          all: false
       annotations:
         keys: []
         collectAll: false
+        promoteToMetrics:
+          keys: []
+          all: false
     healthProbe:
       enabled: true
       port: 2021
