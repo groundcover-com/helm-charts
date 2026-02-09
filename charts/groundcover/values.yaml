@@ -3777,6 +3777,7 @@ backend:
         host: "NONE"  # Read from secret
         port: 5432
         database: temporal
+        adminDatabase: postgres  # Database to connect to when creating temporal databases (use "defaultdb" for Akamai)
         username: postgres
         secret:
           name: "managed-postgres-credentials"

@@ -27,6 +27,7 @@ temporalConfig:
     host: "NONE"  # Set to "NONE" to read from secret, or specify host directly
     port: 5432
     database: temporal
+    adminDatabase: postgres  # Database to connect to when creating temporal databases (use "defaultdb" for Akamai)
     username: postgres
     secret:
       name: "managed-postgres-credentials"  # Default for production
