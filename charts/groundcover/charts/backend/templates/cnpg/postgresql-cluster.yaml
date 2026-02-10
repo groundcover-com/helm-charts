@@ -1,0 +1,53 @@
+{{- if and .Values.global.cnpg.operator.enabled .Values.global.cnpg.cluster.enabled }}
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: {{ include "cnpg.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: cnpg-postgresql
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "groundcover.labels" . | nindent 4 }}
+spec:
+  instances: {{ .Values.global.cnpg.cluster.instances }}
+
+  enablePDB: {{ .Values.global.cnpg.cluster.enablePDB }}
+  # imageName: 125608480246.dkr.ecr.eu-west-3.amazonaws.com/echo-secure-images/postgres:18.1
+  # Enable superuser access to create credentials secret
+  enableSuperuserAccess: true
+
+  # Storage configuration
+  storage:
+    size: {{ .Values.global.cnpg.cluster.storage.size }}
+    {{- if .Values.global.cnpg.cluster.storage.storageClass }}
+    storageClass: {{ .Values.global.cnpg.cluster.storage.storageClass }}
+    {{- end }}
+
+  {{- if .Values.global.cnpg.cluster.postgresql }}
+  # PostgreSQL configuration
+  postgresql:
+    {{- if .Values.global.cnpg.cluster.postgresql.parameters }}
+    parameters:
+      {{- toYaml .Values.global.cnpg.cluster.postgresql.parameters | nindent 6 }}
+    {{- end }}
+  {{- end }}
+
+  # Bootstrap configuration - conditional based on migration toggle
+  bootstrap:
+    initdb:
+      database: postgres
+      owner: postgres
+      {{- if or .Values.global.postgresql.auth.existingSecret .Values.global.cnpg.cluster.existingSecretName }}
+      secret:
+        name: {{ include "cnpg.existingSecretName" . }}
+      {{- end }}
+
+  {{- if .Values.global.cnpg.cluster.resources }}
+  # Resources requirements for PostgreSQL pods
+  resources:
+    {{- toYaml .Values.global.cnpg.cluster.resources | nindent 4 }}
+  {{- end }}
+
+  smartShutdownTimeout: {{ .Values.global.cnpg.cluster.smartShutdownTimeout }}
+  primaryUpdateMethod: {{ .Values.global.cnpg.cluster.primaryUpdateMethod }}
+{{- end }}

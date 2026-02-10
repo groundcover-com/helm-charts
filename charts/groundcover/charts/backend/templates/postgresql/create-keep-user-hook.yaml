@@ -1,4 +1,4 @@
-{{- if and .Values.postgresql.jobs.createKeepUser.enabled .Values.global.postgresql.overrideUrl }}
+{{- if and .Values.postgresql.jobs.createKeepUser.enabled (or .Values.global.postgresql.overrideUrl .Values.global.cnpg.cluster.use) }}
 
 {{- $name := (printf "%s-create-keep-user-%s" (include "postgresql.primary.fullname" $) (randAlphaNum 6 | lower)) -}}
 apiVersion: batch/v1

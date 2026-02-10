@@ -1,0 +1,40 @@
+{{- if .Values.global.cnpg.upgradeCRDs }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "cnpg-crds.fullname" . }}
+  annotations:
+  {{- include "cnpg-crds.job.annotations" . | nindent 4 }}
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      name: {{ include "cnpg-crds.fullname" . }}
+    spec:
+      restartPolicy: Never
+      imagePullSecrets: {{ .Values.imagePullSecrets | toJson }}
+      serviceAccountName: {{ include "cnpg-crds.fullname" . }}
+      containers:
+      - name: apply-crds
+        imagePullPolicy: IfNotPresent
+        image: {{ include "cnpg-crds.job.image" . }}
+        command:
+          - /bin/sh
+          - -c
+          - |
+            set -e
+            kubectl apply --server-side -f /crds/*.yaml
+            kubectl apply --server-side -f /crds-clusters/*.yaml
+        volumeMounts:
+          - name: crds
+            mountPath: /crds
+          - name: crds-clusters
+            mountPath: /crds-clusters
+      volumes:
+        - name: crds
+          configMap:
+            name: {{ include "cnpg-crds.fullname" . }}
+        - name: crds-clusters
+          configMap:
+            name: {{ include "cnpg-crds.fullname" . }}-clusters
+{{- end }}

@@ -2,6 +2,12 @@ dependencies:
 - name: postgresql
   repository: https://charts.bitnami.com/bitnami
   version: 12.6.9
+- name: cloudnative-pg
+  repository: https://cloudnative-pg.github.io/charts
+  version: 0.27.0
+- name: cnpg-crds
+  repository: file://../../../cnpg-crds
+  version: 0.27.0
 - name: keep
   repository: https://keephq.github.io/helm-charts
   version: 0.1.67
@@ -11,5 +17,5 @@ dependencies:
 - name: temporal
   repository: ""
   version: '>=0.0.0'
-digest: sha256:34625709c56d8ccb740d3709edc75aaea591d90ed4f548c387e24ed5e1bad0cf
-generated: "2025-11-18T00:17:18.387413354Z"
+digest: sha256:198f22d27e5fcc81e70f2928fa03d8fce3e112e8deaa8f4f61063a98b147f13e
+generated: "2026-02-04T13:23:37.136806119Z"

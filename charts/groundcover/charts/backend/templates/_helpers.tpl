@@ -35,6 +35,12 @@ PostgreSQL helpers
 {{- define "postgresql.secretName" -}}
 {{- if .Values.postgresql.auth.existingSecret -}}
 {{- .Values.postgresql.auth.existingSecret -}}
+{{- else if and .Values.global.cnpg.cluster.enabled .Values.global.cnpg.cluster.use -}}
+{{- if .Values.global.cnpg.cluster.existingSecretName -}}
+{{- .Values.global.cnpg.cluster.existingSecretName -}}
+{{- else -}}
+{{- printf "%s-app" (include "cnpg.fullname" .) -}}
+{{- end -}}
 {{- else -}}
 {{- printf "%s-postgresql" .Release.Name -}}
 {{- end -}}
@@ -44,7 +50,16 @@ PostgreSQL helpers
 {{- printf "%s-postgresql" .Release.Name -}}
 {{- end -}}
 
-{{- define "postgresql.base.url" -}}
-{{- printf "%s-postgresql:5432" .Release.Name -}}
+{{- define "cnpg.fullname" -}}
+{{- printf "%s-cnpg-postgresql" .Release.Name -}}
 {{- end -}}
 
+{{- define "cnpg.existingSecretName" -}}
+{{- if .Values.global.cnpg.cluster.existingSecretName -}}
+{{- .Values.global.cnpg.cluster.existingSecretName -}}
+{{- else if .Values.global.postgresql.auth.existingSecret -}}
+{{- .Values.global.postgresql.auth.existingSecret -}}
+{{- else -}}
+{{- printf "%s-postgresql" .Release.Name -}}
+{{- end -}}
+{{- end -}}

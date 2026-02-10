@@ -19,6 +19,12 @@ global:
       existingSecret: ""
       secretKeys:
         adminPasswordKey: postgres-password
+  cnpg:
+    operator:
+      enabled: false
+    cluster:
+      use: false
+      enabled: false
   monitors:
     enabled: false
   debug:
@@ -39,7 +45,7 @@ service:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.11.511
+  tag: 1.11.512
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/tools'

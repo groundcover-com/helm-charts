@@ -6,9 +6,9 @@ postgresql:
     createDbs:
       enabled: true
       annotations:
-        helm.sh/hook-weight: "-2"
-        helm.sh/hook: "pre-upgrade,pre-install"
-        helm.sh/hook-delete-policy: "before-hook-creation"
+      
+      # When false, removes Helm hook annotations and disables Helm hooks for DB creation jobs (changing bootstrap job ordering)      
+      helmHooksEnabled: true
   dbs: {}
   nameOverride: postgresql
   image:
@@ -473,3 +473,6 @@ victoria-metrics-distributed:
       vmauth:
         name: "write-global-groundcover"
 
+cloudnative-pg:
+  crds:
+    create: false

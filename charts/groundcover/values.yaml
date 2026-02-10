@@ -200,6 +200,35 @@ global:
     auth:
       database: "postgres"  # Default admin database for connections (use "defaultdb" for Akamai)
 
+  # CloudNativePG configuration
+  cnpg:
+    operator:
+      upgradeCRDs: true
+      enabled: false
+    cluster:
+      use: false
+      enabled: false
+      instances: 3
+      enablePDB: true
+      smartShutdownTimeout: 15
+      primaryUpdateMethod: "switchover"
+      storage:
+        size: 8Gi
+        storageClass:
+      existingSecretName:
+      postgresql:
+        parameters:
+          max_connections: "700"
+          # shared_buffers: "256MB"
+          # work_mem: "4MB"
+      resources:
+        requests:
+          memory: "2Gi"
+          cpu: "1"
+        limits:
+          memory: "2Gi"
+          cpu: "10"
+
 tags:
   # InCloud - Enterprise Setup. groundcover's control-plane reconciled observability infrastructure deployment.
   incloud: false
@@ -667,6 +696,7 @@ dbManager:
   objectStorageQueues: {}
   objectStorageDestTables:
     logs: "logs_v8"
+    metricsMetadata: "metrics_metadata"
   cloudPricing:
     enabled: true
     pricingFileURL: "https://groundcover-public-assets.s3.amazonaws.com/cloud_pricing_v1.csv"
@@ -1118,10 +1148,10 @@ metricsAggregator:
             rollInterval: 1m
             capacity: 100000000
           budget:
-            initialBudget: 16777216       # 16 * 1024 * 1024
+            initialBudget: 33554432       # 32 * 1024 * 1024
             multiplicativeDecrease: 0.90
             additiveIncrease: 8388608     # 8 * 1024 * 1024
-            minBudget: 2097152            # 2 * 1024 * 1024
+            minBudget: 16777216           # 16 * 1024 * 1024
             maxBudget: 67108864           # 64 * 1024 * 1024
             highUtilization: 0.95
             lowUtilization: 0.70
@@ -2786,7 +2816,7 @@ vector:
             date_time_best_effort: true
             buffer:
                 type: memory
-                max_events: 5000
+                max_events: 250000
                 when_full: drop_newest
             batch:
               max_bytes: 100000000
@@ -2922,6 +2952,23 @@ vector:
               timeout_secs: 5
             healthcheck:
               enabled: false
+          s3_metrics_metadata:
+            type: "aws_s3"
+            inputs:
+              - metrics_metadata_extracted
+              - table_write_routing.metrics_metadata
+            bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
+            region: '{{ .Values.vector.objectStorage.region }}'
+            key_prefix: "v2/metrics_metadata/"
+            encoding:
+              codec: json
+              timestamp_format: rfc3339
+            batch:
+              max_bytes: 250000000
+              max_events: 250000
+              timeout_secs: 5
+            healthcheck:
+              enabled: false
       gcs:
         logs:
           gcs_logs:
@@ -3017,6 +3064,23 @@ vector:
             batch:
               max_bytes: 25000000
               max_events: 25000
+              timeout_secs: 5
+            encoding:
+              codec: json
+              timestamp_format: rfc3339
+            healthcheck:
+              enabled: false
+          gcs_metrics_metadata:
+            type: gcp_cloud_storage
+            inputs:
+              - metrics_metadata_extracted
+              - table_write_routing.metrics_metadata
+            key_prefix: v2/metrics_metadata/
+            compression: zstd
+            bucket: '{{ .Values.vector.objectStorage.gcsBucket }}'
+            batch:
+              max_bytes: 250000000
+              max_events: 250000
               timeout_secs: 5
             encoding:
               codec: json

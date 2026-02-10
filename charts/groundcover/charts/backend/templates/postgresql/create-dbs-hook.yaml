@@ -1,11 +1,16 @@
-{{- if and .Values.postgresql.jobs.createDbs.enabled .Values.global.postgresql.overrideUrl }}
-{{- $name := (printf "%s-create-dbs" (include "postgresql.primary.fullname" $)) -}}
+{{- if and .Values.postgresql.jobs.createDbs.enabled ( or .Values.global.postgresql.overrideUrl .Values.global.cnpg.cluster.use ) }}
+{{- $name := (printf "%s-create-dbs-hook" (include "postgresql.primary.fullname" $)) -}}
 apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ $name }}
   namespace: {{ .Release.Namespace }}
   annotations:
+  {{- if and .Values.global.postgresql.overrideUrl .Values.postgresql.jobs.createDbs.helmHooksEnabled }}
+    helm.sh/hook-weight: "-2"
+    helm.sh/hook: "pre-upgrade,pre-install"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+  {{- end }}
   {{- with .Values.postgresql.jobs.createDbs.annotations }}
   {{- toYaml . | nindent 4 }}
   {{- end }}

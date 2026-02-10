@@ -337,8 +337,7 @@ sinks:
 {{- tpl (toYaml .Values.vector.customComponents.sinks.extraSinks) $ | nindent 2 }}
 {{ end }}
 {{- tpl (toYaml .Values.vector.customComponents.sinks.metrics) $ | nindent 2 }}
-{{ if .Values.global.backend.enabled }} {{- /* these sinks are always local only, no matter of ingestion mode */ -}}
-{{- tpl (toYaml (dict "clickhouse_metrics_metadata" .Values.vector.customComponents.sinks.local.custom.clickhouse_metrics_metadata)) $ | nindent 2 }}
+{{ if .Values.global.backend.enabled }} {{- /* this sink is always local only, no matter of ingestion mode */ -}}
 {{- tpl (toYaml (dict "clickhouse_aws_billing_report" .Values.vector.customComponents.sinks.local.custom.clickhouse_aws_billing_report)) $ | nindent 2 }}
 {{ end }}
 {{- /* ingestion modes */ -}}
@@ -357,6 +356,7 @@ sinks:
 {{- tpl (toYaml (dict "clickhouse_measurements" .Values.vector.customComponents.sinks.local.custom.clickhouse_measurements)) $ | nindent 2 }}
 {{- tpl (toYaml (dict "clickhouse_k8s_events" .Values.vector.customComponents.sinks.local.custom.clickhouse_k8s_events)) $ | nindent 2 }}
 {{- tpl (toYaml (dict "clickhouse_monitors" .Values.vector.customComponents.sinks.local.custom.clickhouse_monitors)) $ | nindent 2 }}
+{{- tpl (toYaml (dict "clickhouse_metrics_metadata" .Values.vector.customComponents.sinks.local.custom.clickhouse_metrics_metadata)) $ | nindent 2 }}
 {{ else }} {{- /* remote ingestion over ingress */}}
 {{- tpl (include "remoteSinksWithTLS" .) $ }}
 {{- end -}}
