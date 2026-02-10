@@ -13,7 +13,7 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/component: schema-setup
 spec:
-  ttlSecondsAfterFinished: 300
+  ttlSecondsAfterFinished: 43200
   template:
     metadata:
       labels:
