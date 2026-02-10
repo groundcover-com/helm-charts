@@ -110,6 +110,10 @@ data:
       Enabled: {{ .Values.dbManager.cloudPricing.enabled }}
       PricingFileURL: {{ .Values.dbManager.cloudPricing.pricingFileURL }}
       RefreshInterval: {{ .Values.dbManager.cloudPricing.refreshInterval }}
+    LLMPricing:
+      Enabled: {{ .Values.dbManager.llmPricing.enabled }}
+      PricingFileURL: "https://{{ .Values.dbManager.llmPricing.bucket }}.s3.{{ .Values.dbManager.llmPricing.region }}.amazonaws.com/{{ .Values.dbManager.llmPricing.path }}"
+      RefreshInterval: {{ .Values.dbManager.llmPricing.refreshInterval }}
     CustomAttributesIndexes:
       InvertedIndexLogsKeys:
         {{- toYaml .Values.dbManager.customAttributesIndexes.invertedIndexLogsKeys | nindent 8 }}
