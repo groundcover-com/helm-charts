@@ -50,7 +50,7 @@ service:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.11.517
+  tag: 1.11.518
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/tools'
@@ -182,7 +182,7 @@ kong-crds:
 kong:
   replicaCount: 1
   image:
-    tag: 3.9.1
+    tag: 3.9.1-20260128
     repository: public.ecr.aws/groundcovercom/kong
   admin:
     enabled: true
@@ -217,7 +217,7 @@ kong:
     admissionWebhook:
       enabled: false
     image:
-      tag: "3.5"
+      tag: "3.5.3-20260205"
       repository: public.ecr.aws/groundcovercom/kong/kubernetes-ingress-controller
     ingressClass: groundcover-kong
     # annotations for IngressClass resource (Kubernetes 1.18+)
