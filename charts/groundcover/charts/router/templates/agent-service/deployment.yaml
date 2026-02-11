@@ -140,6 +140,8 @@ spec:
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
               value: {{ $agentService.config.otelExporterOtlpEndpoint | quote }}
             {{- end }}
+            - name: DEV_SHOW_TRACE_ID
+              value: {{ $agentService.config.devShowTraceId | default "false" | quote }}
             - name: LANGSMITH_OTEL_ENABLED
               value: {{ $agentService.config.langsmithOtelEnabled | default "true" | quote }}
             - name: LANGSMITH_OTEL_ONLY
