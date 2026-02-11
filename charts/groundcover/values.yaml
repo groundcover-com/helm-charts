@@ -197,6 +197,11 @@ global:
   postgresql:
     enabled: true
     overrideUrl: ""
+    initContainers:
+      image:
+        registry: "public.ecr.aws/groundcovercom"
+        repository: postgres
+        tag: "18.1-20260208"
     auth:
       database: "postgres"  # Default admin database for connections (use "defaultdb" for Akamai)
 
@@ -206,6 +211,9 @@ global:
       upgradeCRDs: true
       enabled: false
     cluster:
+      image:
+        repository: "{{ .Values.global.origin.registry }}/cloudnative-pg/postgres"
+        tag: 18.1
       use: false
       enabled: false
       instances: 3
@@ -338,8 +346,8 @@ statefulset-modifier:
   enabled: true
   sizePatches: true
   image:
-    tag: 1.34.2
-    repository: "{{ .Values.global.origin.registry }}/alpine/kubectl"
+    repository: '{{ .Values.global.origin.registry }}/tools' 
+    tag: '20260206'
 
 agent:
   imagePullPolicy: 
@@ -3791,7 +3799,7 @@ monitors-manager:
       ssl_mode: require
   extraInitContainers:
     - name: wait-for-db
-      image: '{{ include "postgresql.image" . }}'
+      image: '{{ include "postgresql.initContainers.image" . }}'
       env:
         - name: POSTGRES_PASSWORD
           valueFrom:
@@ -3837,6 +3845,11 @@ config:
   annotations:
 
 backend:
+  cloudnative-pg:
+    image:
+      repository: public.ecr.aws/groundcovercom/cloudnative-pg/cloudnative-pg
+      tag: 1.28.1
+    
   postgresql:
     dbs:
       monitors-manager: monitors_manager

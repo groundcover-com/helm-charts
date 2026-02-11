@@ -24,7 +24,7 @@ spec:
           imagePullSecrets: {{ include "imagePullSecrets" . }}
           containers:
           - name: postgres-cleanup
-            image: '{{ include "postgresql.image" . }}'
+            image: '{{ include "postgresql.initContainers.image" . }}'
             env:
               - name: PGUSER
                 valueFrom:

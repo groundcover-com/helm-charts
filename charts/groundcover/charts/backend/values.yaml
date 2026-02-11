@@ -175,8 +175,8 @@ keep:
   namespace: ""
   deleteSecretJob:
     image:
-      repository: public.ecr.aws/groundcovercom/alpine/kubectl
-      tag: 1.34.2
+      repository: 'public.ecr.aws/groundcovercom/tools' 
+      tag: '20260206'
   backend:
     provisionedProviders:
       victoriametrics:
@@ -289,7 +289,7 @@ keep:
         value: 200
     extraInitContainers:
       - name: wait-for-db
-        image: '{{ include "postgresql.image" . }}'
+        image: '{{ include "postgresql.initContainers.image" . }}'
         env:
           - name: POSTGRES_USERNAME
             valueFrom:
@@ -330,7 +330,7 @@ victoria-metrics-distributed:
       enabled: false
   availabilityZones: []
   pvcAnnotationsJob:
-    image: "{{ .Values.global.origin.registry }}/alpine/kubectl:1.34.2"
+    image: "{{ .Values.global.origin.registry }}/tools:20260206"
     vmstorage:
       enabled: false
       annotations:

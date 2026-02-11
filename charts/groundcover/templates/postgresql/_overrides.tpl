@@ -39,3 +39,7 @@ Get the admin-password key.
 {{- define "postgresql.image" -}}
 {{- printf "%s/%s:%s" .Values.global.postgresql.image.registry .Values.global.postgresql.image.repository .Values.global.postgresql.image.tag -}}
 {{- end -}}
+
+{{- define "postgresql.initContainers.image" -}}
+{{- printf "%s/%s:%s" .Values.global.postgresql.initContainers.image.registry .Values.global.postgresql.initContainers.image.repository .Values.global.postgresql.initContainers.image.tag -}}
+{{- end -}}

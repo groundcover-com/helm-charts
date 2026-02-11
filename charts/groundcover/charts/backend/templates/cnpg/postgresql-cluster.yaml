@@ -12,7 +12,7 @@ spec:
   instances: {{ .Values.global.cnpg.cluster.instances }}
 
   enablePDB: {{ .Values.global.cnpg.cluster.enablePDB }}
-  # imageName: 125608480246.dkr.ecr.eu-west-3.amazonaws.com/echo-secure-images/postgres:18.1
+  imageName: {{ tpl .Values.global.cnpg.cluster.image.repository . }}:{{ .Values.global.cnpg.cluster.image.tag }}
   # Enable superuser access to create credentials secret
   enableSuperuserAccess: true
 

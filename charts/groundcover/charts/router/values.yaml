@@ -15,6 +15,11 @@ global:
       registry: public.ecr.aws/groundcovercom
       repository: bitnami/postgresql
       tag: 15.3.0-debian-11-r75
+    initContainers:
+      image:
+        registry: "public.ecr.aws/groundcovercom"
+        repository: postgres
+        tag: "18.1-20260208"
     auth:
       existingSecret: ""
       secretKeys:
@@ -45,7 +50,7 @@ service:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.11.514
+  tag: 1.11.515
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/tools'
@@ -172,8 +177,8 @@ extraContainers: []
 kong-crds:
   upgradeCRDs: true
   image:
-    repository: public.ecr.aws/groundcovercom/alpine/kubectl
-    tag: 1.34.2
+    repository: 'public.ecr.aws/groundcovercom/tools'
+    tag: '20260206'
 kong:
   replicaCount: 1
   image:
@@ -297,7 +302,7 @@ grafana:
       subPath: ""
   extraInitContainers:
     - name: wait-for-db
-      image: '{{ include "postgresql.image" . }}'
+      image: '{{ include "postgresql.initContainers.image" . }}'
       env:
         - name: POSTGRES_PASSWORD
           valueFrom:

@@ -92,7 +92,7 @@ spec:
             done
             echo "ClickHouse is up"
       - name: wait-for-db
-        image: {{ include "postgresql.image" . }}
+        image: {{ include "postgresql.initContainers.image" . }}
         env:
         - name: POSTGRES_PASSWORD
           valueFrom:

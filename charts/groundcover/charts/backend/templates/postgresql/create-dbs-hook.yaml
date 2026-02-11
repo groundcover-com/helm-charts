@@ -22,7 +22,7 @@ spec:
 
       initContainers:
       - name: wait-for-db
-        image: '{{ include "postgresql.image" . }}'
+        image: '{{ include "postgresql.initContainers.image" . }}'
         env:
           - name: PGPASSWORD
             valueFrom:
@@ -38,15 +38,17 @@ spec:
           - name: POSTGRES_DATABASE
             value: '{{ include "postgresql.database" . }}'
         command:
-          - /bin/bash
+          - /bin/sh
           - -c
           - |
             set -eu
-            . /opt/bitnami/scripts/libautoctl.sh
-            wait_until_can_connect "postgres://${POSTGRES_USER}:${PGPASSWORD}@${PGHOST}:${PGPORT}/${POSTGRES_DATABASE}"
+            until pg_isready -U "${POSTGRES_USER}" -d "dbname=${POSTGRES_DATABASE}" -h "${PGHOST}" -p "${PGPORT}"; do
+              echo "Waiting for postgres..."
+              sleep 2
+            done
       containers:
       - name: psql
-        image: '{{ include "postgresql.image" . }}'
+        image: '{{ include "postgresql.initContainers.image" . }}'
         command:
           - /bin/sh
           - -c

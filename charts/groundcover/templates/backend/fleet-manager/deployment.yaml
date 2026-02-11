@@ -133,7 +133,7 @@ spec:
 {{- end }}
       initContainers:
       - name: wait-for-db
-        image: {{ include "postgresql.image" . }}
+        image: {{ include "postgresql.initContainers.image" . }}
         env:
         - name: POSTGRES_PASSWORD
           valueFrom:

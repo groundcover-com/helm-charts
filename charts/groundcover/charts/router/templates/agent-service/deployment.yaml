@@ -38,7 +38,7 @@ spec:
       initContainers:
         # Create the agent_service database if it doesn't exist
         - name: init-postgres-db
-          image: "{{ $agentService.initImage.repository }}:{{ $agentService.initImage.tag }}"
+          image: '{{ include "postgresql.initContainers.image" . }}'
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
