@@ -1576,7 +1576,7 @@ clickhouse:
   shards: 1
   replicaCount: 1
   image:
-    tag: 25.8.11-debian-12-r0
+    tag: 25.10.3.100-secure
     registry: public.ecr.aws/groundcovercom
     repository: clickhouse
   coldVolume: ""
