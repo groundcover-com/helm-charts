@@ -114,6 +114,10 @@ data:
       Enabled: {{ .Values.global.integrations.agent.enabled }}
       Endpoint: {{ include "integrations-agent.url" . }}
 
+    RumSourcemaps:
+      Enabled: {{ .Values.global.ingestor.enabled }}
+      Endpoint: {{ include "ingestor.rumsourcemaps.http.url" . }}
+
 kind: ConfigMap
 metadata:
   labels:

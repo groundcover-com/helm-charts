@@ -65,6 +65,10 @@ spec:
 {{ toYaml .Values.ingestor.nodeSelector | indent 8 }}
 {{- end }}
       imagePullSecrets: {{ include "imagePullSecrets" . }}
+{{- /* TODO: Remove the sourceMaps.enabled guard once IAM permissions are enabled by default */}}
+{{- if .Values.ingestor.rum.sourceMaps.enabled }}
+      serviceAccountName: {{ include "ingestor.fullname" . }}
+{{- end }}
 {{- if .Values.ingestor.topologySpreadConstraints }}
       topologySpreadConstraints:
 {{ toYaml .Values.ingestor.topologySpreadConstraints | indent 8 }}

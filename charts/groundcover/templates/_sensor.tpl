@@ -52,6 +52,18 @@ receivers:
     enabled: {{ $sensorValues.receivers.metricsscraper.enabled }}
     maxScrapeSize: {{ $sensorValues.receivers.metricsscraper.maxScrapeSize }}
   {{ end }}
+  {{- if $sensorValues.rum }}
+  rum:
+    sourceMaps:
+      enabled: {{ $sensorValues.rum.sourceMaps.enabled }}
+      port: {{ $sensorValues.rum.sourceMaps.port }}
+      provider: {{ $sensorValues.rum.sourceMaps.provider }}
+      bucket: {{ $sensorValues.rum.sourceMaps.bucket }}
+      region: {{ $sensorValues.rum.sourceMaps.region }}
+      storageAccount: {{ $sensorValues.rum.sourceMaps.storageAccount }}
+      assetPath: {{ $sensorValues.rum.sourceMaps.assetPath }}
+      maxUploadSize: {{ $sensorValues.rum.sourceMaps.maxUploadSize }}
+  {{- end }}
 exporters:
   remotewrite:
     url: {{ if $sensorValues.exporters.remotewrite.url }}{{ tpl $sensorValues.exporters.remotewrite.url . }}{{ else }}{{ include "metrics-ingester.write.http.url" . }}{{ end }}
@@ -773,6 +785,12 @@ sensitiveHeadersObfuscationConfig:
   port: {{ $sensorValues.apmIngestor.otel.direct.rum.port }}
   targetPort: {{ $sensorValues.apmIngestor.otel.direct.rum.port }}
 {{- end }}
+{{- if and ($sensorValues.rum) $sensorValues.rum.sourceMaps.enabled $sensorValues.rum.sourceMaps.port }}
+- protocol: TCP
+  name: rum-sourcemaps
+  port: {{ $sensorValues.rum.sourceMaps.port }}
+  targetPort: {{ $sensorValues.rum.sourceMaps.port }}
+{{- end }}
 {{- if and (eq "true" (include "groundcover.sensor.receivers.remotewrite.enabled" .)) (include "groundcover.sensor.receivers.remotewrite.port" .) }}
 - protocol: TCP
   name: prometheus-remote-write
@@ -849,6 +867,11 @@ sensitiveHeadersObfuscationConfig:
 {{- if and $sensorValues.apmIngestor.otel.direct.rum.enabled $sensorValues.apmIngestor.otel.direct.rum.port }}
 - containerPort: {{ $sensorValues.apmIngestor.otel.direct.rum.port }}
   name: rum
+  protocol: TCP
+{{- end }}
+{{- if and ($sensorValues.rum) $sensorValues.rum.sourceMaps.enabled $sensorValues.rum.sourceMaps.port }}
+- containerPort: {{ $sensorValues.rum.sourceMaps.port }}
+  name: rum-sourcemaps
   protocol: TCP
 {{- end }}
 {{- if and (eq "true" (include "groundcover.sensor.receivers.remotewrite.enabled" .)) (include "groundcover.sensor.receivers.remotewrite.port" .) }}

@@ -33,3 +33,8 @@
 {{- define "ingestor.otlplogs.http.url" -}}
     {{- printf "%s/v1/logs" (include "ingestor.otlp.http.url" .) -}}
 {{- end -}}
+
+{{- define "ingestor.rumsourcemaps.http.url" -}}
+    {{- $port := .Values.ingestor.rum.sourceMaps.port | required "ingestor.rum.sourceMaps.port is required" -}}
+    {{- printf "http://%s:%d" (include "ingestor.fullname" .) ($port | int) -}}
+{{- end -}}

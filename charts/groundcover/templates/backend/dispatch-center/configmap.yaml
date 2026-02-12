@@ -94,6 +94,12 @@ data:
     secretStore:
       url: {{ include "fleet-manager.base.url" . }}
 
+    notification:
+      frontendDomain: {{ .Values.router.frontendDomain | default "app.groundcover.com" | quote }}
+      pagerdutyEventsURL: {{ .Values.dispatchCenter.notification.pagerdutyEventsURL | default "https://events.pagerduty.com/v2/enqueue" | quote }}
+      opsgenieUSEndpoint: {{ .Values.dispatchCenter.notification.opsgenieUSEndpoint | default "https://api.opsgenie.com/v2/alerts" | quote }}
+      opsgenieEUEndpoint: {{ .Values.dispatchCenter.notification.opsgenieEUEndpoint | default "https://api.eu.opsgenie.com/v2/alerts" | quote }}
+
     worker:
       taskQueue: "dispatch-center-worker"
       interval: {{ if and .Values.dispatchCenter .Values.dispatchCenter.worker .Values.dispatchCenter.worker.interval }}{{ .Values.dispatchCenter.worker.interval }}{{ else }}15s{{ end }}

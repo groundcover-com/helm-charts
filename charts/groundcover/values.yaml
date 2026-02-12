@@ -1082,6 +1082,16 @@ ingestor:
         rum:
           enabled: true
           port: 8026
+  rum:
+    sourceMaps:
+      enabled: false
+      port: 8027
+      provider: "s3"
+      bucket: ""
+      region: ""
+      storageAccount: ""
+      assetPath: "sourcemaps"
+      maxUploadSize: 0
   lifecycleHooks: 
     preStop:
       exec:
@@ -1492,6 +1502,8 @@ dispatchCenter:
     enableTracing: false
     migrationsPath: "/migrations"
     skipMigrations: false
+  notification:
+    pagerdutyEventsURL: "https://events.pagerduty.com/v2/enqueue"
   tracing:
     enabled: false
     writeTimeout: "5s"
@@ -1516,6 +1528,9 @@ dispatchCenter:
       jumpSizeInMCPU: 100
       windowSize: 12h
       initialWait: 10m
+  notification:
+    opsgenieUSEndpoint: "https://api.opsgenie.com/v2/alerts"
+    opsgenieEUEndpoint: "https://api.eu.opsgenie.com/v2/alerts"
 
 pdfReportGenerator:
   additionalLabels:
@@ -2933,7 +2948,7 @@ vector:
             - logs_to_events_transform
             bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
             region: '{{ .Values.vector.objectStorage.region }}'
-            key_prefix: "v2/events/"
+            key_prefix: "v2/events_v2/"
             encoding:
               codec: json
               timestamp_format: rfc3339
@@ -3049,7 +3064,7 @@ vector:
               - events
               - json_events
               - logs_to_events_transform
-            key_prefix: v2/events/
+            key_prefix: v2/events_v2/
             compression: zstd
             bucket: '{{ .Values.vector.objectStorage.gcsBucket }}'
             batch:

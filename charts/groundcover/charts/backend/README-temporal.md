@@ -85,13 +85,12 @@ The secret must contain:
 For development environments using the redeploy script:
 
 ```bash
-# Simply enable Temporal - the script handles all configuration
-ENABLE_TEMPORAL=true ./scripts/deployments/redeploy_groundcover.sh
+# Simply execute redeploy - the script handles all configuration
+./scripts/deployments/redeploy_groundcover.sh
 ```
 
 The redeploy script automatically:
-- Enables Temporal
-- Configures it to use the internal PostgreSQL
+- Configures temporal to use the internal PostgreSQL
 - Sets up all required environment variables
 - Creates the necessary databases
 
@@ -101,7 +100,7 @@ To use an external PostgreSQL in dev (e.g., from another namespace):
 
 ```bash
 # Set the external secret name
-ENABLE_TEMPORAL=true TEMPORAL_EXTERNAL_SECRET=your-secret-name ./scripts/deployments/redeploy_groundcover.sh
+TEMPORAL_EXTERNAL_SECRET=your-secret-name ./scripts/deployments/redeploy_groundcover.sh
 ```
 
 The secret must contain `host`, `port`, `username`, and `password` keys.
