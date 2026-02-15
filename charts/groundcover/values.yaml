@@ -1802,10 +1802,10 @@ opentelemetry-collector:
     - name: INGESTOR_OTLP_ENDPOINT
       value: '{{ include "ingestor.fullname" . }}:4317'
     - name: INGESTOR_OTLP_HTTP_ENDPOINT
-      value: '{{ include "ingestor.fullname" . }}:4318'
+      value: 'http://{{ include "ingestor.fullname" . }}:4318'
   image:
     repository: public.ecr.aws/groundcovercom/otel/opentelemetry-collector-contrib
-    tag: "0.131.0"
+    tag: "0.145.0"
   podLabels:
     app.kubernetes.io/part-of: '{{ include "groundcover.labels.partOf" . }}'
   podAnnotations:

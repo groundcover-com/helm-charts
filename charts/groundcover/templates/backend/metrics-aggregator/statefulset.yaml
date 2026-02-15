@@ -142,5 +142,5 @@ spec:
         - ReadWriteOnce
       resources:
         requests:
-          storage: {{ default "50Gi" $sensorValues.exporters.remotewrite.maxDiskUsagePerURL }}
+          storage: {{ default "50Gi" $sensorValues.persistence.size | quote }}
 {{ end -}}
