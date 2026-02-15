@@ -1100,6 +1100,8 @@ ingestor:
         - "10"
 
 metricsAggregator:
+  persistence:
+    size: 50Gi
   image:
     repository: "{{ .Values.global.origin.registry }}/sensor"
     tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"

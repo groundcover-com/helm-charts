@@ -142,5 +142,5 @@ spec:
         - ReadWriteOnce
       resources:
         requests:
-          storage: {{ default "50Gi" $sensorValues.persistence.size | quote }}
+          storage: {{ $sensorValues.persistence.size | quote }}
 {{ end -}}
