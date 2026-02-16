@@ -1163,7 +1163,9 @@ metricsAggregator:
           baseDelay: 5s
         rotator:
           handleSummaryTimeout: 5s
-          batchChannelSize: 8192
+          batch:
+            channelSize: 8192
+            maxBytes: 65536
           cache:
             numWindows: 10
             rollInterval: 1m

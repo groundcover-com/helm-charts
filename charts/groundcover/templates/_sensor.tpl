@@ -111,7 +111,9 @@ pipelines:
         baseDelay: {{ $sensorValues.pipelines.metrics.summarizer.writer.baseDelay }}
       rotator:
         handleSummaryTimeout: {{ $sensorValues.pipelines.metrics.summarizer.rotator.handleSummaryTimeout }}
-        batchChannelSize: {{ $sensorValues.pipelines.metrics.summarizer.rotator.batchChannelSize }}
+        batch:
+          channelSize: {{ $sensorValues.pipelines.metrics.summarizer.rotator.batch.channelSize }}
+          maxBytes: {{ $sensorValues.pipelines.metrics.summarizer.rotator.batch.maxBytes }}
         cache:
           numWindows: {{ $sensorValues.pipelines.metrics.summarizer.rotator.cache.numWindows }}
           rollInterval: {{ $sensorValues.pipelines.metrics.summarizer.rotator.cache.rollInterval }}
