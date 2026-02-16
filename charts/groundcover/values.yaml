@@ -806,6 +806,7 @@ integrationsAgent:
     repository: "{{ .Values.global.origin.registry }}/integrations-agent"
     tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
   debugExporters: false
+  addStaleMarkerToCloudwatchMetric: false
   additionalLabels:
   podLabels:
   podAnnotations:

@@ -6,8 +6,8 @@ Expand the name of the chart.
 {{- end }}
 
 {{- define "incloud-ingress.ingressClass" -}}
-{{- if .Values.kong.ingressController }}
-{{- default "kong" .Values.kong.ingressController.ingressClass }}
+{{- if .Values.kong.ingressController.ingressClass }}
+{{- .Values.kong.ingressController.ingressClass }}
 {{- else }}
 {{- ternary "groundcover-kong" "kong" .Values.global.airgap }}
 {{- end }}

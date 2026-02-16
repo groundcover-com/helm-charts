@@ -310,6 +310,7 @@ data:
     {{- end }}
 
     DebugExporters: {{ .Values.integrationsAgent.debugExporters | default false }}
+    AddStaleMarkerToCloudwatchMetric: {{ .Values.integrationsAgent.addStaleMarkerToCloudwatchMetric | default false }}
 
     Integrations:
       Clickhouse:
