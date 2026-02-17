@@ -631,6 +631,11 @@ agent:
           workflow:
             group: "argoproj.io"
             kindPlural: "workflows"
+            isWorkload: true
+          cloneset:
+            group: "apps.kruise.io"
+            kindPlural: "clonesets"
+            isWorkload: true
     sensitiveHeadersObfuscationConfig:
       enabled: true
       mode: "ObfuscateSpecificValues"
@@ -1336,6 +1341,11 @@ k8sWatcher:
         workflow:
           group: "argoproj.io"
           kindPlural: "workflows"
+          isWorkload: true
+        cloneset:
+          group: "apps.kruise.io"
+          kindPlural: "clonesets"
+          isWorkload: true
   image:
     repository: "{{ .Values.global.origin.registry }}/k8s-watcher"
     tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
@@ -3695,7 +3705,7 @@ monitors-manager:
   image:
     registry: public.ecr.aws
     repository: groundcovercom/grafana-groundcover
-    tag: v0.0.43-grafana11.3.7
+    tag: v0.0.44-grafana11.3.7
   nameOverride: monitors-manager
   persistence:
     enabled: true
@@ -3788,6 +3798,8 @@ monitors-manager:
         group_interval: 1m
         repeat_interval: 4h
   grafana.ini:
+    plugins:
+      allow_loading_unsigned_plugins: grafana-clickhouse-datasource
     alerting:
       evaluation_timeout_seconds: 120
     groundcover:
