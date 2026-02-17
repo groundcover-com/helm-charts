@@ -50,7 +50,7 @@ service:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.11.541
+  tag: 1.11.543
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/tools'
@@ -247,7 +247,7 @@ grafana:
   image:
     registry: public.ecr.aws
     repository: groundcovercom/grafana-groundcover
-    tag: v0.0.43-grafana11.3.7
+    tag: v0.0.44-grafana11.3.7
   testFramework:
     enabled: false
   envValueFrom:
@@ -269,6 +269,8 @@ grafana:
       logs: /var/log/grafana
       plugins: /usr/share/grafana/plugins
       provisioning: /etc/grafana/provisioning
+    plugins:
+      allow_loading_unsigned_plugins: grafana-clickhouse-datasource
     log:
       mode: console
     grafana_net:
