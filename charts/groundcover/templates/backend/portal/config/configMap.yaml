@@ -12,6 +12,12 @@ data:
     ClusterId: {{ template "groundcover.clusterId" . }}
     MultipleClusterIds: 
     {{- with .Values.multipleClusterIds }}{{ toYaml . | nindent 6 }}{{- end }}  
+    Features:
+    {{- if .Values.portal.features }}
+    {{ toYaml .Values.portal.features | nindent 6 }}
+    {{- else }}
+      []
+    {{- end }}
     Autodiscovery: {{ or .Values.portal.autodiscovery (not (empty .Values.multipleClusterIds)) }}
     GroundcoverVersion: "OVERRIDEN"
 

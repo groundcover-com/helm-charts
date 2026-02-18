@@ -1445,6 +1445,7 @@ portal:
   env:
     - name: GC_CLICKHOUSE_HOST
       value: '{{ include "clickhouse.shard0Name" . }}'
+  features: []
   extraHeaders:
   # - Key: "Header Key"
   #   Value: "Header Value"
