@@ -4,7 +4,7 @@ kind: ConfigMap
 metadata:
   name: {{ include "cnpg-crds.fullname" . }}
   annotations:
-  {{- include "cnpg-crds.job.annotations" . | nindent 4 }}
+  {{- include "cnpg-crds.configmap.annotations" . | nindent 4 }}
 data:
 {{ (.Files.Glob "crds/crds.yaml").AsConfig | indent 2 }}
 ---
@@ -13,7 +13,7 @@ kind: ConfigMap
 metadata:
   name: {{ include "cnpg-crds.fullname" . }}-clusters
   annotations:
-  {{- include "cnpg-crds.job.annotations" . | nindent 4 }}
+  {{- include "cnpg-crds.configmap.annotations" . | nindent 4 }}
 data:
 {{ (.Files.Glob "crds/clusters.yaml").AsConfig | indent 2 }}
 
