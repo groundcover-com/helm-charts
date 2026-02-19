@@ -140,12 +140,3 @@ Create the name of the service account to use
 {{ true }}
 {{- end -}}
 {{- end -}}
-
-{{/*
-Agent service URL - returns the URL if agent-service is enabled, empty string otherwise
-*/}}
-{{- define "router.agentServiceURL" -}}
-{{- if index .Values "agent-service" "enabled" -}}
-{{- printf "http://%s-agent-service:%v" .Release.Name (index .Values "agent-service" "service" "port") -}}
-{{- end -}}
-{{- end -}}
