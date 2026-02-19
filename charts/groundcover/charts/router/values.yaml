@@ -45,12 +45,16 @@ frontendDomain: ""
 additionalLabels:
 onprem:
   enabled: true
+  # Applied to user-defined ingresses rendered from templates/ingress.yaml
+  ingressAnnotations: {}
+  # Applied to built-in Kong ingresses rendered from templates/kong/ingress.yaml
+  kongIngressAnnotations: {}
 service:
   annotations: {}
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.11.546
+  tag: 1.11.547
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/tools'

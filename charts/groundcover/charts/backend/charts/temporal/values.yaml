@@ -107,7 +107,7 @@ temporal:
       maxUnavailable: 1
   
   web:
-    enabled: true
+    enabled: false
     replicaCount: 1
     image:
       repository: public.ecr.aws/groundcovercom/temporalio/ui
