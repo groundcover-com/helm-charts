@@ -1,9 +1,13 @@
 {{- if and (eq .Values.global.auth.type "no-auth") (eq .Values.global.auth.enabled true) -}}
+{{- $globalKongIngressAnnotations := default (dict) .Values.onprem.kongIngressAnnotations }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
+  {{- $noAuthAnnotations := mergeOverwrite (dict) $globalKongIngressAnnotations (dict "konghq.com/protocols" "http,https") }}
   annotations:
-    konghq.com/protocols: http,https
+    {{- range $key, $value := $noAuthAnnotations }}
+    {{- printf "%s: %s" $key ($value | quote) | nindent 4 }}
+    {{- end }}
   name: router-no-auth-ingress
   namespace: {{ .Release.Namespace }}
 spec:
@@ -23,6 +27,12 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
+  {{- if $globalKongIngressAnnotations }}
+  annotations:
+    {{- range $key, $value := $globalKongIngressAnnotations }}
+    {{- printf "%s: %s" $key ($value | quote) | nindent 4 }}
+    {{- end }}
+  {{- end }}
   name: router-no-auth-api-ingress
   namespace: {{ .Release.Namespace }}
 spec:

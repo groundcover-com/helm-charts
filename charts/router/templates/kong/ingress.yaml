@@ -1,12 +1,16 @@
 {{- if .Values.onprem.enabled -}}
+{{- $globalKongIngressAnnotations := default (dict) .Values.onprem.kongIngressAnnotations }}
 ---
 {{- if .Values.deployedIngresses.ui }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ printf "%s-plain" (include "router.fullname" .) }}
+  {{- $plainAnnotations := mergeOverwrite (dict) $globalKongIngressAnnotations (dict "konghq.com/protocols" "http,https") }}
   annotations:
-    konghq.com/protocols: http,https
+    {{- range $key, $value := $plainAnnotations }}
+    {{- printf "%s: %s" $key ($value | quote) | nindent 4 }}
+    {{- end }}
   labels:
     {{- include "router.labels" . | nindent 4 }}
 spec:
@@ -36,9 +40,11 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ printf "%s-auth" (include "router.fullname" .) }}
+  {{- $authAnnotations := mergeOverwrite (dict) $globalKongIngressAnnotations (dict "konghq.com/plugins" "key-auth" "konghq.com/protocols" "http,https") }}
   annotations:
-    konghq.com/plugins: key-auth
-    konghq.com/protocols: http,https
+    {{- range $key, $value := $authAnnotations }}
+    {{- printf "%s: %s" $key ($value | quote) | nindent 4 }}
+    {{- end }}
   labels:
     {{- include "router.labels" . | nindent 4 }}
 spec:
@@ -74,10 +80,11 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ printf "%s-clickhouse" (include "router.fullname" .) }}
+  {{- $clickhouseAnnotations := mergeOverwrite (dict) $globalKongIngressAnnotations (dict "konghq.com/protocols" "http,https" "konghq.com/headers.X-Clickhouse-User" "default" "konghq.com/plugins" "key-auth,clickhouse-ds-rewrite") }}
   annotations:
-    konghq.com/protocols: http,https
-    konghq.com/headers.X-Clickhouse-User: default
-    konghq.com/plugins: key-auth,clickhouse-ds-rewrite
+    {{- range $key, $value := $clickhouseAnnotations }}
+    {{- printf "%s: %s" $key ($value | quote) | nindent 4 }}
+    {{- end }}
   labels:
     {{- include "router.labels" . | nindent 4 }}
 spec:
@@ -107,10 +114,11 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ printf "%s-grafana" (include "router.fullname" .) }}
+  {{- $grafanaAnnotations := mergeOverwrite (dict) $globalKongIngressAnnotations (dict "konghq.com/protocols" "http,https" "konghq.com/plugins" "grafana-rewrite" "konghq.com/headers.Grafana-Terraform-Provider" "true") }}
   annotations:
-    konghq.com/protocols: http,https
-    konghq.com/plugins: grafana-rewrite
-    konghq.com/headers.Grafana-Terraform-Provider: "true"
+    {{- range $key, $value := $grafanaAnnotations }}
+    {{- printf "%s: %s" $key ($value | quote) | nindent 4 }}
+    {{- end }}
   labels:
     {{- include "router.labels" . | nindent 4 }}
 spec:
