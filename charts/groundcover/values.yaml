@@ -46,11 +46,11 @@ global:
   fleetmanager:
     enabled: true
   ingestor:
-    enabled: false
+    enabled: true
     healthProbe:
       port: 2021
   metricsAggregator:
-    enabled: false
+    enabled: true
   dispatchCenter:
     enabled: false
   pdfReportGenerator:
@@ -804,7 +804,7 @@ agentService:
     namespace: "sre_agent_memories"
     namespacePerDeployment: false
   bedrock:
-    enableModelAccess: false
+    enableModelAccess: true
     region: "us-east-1"
     models: []
   resources:
