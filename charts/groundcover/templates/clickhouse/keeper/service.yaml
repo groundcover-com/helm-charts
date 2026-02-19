@@ -1,0 +1,18 @@
+{{- if .Values.keeper.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "keeper.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "keeper.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: client
+      protocol: TCP
+      port: {{ .Values.keeper.ports.client }}
+      targetPort: {{ .Values.keeper.ports.client }}
+  selector:
+    {{- include "keeper.selectorLabels" . | nindent 4 }}
+{{- end }}

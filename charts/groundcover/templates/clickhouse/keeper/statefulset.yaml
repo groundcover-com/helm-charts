@@ -1,0 +1,136 @@
+{{- if .Values.keeper.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "keeper.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "keeper.labels" . | nindent 4 }}
+    {{- with .Values.keeper.additionalLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  replicas: {{ .Values.keeper.replicas }}
+  serviceName: {{ include "keeper.headless.fullname" . }}
+  podManagementPolicy: {{ .Values.keeper.podManagementPolicy }}
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      {{- include "keeper.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "keeper.selectorLabels" . | nindent 8 }}
+        {{- include "groundcover.labels" . | nindent 8 }}
+        {{- with .Values.keeper.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.keeper.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- with .Values.keeper.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.keeper.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.keeper.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.keeper.priorityClassName }}
+      priorityClassName: {{ .Values.keeper.priorityClassName }}
+      {{- end }}
+      imagePullSecrets: {{ include "imagePullSecrets" . }}
+      securityContext:
+        runAsUser: {{ .Values.keeper.securityContext.runAsUser }}
+        fsGroup: {{ .Values.keeper.securityContext.fsGroup }}
+      volumes:
+        - name: working-dir
+          emptyDir: {}
+        - name: etc-clickhouse-keeper
+          emptyDir: {}
+        - name: keeper-config
+          configMap:
+            name: {{ include "keeper.fullname" . }}
+            items:
+              - key: keeper_config.xml
+                path: keeper_config.xml
+      initContainers:
+        - name: server-id-injector
+          image: '{{ tpl .Values.curl.image.repository . }}:{{ tpl .Values.curl.image.tag . }}'
+          command:
+            - bash
+            - '-xc'
+            - >-
+              export KEEPER_ID=${HOSTNAME##*-};
+              sed "s/KEEPER_ID/${KEEPER_ID}/g" /tmp/clickhouse-keeper/keeper_config.xml > /etc/clickhouse-keeper/keeper_config.xml;
+              cat /etc/clickhouse-keeper/keeper_config.xml
+          volumeMounts:
+            - name: keeper-config
+              mountPath: /tmp/clickhouse-keeper
+            - name: etc-clickhouse-keeper
+              mountPath: /etc/clickhouse-keeper
+      containers:
+        - name: clickhouse-keeper
+          image: {{ .Values.keeper.image.repository }}:{{ .Values.keeper.image.tag }}
+          imagePullPolicy: {{ .Values.keeper.image.pullPolicy }}
+          ports:
+            - name: client
+              containerPort: {{ .Values.keeper.ports.client }}
+              protocol: TCP
+            - name: raft
+              containerPort: {{ .Values.keeper.ports.raft }}
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.keeper.resources | nindent 12 }}
+          volumeMounts:
+            - name: working-dir
+              mountPath: /var/lib/clickhouse_keeper
+            - name: both-paths
+              mountPath: /var/lib/clickhouse_keeper/coordination/logs
+              subPath: logs
+            - name: both-paths
+              mountPath: /var/lib/clickhouse_keeper/coordination/snapshots
+              subPath: snapshots
+            - name: etc-clickhouse-keeper
+              mountPath: /etc/clickhouse-keeper
+          livenessProbe:
+            exec:
+              command:
+                - bash
+                - '-xc'
+                - >-
+                  date && OK=$(exec 3<>/dev/tcp/127.0.0.1/{{ .Values.keeper.ports.client }};
+                  printf 'ruok' >&3; IFS=; tee <&3; exec 3<&-;);
+                  if [[ "${OK}" == "imok" ]]; then exit 0; else exit 1; fi
+            initialDelaySeconds: {{ .Values.keeper.livenessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.keeper.livenessProbe.timeoutSeconds }}
+            periodSeconds: {{ .Values.keeper.livenessProbe.periodSeconds }}
+            successThreshold: {{ .Values.keeper.livenessProbe.successThreshold }}
+            failureThreshold: {{ .Values.keeper.livenessProbe.failureThreshold }}
+      restartPolicy: Always
+      terminationGracePeriodSeconds: {{ .Values.keeper.terminationGracePeriodSeconds }}
+  volumeClaimTemplates:
+    - metadata:
+        name: both-paths
+        labels:
+          {{- include "keeper.labels" . | nindent 10 }}
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ .Values.keeper.persistence.size }}
+        {{- if .Values.keeper.persistence.storageClass }}
+        storageClassName: {{ .Values.keeper.persistence.storageClass | quote }}
+        {{- end }}
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+{{- end }}

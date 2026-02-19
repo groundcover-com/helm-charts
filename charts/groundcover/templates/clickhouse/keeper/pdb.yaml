@@ -1,0 +1,14 @@
+{{- if and .Values.keeper.enabled .Values.keeper.pdb.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "keeper.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "keeper.labels" . | nindent 4 }}
+spec:
+  maxUnavailable: {{ .Values.keeper.pdb.maxUnavailable }}
+  selector:
+    matchLabels:
+      {{- include "keeper.selectorLabels" . | nindent 6 }}
+{{- end }}

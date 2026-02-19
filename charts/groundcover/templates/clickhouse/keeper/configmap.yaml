@@ -1,0 +1,56 @@
+{{- if .Values.keeper.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "keeper.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "keeper.labels" . | nindent 4 }}
+data:
+  keeper_config.xml: |
+{{- if .Values.keeper.config.configOverride }}
+{{ tpl .Values.keeper.config.configOverride . | indent 4 }}
+{{- else }}
+    <clickhouse>
+        <keeper_server>
+            <coordination_settings>
+                <min_session_timeout_ms>{{ .Values.keeper.config.coordinationSettings.minSessionTimeoutMs }}</min_session_timeout_ms>
+                <operation_timeout_ms>{{ .Values.keeper.config.coordinationSettings.operationTimeoutMs }}</operation_timeout_ms>
+                <raft_logs_level>{{ .Values.keeper.config.coordinationSettings.raftLogsLevel }}</raft_logs_level>
+                <session_timeout_ms>{{ .Values.keeper.config.coordinationSettings.sessionTimeoutMs }}</session_timeout_ms>
+            </coordination_settings>
+            <hostname_checks_enabled>{{ .Values.keeper.config.hostnameChecksEnabled }}</hostname_checks_enabled>
+            <log_storage_path>/var/lib/clickhouse_keeper/coordination/logs</log_storage_path>
+            {{ include "keeper.raftConfiguration" . | indent 12 }}
+            <server_id>KEEPER_ID</server_id>
+            <snapshot_storage_path>/var/lib/clickhouse_keeper/coordination/snapshots</snapshot_storage_path>
+            <storage_path>/var/lib/clickhouse_keeper</storage_path>
+            <tcp_port>{{ .Values.keeper.ports.client }}</tcp_port>
+        </keeper_server>
+        <listen_host>0.0.0.0</listen_host>
+        <logger>
+            <console>true</console>
+            <level>{{ .Values.keeper.config.logLevel }}</level>
+        </logger>
+        <max_connections>{{ .Values.keeper.config.maxConnections }}</max_connections>
+        <openSSL>
+            <server>
+                <cacheSessions>true</cacheSessions>
+                <certificateFile>/etc/clickhouse-keeper/server.crt</certificateFile>
+                <dhParamsFile>/etc/clickhouse-keeper/dhparam.pem</dhParamsFile>
+                <disableProtocols>sslv2,sslv3</disableProtocols>
+                <loadDefaultCAFile>true</loadDefaultCAFile>
+                <preferServerCiphers>true</preferServerCiphers>
+                <privateKeyFile>/etc/clickhouse-keeper/server.key</privateKeyFile>
+                <verificationMode>none</verificationMode>
+            </server>
+        </openSSL>
+        <prometheus>
+            <asynchronous_metrics>true</asynchronous_metrics>
+            <endpoint>/metrics</endpoint>
+            <events>true</events>
+            <metrics>true</metrics>
+        </prometheus>
+    </clickhouse>
+{{- end }}
+{{- end }}

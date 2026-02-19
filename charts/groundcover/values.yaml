@@ -1674,6 +1674,61 @@ pdfReportWorker:
     batchSize: 50
   webhookTimeout: "30s"
 
+keeper:
+  enabled: false
+  replicas: 3
+  podManagementPolicy: OrderedReady
+  terminationGracePeriodSeconds: 30
+  image:
+    repository: public.ecr.aws/groundcovercom/clickhouse/clickhouse-keeper
+    tag: "25.12.5-alpine"
+    pullPolicy: IfNotPresent
+  initContainer: {}
+  ports:
+    client: 9181
+    raft: 9234
+  resources:
+    limits:
+      memory: 3000Mi
+    requests:
+      cpu: 50m
+      memory: 100Mi
+  persistence:
+    size: 10Gi
+    storageClass: ""
+  securityContext:
+    runAsUser: 101
+    fsGroup: 101
+  livenessProbe:
+    initialDelaySeconds: 60
+    timeoutSeconds: 1
+    periodSeconds: 3
+    successThreshold: 1
+    failureThreshold: 10
+  config:
+    # Set configOverride to fully replace the default keeper_config.xml content.
+    # When set, all other config fields below are ignored.
+    # Value is evaluated as a Helm template.
+    configOverride: ""
+    hostnameChecksEnabled: true
+    logLevel: information
+    maxConnections: 4096
+    coordinationSettings:
+      minSessionTimeoutMs: 10000
+      operationTimeoutMs: 10000
+      raftLogsLevel: information
+      sessionTimeoutMs: 100000
+  pdb:
+    enabled: true
+    maxUnavailable: 1
+  additionalLabels: {}
+  podLabels: {}
+  podAnnotations: {}
+  affinity: {}
+  nodeSelector: {}
+  tolerations: []
+  priorityClassName:
+
 clickhouse:
   enabled: true
   shards: 1
