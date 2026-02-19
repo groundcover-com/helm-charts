@@ -23,3 +23,14 @@ Tolerations for temporal pods
 {{- toYaml .Values.temporal.tolerations | nindent 0 -}}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Node affinity for temporal pods
+*/}}
+{{- define "temporal.nodeAffinity" -}}
+{{- if .Values.global.temporal.nodeAffinity -}}
+{{- toYaml .Values.global.temporal.nodeAffinity | nindent 0 -}}
+{{- else if .Values.temporal.nodeAffinity -}}
+{{- toYaml .Values.temporal.nodeAffinity | nindent 0 -}}
+{{- end -}}
+{{- end -}}

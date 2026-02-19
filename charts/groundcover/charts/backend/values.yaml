@@ -3,11 +3,13 @@ postgresql:
     createKeepUser:
       enabled: true
       annotations:
+      nodeSelector: {}
+      tolerations: []
+      nodeAffinity: {}
     createDbs:
       enabled: true
       annotations:
-      
-      # When false, removes Helm hook annotations and disables Helm hooks for DB creation jobs (changing bootstrap job ordering)      
+      # When false, removes Helm hook annotations and disables Helm hooks for DB creation jobs (changing bootstrap job ordering)
       helmHooksEnabled: true
   dbs: {}
   nameOverride: postgresql

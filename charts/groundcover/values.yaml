@@ -28,6 +28,7 @@ global:
     enabled: false
     nodeSelector: {}
     tolerations: []
+    nodeAffinity: {}
   vector:
     forceLocal: false
     forceRemote: false

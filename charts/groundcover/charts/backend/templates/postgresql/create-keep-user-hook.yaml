@@ -16,7 +16,19 @@ spec:
     spec:
       restartPolicy: OnFailure
       imagePullSecrets: {{ include "imagePullSecrets" $ }}
-
+      {{- with .Values.postgresql.jobs.createKeepUser.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.postgresql.jobs.createKeepUser.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.postgresql.jobs.createKeepUser.nodeAffinity }}
+      affinity:
+        nodeAffinity:
+          {{- toYaml . | nindent 10 }}
+      {{- end }}
       initContainers:
       - name: wait-for-db
         image: '{{ include "postgresql.initContainers.image" . }}'

@@ -33,6 +33,11 @@ spec:
       tolerations:
         {{- . | nindent 8 }}
       {{- end }}
+      {{- with include "temporal.nodeAffinity" . }}
+      affinity:
+        nodeAffinity:
+          {{- . | nindent 10 }}
+      {{- end }}
       containers:
       - name: create-namespace
         image: "{{ .Values.temporalConfig.adminTools.image.repository }}:{{ .Values.temporalConfig.adminTools.image.tag }}"

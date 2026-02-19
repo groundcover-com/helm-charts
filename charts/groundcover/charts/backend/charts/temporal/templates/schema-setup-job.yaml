@@ -34,6 +34,11 @@ spec:
       tolerations:
         {{- . | nindent 8 }}
       {{- end }}
+      {{- with (include "temporal.nodeAffinity" .) }}
+      affinity:
+        nodeAffinity:
+          {{- . | nindent 10 }}
+      {{- end }}
       containers:
       - name: schema-setup
         image: "{{ .Values.temporalConfig.adminTools.image.repository }}:{{ .Values.temporalConfig.adminTools.image.tag | default "1.29.1-tctl-1.18.4-cli-1.5.0" }}"
