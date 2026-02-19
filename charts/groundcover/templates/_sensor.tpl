@@ -63,6 +63,10 @@ receivers:
       storageAccount: {{ $sensorValues.rum.sourceMaps.storageAccount }}
       assetPath: {{ $sensorValues.rum.sourceMaps.assetPath }}
       maxUploadSize: {{ $sensorValues.rum.sourceMaps.maxUploadSize }}
+      cacheCapacity: {{ $sensorValues.rum.sourceMaps.cacheCapacity }}
+      cacheTTL: {{ $sensorValues.rum.sourceMaps.cacheTTL }}
+      stackTraceCacheCapacity: {{ $sensorValues.rum.sourceMaps.stackTraceCacheCapacity }}
+      stackTraceCacheTTL: {{ $sensorValues.rum.sourceMaps.stackTraceCacheTTL }}
   {{- end }}
 exporters:
   remotewrite:
