@@ -101,7 +101,7 @@ pipelines:
     {{- end }}
     {{- if $sensorValues.pipelines.metrics.summarizer }}
     summarizer:
-      interval: {{ $sensorValues.pipelines.metrics.summarizer.interval }}
+      shards: {{ $sensorValues.pipelines.metrics.summarizer.shards }}
       writer:
         url: {{ tpl $sensorValues.pipelines.metrics.summarizer.writer.url . }}
         compress: {{ $sensorValues.pipelines.metrics.summarizer.writer.compress }}
@@ -111,9 +111,8 @@ pipelines:
         baseDelay: {{ $sensorValues.pipelines.metrics.summarizer.writer.baseDelay }}
       rotator:
         handleSummaryTimeout: {{ $sensorValues.pipelines.metrics.summarizer.rotator.handleSummaryTimeout }}
-        batch:
-          channelSize: {{ $sensorValues.pipelines.metrics.summarizer.rotator.batch.channelSize }}
-          maxBytes: {{ $sensorValues.pipelines.metrics.summarizer.rotator.batch.maxBytes }}
+        interval: {{ $sensorValues.pipelines.metrics.summarizer.rotator.interval }}
+        maximumInitialJitter: {{ $sensorValues.pipelines.metrics.summarizer.rotator.maximumInitialJitter }}
         cache:
           numWindows: {{ $sensorValues.pipelines.metrics.summarizer.rotator.cache.numWindows }}
           rollInterval: {{ $sensorValues.pipelines.metrics.summarizer.rotator.cache.rollInterval }}

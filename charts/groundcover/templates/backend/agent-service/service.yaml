@@ -1,0 +1,19 @@
+{{- $agentService := include "agent-service.values" . | fromYaml }}
+{{- if $agentService.enabled | default false }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "agent-service.fullname" . }}
+  labels:
+    app: {{ include "agent-service.fullname" . }}
+    {{- include "groundcover.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: {{ include "agent-service.fullname" . }}
+{{- end }}

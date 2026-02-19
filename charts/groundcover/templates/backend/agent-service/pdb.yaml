@@ -1,0 +1,24 @@
+{{- $agentService := include "agent-service.values" . | fromYaml }}
+{{- if $agentService.enabled | default false }}
+{{- if $agentService.pdb }}
+{{- if $agentService.pdb.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "agent-service.fullname" . }}
+  labels:
+    app: {{ include "agent-service.fullname" . }}
+    {{- include "groundcover.labels" . | nindent 4 }}
+spec:
+  {{- if $agentService.pdb.minAvailable }}
+  minAvailable: {{ $agentService.pdb.minAvailable }}
+  {{- end }}
+  {{- if $agentService.pdb.maxUnavailable }}
+  maxUnavailable: {{ $agentService.pdb.maxUnavailable }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app: {{ include "agent-service.fullname" . }}
+{{- end }}
+{{- end }}
+{{- end }}

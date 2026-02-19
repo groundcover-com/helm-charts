@@ -124,6 +124,12 @@ data:
       Enabled: {{ .Values.global.ingestor.enabled }}
       Endpoint: {{ include "ingestor.rumsourcemaps.http.url" . }}
 
+    {{- if .Values.portal.configuration.AgentService }}
+    AgentService:
+      Enabled: {{ .Values.portal.configuration.AgentService.Enabled | default (.Values.agentService.enabled | default false) }}
+      Endpoint: {{ .Values.portal.configuration.AgentService.Endpoint | default (printf "http://%s:8080" (include "agent-service.fullname" .)) }}
+    {{- end }}
+
 kind: ConfigMap
 metadata:
   labels:

@@ -1,20 +1,20 @@
-{{- if index .Values "agent-service" "enabled" }}
-{{- $agentService := index .Values "agent-service" }}
+{{- $agentService := include "agent-service.values" . | fromYaml }}
+{{- if $agentService.enabled | default false }}
 {{- $postgres := $agentService.postgres }}
 {{- $gitbook := $agentService.gitbook }}
 {{- $longTermMemory := $agentService.longTermMemory }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-agent-service
+  name: {{ include "agent-service.fullname" . }}
   labels:
-    app: {{ .Release.Name }}-agent-service
-    {{- include "router.labels" . | nindent 4 }}
+    app: {{ include "agent-service.fullname" . }}
+    {{- include "groundcover.labels" . | nindent 4 }}
 spec:
   replicas: {{ $agentService.replicas }}
   selector:
     matchLabels:
-      app: {{ .Release.Name }}-agent-service
+      app: {{ include "agent-service.fullname" . }}
   {{- with $agentService.strategy }}
   strategy:
     {{- toYaml . | nindent 4 }}
@@ -22,15 +22,15 @@ spec:
   template:
     metadata:
       labels:
-        app: {{ .Release.Name }}-agent-service
+        app: {{ include "agent-service.fullname" . }}
         app.kubernetes.io/name: agent-service
         app.kubernetes.io/part-of: groundcover
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "8080"
     spec:
-      serviceAccountName: router
-      imagePullSecrets: {{ include "router.imagePullSecrets" . }}
+      serviceAccountName: {{ ($agentService.serviceAccount).name | default $agentService.serviceAccountName | default (include "agent-service.fullname" .) }}
+      imagePullSecrets: {{ include "imagePullSecrets" . }}
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -55,7 +55,6 @@ spec:
             - /bin/sh
             - -c
             - |
-              # Default to port 5432 if not set
               POSTGRES_PORT="${POSTGRES_PORT:-5432}"
               echo "Checking if database ${POSTGRES_DATABASE} exists..."
               PGPASSWORD="${POSTGRES_PASSWORD}" psql -h "${POSTGRES_HOST}" -p "${POSTGRES_PORT}" -U "${POSTGRES_USERNAME}" -d postgres -tc "SELECT 1 FROM pg_database WHERE datname = '${POSTGRES_DATABASE}'" | grep -q 1 || \
@@ -87,7 +86,7 @@ spec:
               value: {{ $postgres.database | default "agent_service" | quote }}
       containers:
         - name: agent-service
-          image: "{{ $agentService.image.repository }}:{{ tpl $agentService.image.tag $ }}"
+          image: "{{ tpl $agentService.image.repository $ }}:{{ tpl $agentService.image.tag $ }}"
           imagePullPolicy: {{ $agentService.image.pullPolicy }}
           securityContext:
             allowPrivilegeEscalation: false

@@ -754,6 +754,73 @@ dbManager:
     # How often to run the sync (e.g., "1h", "30m", "6h")
     syncInterval: "1h"
 
+agentService:
+  enabled: false
+  replicas: 2
+  serviceAccountName: ""  # deprecated: use serviceAccount.name instead
+  serviceAccount:
+    create: true
+    name: ""
+    annotations: {}
+  image:
+    repository: "{{ .Values.global.origin.registry }}/agent-service"
+    tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
+    pullPolicy: IfNotPresent
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  config:
+    routerUrl: "https://app.groundcover.com"
+    awsRegion: ""
+    bedrockModelId: ""
+    bedrockLargeModelId: ""
+    otelTracingEnabled: "true"
+    otelServiceName: "agent-service"
+    otelExporterOtlpEndpoint: ""
+    devShowTraceId: "false"
+    langsmithOtelEnabled: "true"
+    langsmithOtelOnly: "true"
+    langsmithTracing: "true"
+    langsmithProjectName: "agent-service"
+  postgres:
+    secretName: "managed-postgres-credentials"
+    hostKey: "host"
+    portKey: "port"
+    usernameKey: "username"
+    passwordKey: "password"
+    database: "agent_service"
+  gitbook:
+    secretName: "gitbook-credentials"
+    apiTokenKey: "api-token"
+    organizationIdKey: "organization-id"
+    siteIdKey: "site-id"
+    spacesIdKey: "space-id"
+  longTermMemory:
+    enabled: false
+    embeddingDims: 1024
+    embeddingModel: "bedrock:amazon.titan-embed-text-v2:0"
+    namespace: "sre_agent_memories"
+    namespacePerDeployment: false
+  bedrock:
+    enableModelAccess: false
+    region: "us-east-1"
+    models: []
+  resources:
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: 2000m
+      memory: 2Gi
+  pdb:
+    enabled: false
+  env: []
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
 chip:
   enabled: false
   replicaCount: 1
@@ -1160,7 +1227,7 @@ metricsAggregator:
       aggregation:
         enabled: true
       summarizer:
-        interval: 5s
+        shards: 128
         writer:
           url: '{{ include "vector.json.table.write.metrics_metadata.url" . }}'
           compress: true
@@ -1170,19 +1237,18 @@ metricsAggregator:
           baseDelay: 5s
         rotator:
           handleSummaryTimeout: 5s
-          batch:
-            channelSize: 8192
-            maxBytes: 65536
+          interval: 30s
+          maximumInitialJitter: 30s
           cache:
             numWindows: 10
-            rollInterval: 1m
-            capacity: 100000000
+            rollInterval: 6s
+            capacity: 1000000
           budget:
-            initialBudget: 33554432       # 32 * 1024 * 1024
+            initialBudget: 8388608        # 8 * 1024 * 1024
             multiplicativeDecrease: 0.90
-            additiveIncrease: 8388608     # 8 * 1024 * 1024
-            minBudget: 16777216           # 16 * 1024 * 1024
-            maxBudget: 67108864           # 64 * 1024 * 1024
+            additiveIncrease: 2097152     # 2 * 1024 * 1024
+            minBudget: 4194304            # 4 * 1024 * 1024
+            maxBudget: 16777216           # 16 * 1024 * 1024
             highUtilization: 0.95
             lowUtilization: 0.70
   logs:
@@ -1435,6 +1501,10 @@ logFileTargets: []
 #   workload: "syslog" # optional
 
 portal:
+  configuration:
+    AgentService:
+      Enabled: false
+      Endpoint: ""
   additionalLabels:
   podLabels:
   additionalAnnotations:
