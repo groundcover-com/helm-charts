@@ -1241,7 +1241,7 @@ metricsAggregator:
           maximumInitialJitter: 30s
           cache:
             numWindows: 10
-            rollInterval: 6s
+            rollInterval: 6m
             capacity: 1000000
           budget:
             initialBudget: 8388608        # 8 * 1024 * 1024
