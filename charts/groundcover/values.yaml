@@ -108,7 +108,7 @@ global:
   imagePullSecrets: []
 
   groundcoverPartOf: groundcover
-  groundcoverLabels:
+  groundcoverLabels: {}
 
   clickhouse:
     auth:
