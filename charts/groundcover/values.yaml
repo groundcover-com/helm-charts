@@ -1226,7 +1226,7 @@ metricsAggregator:
       enricherEnabled: false
       aggregation:
         enabled: true
-      summarizer:
+      summary:
         shards: 128
         writer:
           url: '{{ include "vector.json.table.write.metrics_metadata.url" . }}'
@@ -1239,14 +1239,17 @@ metricsAggregator:
           handleSummaryTimeout: 5s
           interval: 30s
           maximumInitialJitter: 30s
+          summarizer:
+            underutilizedResetsThreshold: 4
+            underutilizedRatio: 0.75
           cache:
             numWindows: 10
             rollInterval: 6m
-            capacity: 1000000
+            capacity: 10000000
           budget:
             initialBudget: 8388608        # 8 * 1024 * 1024
             multiplicativeDecrease: 0.90
-            additiveIncrease: 2097152     # 2 * 1024 * 1024
+            additiveIncrease: 262144      # 256 * 1024
             minBudget: 4194304            # 4 * 1024 * 1024
             maxBudget: 16777216           # 16 * 1024 * 1024
             highUtilization: 0.95
@@ -1592,6 +1595,8 @@ dispatchCenter:
     skipMigrations: false
   notification:
     pagerdutyEventsURL: "https://events.pagerduty.com/v2/enqueue"
+    opsgenieUSEndpoint: "https://api.opsgenie.com/v2/alerts"
+    opsgenieEUEndpoint: "https://api.eu.opsgenie.com/v2/alerts"
   tracing:
     enabled: false
     writeTimeout: "5s"
@@ -1616,9 +1621,6 @@ dispatchCenter:
       jumpSizeInMCPU: 100
       windowSize: 12h
       initialWait: 10m
-  notification:
-    opsgenieUSEndpoint: "https://api.opsgenie.com/v2/alerts"
-    opsgenieEUEndpoint: "https://api.eu.opsgenie.com/v2/alerts"
 
 pdfReportGenerator:
   additionalLabels:

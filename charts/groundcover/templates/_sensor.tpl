@@ -103,32 +103,35 @@ pipelines:
         content: {{ $sensorValues.pipelines.metrics.aggregation.configuration.content | quote }}
       {{- end }}
     {{- end }}
-    {{- if $sensorValues.pipelines.metrics.summarizer }}
-    summarizer:
-      shards: {{ $sensorValues.pipelines.metrics.summarizer.shards }}
+    {{- if $sensorValues.pipelines.metrics.summary }}
+    summary:
+      shards: {{ $sensorValues.pipelines.metrics.summary.shards }}
       writer:
-        url: {{ tpl $sensorValues.pipelines.metrics.summarizer.writer.url . }}
-        compress: {{ $sensorValues.pipelines.metrics.summarizer.writer.compress }}
-        tlsSkipVerify: {{ $sensorValues.pipelines.metrics.summarizer.writer.tlsSkipVerify }}
-        maxRetries: {{ $sensorValues.pipelines.metrics.summarizer.writer.maxRetries }}
-        maxDelay: {{ $sensorValues.pipelines.metrics.summarizer.writer.maxDelay }}
-        baseDelay: {{ $sensorValues.pipelines.metrics.summarizer.writer.baseDelay }}
+        url: {{ tpl $sensorValues.pipelines.metrics.summary.writer.url . }}
+        compress: {{ $sensorValues.pipelines.metrics.summary.writer.compress }}
+        tlsSkipVerify: {{ $sensorValues.pipelines.metrics.summary.writer.tlsSkipVerify }}
+        maxRetries: {{ $sensorValues.pipelines.metrics.summary.writer.maxRetries }}
+        maxDelay: {{ $sensorValues.pipelines.metrics.summary.writer.maxDelay }}
+        baseDelay: {{ $sensorValues.pipelines.metrics.summary.writer.baseDelay }}
       rotator:
-        handleSummaryTimeout: {{ $sensorValues.pipelines.metrics.summarizer.rotator.handleSummaryTimeout }}
-        interval: {{ $sensorValues.pipelines.metrics.summarizer.rotator.interval }}
-        maximumInitialJitter: {{ $sensorValues.pipelines.metrics.summarizer.rotator.maximumInitialJitter }}
+        handleSummaryTimeout: {{ $sensorValues.pipelines.metrics.summary.rotator.handleSummaryTimeout }}
+        interval: {{ $sensorValues.pipelines.metrics.summary.rotator.interval }}
+        maximumInitialJitter: {{ $sensorValues.pipelines.metrics.summary.rotator.maximumInitialJitter }}
+        summarizer:
+          underutilizedResetsThreshold: {{ $sensorValues.pipelines.metrics.summary.rotator.summarizer.underutilizedResetsThreshold }}
+          underutilizedRatio: {{ $sensorValues.pipelines.metrics.summary.rotator.summarizer.underutilizedRatio }}
         cache:
-          numWindows: {{ $sensorValues.pipelines.metrics.summarizer.rotator.cache.numWindows }}
-          rollInterval: {{ $sensorValues.pipelines.metrics.summarizer.rotator.cache.rollInterval }}
-          capacity: {{ $sensorValues.pipelines.metrics.summarizer.rotator.cache.capacity }}
+          numWindows: {{ $sensorValues.pipelines.metrics.summary.rotator.cache.numWindows }}
+          rollInterval: {{ $sensorValues.pipelines.metrics.summary.rotator.cache.rollInterval }}
+          capacity: {{ $sensorValues.pipelines.metrics.summary.rotator.cache.capacity }}
         budget:
-          initialBudget: {{ $sensorValues.pipelines.metrics.summarizer.rotator.budget.initialBudget }}
-          multiplicativeDecrease: {{ $sensorValues.pipelines.metrics.summarizer.rotator.budget.multiplicativeDecrease }}
-          additiveIncrease: {{ $sensorValues.pipelines.metrics.summarizer.rotator.budget.additiveIncrease }}
-          minBudget: {{ $sensorValues.pipelines.metrics.summarizer.rotator.budget.minBudget }}
-          maxBudget: {{ $sensorValues.pipelines.metrics.summarizer.rotator.budget.maxBudget }}
-          highUtilization: {{ $sensorValues.pipelines.metrics.summarizer.rotator.budget.highUtilization }}
-          lowUtilization: {{ $sensorValues.pipelines.metrics.summarizer.rotator.budget.lowUtilization }}
+          initialBudget: {{ $sensorValues.pipelines.metrics.summary.rotator.budget.initialBudget }}
+          multiplicativeDecrease: {{ $sensorValues.pipelines.metrics.summary.rotator.budget.multiplicativeDecrease }}
+          additiveIncrease: {{ $sensorValues.pipelines.metrics.summary.rotator.budget.additiveIncrease }}
+          minBudget: {{ $sensorValues.pipelines.metrics.summary.rotator.budget.minBudget }}
+          maxBudget: {{ $sensorValues.pipelines.metrics.summary.rotator.budget.maxBudget }}
+          highUtilization: {{ $sensorValues.pipelines.metrics.summary.rotator.budget.highUtilization }}
+          lowUtilization: {{ $sensorValues.pipelines.metrics.summary.rotator.budget.lowUtilization }}
     {{- end }}
 startuptimeout: 120s
 {{ if $sensorValues.collectionEnabled }}
