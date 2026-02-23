@@ -124,6 +124,9 @@ data:
       Enabled: {{ .Values.global.ingestor.enabled }}
       Endpoint: {{ include "ingestor.rumsourcemaps.http.url" . }}
 
+    DispatchCenter:
+      Enabled: {{ .Values.global.dispatchCenter.enabled }}
+      Endpoint: http://{{ include "dispatch-center.fullname" . }}:8080
     {{- if .Values.portal.configuration.AgentService }}
     AgentService:
       Enabled: {{ .Values.portal.configuration.AgentService.Enabled | default (.Values.agentService.enabled | default false) }}

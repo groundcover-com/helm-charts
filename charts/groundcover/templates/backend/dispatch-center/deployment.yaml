@@ -150,6 +150,9 @@ spec:
         imagePullPolicy: Always
         name: {{ include "dispatch-center.fullname" . }}
         ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
         - containerPort: 9102
           name: metrics
           protocol: TCP

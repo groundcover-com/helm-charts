@@ -94,6 +94,9 @@ data:
     secretStore:
       url: {{ include "fleet-manager.base.url" . }}
 
+    apiServer:
+      port: 8080
+
     notification:
       frontendDomain: {{ .Values.router.frontendDomain | default "app.groundcover.com" | quote }}
       pagerdutyEventsURL: {{ .Values.dispatchCenter.notification.pagerdutyEventsURL | default "https://events.pagerduty.com/v2/enqueue" | quote }}

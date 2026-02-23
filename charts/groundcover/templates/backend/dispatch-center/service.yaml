@@ -17,6 +17,10 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   ports:
+  - name: http
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
   - name: metrics
     port: 9102
     protocol: TCP
