@@ -1246,6 +1246,7 @@ metricsAggregator:
             numWindows: 10
             rollInterval: 6m
             capacity: 10000000
+            jitterLambda: 0.5
           budget:
             initialBudget: 8388608        # 8 * 1024 * 1024
             multiplicativeDecrease: 0.90

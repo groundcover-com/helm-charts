@@ -124,6 +124,7 @@ pipelines:
           numWindows: {{ $sensorValues.pipelines.metrics.summary.rotator.cache.numWindows }}
           rollInterval: {{ $sensorValues.pipelines.metrics.summary.rotator.cache.rollInterval }}
           capacity: {{ $sensorValues.pipelines.metrics.summary.rotator.cache.capacity }}
+          jitterLambda: {{ $sensorValues.pipelines.metrics.summary.rotator.cache.jitterLambda }}
         budget:
           initialBudget: {{ $sensorValues.pipelines.metrics.summary.rotator.budget.initialBudget }}
           multiplicativeDecrease: {{ $sensorValues.pipelines.metrics.summary.rotator.budget.multiplicativeDecrease }}
