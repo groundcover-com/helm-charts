@@ -677,6 +677,11 @@ customOtlpEndpoint:
   batchSize: 350
   flushInterval: 1s
 
+{{ if $sensorValues.tracesStaticOttlRules }}
+tracesStaticOttlRules:
+{{- $sensorValues.tracesStaticOttlRules | toYaml | nindent 2 }}
+{{ end }}
+
 {{ if $sensorValues.collectionEnabled }}
 mySqlConfig:
   KeepSQLAlias: true
