@@ -791,12 +791,6 @@ agentService:
     usernameKey: "username"
     passwordKey: "password"
     database: "agent_service"
-  gitbook:
-    secretName: "gitbook-credentials"
-    apiTokenKey: "api-token"
-    organizationIdKey: "organization-id"
-    siteIdKey: "site-id"
-    spacesIdKey: "space-id"
   longTermMemory:
     enabled: false
     embeddingDims: 1024
@@ -3332,6 +3326,13 @@ router:
   enabled: false
   additionalLabels:
   additionalAnnotations:
+  gitbook:
+    enabled: true
+    secretName: "gitbook-credentials"
+    apiTokenKey: "api-token"
+    organizationIdKey: "organization-id"
+    siteIdKey: "site-id"
+    spaceIdKey: "space-id"
 
 metrics-ingester:
   podSecurityContext:

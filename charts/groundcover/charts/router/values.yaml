@@ -49,12 +49,19 @@ onprem:
   ingressAnnotations: {}
   # Applied to built-in Kong ingresses rendered from templates/kong/ingress.yaml
   kongIngressAnnotations: {}
+gitbook:
+  enabled: true
+  secretName: "gitbook-credentials"
+  apiTokenKey: "api-token"
+  organizationIdKey: "organization-id"
+  siteIdKey: "site-id"
+  spaceIdKey: "space-id"
 service:
   annotations: {}
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.11.571
+  tag: 1.11.572
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/tools'
