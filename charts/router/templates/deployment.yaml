@@ -109,6 +109,32 @@ spec:
                   name: {{ include "postgresql.secretName" . }}
                   key: {{ include "postgresql.adminPasswordKey" . }}
             {{- end }}
+            {{- if .Values.gitbook.enabled }}
+            - name: GITBOOK_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.gitbook.secretName | quote }}
+                  key: {{ .Values.gitbook.apiTokenKey | quote }}
+                  optional: true
+            - name: GITBOOK_ORGANIZATION_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.gitbook.secretName | quote }}
+                  key: {{ .Values.gitbook.organizationIdKey | quote }}
+                  optional: true
+            - name: GITBOOK_SITE_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.gitbook.secretName | quote }}
+                  key: {{ .Values.gitbook.siteIdKey | quote }}
+                  optional: true
+            - name: GITBOOK_SPACE_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.gitbook.secretName | quote }}
+                  key: {{ .Values.gitbook.spaceIdKey | quote }}
+                  optional: true
+            {{- end }}
             - name: GIN_MODE
               value: "release"
             - name: GC_GROUNDCOVERVERSION
