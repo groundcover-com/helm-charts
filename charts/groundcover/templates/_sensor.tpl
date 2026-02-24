@@ -117,9 +117,6 @@ pipelines:
         handleSummaryTimeout: {{ $sensorValues.pipelines.metrics.summary.rotator.handleSummaryTimeout }}
         interval: {{ $sensorValues.pipelines.metrics.summary.rotator.interval }}
         maximumInitialJitter: {{ $sensorValues.pipelines.metrics.summary.rotator.maximumInitialJitter }}
-        summarizer:
-          underutilizedResetsThreshold: {{ $sensorValues.pipelines.metrics.summary.rotator.summarizer.underutilizedResetsThreshold }}
-          underutilizedRatio: {{ $sensorValues.pipelines.metrics.summary.rotator.summarizer.underutilizedRatio }}
         cache:
           numWindows: {{ $sensorValues.pipelines.metrics.summary.rotator.cache.numWindows }}
           rollInterval: {{ $sensorValues.pipelines.metrics.summary.rotator.cache.rollInterval }}

@@ -1233,9 +1233,6 @@ metricsAggregator:
           handleSummaryTimeout: 5s
           interval: 30s
           maximumInitialJitter: 30s
-          summarizer:
-            underutilizedResetsThreshold: 4
-            underutilizedRatio: 0.75
           cache:
             numWindows: 10
             rollInterval: 6m
