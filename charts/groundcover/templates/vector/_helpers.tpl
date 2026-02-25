@@ -152,6 +152,10 @@ http
 {{- printf "%s/measurements" (include "incloud.ingestion.json.url" .) -}}
 {{- end -}}
 
+{{- define "vector.incloud.json.session_replay.url" -}}
+{{- printf "%s/session_replay" (include "incloud.ingestion.json.url" .) -}}
+{{- end -}}
+
 {{- define "vector.cluster.otlp.grpc.monitors.port" -}}
 {{-  printf "4347"  -}}
 {{- end -}}
@@ -354,6 +358,7 @@ sinks:
 {{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.tracesPipeline "sinks" .Values.vector.customComponents.sinks.local.traces)) $ -}}
 {{- tpl (toYaml (dict "clickhouse_k8s_entities" .Values.vector.customComponents.sinks.local.custom.clickhouse_k8s_entities)) $ | nindent 2 }}
 {{- tpl (toYaml (dict "clickhouse_measurements" .Values.vector.customComponents.sinks.local.custom.clickhouse_measurements)) $ | nindent 2 }}
+{{- tpl (toYaml (dict "clickhouse_session_replay" .Values.vector.customComponents.sinks.local.custom.clickhouse_session_replay)) $ | nindent 2 }}
 {{- tpl (toYaml (dict "clickhouse_k8s_events" .Values.vector.customComponents.sinks.local.custom.clickhouse_k8s_events)) $ | nindent 2 }}
 {{- tpl (toYaml (dict "clickhouse_monitors" .Values.vector.customComponents.sinks.local.custom.clickhouse_monitors)) $ | nindent 2 }}
 {{- tpl (toYaml (dict "clickhouse_metrics_metadata" .Values.vector.customComponents.sinks.local.custom.clickhouse_metrics_metadata)) $ | nindent 2 }}

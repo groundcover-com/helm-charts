@@ -2451,6 +2451,13 @@ vector:
             codec: json
           path: ""
           strict_path: false
+        json_session_replay:
+          type: http
+          address: "0.0.0.0:4389"
+          decoding:
+            codec: json
+          path: ""
+          strict_path: false
         json_monitors:
           type: http
           address: "0.0.0.0:4349"
@@ -2522,6 +2529,7 @@ vector:
           route:
             entities: .log_type == "entity"
             measurements: .log_type == "measurement"
+            session_replay: .log_type == "session_replay"
         entities:
           inputs:
             - custom_from_logs_routing.entities
@@ -2539,6 +2547,12 @@ vector:
         measurements:
           inputs:
             - custom_from_logs_routing.measurements
+          type: "remap"
+          source: |-
+
+        session_replay:
+          inputs:
+            - custom_from_logs_routing.session_replay
           type: "remap"
           source: |-
 
@@ -2801,6 +2815,30 @@ vector:
               max_bytes: 2000000
               max_events: 2000
               timeout_secs: 1
+          json_session_replay_sink:
+            type: http
+            inputs:
+              - session_replay
+              - json_session_replay
+            uri: '{{ include "vector.incloud.json.session_replay.url" . }}'
+            method: post
+            encoding:
+              codec: json
+              json:
+                timestamp_format: rfc3339
+            compression: zstd
+            request:
+              retry_attempts: 5
+              headers:
+                apikey: $API_KEY
+            buffer:
+                type: memory
+                max_events: 5000
+                when_full: drop_newest
+            batch:
+              max_bytes: 2000000
+              max_events: 2000
+              timeout_secs: 1
       local:
         logs:
           clickhouse_logs:
@@ -2885,6 +2923,32 @@ vector:
             endpoint: '{{ include "clickhouse.shard0HttpEndpoint" . }}'
             database: "groundcover"
             table: "measurements"
+            request:
+              retry_attempts: 5
+            auth:
+              user: '{{ include "clickhouse.username" . }}'
+              password: $CLICKHOUSE_PASSWORD
+              strategy: "basic"
+            format: "json_each_row"
+            encoding:
+              timestamp_format: rfc3339
+            date_time_best_effort: true
+            buffer:
+                type: memory
+                max_events: 5000
+                when_full: drop_newest
+            batch:
+              max_bytes: 100000000
+              max_events: 10000
+              timeout_secs: 2
+          clickhouse_session_replay:
+            type: clickhouse
+            inputs:
+              - session_replay
+              - json_session_replay
+            endpoint: '{{ include "clickhouse.shard0HttpEndpoint" . }}'
+            database: "groundcover"
+            table: "session_replay_v1"
             request:
               retry_attempts: 5
             auth:
@@ -3095,6 +3159,22 @@ vector:
               timeout_secs: 5
             healthcheck:
               enabled: false
+          s3_session_replay:
+            type: "aws_s3"
+            inputs:
+              - session_replay
+            bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
+            region: '{{ .Values.vector.objectStorage.region }}'
+            key_prefix: "v2/session_replay/"
+            encoding:
+              codec: json
+              timestamp_format: rfc3339
+            batch:
+              max_bytes: 25000000
+              max_events: 25000
+              timeout_secs: 5
+            healthcheck:
+              enabled: false
           s3_monitors:
             type: "aws_s3"
             inputs:
@@ -3202,6 +3282,22 @@ vector:
               - json_events
               - logs_to_events_transform
             key_prefix: v2/events_v2/
+            compression: zstd
+            bucket: '{{ .Values.vector.objectStorage.gcsBucket }}'
+            batch:
+              max_bytes: 25000000
+              max_events: 25000
+              timeout_secs: 5
+            encoding:
+              codec: json
+              timestamp_format: rfc3339
+            healthcheck:
+              enabled: false
+          gcs_session_replay:
+            type: gcp_cloud_storage
+            inputs:
+              - session_replay
+            key_prefix: v2/session_replay/
             compression: zstd
             bucket: '{{ .Values.vector.objectStorage.gcsBucket }}'
             batch:
