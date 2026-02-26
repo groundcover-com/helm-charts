@@ -1432,6 +1432,7 @@ k8sWatcher:
       drop:
         - ALL
   clusterDiscoveryInterval: 5m
+  additionalMetricLabels: {}
   resources:
     limits:
       cpu: 2000m

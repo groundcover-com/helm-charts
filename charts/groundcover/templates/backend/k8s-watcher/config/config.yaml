@@ -90,6 +90,10 @@ data:
     MetricLabels:
     {{- .Values.global.metricLabels | toYaml | nindent 6 }}
     {{- end }}
+    {{- if .Values.k8sWatcher.additionalMetricLabels }}
+    AdditionalMetricLabels:
+    {{- .Values.k8sWatcher.additionalMetricLabels | toYaml | nindent 6 }}
+    {{- end }}
     Watch:
     {{- .Values.k8sWatcher.watch | toYaml | nindent 6 }}
 
