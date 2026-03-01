@@ -117,6 +117,16 @@ spec:
             {{- if $agentService.config.otelExporterOtlpEndpoint }}
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
               value: {{ $agentService.config.otelExporterOtlpEndpoint | quote }}
+            {{- else if eq (include "telemetry.enabled" .) "true" }}
+            - name: TRACING_APIKEY
+              valueFrom:
+                secretKeyRef:
+                  key: {{ template "groundcover.apikeySecretKey" . }}
+                  name: {{ template "groundcover.apikeySecretName" . }}
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: {{ include "telemetry.traces.otlpUrl" . | quote }}
+            - name: OTEL_EXPORTER_OTLP_HEADERS
+              value: "apikey=$(TRACING_APIKEY)"
             {{- end }}
             - name: DEV_SHOW_TRACE_ID
               value: {{ $agentService.config.devShowTraceId | default "false" | quote }}
