@@ -1,3 +1,5 @@
+{{- $vc := .Values.vector.configMap | default dict }}
+{{- if and (.Values.vector.enabled | default true) (ne ($vc.enabled | toString) "false") }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -9,3 +11,4 @@ metadata:
 data:
   vector.yaml: |
     {{- include "vector.config.customConfig" . | nindent 4}}
+{{- end }}

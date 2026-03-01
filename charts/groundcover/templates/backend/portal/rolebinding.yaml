@@ -1,4 +1,4 @@
-{{ if .Values.global.backend.enabled }}
+{{ if or .Values.global.backend.enabled (.Values.portal.enabled | default false) }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:

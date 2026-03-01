@@ -354,3 +354,16 @@ Create the name of the agent priority class to use
 {{- end }}
 {{- end }}
 {{- end -}}
+
+{{/*
+  keep.base.url: if portal.workflowsUrl is set (e.g. standalone.yaml), use it.
+  Otherwise chart default (existing behavior): local keep when backend enabled.
+*/}}
+{{- define "keep.base.url" -}}
+{{- $portal := index .Values "portal" -}}
+{{- if and $portal $portal.workflowsUrl -}}
+{{- $portal.workflowsUrl -}}
+{{- else -}}
+{{- printf "http://%s:8080" (include "keep.backend.fullname" .) -}}
+{{- end -}}
+{{- end -}}

@@ -1,4 +1,4 @@
-{{ if .Values.global.backend.enabled }}
+{{ if or .Values.global.backend.enabled (.Values.portal.enabled | default false) }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:

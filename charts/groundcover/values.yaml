@@ -2127,7 +2127,12 @@ opentelemetry-collector:
   nodeSelector: {}
   tolerations: []
 
+# When false, vector subchart and parent vector templates are not created (e.g. standalone).
 vector:
+  enabled: true
+  # Create vector-config-map ConfigMap. Set to false when not running vector (e.g. standalone).
+  configMap:
+    enabled: true
   podSecurityContext:
     runAsUser: 1000
     runAsNonRoot: true
@@ -2622,6 +2627,10 @@ vector:
             description, err = get(value: .annotations, path: ["_gc_description"])
             if err == null && description != null {
               .labels._gc_description = description
+            }
+            repeat_disabled, err = get(value: .annotations, path: ["_gc_repeat_disabled"])
+            if err == null && repeat_disabled != null {
+              .labels._gc_repeat_disabled = repeat_disabled
             }
             del(.annotations)
             .insert_time = now()
@@ -3421,14 +3430,22 @@ router:
   additionalLabels:
   additionalAnnotations:
   gitbook:
-    enabled: true
+    enabled: false
     secretName: "gitbook-credentials"
     apiTokenKey: "api-token"
     organizationIdKey: "organization-id"
     siteIdKey: "site-id"
     spaceIdKey: "space-id"
 
+# When false, metrics-ingester subchart and certificate are not created (e.g. standalone).
+# Chart.yaml condition uses metricsIngester.enabled (no hyphen in path); keep in sync with metrics-ingester.enabled.
+metricsIngester:
+  enabled: true
 metrics-ingester:
+  enabled: true
+  # Create TLS certificate secret for metrics-ingester. Set to false when not running metrics-ingester (e.g. standalone).
+  certificate:
+    enabled: true
   podSecurityContext:
     runAsUser: 1000
     runAsNonRoot: true
@@ -3823,6 +3840,10 @@ custom-metrics:
           - source_labels: [__meta_kubernetes_pod_node_name]
             action: replace
             target_label: node
+
+# Create victoria-metrics-aggregation-config ConfigMap (used by victoria-metrics server). Set to false when not running victoria-metrics (e.g. standalone).
+victoriaMetricsAggregationConfig:
+  enabled: true
 
 victoria-metrics-single:
   # imagePullSecrets: []
