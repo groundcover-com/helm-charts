@@ -2632,6 +2632,10 @@ vector:
             if err == null && repeat_disabled != null {
               .labels._gc_repeat_disabled = repeat_disabled
             }
+            data_type, err = get(value: .annotations, path: ["_gc_data_type"])
+            if err == null && data_type != null {
+              .labels._gc_data_type = data_type
+            }
             del(.annotations)
             .insert_time = now()
         metrics_metadata_to_logs:
