@@ -6,6 +6,24 @@ Expand the name of the chart.
 {{- end }}
 
 {{/*
+Override common labels to include global.groundcoverLabels
+*/}}
+{{- define "vector.labels" -}}
+helm.sh/chart: {{ include "vector.chart" . }}
+{{ include "vector.selectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ include "vector.image.tag" . | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- with .Values.commonLabels }}
+{{ toYaml . }}
+{{- end }}
+{{- with .Values.global.groundcoverLabels }}
+{{ toYaml . }}
+{{- end }}
+{{- end }}
+
+{{/*
 Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
