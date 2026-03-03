@@ -16,7 +16,7 @@ spec:
       restartPolicy: OnFailure
       containers:
       - name: provision-dedup
-        image: alpine:3.22
+        image: {{ .Values.keep.dedupInitJob.image }}
         command: ["/bin/sh", "-c", "apk add --no-cache curl jq && /scripts/provision-dedup.sh"]
         env:
         - name: KEEP_API_KEY

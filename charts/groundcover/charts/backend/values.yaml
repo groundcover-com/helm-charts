@@ -179,6 +179,8 @@ keep:
     image:
       repository: 'public.ecr.aws/groundcovercom/tools' 
       tag: '20260206'
+  dedupInitJob:
+    image: 'us-docker.pkg.dev/groundcovercom/repo/library/alpine:3.22'
   backend:
     provisionedProviders:
       victoriametrics:
