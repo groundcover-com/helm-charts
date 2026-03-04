@@ -269,6 +269,10 @@ tracesWorkloadFilters:
   []
   # - matchType: "block"
   #   regex: "do-not-show-me"
+tracesContainerFilters:
+  []
+  # - matchType: "block"
+  #   regex: "istio-proxy"
 logsDropFilters: []
 # - '{namespace="demo-ng",workload="loadgenerator"} |~ ".*GET.*"'
 logsMultiLines:
@@ -774,8 +778,8 @@ agentService:
   config:
     routerUrl: "https://app.groundcover.com"
     awsRegion: ""
-    bedrockModelId: ""
-    bedrockLargeModelId: ""
+    bedrockModelId: "anthropic.claude-sonnet-4-6"
+    bedrockLargeModelId: "anthropic.claude-sonnet-4-6"
     otelTracingEnabled: "true"
     otelServiceName: "agent-service"
     otelExporterOtlpEndpoint: ""

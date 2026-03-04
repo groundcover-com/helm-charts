@@ -493,6 +493,7 @@ runningNamespace: ""
 shouldDropRunningNamespaces: {{ include "groundcover.shouldDropRunningNamespaces" . }}
 tracesNamespaceFilters: {{ toYaml .Values.tracesNamespaceFilters | nindent 2 }}
 tracesWorkloadFilters: {{ toYaml .Values.tracesWorkloadFilters | nindent 2 }}
+tracesContainerFilters: {{ toYaml .Values.tracesContainerFilters | nindent 2 }}
 nodelabels: {{ toYaml $sensorValues.nodelabels | nindent 2 }}
 {{- if .Values.global.metricLabels }}
 MetricLabels:
