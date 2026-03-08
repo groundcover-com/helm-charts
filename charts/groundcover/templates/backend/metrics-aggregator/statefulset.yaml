@@ -137,6 +137,10 @@ spec:
         {{- include "groundcover.labels" . | nindent 8 }}
         app: metrics-aggregator
         app.kubernetes.io/name: metrics-aggregator
+      {{- if $sensorValues.persistence.annotations }}
+      annotations:
+{{ toYaml $sensorValues.persistence.annotations | indent 8 }}
+      {{- end }}
     spec:
       accessModes:
         - ReadWriteOnce

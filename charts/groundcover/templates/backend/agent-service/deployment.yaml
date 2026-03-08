@@ -6,6 +6,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "agent-service.fullname" . }}
+  annotations:
+    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
   labels:
     app: {{ include "agent-service.fullname" . }}
     {{- include "groundcover.labels" . | nindent 4 }}
@@ -27,6 +29,7 @@ spec:
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "8080"
+        groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
     spec:
       serviceAccountName: {{ ($agentService.serviceAccount).name | default $agentService.serviceAccountName | default (include "agent-service.fullname" .) }}
       imagePullSecrets: {{ include "imagePullSecrets" . }}
@@ -96,6 +99,10 @@ spec:
             - containerPort: 8080
               name: http
           env:
+            - name: GC_GROUNDCOVERVERSION
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.annotations['groundcover_version']
             - name: ROUTER_URL
               value: {{ $agentService.config.routerUrl | quote }}
             {{- if $agentService.config.awsRegion }}

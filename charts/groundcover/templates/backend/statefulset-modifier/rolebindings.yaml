@@ -1,4 +1,4 @@
-{{ if and .Values.global.backend.enabled (index .Values "statefulset-modifier" "enabled") }}
+{{ if and .Values.global.backend.enabled (or (index .Values "statefulset-modifier" "enabled") (index .Values "statefulset-modifier" "metrics-aggregator" "enabled")) }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:

@@ -349,6 +349,8 @@ priorityClass:
 
 statefulset-modifier:
   enabled: true
+  metrics-aggregator:
+    enabled: true
   sizePatches: true
   image:
     repository: '{{ .Values.global.origin.registry }}/tools' 
@@ -1170,6 +1172,7 @@ ingestor:
 metricsAggregator:
   persistence:
     size: 50Gi
+    annotations: {}
   image:
     repository: "{{ .Values.global.origin.registry }}/sensor"
     tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
