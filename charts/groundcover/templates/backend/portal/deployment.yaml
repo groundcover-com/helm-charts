@@ -72,7 +72,7 @@ spec:
         - name: GC_MONITORSMANAGER_ENABLED
           value: "true"
         - name: GC_MONITORSMANAGER_URL
-          value: {{ template "monitors-manager.httpEndpoint" . }}
+          value: {{ default (include "monitors-manager.httpEndpoint" .) .Values.portal.monitorsManagerUrl | quote }}
         - name: GC_MONITORSMANAGER_USERNAME
           valueFrom:
             secretKeyRef:
