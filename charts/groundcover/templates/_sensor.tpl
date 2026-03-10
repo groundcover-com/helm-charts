@@ -78,6 +78,7 @@ exporters:
     numberOfConcurrentQueues: {{ $sensorValues.exporters.remotewrite.numberOfConcurrentQueues }}
     forcePrometheusProtocol: {{ $sensorValues.exporters.remotewrite.forcePrometheusProtocol }}
     memoryAllowedBytes: {{ $sensorValues.exporters.remotewrite.memoryAllowedBytes }}
+    maxBlockSize: {{ $sensorValues.exporters.remotewrite.maxBlockSize }}
 pipelines:
   metrics:
     enricherEnabled: {{ $sensorValues.pipelines.metrics.enricherEnabled }}

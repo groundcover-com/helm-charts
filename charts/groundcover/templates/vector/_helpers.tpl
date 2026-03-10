@@ -9,6 +9,8 @@ true
 true
 {{ else if (and (not (empty .Values.vector.objectStorage.gcsBucket)) .Values.vector.objectStorage.allowed) }}
 true
+{{ else if (and (not (empty .Values.vector.objectStorage.azureBlobContainer)) (not (empty .Values.vector.objectStorage.azureConnectionString)) .Values.vector.objectStorage.allowed) }}
+true
 {{ else if (or (.Values.vector.customComponents.sinks.overrideSinks) (.Values.vector.customComponents.transforms.overrideTransforms) (.Values.vector.customComponents.sources.overrideSources)) }}
 true
 {{ else if (or (.Values.vector.logsPipeline.extraSteps) (.Values.vector.tracesPipeline.extraSteps)) }}
@@ -353,6 +355,10 @@ sinks:
 {{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.logsPipeline "sinks" .Values.vector.customComponents.sinks.gcs.logs)) $ -}}
 {{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.tracesPipeline "sinks" .Values.vector.customComponents.sinks.gcs.traces )) $ -}}
 {{- tpl (toYaml .Values.vector.customComponents.sinks.gcs.custom) $ | nindent 2 }}
+{{ else if and (not (empty .Values.vector.objectStorage.azureBlobContainer)) (not (empty .Values.vector.objectStorage.azureConnectionString)) .Values.vector.objectStorage.allowed }} {{- /* ingestion using azure blob */}}
+{{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.logsPipeline "sinks" .Values.vector.customComponents.sinks.azure.logs)) $ -}}
+{{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.tracesPipeline "sinks" .Values.vector.customComponents.sinks.azure.traces)) $ -}}
+{{- tpl (toYaml .Values.vector.customComponents.sinks.azure.custom) $ | nindent 2 }}
 {{ else if .Values.global.backend.enabled }} {{- /* ingestion to local DB */}}
 {{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.logsPipeline "sinks" .Values.vector.customComponents.sinks.local.logs)) $ -}}
 {{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.tracesPipeline "sinks" .Values.vector.customComponents.sinks.local.traces)) $ -}}
@@ -373,6 +379,10 @@ sinks:
 {{ if and .Values.vector.objectStorage.backups (not (empty .Values.vector.objectStorage.gcsBucket)) }} {{- /* gcs backups */}}
 {{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.logsPipeline "sinks" .Values.vector.customComponents.sinks.gcsBackups.logs)) $ -}}
 {{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.tracesPipeline "sinks" .Values.vector.customComponents.sinks.gcsBackups.traces)) $ -}}
+{{- end -}}
+{{ if and .Values.vector.objectStorage.backups (not (empty .Values.vector.objectStorage.azureBlobContainer)) (not (empty .Values.vector.objectStorage.azureConnectionString)) }} {{- /* azure backups */}}
+{{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.logsPipeline "sinks" .Values.vector.customComponents.sinks.azureBackups.logs)) $ -}}
+{{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.tracesPipeline "sinks" .Values.vector.customComponents.sinks.azureBackups.traces)) $ -}}
 {{- end -}}
 {{- end -}}
 {{- end -}}

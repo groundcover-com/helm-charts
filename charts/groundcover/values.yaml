@@ -2364,6 +2364,8 @@ vector:
     backups: false
     s3Bucket:
     region:
+    azureBlobContainer:
+    azureConnectionString:
   customGlobalConfig:
     api:
       enabled: true
@@ -3360,6 +3362,148 @@ vector:
               timestamp_format: rfc3339
             healthcheck:
               enabled: false
+      azure:
+        logs:
+          azure_logs:
+            type: azure_blob
+            container_name: '{{ .Values.vector.objectStorage.azureBlobContainer }}'
+            connection_string: '{{ .Values.vector.objectStorage.azureConnectionString }}'
+            blob_prefix: v2/logs_v3/
+            compression: zstd
+            encoding:
+              codec: json
+              timestamp_format: rfc3339
+            batch:
+              max_bytes: 25000000
+              max_events: 25000
+              timeout_secs: 5
+            healthcheck:
+              enabled: false
+        traces:
+          azure_traces:
+            type: azure_blob
+            container_name: '{{ .Values.vector.objectStorage.azureBlobContainer }}'
+            connection_string: '{{ .Values.vector.objectStorage.azureConnectionString }}'
+            blob_prefix: v2/traces_v2/
+            compression: zstd
+            encoding:
+              codec: json
+              timestamp_format: rfc3339
+            batch:
+              max_bytes: 25000000
+              max_events: 2500
+              timeout_secs: 5
+            healthcheck:
+              enabled: false
+        custom:
+          azure_entities:
+            type: azure_blob
+            inputs:
+              - entities
+              - json_entities
+            container_name: '{{ .Values.vector.objectStorage.azureBlobContainer }}'
+            connection_string: '{{ .Values.vector.objectStorage.azureConnectionString }}'
+            blob_prefix: v2/entities/
+            compression: zstd
+            encoding:
+              codec: json
+              timestamp_format: rfc3339
+            batch:
+              max_bytes: 25000000
+              max_events: 25000
+              timeout_secs: 5
+            healthcheck:
+              enabled: false
+          azure_measurements:
+            type: azure_blob
+            inputs:
+              - measurements
+              - json_measurements
+            container_name: '{{ .Values.vector.objectStorage.azureBlobContainer }}'
+            connection_string: '{{ .Values.vector.objectStorage.azureConnectionString }}'
+            blob_prefix: v2/measurements/
+            compression: zstd
+            encoding:
+              codec: json
+              timestamp_format: rfc3339
+            batch:
+              max_bytes: 25000000
+              max_events: 25000
+              timeout_secs: 5
+            healthcheck:
+              enabled: false
+          azure_events:
+            type: azure_blob
+            inputs:
+            - events
+            - json_events
+            - logs_to_events_transform
+            container_name: '{{ .Values.vector.objectStorage.azureBlobContainer }}'
+            connection_string: '{{ .Values.vector.objectStorage.azureConnectionString }}'
+            blob_prefix: v2/events_v2/
+            compression: zstd
+            encoding:
+              codec: json
+              timestamp_format: rfc3339
+            batch:
+              max_bytes: 25000000
+              max_events: 25000
+              timeout_secs: 5
+            healthcheck:
+              enabled: false
+          azure_session_replay:
+            type: azure_blob
+            inputs:
+              - session_replay
+            container_name: '{{ .Values.vector.objectStorage.azureBlobContainer }}'
+            connection_string: '{{ .Values.vector.objectStorage.azureConnectionString }}'
+            blob_prefix: v2/session_replay/
+            compression: zstd
+            encoding:
+              codec: json
+              timestamp_format: rfc3339
+            batch:
+              max_bytes: 25000000
+              max_events: 25000
+              timeout_secs: 5
+            healthcheck:
+              enabled: false
+          azure_monitors:
+            type: azure_blob
+            inputs:
+            - monitors
+            - json_monitors
+            container_name: '{{ .Values.vector.objectStorage.azureBlobContainer }}'
+            connection_string: '{{ .Values.vector.objectStorage.azureConnectionString }}'
+            blob_prefix: v2/monitors_v4/
+            compression: zstd
+            encoding:
+              codec: json
+              timestamp_format: rfc3339
+            batch:
+              max_bytes: 25000000
+              max_events: 25000
+              timeout_secs: 5
+            healthcheck:
+              enabled: false
+          azure_metrics_metadata:
+            type: azure_blob
+            inputs:
+              - metrics_metadata_extracted
+              - table_write_routing.metrics_metadata
+            container_name: '{{ .Values.vector.objectStorage.azureBlobContainer }}'
+            connection_string: '{{ .Values.vector.objectStorage.azureConnectionString }}'
+            blob_prefix: v2/metrics_metadata/
+            compression: zstd
+            encoding:
+              codec: json
+              timestamp_format: rfc3339
+            batch:
+              max_bytes: 250000000
+              max_events: 250000
+              timeout_secs: 5
+            healthcheck:
+              enabled: false
       s3Backups:
         logs:
           s3_logs_backups:
@@ -3430,6 +3574,41 @@ vector:
               enabled: false
             filename_time_format: "%Y/%m/%d/%H/%s"
             storage_class: NEARLINE
+      azureBackups:
+        logs:
+          azure_logs_backup:
+            type: azure_blob
+            container_name: '{{ .Values.vector.objectStorage.azureBlobContainer }}'
+            connection_string: '{{ .Values.vector.objectStorage.azureConnectionString }}'
+            blob_prefix: backup/30d/v2/logs_v3/
+            compression: zstd
+            blob_time_format: "%Y/%m/%d/%H/%s"
+            encoding:
+              codec: json
+              timestamp_format: rfc3339
+            batch:
+              max_bytes: 250000000
+              max_events: 300000
+              timeout_secs: 10
+            healthcheck:
+              enabled: false
+        traces:
+          azure_traces_backup:
+            type: azure_blob
+            container_name: '{{ .Values.vector.objectStorage.azureBlobContainer }}'
+            connection_string: '{{ .Values.vector.objectStorage.azureConnectionString }}'
+            blob_prefix: backup/7d/v2/traces_v2/
+            compression: zstd
+            blob_time_format: "%Y/%m/%d/%H/%s"
+            encoding:
+              codec: json
+              timestamp_format: rfc3339
+            batch:
+              max_bytes: 250000000
+              max_events: 300000
+              timeout_secs: 10
+            healthcheck:
+              enabled: false
 router:
   # onprem or cloud
   mode: cloud
