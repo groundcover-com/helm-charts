@@ -949,16 +949,6 @@ integrationsAgent:
       maxRetries: 3
       maxDelay: 15s
       baseDelay: 5s
-      metadata:
-        maxRetries: 3
-        maxDelay: 15s
-        baseDelay: 5s
-        compress: true
-        cacheTTL: 1h
-        cacheSize: 100000
-        writeInterval: 10s
-        maxBatchSize: 2000
-        maxBatchWait: 10s
   instrumentation:
     # Tracing batch processor settings
     batchSize: 512

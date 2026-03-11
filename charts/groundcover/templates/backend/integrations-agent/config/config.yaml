@@ -342,45 +342,6 @@ data:
       {{- end }}
       {{- end }}
       {{- end }}
-      MetricsMetadata:
-        Url: {{ include "vector.json.table.write.metrics_metadata.url" . }}
-        {{- if .Values.integrationsAgent.exporters }}
-        {{- if .Values.integrationsAgent.exporters.prometheus }}
-        {{- if .Values.integrationsAgent.exporters.prometheus.metadata }}
-        {{- if .Values.integrationsAgent.exporters.prometheus.metadata.compress }}
-        Compress: {{ .Values.integrationsAgent.exporters.prometheus.metadata.compress }}
-        {{- end }}
-        TlsSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
-        {{- if .Values.integrationsAgent.exporters.prometheus.metadata.maxRetries }}
-        MaxRetries: {{ .Values.integrationsAgent.exporters.prometheus.metadata.maxRetries }}
-        {{- end }}
-        {{- if .Values.integrationsAgent.exporters.prometheus.metadata.maxDelay }}
-        MaxDelay: {{ .Values.integrationsAgent.exporters.prometheus.metadata.maxDelay }}
-        {{- end }}
-        {{- if .Values.integrationsAgent.exporters.prometheus.metadata.baseDelay }}
-        BaseDelay: {{ .Values.integrationsAgent.exporters.prometheus.metadata.baseDelay }}
-        {{- end }}
-        {{- if .Values.integrationsAgent.exporters.prometheus.metadata.cacheSize }}
-        CacheSize: {{ .Values.integrationsAgent.exporters.prometheus.metadata.cacheSize }}
-        {{- end }}
-        {{- if .Values.integrationsAgent.exporters.prometheus.metadata.cacheTTL }}
-        CacheTTL: {{ .Values.integrationsAgent.exporters.prometheus.metadata.cacheTTL }}
-        {{- end }}
-        {{- if .Values.integrationsAgent.exporters.prometheus.metadata.maxBatchSize }}
-        MaxBatchSize: {{ .Values.integrationsAgent.exporters.prometheus.metadata.maxBatchSize }}
-        {{- end }}
-        {{- if .Values.integrationsAgent.exporters.prometheus.metadata.bufferSize }}
-        BufferSize: {{ .Values.integrationsAgent.exporters.prometheus.metadata.bufferSize }}
-        {{- end }}
-        {{- if .Values.integrationsAgent.exporters.prometheus.metadata.writeInterval }}
-        WriteInterval: {{ .Values.integrationsAgent.exporters.prometheus.metadata.writeInterval }}
-        {{- end }}
-        {{- if .Values.integrationsAgent.exporters.prometheus.metadata.maxBatchWait }}
-        MaxBatchWait: {{ .Values.integrationsAgent.exporters.prometheus.metadata.maxBatchWait }}
-        {{- end }}
-      {{- end }}
-      {{- end }}
-      {{- end }}
     - Type: "awsbilling_http_json"
       Name: "awsbilling_http_json"
       Url: {{ include "vector.json.table.write.aws_billing_report.url" . }}
