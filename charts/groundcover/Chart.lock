@@ -13,7 +13,7 @@ dependencies:
   version: 0.9.17
 - name: victoria-metrics-operator
   repository: https://victoriametrics.github.io/helm-charts
-  version: 0.49.1
+  version: 0.59.2
 - name: victoria-metrics-agent
   repository: ""
   version: 0.9.17
@@ -38,5 +38,5 @@ dependencies:
 - name: vector
   repository: https://helm.vector.dev
   version: 0.37.0
-digest: sha256:c88f34ce4270241dedea24f7964765dce89753eb6051fa9ff738355351afccc4
-generated: "2025-11-17T16:45:00.246814354Z"
+digest: sha256:6318f16ba0caa22dc2102017ddc7de27cbe5adfbaf70dbaf29842e601d715780
+generated: "2026-03-10T15:02:51.635881724Z"

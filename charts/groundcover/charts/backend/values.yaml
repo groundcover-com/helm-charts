@@ -341,7 +341,7 @@ victoria-metrics-distributed:
   common:
     vmauth:
       spec:
-        configReloaderImageTag: public.ecr.aws/groundcovercom/victoriametrics/operator:config-reloader-v0.67.0
+        configReloaderImageTag: public.ecr.aws/groundcovercom/victoriametrics/operator:config-reloader-v0.68.2
         image:
           repository: public.ecr.aws/groundcovercom/victoriametrics/vmauth
           tag: v1.136.0      
@@ -366,7 +366,7 @@ victoria-metrics-distributed:
         topologySpreadConstraints: []
     vmagent:
       spec:
-        configReloaderImageTag: public.ecr.aws/groundcovercom/victoriametrics/operator:config-reloader-v0.67.0
+        configReloaderImageTag: public.ecr.aws/groundcovercom/victoriametrics/operator:config-reloader-v0.68.2
         image:
           repository: public.ecr.aws/groundcovercom/vmagent
           tag: v1.136.0
@@ -407,7 +407,7 @@ victoria-metrics-distributed:
         vminsert:
           image:
             repository: public.ecr.aws/groundcovercom/victoriametrics/vminsert
-            tag: v1.136.0-cluster        
+            tag: v1.137.0-cluster-20260303        
           extraArgs:
             maxConcurrentInserts: "1000"
             maxLabelsPerTimeseries: "50"
@@ -429,7 +429,7 @@ victoria-metrics-distributed:
         vmselect:
           image:
             repository: public.ecr.aws/groundcovercom/victoriametrics/vmselect
-            tag: v1.136.0-cluster
+            tag: v1.137.0-cluster-20260303
           extraArgs:
             search.maxQueryLen: "100000"
             search.maxSeries: "30000"
@@ -458,7 +458,7 @@ victoria-metrics-distributed:
         vmstorage:
           image:
             repository: public.ecr.aws/groundcovercom/victoriametrics/vmstorage
-            tag: v1.136.0-cluster        
+            tag: v1.137.0-cluster-20260303
           extraArgs:
             search.maxConcurrentRequests: "8"
             search.maxTagKeys: "200000"
