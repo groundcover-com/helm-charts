@@ -127,6 +127,9 @@ data:
     DispatchCenter:
       Enabled: {{ .Values.global.dispatchCenter.enabled }}
       Endpoint: http://{{ include "dispatch-center.fullname" . }}:8080
+    CommHub:
+      Enabled: {{ .Values.global.commHub.enabled }}
+      Endpoint: http://{{ include "comm-hub.fullname" . }}:8080
     {{- if .Values.portal.configuration.AgentService }}
     AgentService:
       Enabled: {{ .Values.portal.configuration.AgentService.Enabled | default (.Values.agentService.enabled | default false) }}

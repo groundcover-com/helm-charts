@@ -1,0 +1,84 @@
+{{- if .Values.global.commHub.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "comm-hub.configMapName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+    app: comm-hub
+    app.kubernetes.io/name: comm-hub
+data:
+  config.yaml: |
+    healthProbe:
+      enabled: {{ .Values.commHub.healthProbe.enabled | default true }}
+      port: {{ .Values.commHub.healthProbe.port | default 8089 }}
+
+    telemetry:
+      enabled: {{ include "telemetry.enabled" . }}
+      traces:
+        enabled: true
+        endpoint: {{ include "telemetry.traces.otlpUrl" . | quote }}
+        writeTimeout: {{ .Values.commHub.tracing.writeTimeout | default "5s" }}
+        flushInterval: {{ .Values.commHub.tracing.flushInterval | default "5s" }}
+        batchSize: {{ .Values.commHub.tracing.batchSize | default 50 }}
+      pprof:
+        enabled: true
+        cpuSamplingDuration: {{ .Values.commHub.pprof.cpuSamplingDuration | default "60s" }}
+        httpUploader:
+          enabled: {{ eq (.Values.commHub.pprof.uploaderType | default "pyroscope") "http" }}
+          pushURL: {{ printf "%s/upload/pprof" (include "telemetry.metrics.base.url" .) | quote }}
+        pyroscopeUploader:
+          enabled: {{ eq (.Values.commHub.pprof.uploaderType | default "pyroscope") "pyroscope" }}
+          pushURL: {{ include "telemetry.metrics.base.url" . | quote }}
+        backoffTicker:
+          interval: {{ .Values.commHub.pprof.backoffTicker.interval | default "10s" }}
+          exponent: {{ .Values.commHub.pprof.backoffTicker.exponent | default 40 }}
+        memoryTicker:
+          enabled: {{ .Values.commHub.pprof.memoryTicker.enabled | default true }}
+          interval: {{ .Values.commHub.pprof.memoryTicker.interval | default "60s" }}
+          jumpSizeInBytes: {{ .Values.commHub.pprof.memoryTicker.jumpSizeInBytes | default 100000000 }}
+          windowSize: {{ .Values.commHub.pprof.memoryTicker.windowSize | default "12h" }}
+          initialWait: {{ .Values.commHub.pprof.memoryTicker.initialWait | default "10m" }}
+        cpuTicker:
+          enabled: {{ .Values.commHub.pprof.cpuTicker.enabled | default true }}
+          interval: {{ .Values.commHub.pprof.cpuTicker.interval | default "60s" }}
+          jumpSizeInMCPU: {{ .Values.commHub.pprof.cpuTicker.jumpSizeInMCPU | default 100 }}
+          windowSize: {{ .Values.commHub.pprof.cpuTicker.windowSize | default "12h" }}
+          initialWait: {{ .Values.commHub.pprof.cpuTicker.initialWait | default "10m" }}
+      instrumentation:
+        serviceName: "comm-hub"
+        originCluster: {{ include "groundcover.clusterId" . | quote }}
+        tracingTargets:
+          - endpoint: {{ include "ingestor.otlptraces.cluster.http.url" . | quote }}
+
+          {{- if and .Values.commHub.instrumentation .Values.commHub.instrumentation.additionalTraceTargets }}
+          {{- toYaml .Values.commHub.instrumentation.additionalTraceTargets | nindent 10 }}
+          {{- end }}
+
+        metricsTargets:
+          - endpoint: {{ include "metrics-ingester.promethues-exposition.http.url" . | quote }}
+
+    dynconf:
+      enabled: {{ .Values.global.fleetmanager.enabled }}
+      url: {{ include "fleet-manager.url" . }}
+      maximumInitialJitter: {{ .Values.fleetClientConfig.maximumInitialJitter }}
+      requestInterval: {{ .Values.fleetClientConfig.requestInterval }}
+      initialUpdateTimeout: {{ .Values.fleetClientConfig.initialUpdateTimeout }}
+      insecureSkipVerify: {{ .Values.fleetClientConfig.tlsSkipVerify }}
+
+    secretStore:
+      url: {{ include "fleet-manager.base.url" . }}
+
+    apiServer:
+      port: 8080
+
+    cursorCloud:
+      baseURL: {{ .Values.commHub.cursorCloud.baseURL | default "https://api.cursor.com" | quote }}
+      maxConnsPerHost: {{ .Values.commHub.cursorCloud.maxConnsPerHost | default 20 }}
+      requestTimeout: {{ .Values.commHub.cursorCloud.requestTimeout | default "30s" }}
+      maxRetries: {{ .Values.commHub.cursorCloud.maxRetries | default 5 }}
+
+    routeConfig:
+      secretCacheTTL: {{ .Values.commHub.routeConfig.secretCacheTTL | default "5m" }}
+{{- end }}

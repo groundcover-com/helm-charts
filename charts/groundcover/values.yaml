@@ -53,6 +53,8 @@ global:
     enabled: true
   dispatchCenter:
     enabled: false
+  commHub:
+    enabled: false
   pdfReportGenerator:
     enabled: false
   pdfReportWorker:
@@ -334,6 +336,7 @@ logPatternsConfig:
 
 fleetClientConfig:
   overrideURL: ""
+  overrideBaseURL: ""
   requestIntervalEnabled: true
   maximumInitialJitter: 30s
   requestInterval: 30s
@@ -1583,6 +1586,60 @@ dispatchCenter:
     pagerdutyEventsURL: "https://events.pagerduty.com/v2/enqueue"
     opsgenieUSEndpoint: "https://api.opsgenie.com/v2/alerts"
     opsgenieEUEndpoint: "https://api.eu.opsgenie.com/v2/alerts"
+  tracing:
+    enabled: false
+    writeTimeout: "5s"
+    flushInterval: "5s"
+    batchSize: 50
+  pprof:
+    enabled: '{{ include "telemetry.enabled" . }}'
+    uploaderType: pyroscope
+    cpuSamplingDuration: 60s
+    backoffTicker:
+      interval: 10s
+      exponent: 40
+    memoryTicker:
+      enabled: true
+      interval: 60s
+      jumpSizeInBytes: 100000000
+      windowSize: 12h
+      initialWait: 10m
+    cpuTicker:
+      enabled: true
+      interval: 60s
+      jumpSizeInMCPU: 100
+      windowSize: 12h
+      initialWait: 10m
+
+commHub:
+  additionalLabels:
+  podLabels:
+  additionalAnnotations:
+  podAnnotations:
+  affinity:
+  nodeSelector:
+  tolerations: []
+  priorityClassName:
+  env: []
+  image:
+    repository: "{{ .Values.global.origin.registry }}/comm-hub"
+    tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
+  resources:
+    limits:
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  healthProbe:
+    enabled: true
+    port: 8089
+  cursorCloud:
+    baseURL: "https://api.cursor.com"
+    maxConnsPerHost: 20
+    requestTimeout: "30s"
+    maxRetries: 5
+  routeConfig:
+    secretCacheTTL: "5m"
   tracing:
     enabled: false
     writeTimeout: "5s"

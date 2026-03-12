@@ -252,7 +252,9 @@ Get cluster_id from values or generate random one
 {{- end -}}
 
 {{- define "fleet-manager.base.url" -}}
-{{- if not .Values.global.backend.enabled -}}
+{{- if .Values.fleetClientConfig.overrideBaseURL -}}
+    {{- .Values.fleetClientConfig.overrideBaseURL -}}
+{{- else if not .Values.global.backend.enabled -}}
     {{- printf "https://%s/fleet-manager" .Values.global.ingress.site -}}
 {{- else -}}
     {{- printf "http://%s:8080" (include "fleet-manager.fullname" .) -}}

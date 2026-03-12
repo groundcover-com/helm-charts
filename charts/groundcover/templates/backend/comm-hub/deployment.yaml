@@ -1,0 +1,127 @@
+{{ if .Values.global.commHub.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+    {{- if .Values.commHub.additionalAnnotations }}
+{{ toYaml .Values.commHub.additionalAnnotations | indent 4 }}
+    {{- end }}
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+    app: comm-hub
+    app.kubernetes.io/name: comm-hub
+    {{- if .Values.commHub.additionalLabels }}
+{{ toYaml .Values.commHub.additionalLabels | indent 4 }}
+    {{- end }}
+  name: {{ include "comm-hub.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: comm-hub
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9102"
+        groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+        {{- if .Values.commHub.additionalAnnotations }}
+{{ toYaml .Values.commHub.additionalAnnotations | indent 8 }}
+        {{- end }}
+        {{- if .Values.commHub.podAnnotations }}
+{{ toYaml .Values.commHub.podAnnotations | indent 8 }}
+        {{- end }}
+      labels:
+        app: comm-hub
+        app.kubernetes.io/name: comm-hub
+        {{- include "groundcover.labels" . | nindent 8 }}
+        {{- if .Values.commHub.additionalLabels }}
+{{ toYaml .Values.commHub.additionalLabels | indent 8 }}
+        {{- end }}
+        {{- if .Values.commHub.podLabels }}
+{{ toYaml .Values.commHub.podLabels | indent 8 }}
+        {{- end }}
+    spec:
+{{- if .Values.commHub.tolerations }}
+      tolerations:
+{{ toYaml .Values.commHub.tolerations | indent 8 }}
+{{- end }}
+{{- if .Values.commHub.affinity }}
+      affinity:
+{{ toYaml .Values.commHub.affinity | indent 8 }}
+{{- end }}
+{{- if .Values.commHub.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.commHub.nodeSelector | indent 8 }}
+{{- end }}
+      imagePullSecrets: {{ include "imagePullSecrets" . }}
+      containers:
+      - env:
+        - name: GC_GROUNDCOVERVERSION
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['groundcover_version']
+        {{- if eq (include "telemetry.enabled" .) "true" }}
+        - name: API_KEY
+          valueFrom:
+            secretKeyRef:
+              key: {{ template "groundcover.apikeySecretKey" . }}
+              name: {{ template "groundcover.apikeySecretName" . }}
+        {{- end }}
+        {{- with .Values.commHub.env }}
+        {{- tpl (toYaml .) $ | nindent 8 }}
+        {{- end }}
+        envFrom:
+          - secretRef:
+              name: {{ include "groundcover.config.secretName" .}}
+        volumeMounts:
+        - name: config
+          mountPath: /etc/comm-hub
+          readOnly: true
+        image: {{ tpl .Values.commHub.image.repository . }}:{{ tpl .Values.commHub.image.tag . }}
+        imagePullPolicy: Always
+        name: {{ include "comm-hub.fullname" . }}
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        - containerPort: 9102
+          name: metrics
+          protocol: TCP
+        {{- if .Values.commHub.healthProbe.enabled }}
+        - containerPort: {{ .Values.commHub.healthProbe.port }}
+          name: health-http
+          protocol: TCP
+        {{- end }}
+        {{- if .Values.commHub.healthProbe.enabled }}
+        readinessProbe:
+          httpGet:
+            scheme: HTTP
+            path: /health
+            port: health-http
+          initialDelaySeconds: 5
+          periodSeconds: 15
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            scheme: HTTP
+            path: /health
+            port: health-http
+          initialDelaySeconds: 10
+          periodSeconds: 15
+          timeoutSeconds: 5
+          failureThreshold: 3
+        {{- end }}
+        resources:
+{{- toYaml .Values.commHub.resources | nindent 10 }}
+      volumes:
+      - name: config
+        configMap:
+          name: {{ include "comm-hub.configMapName" . }}
+{{- if .Values.commHub.priorityClassName }}
+      priorityClassName: {{ .Values.commHub.priorityClassName }}
+{{- end }}
+{{ end -}}
