@@ -1155,6 +1155,10 @@ ingestor:
       storageAccount: ""
       assetPath: "sourcemaps"
       maxUploadSize: 0
+      cacheCapacity: 1000
+      cacheTTL: "1h"
+      stackTraceCacheCapacity: 1000
+      stackTraceCacheTTL: "1h"
   lifecycleHooks: 
     preStop:
       exec:
@@ -2074,6 +2078,12 @@ opentelemetry-collector:
       containerPort: 8026
       servicePort: 8026
       hostPort: 8026
+      protocol: TCP
+    rum-sourcemaps:
+      enabled: false
+      containerPort: 8027
+      servicePort: 8027
+      hostPort: 8027
       protocol: TCP
   config:
     extensions:

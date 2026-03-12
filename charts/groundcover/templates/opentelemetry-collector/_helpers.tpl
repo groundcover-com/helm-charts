@@ -150,6 +150,10 @@ http
 {{- printf "http://%s:%d/json/rum" (include "opentelemetry-collector.fullname" .) (index .Values.global "opentelemetry-collector" "ports" "rum" "servicePort" | int ) -}}
 {{- end -}}
 
+{{- define "opentelemetry-collector.rumsourcemaps.http.url" -}}
+{{- printf "http://%s:%d/rum/sourcemaps" (include "ingestor.fullname" .) (index .Values.global "opentelemetry-collector" "ports" "rum-sourcemaps" "servicePort" | int ) -}}
+{{- end -}}
+
 {{- define "opentelemetry-collector.zipkin.http.url" -}}
 {{- printf "%s/api/v2/spans" (include "opentelemetry-collector.otlp.http.url" .) -}}
 {{- end -}}

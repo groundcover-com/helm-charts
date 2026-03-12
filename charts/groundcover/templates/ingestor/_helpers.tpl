@@ -35,6 +35,6 @@
 {{- end -}}
 
 {{- define "ingestor.rumsourcemaps.http.url" -}}
-    {{- $port := .Values.ingestor.rum.sourceMaps.port | required "ingestor.rum.sourceMaps.port is required" -}}
+    {{- $port := index .Values.global "opentelemetry-collector" "ports" "rum-sourcemaps" "servicePort" | required "global.opentelemetry-collector.ports.rum-sourcemaps.servicePort is required" -}}
     {{- printf "http://%s:%d" (include "ingestor.fullname" .) ($port | int) -}}
 {{- end -}}
