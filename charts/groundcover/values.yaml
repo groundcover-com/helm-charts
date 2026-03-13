@@ -506,6 +506,17 @@ agent:
         enricherEnabled: true
         additionalMetricLabels: {}
     logs:
+      # Custom relabel configs that will be appended to the kubernetes-logs job relabel_configs
+      # This allows you to add filtering/labeling for log target discovery without modifying the default config
+      # Example usage:
+      # customRelabelConfigs:
+      #   - source_labels: [__meta_kubernetes_namespace]
+      #     action: drop
+      #     regex: 'kube-system'
+      #   - source_labels: [__meta_kubernetes_pod_label_app]
+      #     target_label: app
+      #     action: replace
+      customRelabelConfigs: []
       pipeline:
         dropOldLogs:
           dropThreshold: 3h
