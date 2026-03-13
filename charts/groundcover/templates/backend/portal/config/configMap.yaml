@@ -122,7 +122,9 @@ data:
 
     RumSourcemaps:
       Enabled: {{ .Values.global.ingestor.enabled }}
+      {{- if .Values.global.ingestor.enabled }}
       Endpoint: {{ include "ingestor.rumsourcemaps.http.url" . }}
+      {{- end }}
 
     DispatchCenter:
       Enabled: {{ .Values.global.dispatchCenter.enabled }}
