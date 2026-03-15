@@ -130,12 +130,12 @@ global:
     write:
       destinations:
         backend:
-          url: '{{ include "victoria-metrics.write.http.url" . }},{{ include "vector.cluster.prometheus_remote_write.vm_metrics.endpoint" . }}'
-          rateLimit: '0,500000'
-          disableOnDiskQueue: 'false,false'
-          maxDiskUsagePerURL: '10GB,512MB'
-          forceVMProto: "true,false"
-          forcePromProto: "false,true"
+          url: '{{ include "victoria-metrics.write.http.url" . }}'
+          rateLimit: '0'
+          disableOnDiskQueue: 'false'
+          maxDiskUsagePerURL: '10GB'
+          forceVMProto: "true"
+          forcePromProto: "false"
         sensor:
           url: '{{ include "victoria-metrics.write.http.url" . }}'
           rateLimit: '0'
@@ -1794,7 +1794,7 @@ clickhouse:
   shards: 1
   replicaCount: 1
   image:
-    tag: 25.10.3.100-secure
+    tag: 26.1.4.35
     registry: public.ecr.aws/groundcovercom
     repository: clickhouse
   coldVolume: ""
@@ -2460,10 +2460,6 @@ vector:
           type: statsd
           address: 0.0.0.0:8125
           mode: tcp
-        vm_metrics:
-          type: prometheus_remote_write
-          address: 0.0.0.0:4599
-          mode: tcp
       otel:
         otel_logs:
           type: opentelemetry
@@ -2711,29 +2707,6 @@ vector:
             }
             del(.annotations)
             .insert_time = now()
-        metrics_metadata_to_logs:
-          inputs:
-            - "vm_metrics"
-          type: "metric_to_log"
-        throttled_metrics_metadata_to_logs:
-          inputs:
-            - "metrics_metadata_to_logs"
-          type: "throttle"
-          threshold: 1000
-          window_secs: 1
-        metrics_metadata_extracted:
-          inputs:
-            - "throttled_metrics_metadata_to_logs"
-          type: "remap"
-          source: |-
-            . =  {
-              "timestamp": .timestamp,
-              "cluster": .tags.clusterId,
-              "env": .tags.env,
-              "namespace": .tags.namespace,
-              "name": .name,
-              "tags": .tags
-            }
       logs_to_events: # inputs list should be injected
         type: "remap"
         source: |-
@@ -3110,7 +3083,6 @@ vector:
           clickhouse_metrics_metadata:
             type: clickhouse
             inputs:
-              - metrics_metadata_extracted
               - table_write_routing.metrics_metadata
             endpoint: '{{ include "clickhouse.shard0HttpEndpoint" . }}'
             database: "groundcover"
@@ -3282,7 +3254,6 @@ vector:
           s3_metrics_metadata:
             type: "aws_s3"
             inputs:
-              - metrics_metadata_extracted
               - table_write_routing.metrics_metadata
             bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
             region: '{{ .Values.vector.objectStorage.region }}'
@@ -3416,7 +3387,6 @@ vector:
           gcs_metrics_metadata:
             type: gcp_cloud_storage
             inputs:
-              - metrics_metadata_extracted
               - table_write_routing.metrics_metadata
             key_prefix: v2/metrics_metadata/
             compression: zstd
@@ -3557,7 +3527,6 @@ vector:
           azure_metrics_metadata:
             type: azure_blob
             inputs:
-              - metrics_metadata_extracted
               - table_write_routing.metrics_metadata
             container_name: '{{ .Values.vector.objectStorage.azureBlobContainer }}'
             connection_string: '{{ .Values.vector.objectStorage.azureConnectionString }}'
