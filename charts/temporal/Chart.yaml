@@ -1,5 +1,5 @@
 apiVersion: v2
-appVersion: 1.11.680
+appVersion: 1.11.681
 dependencies:
 - condition: global.temporal.enabled
   name: temporal
@@ -8,4 +8,4 @@ dependencies:
 description: groundcover's Temporal Helm chart
 name: temporal
 type: application
-version: 1.11.680
+version: 1.11.681
