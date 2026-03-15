@@ -113,6 +113,7 @@ data:
     LLMPricing:
       Enabled: {{ .Values.dbManager.llmPricing.enabled }}
       PricingFileURL: "https://{{ .Values.dbManager.llmPricing.bucket }}.s3.{{ .Values.dbManager.llmPricing.region }}.amazonaws.com/{{ .Values.dbManager.llmPricing.path }}"
+      PricingFileURLV2: "https://{{ .Values.dbManager.llmPricing.bucket }}.s3.{{ .Values.dbManager.llmPricing.region }}.amazonaws.com/{{ .Values.dbManager.llmPricing.pathV2 }}"
       RefreshInterval: {{ .Values.dbManager.llmPricing.refreshInterval }}
     CustomAttributesIndexes:
       InvertedIndexLogsKeys:

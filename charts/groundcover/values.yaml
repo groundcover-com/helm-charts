@@ -740,6 +740,7 @@ dbManager:
     bucket: "groundcover-llm-pricing"
     region: "us-east-1"
     path: "llm-pricing/latest.csv"
+    pathV2: "llm-pricing/latestv2.csv"
     refreshInterval: 6h # {amount}[h(ours), d(ays), w(eeks), y(ears)]
   customAttributesIndexes:
     # List of keys to use for inverted index on logs table
