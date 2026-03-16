@@ -652,11 +652,28 @@ agent:
           workflow:
             group: "argoproj.io"
             kindPlural: "workflows"
-            isWorkload: true
+            workload:
+              enabled: true
+              nameFrom:
+                generateNamePattern: "^(.+)-$"
+                labels:
+                  - "run-family"
+                  - "workflows.argoproj.io/workflow-template"
+                  - "workflows.argoproj.io/cron-workflow"
           cloneset:
             group: "apps.kruise.io"
             kindPlural: "clonesets"
-            isWorkload: true
+            workload:
+              enabled: true
+          rollout:
+            group: "argoproj.io"
+            kindPlural: "rollouts"
+          sparkapplication:
+            group: "sparkoperator.k8s.io"
+            kindPlural: "sparkapplications"
+          runner:
+            group: "actions.summerwind.dev"
+            kindPlural: "runners"
     sensitiveHeadersObfuscationConfig:
       enabled: true
       mode: "ObfuscateSpecificValues"
@@ -1415,11 +1432,27 @@ k8sWatcher:
         workflow:
           group: "argoproj.io"
           kindPlural: "workflows"
-          isWorkload: true
+          workload:
+            enabled: true
+            nameFrom:
+              labels:
+                - "run-family"
+                - "workflows.argoproj.io/workflow-template"
+                - "workflows.argoproj.io/cron-workflow"
         cloneset:
           group: "apps.kruise.io"
           kindPlural: "clonesets"
-          isWorkload: true
+          workload:
+            enabled: true
+        rollout:
+          group: "argoproj.io"
+          kindPlural: "rollouts"
+        sparkapplication:
+          group: "sparkoperator.k8s.io"
+          kindPlural: "sparkapplications"
+        runner:
+          group: "actions.summerwind.dev"
+          kindPlural: "runners"
   image:
     repository: "{{ .Values.global.origin.registry }}/k8s-watcher"
     tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
