@@ -668,6 +668,8 @@ agent:
           rollout:
             group: "argoproj.io"
             kindPlural: "rollouts"
+            workload:
+              enabled: true
           sparkapplication:
             group: "sparkoperator.k8s.io"
             kindPlural: "sparkapplications"
@@ -1447,6 +1449,8 @@ k8sWatcher:
         rollout:
           group: "argoproj.io"
           kindPlural: "rollouts"
+          workload:
+            enabled: true
         sparkapplication:
           group: "sparkoperator.k8s.io"
           kindPlural: "sparkapplications"
