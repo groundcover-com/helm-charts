@@ -61,7 +61,7 @@ service:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.11.683
+  tag: 1.11.684
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/tools'
@@ -85,7 +85,6 @@ ingresses:
 #           port: 8080
 imagePullSecrets: []
 configuration:
-  EnableAgentMCPTool: false
   authProxy: false
   authProxyHeaders:
     User: "X-WEBAUTH-USER"
