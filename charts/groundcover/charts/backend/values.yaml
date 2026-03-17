@@ -344,7 +344,7 @@ victoria-metrics-distributed:
         configReloaderImageTag: public.ecr.aws/groundcovercom/victoriametrics/operator:config-reloader-v0.68.2
         image:
           repository: public.ecr.aws/groundcovercom/victoriametrics/vmauth
-          tag: v1.136.0      
+          tag: v1.138.0-scratch      
         replicaCount: 2
         resources:
           limits:
