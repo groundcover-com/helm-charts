@@ -1,5 +1,25 @@
 global:
-  # Shared K8s metric labels configuration for both sensor and k8s-watcher
+  # Unified extra labels configuration for K8s metadata across all signals.
+  # Replaces: customEntityTags, metricLabels, additionalMetricLabels, nodelabels.
+  extraLabels:
+    staticLabels: {}
+    pods:
+      labels:
+        collectAll: false
+        metrics: []
+        logs: []
+        traces: []
+        events: []
+      annotations:
+        collectAll: false
+        metrics: []
+        logs: []
+        traces: []
+        events: []
+    nodes:
+      labels: []
+
+  # DEPRECATED: Use global.extraLabels instead. Kept for backward compatibility.
   metricLabels:
     pod:
       keys: []
@@ -429,7 +449,7 @@ agent:
       limits:
         memory: 1Gi
         cpu: 1000m
-    nodelabels: []
+    nodelabels: [] # DEPRECATED: Use global.extraLabels.nodes.labels instead
     contentTypesToDrop: []
     contentTypesWithoutClustering: []
     hostHeadersToDrop: []
@@ -451,7 +471,7 @@ agent:
     collectionEnabled: true
     ingestionEnabled: true
     useOldTracefsMountPath: false
-    customEntityTags:
+    customEntityTags: # DEPRECATED: Use global.extraLabels.pods instead
       labels:
         keys: []
         collectAll: false
@@ -504,7 +524,7 @@ agent:
     pipelines:
       metrics:
         enricherEnabled: true
-        additionalMetricLabels: {}
+        additionalMetricLabels: {} # DEPRECATED: Use global.extraLabels.staticLabels instead
     logs:
       # Custom relabel configs that will be appended to the kubernetes-logs job relabel_configs
       # This allows you to add filtering/labeling for log target discovery without modifying the default config
@@ -1481,7 +1501,7 @@ k8sWatcher:
       drop:
         - ALL
   clusterDiscoveryInterval: 5m
-  additionalMetricLabels: {}
+  additionalMetricLabels: {} # DEPRECATED: Use global.extraLabels.staticLabels instead
   resources:
     limits:
       cpu: 2000m
@@ -2944,7 +2964,7 @@ vector:
         logs:
           clickhouse_logs:
             type: clickhouse
-            endpoint: '{{ include "clickhouse.shard0HttpEndpoint" . }}'
+            endpoint: '{{ include "clickhouse.httpEndpoint" . }}'
             database: "groundcover"
             table: "logs_v8"
             request:
@@ -2968,7 +2988,7 @@ vector:
         traces:
           clickhouse_traces:
             type: clickhouse
-            endpoint: '{{ include "clickhouse.shard0HttpEndpoint" . }}'
+            endpoint: '{{ include "clickhouse.httpEndpoint" . }}'
             database: "groundcover"
             table: "traces_v2"
             request:
@@ -3021,7 +3041,7 @@ vector:
             inputs:
               - measurements
               - json_measurements
-            endpoint: '{{ include "clickhouse.shard0HttpEndpoint" . }}'
+            endpoint: '{{ include "clickhouse.httpEndpoint" . }}'
             database: "groundcover"
             table: "measurements"
             request:
