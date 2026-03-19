@@ -1,7 +1,7 @@
 global:
   # Unified extra labels configuration for K8s metadata across all signals.
   # Replaces: customEntityTags, metricLabels, additionalMetricLabels, nodelabels.
-  extraLabels:
+  labelEnrichment:
     staticLabels: {}
     pods:
       labels:
@@ -19,7 +19,7 @@ global:
     nodes:
       labels: []
 
-  # DEPRECATED: Use global.extraLabels instead. Kept for backward compatibility.
+  # DEPRECATED: Use global.labelEnrichment instead. Kept for backward compatibility.
   metricLabels:
     pod:
       keys: []
@@ -449,7 +449,7 @@ agent:
       limits:
         memory: 1Gi
         cpu: 1000m
-    nodelabels: [] # DEPRECATED: Use global.extraLabels.nodes.labels instead
+    nodelabels: [] # DEPRECATED: Use global.labelEnrichment.nodes.labels instead
     contentTypesToDrop: []
     contentTypesWithoutClustering: []
     hostHeadersToDrop: []
@@ -471,7 +471,7 @@ agent:
     collectionEnabled: true
     ingestionEnabled: true
     useOldTracefsMountPath: false
-    customEntityTags: # DEPRECATED: Use global.extraLabels.pods instead
+    customEntityTags: # DEPRECATED: Use global.labelEnrichment.pods instead
       labels:
         keys: []
         collectAll: false
@@ -524,7 +524,7 @@ agent:
     pipelines:
       metrics:
         enricherEnabled: true
-        additionalMetricLabels: {} # DEPRECATED: Use global.extraLabels.staticLabels instead
+        additionalMetricLabels: {} # DEPRECATED: Use global.labelEnrichment.staticLabels instead
     logs:
       # Custom relabel configs that will be appended to the kubernetes-logs job relabel_configs
       # This allows you to add filtering/labeling for log target discovery without modifying the default config
@@ -1501,7 +1501,7 @@ k8sWatcher:
       drop:
         - ALL
   clusterDiscoveryInterval: 5m
-  additionalMetricLabels: {} # DEPRECATED: Use global.extraLabels.staticLabels instead
+  additionalMetricLabels: {} # DEPRECATED: Use global.labelEnrichment.staticLabels instead
   resources:
     limits:
       cpu: 2000m

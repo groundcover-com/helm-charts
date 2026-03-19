@@ -86,9 +86,9 @@ data:
         jumpSizeInMCPU: {{ .Values.k8sWatcher.pprof.cpuTicker.jumpSizeInMCPU }}
         windowSize: {{ .Values.k8sWatcher.pprof.cpuTicker.windowSize }}
         initialWait: {{ .Values.k8sWatcher.pprof.cpuTicker.initialWait }}    
-    {{- if .Values.global.extraLabels }}
-    ExtraLabels:
-    {{- .Values.global.extraLabels | toYaml | nindent 6 }}
+    {{- if .Values.global.labelEnrichment }}
+    LabelEnrichment:
+    {{- .Values.global.labelEnrichment | toYaml | nindent 6 }}
     {{- end }}
     {{- if .Values.global.metricLabels }}
     MetricLabels:
