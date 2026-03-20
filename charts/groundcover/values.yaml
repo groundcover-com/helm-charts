@@ -865,7 +865,8 @@ agentService:
       cpu: 2000m
       memory: 2Gi
   pdb:
-    enabled: false
+    enabled: true
+    minAvailable: 1
   env: []
   nodeSelector: {}
   tolerations: []

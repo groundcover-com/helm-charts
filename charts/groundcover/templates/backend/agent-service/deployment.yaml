@@ -30,7 +30,9 @@ spec:
         prometheus.io/scrape: "true"
         prometheus.io/port: "8080"
         groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+        karpenter.sh/do-not-disrupt: "true"
     spec:
+      terminationGracePeriodSeconds: 450
       serviceAccountName: {{ ($agentService.serviceAccount).name | default $agentService.serviceAccountName | default (include "agent-service.fullname" .) }}
       imagePullSecrets: {{ include "imagePullSecrets" . }}
       securityContext:
@@ -182,6 +184,10 @@ spec:
             {{- with $agentService.env }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sleep", "5"]
           resources:
             {{- toYaml $agentService.resources | nindent 12 }}
           readinessProbe:
@@ -192,7 +198,7 @@ spec:
             periodSeconds: 10
           livenessProbe:
             httpGet:
-              path: /health
+              path: /livez
               port: 8080
             initialDelaySeconds: 10
             periodSeconds: 30
