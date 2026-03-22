@@ -61,7 +61,7 @@ service:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.11.713
+  tag: 1.11.714
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/tools'
@@ -255,7 +255,7 @@ grafana:
   image:
     registry: public.ecr.aws
     repository: groundcovercom/grafana-groundcover
-    tag: v0.0.44-grafana11.3.7
+    tag: v0.0.46-grafana11.3.7
   testFramework:
     enabled: false
   envValueFrom:

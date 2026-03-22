@@ -1199,7 +1199,7 @@ ingestor:
           port: 8026
   rum:
     sourceMaps:
-      enabled: false
+      enabled: true
       port: 8027
       provider: "s3"
       bucket: ""
@@ -2153,7 +2153,7 @@ opentelemetry-collector:
       hostPort: 8026
       protocol: TCP
     rum-sourcemaps:
-      enabled: false
+      enabled: true
       containerPort: 8027
       servicePort: 8027
       hostPort: 8027
@@ -4236,7 +4236,7 @@ monitors-manager:
   image:
     registry: public.ecr.aws
     repository: groundcovercom/grafana-groundcover
-    tag: v0.0.44-grafana11.3.7
+    tag: v0.0.46-grafana11.3.7
   nameOverride: monitors-manager
   persistence:
     enabled: true

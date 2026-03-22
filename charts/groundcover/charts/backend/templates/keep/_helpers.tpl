@@ -11,6 +11,8 @@
 {{- $secret := (lookup "v1" "Secret" .Release.Namespace "keep-credentials" | default dict) -}}
 {{- if $secret -}}
     {{- index $secret "data" "webhook-key" | b64dec -}}
+{{- else if .Values.global.workflows.webhookApiKey -}}
+    {{- .Values.global.workflows.webhookApiKey -}}
 {{- else -}}
     {{- randAlphaNum 16 -}}
 {{- end -}}
