@@ -124,4 +124,9 @@ spec:
       {{- with .Values.integrationsAgent.extraVolumes }}
         {{- toYaml . | nindent 6 }}
       {{- end }}
+{{- if .Values.global.ingestion.mtlsSecretName }}
+      - name: ingestion-mtls-certs
+        secret:
+          secretName: {{ .Values.global.ingestion.mtlsSecretName }}
+{{- end }}
 {{ end }}

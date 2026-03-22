@@ -105,6 +105,10 @@ global:
 
   ingestion:
     tls_skip_verify: true
+    mtlsSecretName: ""
+    tlsCertFile: ""
+    tlsKeyFile: ""
+    tlsCAFile: ""
     pdbs:
       enabled: true
   groundcover_token:
@@ -362,6 +366,10 @@ fleetClientConfig:
   requestInterval: 30s
   initialUpdateTimeout: 60s # setting value to 0 means sensor will not wait for initial update
   insecureSkipVerify: false
+  mtlsSecretName: ""
+  tlsCertFile: ""
+  tlsKeyFile: ""
+  tlsCAFile: ""
 priorityClass:
   create: false
   name:

@@ -105,6 +105,11 @@ spec:
         volumeMounts:
         - mountPath: /config
           name: k8s-watcher-config-volume
+{{- if .Values.global.ingestion.mtlsSecretName }}
+        - mountPath: /etc/ingestion-mtls-certs
+          name: ingestion-mtls-certs
+          readOnly: true
+{{- end }}
       initContainers:
       {{- include "groundcover.initContainer.waitForEndpoint" (dict 
           "root" $ 
@@ -130,4 +135,9 @@ spec:
       - configMap:
           name: k8s-watcher-config
         name: k8s-watcher-config-volume
+{{- if .Values.global.ingestion.mtlsSecretName }}
+      - name: ingestion-mtls-certs
+        secret:
+          secretName: {{ .Values.global.ingestion.mtlsSecretName }}
+{{- end }}
 {{ end }}

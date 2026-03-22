@@ -180,6 +180,16 @@ spec:
             - mountPath: /var/lib/docker/containers
               name: docker
               readOnly: true
+{{- if .Values.global.ingestion.mtlsSecretName }}
+            - mountPath: /etc/ingestion-mtls-certs
+              name: ingestion-mtls-certs
+              readOnly: true
+{{- end }}
+{{- if .Values.fleetClientConfig.mtlsSecretName }}
+            - mountPath: /etc/fleet-mtls-certs
+              name: fleet-mtls-certs
+              readOnly: true
+{{- end }}
 {{- if and (eq (include "telemetry.enabled" .) "true") (eq .Values.agent.flb.enabled true) }}
         - name: fluent-bit
           image: {{ tpl .Values.agent.flb.image.repository . }}:{{ .Values.agent.flb.image.tag }}
@@ -312,4 +322,14 @@ spec:
         - hostPath:
             path: /var/log
           name: varlog
+{{- if .Values.global.ingestion.mtlsSecretName }}
+        - name: ingestion-mtls-certs
+          secret:
+            secretName: {{ .Values.global.ingestion.mtlsSecretName }}
+{{- end }}
+{{- if .Values.fleetClientConfig.mtlsSecretName }}
+        - name: fleet-mtls-certs
+          secret:
+            secretName: {{ .Values.fleetClientConfig.mtlsSecretName }}
+{{- end }}
 {{- end }}

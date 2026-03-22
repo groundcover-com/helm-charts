@@ -131,6 +131,16 @@ spec:
         volumeMounts:
         - mountPath: /config
           name: ingestor-config-volume
+{{- if .Values.global.ingestion.mtlsSecretName }}
+        - mountPath: /etc/ingestion-mtls-certs
+          name: ingestion-mtls-certs
+          readOnly: true
+{{- end }}
+{{- if .Values.fleetClientConfig.mtlsSecretName }}
+        - mountPath: /etc/fleet-mtls-certs
+          name: fleet-mtls-certs
+          readOnly: true
+{{- end }}
 {{- if .Values.ingestor.priorityClassName }}
       priorityClassName: {{ .Values.ingestor.priorityClassName }}
 {{- end }}
@@ -155,4 +165,14 @@ spec:
       - configMap:
           name: ingestor-config
         name: ingestor-config-volume
+{{- if .Values.global.ingestion.mtlsSecretName }}
+      - name: ingestion-mtls-certs
+        secret:
+          secretName: {{ .Values.global.ingestion.mtlsSecretName }}
+{{- end }}
+{{- if .Values.fleetClientConfig.mtlsSecretName }}
+      - name: fleet-mtls-certs
+        secret:
+          secretName: {{ .Values.fleetClientConfig.mtlsSecretName }}
+{{- end }}
 {{ end -}}

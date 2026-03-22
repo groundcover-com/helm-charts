@@ -123,6 +123,16 @@ spec:
           name: metrics-aggregator-config-volume
         - mountPath: {{default "/vmagent_pq/vmagent-remotewrite-data" $sensorValues.exporters.remotewrite.tmpDataPath}}
           name: persistent-queue-data
+{{- if .Values.global.ingestion.mtlsSecretName }}
+        - mountPath: /etc/ingestion-mtls-certs
+          name: ingestion-mtls-certs
+          readOnly: true
+{{- end }}
+{{- if .Values.fleetClientConfig.mtlsSecretName }}
+        - mountPath: /etc/fleet-mtls-certs
+          name: fleet-mtls-certs
+          readOnly: true
+{{- end }}
 {{- if $sensorValues.priorityClassName }}
       priorityClassName: {{ $sensorValues.priorityClassName }}
 {{- end }}
@@ -130,6 +140,16 @@ spec:
       - configMap:
           name: {{ include "metrics-aggregator.fullname" . }}-config
         name: metrics-aggregator-config-volume
+{{- if .Values.global.ingestion.mtlsSecretName }}
+      - name: ingestion-mtls-certs
+        secret:
+          secretName: {{ .Values.global.ingestion.mtlsSecretName }}
+{{- end }}
+{{- if .Values.fleetClientConfig.mtlsSecretName }}
+      - name: fleet-mtls-certs
+        secret:
+          secretName: {{ .Values.fleetClientConfig.mtlsSecretName }}
+{{- end }}
   volumeClaimTemplates:
   - metadata:
       name: persistent-queue-data

@@ -520,12 +520,18 @@ apmIngestor:
     writeTimeout: 10s
     batchSize: 100
     flushInterval: 30s
+    tlsCertFile: {{ .Values.global.ingestion.tlsCertFile | default "" | quote }}
+    tlsKeyFile: {{ .Values.global.ingestion.tlsKeyFile | default "" | quote }}
+    tlsCAFile: {{ .Values.global.ingestion.tlsCAFile | default "" | quote }}
   logsOtlpEndpoint:
     endpoint: {{ include "ingestion.logs.otlp.http.url" . }}
     insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
     writeTimeout: 10s
     batchSize: 100
     flushInterval: 30s
+    tlsCertFile: {{ .Values.global.ingestion.tlsCertFile | default "" | quote }}
+    tlsKeyFile: {{ .Values.global.ingestion.tlsKeyFile | default "" | quote }}
+    tlsCAFile: {{ .Values.global.ingestion.tlsCAFile | default "" | quote }}
   dataDog:
     enabled: {{ $sensorValues.apmIngestor.dataDog.enabled }}
     tracesPort: {{ $sensorValues.apmIngestor.dataDog.tracesPort }}
@@ -605,6 +611,9 @@ fleetClientConfig:
   requestInterval: {{ .Values.fleetClientConfig.requestInterval }}
   initialUpdateTimeout: {{ .Values.fleetClientConfig.initialUpdateTimeout }}
   insecureSkipVerify: {{ .Values.fleetClientConfig.insecureSkipVerify }}
+  tlsCertFile: {{ .Values.fleetClientConfig.tlsCertFile | default "" | quote }}
+  tlsKeyFile: {{ .Values.fleetClientConfig.tlsKeyFile | default "" | quote }}
+  tlsCAFile: {{ .Values.fleetClientConfig.tlsCAFile | default "" | quote }}
 
 logs:
   {{ if $sensorValues.collectionEnabled }}
@@ -668,16 +677,25 @@ tracesOtlpEndpoint:
   endpoint: {{ include "ingestion.traces.otlp.http.url" . }}
   insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
   writeTimeout: 10s
+  tlsCertFile: {{ .Values.global.ingestion.tlsCertFile | default "" | quote }}
+  tlsKeyFile: {{ .Values.global.ingestion.tlsKeyFile | default "" | quote }}
+  tlsCAFile: {{ .Values.global.ingestion.tlsCAFile | default "" | quote }}
 logsOtlpEndpoint:
   endpoint: {{ include "ingestion.logs.otlp.http.url" . }}
   insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
   writeTimeout: 10s
+  tlsCertFile: {{ .Values.global.ingestion.tlsCertFile | default "" | quote }}
+  tlsKeyFile: {{ .Values.global.ingestion.tlsKeyFile | default "" | quote }}
+  tlsCAFile: {{ .Values.global.ingestion.tlsCAFile | default "" | quote }}
 customOtlpEndpoint:
   endpoint: {{ include "ingestion.custom.otlp.http.url" . }}
   insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
   writeTimeout: 10s
   batchSize: 350
   flushInterval: 1s
+  tlsCertFile: {{ .Values.global.ingestion.tlsCertFile | default "" | quote }}
+  tlsKeyFile: {{ .Values.global.ingestion.tlsKeyFile | default "" | quote }}
+  tlsCAFile: {{ .Values.global.ingestion.tlsCAFile | default "" | quote }}
 
 {{ if $sensorValues.tracesStaticOttlRules }}
 tracesStaticOttlRules:

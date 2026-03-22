@@ -58,10 +58,20 @@ data:
       batchSize: 350
       concurrency: 15
       flushInterval: 1s
+      {{- if .Values.global.ingestion.mtlsSecretName }}
+      tlsCertFile: {{ .Values.global.ingestion.tlsCertFile | quote }}
+      tlsKeyFile: {{ .Values.global.ingestion.tlsKeyFile | quote }}
+      tlsCAFile: {{ .Values.global.ingestion.tlsCAFile | quote }}
+      {{- end }}
     tracesOtlpEndpoint:
       endpoint: {{ include "ingestion.traces.otlp.http.url" . }}
       insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
       writeTimeout: 10s
+      {{- if .Values.global.ingestion.mtlsSecretName }}
+      tlsCertFile: {{ .Values.global.ingestion.tlsCertFile | quote }}
+      tlsKeyFile: {{ .Values.global.ingestion.tlsKeyFile | quote }}
+      tlsCAFile: {{ .Values.global.ingestion.tlsCAFile | quote }}
+      {{- end }}
     Pprof:
       enabled: {{ include "telemetry.enabled" . }}
       cpuSamplingDuration: {{ .Values.k8sWatcher.pprof.cpuSamplingDuration }}

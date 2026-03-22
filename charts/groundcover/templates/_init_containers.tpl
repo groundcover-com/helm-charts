@@ -33,6 +33,13 @@ Usage:
       {{- if .root.Values.global.ingestion.tls_skip_verify }}
         -k \
       {{- end }}
+      {{- if .root.Values.global.ingestion.mtlsSecretName }}
+        --cert {{ .root.Values.global.ingestion.tlsCertFile }} \
+        --key {{ .root.Values.global.ingestion.tlsKeyFile }} \
+        {{- if .root.Values.global.ingestion.tlsCAFile }}
+        --cacert {{ .root.Values.global.ingestion.tlsCAFile }} \
+        {{- end }}
+      {{- end }}
         -sw '%{http_code}' {{ .url }} -o "$RESPONSE")
         if [ "$HTTP_CODE" -eq {{ .expectedCode }} ]; then
           rm -f "$RESPONSE"
@@ -50,6 +57,12 @@ Usage:
     - /bin/sh
     - -c
   image: '{{ tpl .root.Values.curl.image.repository .root }}:{{ tpl .root.Values.curl.image.tag .root }}'
+{{- if .root.Values.global.ingestion.mtlsSecretName }}
+  volumeMounts:
+  - mountPath: /etc/ingestion-mtls-certs
+    name: ingestion-mtls-certs
+    readOnly: true
+{{- end }}
   securityContext:
     allowPrivilegeEscalation: false
     capabilities:
