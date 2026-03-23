@@ -6,7 +6,13 @@ global:
     pods:
       labels:
         collectAll: false
-        metrics: []
+        metrics:
+          - app.kubernetes.io/name
+          - app.kubernetes.io/instance
+          - app.kubernetes.io/version
+          - app.kubernetes.io/component
+          - app.kubernetes.io/part-of
+          - app.kubernetes.io/managed-by
         logs: []
         traces: []
         events: []
