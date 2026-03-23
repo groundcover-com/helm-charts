@@ -72,7 +72,10 @@ exporters:
   remotewrite:
     url: {{ if $sensorValues.exporters.remotewrite.url }}{{ tpl $sensorValues.exporters.remotewrite.url . }}{{ else }}{{ include "metrics-ingester.write.http.url" . }}{{ end }}
     usePrometheusCompatibleNaming: {{ $sensorValues.exporters.remotewrite.usePrometheusCompatibleNaming }}
-    tlsSkipVerify: true
+    tlsSkipVerify: {{ $sensorValues.exporters.remotewrite.tlsSkipVerify }}
+    tlsCertFile: {{ $sensorValues.exporters.remotewrite.tlsCertFile | default "" | quote }}
+    tlsKeyFile: {{ $sensorValues.exporters.remotewrite.tlsKeyFile | default "" | quote }}
+    tlsCAFile: {{ $sensorValues.exporters.remotewrite.tlsCAFile | default "" | quote }}
     maxDiskUsagePerURL: {{ $sensorValues.exporters.remotewrite.maxDiskUsagePerURL }}
     tmpDataPath: {{ $sensorValues.exporters.remotewrite.tmpDataPath }}
     numberOfConcurrentQueues: {{ $sensorValues.exporters.remotewrite.numberOfConcurrentQueues }}

@@ -535,6 +535,10 @@ agent:
         usePrometheusCompatibleNaming: true
         forcePrometheusProtocol: true
         memoryAllowedBytes: "50MB"
+        tlsSkipVerify: true
+        tlsCertFile: ""
+        tlsKeyFile: ""
+        tlsCAFile: ""
     pipelines:
       metrics:
         enricherEnabled: true
