@@ -790,6 +790,7 @@ dbManager:
   objectStorageQueues: {}
   objectStorageDestTables:
     logs: "logs_v8"
+    traces: "traces_v2"
     metricsMetadata: "metrics_metadata"
   cloudPricing:
     enabled: true
