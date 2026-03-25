@@ -684,6 +684,9 @@ agent:
         unstructuredConfig:
     noPayloadsMode: false
     k8sEntitiesWatch:
+      # pod:
+      #   enabled: true  # must explicitly define
+      #   fieldSelector: "metadata.namespace!=demo-ng"
       crd:
         enabled: true
         allowedKinds:
