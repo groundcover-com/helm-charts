@@ -1,5 +1,6 @@
 {{- $agentService := include "agent-service.values" . | fromYaml }}
 {{- if $agentService.enabled | default false }}
+{{- if ne ($agentService.config.llmProvider | default "bedrock") "vertex" }}
 {{- if $agentService.bedrock }}
 {{- if $agentService.bedrock.enableModelAccess }}
 apiVersion: batch/v1
@@ -64,6 +65,7 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+{{- end }}
 {{- end }}
 {{- end }}
 {{- end }}

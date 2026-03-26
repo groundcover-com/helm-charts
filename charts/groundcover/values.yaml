@@ -861,9 +861,15 @@ agentService:
       maxSurge: 1
   config:
     routerUrl: "https://app.groundcover.com"
+    llmProvider: "bedrock"  # "bedrock" or "vertex"
     awsRegion: ""
     bedrockModelId: "anthropic.claude-sonnet-4-6"
     bedrockLargeModelId: "anthropic.claude-sonnet-4-6"
+    # GCP Vertex AI settings (used when llmProvider: "vertex")
+    gcpProjectId: ""
+    gcpRegion: "global"
+    vertexModelId: "claude-haiku-4-5@20251001"
+    vertexLargeModelId: "claude-sonnet-4-6@default"
     otelTracingEnabled: "true"
     otelServiceName: "agent-service"
     otelExporterOtlpEndpoint: ""
@@ -885,6 +891,10 @@ agentService:
     enableModelAccess: true
     region: "us-east-1"
     models: []
+  vertex:
+    region: "global"
+    projectId: ""
+  gcpCredentials: {}  # configMapName, audience (for EKS→GCP WIF)
   resources:
     requests:
       cpu: 500m

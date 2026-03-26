@@ -107,6 +107,8 @@ spec:
                   fieldPath: metadata.annotations['groundcover_version']
             - name: ROUTER_URL
               value: {{ $agentService.config.routerUrl | quote }}
+            - name: LLM_PROVIDER
+              value: {{ $agentService.config.llmProvider | default "bedrock" | quote }}
             {{- if $agentService.config.awsRegion }}
             - name: AWS_REGION
               value: {{ $agentService.config.awsRegion | quote }}
@@ -118,6 +120,28 @@ spec:
             {{- if $agentService.config.bedrockLargeModelId }}
             - name: ORCHESTRATOR_MODEL_ID
               value: {{ $agentService.config.bedrockLargeModelId | quote }}
+            {{- end }}
+            {{- if eq ($agentService.config.llmProvider | default "bedrock") "vertex" }}
+            {{- if $agentService.config.gcpProjectId }}
+            - name: GCP_PROJECT_ID
+              value: {{ $agentService.config.gcpProjectId | quote }}
+            {{- end }}
+            {{- if $agentService.config.gcpRegion }}
+            - name: GCP_REGION
+              value: {{ $agentService.config.gcpRegion | quote }}
+            {{- end }}
+            {{- if $agentService.config.vertexModelId }}
+            - name: VERTEX_MODEL_ID
+              value: {{ $agentService.config.vertexModelId | quote }}
+            {{- end }}
+            {{- if $agentService.config.vertexLargeModelId }}
+            - name: VERTEX_ORCHESTRATOR_MODEL_ID
+              value: {{ $agentService.config.vertexLargeModelId | quote }}
+            {{- end }}
+            {{- end }}
+            {{- if $agentService.gcpCredentials }}
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /var/run/secrets/gcp/gcp-config.json
             {{- end }}
             - name: OTEL_TRACING_ENABLED
               value: {{ $agentService.config.otelTracingEnabled | quote }}
@@ -184,6 +208,15 @@ spec:
             {{- with $agentService.env }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
+          {{- if $agentService.gcpCredentials }}
+          volumeMounts:
+            - name: gcp-credentials
+              mountPath: /var/run/secrets/gcp
+              readOnly: true
+            - name: gcp-token
+              mountPath: /var/run/secrets/tokens
+              readOnly: true
+          {{- end }}
           lifecycle:
             preStop:
               exec:
@@ -213,5 +246,18 @@ spec:
       {{- with $agentService.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if $agentService.gcpCredentials }}
+      volumes:
+        - name: gcp-credentials
+          configMap:
+            name: {{ $agentService.gcpCredentials.configMapName }}
+        - name: gcp-token
+          projected:
+            sources:
+              - serviceAccountToken:
+                  audience: {{ $agentService.gcpCredentials.audience | quote }}
+                  expirationSeconds: 3600
+                  path: gcp-token
       {{- end }}
 {{- end }}
