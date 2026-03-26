@@ -184,6 +184,7 @@ httphandler:
   interval: 30s
   summarizerActiveTtl: 45s
   aggregationCacheSize: 4096
+  includeHostInAPMMetrics: {{ (default dict $sensorValues.httphandler).includeHostInAPMMetrics | default false }}
 
 grpchandler:
   samplesthreshold: 10

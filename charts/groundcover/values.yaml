@@ -634,6 +634,7 @@ agent:
         windowSize: 12h
         initialWait: 10m
     httphandler:
+      includeHostInAPMMetrics: false
       truncationConfig:
         enabled: true
         payloadSizeLimit: 10240
