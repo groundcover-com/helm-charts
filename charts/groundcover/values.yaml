@@ -815,7 +815,7 @@ dbManager:
     favoriteAttributesTracesKeys: []
   indexTiers: {}
     # Map of table types to index tier configurations
-    # Currently supports: logs (future: traces, etc.)
+    # Currently supports: logs, traces
     # Uses GCQL syntax for filters
     # Example:
     # logs:
@@ -825,6 +825,11 @@ dbManager:
     #     filters: "cluster:prod"
     #   - name: "archived"
     #     filters: "namespace:*-archive AND NOT level:debug"
+    # traces:
+    #   - name: "hot"
+    #     filters: "cluster:prod AND protocol_type:HTTP AND status:ERROR"
+    #   - name: "warm"
+    #     filters: "cluster:prod"
   popularAttributes:
     # Enable automatic discovery of popular attribute keys from query patterns
     enabled: false
