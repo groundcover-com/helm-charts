@@ -1660,6 +1660,36 @@ portal:
     config:
   autodiscovery: false
   maxResponseSizeBytes: 33554432
+  
+  # MetricsQL query usage tracking
+  queryUsageTracker:
+    enabled: false
+
+  # Instrumentation configuration for metrics and tracing
+  instrumentation:
+    # Metrics push configuration
+    metricsTargets: []
+      # - endpoint: "http://victoriametrics:8428/api/v1/import/prometheus"
+      #   headers:
+      #     X-Auth: "APIKEY_PLACEHOLDER"
+    metricsPushInterval: 15s
+    metricsExtraLabels: {}
+      # cluster: "my-cluster"
+      # env: "production"
+    
+    # Tracing configuration
+    tracingTargets: []
+      # - endpoint: "https://otel-collector:4318/v1/traces"
+      #   headers:
+      #     Authorization: "Bearer token"
+      #   insecure: false
+      #   tlsSkipVerify: false
+    batchSize: 512
+    batchTimeout: 5s
+    exportTimeout: 30s
+    maxQueueSize: 2048
+    spanAttributes: {}
+      # env: "production"
 
 dispatchCenter:
   additionalLabels:

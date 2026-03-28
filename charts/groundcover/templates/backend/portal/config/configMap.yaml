@@ -48,6 +48,8 @@ data:
 
     VictoriaMetrics:
       URL: {{ include "victoria-metrics.read.http.url" . }}
+      QueryUsageTracker:
+        Enabled: {{ .Values.portal.queryUsageTracker.enabled }}
 
     ClickHouse:
       Pass: "OVERRIDEN"
@@ -119,6 +121,59 @@ data:
     IntegrationAgent:
       Enabled: {{ .Values.global.integrations.agent.enabled }}
       Endpoint: {{ include "integrations-agent.url" . }}
+
+    Instrumentation:
+      MetricsTargets:
+      {{- range .Values.portal.instrumentation.metricsTargets }}
+        - Endpoint: {{ .endpoint }}
+          {{- if .headers }}
+          Headers:
+            {{- range $key, $value := .headers }}
+            {{ $key }}: {{ $value | quote }}
+            {{- end }}
+          {{- end }}
+      {{- end }}
+      MetricsPushInterval: {{ .Values.portal.instrumentation.metricsPushInterval }}
+      {{- if .Values.portal.instrumentation.metricsExtraLabels }}
+      MetricsExtraLabels:
+        {{- range $key, $value := .Values.portal.instrumentation.metricsExtraLabels }}
+        {{ $key }}: {{ $value | quote }}
+        {{- end }}
+      {{- end }}
+      TracingTargets:
+      {{- range .Values.portal.instrumentation.tracingTargets }}
+        - Endpoint: {{ .endpoint }}
+          {{- if .headers }}
+          Headers:
+            {{- range $key, $value := .headers }}
+            {{ $key }}: {{ $value | quote }}
+            {{- end }}
+          {{- end }}
+          {{- if .insecure }}
+          Insecure: {{ .insecure }}
+          {{- end }}
+          {{- if .tlsSkipVerify }}
+          TlsSkipVerify: {{ .tlsSkipVerify }}
+          {{- end }}
+      {{- end }}
+      {{- if .Values.portal.instrumentation.batchSize }}
+      BatchSize: {{ .Values.portal.instrumentation.batchSize }}
+      {{- end }}
+      {{- if .Values.portal.instrumentation.batchTimeout }}
+      BatchTimeout: {{ .Values.portal.instrumentation.batchTimeout }}
+      {{- end }}
+      {{- if .Values.portal.instrumentation.exportTimeout }}
+      ExportTimeout: {{ .Values.portal.instrumentation.exportTimeout }}
+      {{- end }}
+      {{- if .Values.portal.instrumentation.maxQueueSize }}
+      MaxQueueSize: {{ .Values.portal.instrumentation.maxQueueSize }}
+      {{- end }}
+      {{- if .Values.portal.instrumentation.spanAttributes }}
+      SpanAttributes:
+        {{- range $key, $value := .Values.portal.instrumentation.spanAttributes }}
+        {{ $key }}: {{ $value | quote }}
+        {{- end }}
+      {{- end }}
 
     RumSourcemaps:
       Enabled: {{ .Values.global.ingestor.enabled }}
