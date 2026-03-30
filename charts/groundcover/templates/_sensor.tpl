@@ -542,6 +542,8 @@ apmIngestor:
     samplingRatio: {{ $sensorValues.apmIngestor.dataDog.samplingRatio }}
     handleTraces: {{ $sensorValues.apmIngestor.dataDog.handleTraces }}
     handleStats: {{ $sensorValues.apmIngestor.dataDog.handleStats }}
+    handleSeries: {{ $sensorValues.apmIngestor.dataDog.handleSeries }}
+    innerPort: {{ $sensorValues.apmIngestor.dataDog.innerPort | default 0 }}
   otel:
     direct:
       enabled: {{ $sensorValues.apmIngestor.otel.direct.enabled }}
@@ -916,7 +918,7 @@ sensitiveHeadersObfuscationConfig:
 {{- if and (eq "true" (include "groundcover.sensor.receivers.remotewrite.enabled" .)) (include "groundcover.sensor.receivers.remotewrite.port" .) }}
 - containerPort: {{ include "groundcover.sensor.receivers.remotewrite.port" . }}
   name: remote-write
-  protocol: TCP     
+  protocol: TCP
 {{- end }}
 {{- if $sensorValues.healthProbe.enabled }}
 - containerPort: {{ $sensorValues.healthProbe.port }}
