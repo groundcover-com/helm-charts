@@ -346,20 +346,15 @@ spec:
                 name: {{ include "metrics-ingester.fullname" . }}
                 port:
                   name: http
-          - path: {{ get (urlParse (include "metrics-ingester.datadog.http.v1.url" .)) "path" }}
+          {{- range (include "metrics-ingester.datadog.series.paths" . | fromJsonArray) }}
+          - path: {{ . }}
             pathType: Exact
             backend:
               service:
-                name: {{ .Values.global.ingestor.enabled | ternary (include "ingestor.fullname" .) (include "opentelemetry-collector.fullname" .) }}
+                name: {{ include "ingestor.fullname" $ }}
                 port:
-                  number: {{ index .Values.global "opentelemetry-collector" "ports" "datadogapm" "servicePort" | int }}
-          - path: {{ get (urlParse (include "metrics-ingester.datadog.http.v2.url" .)) "path" }}
-            pathType: Exact
-            backend:
-              service:
-                name: {{ .Values.global.ingestor.enabled | ternary (include "ingestor.fullname" .) (include "opentelemetry-collector.fullname" .) }}
-                port:
-                  number: {{ index .Values.global "opentelemetry-collector" "ports" "datadogapm" "servicePort" | int }}
+                  number: {{ index $.Values.global "opentelemetry-collector" "ports" "datadogapm" "servicePort" | int }}
+          {{- end }}
           - path: {{ get (urlParse (include "metrics-ingester.datadog.http.beta.sketches.url" .)) "path" }}
             pathType: Exact
             backend:
