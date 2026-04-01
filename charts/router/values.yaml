@@ -61,7 +61,7 @@ service:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.11.748
+  tag: 1.11.749
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/tools'
@@ -140,6 +140,7 @@ configuration:
   Reporter:
     StoreStatus: false
   Monitors:
+    MigrationsPath: /monitors-migrations
     DB:
       Host: '{{ splitList ":" (include "postgresql.base.url" .) | first }}'
       Port: '{{ splitList ":" (include "postgresql.base.url" .) | last }}'
