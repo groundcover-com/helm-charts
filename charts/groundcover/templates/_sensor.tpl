@@ -544,6 +544,7 @@ apmIngestor:
     handleStats: {{ $sensorValues.apmIngestor.dataDog.handleStats }}
     handleSeries: {{ $sensorValues.apmIngestor.dataDog.handleSeries }}
     innerPort: {{ $sensorValues.apmIngestor.dataDog.innerPort | default 0 }}
+    envFilterValues: {{ $sensorValues.apmIngestor.dataDog.envFilterValues | default list | toJson }}
   otel:
     direct:
       enabled: {{ $sensorValues.apmIngestor.otel.direct.enabled }}

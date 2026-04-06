@@ -569,6 +569,8 @@ agent:
         handleStats: true
         handleSeries: false
         innerPort: 8127
+        envFilterValues:
+          - "none"
       otel:
         direct:
           enabled: true
@@ -1189,6 +1191,8 @@ ingestor:
       handleStats: true
       handleSeries: false
       innerPort: 8127
+      envFilterValues:
+        - "none"
     otel:
       direct:
         enabled: true
