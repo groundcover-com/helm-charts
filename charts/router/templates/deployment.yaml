@@ -30,6 +30,9 @@ spec:
         prometheus.io/scrape: "true"
         prometheus.io/port: "9102"
         checksum/router_config: {{ include (print $.Template.BasePath "/config/configMap.yaml") . | sha256sum }}
+        {{- if .Values.configurationSecretName }}
+        checksum/config_secret: {{ .Values.configurationSecretName | sha256sum }}
+        {{- end }}
     spec:
       serviceAccountName: router
       {{- if .Values.onprem.enabled }}
@@ -71,6 +74,11 @@ spec:
               mountPath: /config
             - name: certs
               mountPath: /certs
+            {{- if .Values.configurationSecretName }}
+            - name: config-secret-volume
+              mountPath: /config-secret
+              readOnly: true
+            {{- end }}
           ports:
             - containerPort: 8080
               name: frontend
@@ -135,6 +143,10 @@ spec:
                   key: {{ .Values.gitbook.spaceIdKey | quote }}
                   optional: true
             {{- end }}
+            {{- if .Values.configurationSecretName }}
+            - name: CONFIG_OVERRIDES_PATH
+              value: /config-secret/config.yaml
+            {{- end }}
             - name: GIN_MODE
               value: "release"
             - name: GC_GROUNDCOVERVERSION
@@ -181,6 +193,11 @@ spec:
         - name: config-volume
           configMap:
             name: router-config
+        {{- if .Values.configurationSecretName }}
+        - name: config-secret-volume
+          secret:
+            secretName: {{ .Values.configurationSecretName }}
+        {{- end }}
         - name: certs
           secret:
             secretName: {{ include "router.jwt.secretName" . }}

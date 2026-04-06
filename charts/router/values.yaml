@@ -61,7 +61,7 @@ service:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.11.751
+  tag: 1.11.752
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/tools'
@@ -84,6 +84,7 @@ ingresses:
 #           pathType: Prefix
 #           port: 8080
 imagePullSecrets: []
+configurationSecretName: ""
 configuration:
   authProxy: false
   authProxyHeaders:
