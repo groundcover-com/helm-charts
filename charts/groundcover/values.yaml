@@ -567,7 +567,7 @@ agent:
         samplingRatio: 0.05
         handleTraces: true
         handleStats: true
-        handleSeries: true
+        handleSeries: false
         innerPort: 8127
       otel:
         direct:
@@ -1187,7 +1187,7 @@ ingestor:
       samplingRatio: 0.05
       handleTraces: true
       handleStats: true
-      handleSeries: true
+      handleSeries: false
       innerPort: 8127
     otel:
       direct:

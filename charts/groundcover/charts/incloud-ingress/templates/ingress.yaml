@@ -351,9 +351,9 @@ spec:
             pathType: Exact
             backend:
               service:
-                name: {{ include "ingestor.fullname" $ }}
+                name: {{ include "metrics-ingester.fullname" $ }}
                 port:
-                  number: {{ index $.Values.global "opentelemetry-collector" "ports" "datadogapm" "servicePort" | int }}
+                  name: http
           {{- end }}
           - path: {{ get (urlParse (include "metrics-ingester.datadog.http.beta.sketches.url" .)) "path" }}
             pathType: Exact
