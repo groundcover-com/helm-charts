@@ -161,6 +161,10 @@ spec:
             - name: OTEL_EXPORTER_OTLP_HEADERS
               value: "apikey=$(TRACING_APIKEY)"
             {{- end }}
+            {{- if $agentService.config.otelRecordConversationContent }}
+            - name: OTEL_RECORD_CONVERSATION_CONTENT
+              value: {{ $agentService.config.otelRecordConversationContent | quote }}
+            {{- end }}
             - name: DEV_SHOW_TRACE_ID
               value: {{ $agentService.config.devShowTraceId | default "false" | quote }}
             - name: POSTGRES_HOST
