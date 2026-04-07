@@ -234,7 +234,7 @@ global:
       image:
         registry: "public.ecr.aws/groundcovercom"
         repository: postgres
-        tag: "18.1-20260208"
+        tag: "18.1-20260405"
     auth:
       database: "postgres"  # Default admin database for connections (use "defaultdb" for Akamai)
 
@@ -4489,7 +4489,7 @@ backend:
   cloudnative-pg:
     image:
       repository: public.ecr.aws/groundcovercom/cloudnative-pg/cloudnative-pg
-      tag: 1.28.1
+      tag: 1.28.2
     
   postgresql:
     dbs:

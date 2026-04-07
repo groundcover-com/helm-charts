@@ -178,7 +178,7 @@ keep:
   deleteSecretJob:
     image:
       repository: 'public.ecr.aws/groundcovercom/tools' 
-      tag: '20260206'
+      tag: '20260407'
   dedupInitJob:
     image: 'us-docker.pkg.dev/groundcovercom/repo/library/alpine:3.22'
   backend:
@@ -497,3 +497,8 @@ victoria-metrics-distributed:
 cloudnative-pg:
   crds:
     create: false
+
+cnpg-crds:
+  image:
+    repository: 'public.ecr.aws/groundcovercom/tools' 
+    tag: '20260407'
