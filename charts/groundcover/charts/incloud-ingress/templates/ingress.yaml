@@ -351,9 +351,15 @@ spec:
             pathType: Exact
             backend:
               service:
+                {{- if $.Values.global.ingestor.routeSeriesToIngestor }}
+                name: {{ include "ingestor.fullname" $ }}
+                port:
+                  number: {{ index $.Values.global "opentelemetry-collector" "ports" "datadogapm" "servicePort" | int }}
+                {{- else }}
                 name: {{ include "metrics-ingester.fullname" $ }}
                 port:
                   name: http
+                {{- end }}
           {{- end }}
           - path: {{ get (urlParse (include "metrics-ingester.datadog.http.beta.sketches.url" .)) "path" }}
             pathType: Exact

@@ -73,6 +73,7 @@ global:
     enabled: true
   ingestor:
     enabled: true
+    routeSeriesToIngestor: false
     healthProbe:
       port: 2021
   metricsAggregator:
@@ -569,7 +570,6 @@ agent:
         handleTraces: true
         handleStats: true
         handleSeries: false
-        innerPort: 8127
         envFilterValues:
           - "none"
       otel:
@@ -1192,7 +1192,6 @@ ingestor:
       handleTraces: true
       handleStats: true
       handleSeries: false
-      innerPort: 8127
       envFilterValues:
         - "none"
     otel:
