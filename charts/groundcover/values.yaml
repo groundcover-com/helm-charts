@@ -572,6 +572,7 @@ agent:
         handleSeries: false
         envFilterValues:
           - "none"
+        statsCacheTTL: 5m
       otel:
         direct:
           enabled: true
@@ -1194,6 +1195,7 @@ ingestor:
       handleSeries: false
       envFilterValues:
         - "none"
+      statsCacheTTL: 5m
     otel:
       direct:
         enabled: true

@@ -545,6 +545,7 @@ apmIngestor:
     handleStats: {{ $sensorValues.apmIngestor.dataDog.handleStats }}
     handleSeries: {{ $sensorValues.apmIngestor.dataDog.handleSeries }}
     envFilterValues: {{ $sensorValues.apmIngestor.dataDog.envFilterValues | default list | toJson }}
+    statsCacheTTL: {{ $sensorValues.apmIngestor.dataDog.statsCacheTTL | default "5m" }}
   otel:
     direct:
       enabled: {{ $sensorValues.apmIngestor.otel.direct.enabled }}
