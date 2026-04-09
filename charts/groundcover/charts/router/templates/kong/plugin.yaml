@@ -100,4 +100,17 @@ config:
   policy: local
   fault_tolerant: true
 plugin: rate-limiting
+---
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: strip-webauth-headers-plugin
+  namespace: {{ .Release.Namespace }}
+plugin: pre-function
+config:
+  access:
+    - |
+      kong.service.request.clear_header("X-WEBAUTH-USER")
+      kong.service.request.clear_header("X-WEBAUTH-ROLES")
+      kong.service.request.clear_header("X-WEBAUTH-ORG")
 {{- end -}}

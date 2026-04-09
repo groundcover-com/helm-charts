@@ -200,5 +200,5 @@ spec:
         {{- end }}
         - name: certs
           secret:
-            secretName: {{ include "router.jwt.secretName" . }}
+            secretName: {{ ternary (include "router.jwt.generatedSecretName" .) (include "router.jwt.secretName" .) (or (eq .Values.global.auth.type "no-auth") (eq .Values.global.airgap true)) }}
 {{ end -}}

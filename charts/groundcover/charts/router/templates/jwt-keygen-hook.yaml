@@ -1,0 +1,108 @@
+{{- if or (eq .Values.global.auth.type "no-auth") ( eq .Values.global.airgap true) -}}
+{{- $generatedSecretName := include "router.jwt.generatedSecretName" . -}}
+{{- if not (lookup "v1" "Secret" .Release.Namespace $generatedSecretName) }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: jwt-keygen
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "router.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    "helm.sh/hook-weight": "-5"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: jwt-keygen
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "router.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    "helm.sh/hook-weight": "-5"
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: jwt-keygen
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "router.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    "helm.sh/hook-weight": "-5"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: jwt-keygen
+subjects:
+  - kind: ServiceAccount
+    name: jwt-keygen
+    namespace: {{ .Release.Namespace }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: jwt-keygen
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "router.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    "helm.sh/hook-weight": "-4"
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: jwt-keygen
+    spec:
+      restartPolicy: Never
+      imagePullSecrets: {{ include "router.imagePullSecrets" . }}
+      serviceAccountName: jwt-keygen
+      containers:
+        - name: keygen
+          image: '{{ tpl .Values.curl.image.repository . }}:{{ tpl .Values.curl.image.tag . }}'
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              SECRET_NAME="{{ $generatedSecretName }}"
+              NAMESPACE="{{ .Release.Namespace }}"
+
+              # Check if secret already exists
+              if kubectl get secret "$SECRET_NAME" -n "$NAMESPACE" >/dev/null 2>&1; then
+                echo "Secret $SECRET_NAME already exists, skipping"
+                exit 0
+              fi
+
+              # Generate RSA key pair (PKCS8 format for x509.ParsePKCS8PrivateKey compatibility)
+              openssl genpkey -algorithm RSA -out /tmp/private_key.pem -pkeyopt rsa_keygen_bits:2048
+              openssl pkey -in /tmp/private_key.pem -pubout -out /tmp/public_key.pem
+
+              # Create Kubernetes secret
+              kubectl create secret generic "$SECRET_NAME" \
+                --from-file=private_key.pem=/tmp/private_key.pem \
+                --from-file=public_key.pem=/tmp/public_key.pem \
+                -n "$NAMESPACE"
+
+              kubectl label secret "$SECRET_NAME" \
+                app.kubernetes.io/managed-by=Helm \
+                app.kubernetes.io/part-of=groundcover \
+                -n "$NAMESPACE"
+
+              echo "Successfully created secret $SECRET_NAME"
+{{- end }}
+{{- end }}

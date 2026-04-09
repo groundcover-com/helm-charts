@@ -1,0 +1,21 @@
+{{- if and (eq .Values.global.auth.type "no-auth") (eq .Values.global.auth.enabled true) -}}
+---
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: api-ingeress-plugin
+  namespace: {{ .Release.Namespace }}
+plugin: pre-function
+config:
+  access:
+    - |
+
+      kong.service.request.clear_header("X-WEBAUTH-USER")
+      kong.service.request.clear_header("X-WEBAUTH-ROLES")
+      kong.service.request.clear_header("X-WEBAUTH-ORG")
+
+      local auth = kong.request.get_header("Authorization")
+      if not auth then
+        return kong.response.exit(401, { message = "Unauthorized - Authorization header is required" })                                                                            
+      end
+{{- end -}}

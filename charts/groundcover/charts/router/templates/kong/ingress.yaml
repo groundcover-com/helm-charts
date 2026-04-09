@@ -40,7 +40,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ printf "%s-auth" (include "router.fullname" .) }}
-  {{- $authAnnotations := mergeOverwrite (dict) $globalKongIngressAnnotations (dict "konghq.com/plugins" "key-auth" "konghq.com/protocols" "http,https") }}
+  {{- $authAnnotations := mergeOverwrite (dict) $globalKongIngressAnnotations (dict "konghq.com/plugins" "key-auth,strip-webauth-headers-plugin" "konghq.com/protocols" "http,https") }}
   annotations:
     {{- range $key, $value := $authAnnotations }}
     {{- printf "%s: %s" $key ($value | quote) | nindent 4 }}
@@ -80,7 +80,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ printf "%s-clickhouse" (include "router.fullname" .) }}
-  {{- $clickhouseAnnotations := mergeOverwrite (dict) $globalKongIngressAnnotations (dict "konghq.com/protocols" "http,https" "konghq.com/headers.X-Clickhouse-User" "default" "konghq.com/plugins" "key-auth,clickhouse-ds-rewrite") }}
+  {{- $clickhouseAnnotations := mergeOverwrite (dict) $globalKongIngressAnnotations (dict "konghq.com/protocols" "http,https" "konghq.com/headers.X-Clickhouse-User" "default" "konghq.com/plugins" "key-auth,clickhouse-ds-rewrite,strip-webauth-headers-plugin") }}
   annotations:
     {{- range $key, $value := $clickhouseAnnotations }}
     {{- printf "%s: %s" $key ($value | quote) | nindent 4 }}
@@ -114,7 +114,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ printf "%s-grafana" (include "router.fullname" .) }}
-  {{- $grafanaAnnotations := mergeOverwrite (dict) $globalKongIngressAnnotations (dict "konghq.com/protocols" "http,https" "konghq.com/plugins" "grafana-rewrite" "konghq.com/headers.Grafana-Terraform-Provider" "true") }}
+  {{- $grafanaAnnotations := mergeOverwrite (dict) $globalKongIngressAnnotations (dict "konghq.com/protocols" "http,https" "konghq.com/plugins" "grafana-rewrite,strip-webauth-headers-plugin" "konghq.com/headers.Grafana-Terraform-Provider" "true") }}
   annotations:
     {{- range $key, $value := $grafanaAnnotations }}
     {{- printf "%s: %s" $key ($value | quote) | nindent 4 }}

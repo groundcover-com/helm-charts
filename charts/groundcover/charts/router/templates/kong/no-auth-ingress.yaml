@@ -27,12 +27,11 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  {{- if $globalKongIngressAnnotations }}
+  {{- $noAuthAnnotations := mergeOverwrite (dict) $globalKongIngressAnnotations (dict "konghq.com/plugins" "api-ingeress-plugin") }}
   annotations:
-    {{- range $key, $value := $globalKongIngressAnnotations }}
+    {{- range $key, $value := $noAuthAnnotations }}
     {{- printf "%s: %s" $key ($value | quote) | nindent 4 }}
     {{- end }}
-  {{- end }}
   name: router-no-auth-api-ingress
   namespace: {{ .Release.Namespace }}
 spec:
