@@ -51,6 +51,7 @@ receivers:
   metricsscraper:
     enabled: {{ $sensorValues.receivers.metricsscraper.enabled }}
     maxScrapeSize: {{ $sensorValues.receivers.metricsscraper.maxScrapeSize }}
+    enableTCP6: {{ $sensorValues.receivers.metricsscraper.enableTCP6 }}
   {{ end }}
   {{- if $sensorValues.rum }}
   rum:

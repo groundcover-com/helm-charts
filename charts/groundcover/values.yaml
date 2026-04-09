@@ -508,6 +508,7 @@ agent:
       metricsscraper:
         enabled: false
         maxScrapeSize: 67108864
+        enableTCP6: false
         # Custom relabel configs that will be appended to the default kubernetes-pods job relabel_configs
         # This allows you to add filtering/labeling without creating a new scrape job
         # Example usage:
