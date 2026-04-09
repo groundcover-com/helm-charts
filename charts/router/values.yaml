@@ -61,7 +61,7 @@ service:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.11.757
+  tag: 1.11.758
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/tools'
@@ -312,7 +312,7 @@ grafana:
   extraSecretMounts:
     - name: certs
       mountPath: /certs
-      secretName: groundcover-jwt
+      secretName: groundcover-jwt-generated
       readOnly: true
       subPath: ""
   extraInitContainers:

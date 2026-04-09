@@ -104,6 +104,10 @@ Create the name of the service account to use
 {{ print "groundcover-jwt" }}
 {{- end -}}
 
+{{- define "router.jwt.generatedSecretName" -}}
+{{ print "groundcover-jwt-generated" }}
+{{- end -}}
+
 {{- define "router.jwt.secretKey" -}}
 {{ print "private_key.pem" }}
 {{- end -}}
