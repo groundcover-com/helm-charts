@@ -30,7 +30,6 @@ spec:
         prometheus.io/scrape: "true"
         prometheus.io/port: "8080"
         groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
-        karpenter.sh/do-not-disrupt: "true"
     spec:
       terminationGracePeriodSeconds: 450
       serviceAccountName: {{ ($agentService.serviceAccount).name | default $agentService.serviceAccountName | default (include "agent-service.fullname" .) }}
