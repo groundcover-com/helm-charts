@@ -1817,6 +1817,18 @@ commHub:
       jumpSizeInMCPU: 100
       windowSize: 12h
       initialWait: 10m
+  postgresql:
+    enabled: true
+    name: "comm_hub"
+    sslMode: "disable"
+    timeout: "30s"
+    interval: "2s"
+    enableTracing: false
+    migrationsPath: "/migrations"
+    skipMigrations: false
+  encryption:
+    existingSecret: ""
+    secretKey: "encryption-key"
 
 pdfReportGenerator:
   additionalLabels:

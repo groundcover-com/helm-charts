@@ -71,6 +71,24 @@ spec:
               key: {{ template "groundcover.apikeySecretKey" . }}
               name: {{ template "groundcover.apikeySecretName" . }}
         {{- end }}
+        {{- if or .Values.commHub.postgresql.existingSecret .Values.global.postgresql.enabled }}
+        - name: GC_POSTGRESQL_PASS
+          valueFrom:
+            secretKeyRef:
+              {{- if .Values.commHub.postgresql.existingSecret }}
+              name: {{ .Values.commHub.postgresql.existingSecret }}
+              key: {{ .Values.commHub.postgresql.existingSecretKey | default "password" }}
+              {{- else }}
+              name: {{ include "postgresql.secretName" . }}
+              key: {{ include "postgresql.adminPasswordKey" . }}
+              {{- end }}
+        {{- end }}
+        - name: GC_ENCRYPTION_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "comm-hub.encryptionSecretName" . }}
+              key: {{ include "comm-hub.encryptionSecretKeyName" . }}
+              optional: true
         {{- with .Values.commHub.env }}
         {{- tpl (toYaml .) $ | nindent 8 }}
         {{- end }}
