@@ -132,4 +132,6 @@ data:
       MinThreshold: {{ .Values.dbManager.popularAttributes.minThreshold | default 2 }}
       MaxKeysPerDomain: {{ .Values.dbManager.popularAttributes.maxKeysPerDomain | default 50 }}
       SyncInterval: {{ .Values.dbManager.popularAttributes.syncInterval | default "1h" }}
+    WorkloadScheduling:
+      {{- toYaml .Values.dbManager.workloadScheduling | nindent 6 }}
 {{- end -}}

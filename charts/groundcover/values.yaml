@@ -847,6 +847,25 @@ dbManager:
     maxKeysPerDomain: 50
     # How often to run the sync (e.g., "1h", "30m", "6h")
     syncInterval: "1h"
+  workloadScheduling:
+    Resources:
+      - Name: cpu
+        Clauses:
+          - "WORKER THREAD"
+    Workloads:
+      - Name: all
+      - Name: heavy
+        Parent: all
+        Settings:
+          priority: 1
+      - Name: light
+        Parent: all
+        Settings:
+          priority: 8
+      - Name: dispatch-center
+        Parent: all
+        Settings:
+          priority: 20
 
 agentService:
   enabled: false
