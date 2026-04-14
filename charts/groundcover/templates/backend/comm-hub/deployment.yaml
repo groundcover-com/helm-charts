@@ -45,6 +45,7 @@ spec:
 {{ toYaml .Values.commHub.podLabels | indent 8 }}
         {{- end }}
     spec:
+      enableServiceLinks: false
 {{- if .Values.commHub.tolerations }}
       tolerations:
 {{ toYaml .Values.commHub.tolerations | indent 8 }}
