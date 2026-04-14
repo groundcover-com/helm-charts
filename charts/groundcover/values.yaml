@@ -476,6 +476,7 @@ agent:
     forceSamplingByProductType:
       enabled: true
       products:
+        - gen_ai
         - openai
         - anthropic
         - bedrock
@@ -751,8 +752,8 @@ agent:
         secretKeyRef:
           key: '{{ template "groundcover.apikeySecretKey" . }}'
           name: '{{ template "groundcover.apikeySecretName" . }}' 
-    httpUnlimitedEndpoints: "/v1/chat/completions,/v1/responses,/v1/messages,/model/"
-    http2UnlimitedEndpoints: "/v1/chat/completions,/v1/responses,/v1/messages,/model/"
+    httpUnlimitedEndpoints: "/v1/chat/completions,/v1/responses,/v1/messages,/model/,:generateContent,:streamGenerateContent"
+    http2UnlimitedEndpoints: "/v1/chat/completions,/v1/responses,/v1/messages,/model/,:generateContent,:streamGenerateContent"
     childcountruleoverrides:
     - depth: 0
       maxChildren: 100
