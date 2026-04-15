@@ -500,5 +500,5 @@ cloudnative-pg:
 
 cnpg-crds:
   image:
-    repository: 'public.ecr.aws/groundcovercom/tools' 
+    repository: 'public.ecr.aws/groundcovercom/tools'
     tag: '20260407'

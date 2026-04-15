@@ -16,6 +16,6 @@ config:
 
       local auth = kong.request.get_header("Authorization")
       if not auth then
-        return kong.response.exit(401, { message = "Unauthorized - Authorization header is required" })                                                                            
+        return kong.response.exit(401, { message = "Unauthorized - Authorization header is required" })
       end
 {{- end -}}
