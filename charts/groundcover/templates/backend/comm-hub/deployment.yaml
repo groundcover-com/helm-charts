@@ -28,6 +28,7 @@ spec:
         prometheus.io/scrape: "true"
         prometheus.io/port: "9102"
         groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+        checksum/config: {{ include (print $.Template.BasePath "/backend/comm-hub/configmap.yaml") . | sha256sum }}
         {{- if .Values.commHub.additionalAnnotations }}
 {{ toYaml .Values.commHub.additionalAnnotations | indent 8 }}
         {{- end }}
@@ -72,17 +73,18 @@ spec:
               key: {{ template "groundcover.apikeySecretKey" . }}
               name: {{ template "groundcover.apikeySecretName" . }}
         {{- end }}
-        {{- if or .Values.commHub.postgresql.existingSecret .Values.global.postgresql.enabled }}
+        {{- if .Values.commHub.postgresql.existingSecret }}
         - name: GC_POSTGRESQL_PASS
           valueFrom:
             secretKeyRef:
-              {{- if .Values.commHub.postgresql.existingSecret }}
               name: {{ .Values.commHub.postgresql.existingSecret }}
               key: {{ .Values.commHub.postgresql.existingSecretKey | default "password" }}
-              {{- else }}
+        {{- else }}
+        - name: GC_POSTGRESQL_PASS
+          valueFrom:
+            secretKeyRef:
               name: {{ include "postgresql.secretName" . }}
               key: {{ include "postgresql.adminPasswordKey" . }}
-              {{- end }}
         {{- end }}
         - name: GC_ENCRYPTION_KEY
           valueFrom:

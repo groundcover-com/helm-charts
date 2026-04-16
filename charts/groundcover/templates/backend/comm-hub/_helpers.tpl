@@ -21,28 +21,6 @@ Comm Hub encryption secret name
 {{- end -}}
 
 {{/*
-Comm Hub PostgreSQL host — override or parsed from global base URL
-*/}}
-{{- define "comm-hub.postgresql.host" -}}
-{{- if .Values.commHub.postgresql.host -}}
-  {{- .Values.commHub.postgresql.host -}}
-{{- else if .Values.global.postgresql.enabled -}}
-  {{- splitList ":" (include "postgresql.base.url" .) | first -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Comm Hub PostgreSQL port — override or parsed from global base URL
-*/}}
-{{- define "comm-hub.postgresql.port" -}}
-{{- if .Values.commHub.postgresql.port -}}
-  {{- .Values.commHub.postgresql.port -}}
-{{- else if .Values.global.postgresql.enabled -}}
-  {{- splitList ":" (include "postgresql.base.url" .) | last -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
 Comm Hub encryption secret key name — centralised default
 */}}
 {{- define "comm-hub.encryptionSecretKeyName" -}}

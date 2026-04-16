@@ -190,6 +190,9 @@ spec:
               name: fleet-mtls-certs
               readOnly: true
 {{- end }}
+{{- with .Values.agent.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+{{- end }}
 {{- if and (eq (include "telemetry.enabled" .) "true") (eq .Values.agent.flb.enabled true) }}
         - name: fluent-bit
           image: {{ tpl .Values.agent.flb.image.repository . }}:{{ .Values.agent.flb.image.tag }}
@@ -331,5 +334,8 @@ spec:
         - name: fleet-mtls-certs
           secret:
             secretName: {{ .Values.fleetClientConfig.mtlsSecretName }}
+{{- end }}
+{{- with .Values.agent.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
 {{- end }}
 {{- end }}

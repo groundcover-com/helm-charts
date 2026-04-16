@@ -110,6 +110,9 @@ spec:
           name: ingestion-mtls-certs
           readOnly: true
 {{- end }}
+        {{- with .Values.k8sWatcher.extraVolumeMounts }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
       initContainers:
       {{- include "groundcover.initContainer.waitForEndpoint" (dict 
           "root" $ 
@@ -135,6 +138,9 @@ spec:
       - configMap:
           name: k8s-watcher-config
         name: k8s-watcher-config-volume
+      {{- with .Values.k8sWatcher.extraVolumes }}
+        {{- toYaml . | nindent 6 }}
+      {{- end }}
 {{- if .Values.global.ingestion.mtlsSecretName }}
       - name: ingestion-mtls-certs
         secret:

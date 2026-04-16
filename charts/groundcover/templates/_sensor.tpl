@@ -108,6 +108,14 @@ pipelines:
         content: {{ $sensorValues.pipelines.metrics.aggregation.configuration.content | quote }}
       {{- end }}
     {{- end }}
+    {{- if $sensorValues.pipelines.metrics.relabeling }}
+    relabeling:
+      enabled: {{ $sensorValues.pipelines.metrics.relabeling.enabled }}
+      {{- if $sensorValues.pipelines.metrics.relabeling.configuration }}
+      configuration:
+        {{- $sensorValues.pipelines.metrics.relabeling.configuration | toYaml | nindent 8 }}
+      {{- end }}
+    {{- end }}
     {{- if $sensorValues.pipelines.metrics.summary }}
     summary:
       shards: {{ $sensorValues.pipelines.metrics.summary.shards }}

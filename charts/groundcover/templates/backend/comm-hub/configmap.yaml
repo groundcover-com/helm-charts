@@ -83,16 +83,12 @@ data:
       secretCacheTTL: {{ .Values.commHub.routeConfig.secretCacheTTL | default "5m" }}
 
     postgresql:
-      host: {{ include "comm-hub.postgresql.host" . | quote }}
-      port: {{ include "comm-hub.postgresql.port" . | quote }}
+      host: {{ tpl (toString .Values.commHub.postgresql.host) . | quote }}
+      port: {{ tpl (toString .Values.commHub.postgresql.port) . | quote }}
       name: {{ .Values.commHub.postgresql.name | default "comm_hub" | quote }}
-      {{- if .Values.commHub.postgresql.user }}
-      user: {{ .Values.commHub.postgresql.user | quote }}
-      {{- else }}
-      user: {{ include "postgresql.username" . | quote }}
-      {{- end }}
+      user: {{ tpl (toString .Values.commHub.postgresql.user) . | quote }}
       pass: ""
-      sslMode: {{ .Values.commHub.postgresql.sslMode | default "disable" | quote }}
+      sslMode: {{ .Values.commHub.postgresql.sslMode | default "require" | quote }}
       timeout: {{ .Values.commHub.postgresql.timeout | default "30s" }}
       interval: {{ .Values.commHub.postgresql.interval | default "2s" }}
       enableTracing: {{ .Values.commHub.postgresql.enableTracing | default false }}

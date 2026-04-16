@@ -414,6 +414,8 @@ agent:
             - fargate
   nodeSelector:
   priorityClassName:
+  extraVolumes: []
+  extraVolumeMounts: []
   hostNetwork: false
   monitoring:
     port: 9102
@@ -752,8 +754,19 @@ agent:
         secretKeyRef:
           key: '{{ template "groundcover.apikeySecretKey" . }}'
           name: '{{ template "groundcover.apikeySecretName" . }}' 
-    httpUnlimitedEndpoints: "/v1/chat/completions,/v1/responses,/v1/messages,/model/,:generateContent,:streamGenerateContent"
-    http2UnlimitedEndpoints: "/v1/chat/completions,/v1/responses,/v1/messages,/model/,:generateContent,:streamGenerateContent"
+    genaiUnlimitedEndpoints:
+      - /v1/chat/completions
+      - /v1/responses
+      - /v1/messages
+      - /model/
+      - :generateContent
+      - :streamGenerateContent
+      - :rawPredict
+      - :streamRawPredict
+      - :embedContent
+      - :predict
+    httpUnlimitedEndpoints: '{{ join "," .Values.agent.sensor.genaiUnlimitedEndpoints }}'
+    http2UnlimitedEndpoints: '{{ join "," .Values.agent.sensor.genaiUnlimitedEndpoints }}'
     childcountruleoverrides:
     - depth: 0
       maxChildren: 100
@@ -1341,6 +1354,8 @@ metricsAggregator:
       enricherEnabled: false
       aggregation:
         enabled: true
+      relabeling:
+        enabled: true
       summary:
         shards: 128
         writer:
@@ -1621,6 +1636,8 @@ k8sWatcher:
     initialDelaySeconds: 45
     periodSeconds: 15
     failureThreshold: 20
+  extraVolumes: []
+  extraVolumeMounts: []
 
 journalScraper:
   serviceNames: ["kubelet", "kernel"]
@@ -1839,8 +1856,11 @@ commHub:
       initialWait: 10m
   postgresql:
     enabled: true
+    host: '{{ splitList ":" (include "postgresql.base.url" .) | first }}'
+    port: '{{ splitList ":" (include "postgresql.base.url" .) | last }}'
     name: "comm_hub"
-    sslMode: "disable"
+    user: '{{ include "postgresql.username" . }}'
+    sslMode: "require"
     timeout: "30s"
     interval: "2s"
     enableTracing: false
