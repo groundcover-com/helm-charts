@@ -211,6 +211,9 @@ spec:
             {{- with $agentService.env }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
+            {{- with $agentService.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
           {{- if $agentService.gcpCredentials }}
           volumeMounts:
             - name: gcp-credentials
