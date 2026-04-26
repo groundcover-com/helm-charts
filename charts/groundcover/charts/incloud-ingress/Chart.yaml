@@ -14,11 +14,11 @@ dependencies:
 - condition: cert-manager.enabled
   name: cert-manager
   repository: https://charts.jetstack.io
-  version: 1.15.3
+  version: 1.20.2
 - condition: cert-manager-crds.enabled
   name: cert-manager-crds
   repository: file://../../../cert-manager-crds
-  version: 1.15.1
+  version: 1.20.2
 description: A Helm chart for Kubernetes
 name: incloud-ingress
 type: application

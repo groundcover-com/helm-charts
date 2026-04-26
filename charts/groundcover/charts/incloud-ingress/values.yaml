@@ -78,7 +78,7 @@ cert-manager:
 
 cert-manager-crds:
   enabled: false
-  upgradeCRDs: false
+  upgradeCRDs: true
   image:
     repository: public.ecr.aws/groundcovercom/tools
     tag: "20260407"

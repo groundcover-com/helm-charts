@@ -85,6 +85,10 @@ data:
       BatchSize: 50
       Headers:
         apikey: "OVERRIDEN"
+    {{- else }}
+    Tracing:
+      Enabled: false
+      Endpoint: ""
     {{- end }}
 
     BackendName: "{{ .Values.global.backend.name }}"
