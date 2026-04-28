@@ -1776,6 +1776,11 @@ dispatchCenter:
     pagerdutyEventsURL: "https://events.pagerduty.com/v2/enqueue"
     opsgenieUSEndpoint: "https://api.opsgenie.com/v2/alerts"
     opsgenieEUEndpoint: "https://api.eu.opsgenie.com/v2/alerts"
+  worker:
+    evaluationErrors:
+      interval: 5m
+      lookback: 5m
+      maxRows: 5000
   tracing:
     enabled: false
     writeTimeout: "5s"

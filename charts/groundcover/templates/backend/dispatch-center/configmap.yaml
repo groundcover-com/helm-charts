@@ -106,6 +106,10 @@ data:
     worker:
       taskQueue: "dispatch-center-worker"
       interval: {{ if and .Values.dispatchCenter .Values.dispatchCenter.worker .Values.dispatchCenter.worker.interval }}{{ .Values.dispatchCenter.worker.interval }}{{ else }}15s{{ end }}
+      evaluationErrors:
+        interval: {{ if and .Values.dispatchCenter .Values.dispatchCenter.worker .Values.dispatchCenter.worker.evaluationErrors .Values.dispatchCenter.worker.evaluationErrors.interval }}{{ .Values.dispatchCenter.worker.evaluationErrors.interval }}{{ else }}5m{{ end }}
+        lookback: {{ if and .Values.dispatchCenter .Values.dispatchCenter.worker .Values.dispatchCenter.worker.evaluationErrors .Values.dispatchCenter.worker.evaluationErrors.lookback }}{{ .Values.dispatchCenter.worker.evaluationErrors.lookback }}{{ else }}5m{{ end }}
+        maxRows: {{ if and .Values.dispatchCenter .Values.dispatchCenter.worker .Values.dispatchCenter.worker.evaluationErrors .Values.dispatchCenter.worker.evaluationErrors.maxRows }}{{ .Values.dispatchCenter.worker.evaluationErrors.maxRows }}{{ else }}5000{{ end }}
       maxChildWorkflowsPerBatch: {{ if and .Values.dispatchCenter .Values.dispatchCenter.worker .Values.dispatchCenter.worker.maxChildWorkflowsPerBatch }}{{ .Values.dispatchCenter.worker.maxChildWorkflowsPerBatch }}{{ else }}5000{{ end }}
       maxActivityRetryAttempts: {{ if and .Values.dispatchCenter .Values.dispatchCenter.worker .Values.dispatchCenter.worker.maxActivityRetryAttempts }}{{ .Values.dispatchCenter.worker.maxActivityRetryAttempts }}{{ else }}1000{{ end }}
 
