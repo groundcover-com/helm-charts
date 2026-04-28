@@ -1780,7 +1780,6 @@ dispatchCenter:
     evaluationErrors:
       interval: 5m
       lookback: 5m
-      maxRows: 5000
   tracing:
     enabled: false
     writeTimeout: "5s"
@@ -2469,7 +2468,7 @@ vector:
     #         .float_attributes.random_number = to_int!(res.number)
   image:
     repository: public.ecr.aws/groundcovercom/vector
-    tag: 0.53.0-debian
+    tag: 0.54.0-debian
   lifecycle: 
     preStop:
       exec:
@@ -4372,7 +4371,7 @@ monitors-manager:
   image:
     registry: public.ecr.aws
     repository: groundcovercom/grafana-groundcover
-    tag: v0.0.48-grafana11.3.7
+    tag: v0.0.49-grafana11.3.7
   nameOverride: monitors-manager
   persistence:
     enabled: true
