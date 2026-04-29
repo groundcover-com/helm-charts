@@ -552,6 +552,9 @@ apmIngestor:
     handleTraces: {{ $sensorValues.apmIngestor.dataDog.handleTraces }}
     handleStats: {{ $sensorValues.apmIngestor.dataDog.handleStats }}
     handleSeries: {{ $sensorValues.apmIngestor.dataDog.handleSeries }}
+    handleSketches: {{ $sensorValues.apmIngestor.dataDog.handleSketches }}
+    handleLogs: {{ $sensorValues.apmIngestor.dataDog.handleLogs }}
+    innerPort: {{ dig "apmIngestor" "dataDog" "innerPort" 0 $sensorValues }}
     envFilterValues: {{ $sensorValues.apmIngestor.dataDog.envFilterValues | default list | toJson }}
     statsCacheTTL: {{ $sensorValues.apmIngestor.dataDog.statsCacheTTL | default "5m" }}
   otel:
@@ -588,6 +591,9 @@ apmIngestor:
       rum:
         enabled: {{ $sensorValues.apmIngestor.otel.direct.rum.enabled }}
         port: {{ $sensorValues.apmIngestor.otel.direct.rum.port }}
+      statsd:
+        enabled: {{ dig "apmIngestor" "otel" "direct" "statsd" "enabled" false $sensorValues }}
+        port: {{ dig "apmIngestor" "otel" "direct" "statsd" "port" 8125 $sensorValues }}
 {{ end }}
 pprof:
   enabled: {{ include "telemetry.enabled" . }}
@@ -836,6 +842,12 @@ sensitiveHeadersObfuscationConfig:
   port: {{ $sensorValues.apmIngestor.otel.direct.rum.port }}
   targetPort: {{ $sensorValues.apmIngestor.otel.direct.rum.port }}
 {{- end }}
+{{- if and (dig "apmIngestor" "otel" "direct" "statsd" "enabled" false $sensorValues) (dig "apmIngestor" "otel" "direct" "statsd" "port" 0 $sensorValues) }}
+- protocol: UDP
+  name: statsd
+  port: {{ dig "apmIngestor" "otel" "direct" "statsd" "port" 8125 $sensorValues }}
+  targetPort: {{ dig "apmIngestor" "otel" "direct" "statsd" "port" 8125 $sensorValues }}
+{{- end }}
 {{- if and ($sensorValues.rum) $sensorValues.rum.sourceMaps.enabled $sensorValues.rum.sourceMaps.port }}
 - protocol: TCP
   name: rum-sourcemaps
@@ -919,6 +931,11 @@ sensitiveHeadersObfuscationConfig:
 - containerPort: {{ $sensorValues.apmIngestor.otel.direct.rum.port }}
   name: rum
   protocol: TCP
+{{- end }}
+{{- if and (dig "apmIngestor" "otel" "direct" "statsd" "enabled" false $sensorValues) (dig "apmIngestor" "otel" "direct" "statsd" "port" 0 $sensorValues) }}
+- containerPort: {{ dig "apmIngestor" "otel" "direct" "statsd" "port" 8125 $sensorValues }}
+  name: statsd
+  protocol: UDP
 {{- end }}
 {{- if and ($sensorValues.rum) $sensorValues.rum.sourceMaps.enabled $sensorValues.rum.sourceMaps.port }}
 - containerPort: {{ $sensorValues.rum.sourceMaps.port }}

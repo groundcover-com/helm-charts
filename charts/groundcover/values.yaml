@@ -74,6 +74,8 @@ global:
   ingestor:
     enabled: true
     routeSeriesToIngestor: false
+    routeSketchesToIngestor: false
+    routeLogsToIngestor: false
     healthProbe:
       port: 2021
   metricsAggregator:
@@ -572,7 +574,10 @@ agent:
         samplingRatio: 0.05
         handleTraces: true
         handleStats: true
-        handleSeries: false
+        handleSeries: true
+        handleSketches: true
+        handleLogs: true
+        innerPort: 8127
         envFilterValues:
           - "none"
         statsCacheTTL: 5m
@@ -623,6 +628,9 @@ agent:
           rum:
             enabled: false
             port: 8026
+          statsd:
+            enabled: false
+            port: 8125
     pprof:
       enabled: true
       uploaderType: pyroscope
@@ -1225,7 +1233,10 @@ ingestor:
       samplingRatio: 0.05
       handleTraces: true
       handleStats: true
-      handleSeries: false
+      handleSeries: true
+      handleSketches: true
+      handleLogs: true
+      innerPort: 8127
       envFilterValues:
         - "none"
       statsCacheTTL: 5m
@@ -1279,6 +1290,9 @@ ingestor:
         rum:
           enabled: true
           port: 8026
+        statsd:
+          enabled: false
+          port: 8125
   rum:
     sourceMaps:
       enabled: true

@@ -365,9 +365,31 @@ spec:
             pathType: Exact
             backend:
               service:
-                name: {{ include "metrics-ingester.fullname" . }}
+                {{- if $.Values.global.ingestor.routeSketchesToIngestor }}
+                name: {{ include "ingestor.fullname" $ }}
+                port:
+                  number: {{ index $.Values.global "opentelemetry-collector" "ports" "datadogapm" "servicePort" | int }}
+                {{- else }}
+                name: {{ include "metrics-ingester.fullname" $ }}
                 port:
                   name: http
+                {{- end }}
+          {{- if $.Values.global.ingestor.routeLogsToIngestor }}
+          - path: /api/v2/logs
+            pathType: Exact
+            backend:
+              service:
+                name: {{ include "ingestor.fullname" $ }}
+                port:
+                  number: {{ index $.Values.global "opentelemetry-collector" "ports" "datadogapm" "servicePort" | int }}
+          - path: /datadog/api/v2/logs
+            pathType: Exact
+            backend:
+              service:
+                name: {{ include "ingestor.fullname" $ }}
+                port:
+                  number: {{ index $.Values.global "opentelemetry-collector" "ports" "datadogapm" "servicePort" | int }}
+          {{- end }}
 
 ---
 
