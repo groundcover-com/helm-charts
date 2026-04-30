@@ -3,6 +3,13 @@ global:
   # Replaces: customEntityTags, metricLabels, additionalMetricLabels, nodelabels.
   labelEnrichment:
     staticLabels: {}
+    identifiersMapping: 
+      team:
+        - groundcover-team
+        - tags.datadoghq.com/team
+      service:
+        - groundcover-service
+        - tags.datadoghq.com/service
     pods:
       labels:
         collectAll: false
@@ -1846,6 +1853,11 @@ commHub:
     maxConnsPerHost: 20
     requestTimeout: "30s"
     maxRetries: 5
+  slack:
+    enabled: false
+    baseURL: "https://slack.com"
+    # Empty value lets the chart resolve Slack callback URLs from global.ingress.site.
+    frontendDomain: ""
   routeConfig:
     secretCacheTTL: "5m"
   tracing:

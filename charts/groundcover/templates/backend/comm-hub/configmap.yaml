@@ -1,4 +1,5 @@
 {{- if .Values.global.commHub.enabled }}
+{{- $slackFrontendDomain := .Values.commHub.slack.frontendDomain | default .Values.global.ingress.site -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -78,6 +79,11 @@ data:
       maxConnsPerHost: {{ .Values.commHub.cursorCloud.maxConnsPerHost | default 20 }}
       requestTimeout: {{ .Values.commHub.cursorCloud.requestTimeout | default "30s" }}
       maxRetries: {{ .Values.commHub.cursorCloud.maxRetries | default 5 }}
+
+    slack:
+      enabled: {{ .Values.commHub.slack.enabled | default false }}
+      baseURL: {{ .Values.commHub.slack.baseURL | default "https://slack.com" | quote }}
+      frontendDomain: {{- if .Values.commHub.slack.enabled }} {{ required "commHub.slack.frontendDomain or global.ingress.site is required when commHub.slack.enabled=true" $slackFrontendDomain | quote }}{{- else }} {{ $slackFrontendDomain | default "" | quote }}{{- end }}
 
     routeConfig:
       secretCacheTTL: {{ .Values.commHub.routeConfig.secretCacheTTL | default "5m" }}
