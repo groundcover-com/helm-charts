@@ -290,6 +290,126 @@ telemetry_metrics:
   type: internal_metrics
 {{- end -}}
 
+{{/* Ingestion metrics transforms - calculate body_length and emit counters for logs and traces */}}
+{{/* Only rendered when ingestionMetrics is enabled AND no override modes are active */}}
+{{/* Uses pipelineOutputFromSteps to consume the same pipeline output as normal sinks (after dropOldLogs, etc.) */}}
+{{- define "vector.config.transforms.ingestionMetrics" -}}
+{{- if and .Values.vector.ingestionMetrics.enabled (not .Values.vector.customComponents.transforms.overrideTransforms) (not .Values.vector.customComponents.sources.overrideSources) (not .Values.vector.customComponents.sinks.overrideSinks) }}
+# Logs ingestion metrics pipeline: prep -> log_to_metric
+logs_ingestion_metrics_prep:
+  inputs:
+{{ include "pipelineOutputFromSteps" (dict "pipeline" .Values.vector.logsPipeline) | indent 4 }}
+  type: remap
+  source: |-
+    if !exists(.body_length) || .body_length == 0 {
+      .body_length = length(string(.body) ?? "")
+    }
+    .ingested_count = 1
+    .signal_type = "logs"
+logs_ingestion_to_metric:
+  inputs:
+    - logs_ingestion_metrics_prep
+  type: log_to_metric
+  metrics:
+    - type: counter
+      field: body_length
+      name: ingestion_bytes_total
+      namespace: groundcover_metrics
+      increment_by_value: true
+      tags:
+        env: "{{ "{{" }} env {{ "}}" }}"
+        env_type: "{{ "{{" }} env_type {{ "}}" }}"
+        cluster: "{{ "{{" }} cluster {{ "}}" }}"
+        namespace: "{{ "{{" }} namespace {{ "}}" }}"
+        workload: "{{ "{{" }} workload {{ "}}" }}"
+        source: "{{ "{{" }} source {{ "}}" }}"
+        signal_type: "{{ "{{" }} signal_type {{ "}}" }}"
+        instance: "${MY_POD_NAME}"
+    - type: counter
+      field: ingested_count
+      name: ingestion_count_total
+      namespace: groundcover_metrics
+      increment_by_value: true
+      tags:
+        env: "{{ "{{" }} env {{ "}}" }}"
+        env_type: "{{ "{{" }} env_type {{ "}}" }}"
+        cluster: "{{ "{{" }} cluster {{ "}}" }}"
+        namespace: "{{ "{{" }} namespace {{ "}}" }}"
+        workload: "{{ "{{" }} workload {{ "}}" }}"
+        source: "{{ "{{" }} source {{ "}}" }}"
+        signal_type: "{{ "{{" }} signal_type {{ "}}" }}"
+        instance: "${MY_POD_NAME}"
+# Traces ingestion metrics pipeline: prep -> log_to_metric
+traces_ingestion_metrics_prep:
+  inputs:
+{{ include "pipelineOutputFromSteps" (dict "pipeline" .Values.vector.tracesPipeline) | indent 4 }}
+  type: remap
+  source: |-
+    if !exists(.body_length) || .body_length == 0 {
+      request_body_len = length(string(.request_body) ?? "")
+      response_body_len = length(string(.response_body) ?? "")
+      request_headers_len = length(keys(object(.http_request_headers) ?? {})) * 60
+      response_headers_len = length(keys(object(.http_response_headers) ?? {})) * 60
+      string_attrs_len = length(keys(object(.string_attributes) ?? {})) * 60
+      float_attrs_len = length(keys(object(.float_attributes) ?? {})) * 38
+      .body_length = request_body_len + response_body_len + request_headers_len + response_headers_len + string_attrs_len + float_attrs_len
+    }
+    .ingested_count = 1
+    .signal_type = "traces"
+traces_ingestion_to_metric:
+  inputs:
+    - traces_ingestion_metrics_prep
+  type: log_to_metric
+  metrics:
+    - type: counter
+      field: body_length
+      name: ingestion_bytes_total
+      namespace: groundcover_metrics
+      increment_by_value: true
+      tags:
+        env: "{{ "{{" }} env {{ "}}" }}"
+        env_type: "{{ "{{" }} env_type {{ "}}" }}"
+        cluster: "{{ "{{" }} cluster {{ "}}" }}"
+        namespace: "{{ "{{" }} namespace {{ "}}" }}"
+        workload: "{{ "{{" }} workload {{ "}}" }}"
+        source: "{{ "{{" }} source {{ "}}" }}"
+        signal_type: "{{ "{{" }} signal_type {{ "}}" }}"
+        instance: "${MY_POD_NAME}"
+    - type: counter
+      field: ingested_count
+      name: ingestion_count_total
+      namespace: groundcover_metrics
+      increment_by_value: true
+      tags:
+        env: "{{ "{{" }} env {{ "}}" }}"
+        env_type: "{{ "{{" }} env_type {{ "}}" }}"
+        cluster: "{{ "{{" }} cluster {{ "}}" }}"
+        namespace: "{{ "{{" }} namespace {{ "}}" }}"
+        workload: "{{ "{{" }} workload {{ "}}" }}"
+        source: "{{ "{{" }} source {{ "}}" }}"
+        signal_type: "{{ "{{" }} signal_type {{ "}}" }}"
+        instance: "${MY_POD_NAME}"
+{{- end }}
+{{- end -}}
+
+{{/* Ingestion metrics sink - sends metrics to metrics-ingester via prometheus remote write with 60s flush */}}
+{{/* Only rendered when ingestionMetrics is enabled AND no override modes are active */}}
+{{- define "vector.config.sinks.ingestionMetrics" -}}
+{{- if and .Values.vector.ingestionMetrics.enabled (not .Values.vector.customComponents.transforms.overrideTransforms) (not .Values.vector.customComponents.sources.overrideSources) (not .Values.vector.customComponents.sinks.overrideSinks) }}
+ingestion_metrics_sink:
+  inputs:
+    - logs_ingestion_to_metric
+    - traces_ingestion_to_metric
+  type: prometheus_remote_write
+  endpoint: '{{ include "metrics-ingester.cluster.http.write.url" . }}'
+  batch:
+    timeout_secs: 60
+  healthcheck:
+    enabled: false
+  expire_metrics_secs: 1800
+{{- end }}
+{{- end -}}
+
 {{- define "vector.config.customConfig" -}}
 
 {{ if .Values.vector.customGlobalConfig }}
@@ -312,6 +432,7 @@ sources:
 
 transforms:
 {{- include "vector.config.transforms.telemetry" . | nindent 2 }}
+{{- include "vector.config.transforms.ingestionMetrics" . | nindent 2 }}
 {{ if .Values.vector.customComponents.transforms.overrideTransforms }}
 {{- tpl (toYaml .Values.vector.customComponents.transforms.overrideTransforms) $ | nindent 2 -}}
 {{ else }}
@@ -330,6 +451,7 @@ sinks:
 {{- tpl (toYaml .Values.vector.customComponents.sinks.overrideSinks) $ | nindent 2 -}}
 {{ else }}
 {{- include "vector.config.sinks.telemetry" . | nindent 2 }}
+{{- include "vector.config.sinks.ingestionMetrics" . | nindent 2 }}
 {{ if .Values.vector.customComponents.sinks.extraSinks }}
 {{- tpl (toYaml .Values.vector.customComponents.sinks.extraSinks) $ | nindent 2 }}
 {{ end }}

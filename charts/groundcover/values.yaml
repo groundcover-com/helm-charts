@@ -2427,6 +2427,11 @@ vector:
   # Create vector-config-map ConfigMap. Set to false when not running vector (e.g. standalone).
   configMap:
     enabled: true
+  # Enable ingestion metrics to track bytes and count of ingested logs/traces
+  # Emits groundcover_metrics_ingestion_bytes_total and groundcover_metrics_ingestion_count_total metrics
+  # via prometheus remote write to the metrics-ingester endpoint
+  ingestionMetrics:
+    enabled: false
   podSecurityContext:
     runAsUser: 1000
     runAsNonRoot: true
@@ -2609,6 +2614,11 @@ vector:
         fieldRef:
           apiVersion: v1
           fieldPath: status.podIP
+    - name: MY_POD_NAME
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: metadata.name
     - name: API_KEY
       valueFrom:
         secretKeyRef:
