@@ -3414,7 +3414,7 @@ vector:
               - json_entities
             bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
             region: '{{ .Values.vector.objectStorage.region }}'
-            key_prefix: "v2/entities/"
+            key_prefix: "v2/entities_v2/"
             encoding:
               codec: json
               timestamp_format: rfc3339
@@ -3545,7 +3545,7 @@ vector:
             inputs:
               - entities
               - json_entities
-            key_prefix: v2/entities/
+            key_prefix: v2/entities_v2/
             compression: zstd
             bucket: '{{ .Values.vector.objectStorage.gcsBucket }}'
             batch:
@@ -3682,7 +3682,7 @@ vector:
               - json_entities
             container_name: '{{ .Values.vector.objectStorage.azureBlobContainer }}'
             connection_string: '{{ .Values.vector.objectStorage.azureConnectionString }}'
-            blob_prefix: v2/entities/
+            blob_prefix: v2/entities_v2/
             compression: zstd
             encoding:
               codec: json
