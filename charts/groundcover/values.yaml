@@ -556,6 +556,10 @@ agent:
     pipelines:
       metrics:
         enricherEnabled: true
+        aggregation:
+          enabled: false
+        relabeling:
+          enabled: true
         additionalMetricLabels: {} # DEPRECATED: Use global.labelEnrichment.staticLabels instead
     logs:
       # Custom relabel configs that will be appended to the kubernetes-logs job relabel_configs
@@ -1205,6 +1209,10 @@ ingestor:
   pipelines:
     metrics:
       enricherEnabled: true
+      aggregation:
+        enabled: false
+      relabeling:
+        enabled: true
   logs:
     pipeline:
       dropOldLogs:
@@ -1376,7 +1384,7 @@ metricsAggregator:
       aggregation:
         enabled: true
       relabeling:
-        enabled: true
+        enabled: false
       summary:
         shards: 128
         writer:
