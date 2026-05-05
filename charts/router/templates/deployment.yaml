@@ -79,6 +79,14 @@ spec:
               mountPath: /config-secret
               readOnly: true
             {{- end }}
+            {{- if .Values.gcpCredentials }}
+            - name: gcp-credentials
+              mountPath: /var/run/secrets/gcp
+              readOnly: true
+            - name: gcp-token
+              mountPath: /var/run/secrets/tokens
+              readOnly: true
+            {{- end }}
           ports:
             - containerPort: 8080
               name: frontend
@@ -157,6 +165,30 @@ spec:
               value: "{{ .Values.origin.tag }}"
             - name: ROUTER_SENTRY_DSN
               value: "{{ .Values.sentryDsn }}"
+            {{- if .Values.gcpCredentials }}
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /var/run/secrets/gcp/gcp-config.json
+            - name: LLM_PROVIDER
+              value: "vertex"
+            {{- with .Values.vertexConfig }}
+            {{- if .gcpProjectId }}
+            - name: GCP_PROJECT_ID
+              value: {{ .gcpProjectId | quote }}
+            {{- end }}
+            {{- if .gcpRegion }}
+            - name: GCP_REGION
+              value: {{ .gcpRegion | quote }}
+            {{- end }}
+            {{- if .vertexAnthropicModel }}
+            - name: VERTEX_ANTHROPIC_MODEL
+              value: {{ .vertexAnthropicModel | quote }}
+            {{- end }}
+            {{- if .vertexHaikuModel }}
+            - name: VERTEX_HAIKU_MODEL
+              value: {{ .vertexHaikuModel | quote }}
+            {{- end }}
+            {{- end }}
+            {{- end }}
 {{- if .Values.extraEnv }}
             {{- toYaml .Values.extraEnv | nindent 12 }}
 {{- end }}
@@ -201,4 +233,16 @@ spec:
         - name: certs
           secret:
             secretName: {{ ternary (include "router.jwt.generatedSecretName" .) (include "router.jwt.secretName" .) (or (eq .Values.global.auth.type "no-auth") (eq .Values.global.airgap true)) }}
+        {{- if .Values.gcpCredentials }}
+        - name: gcp-credentials
+          configMap:
+            name: {{ .Values.gcpCredentials.configMapName }}
+        - name: gcp-token
+          projected:
+            sources:
+              - serviceAccountToken:
+                  audience: {{ .Values.gcpCredentials.audience | quote }}
+                  expirationSeconds: 3600
+                  path: gcp-token
+        {{- end }}
 {{ end -}}
