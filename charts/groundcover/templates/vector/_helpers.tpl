@@ -306,6 +306,12 @@ logs_ingestion_metrics_prep:
     }
     .ingested_count = 1
     .signal_type = "logs"
+    .env = string(.env) ?? ""
+    .env_type = string(.env_type) ?? ""
+    .cluster = string(.cluster) ?? ""
+    .namespace = string(.namespace) ?? ""
+    .workload = string(.workload) ?? ""
+    .source = string(.source) ?? ""
 logs_ingestion_to_metric:
   inputs:
     - logs_ingestion_metrics_prep
@@ -356,6 +362,12 @@ traces_ingestion_metrics_prep:
     }
     .ingested_count = 1
     .signal_type = "traces"
+    .env = string(.env) ?? ""
+    .env_type = string(.env_type) ?? ""
+    .cluster = string(.cluster) ?? ""
+    .namespace = string(.namespace) ?? ""
+    .workload = string(.workload) ?? ""
+    .source = string(.source) ?? ""
 traces_ingestion_to_metric:
   inputs:
     - traces_ingestion_metrics_prep

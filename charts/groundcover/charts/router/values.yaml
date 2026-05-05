@@ -61,7 +61,7 @@ service:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.11.819
+  tag: 1.11.820
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/tools'
@@ -187,6 +187,18 @@ nodeSelector: {}
 tolerations: []
 extraEnv: []
 extraContainers: []
+gcpCredentials: {}
+# When populated, expects:
+#   configMapName: "agent-service-gcp-auth-config"
+#   audience: "//iam.googleapis.com/projects/..."
+
+vertexConfig: {}
+# When populated (alongside gcpCredentials), overrides Vertex AI defaults:
+#   gcpProjectId: "incloud-backend-dev"
+#   gcpRegion: "global"
+#   vertexAnthropicModel: "claude-sonnet-4-6@default"
+#   vertexHaikuModel: "claude-haiku-4-5@20251001"
+
 kong-crds:
   upgradeCRDs: true
   image:
