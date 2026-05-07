@@ -105,6 +105,7 @@ spec:
 {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          {{- include "router.containerResizePolicy" (dict "value" .Values.resizePolicy "path" "router.resizePolicy" "kubeVersion" .Capabilities.KubeVersion.GitVersion "indent" 10) }}
           env:
             {{- if .Values.onprem.enabled }}
             - name: GC_KONG_API_ENDPOINT
