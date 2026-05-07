@@ -211,6 +211,9 @@ resourcesPreset: "small"
 ##     memory: 1024Mi
 ##
 resources: {}
+## @param resizePolicy Set container resource resize policy for the ClickHouse container
+##
+resizePolicy: []
 ## @param perShardResources Set container requests and limits for a specific shard in the clickhouse deployment
 ## If no perShardResources is provided, then .Values.resources or common.resources.preset will take effect.
 ## Individual keys must follow the shard<index> pattern as shown below

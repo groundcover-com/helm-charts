@@ -138,6 +138,7 @@ spec:
         {{- end }}
         resources:
 {{- toYaml .Values.commHub.resources | nindent 10 }}
+{{- include "groundcover.containerResizePolicy" (dict "value" .Values.commHub.resizePolicy "path" "commHub.resizePolicy" "kubeVersion" .Capabilities.KubeVersion.GitVersion "indent" 8) }}
       volumes:
       - name: config
         configMap:

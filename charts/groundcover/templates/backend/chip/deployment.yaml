@@ -42,4 +42,5 @@ spec:
               key: {{ include "clickhouse.secretKey" . }}
         resources:
           {{- toYaml .Values.chip.resources | nindent 10 }}
+{{- include "groundcover.containerResizePolicy" (dict "value" .Values.chip.resizePolicy "path" "chip.resizePolicy" "kubeVersion" .Capabilities.KubeVersion.GitVersion "indent" 8) }}
 {{- end }}

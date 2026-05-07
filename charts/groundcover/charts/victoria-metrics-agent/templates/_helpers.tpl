@@ -64,6 +64,45 @@ Create the name of the service account to use
 {{- end -}}
 
 {{/*
+Validate and render a container resizePolicy block.
+*/}}
+{{- define "chart.containerResizePolicy" -}}
+{{- $value := .value -}}
+{{- $path := .path -}}
+{{- $indent := .indent | int -}}
+{{- $kubeVersion := .kubeVersion -}}
+{{- if $value -}}
+{{- if not (kindIs "slice" $value) -}}
+{{- fail (printf "%s must be a list of objects with resourceName and restartPolicy" $path) -}}
+{{- end -}}
+{{- range $index, $policy := $value -}}
+{{- $entryPath := printf "%s[%d]" $path $index -}}
+{{- if not (kindIs "map" $policy) -}}
+{{- fail (printf "%s must be an object with resourceName and restartPolicy" $entryPath) -}}
+{{- end -}}
+{{- if not (hasKey $policy "resourceName") -}}
+{{- fail (printf "%s.resourceName is required" $entryPath) -}}
+{{- end -}}
+{{- if not (hasKey $policy "restartPolicy") -}}
+{{- fail (printf "%s.restartPolicy is required" $entryPath) -}}
+{{- end -}}
+{{- $resourceName := get $policy "resourceName" -}}
+{{- $restartPolicy := get $policy "restartPolicy" -}}
+{{- if or (not (kindIs "string" $resourceName)) (empty $resourceName) -}}
+{{- fail (printf "%s.resourceName must be a non-empty string" $entryPath) -}}
+{{- end -}}
+{{- if or (not (kindIs "string" $restartPolicy)) (not (has $restartPolicy (list "NotRequired" "RestartContainer"))) -}}
+{{- fail (printf "%s.restartPolicy must be one of NotRequired or RestartContainer" $entryPath) -}}
+{{- end -}}
+{{- end -}}
+{{- if semverCompare ">=1.27.0-0" $kubeVersion -}}
+{{- printf "resizePolicy:" | nindent $indent -}}
+{{- toYaml $value | nindent (add $indent 2 | int) -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Defines the name of configuration map
 */}}
 {{- define "chart.configname" -}}

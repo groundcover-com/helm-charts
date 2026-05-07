@@ -118,6 +118,7 @@ spec:
         {{- end }}
         resources:
 {{- toYaml $sensorValues.resources | nindent 10 }}
+{{- include "groundcover.containerResizePolicy" (dict "value" $sensorValues.resizePolicy "path" "metricsAggregator.resizePolicy" "kubeVersion" .Capabilities.KubeVersion.GitVersion "indent" 8) }}
         volumeMounts:
         - mountPath: /config
           name: metrics-aggregator-config-volume

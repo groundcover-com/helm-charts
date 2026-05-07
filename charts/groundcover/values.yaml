@@ -401,7 +401,7 @@ statefulset-modifier:
   sizePatches: true
   image:
     repository: '{{ .Values.global.origin.registry }}/tools' 
-    tag: '20260206'
+    tag: '20260506'
 
 agent:
   imagePullPolicy: 
@@ -457,6 +457,7 @@ agent:
       limits:
         cpu: 100m
         memory: 64Mi
+    resizePolicy: []
     env: []
     builtinEnv:
     - name: API_KEY
@@ -475,6 +476,7 @@ agent:
       limits:
         memory: 1Gi
         cpu: 1000m
+    resizePolicy: []
     nodelabels: [] # DEPRECATED: Use global.labelEnrichment.nodes.labels instead
     contentTypesToDrop: []
     contentTypesWithoutClustering: []
@@ -821,6 +823,7 @@ dbManager:
     requests:
       cpu: 15m
       memory: 15Mi
+  resizePolicy: []
   extraEnvVars:
     - name: CLICKHOUSE_PASSWORD
       valueFrom:
@@ -961,6 +964,7 @@ agentService:
     limits:
       cpu: 2000m
       memory: 2Gi
+  resizePolicy: []
   pdb:
     enabled: true
     minAvailable: 1
@@ -1006,6 +1010,7 @@ chip:
     limits:
       memory: "2Gi"
       cpu: "2000m"
+  resizePolicy: []
 
 integrationsAgent:
   initContainers:
@@ -1042,6 +1047,7 @@ integrationsAgent:
     requests:
       cpu: 500m
       memory: 256Mi
+  resizePolicy: []
   pprof:
     enabled: true
     uploaderType: pyroscope
@@ -1135,6 +1141,7 @@ syntheticsWorker:
     requests:
       cpu: 100m
       memory: 256Mi
+  resizePolicy: []
   env: []
   builtinEnv: []
   readinessProbe:
@@ -1188,6 +1195,7 @@ ingestor:
       memory: 512Mi
     limits:
       memory: 2048Mi
+  resizePolicy: []
   builtinEnv:
   - name: API_KEY
     valueFrom:
@@ -1359,6 +1367,7 @@ metricsAggregator:
       memory: 512Mi
     limits:
       memory: 2048Mi
+  resizePolicy: []
   builtinEnv:
   - name: API_KEY
     valueFrom:
@@ -1489,6 +1498,7 @@ fleetManager:
     limits:
       cpu: 500m
       memory: 512Mi
+  resizePolicy: []
   builtinEnv:
   - name: API_KEY
     valueFrom:
@@ -1623,6 +1633,7 @@ k8sWatcher:
     requests:
       cpu: 500m
       memory: 256Mi
+  resizePolicy: []
   pprof:
     enabled: true
     uploaderType: pyroscope
@@ -1710,6 +1721,7 @@ portal:
     requests:
       cpu: 50m
       memory: 256Mi
+  resizePolicy: []
   pprof:
     enabled: true
     uploaderType: pyroscope
@@ -1787,6 +1799,7 @@ dispatchCenter:
     requests:
       cpu: 1
       memory: 4Gi
+  resizePolicy: []
   healthProbe:
     enabled: true
     port: 8089
@@ -1853,6 +1866,7 @@ commHub:
     requests:
       cpu: 100m
       memory: 256Mi
+  resizePolicy: []
   healthProbe:
     enabled: true
     port: 8089
@@ -1927,6 +1941,7 @@ pdfReportGenerator:
     requests:
       cpu: 500m
       memory: 1Gi
+  resizePolicy: []
   frontendUrl: '{{ printf "https://%s" (required "pdfReportGenerator.frontendUrl requires .Values.global.ingress.site to be set" .Values.global.ingress.site) }}'
   logLevel: "info"
   pdfTimeout: "60000"
@@ -1950,6 +1965,7 @@ pdfReportWorker:
     requests:
       cpu: 100m
       memory: 256Mi
+  resizePolicy: []
   healthProbe:
     enabled: true
     port: 8090
@@ -1981,6 +1997,7 @@ keeper:
     requests:
       cpu: 50m
       memory: 100Mi
+  resizePolicy: []
   persistence:
     size: 10Gi
     storageClass: ""
@@ -2198,6 +2215,7 @@ clickhouse:
       memory: 4Gi
     limits:
       memory: 8Gi
+  resizePolicy: []
 
   ## @param affinity Affinity for ClickHouse pods assignment
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
@@ -3968,6 +3986,7 @@ metrics-ingester:
     requests:
       cpu: 100m
       memory: 256Mi
+  resizePolicy: []
   rollout:
     maxUnavailable: 0
     maxSurge: 1
@@ -3998,6 +4017,7 @@ victoria-metrics-agent:
     requests:
       cpu: 100m
       memory: 128Mi
+  resizePolicy: []
   podAnnotations:
     prometheus.io/port: "8429"
     prometheus.io/scrape: "true"
@@ -4215,6 +4235,7 @@ custom-metrics:
     requests:
       cpu: 100m
       memory: 256Mi
+  resizePolicy: []
   extraArgs:
     remoteWrite.url: '{{ include "ingester.buildRemoteWriteURLTargets" . }}'
     remoteWrite.rateLimit: '{{ include "ingester.buildRemoteWriteRateLimit" . }}'
@@ -4571,7 +4592,7 @@ monitors-manager:
 curl:
   image:
     repository: '{{ .Values.global.origin.registry }}/tools' 
-    tag: '20260206'
+    tag: '20260506'
 
 rbac:
   pspEnabled: false

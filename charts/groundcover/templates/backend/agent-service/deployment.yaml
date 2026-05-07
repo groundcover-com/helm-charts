@@ -229,6 +229,7 @@ spec:
                 command: ["/bin/sleep", "5"]
           resources:
             {{- toYaml $agentService.resources | nindent 12 }}
+          {{- include "groundcover.containerResizePolicy" (dict "value" $agentService.resizePolicy "path" "agentService.resizePolicy" "kubeVersion" .Capabilities.KubeVersion.GitVersion "indent" 10) }}
           readinessProbe:
             httpGet:
               path: /health

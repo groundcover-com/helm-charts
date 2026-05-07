@@ -128,6 +128,7 @@ spec:
         {{- end }}
         resources:
 {{- toYaml .Values.ingestor.resources | nindent 10 }}
+{{- include "groundcover.containerResizePolicy" (dict "value" .Values.ingestor.resizePolicy "path" "ingestor.resizePolicy" "kubeVersion" .Capabilities.KubeVersion.GitVersion "indent" 8) }}
         volumeMounts:
         - mountPath: /config
           name: ingestor-config-volume

@@ -89,6 +89,7 @@ spec:
               protocol: TCP
           resources:
             {{- toYaml .Values.keeper.resources | nindent 12 }}
+          {{- include "groundcover.containerResizePolicy" (dict "value" .Values.keeper.resizePolicy "path" "keeper.resizePolicy" "kubeVersion" .Capabilities.KubeVersion.GitVersion "indent" 10) }}
           volumeMounts:
             - name: working-dir
               mountPath: /var/lib/clickhouse_keeper

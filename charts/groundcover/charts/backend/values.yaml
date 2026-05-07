@@ -178,7 +178,7 @@ keep:
   deleteSecretJob:
     image:
       repository: 'public.ecr.aws/groundcovercom/tools' 
-      tag: '20260407'
+      tag: '20260506'
   dedupInitJob:
     image: 'us-docker.pkg.dev/groundcovercom/repo/library/alpine:3.22'
   backend:
@@ -334,7 +334,7 @@ victoria-metrics-distributed:
       enabled: false
   availabilityZones: []
   pvcAnnotationsJob:
-    image: "{{ .Values.global.origin.registry }}/tools:20260206"
+    image: "{{ .Values.global.origin.registry }}/tools:20260506"
     vmstorage:
       enabled: false
       annotations:
@@ -501,4 +501,4 @@ cloudnative-pg:
 cnpg-crds:
   image:
     repository: 'public.ecr.aws/groundcovercom/tools'
-    tag: '20260407'
+    tag: '20260506'

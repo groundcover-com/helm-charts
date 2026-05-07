@@ -117,6 +117,7 @@ spec:
           image: {{ tpl $sensorValues.image.repository . }}:{{ tpl $sensorValues.image.tag .}}
           resources:
 {{- toYaml $sensorValues.resources | nindent 12 }}
+{{- include "groundcover.containerResizePolicy" (dict "value" $sensorValues.resizePolicy "path" "agent.sensor.resizePolicy" "kubeVersion" .Capabilities.KubeVersion.GitVersion "indent" 10) }}
           imagePullPolicy: {{ default "Always" .Values.agent.imagePullPolicy }}
           name: "sensor"
           ports:
@@ -252,6 +253,7 @@ spec:
               name: {{include "groundcover.config.secretName" .}}
           resources:
             {{- toYaml .Values.agent.flb.resources | nindent 12 }}
+          {{- include "groundcover.containerResizePolicy" (dict "value" .Values.agent.flb.resizePolicy "path" "agent.flb.resizePolicy" "kubeVersion" .Capabilities.KubeVersion.GitVersion "indent" 10) }}
 {{- end }}              
       dnsPolicy: ClusterFirstWithHostNet
       hostNetwork: {{ default false .Values.agent.hostNetwork }}

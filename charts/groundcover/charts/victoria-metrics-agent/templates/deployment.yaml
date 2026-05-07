@@ -167,6 +167,7 @@ spec:
           {{- include "chart.license.mount" . | nindent 12 }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          {{- include "chart.containerResizePolicy" (dict "value" .Values.resizePolicy "path" "victoria-metrics-agent.resizePolicy" "kubeVersion" .Capabilities.KubeVersion.GitVersion "indent" 10) }}
         {{- with .Values.extraContainers }}
         {{- toYaml . | nindent 8 }}
         {{- end }}

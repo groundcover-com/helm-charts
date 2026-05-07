@@ -144,6 +144,7 @@ spec:
         {{- end }}
         resources:
 {{- toYaml .Values.pdfReportWorker.resources | nindent 10 }}
+{{- include "groundcover.containerResizePolicy" (dict "value" .Values.pdfReportWorker.resizePolicy "path" "pdfReportWorker.resizePolicy" "kubeVersion" .Capabilities.KubeVersion.GitVersion "indent" 8) }}
       volumes:
       - name: config
         configMap:

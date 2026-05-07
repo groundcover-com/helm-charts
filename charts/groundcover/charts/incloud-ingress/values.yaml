@@ -5,7 +5,7 @@ kong-crds:
   upgradeCRDs: true
   image:
     repository: 'public.ecr.aws/groundcovercom/tools' 
-    tag: '20260407'
+    tag: '20260506'
 
 kong:
   replicaCount: 2
@@ -81,4 +81,4 @@ cert-manager-crds:
   upgradeCRDs: true
   image:
     repository: public.ecr.aws/groundcovercom/tools
-    tag: "20260407"
+    tag: "20260506"

@@ -182,6 +182,7 @@ spec:
         {{- end }}  
         resources:
 {{- toYaml .Values.dispatchCenter.resources | nindent 10 }}
+{{- include "groundcover.containerResizePolicy" (dict "value" .Values.dispatchCenter.resizePolicy "path" "dispatchCenter.resizePolicy" "kubeVersion" .Capabilities.KubeVersion.GitVersion "indent" 8) }}
       volumes:
       - name: config
         configMap:

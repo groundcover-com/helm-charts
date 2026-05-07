@@ -90,6 +90,7 @@ spec:
           {{ toYaml .Values.integrationsAgent.livenessProbe | nindent 10 }}
         resources:
 {{- toYaml .Values.integrationsAgent.resources | nindent 10 }}
+{{- include "groundcover.containerResizePolicy" (dict "value" .Values.integrationsAgent.resizePolicy "path" "integrationsAgent.resizePolicy" "kubeVersion" .Capabilities.KubeVersion.GitVersion "indent" 8) }}
         volumeMounts:
         - mountPath: /config
           name: integrations-agent-config-volume

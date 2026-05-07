@@ -125,6 +125,7 @@ spec:
           failureThreshold: 20
         resources:
 {{- toYaml .Values.fleetManager.resources | nindent 10 }}
+{{- include "groundcover.containerResizePolicy" (dict "value" .Values.fleetManager.resizePolicy "path" "fleetManager.resizePolicy" "kubeVersion" .Capabilities.KubeVersion.GitVersion "indent" 8) }}
         volumeMounts:
         - mountPath: /config
           name: fleet-manager-config-volume

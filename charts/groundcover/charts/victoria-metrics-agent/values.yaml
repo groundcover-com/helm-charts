@@ -3,7 +3,7 @@
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
-groundcover_version: 1.11.829
+groundcover_version: 1.11.831
 # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
 deployment:
   enabled: true
@@ -180,6 +180,7 @@ resources: {}
 #   cpu: 100m
 #   memory: 128Mi
 
+resizePolicy: []
 # Annotations to be added to the deployment
 annotations: {}
 # Annotations to be added to pod

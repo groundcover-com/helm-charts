@@ -84,6 +84,7 @@ spec:
           name: http          
         resources:
 {{- toYaml .Values.dbManager.resources | nindent 10 }}
+{{- include "groundcover.containerResizePolicy" (dict "value" .Values.dbManager.resizePolicy "path" "dbManager.resizePolicy" "kubeVersion" .Capabilities.KubeVersion.GitVersion "indent" 8) }}
         volumeMounts:
         - mountPath: /config
           name: db-manager-config-volume

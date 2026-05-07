@@ -96,6 +96,7 @@ spec:
           failureThreshold: 3
         resources:
 {{- toYaml .Values.pdfReportGenerator.resources | nindent 10 }}
+{{- include "groundcover.containerResizePolicy" (dict "value" .Values.pdfReportGenerator.resizePolicy "path" "pdfReportGenerator.resizePolicy" "kubeVersion" .Capabilities.KubeVersion.GitVersion "indent" 8) }}
 {{- if .Values.pdfReportGenerator.priorityClassName }}
       priorityClassName: {{ .Values.pdfReportGenerator.priorityClassName }}
 {{- end }}
