@@ -878,6 +878,12 @@ dbManager:
     #     retention: "10d"
     #   - name: "warm"
     #     filters: "cluster:prod"
+    # events:
+    #   - name: "hot"
+    #     filters: "category:k8s_events AND severity:warning"
+    #  retention: "3d"
+    #   - name: "warm"
+    #     filters: "category:k8s_events"
     #     retention: "5d"
   popularAttributes:
     # Enable automatic discovery of popular attribute keys from query patterns
