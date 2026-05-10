@@ -3,11 +3,13 @@ global:
   # Replaces: customEntityTags, metricLabels, additionalMetricLabels, nodelabels.
   labelEnrichment:
     staticLabels: {}
-    identifiersMapping: 
+    identifiersMapping:
       team:
+        - groundcover.com/team
         - groundcover-team
         - tags.datadoghq.com/team
       service:
+        - groundcover.com/service
         - groundcover-service
         - tags.datadoghq.com/service
     pods:
@@ -863,15 +865,20 @@ dbManager:
     # logs:
     #   - name: "hot"
     #     filters: "cluster:prod AND namespace:critical"
+    #     retention: "3d"
     #   - name: "warm"
     #     filters: "cluster:prod"
+    #     retention: "4d"
     #   - name: "archived"
     #     filters: "namespace:*-archive AND NOT level:debug"
+    #     retention: "7d"
     # traces:
     #   - name: "hot"
     #     filters: "cluster:prod AND protocol_type:HTTP AND status:ERROR"
+    #     retention: "10d"
     #   - name: "warm"
     #     filters: "cluster:prod"
+    #     retention: "5d"
   popularAttributes:
     # Enable automatic discovery of popular attribute keys from query patterns
     enabled: false
@@ -1880,6 +1887,13 @@ commHub:
     baseURL: "https://slack.com"
     # Empty value lets the chart resolve Slack callback URLs from global.ingress.site.
     frontendDomain: ""
+  mcp:
+    # Gates the MCP connector. Off by default so environments that haven't
+    # opted in stay dark. AllowInsecureURLs permits http:// MCP server URLs
+    # for local dev only — must remain false in production.
+    enabled: false
+    allowInsecureURLs: false
+    proxyTimeout: "30s"
   routeConfig:
     secretCacheTTL: "5m"
   tracing:

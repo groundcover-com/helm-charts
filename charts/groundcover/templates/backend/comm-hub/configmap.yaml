@@ -85,6 +85,11 @@ data:
       baseURL: {{ .Values.commHub.slack.baseURL | default "https://slack.com" | quote }}
       frontendDomain: {{- if .Values.commHub.slack.enabled }} {{ required "commHub.slack.frontendDomain or global.ingress.site is required when commHub.slack.enabled=true" $slackFrontendDomain | quote }}{{- else }} {{ $slackFrontendDomain | default "" | quote }}{{- end }}
 
+    mcp:
+      enabled: {{ .Values.commHub.mcp.enabled | default false }}
+      allowInsecureURLs: {{ .Values.commHub.mcp.allowInsecureURLs | default false }}
+      proxyTimeout: {{ .Values.commHub.mcp.proxyTimeout | default "30s" }}
+
     routeConfig:
       secretCacheTTL: {{ .Values.commHub.routeConfig.secretCacheTTL | default "5m" }}
 
