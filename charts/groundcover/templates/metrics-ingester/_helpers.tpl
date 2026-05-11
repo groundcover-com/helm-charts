@@ -30,6 +30,10 @@
 {{- list "/api/v1/series" "/api/v2/series" "/datadog/api/v1/series" "/datadog/api/v2/series" | toJson -}}
 {{- end -}}
 
+{{- define "metrics-ingester.datadog.checkrun.paths" -}}
+{{- list "/api/v1/check_run" "/datadog/api/v1/check_run" | toJson -}}
+{{- end -}}
+
 {{- define "metrics-ingester.datadog.http.beta.sketches.url" -}}
 {{- printf "%s/datadog/api/beta/sketches" (include "metrics-ingester.base.http.url" .) -}}
 {{- end -}}

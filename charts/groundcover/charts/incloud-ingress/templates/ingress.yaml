@@ -374,6 +374,15 @@ spec:
                 port:
                   name: http
                 {{- end }}
+          {{- range (include "metrics-ingester.datadog.checkrun.paths" . | fromJsonArray) }}
+          - path: {{ . }}
+            pathType: Exact
+            backend:
+              service:
+                name: {{ include "ingestor.fullname" $ }}
+                port:
+                  number: {{ index $.Values.global "opentelemetry-collector" "ports" "datadogapm" "servicePort" | int }}
+          {{- end }}
           {{- if $.Values.global.ingestor.routeLogsToIngestor }}
           - path: /api/v2/logs
             pathType: Exact
