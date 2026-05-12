@@ -526,6 +526,9 @@ agent:
         enabled: false
         maxScrapeSize: 67108864
         enableTCP6: false
+        # Extra scrape jobs appended to the sensor's scrape config.
+        # role: pod jobs are auto node-scoped; other roles run cluster-wide on every sensor.
+        extraScrapeConfigs: []
         # Custom relabel configs that will be appended to the default kubernetes-pods job relabel_configs
         # This allows you to add filtering/labeling without creating a new scrape job
         # Example usage:
