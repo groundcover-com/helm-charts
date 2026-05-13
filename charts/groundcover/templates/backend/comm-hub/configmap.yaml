@@ -80,6 +80,9 @@ data:
       requestTimeout: {{ .Values.commHub.cursorCloud.requestTimeout | default "30s" }}
       maxRetries: {{ .Values.commHub.cursorCloud.maxRetries | default 5 }}
 
+    providers:
+      registrySyncInterval: {{ .Values.commHub.providers.registrySyncInterval | default "1s" }}
+
     slack:
       enabled: {{ .Values.commHub.slack.enabled | default false }}
       baseURL: {{ .Values.commHub.slack.baseURL | default "https://slack.com" | quote }}

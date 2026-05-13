@@ -1891,6 +1891,8 @@ commHub:
     maxConnsPerHost: 20
     requestTimeout: "30s"
     maxRetries: 5
+  providers:
+    registrySyncInterval: "1s"
   slack:
     enabled: false
     baseURL: "https://slack.com"
