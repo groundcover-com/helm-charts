@@ -61,7 +61,7 @@ service:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.11.850
+  tag: 1.11.851
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/tools'
@@ -279,6 +279,12 @@ grafana:
         name: '{{ include "postgresql.secretName" . }}'
         key: '{{ include "postgresql.adminPasswordKey" . }}'
   grafana.ini:
+    analytics:
+      reporting_enabled: false
+      check_for_updates: false
+      check_for_plugin_updates: false
+    news:
+      news_feed_enabled: false
     live:
       allowed_origins: "*"
     database:
