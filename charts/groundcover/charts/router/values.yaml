@@ -61,11 +61,11 @@ service:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.11.854
+  tag: 1.11.855
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/tools'
-    tag: '20260506'
+    tag: '20260514'
 serviceAccount:
   annotations:
 deployedIngresses:
@@ -204,7 +204,7 @@ kong-crds:
   upgradeCRDs: true
   image:
     repository: 'public.ecr.aws/groundcovercom/tools'
-    tag: '20260506'
+    tag: '20260514'
 kong:
   replicaCount: 1
   image:

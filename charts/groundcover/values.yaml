@@ -403,7 +403,7 @@ statefulset-modifier:
   sizePatches: true
   image:
     repository: '{{ .Values.global.origin.registry }}/tools' 
-    tag: '20260506'
+    tag: '20260514'
 
 agent:
   imagePullPolicy: 
@@ -450,7 +450,7 @@ agent:
     # for ipv6, change to "[::]"
     bindAddress: 0.0.0.0
     image:
-      tag: 4.2.2
+      tag: 4.2.4-20260514-1
       repository: "{{ .Values.global.origin.registry }}/fluent/fluent-bit"
     resources:
       requests:
@@ -4623,7 +4623,7 @@ monitors-manager:
 curl:
   image:
     repository: '{{ .Values.global.origin.registry }}/tools' 
-    tag: '20260506'
+    tag: '20260514'
 
 rbac:
   pspEnabled: false
