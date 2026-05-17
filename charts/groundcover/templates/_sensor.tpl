@@ -46,6 +46,9 @@ receivers:
     enabled: {{ $sensorValues.receivers.remotewrite.enabled }}
     port: {{ $sensorValues.receivers.remotewrite.port }}
     maxConcurrentInserts: {{ $sensorValues.receivers.remotewrite.maxConcurrentInserts }}
+  prometheusimport:
+    enabled: {{ $sensorValues.receivers.prometheusimport.enabled }}
+    port: {{ $sensorValues.receivers.prometheusimport.port }}
   {{ end }}
   {{ if $sensorValues.collectionEnabled }}
   metricsscraper:
@@ -859,6 +862,12 @@ sensitiveHeadersObfuscationConfig:
   port: {{ include "groundcover.sensor.receivers.remotewrite.port" . }}
   targetPort: {{ include "groundcover.sensor.receivers.remotewrite.port" . }}
 {{- end }}
+{{- if and $sensorValues.receivers.prometheusimport.enabled $sensorValues.receivers.prometheusimport.port }}
+- protocol: TCP
+  name: prom-import
+  port: {{ $sensorValues.receivers.prometheusimport.port }}
+  targetPort: {{ $sensorValues.receivers.prometheusimport.port }}
+{{- end }}
 {{- if and $sensorValues.healthProbe.enabled $sensorValues.healthProbe.port }}
 - protocol: TCP
   name: health-http
@@ -944,6 +953,11 @@ sensitiveHeadersObfuscationConfig:
 {{- if and (eq "true" (include "groundcover.sensor.receivers.remotewrite.enabled" .)) (include "groundcover.sensor.receivers.remotewrite.port" .) }}
 - containerPort: {{ include "groundcover.sensor.receivers.remotewrite.port" . }}
   name: remote-write
+  protocol: TCP
+{{- end }}
+{{- if and $sensorValues.receivers.prometheusimport.enabled $sensorValues.receivers.prometheusimport.port }}
+- containerPort: {{ $sensorValues.receivers.prometheusimport.port }}
+  name: prom-import
   protocol: TCP
 {{- end }}
 {{- if $sensorValues.healthProbe.enabled }}

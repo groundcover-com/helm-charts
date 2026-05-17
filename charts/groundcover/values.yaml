@@ -522,6 +522,9 @@ agent:
       remotewrite:
         enabled: true
         port: 8428
+      prometheusimport:
+        enabled: true
+        port: 8430
       metricsscraper:
         enabled: false
         maxScrapeSize: 67108864
@@ -1225,6 +1228,9 @@ ingestor:
     remotewrite:
       enabled: true
       port: 8428
+    prometheusimport:
+      enabled: true
+      port: 8430
   exporters:
     remotewrite:
       usePrometheusCompatibleNaming: true
@@ -1398,6 +1404,9 @@ metricsAggregator:
     remotewrite:
       enabled: true
       port: 8428
+    prometheusimport:
+      enabled: false
+      port: 8430
   exporters:
     remotewrite:
       usePrometheusCompatibleNaming: false
