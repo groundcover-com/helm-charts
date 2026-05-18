@@ -941,7 +941,7 @@ agentService:
       maxSurge: 1
   config:
     routerUrl: "https://app.groundcover.com"
-    llmProvider: "bedrock"  # "bedrock" or "vertex"
+    llmProvider: "bedrock"  # "bedrock", "vertex", or "azure"
     awsRegion: ""
     bedrockModelId: "anthropic.claude-sonnet-4-6"
     bedrockLargeModelId: "anthropic.claude-sonnet-4-6"
@@ -950,6 +950,17 @@ agentService:
     gcpRegion: "global"
     vertexModelId: "claude-haiku-4-5@20251001"
     vertexLargeModelId: "claude-sonnet-4-6@default"
+    # Azure Foundry settings (used when llmProvider: "azure")
+    # Provide either azureFoundryBaseUrl (full https://<resource>.services.ai.azure.com/anthropic)
+    # or azureFoundryResource (just the resource name; SDK constructs the URL).
+    azureFoundryBaseUrl: ""
+    azureFoundryResource: ""
+    azureModelId: "claude-haiku-4-5"
+    azureOrchestratorModelId: "claude-sonnet-4-6"
+    # Set true to use AKS workload identity + Entra ID instead of an API key.
+    # Requires azure-identity to be installed and the SA federated to a UAMI
+    # with the "Azure AI User" role on the Foundry resource.
+    azureFoundryUseEntra: false
     otelTracingEnabled: "true"
     otelServiceName: "agent-service"
     otelExporterOtlpEndpoint: ""
@@ -976,6 +987,10 @@ agentService:
     region: "global"
     projectId: ""
   gcpCredentials: {}  # configMapName, audience (for EKS→GCP WIF)
+  # azureFoundryCredentials wires AZURE_FOUNDRY_API_KEY from a K8s secret.
+  # Required when llmProvider=azure and azureFoundryUseEntra=false (the default).
+  # Shape: { secretName: "agent-service-azure-foundry", apiKeySecretKey: "api-key" }
+  azureFoundryCredentials: {}
   resources:
     requests:
       cpu: 500m

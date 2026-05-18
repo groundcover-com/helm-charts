@@ -9,6 +9,25 @@ kong-crds:
 
 kong:
   replicaCount: 2
+  autoscaling:
+    enabled: false
+    minReplicas: 3
+    maxReplicas: 15
+    metrics:
+      - type: ContainerResource
+        containerResource:
+          name: cpu
+          container: proxy
+          target:
+            type: Utilization
+            averageUtilization: 65
+      - type: ContainerResource
+        containerResource:
+          name: memory
+          container: proxy
+          target:
+            type: Utilization
+            averageUtilization: 75
   image:
     tag: 3.9.1-20260128
     repository: public.ecr.aws/groundcovercom/kong

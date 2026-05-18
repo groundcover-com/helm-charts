@@ -166,6 +166,10 @@ spec:
               value: "{{ .Values.origin.tag }}"
             - name: ROUTER_SENTRY_DSN
               value: "{{ .Values.sentryDsn }}"
+            {{- $azureEnabled := and .Values.azureFoundryCredentials .Values.azureFoundryCredentials.secretName }}
+            {{- if and .Values.gcpCredentials $azureEnabled }}
+            {{- fail "router: gcpCredentials (Vertex) and azureFoundryCredentials (Azure Foundry) are mutually exclusive — set exactly one. Picking both would emit a duplicate LLM_PROVIDER env var and merge unrelated provider config." }}
+            {{- end }}
             {{- if .Values.gcpCredentials }}
             - name: GOOGLE_APPLICATION_CREDENTIALS
               value: /var/run/secrets/gcp/gcp-config.json
@@ -187,6 +191,27 @@ spec:
             {{- if .vertexHaikuModel }}
             - name: VERTEX_HAIKU_MODEL
               value: {{ .vertexHaikuModel | quote }}
+            {{- end }}
+            {{- end }}
+            {{- end }}
+            {{- if $azureEnabled }}
+            - name: LLM_PROVIDER
+              value: "azure"
+            - name: AZURE_FOUNDRY_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.azureFoundryCredentials.secretName | quote }}
+                  key: {{ .Values.azureFoundryCredentials.apiKeySecretKey | default "api-key" | quote }}
+            - name: AZURE_FOUNDRY_BASE_URL
+              value: {{ required "router: azureFoundryConfig.azureFoundryBaseUrl is required when azureFoundryCredentials is set (cmd/router/router.go enforces it at startup)." (.Values.azureFoundryConfig).azureFoundryBaseUrl | quote }}
+            {{- with .Values.azureFoundryConfig }}
+            {{- if .azureModelId }}
+            - name: AZURE_MODEL_ID
+              value: {{ .azureModelId | quote }}
+            {{- end }}
+            {{- if .azureOrchestratorModelId }}
+            - name: AZURE_ORCHESTRATOR_MODEL_ID
+              value: {{ .azureOrchestratorModelId | quote }}
             {{- end }}
             {{- end }}
             {{- end }}

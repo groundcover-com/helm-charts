@@ -138,6 +138,37 @@ spec:
               value: {{ $agentService.config.vertexLargeModelId | quote }}
             {{- end }}
             {{- end }}
+            {{- if eq ($agentService.config.llmProvider | default "bedrock") "azure" }}
+            {{- if $agentService.config.azureFoundryBaseUrl }}
+            - name: AZURE_FOUNDRY_BASE_URL
+              value: {{ $agentService.config.azureFoundryBaseUrl | quote }}
+            {{- end }}
+            {{- if $agentService.config.azureFoundryResource }}
+            - name: AZURE_FOUNDRY_RESOURCE
+              value: {{ $agentService.config.azureFoundryResource | quote }}
+            {{- end }}
+            {{- if $agentService.config.azureModelId }}
+            - name: AZURE_MODEL_ID
+              value: {{ $agentService.config.azureModelId | quote }}
+            {{- end }}
+            {{- if $agentService.config.azureOrchestratorModelId }}
+            - name: AZURE_ORCHESTRATOR_MODEL_ID
+              value: {{ $agentService.config.azureOrchestratorModelId | quote }}
+            {{- end }}
+            {{- if $agentService.config.azureFoundryUseEntra }}
+            - name: AZURE_FOUNDRY_USE_ENTRA
+              value: {{ $agentService.config.azureFoundryUseEntra | quote }}
+            {{- end }}
+            {{- if and $agentService.azureFoundryCredentials $agentService.azureFoundryCredentials.secretName }}
+            - name: AZURE_FOUNDRY_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $agentService.azureFoundryCredentials.secretName | quote }}
+                  key: {{ $agentService.azureFoundryCredentials.apiKeySecretKey | default "api-key" | quote }}
+            {{- else if not $agentService.config.azureFoundryUseEntra }}
+            {{- fail "agentService.azureFoundryCredentials.secretName is required when agentService.config.llmProvider=azure and agentService.config.azureFoundryUseEntra=false. Either provide the K8s secret holding the Foundry API key, or set azureFoundryUseEntra=true to use AKS workload identity instead." }}
+            {{- end }}
+            {{- end }}
             {{- if $agentService.gcpCredentials }}
             - name: GOOGLE_APPLICATION_CREDENTIALS
               value: /var/run/secrets/gcp/gcp-config.json

@@ -61,7 +61,7 @@ service:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.11.865
+  tag: 1.11.866
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/tools'
@@ -199,6 +199,22 @@ vertexConfig: {}
 #   gcpRegion: "global"
 #   vertexAnthropicModel: "claude-sonnet-4-6@default"
 #   vertexHaikuModel: "claude-haiku-4-5@20251001"
+
+azureFoundryCredentials: {}
+# When populated, sets LLM_PROVIDER=azure on the router and wires the AI
+# log parser (OTTL generation pipeline) at
+# internal/services/router/api/pipelines/logs/ai_log_parser to talk to
+# Microsoft Azure Foundry. AZURE_FOUNDRY_API_KEY is pulled from a K8s
+# secret rather than a value literal.
+# Expects:
+#   secretName: "agent-service-azure-foundry"  # K8s secret holding the api key
+#   apiKeySecretKey: "api-key"                 # key within the secret (default "api-key")
+
+azureFoundryConfig: {}
+# When populated (alongside azureFoundryCredentials), overrides Azure Foundry defaults:
+#   azureFoundryBaseUrl: "https://<resource>.services.ai.azure.com/anthropic"
+#   azureModelId: "claude-haiku-4-5"
+#   azureOrchestratorModelId: "claude-sonnet-4-6"
 
 kong-crds:
   upgradeCRDs: true
