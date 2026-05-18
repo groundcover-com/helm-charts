@@ -1112,6 +1112,7 @@ integrationsAgent:
   extraVolumes: []
   extraVolumeMounts: []
   rateLimits:
+    cloudwatchRateLimiterBucketed: false
     cloudwatchListMetrics:
       count: 20
       duration: 1s

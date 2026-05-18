@@ -385,6 +385,9 @@ data:
     {{- end }}
     {{- if .Values.integrationsAgent.rateLimits }}
     RateLimits:
+      {{- if hasKey .Values.integrationsAgent.rateLimits "cloudwatchRateLimiterBucketed" }}
+      CloudwatchRateLimiterBucketed: {{ .Values.integrationsAgent.rateLimits.cloudwatchRateLimiterBucketed }}
+      {{- end }}
       {{- if .Values.integrationsAgent.rateLimits.cloudwatchListMetrics }}
       CloudwatchListMetrics:
         Count: {{ .Values.integrationsAgent.rateLimits.cloudwatchListMetrics.count }}
