@@ -450,7 +450,7 @@ agent:
     # for ipv6, change to "[::]"
     bindAddress: 0.0.0.0
     image:
-      tag: 4.2.4-20260514-1
+      tag: 4.2.4-20260518-1
       repository: "{{ .Values.global.origin.registry }}/fluent/fluent-bit"
     resources:
       requests:
