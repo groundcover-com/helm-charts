@@ -930,6 +930,11 @@ agentService:
     create: true
     name: ""
     annotations: {}
+  # Extra labels to merge onto the agent-service pod template.
+  # AKS workload-identity users must add `azure.workload.identity/use: "true"`
+  # here (mirrors the same pattern as sibling workload-identity services
+  # in the flux overlay — db-manager, integrations-agent, etc.).
+  podLabels: {}
   image:
     repository: "{{ .Values.global.origin.registry }}/agent-service"
     tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
