@@ -589,6 +589,9 @@ agent:
           dropAlwaysThreshold: 12h
           delayStart: 2m
     apmIngestor:
+      measurements:
+        enabled: false
+        flushInterval: 30s
       dataDog:
         enabled: true
         tracesPort: 8126
@@ -1293,6 +1296,9 @@ ingestor:
   ingestionEnabled: true
   setLocalTrafficPolicy: false
   apmIngestor:
+    measurements:
+      enabled: false
+      flushInterval: 30s
     dataDog:
       enabled: true
       tracesPort: 8126
@@ -1495,6 +1501,9 @@ metricsAggregator:
   ingestionEnabled: true
   setLocalTrafficPolicy: false
   apmIngestor:
+    measurements:
+      enabled: false
+      flushInterval: 30s
     dataDog:
       enabled: false
     otel:

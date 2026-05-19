@@ -548,6 +548,9 @@ apmIngestor:
     tlsCertFile: {{ .Values.global.ingestion.tlsCertFile | default "" | quote }}
     tlsKeyFile: {{ .Values.global.ingestion.tlsKeyFile | default "" | quote }}
     tlsCAFile: {{ .Values.global.ingestion.tlsCAFile | default "" | quote }}
+  measurements:
+    enabled: {{ dig "apmIngestor" "measurements" "enabled" false $sensorValues }}
+    flushInterval: {{ dig "apmIngestor" "measurements" "flushInterval" "30s" $sensorValues }}
   dataDog:
     enabled: {{ $sensorValues.apmIngestor.dataDog.enabled }}
     tracesPort: {{ $sensorValues.apmIngestor.dataDog.tracesPort }}
