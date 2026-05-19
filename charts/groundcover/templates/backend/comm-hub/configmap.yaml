@@ -1,5 +1,5 @@
 {{- if .Values.global.commHub.enabled }}
-{{- $slackFrontendDomain := .Values.commHub.slack.frontendDomain | default .Values.global.ingress.site -}}
+{{- $slackFrontendDomain := .Values.commHub.slack.frontendDomain | default .Values.global.ingress.site | default "" -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -86,7 +86,9 @@ data:
     slack:
       enabled: {{ .Values.commHub.slack.enabled | default false }}
       baseURL: {{ .Values.commHub.slack.baseURL | default "https://slack.com" | quote }}
-      frontendDomain: {{- if .Values.commHub.slack.enabled }} {{ required "commHub.slack.frontendDomain or global.ingress.site is required when commHub.slack.enabled=true" $slackFrontendDomain | quote }}{{- else }} {{ $slackFrontendDomain | default "" | quote }}{{- end }}
+      frontendDomain: {{ $slackFrontendDomain | quote }}
+      maxConnsPerHost: {{ .Values.commHub.slack.maxConnsPerHost | default 10 }}
+      requestTimeout: {{ .Values.commHub.slack.requestTimeout | default "30s" }}
 
     mcp:
       enabled: {{ .Values.commHub.mcp.enabled | default false }}

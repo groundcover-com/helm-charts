@@ -1921,7 +1921,9 @@ commHub:
   slack:
     enabled: false
     baseURL: "https://slack.com"
-    # Empty value lets the chart resolve Slack callback URLs from global.ingress.site.
+    maxConnsPerHost: 10
+    requestTimeout: "30s"
+    # Empty value lets the chart resolve to global.ingress.site, which dev/onprem deploys override per namespace.
     frontendDomain: ""
   mcp:
     # Gates the MCP connector. Off by default so environments that haven't
