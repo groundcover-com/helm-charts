@@ -61,7 +61,7 @@ service:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.11.874
+  tag: 1.11.875
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/tools'
