@@ -89,10 +89,15 @@ spec:
         - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
+              {{ if .Values.commHub.postgresql.existingSecret }}
+              name: {{ .Values.commHub.postgresql.existingSecret }}
+              key: {{ .Values.commHub.postgresql.existingSecretKey | default "password" }}
+              {{ else }}
               name: {{ include "postgresql.secretName" . }}
               key: {{ include "postgresql.adminPasswordKey" . }}
+              {{ end }}
         - name: POSTGRES_USER
-          value: '{{ include "postgresql.username" . }}'
+          value: {{ tpl (toString .Values.commHub.postgresql.user) . | quote }}
         - name: POSTGRES_DATABASE
           value: '{{ include "postgresql.database" . }}'
         command:
@@ -103,8 +108,8 @@ spec:
           pg_isready \
             -U "$POSTGRES_USER" \
             -d "dbname=$POSTGRES_DATABASE" \
-            -h {{ splitList ":" (include "postgresql.base.url" .) | first }} \
-            -p {{ splitList ":" (include "postgresql.base.url" .) | last }}
+            -h {{ tpl (toString .Values.commHub.postgresql.host) . | quote }} \
+            -p {{ tpl (toString .Values.commHub.postgresql.port) . | quote }}
       containers:
       - env:
         - name: GC_GROUNDCOVERVERSION

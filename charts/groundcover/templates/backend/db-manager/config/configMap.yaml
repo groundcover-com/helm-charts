@@ -134,4 +134,18 @@ data:
       SyncInterval: {{ .Values.dbManager.popularAttributes.syncInterval | default "1h" }}
     WorkloadScheduling:
       {{- toYaml .Values.dbManager.workloadScheduling | nindent 6 }}
+    StorageManagement:
+      Db:
+        host: {{ tpl .Values.dbManager.db.host . }}
+        port: {{ tpl .Values.dbManager.db.port . }}
+        name: {{ .Values.dbManager.db.name }}
+        user: {{ tpl .Values.dbManager.db.user . }}
+        admindbname: {{ .Values.dbManager.db.admindbname }}
+        pass: ""
+        timeout: {{ .Values.dbManager.db.timeout }}
+        interval: {{ .Values.dbManager.db.interval }}
+        sslmode: {{ .Values.dbManager.db.sslmode }}
+      MigrationsPath: {{ .Values.dbManager.migrationsPath }}
+      SkipMigrations: {{ .Values.dbManager.skipMigrations }}
+      EnableStorageMgmt: {{ .Values.dbManager.enableStorageMgmt | default false }}
 {{- end -}}

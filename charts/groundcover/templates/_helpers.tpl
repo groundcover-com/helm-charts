@@ -280,6 +280,10 @@ Get cluster_id from values or generate random one
 {{- print "http://db-manager:8888/writer-ready" -}}
 {{- end -}}
 
+{{- define "db-manager.http.url" -}}
+{{- print "http://db-manager:8888" -}}
+{{- end -}}
+
 {{- define "fleet-manager.url" -}}
 {{- if .Values.fleetClientConfig.overrideURL -}}
     {{- .Values.fleetClientConfig.overrideURL -}}

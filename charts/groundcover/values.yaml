@@ -942,6 +942,21 @@ dbManager:
         Parent: all
         Settings:
           priority: 20
+  db:
+    host: '{{ splitList ":" (include "postgresql.base.url" .) | first }}'
+    port: '{{ splitList ":" (include "postgresql.base.url" .) | last }}'
+    name: "dbmanager"
+    user: '{{ include "postgresql.username" . }}'
+    pass: ""
+    timeout: 150s
+    interval: 5s
+    sslmode: "require"
+    admindbname: ""
+  skipMigrations: false
+  migrationsPath: "/migrations"
+  # When false, db-manager skips its Postgres pool and runs the legacy
+  # ConfigMap-only retention path (no seeding, no read-back, no storage-management API).
+  enableStorageMgmt: false
 
 agentService:
   enabled: false

@@ -191,6 +191,9 @@ data:
     CommHub:
       Enabled: {{ .Values.global.commHub.enabled }}
       Endpoint: http://{{ include "comm-hub.fullname" . }}:8080
+    DBManager:
+      Enabled: {{ .Values.global.backend.enabled }}
+      Endpoint: {{ include "db-manager.http.url" . }}
     {{- if .Values.portal.configuration.AgentService }}
     AgentService:
       Enabled: {{ .Values.portal.configuration.AgentService.Enabled | default (.Values.agentService.enabled | default false) }}
