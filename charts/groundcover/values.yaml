@@ -681,6 +681,16 @@ agent:
         payloadSizeLimit: 10240
       obfuscationConfig:
         keyValueConfig:
+          enabled: false
+          mode: "ObfuscateSpecificValues"
+          caseSensitive: false
+          specificKeys:
+            - "SecretAccessKey"
+            - "Token"
+            - "client_token"
+            - "secret_id"
+            - "password"
+            - "private_key"
         unstructuredConfig:
     grpchandler:
       truncationConfig:
@@ -769,15 +779,23 @@ agent:
           "X-Amz-Security-Token",
           "X-Amz-Credential",
           "X-Amz-Firehose-Access-Key",
+          "X-Aws-Ec2-Metadata-Token",
+          "X-Aws-Parameters-Secrets-Token",
           "Cookie",
           "Set-Cookie",
+          "token",
+          "apikey",
+          "api_key",
           "Api-Key",
           "X-Api-Key",
           "X-Csrf-Token",
           "X-XSRF-TOKEN",
           "X-Google-Api-Key",
+          "X-Goog-Api-Key",
           "X-Firebase-Auth",
-          "X-Vault-Token"
+          "X-Vault-Token",
+          "X-Consul-Token",
+          "X-Okta-Access-Token"
         ]
     env:
     builtinEnv:
