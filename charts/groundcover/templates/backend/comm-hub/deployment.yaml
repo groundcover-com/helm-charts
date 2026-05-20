@@ -17,11 +17,15 @@ metadata:
   name: {{ include "comm-hub.fullname" . }}
   namespace: {{ .Release.Namespace }}
 spec:
+  replicas: {{ default 2 .Values.commHub.replicas }}
   selector:
     matchLabels:
       app: comm-hub
   strategy:
-    type: Recreate
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
   template:
     metadata:
       annotations:
@@ -60,6 +64,47 @@ spec:
 {{ toYaml .Values.commHub.nodeSelector | indent 8 }}
 {{- end }}
       imagePullSecrets: {{ include "imagePullSecrets" . }}
+      initContainers:
+      {{ if and .Values.global.temporal.enabled .Values.commHub.temporal.host }}
+      - name: wait-for-temporal
+        image: '{{ tpl .Values.curl.image.repository . }}:{{ tpl .Values.curl.image.tag . }}'
+        command:
+          - /bin/sh
+          - -c
+        args:
+          - |
+            TEMPORAL_HOST="{{ .Values.commHub.temporal.host }}"
+            TEMPORAL_PORT="7233"
+
+            echo "Waiting for Temporal at ${TEMPORAL_HOST}:${TEMPORAL_PORT}..."
+            while ! nc -z ${TEMPORAL_HOST} ${TEMPORAL_PORT}; do
+              echo "Temporal is unavailable - sleeping"
+              sleep 2
+            done
+            echo "Temporal is up"
+      {{ end }}
+      - name: wait-for-db
+        image: {{ include "postgresql.initContainers.image" . }}
+        env:
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "postgresql.secretName" . }}
+              key: {{ include "postgresql.adminPasswordKey" . }}
+        - name: POSTGRES_USER
+          value: '{{ include "postgresql.username" . }}'
+        - name: POSTGRES_DATABASE
+          value: '{{ include "postgresql.database" . }}'
+        command:
+        - /bin/sh
+        - -c
+        args:
+        - |
+          pg_isready \
+            -U "$POSTGRES_USER" \
+            -d "dbname=$POSTGRES_DATABASE" \
+            -h {{ splitList ":" (include "postgresql.base.url" .) | first }} \
+            -p {{ splitList ":" (include "postgresql.base.url" .) | last }}
       containers:
       - env:
         - name: GC_GROUNDCOVERVERSION

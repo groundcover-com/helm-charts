@@ -1904,6 +1904,7 @@ dispatchCenter:
       initialWait: 10m
 
 commHub:
+  replicas: 2
   additionalLabels:
   podLabels:
   additionalAnnotations:
@@ -1926,6 +1927,8 @@ commHub:
   healthProbe:
     enabled: true
     port: 8089
+  temporal:
+    host: ""
   cursorCloud:
     baseURL: "https://api.cursor.com"
     maxConnsPerHost: 20
