@@ -17,11 +17,12 @@ metadata:
   name: {{ include "dispatch-center.fullname" . }}
   namespace: {{ .Release.Namespace }}
 spec:
+  replicas: {{ .Values.dispatchCenter.replicas }}
   selector:
     matchLabels:
       app: dispatch-center
   strategy:
-    type: Recreate
+    type: RollingUpdate
   template:
     metadata:
       annotations:

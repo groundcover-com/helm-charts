@@ -1844,6 +1844,7 @@ dispatchCenter:
   nodeSelector:
   tolerations: []
   priorityClassName:
+  replicas: 2
   env: []
   image:
     repository: "{{ .Values.global.origin.registry }}/dispatch-center"
