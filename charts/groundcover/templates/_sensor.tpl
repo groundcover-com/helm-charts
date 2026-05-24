@@ -660,11 +660,6 @@ logs:
       minBackoff: 500ms
       maxBackoff: 5m
       maxRetries: 10
-    externalLabels:
-      cluster_id: {{ include "groundcover.clusterId" . }}
-      env_name: {{ include "groundcover.env" . }}
-      gc_env_type: {{ .Values.env_type }}
-      job: sensor
     timeout: 10s
     useRingBuffer: false
     dropRunningNamespaceLogs: {{  include "groundcover.dropRunningNamespaceLogs" .}}
