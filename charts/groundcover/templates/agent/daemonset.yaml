@@ -22,9 +22,11 @@ metadata:
     {{- end }}
 spec:
   updateStrategy:
-    type: RollingUpdate
+    type: {{ .Values.agent.updateStrategy.type }}
+    {{- if eq .Values.agent.updateStrategy.type "RollingUpdate" }}
     rollingUpdate:
-      maxUnavailable: 100%
+      maxUnavailable: {{ .Values.agent.updateStrategy.rollingUpdate.maxUnavailable }}
+    {{- end }}
   selector:
     matchLabels:
       app: sensor

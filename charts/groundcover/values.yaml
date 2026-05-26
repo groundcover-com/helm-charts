@@ -412,6 +412,10 @@ agent:
   podLabels:
   additionalAnnotations:
   podAnnotations:
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 100%
   tolerations:
   - operator: "Exists"
   affinity:
@@ -3397,7 +3401,7 @@ vector:
             - logs_to_events_transform
             endpoint: '{{ include "clickhouse.shard0HttpEndpoint" . }}'
             database: "groundcover"
-            table: "events_v3"
+            table: "events_v2"
             request:
               retry_attempts: 5
             auth:
