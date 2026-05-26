@@ -412,6 +412,10 @@ agent:
   podLabels:
   additionalAnnotations:
   podAnnotations:
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 100%
   tolerations:
   - operator: "Exists"
   affinity:
