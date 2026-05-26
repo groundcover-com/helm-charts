@@ -3401,7 +3401,7 @@ vector:
             - logs_to_events_transform
             endpoint: '{{ include "clickhouse.shard0HttpEndpoint" . }}'
             database: "groundcover"
-            table: "events_v2"
+            table: "events_v3"
             request:
               retry_attempts: 5
             auth:
