@@ -102,7 +102,6 @@ data:
       pagerdutyEventsURL: {{ .Values.dispatchCenter.notification.pagerdutyEventsURL | default "https://events.pagerduty.com/v2/enqueue" | quote }}
       opsgenieUSEndpoint: {{ .Values.dispatchCenter.notification.opsgenieUSEndpoint | default "https://api.opsgenie.com/v2/alerts" | quote }}
       opsgenieEUEndpoint: {{ .Values.dispatchCenter.notification.opsgenieEUEndpoint | default "https://api.eu.opsgenie.com/v2/alerts" | quote }}
-      commHubBaseURL: {{ printf "http://%s:8080" (include "comm-hub.fullname" .) | quote }}
 
     worker:
       taskQueue: "dispatch-center-worker"
