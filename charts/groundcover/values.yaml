@@ -471,6 +471,7 @@ agent:
     image:
       repository: "{{ .Values.global.origin.registry }}/sensor"
       tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
+    maxUnavailable: 100%
     resources:
       requests:
         memory: 300Mi
