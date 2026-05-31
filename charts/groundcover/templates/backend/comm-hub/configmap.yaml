@@ -1,5 +1,5 @@
 {{- if .Values.global.commHub.enabled }}
-{{- $slackFrontendDomain := .Values.commHub.slack.frontendDomain | default .Values.global.ingress.site | default "" -}}
+{{- $slackFrontendDomain := .Values.commHub.slack.frontendDomain | default .Values.router.frontendDomain | default "" -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
