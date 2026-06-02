@@ -1,0 +1,30 @@
+{{- $ds := (.Values.vmclusters).dualShipping | default dict -}}
+{{- if $ds.enabled -}}
+{{- $ns := .Release.Namespace -}}
+{{- /* whole spec is passed through from values as-is, so any CR field is editable */ -}}
+{{- $spec := deepCopy ($ds.spec | default dict) -}}
+{{- /* remoteWrite is computed dynamically and appended to anything set in values */ -}}
+{{- $rw := $spec.remoteWrite | default list -}}
+{{- range $name, $_ := (.Values.vmclusters).clusters -}}
+{{- $rw = append $rw (dict "url" (printf "http://vminsert-%s.%s:8480/insert/0/prometheus/api/v1/write" $name $ns)) -}}
+{{- end -}}
+{{- /* the default backend write path - reuses the chart's routing helper, which
+       returns the vmauth write balancer when distributed mode is enabled and the
+       vmsingle write url otherwise (and is empty if neither is resolvable) */ -}}
+{{- $defaultUrl := include "metrics-aggregator.write.url" . | trim -}}
+{{- if $defaultUrl -}}
+{{- $rw = append $rw (dict "url" $defaultUrl) -}}
+{{- end -}}
+{{- if not $rw -}}
+{{- fail "vmclusters.dualShipping.enabled is true but no remoteWrite targets were resolved - add entries under vmclusters.clusters, set backend.victoria-metrics-distributed.availabilityZones, or set vmclusters.dualShipping.spec.remoteWrite" -}}
+{{- end -}}
+{{- $_ := set $spec "remoteWrite" $rw -}}
+---
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMAgent
+metadata:
+  name: vmcluster-dual-shipping
+  namespace: {{ $ns }}
+  labels: {{ include "groundcover.labels" $ | nindent 4 }}
+spec: {{ tpl (toYaml $spec) $ | nindent 2 }}
+{{- end }}

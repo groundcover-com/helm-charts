@@ -403,7 +403,7 @@ statefulset-modifier:
   sizePatches: true
   image:
     repository: '{{ .Values.global.origin.registry }}/tools' 
-    tag: '20260514'
+    tag: '20260601'
 
 agent:
   imagePullPolicy: 
@@ -450,7 +450,7 @@ agent:
     # for ipv6, change to "[::]"
     bindAddress: 0.0.0.0
     image:
-      tag: 4.2.4-20260518-1
+      tag: 4.2.4-20260601-1
       repository: "{{ .Values.global.origin.registry }}/fluent/fluent-bit"
     resources:
       requests:
@@ -2629,7 +2629,7 @@ vector:
     #         .float_attributes.random_number = to_int!(res.number)
   image:
     repository: public.ecr.aws/groundcovercom/vector
-    tag: 0.54.0-debian
+    tag: 0.54.0-debian-20260601-1
   lifecycle: 
     preStop:
       exec:
@@ -4215,7 +4215,7 @@ victoria-metrics-agent:
 kube-state-metrics:
   image:
     registry: quay.io/groundcover
-    tag: "v2.18.0-20260205"
+    tag: "v2.19.0-20260602-1"
   resources:
     requests:
       cpu: 200m
@@ -4709,7 +4709,7 @@ monitors-manager:
 curl:
   image:
     repository: '{{ .Values.global.origin.registry }}/tools' 
-    tag: '20260514'
+    tag: '20260601'
 
 rbac:
   pspEnabled: false
@@ -4952,6 +4952,86 @@ backend:
                   name: "managed-postgres-credentials"
                   key: "password"
 
+vmclusters:
+  # Opt-in dual-shipping VMAgent (vmcluster-dual-shipping). When enabled it remote-writes
+  # to the vminsert of every cluster under `clusters` plus the default distributed-chart
+  # cluster (vminsert-vmcluster-<first availabilityZone>).
+  #
+  # `spec` is passed through to the VMAgent CR verbatim - edit/add any field here.
+  # `remoteWrite` is computed from the clusters above and appended to whatever you set.
+  dualShipping:
+    enabled: false
+    spec:
+      image:
+        repository: "{{ .Values.global.origin.registry }}/vmagent"
+        tag: v1.136.0
+      selectAllByDefault: false
+      ingestOnlyMode: true
+      replicaCount: 1
+      podDisruptionBudget:
+        maxUnavailable: 33%
+      statefulMode: true
+      # 100Gi persistent volume backing the on-disk remote-write queue
+      statefulStorage:
+        volumeClaimTemplate:
+          spec:
+            resources:
+              requests:
+                storage: 100Gi
+      extraArgs:
+        maxConcurrentInserts: "1000"
+        remoteWrite.maxDiskUsagePerURL: "100GB"
+        remoteWrite.queues: "200"
+
+  # Shared baseline deep-merged under every entry in `clusters` (per-cluster wins).
+  # Mirrors the defaults of the distributed victoria-metrics chart, plus prometheus
+  # scrape annotations on each component's pods.
+  defaults:
+    retentionPeriod: "30d"
+    replicationFactor: 1
+    vmstorage:
+      replicaCount: 5
+      storageDataPath: /vm-data
+      image:
+        repository: "{{ .Values.global.origin.registry }}/victoriametrics/vmstorage"
+        tag: v1.137.0-cluster-20260303
+      extraArgs:
+        search.maxConcurrentRequests: "8"
+        search.maxTagKeys: "200000"
+        search.maxTagValues: "500000"
+      podMetadata:
+        annotations:
+          prometheus.io/scrape: "true"
+          prometheus.io/port: "8482"
+          prometheus.io/path: "/metrics"
+    vmselect:
+      replicaCount: 2
+      image:
+        repository: "{{ .Values.global.origin.registry }}/victoriametrics/vmselect"
+        tag: v1.137.0-cluster-20260303
+      extraArgs:
+        search.maxQueryLen: "100000"
+        search.maxSeries: "30000"
+        search.maxUniqueTimeseries: "2000000"
+      podMetadata:
+        annotations:
+          prometheus.io/scrape: "true"
+          prometheus.io/port: "8481"
+          prometheus.io/path: "/metrics"
+    vminsert:
+      replicaCount: 3
+      image:
+        repository: "{{ .Values.global.origin.registry }}/victoriametrics/vminsert"
+        tag: v1.137.0-cluster-20260303
+      extraArgs:
+        maxConcurrentInserts: "1000"
+        maxLabelsPerTimeseries: "50"
+      podMetadata:
+        annotations:
+          prometheus.io/scrape: "true"
+          prometheus.io/port: "8480"
+          prometheus.io/path: "/metrics"
+  clusters: {}
 groundcover:
   extraObjects: {}
   podDisruptionBudget:

@@ -1,0 +1,39 @@
+{{- $common := list "nodeSelector" "tolerations" "affinity" "topologySpreadConstraints" -}}
+{{- $components := list "vmstorage" "vmselect" "vminsert" -}}
+{{- $defaults := (.Values.vmclusters).defaults | default dict -}}
+{{- range $name, $overrides := (.Values.vmclusters).clusters }}
+{{- $cluster := mergeOverwrite (deepCopy $defaults) (deepCopy ($overrides | default dict)) -}}
+{{- /* cluster-level common scheduling block + cluster-level pdb default */ -}}
+{{- $commonSpec := dict -}}
+{{- range $k := $common -}}
+{{- if hasKey $cluster $k }}{{- $_ := set $commonSpec $k (index $cluster $k) -}}{{- end -}}
+{{- end -}}
+{{- $clusterPdb := $cluster.pdb | default dict -}}
+{{- /* base spec = everything that is not a component / helper key */ -}}
+{{- $spec := omit $cluster "pdb" "nodeSelector" "tolerations" "affinity" "topologySpreadConstraints" -}}
+{{- range $comp := $components -}}
+{{- if hasKey $cluster $comp -}}
+{{- $compSpec := index $cluster $comp | default dict -}}
+{{- /* component value wins over cluster-level common scheduling */ -}}
+{{- $merged := merge (deepCopy $compSpec) (deepCopy $commonSpec) -}}
+{{- /* resolve pdb: component-level keys override cluster-level, missing keys inherited */ -}}
+{{- $pdb := merge (deepCopy (index $compSpec "pdb" | default dict)) (deepCopy $clusterPdb) -}}
+{{- $merged = omit $merged "pdb" -}}
+{{- if $pdb.enable -}}
+{{- $pdbSpec := dict -}}
+{{- if hasKey $pdb "minAvailable" }}{{- $_ := set $pdbSpec "minAvailable" $pdb.minAvailable -}}{{- end -}}
+{{- if hasKey $pdb "maxUnavailable" }}{{- $_ := set $pdbSpec "maxUnavailable" $pdb.maxUnavailable -}}{{- end -}}
+{{- $_ := set $merged "podDisruptionBudget" $pdbSpec -}}
+{{- end -}}
+{{- $_ := set $spec $comp $merged -}}
+{{- end -}}
+{{- end }}
+---
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMCluster
+metadata:
+  name: {{ $name }}
+  namespace: {{ $.Release.Namespace }}
+  labels: {{ include "groundcover.labels" $ | nindent 4 }}
+spec: {{ tpl (toYaml $spec) $ | nindent 2 }}
+{{- end }}
