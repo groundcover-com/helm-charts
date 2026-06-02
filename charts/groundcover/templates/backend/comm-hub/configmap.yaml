@@ -90,6 +90,11 @@ data:
       maxConnsPerHost: {{ .Values.commHub.slack.maxConnsPerHost | default 10 }}
       requestTimeout: {{ .Values.commHub.slack.requestTimeout | default "30s" }}
 
+    socketMode:
+      # Quote the durations so a numeric override (e.g. 30) renders as a string and fails
+      # loudly in config.Load rather than being decoded as nanoseconds (30 -> 30ns).
+      reconcileInterval: {{ .Values.commHub | dig "socketMode" "reconcileInterval" "15s" | quote }}
+
     mcp:
       enabled: {{ .Values.commHub.mcp.enabled | default false }}
       allowInsecureURLs: {{ .Values.commHub.mcp.allowInsecureURLs | default false }}

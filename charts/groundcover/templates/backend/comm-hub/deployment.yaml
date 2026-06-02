@@ -17,14 +17,21 @@ metadata:
   name: {{ include "comm-hub.fullname" . }}
   namespace: {{ .Release.Namespace }}
 spec:
+  # Slack Socket Mode: sockets-per-connector = pod count (including rolling surge), and
+  # Slack caps Socket Mode at 10 connections per app per connector. Keep peak pods <= 10
+  # and do NOT add an HPA without revisiting internal/socketmode (with maxSurge:1, peak =
+  # replicas + 1).
   replicas: {{ default 2 .Values.commHub.replicas }}
+  progressDeadlineSeconds: 120
   selector:
     matchLabels:
       app: comm-hub
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxUnavailable: 1
+      # maxUnavailable:0 + maxSurge:1 = make-before-break: the surge pod must pass its
+      # startupProbe (open its sockets) before an old pod is retired.
+      maxUnavailable: 0
       maxSurge: 1
   template:
     metadata:
@@ -116,6 +123,10 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.annotations['groundcover_version']
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         {{- if eq (include "telemetry.enabled" .) "true" }}
         - name: API_KEY
           valueFrom:
@@ -162,7 +173,7 @@ spec:
         - containerPort: 9102
           name: metrics
           protocol: TCP
-        {{- if .Values.commHub.healthProbe.enabled }}
+        {{- if or .Values.commHub.healthProbe.enabled .Values.commHub.slack.enabled }}
         - containerPort: {{ .Values.commHub.healthProbe.port }}
           name: health-http
           protocol: TCP
@@ -185,6 +196,19 @@ spec:
           periodSeconds: 15
           timeoutSeconds: 5
           failureThreshold: 3
+        {{- end }}
+        {{- if .Values.commHub.slack.enabled }}
+        # Gates the rollout on the socket reconciler bootstrapping (opening >=1 socket /
+        # matching the fleet's coverage). Served on the shared health port -- a probe-path
+        # distinction, not a port one -- so readiness/liveness stay on /health and socket
+        # state never gates the pod's API traffic.
+        startupProbe:
+          httpGet:
+            scheme: HTTP
+            path: /startupz
+            port: health-http
+          periodSeconds: 5
+          failureThreshold: 24
         {{- end }}
         resources:
 {{- toYaml .Values.commHub.resources | nindent 10 }}

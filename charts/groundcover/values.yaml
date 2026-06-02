@@ -246,7 +246,7 @@ global:
       image:
         registry: "public.ecr.aws/groundcovercom"
         repository: postgres
-        tag: "18.1-20260405"
+        tag: "18.4-20260602-1"
     auth:
       database: "postgres"  # Default admin database for connections (use "defaultdb" for Akamai)
 
