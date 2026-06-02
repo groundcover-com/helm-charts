@@ -4540,7 +4540,7 @@ monitors-manager:
   image:
     registry: public.ecr.aws
     repository: groundcovercom/grafana-groundcover
-    tag: v0.0.49-grafana11.3.7
+    tag: v0.0.50-grafana11.3.7
   nameOverride: monitors-manager
   persistence:
     enabled: true
@@ -4581,6 +4581,7 @@ monitors-manager:
           jsonData:
             prometheusType: "Prometheus"
             prometheusVersion: "2.50.1"
+            timeout: 60
         - name: Clickhouse
           type: grafana-clickhouse-datasource
           uid: clickhouse
@@ -4590,6 +4591,10 @@ monitors-manager:
             port: "{{ .Values.global.clickhouse.containerPorts.tcp | int }}"
             server: '{{ include "clickhouse.shard0Name" . }}'
             username: '{{ include "clickhouse.readerUsername" . }}'
+            queryTimeout: "60"
+            customSettings:
+              - setting: enable_analyzer
+                value: "1"
           access: proxy
           secureJsonData:
             password: $CLICKHOUSE_PASSWORD
@@ -4641,8 +4646,10 @@ monitors-manager:
       news_feed_enabled: false
     plugins:
       allow_loading_unsigned_plugins: grafana-clickhouse-datasource
-    alerting:
-      evaluation_timeout_seconds: 120
+    unified_alerting:
+      max_attempts: 2
+      evaluation_timeout: 120s
+      
     groundcover:
       alerting_overrides_checksum: '{{ .Values.alertingOverrides | quote | sha256sum }}'
       workflows_enabled: '{{ .Values.global.workflows.enabled }}'
