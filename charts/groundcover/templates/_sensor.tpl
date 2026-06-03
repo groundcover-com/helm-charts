@@ -158,6 +158,7 @@ productmetricsflushmintotalcounter:
   sql: 1
   kafka: 1
   dns: 1
+  sip: 1
   grpc: 1
   mongodb: 1
   node_info: 1
@@ -375,6 +376,17 @@ dnshandler:
       enabled: {{ coalesce $sensorValues.obfuscateData $sensorValues.dnshandler.obfuscationConfig.unstructuredConfig.enabled }}
     {{ end }}
   {{ end }}
+  interval: 30s
+  summarizerActiveTtl: 45s
+  aggregationCacheSize: 300
+
+siphandler:
+  samplesthreshold: 10
+  issuesthreshold: 10
+  sampling:
+    samplingmode: 1 # DefaultSample
+    samplingLimitMaxQueue: 10
+    samplingLimitAgeOut: 1s
   interval: 30s
   summarizerActiveTtl: 45s
   aggregationCacheSize: 300
