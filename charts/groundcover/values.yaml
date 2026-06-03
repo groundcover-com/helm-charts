@@ -2143,7 +2143,7 @@ clickhouse:
   shards: 1
   replicaCount: 1
   image:
-    tag: 26.1.4.35
+    tag: 26.1.11.9-20260603-1
     registry: public.ecr.aws/groundcovercom
     repository: clickhouse
   coldVolume: ""
