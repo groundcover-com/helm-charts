@@ -2089,7 +2089,7 @@ keeper:
   terminationGracePeriodSeconds: 30
   image:
     repository: public.ecr.aws/groundcovercom/clickhouse/clickhouse-keeper
-    tag: "25.12.5-alpine"
+    tag: "25.12.11-alpine"
     pullPolicy: IfNotPresent
   initContainer: {}
   ports:
