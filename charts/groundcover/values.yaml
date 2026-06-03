@@ -4540,7 +4540,7 @@ monitors-manager:
   image:
     registry: public.ecr.aws
     repository: groundcovercom/grafana-groundcover
-    tag: v0.0.50-grafana11.3.7
+    tag: v0.0.51-grafana11.3.7
   nameOverride: monitors-manager
   persistence:
     enabled: true
@@ -4645,7 +4645,7 @@ monitors-manager:
     news:
       news_feed_enabled: false
     plugins:
-      allow_loading_unsigned_plugins: grafana-clickhouse-datasource
+      allow_loading_unsigned_plugins: grafana-clickhouse-datasource,victoriametrics-metrics-datasource
     unified_alerting:
       max_attempts: 2
       evaluation_timeout: 120s
