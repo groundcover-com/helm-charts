@@ -1,5 +1,4 @@
 {{- if .Values.global.commHub.enabled }}
-{{- $slackFrontendDomain := .Values.commHub.slack.frontendDomain | default .Values.router.frontendDomain | default "" -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -74,6 +73,8 @@ data:
     apiServer:
       port: 8080
 
+    frontendDomain: {{ .Values.router.frontendDomain | default "app.groundcover.com" | quote }}
+
     cursorCloud:
       baseURL: {{ .Values.commHub.cursorCloud.baseURL | default "https://api.cursor.com" | quote }}
       maxConnsPerHost: {{ .Values.commHub.cursorCloud.maxConnsPerHost | default 20 }}
@@ -86,7 +87,6 @@ data:
     slack:
       enabled: {{ .Values.commHub.slack.enabled | default false }}
       baseURL: {{ .Values.commHub.slack.baseURL | default "https://slack.com" | quote }}
-      frontendDomain: {{ $slackFrontendDomain | quote }}
       maxConnsPerHost: {{ .Values.commHub.slack.maxConnsPerHost | default 10 }}
       requestTimeout: {{ .Values.commHub.slack.requestTimeout | default "30s" }}
 
@@ -102,6 +102,9 @@ data:
 
     routeConfig:
       secretCacheTTL: {{ .Values.commHub.routeConfig.secretCacheTTL | default "5m" }}
+
+    routerProxy:
+      fleetManagerUrl: {{ include "fleet-manager.base.url" . }}
 
     postgresql:
       host: {{ tpl (toString .Values.commHub.postgresql.host) . | quote }}
