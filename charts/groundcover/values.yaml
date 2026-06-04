@@ -258,7 +258,7 @@ global:
     cluster:
       image:
         repository: "{{ .Values.global.origin.registry }}/cloudnative-pg/postgres"
-        tag: 18.1
+        tag: 18-system-20260603-1
       use: false
       enabled: false
       instances: 3
@@ -1369,7 +1369,7 @@ ingestor:
           - key: source
             from_context: x-groundcover-source
             action: upsert
-        samplingRatio: 0.05
+        samplingRatio: 1
         zipkin:
           enabled: true
           port: 9411
@@ -4727,7 +4727,7 @@ backend:
   cloudnative-pg:
     image:
       repository: public.ecr.aws/groundcovercom/cloudnative-pg/cloudnative-pg
-      tag: 1.28.2
+      tag: 1.28.3-mini-20260603-1
     
   postgresql:
     dbs:
