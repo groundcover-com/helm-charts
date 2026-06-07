@@ -117,6 +117,10 @@ replicaCount: 3
 ## @param distributeReplicasByZone Schedules replicas of the same shard to different availability zones
 ##
 distributeReplicasByZone: false
+## @param statefulsetShardSelector.enabled Add the shard label to StatefulSet selectors. This changes an immutable field on existing StatefulSets and must be enabled only during a planned migration.
+##
+statefulsetShardSelector:
+  enabled: false
 ## @param containerPorts.http ClickHouse HTTP container port
 ## @param containerPorts.https ClickHouse HTTPS container port
 ## @param containerPorts.tcp ClickHouse TCP container port

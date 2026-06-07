@@ -2140,6 +2140,8 @@ clickhouse:
   enabled: true
   shards: 1
   replicaCount: 1
+  statefulsetShardSelector:
+    enabled: false
   image:
     tag: 26.1.11.9-20260603-1
     registry: public.ecr.aws/groundcovercom

@@ -17,6 +17,8 @@ metadata:
   labels: {{- include "common.labels.standard" ( dict "customLabels" $.Values.commonLabels "context" $ ) | nindent 4 }}
     app.kubernetes.io/component: clickhouse
     shard: {{ $i | quote }}
+  {{- $statefulsetShardSelector := default dict $.Values.statefulsetShardSelector -}}
+  {{- $selectorEnabled := default false $statefulsetShardSelector.enabled -}}
   {{- if $.Values.commonAnnotations }}
   annotations: {{- include "common.tplvalues.render" ( dict "value" $.Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
@@ -27,6 +29,9 @@ spec:
   selector:
     matchLabels: {{- include "common.labels.matchLabels" ( dict "customLabels" $podLabels "context" $ ) | nindent 6 }}
       app.kubernetes.io/component: clickhouse
+      {{- if eq (toString $selectorEnabled) "true" }}
+      shard: {{ $i | quote }}
+      {{- end }}
   serviceName: {{ printf "%s-headless" (include "common.names.fullname" $) }}
   {{- if $.Values.updateStrategy }}
   updateStrategy: {{- toYaml $.Values.updateStrategy | nindent 4 }}

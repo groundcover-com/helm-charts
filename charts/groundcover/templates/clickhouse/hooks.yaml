@@ -1,10 +1,13 @@
-{{ if and (.Values.global.backend.enabled) (.Values.clickhouse.persistence.enabled) (index .Values "statefulset-modifier" "enabled") (not (index .Values "clickhouse" "persistence" "dropBeforeCreate")) }}
-{{- $shouldPatchPvc := true -}}
-{{- $shouldPatchAnnotations := true -}}
+{{- $statefulsetShardSelector := default dict .Values.clickhouse.statefulsetShardSelector -}}
+{{- $selectorEnabled := default false $statefulsetShardSelector.enabled -}}
+{{ if and (.Values.global.backend.enabled) (or (and (.Values.clickhouse.persistence.enabled) (index .Values "statefulset-modifier" "enabled")) .Release.IsUpgrade) (not (index .Values "clickhouse" "persistence" "dropBeforeCreate")) }}
 {{- $shouldPatchSize := (index .Values "statefulset-modifier" "sizePatches") -}}
 {{- $shards := .Values.clickhouse.shards | int -}}
 {{- $annotations := $.Values.clickhouse.persistence.annotations | toJson -}}
 {{- range $shardIndex, $e := until $shards -}}
+{{- $shouldPatchPvc := false -}}
+{{- $shouldPatchAnnotations := false -}}
+{{- $shouldPatchSelector := false -}}
 {{- /* Per-shard PVC sizing: shardSizes takes precedence, then extraShardsSize for non-zero shards, then default size */ -}}
 {{- $shardSizes := $.Values.clickhouse.persistence.shardSizes | default dict -}}
 {{- $shardKey := printf "shard%d" $shardIndex -}}
@@ -29,15 +32,31 @@
 {{- $name := (printf "%s-ch-%d" (include "statefulset-modifier.fullname" $) $shardIndex) -}}
 {{- $pvcName := (printf "data-%s-0" $stsName) -}}
 {{ if $.Release.IsUpgrade }}
+{{- $sts := (lookup "apps/v1" "StatefulSet" $.Release.Namespace $stsName | default dict) -}}
+{{- if and $.Values.clickhouse.persistence.enabled (index $.Values "statefulset-modifier" "enabled") }}
 {{- $pvc := (lookup "v1" "PersistentVolumeClaim" $.Release.Namespace $pvcName | default dict) -}}
 {{- $pvcCapacitySize := ($pvc | dig "status" "capacity" "storage" $pvcSize) -}}
-{{- $sts := (lookup "apps/v1" "StatefulSet" $.Release.Namespace $stsName | default dict) -}}
 {{- $stsPvcSize := ($sts | dig "spec" "volumeClaimTemplates" (list dict) | first | dig "spec" "resources" "requests" "storage" $pvcSize) -}}
 {{- $stsPvcAnnotations := ($sts | dig "spec" "volumeClaimTemplates" (list dict) | first | dig "metadata" "annotations" dict) | toJson -}}
 {{- $shouldPatchPvc = (not (eq $pvcSize $pvcCapacitySize)) -}}
 {{- $shouldPatchAnnotations = (not (eq $stsPvcAnnotations $annotations)) -}}
 {{- end -}}
-{{ if or (and $shouldPatchPvc $shouldPatchSize) $shouldPatchAnnotations }}
+{{- if hasKey $sts "metadata" }}
+{{- $renderedPodLabels := include "common.tplvalues.merge" (dict "values" (list ($.Values.clickhouse.podLabels | default dict) ($.Values.clickhouse.commonLabels | default dict)) "context" $) | fromYaml | default dict -}}
+{{- $desiredSelectorLabels := merge (pick $renderedPodLabels "app.kubernetes.io/name" "app.kubernetes.io/instance" "helm.sh/chart" "app.kubernetes.io/managed-by") (dict "app.kubernetes.io/name" (default "clickhouse" $.Values.clickhouse.nameOverride) "app.kubernetes.io/instance" $.Release.Name) -}}
+{{- $_ := set $desiredSelectorLabels "app.kubernetes.io/component" "clickhouse" -}}
+{{- if eq (toString $selectorEnabled) "true" }}
+{{- $_ := set $desiredSelectorLabels "shard" (toString $shardIndex) -}}
+{{- end }}
+{{- $stsSelectorLabels := ($sts | dig "spec" "selector" "matchLabels" dict) -}}
+{{- $shouldPatchSelector = (not (eq ($stsSelectorLabels | toJson) ($desiredSelectorLabels | toJson))) -}}
+{{- end -}}
+{{- else -}}
+{{- $shouldPatchPvc = and $.Values.clickhouse.persistence.enabled (index $.Values "statefulset-modifier" "enabled") -}}
+{{- $shouldPatchAnnotations = and $.Values.clickhouse.persistence.enabled (index $.Values "statefulset-modifier" "enabled") -}}
+{{- $shouldPatchSelector = false -}}
+{{- end -}}
+{{ if or (and $shouldPatchPvc $shouldPatchSize) $shouldPatchAnnotations $shouldPatchSelector }}
 ---
 apiVersion: batch/v1
 kind: Job
