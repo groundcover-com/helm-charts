@@ -75,6 +75,11 @@ data:
 
     frontendDomain: {{ .Values.router.frontendDomain | default "app.groundcover.com" | quote }}
 
+    # agent-service base URL the Slack inbound bridge dispatches runs to (direct, not via the
+    # router). Defaults to the in-namespace agent-service; the bridge appends the in-cluster-only
+    # run path. Override with commHub.agentServiceUrl to point elsewhere.
+    agentServiceUrl: {{ .Values.commHub | dig "agentServiceUrl" (printf "http://%s:8080" (include "agent-service.fullname" $)) | quote }}
+
     cursorCloud:
       baseURL: {{ .Values.commHub.cursorCloud.baseURL | default "https://api.cursor.com" | quote }}
       maxConnsPerHost: {{ .Values.commHub.cursorCloud.maxConnsPerHost | default 20 }}

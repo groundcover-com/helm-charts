@@ -109,6 +109,13 @@ spec:
                   fieldPath: metadata.annotations['groundcover_version']
             - name: ROUTER_URL
               value: {{ $agentService.config.routerUrl | quote }}
+            {{- if .Values.global.commHub.enabled }}
+            # comm-hub's in-cluster base. A Slack-initiated run posts its answer back to comm-hub's
+            # chat.postMessage directly, and routes its tool/router calls through comm-hub's
+            # /router-proxy (backend-auth impersonation). Derived from the release name.
+            - name: COMM_HUB_URL
+              value: {{ printf "http://%s:8080" (include "comm-hub.fullname" .) | quote }}
+            {{- end }}
             - name: LLM_PROVIDER
               value: {{ $agentService.config.llmProvider | default "bedrock" | quote }}
             {{- if $agentService.config.awsRegion }}
