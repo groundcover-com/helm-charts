@@ -61,7 +61,7 @@ service:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.11.969
+  tag: 1.11.970
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/tools'
@@ -104,6 +104,8 @@ configuration:
     Host: "portal"
     Port: "5555"
   ListenPort: "8080"
+  # Trusted public host for OAuth discovery URLs (falls back to request Host when empty).
+  FrontendDomain: '{{ .Values.frontendDomain }}'
   JWT:
     RequiredScope: "access:router"
     OrgClaimKey: "https://client.info/org"
@@ -112,6 +114,12 @@ configuration:
     TenantURL: "https://auth.groundcover.com/"
     JWKSPath: ".well-known/jwks.json"
     MCPOAuthClientId: "groundcover-mcp-client-id"
+    # Default https redirect hosts the MCP OAuth proxy accepts (loopback http and
+    # native schemes are always allowed). Override per-environment to add a host.
+    MCPOAuthAllowedRedirectHosts:
+      - "claude.ai"
+      - "vscode.dev"
+      - "www.cursor.com"
   RBAC:
     DB:
       Host: '{{ splitList ":" (include "postgresql.base.url" .) | first }}'
