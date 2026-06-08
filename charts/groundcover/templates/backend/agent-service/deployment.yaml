@@ -108,7 +108,7 @@ spec:
                 fieldRef:
                   fieldPath: metadata.annotations['groundcover_version']
             - name: ROUTER_URL
-              value: {{ $agentService.config.routerUrl | quote }}
+              value: {{ $agentService.config.routerUrl | default (printf "https://%s" (.Values.router.frontendDomain | default "app.groundcover.com")) | quote }}
             {{- if .Values.global.commHub.enabled }}
             # comm-hub's in-cluster base. A Slack-initiated run posts its answer back to comm-hub's
             # chat.postMessage directly, and routes its tool/router calls through comm-hub's

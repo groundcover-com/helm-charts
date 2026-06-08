@@ -982,7 +982,7 @@ agentService:
       maxUnavailable: 0
       maxSurge: 1
   config:
-    routerUrl: "https://app.groundcover.com"
+    routerUrl: ""
     llmProvider: "bedrock"  # "bedrock", "vertex", or "azure"
     awsRegion: ""
     bedrockModelId: "anthropic.claude-sonnet-4-6"
