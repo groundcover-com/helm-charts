@@ -75,7 +75,10 @@ data:
       URL: {{ printf "http://%s:%d" (include "fleet-manager.fullname" .) (int .Values.fleetManager.manageHttpPort) }}
 
     BackendSettingsEnabled: {{ .Values.portal.backendSettings.enabled }}
-    
+
+    BackendSigningKey:
+      Enabled: {{ .Values.portal.backendSigningKey.enabled }}
+
     {{- if eq (include "telemetry.enabled" .) "true" }}
     Tracing:
       Enabled: true

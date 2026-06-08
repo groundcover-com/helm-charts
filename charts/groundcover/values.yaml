@@ -1836,6 +1836,11 @@ portal:
   backendSettings:
     enabled: false
     config:
+  # Portal-scoped gate for backend signing key generation/rotation over the
+  # reverse tunnel (backend-to-router auth). Router announces its known key_id on
+  # connect; when disabled portal responds with a no-op and generates nothing.
+  backendSigningKey:
+    enabled: false
   autodiscovery: false
   maxResponseSizeBytes: 33554432
   
