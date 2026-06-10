@@ -2,6 +2,7 @@
 {{- if $agentService.enabled | default false }}
 {{- $postgres := $agentService.postgres }}
 {{- $longTermMemory := $agentService.longTermMemory }}
+{{- $temporal := $agentService.temporal | default dict }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -248,6 +249,16 @@ spec:
             - name: ENABLE_DIRECT_MEMORY_MANAGEMENT_TOOLS
               value: {{ $longTermMemory.enableDirectMemoryManagementTools | default false | quote }}
             {{- end }}
+            {{- end }}
+            {{- if $temporal.enabled }}
+            - name: TEMPORAL_ENABLED
+              value: "true"
+            - name: TEMPORAL_ADDRESS
+              value: {{ $temporal.address | default (printf "%s-temporal-frontend:7233" .Release.Name) | quote }}
+            - name: TEMPORAL_NAMESPACE
+              value: {{ $temporal.namespace | default "default" | quote }}
+            - name: TEMPORAL_TASK_QUEUE
+              value: {{ $temporal.taskQueue | default "agent-service-runs" | quote }}
             {{- end }}
             {{- with $agentService.env }}
             {{- toYaml . | nindent 12 }}

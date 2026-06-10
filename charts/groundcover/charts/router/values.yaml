@@ -61,7 +61,7 @@ service:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.11.983
+  tag: 1.11.984
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/tools'
@@ -130,6 +130,8 @@ configuration:
       Timeout: 150s
       Interval: 5s
       SSLMode: "require"
+      MinConns: 16
+      MaxConns: 64
     Cache:
       ttl: 10m
       PurgeInterval: 20m

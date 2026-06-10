@@ -1008,6 +1008,12 @@ agentService:
     otelExporterOtlpEndpoint: ""
     otelRecordConversationContent: ""
     devShowTraceId: "false"
+  # address defaults to the in-cluster frontend service (<release>-temporal-frontend:7233).
+  temporal:
+    enabled: false
+    address: ""
+    namespace: "default"
+    taskQueue: "agent-service-runs"
   postgres:
     secretName: "managed-postgres-credentials"
     hostKey: "host"
