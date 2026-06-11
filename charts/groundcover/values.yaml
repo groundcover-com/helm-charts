@@ -3037,10 +3037,14 @@ vector:
               .previous_state = to_string(split(.previous_state, "(", 2)[0])
               .previous_state = strip_whitespace(.previous_state)
             }
+            .state_change_reason = ""
             .state, err = to_string(del(.current))
             if err == null {
-              .state = to_string(split(.state, "(", 2)[0])
-              .state = strip_whitespace(.state)
+              state_parts = split(.state, "(", 2)
+              if length(state_parts) > 1 {
+                .state_change_reason = strip_whitespace(to_string(split(to_string(state_parts[1]), ")", 2)[0]))
+              }
+              .state = strip_whitespace(to_string(state_parts[0]))
             }
             .cluster = get!(value: .labels, path: ["cluster"])
             if .cluster == "" {
@@ -3615,7 +3619,7 @@ vector:
             - json_monitors
             bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
             region: '{{ .Values.vector.objectStorage.region }}'
-            key_prefix: "v2/monitors_v4/"
+            key_prefix: "v2/monitors_v5/"
             encoding:
               codec: json
               timestamp_format: rfc3339
@@ -3746,7 +3750,7 @@ vector:
             inputs:
               - monitors
               - json_monitors
-            key_prefix: v2/monitors_v4/
+            key_prefix: v2/monitors_v5/
             compression: zstd
             bucket: '{{ .Values.vector.objectStorage.gcsBucket }}'
             batch:
@@ -3887,7 +3891,7 @@ vector:
             - json_monitors
             container_name: '{{ .Values.vector.objectStorage.azureBlobContainer }}'
             connection_string: '{{ .Values.vector.objectStorage.azureConnectionString }}'
-            blob_prefix: v2/monitors_v4/
+            blob_prefix: v2/monitors_v5/
             compression: zstd
             encoding:
               codec: json
