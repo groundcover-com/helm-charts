@@ -42,6 +42,10 @@
 {{- end -}}
 {{- end -}}
 
+{{- define "ingestion_measurements.retention" -}}
+{{ .Values.global.ingestionMeasurements.retention }}
+{{- end -}}
+
 {{- define "entities.retention" -}}
 {{ .Values.global.entities.retention }}
 {{- end -}}

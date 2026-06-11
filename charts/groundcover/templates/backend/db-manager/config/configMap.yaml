@@ -61,6 +61,10 @@ data:
         cold_move_duration: {{ .Values.global.measurements.cold_move_duration }}
         custom_retention_overrides:
           {{- include "measurements.custom_retention_overrides" . | indent 8 }}
+      Ingestion_Measurements:
+        retention: {{ include "ingestion_measurements.retention" . }}
+        cold_volume: {{ .Values.clickhouse.coldVolume }}
+        cold_move_duration: {{ .Values.global.ingestionMeasurements.cold_move_duration }}
       Monitor_State:
         retention: {{ include "monitors.evaluation.retention" .}}
         cold_volume: {{ .Values.clickhouse.coldVolume }}

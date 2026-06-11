@@ -205,6 +205,10 @@ global:
     retention: 7d # {amount}[h(ours), d(ays), w(eeks), y(ears)]
     cold_move_duration: 7d
 
+  ingestionMeasurements:
+    retention: 180d # {amount}[h(ours), d(ays), w(eeks), y(ears)]
+    cold_move_duration: 30d
+
   sources:
     retention: 30d # {amount}[h(ours), d(ays), w(eeks), y(ears)]
     cold_move_duration: 7d
@@ -351,8 +355,11 @@ positionsFile: "/var/run/positions/positions.yaml"
 decolorizeLogs: false
 maxLogSize: 102400 # 100KB
 maxLogContentSize: 15360 # 15KB
-logBatchSendQueueWorkerCount: 3
+logBatchSize: 20971520 # 20MB
+logBatchMaxBackoff: 30s
+logBatchSendQueueWorkerCount: 5
 logBatchSendQueueMaxSize: 10
+maxLogLinesPerBatch: 20000
 jsonFlattenMaxDepth: 6
 jsonFlattenMaxAttributes: 300
 dropRawBody: false

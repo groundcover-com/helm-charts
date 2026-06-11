@@ -667,16 +667,17 @@ logs:
   {{ end }}
   client:
     batchwait: 5000ms
-    batchsize: 10485760
+    batchsize: {{ .Values.logBatchSize }}
     backoffConfig:
       minBackoff: 500ms
-      maxBackoff: 5m
+      maxBackoff: {{ .Values.logBatchMaxBackoff }}
       maxRetries: 10
     timeout: 10s
     useRingBuffer: false
     dropRunningNamespaceLogs: {{  include "groundcover.dropRunningNamespaceLogs" .}}
     logBatchSendQueueWorkerCount: {{ .Values.logBatchSendQueueWorkerCount }} 
     logBatchSendQueueMaxSize : {{ .Values.logBatchSendQueueMaxSize }}
+    maxLogLinesPerBatch: {{ .Values.maxLogLinesPerBatch }}
     otlpExportLimits:
       jsonFlattenMaxDepth: {{ .Values.jsonFlattenMaxDepth }}
       jsonFlattenMaxAttributes: {{ .Values.jsonFlattenMaxAttributes }}
