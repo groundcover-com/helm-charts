@@ -4224,6 +4224,9 @@ victoria-metrics-agent:
           insecure_skip_verify: true
 
 kube-state-metrics:
+  # Set to false to disable prometheus.io/scrape annotation on the service
+  # This prevents external Prometheus instances from scraping kube-state-metrics
+  prometheusScrape: true
   image:
     registry: quay.io/groundcover
     tag: "v2.19.0-20260602-1"
