@@ -33,6 +33,34 @@
 {{- end -}}
 {{- end -}}
 
+{{/*
+Dedicated read-only ClickHouse user the schema-managed dictionaries
+authenticate with when global.clickhouse.dictionaryUser.enabled is set. Created
+by db-manager on boot (CREATE USER IF NOT EXISTS + GRANT SELECT); its password
+comes from the dedicated secret below, NOT the rotating admin secret, so admin
+password rotations never invalidate dictionary credentials.
+*/}}
+{{- define "clickhouse.dictionaryUsername" -}}
+{{- default "dictionary_reader" .Values.global.clickhouse.dictionaryUser.username -}}
+{{- end -}}
+
+{{- define "clickhouse.dictionaryUserSecretName" -}}
+{{- default (printf "%s-dictionary-user" (include "clickhouse.fullname" .)) .Values.global.clickhouse.dictionaryUser.existingSecret -}}
+{{- end -}}
+
+{{- define "clickhouse.dictionaryUserSecretKey" -}}
+{{- .Values.global.clickhouse.dictionaryUser.existingSecretKey -}}
+{{- end -}}
+
+{{- define "clickhouse.dictionaryUserPassword" -}}
+{{- $secret := (lookup "v1" "Secret" .Release.Namespace (include "clickhouse.dictionaryUserSecretName" .) | default dict) -}}
+{{- if $secret.data -}}
+    {{- index $secret.data (include "clickhouse.dictionaryUserSecretKey" .) | b64dec -}}
+{{- else -}}
+    {{- randAlphaNum 24 -}}
+{{- end -}}
+{{- end -}}
+
 {{- define "clickhouse.nativeEndpoint" -}}
 {{-  printf "clickhouse://%s:%d" (include "clickhouse.fullname" .) (include "clickhouse.nativePort" . | int ) -}}
 {{- end -}}

@@ -159,6 +159,53 @@ global:
       # override to use exisiting secret
       existingSecret: ""
       existingSecretKey: admin-password
+    # Opt-in feature flag for the dedicated read-only dictionary user.
+    # Enabling it also wires up end-to-end ClickHouse admin-password
+    # rotation handling for the backend, since the two ship as one unit:
+    # the dictionary user makes dictionaries survive a rotation, and the
+    # checksum annotations below roll the dependent pods so they pick up
+    # the rotated password (see the NOT-covered note below for the exception).
+    # When true:
+    #   * Chart adds `checksum/clickhouse-secret` annotations to the in-tree
+    #     consumer pod templates (db-manager, portal, chip, dispatch-center),
+    #     to the CH server StatefulSet, and to keep-backend (the last two via
+    #     their subcharts' `podAnnotations`), so any change to the rendered
+    #     password value rolls those pods on the next `helm upgrade`.
+    #   * monitors-manager's grafana.ini `ch_password_checksum` entry is
+    #     populated, so the existing `checksum/config` annotation on the
+    #     Grafana pod template flips on rotation.
+    #   * A dedicated read-only ClickHouse user (`dictionary_reader`) is
+    #     introduced for the 5 schema-managed dictionaries, with its own
+    #     non-rotating Secret (see the fields below). db_manager
+    #     creates the user on boot when missing (the `manager` user gets
+    #     access_management for that, see clickhouse.usersExtraOverrides)
+    #     and rewrites any dictionary whose SOURCE clause doesn't yet
+    #     authenticate as it — so admin password rotations never
+    #     invalidate dictionary credentials.
+    # When false (default), all of the above are inert: annotations are
+    # empty / absent, and db_manager skips the reconcile step.
+    #
+    # NOT covered: vector. Its Deployment comes from the upstream vector
+    # subchart, which renders podAnnotations verbatim (no tpl), so the
+    # chart cannot inject a password-checksum annotation. After a
+    # rotation, vector keeps writing with the old credential and its
+    # ClickHouse sinks fail with 401 Unauthorized, silently dropping
+    # logs/traces until restarted. Roll it manually after every rotation:
+    #   kubectl -n <namespace> rollout restart deployment/<release>-vector
+    dictionaryUser:
+      enabled: false
+      # ClickHouse user name the dictionaries authenticate with. Must be
+      # a plain identifier ([a-zA-Z_][a-zA-Z0-9_]*); db-manager refuses
+      # anything else. Changing it on an existing install creates the new
+      # user and re-points the dictionaries on the next db-manager boot
+      # (the old user is not dropped).
+      username: dictionary_reader
+      # Dedicated secret holding the static password of the read-only
+      # `dictionary_reader` ClickHouse user. Auto-generated (and preserved
+      # across upgrades via lookup + resource-policy keep) when
+      # existingSecret is empty.
+      existingSecret: ""
+      existingSecretKey: dictionary-user-password
 
   logs:
     overrideUrl: ""
@@ -2169,6 +2216,19 @@ clickhouse:
     enabled: false
   podLabels:
     app.kubernetes.io/part-of: '{{ include "groundcover.labels.partOf" . }}'
+  # Force the ClickHouse server StatefulSet to roll when the
+  # `admin-password` value in its Secret changes. Gated by
+  # `global.clickhouse.dictionaryUser.enabled` (the dictionary-user /
+  # admin-password-rotation feature gate): the entire
+  # annotation entry below is emitted only when the flag is true;
+  # when false, podAnnotations evaluates to an empty string and the
+  # Bitnami chart's `{{- if $.Values.podAnnotations }}` guard skips
+  # the annotations block (or just emits no extra entries — see
+  # `common.tplvalues.render`).
+  podAnnotations: |
+    {{- if .Values.global.clickhouse.dictionaryUser.enabled }}
+    checksum/clickhouse-secret: '{{ include "clickhouse.password" . | sha256sum }}'
+    {{- end }}
   podSecurityContext:
     enabled: false
   volumePermissions:
@@ -2276,6 +2336,12 @@ clickhouse:
           <networks>
             <ip>::/0</ip>
           </networks>
+          {{- if .Values.global.clickhouse.dictionaryUser.enabled }}
+          {{- /* Lets db-manager CREATE USER / GRANT the dedicated read-only
+                 dictionary user. This string is tpl-rendered inside the
+                 clickhouse subchart, where globals are still reachable. */}}
+          <access_management>1</access_management>
+          {{- end }}
         </manager>
         <reader>
           <password from_env="CLICKHOUSE_PASSWORD" />
@@ -4678,6 +4744,18 @@ monitors-manager:
     groundcover:
       alerting_overrides_checksum: '{{ .Values.alertingOverrides | quote | sha256sum }}'
       workflows_enabled: '{{ .Values.global.workflows.enabled }}'
+      # Roll the monitors-manager (Grafana) pod when the ClickHouse
+      # admin password rotates. Gated by
+      # `global.clickhouse.dictionaryUser.enabled` (the dictionary-user /
+      # admin-password-rotation feature gate) — value is the
+      # password sha256 when enabled, empty string when disabled.
+      # Grafana tpl-evaluates string entries in `grafana.ini` and
+      # renders them into the Grafana config ConfigMap; the pod template
+      # already carries a `checksum/config` annotation hashing that
+      # ConfigMap, so a change here flips the checksum and rolls the
+      # pod. The key is unused by Grafana — its grafana.ini parser
+      # ignores unknown sections.
+      ch_password_checksum: '{{ if .Values.global.clickhouse.dictionaryUser.enabled }}{{ include "clickhouse.password" . | sha256sum }}{{ end }}'
     "unified_alerting.state_history":
       enabled: true
       backend: "loki"
@@ -4762,6 +4840,16 @@ backend:
       keep: keep
   keep:
     backend:
+      # Roll the keep-backend pod when the ClickHouse password changes.
+      # Gated by `global.clickhouse.dictionaryUser.enabled`: value
+      # is the password sha256 when enabled, empty string when
+      # disabled. (Unlike the Bitnami chart, keep's template iterates
+      # `podAnnotations` as a Map and can't accept a string-then-tpl
+      # form, so we can't fully omit the annotation key when disabled
+      # — it remains with an empty value, which is stable across
+      # renders so no spurious rolls.)
+      podAnnotations:
+        checksum/clickhouse-secret: '{{ if .Values.global.clickhouse.dictionaryUser.enabled }}{{ include "clickhouse.password" . | sha256sum }}{{ end }}'
       resources:
         limits:
           memory: 2Gi

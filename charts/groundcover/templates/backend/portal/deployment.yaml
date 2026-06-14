@@ -29,6 +29,9 @@ spec:
         prometheus.io/port: "9102"
         groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
         checksum/config: {{ include (print $.Template.BasePath "/backend/portal/config/configMap.yaml") . | sha256sum }}
+        {{- if .Values.global.clickhouse.dictionaryUser.enabled }}
+        checksum/clickhouse-secret: {{ include "clickhouse.password" . | sha256sum }}
+        {{- end }}
         {{- if .Values.portal.backendSettings.enabled }}
         checksum/backend-settings: {{ include (print $.Template.BasePath "/backend/portal/config/backend-settings-configMap.yaml") . | sha256sum }}
         {{- end }}

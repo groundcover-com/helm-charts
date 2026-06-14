@@ -17,6 +17,9 @@ spec:
         {{- include "chip.selectorLabels" . | nindent 8 }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/backend/chip/configmap.yaml") . | sha256sum }}
+        {{- if .Values.global.clickhouse.dictionaryUser.enabled }}
+        checksum/clickhouse-secret: {{ include "clickhouse.password" . | sha256sum }}
+        {{- end }}
     spec:
       serviceAccountName: {{ include "chip.serviceAccountName" . }}
       {{- with .Values.chip.nodeSelector }}

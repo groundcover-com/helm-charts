@@ -104,6 +104,10 @@ data:
       Database: {{ include "clickhouse.database" . }}
       HTTPPort: {{ .Values.global.clickhouse.containerPorts.http | int }}
       NativePort: {{ .Values.global.clickhouse.containerPorts.tcp | int }}
+    DictionaryUser:
+      Enabled: {{ .Values.global.clickhouse.dictionaryUser.enabled }}
+      User: {{ include "clickhouse.dictionaryUsername" . }}
+      Password: "OVERRIDEN"
     ExtraShards:
       {{- (include "clickhouse.extraShardsList" .) | nindent 6  }}
     ObjectStorageQueues:
