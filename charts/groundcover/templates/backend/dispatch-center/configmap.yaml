@@ -103,6 +103,9 @@ data:
       opsgenieUSEndpoint: {{ .Values.dispatchCenter.notification.opsgenieUSEndpoint | default "https://api.opsgenie.com/v2/alerts" | quote }}
       opsgenieEUEndpoint: {{ .Values.dispatchCenter.notification.opsgenieEUEndpoint | default "https://api.eu.opsgenie.com/v2/alerts" | quote }}
       commHubBaseURL: {{ printf "http://%s:8080" (include "comm-hub.fullname" .) | quote }}
+      providers:
+        slackApp:
+          interactiveNotifications: {{ dig "dispatchCenter" "providers" "slackApp" "interactiveNotifications" false .Values }}
 
     worker:
       taskQueue: "dispatch-center-worker"

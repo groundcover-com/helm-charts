@@ -1944,6 +1944,9 @@ dispatchCenter:
   tolerations: []
   priorityClassName:
   replicas: 2
+  providers:
+    slackApp:
+      interactiveNotifications: false
   env: []
   image:
     repository: "{{ .Values.global.origin.registry }}/dispatch-center"
