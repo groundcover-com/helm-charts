@@ -3122,6 +3122,13 @@ vector:
               }
               .state = strip_whitespace(to_string(state_parts[0]))
             }
+            # _gc_no_data is internally owned: drop any client-supplied value, then
+            # set it only when the monitor is in the NoData state, so the condition
+            # is matchable for notification routing.
+            del(.labels._gc_no_data)
+            if .state == "NoData" {
+              .labels._gc_no_data = "true"
+            }
             .cluster = get!(value: .labels, path: ["cluster"])
             if .cluster == "" {
               .cluster = get!(value: .labels, path: ["clusterId"])
