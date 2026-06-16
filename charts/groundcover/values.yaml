@@ -4641,7 +4641,7 @@ monitors-manager:
   image:
     registry: public.ecr.aws
     repository: groundcovercom/grafana-groundcover
-    tag: v0.0.52-grafana11.3.7
+    tag: v0.0.53-grafana11.3.7
   nameOverride: monitors-manager
   persistence:
     enabled: true
@@ -4670,16 +4670,22 @@ monitors-manager:
       mountPath: /etc/grafana/provisioning/alerting/
       configMap: alerting-overrides-config
       readOnly: true
+    # -- When true, the VM datasource is provisioned with the native
+  # VictoriaMetrics datasource plugin (victoriametrics-metrics-datasource).
+  # When false, it uses the standard Prometheus datasource type.
+  useVmNativeDatasource: true
   datasources:
     datasources.yaml:
       apiVersion: 1
       datasources:
         - name: VM
-          type: prometheus
+          type: '{{ if .Values.useVmNativeDatasource }}victoriametrics-metrics-datasource{{ else }}prometheus{{ end }}'
           uid: victoria-metrics
           url: '{{ include "victoria-metrics.read.http.url" . }}'
           access: proxy
           jsonData:
+            # prometheusType/prometheusVersion are only used by the Prometheus
+            # datasource type; the native VictoriaMetrics plugin ignores them.
             prometheusType: "Prometheus"
             prometheusVersion: "2.50.1"
             timeout: 60
