@@ -105,7 +105,7 @@ data:
       commHubBaseURL: {{ printf "http://%s:8080" (include "comm-hub.fullname" .) | quote }}
       providers:
         slackApp:
-          interactiveNotifications: {{ dig "dispatchCenter" "providers" "slackApp" "interactiveNotifications" false .Values }}
+          interactiveNotifications: {{ .Values.dispatchCenter.providers.slackApp.interactiveNotifications | default false }}
 
     worker:
       taskQueue: "dispatch-center-worker"
