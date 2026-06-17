@@ -3131,12 +3131,32 @@ vector:
               }
               .state = strip_whitespace(to_string(state_parts[0]))
             }
+            # Grafana leaves state_change_reason empty for normal, data-driven
+            # transitions (it only sets NoData/MissingSeries/Error/Updated/etc).
+            # When such a transition belongs to a threshold-based monitor, label
+            # it "Threshold" so the cause is queryable. The direction (above vs.
+            # below the threshold) is intentionally NOT encoded, since it depends
+            # on the rule operator; state/previous_state already convey direction.
+            if .state_change_reason == "" && .state != .previous_state {
+              configured_threshold, err = get(value: .values, path: ["_gc_configured_threshold"])
+              if err == null && configured_threshold != null {
+                .state_change_reason = "Threshold"
+              }
+            }
             # _gc_no_data is internally owned: drop any client-supplied value, then
             # set it only when the monitor is in the NoData state, so the condition
             # is matchable for notification routing.
             del(.labels._gc_no_data)
             if .state == "NoData" {
               .labels._gc_no_data = "true"
+            }
+            # _gc_state_change_reason is internally owned: drop any client-supplied
+            # value, then set it to the state change reason (Threshold/NoData/
+            # MissingSeries/Error/Updated/...) so notification routes can match on
+            # why the state changed.
+            del(.labels._gc_state_change_reason)
+            if .state_change_reason != "" {
+              .labels._gc_state_change_reason = .state_change_reason
             }
             .cluster = get!(value: .labels, path: ["cluster"])
             if .cluster == "" {
