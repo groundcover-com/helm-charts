@@ -156,4 +156,5 @@ data:
       MigrationsPath: {{ .Values.dbManager.migrationsPath }}
       SkipMigrations: {{ .Values.dbManager.skipMigrations }}
       EnableStorageMgmt: {{ .Values.dbManager.enableStorageMgmt | default false }}
+      MaxIndexTiers: {{ .Values.dbManager.maxIndexTiers | default 20 }}
 {{- end -}}

@@ -1012,6 +1012,8 @@ dbManager:
   # When false, db-manager skips its Postgres pool and runs the legacy
   # ConfigMap-only retention path (no seeding, no read-back, no storage-management API).
   enableStorageMgmt: false
+  # Maximum number of index tiers (active + previously deleted) allowed per data type policy.
+  maxIndexTiers: 20
 
 agentService:
   enabled: false
@@ -2042,6 +2044,13 @@ commHub:
     enabled: false
     baseURL: "https://slack.com"
     maxConnsPerHost: 10
+    requestTimeout: "30s"
+  linear:
+    enabled: false
+    authBaseURL: "https://linear.app"
+    apiBaseURL: "https://api.linear.app"
+    clientID: ""
+    maxConnsPerHost: 20
     requestTimeout: "30s"
   mcp:
     # Gates the MCP connector. Off by default so environments that haven't

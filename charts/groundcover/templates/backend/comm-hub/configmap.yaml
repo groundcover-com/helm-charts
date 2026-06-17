@@ -95,6 +95,14 @@ data:
       maxConnsPerHost: {{ .Values.commHub.slack.maxConnsPerHost | default 10 }}
       requestTimeout: {{ .Values.commHub.slack.requestTimeout | default "30s" }}
 
+    linear:
+      enabled: {{ .Values.commHub.linear.enabled | default false }}
+      authBaseURL: {{ .Values.commHub.linear.authBaseURL | default "https://linear.app" | quote }}
+      apiBaseURL: {{ .Values.commHub.linear.apiBaseURL | default "https://api.linear.app" | quote }}
+      clientID: {{ .Values.commHub.linear.clientID | default "" | quote }}
+      maxConnsPerHost: {{ .Values.commHub.linear.maxConnsPerHost | default 20 }}
+      requestTimeout: {{ .Values.commHub.linear.requestTimeout | default "30s" }}
+
     socketMode:
       # Quote the durations so a numeric override (e.g. 30) renders as a string and fails
       # loudly in config.Load rather than being decoded as nanoseconds (30 -> 30ns).
