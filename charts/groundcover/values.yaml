@@ -920,6 +920,7 @@ dbManager:
     logs: "logs_v8"
     traces: "traces_v2"
     metricsMetadata: "metrics_metadata"
+    events: "events_v3"
   cloudPricing:
     enabled: true
     pricingFileURL: "https://groundcover-public-assets.s3.amazonaws.com/cloud_pricing_v1.csv"
