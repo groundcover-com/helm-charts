@@ -81,6 +81,8 @@ spec:
               value: {{ (tpl $sensorValues.http2UnlimitedEndpoints .) | quote }}
             - name: FLORA_CONTAINERREPOSITORY_TRACKEDCONTAINERTYPE
               value: {{ "kubernetes" }}
+            - name: FLORA_NATTRACKER_NATENTRIESMAXSIZE
+              value: {{ $sensorValues.natEntriesMaxSize | quote }}
             - name: NODE_NAME
               valueFrom:
                 fieldRef:

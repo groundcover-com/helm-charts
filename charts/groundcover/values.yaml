@@ -872,6 +872,7 @@ agent:
       - :predict
     httpUnlimitedEndpoints: '{{ join "," .Values.agent.sensor.genaiUnlimitedEndpoints }}'
     http2UnlimitedEndpoints: '{{ join "," .Values.agent.sensor.genaiUnlimitedEndpoints }}'
+    natEntriesMaxSize: 131072
     childcountruleoverrides:
     - depth: 0
       maxChildren: 100
