@@ -2035,6 +2035,14 @@ commHub:
     port: 8089
   temporal:
     host: ""
+    port: 7233
+    # CommHub's OAuth refresh worker uses a dedicated Temporal namespace.
+    # The ensure-temporal-namespace init container creates it when OAuth refresh is enabled.
+    namespace: "commhub"
+    adminToolsImage:
+      repository: public.ecr.aws/groundcovercom/temporalio/admin-tools
+      tag: "1.29.6-20260602-1"
+      pullPolicy: IfNotPresent
   cursorCloud:
     baseURL: "https://api.cursor.com"
     maxConnsPerHost: 20
@@ -2042,6 +2050,20 @@ commHub:
     maxRetries: 5
   providers:
     registrySyncInterval: "1s"
+  oauthRefresh:
+    disabled: false
+    # Empty values render release-scoped defaults so multiple CommHub releases
+    # can share one Temporal namespace without sharing one singleton workflow.
+    taskQueue: ""
+    workflowId: ""
+    interval: "5m"
+    window: "30m"
+    activityTimeout: "5m"
+    refreshTimeout: "30s"
+    heartbeatTimeout: "1m"
+    batchSize: 5
+    maxConcurrentWorkflowTaskPollers: 2
+    maxConcurrentActivityTaskPollers: 4
   slack:
     enabled: false
     baseURL: "https://slack.com"

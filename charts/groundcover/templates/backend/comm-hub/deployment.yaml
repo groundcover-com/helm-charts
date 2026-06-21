@@ -72,7 +72,7 @@ spec:
 {{- end }}
       imagePullSecrets: {{ include "imagePullSecrets" . }}
       initContainers:
-      {{ if and .Values.global.temporal.enabled .Values.commHub.temporal.host }}
+      {{ if eq (include "comm-hub.oauthRefreshDisabled" .) "false" }}
       - name: wait-for-temporal
         image: '{{ tpl .Values.curl.image.repository . }}:{{ tpl .Values.curl.image.tag . }}'
         command:
@@ -80,8 +80,8 @@ spec:
           - -c
         args:
           - |
-            TEMPORAL_HOST="{{ .Values.commHub.temporal.host }}"
-            TEMPORAL_PORT="7233"
+            TEMPORAL_HOST="{{ .Values.commHub.temporal.host | default (printf "%s-temporal-frontend" .Release.Name) }}"
+            TEMPORAL_PORT="{{ .Values.commHub.temporal.port | default 7233 }}"
 
             echo "Waiting for Temporal at ${TEMPORAL_HOST}:${TEMPORAL_PORT}..."
             while ! nc -z ${TEMPORAL_HOST} ${TEMPORAL_PORT}; do
@@ -89,6 +89,48 @@ spec:
               sleep 2
             done
             echo "Temporal is up"
+      - name: ensure-temporal-namespace
+        image: '{{ tpl (.Values.commHub | dig "temporal" "adminToolsImage" "repository" "public.ecr.aws/groundcovercom/temporalio/admin-tools") . }}:{{ tpl (.Values.commHub | dig "temporal" "adminToolsImage" "tag" "1.29.6-20260602-1") . }}'
+        imagePullPolicy: {{ .Values.commHub | dig "temporal" "adminToolsImage" "pullPolicy" "IfNotPresent" }}
+        command:
+          - /bin/bash
+          - -c
+        args:
+          - |
+            set -e
+
+            TEMPORAL_ADDRESS="{{ printf "%s:%v" (.Values.commHub.temporal.host | default (printf "%s-temporal-frontend" .Release.Name)) (.Values.commHub.temporal.port | default 7233) }}"
+            TEMPORAL_NAMESPACE="{{ .Values.commHub.temporal.namespace | default "commhub" }}"
+
+            echo "Ensuring Temporal namespace ${TEMPORAL_NAMESPACE} exists at ${TEMPORAL_ADDRESS}..."
+            TEMPORAL_READY=false
+            for i in {1..60}; do
+              if tctl --address "${TEMPORAL_ADDRESS}" cluster health 2>/dev/null | grep -q SERVING; then
+                TEMPORAL_READY=true
+                break
+              fi
+              echo "Temporal is not healthy yet - sleeping"
+              sleep 2
+            done
+            if [ "${TEMPORAL_READY}" != "true" ]; then
+              echo "Temporal did not become healthy at ${TEMPORAL_ADDRESS}"
+              exit 1
+            fi
+
+            if tctl --address "${TEMPORAL_ADDRESS}" --namespace "${TEMPORAL_NAMESPACE}" namespace describe >/dev/null 2>&1; then
+              echo "Temporal namespace ${TEMPORAL_NAMESPACE} already exists"
+              exit 0
+            fi
+
+            tctl --address "${TEMPORAL_ADDRESS}" --namespace "${TEMPORAL_NAMESPACE}" namespace register \
+              --description "CommHub namespace for Temporal workflows" \
+              --retention 7d \
+              --active_cluster active || {
+                echo "Namespace registration failed, checking if another pod created it..."
+                tctl --address "${TEMPORAL_ADDRESS}" --namespace "${TEMPORAL_NAMESPACE}" namespace describe >/dev/null 2>&1
+              }
+
+            echo "Temporal namespace ${TEMPORAL_NAMESPACE} is ready"
       {{ end }}
       - name: wait-for-db
         image: {{ include "postgresql.initContainers.image" . }}

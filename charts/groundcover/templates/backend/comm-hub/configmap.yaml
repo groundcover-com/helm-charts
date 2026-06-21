@@ -10,6 +10,10 @@ metadata:
     app.kubernetes.io/name: comm-hub
 data:
   config.yaml: |
+    temporal:
+      address: {{ printf "%s:%v" (.Values.commHub.temporal.host | default (printf "%s-temporal-frontend" .Release.Name)) (.Values.commHub.temporal.port | default 7233) | quote }}
+      namespace: {{ .Values.commHub.temporal.namespace | default "commhub" | quote }}
+
     healthProbe:
       enabled: {{ .Values.commHub.healthProbe.enabled | default true }}
       port: {{ .Values.commHub.healthProbe.port | default 8089 }}
@@ -89,6 +93,19 @@ data:
     providers:
       registrySyncInterval: {{ .Values.commHub.providers.registrySyncInterval | default "1s" }}
 
+    oauthRefresh:
+      disabled: {{ include "comm-hub.oauthRefreshDisabled" . }}
+      taskQueue: {{ include "comm-hub.oauthRefreshTaskQueue" . | quote }}
+      workflowId: {{ include "comm-hub.oauthRefreshWorkflowID" . | quote }}
+      interval: {{ .Values.commHub | dig "oauthRefresh" "interval" "5m" | quote }}
+      window: {{ .Values.commHub | dig "oauthRefresh" "window" "30m" | quote }}
+      activityTimeout: {{ .Values.commHub | dig "oauthRefresh" "activityTimeout" "5m" | quote }}
+      refreshTimeout: {{ .Values.commHub | dig "oauthRefresh" "refreshTimeout" "30s" | quote }}
+      heartbeatTimeout: {{ .Values.commHub | dig "oauthRefresh" "heartbeatTimeout" "1m" | quote }}
+      batchSize: {{ .Values.commHub | dig "oauthRefresh" "batchSize" 5 }}
+      maxConcurrentWorkflowTaskPollers: {{ .Values.commHub | dig "oauthRefresh" "maxConcurrentWorkflowTaskPollers" 2 }}
+      maxConcurrentActivityTaskPollers: {{ .Values.commHub | dig "oauthRefresh" "maxConcurrentActivityTaskPollers" 4 }}
+
     slack:
       enabled: {{ .Values.commHub.slack.enabled | default false }}
       baseURL: {{ .Values.commHub.slack.baseURL | default "https://slack.com" | quote }}
@@ -100,6 +117,8 @@ data:
       authBaseURL: {{ .Values.commHub.linear.authBaseURL | default "https://linear.app" | quote }}
       apiBaseURL: {{ .Values.commHub.linear.apiBaseURL | default "https://api.linear.app" | quote }}
       clientID: {{ .Values.commHub.linear.clientID | default "" | quote }}
+      # Keep the key present so secret-backed GC_LINEAR_CLIENTSECRET env overrides are unmarshaled.
+      clientSecret: ""
       maxConnsPerHost: {{ .Values.commHub.linear.maxConnsPerHost | default 20 }}
       requestTimeout: {{ .Values.commHub.linear.requestTimeout | default "30s" }}
 
