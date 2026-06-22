@@ -151,6 +151,9 @@ data:
       {{- if .withInventoryDiscovery }}
       AwsWithInventoryDiscovery: {{ .withInventoryDiscovery }}
       {{- end }}
+      {{- if .searchTags }}
+      AwsSearchTags: {{ toYaml .searchTags | nindent 8 }}
+      {{- end }}
       AwsNamespaces:
       {{- range .namespaces }}
         - "{{ . }}"
