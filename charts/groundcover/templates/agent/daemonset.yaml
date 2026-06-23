@@ -107,6 +107,12 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: status.hostIP
+            - name: GC_MEMORY_LIMIT_BYTES
+              valueFrom:
+                resourceFieldRef:
+                  containerName: sensor
+                  resource: limits.memory
+                  divisor: "1"
             {{- with $sensorValues.env }}
               {{ tpl (toYaml .) $ | nindent 12 }}
             {{- end }}
