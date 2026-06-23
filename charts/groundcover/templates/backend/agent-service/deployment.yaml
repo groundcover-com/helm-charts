@@ -180,6 +180,20 @@ spec:
             {{- fail "agentService.azureFoundryCredentials.secretName is required when agentService.config.llmProvider=azure and agentService.config.azureFoundryUseEntra=false. Either provide the K8s secret holding the Foundry API key, or set azureFoundryUseEntra=true to use AKS workload identity instead." }}
             {{- end }}
             {{- end }}
+            {{- if eq ($agentService.config.llmProvider | default "bedrock") "anthropic" }}
+            - name: FLEET_MANAGER_URL
+              value: {{ include "fleet-manager.base.url" . | quote }}
+            - name: ANTHROPIC_API_KEY_SECRET_REF
+              value: {{ required "agentService.config.anthropicApiKeySecretRef is required when agentService.config.llmProvider=anthropic. Provide a Fleet Manager secret ref like secretRef::store::<id>." $agentService.config.anthropicApiKeySecretRef | quote }}
+            {{- if $agentService.config.anthropicModelId }}
+            - name: ANTHROPIC_MODEL_ID
+              value: {{ $agentService.config.anthropicModelId | quote }}
+            {{- end }}
+            {{- if $agentService.config.anthropicLargeModelId }}
+            - name: ANTHROPIC_LARGE_MODEL_ID
+              value: {{ $agentService.config.anthropicLargeModelId | quote }}
+            {{- end }}
+            {{- end }}
             {{- if $agentService.gcpCredentials }}
             - name: GOOGLE_APPLICATION_CREDENTIALS
               value: /var/run/secrets/gcp/gcp-config.json
