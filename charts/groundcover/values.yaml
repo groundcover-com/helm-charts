@@ -4177,6 +4177,18 @@ metricsIngester:
   enabled: true
 metrics-ingester:
   enabled: true
+  # Horizontal scaling for metrics-ingester (signals ingestion / batching is horizontally
+  # scalable). Additive and disabled by default. When autoscaling.enabled is true the static
+  # replica count is dropped and the HPA owns it.
+  # autoscaling:
+  #   enabled: true
+  #   minReplicas: 2
+  #   maxReplicas: 10
+  #   targetCPUUtilizationPercentage: 80
+  #   targetMemoryUtilizationPercentage: 80
+  # For scaling on signals beyond CPU/memory, KEDA can be layered on externally: apply a
+  # ScaledObject targeting this Deployment and KEDA manages its own HPA. Nothing KEDA-specific
+  # ships in this chart.
   # Create TLS certificate secret for metrics-ingester. Set to false when not running metrics-ingester (e.g. standalone).
   certificate:
     enabled: true
