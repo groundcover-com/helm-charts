@@ -8,6 +8,10 @@ data:
     Env:
     IsBackend: {{ .Values.global.backend.enabled }}
     RunningNamespace:
+    {{- if .Values.global.labelEnrichment }}
+    LabelEnrichment:
+    {{- .Values.global.labelEnrichment | toYaml | nindent 6 }}
+    {{- end }}
     {{- if .Values.integrationsAgent }}
     {{- if .Values.integrationsAgent.targets }}
     Targets:
