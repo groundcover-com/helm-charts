@@ -56,7 +56,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       expireAfter: {{ default "Never" $value.expireAfter }}
-      terminationGracePeriod: {{ default "1h" $value.terminationGracePeriod }}
+      terminationGracePeriod: {{ default "null" $value.terminationGracePeriod }}
       nodeClassRef:
         group: karpenter.k8s.aws
         kind: EC2NodeClass
