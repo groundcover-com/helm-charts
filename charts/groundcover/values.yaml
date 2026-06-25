@@ -2075,11 +2075,11 @@ commHub:
     maxConnsPerHost: 10
     requestTimeout: "30s"
   linear:
-    enabled: false
+    enabled: true
     authBaseURL: "https://linear.app"
     apiBaseURL: "https://api.linear.app"
     # Public Linear OAuth client ID (PKCE flow — no client secret anywhere).
-    clientID: ""
+    clientID: "e26a80502182d238d8c5b1311cc3eec4"
     maxConnsPerHost: 20
     requestTimeout: "30s"
   mcp:
