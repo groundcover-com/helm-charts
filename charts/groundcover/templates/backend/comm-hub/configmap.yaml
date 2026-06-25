@@ -116,9 +116,9 @@ data:
       enabled: {{ .Values.commHub.linear.enabled | default false }}
       authBaseURL: {{ .Values.commHub.linear.authBaseURL | default "https://linear.app" | quote }}
       apiBaseURL: {{ .Values.commHub.linear.apiBaseURL | default "https://api.linear.app" | quote }}
+      # Public Linear OAuth client ID. The flow uses PKCE, so there is no client
+      # secret in CommHub (or anywhere in the cluster).
       clientID: {{ .Values.commHub.linear.clientID | default "" | quote }}
-      # Keep the key present so secret-backed GC_LINEAR_CLIENTSECRET env overrides are unmarshaled.
-      clientSecret: ""
       maxConnsPerHost: {{ .Values.commHub.linear.maxConnsPerHost | default 20 }}
       requestTimeout: {{ .Values.commHub.linear.requestTimeout | default "30s" }}
 
