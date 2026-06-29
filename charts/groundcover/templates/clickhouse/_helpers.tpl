@@ -26,8 +26,16 @@
 {{- $secret := (lookup "v1" "Secret" .Release.Namespace (include "clickhouse.secretName" .) | default dict) -}}
 {{- if .Values.global.clickhouse.auth.password -}}
     {{- .Values.global.clickhouse.auth.password -}}
-{{- else if $secret -}}
-    {{- index $secret "data" (include "clickhouse.secretKey" .) | b64dec -}}
+{{- else if $secret.data -}}
+    {{- index $secret.data (include "clickhouse.secretKey" .) | b64dec -}}
+{{- else if .Values.global.clickhouse.auth.existingSecret -}}
+    {{- /* Externally-managed secret that isn't readable in this render (e.g. a
+           dry-run, where lookup returns nothing). Never fall back to randAlphaNum
+           here: with an existingSecret the chart isn't the source of truth, and a
+           fresh random value each render churns every checksum/clickhouse-secret
+           annotation and rolls the consumer pods on every reconcile. Return a
+           stable token instead so the checksum is deterministic. */ -}}
+    {{- printf "existing-%s" (include "clickhouse.secretName" .) -}}
 {{- else -}}
     {{- randAlphaNum 16 -}}
 {{- end -}}
