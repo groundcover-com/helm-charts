@@ -556,6 +556,7 @@ agent:
     trafficDistribution:
     collectionEnabled: true
     ingestionEnabled: true
+    enableLegacyApmMetrics: true
     useOldTracefsMountPath: false
     customEntityTags: # DEPRECATED: Use global.labelEnrichment.pods instead
       labels:

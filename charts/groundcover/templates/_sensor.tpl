@@ -151,6 +151,7 @@ startuptimeout: 120s
 {{ if $sensorValues.collectionEnabled }}
 productchansize: 512
 pushsummaries: true
+enablelegacyapmmetrics: {{ $sensorValues.enableLegacyApmMetrics }}
 productmetricsflushmintotalcounter:
   http: 1
   redis: 1
