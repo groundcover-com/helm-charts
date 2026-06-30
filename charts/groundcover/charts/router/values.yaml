@@ -61,7 +61,7 @@ service:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.12.29
+  tag: 1.12.30
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/tools'
@@ -104,6 +104,10 @@ configuration:
     Host: "portal"
     Port: "5555"
   ListenPort: "8080"
+  # Max total size (bytes) of the request line + headers the router HTTP server
+  # accepts. 0 (or omitted) uses the net/http default of 1 MB. Overridable via
+  # the GC_MAXHEADERBYTES env var.
+  MaxHeaderBytes: 0
   # Trusted public host for OAuth discovery URLs (falls back to request Host when empty).
   FrontendDomain: '{{ .Values.frontendDomain }}'
   JWT:
