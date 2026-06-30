@@ -4380,7 +4380,7 @@ kube-state-metrics:
   prometheusScrape: true
   image:
     registry: quay.io/groundcover
-    tag: "v2.19.0-20260602-1"
+    tag: "v2.19.1-mini-20260630-1"
   resources:
     requests:
       cpu: 200m
