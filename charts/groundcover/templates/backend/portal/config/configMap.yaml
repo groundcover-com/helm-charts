@@ -48,6 +48,17 @@ data:
 
     VictoriaMetrics:
       URL: {{ include "victoria-metrics.read.http.url" . }}
+      {{- /* The base URL above should point at the dedup vmselect (via
+             global.metrics.read.overrideHost) so portal and monitors-manager share it.
+             VMSelectSkipSlow is the portal-only fast path, rendered only with dual shipping. */}}
+      {{- if ((.Values.vmclusters).dualShipping).enabled }}
+      {{- $skipSlow := include "vmclusters.portalQuery.skipSlowCluster" . }}
+      {{- if $skipSlow }}
+      VMSelectSkipSlow: {{ include "vmclusters.vmselectUrl" $skipSlow }}
+      {{- end }}
+      {{- /* Feature gate the portal reads to decide whether to use VMSelectSkipSlow. Default false. */}}
+      VMSelectSkipSlowEnabled: {{ dig "skipSlowEnabled" false ((.Values.vmclusters).portalQuery | default dict) }}
+      {{- end }}
       QueryUsageTracker:
         Enabled: {{ .Values.portal.queryUsageTracker.enabled }}
 

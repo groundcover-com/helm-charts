@@ -5206,6 +5206,7 @@ vmclusters:
         search.maxQueryLen: "100000"
         search.maxSeries: "30000"
         search.maxUniqueTimeseries: "2000000"
+        search.skipSlowReplicas: "true"
       podMetadata:
         annotations:
           prometheus.io/scrape: "true"
@@ -5225,6 +5226,21 @@ vmclusters:
           prometheus.io/port: "8480"
           prometheus.io/path: "/metrics"
   clusters: {}
+
+  # Portal skip-slow query selector for the 2-vmcluster + dual-shipping setup.
+  # The dual-shipping vmagent writes identical data to both clusters. The base read URL
+  # (set via global.metrics.read.overrideHost) should point at the dedup vmselect so the
+  # portal AND monitors-manager share it; this field adds the portal-only fast-path
+  # skip-slow vmselect. It names a VMCluster whose vmselect runs with -search.skipSlowReplicas;
+  # the portal builds http://vmselect-<name>:8481/select/0/prometheus. Rendered only when
+  # vmclusters.dualShipping.enabled. tpl-evaluated; empty = the single cluster key under
+  # `clusters` above.
+  portalQuery:
+    skipSlowCluster: ""  # VMCluster name whose vmselect runs with -search.skipSlowReplicas
+    # Portal runtime feature gate (read from the ConfigMap by the portal): false = keep the
+    # current single-URL behavior; set true to have the portal start using VMSelectSkipSlow.
+    # Rendered as VictoriaMetrics.VMSelectSkipSlowEnabled, only when dualShipping.enabled.
+    skipSlowEnabled: false
 groundcover:
   extraObjects: {}
   podDisruptionBudget:
