@@ -2090,6 +2090,15 @@ commHub:
     enabled: false
     allowInsecureURLs: false
     proxyTimeout: "30s"
+    # Gates the OAuth 2.1 auth mode (discovery/DCR/PKCE/refresh) for MCP
+    # connectors. Off by default until GA. oauthDiscoveryTimeout is the per-call
+    # timeout for the shared OAuth HTTP client — it caps discovery, DCR, token
+    # exchange, and refresh. oauthClientName and oauthSoftwareStatement are
+    # optional dynamic-client-registration (DCR) metadata.
+    enableOAuth: false
+    oauthDiscoveryTimeout: "15s"
+    oauthClientName: ""
+    oauthSoftwareStatement: ""
   routeConfig:
     secretCacheTTL: "5m"
   tracing:

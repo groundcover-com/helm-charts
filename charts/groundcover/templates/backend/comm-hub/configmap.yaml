@@ -131,6 +131,16 @@ data:
       enabled: {{ .Values.commHub.mcp.enabled | default false }}
       allowInsecureURLs: {{ .Values.commHub.mcp.allowInsecureURLs | default false }}
       proxyTimeout: {{ .Values.commHub.mcp.proxyTimeout | default "30s" }}
+      enableOAuth: {{ .Values.commHub.mcp.enableOAuth | default false }}
+      # Quote the duration so a numeric override (e.g. 15) renders as a string and
+      # fails loudly in config.Load rather than being decoded as nanoseconds (15 -> 15ns).
+      oauthDiscoveryTimeout: {{ .Values.commHub.mcp.oauthDiscoveryTimeout | default "15s" | quote }}
+      {{- with .Values.commHub.mcp.oauthClientName }}
+      oauthClientName: {{ . | quote }}
+      {{- end }}
+      {{- with .Values.commHub.mcp.oauthSoftwareStatement }}
+      oauthSoftwareStatement: {{ . | quote }}
+      {{- end }}
 
     routeConfig:
       secretCacheTTL: {{ .Values.commHub.routeConfig.secretCacheTTL | default "5m" }}
