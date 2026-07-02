@@ -552,6 +552,7 @@ apmIngestor:
     tlsCertFile: {{ .Values.global.ingestion.tlsCertFile | default "" | quote }}
     tlsKeyFile: {{ .Values.global.ingestion.tlsKeyFile | default "" | quote }}
     tlsCAFile: {{ .Values.global.ingestion.tlsCAFile | default "" | quote }}
+    maxSpansPerMarshal: {{ $sensorValues.apmIngestor.tracesOtlpEndpoint.maxSpansPerMarshal }}
   logsOtlpEndpoint:
     endpoint: {{ include "ingestion.logs.otlp.http.url" . }}
     insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
@@ -716,6 +717,7 @@ tracesOtlpEndpoint:
   tlsCertFile: {{ .Values.global.ingestion.tlsCertFile | default "" | quote }}
   tlsKeyFile: {{ .Values.global.ingestion.tlsKeyFile | default "" | quote }}
   tlsCAFile: {{ .Values.global.ingestion.tlsCAFile | default "" | quote }}
+  maxSpansPerMarshal: {{ $sensorValues.apmIngestor.tracesOtlpEndpoint.maxSpansPerMarshal }}
 logsOtlpEndpoint:
   endpoint: {{ include "ingestion.logs.otlp.http.url" . }}
   insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
