@@ -58,7 +58,14 @@ data:
         Annotations Off
         K8S-Logging.Parser On
         K8S-Logging.Exclude On
-    
+
+    # keep only groundcover components; the tail glob matches every pod in the
+    # release namespace, which may be shared with non-groundcover workloads
+    [FILTER]
+        Name grep
+        Match kube.*
+        Regex $kubernetes['labels']['app.kubernetes.io/part-of'] ^{{ include "groundcover.labels.partOf" . | regexQuoteMeta }}$
+
     [FILTER]
         Name record_modifier
         Match *
