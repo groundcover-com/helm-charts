@@ -2053,7 +2053,7 @@ commHub:
     namespace: "commhub"
     adminToolsImage:
       repository: public.ecr.aws/groundcovercom/temporalio/admin-tools
-      tag: "1.29.7-20260622-1"
+      tag: "1.29.7-20260706-1"
       pullPolicy: IfNotPresent
   cursorCloud:
     baseURL: "https://api.cursor.com"

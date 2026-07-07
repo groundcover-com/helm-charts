@@ -6,7 +6,7 @@ temporalConfig:
   adminTools:
     image:
       repository: public.ecr.aws/groundcovercom/temporalio/admin-tools
-      tag: "1.29.7-20260702-1"
+      tag: "1.29.7-20260706-1"
       pullPolicy: IfNotPresent
   schemaConfigMaps:
     annotations: 
@@ -117,7 +117,7 @@ temporal:
     enabled: true
     image:
       repository: public.ecr.aws/groundcovercom/temporalio/admin-tools
-      tag: 1.29.7-20260702-1
+      tag: 1.29.7-20260706-1
 
   # Disable schema management - handled by our job
   schema:
