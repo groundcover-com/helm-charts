@@ -526,6 +526,9 @@ tracesWorkloadFilters: {{ toYaml .Values.tracesWorkloadFilters | nindent 2 }}
 {{- if .Values.global.labelEnrichment }}
 LabelEnrichment: {{ toYaml .Values.global.labelEnrichment | nindent 2 }}
 {{- end }}
+{{- if .Values.global.obfuscationConfig }}
+ObfuscationConfig: {{ toYaml .Values.global.obfuscationConfig | nindent 2 }}
+{{- end }}
 tracesContainerFilters: {{ toYaml .Values.tracesContainerFilters | nindent 2 }}
 nodelabels: {{ toYaml $sensorValues.nodelabels | nindent 2 }}
 {{- if .Values.global.metricLabels }}

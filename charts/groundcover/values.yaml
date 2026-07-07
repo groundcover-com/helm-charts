@@ -34,6 +34,13 @@ global:
     nodes:
       labels: []
 
+  # Obfuscation of collected entity metadata. Applied by the k8s-watcher (k8s
+  # container/pod entities) and the sensor (Linux/Docker container entities).
+  obfuscationConfig:
+    # List of environment variable names whose values are replaced with
+    # <REDACTED> in the Container Info tab. Matching is case-insensitive.
+    envVariables: []
+
   # DEPRECATED: Use global.labelEnrichment instead. Kept for backward compatibility.
   metricLabels:
     pod:

@@ -100,6 +100,10 @@ data:
     LabelEnrichment:
     {{- .Values.global.labelEnrichment | toYaml | nindent 6 }}
     {{- end }}
+    {{- if .Values.global.obfuscationConfig }}
+    ObfuscationConfig:
+    {{- .Values.global.obfuscationConfig | toYaml | nindent 6 }}
+    {{- end }}
     {{- if .Values.global.metricLabels }}
     MetricLabels:
     {{- .Values.global.metricLabels | toYaml | nindent 6 }}
