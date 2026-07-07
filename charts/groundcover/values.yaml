@@ -905,6 +905,10 @@ dbManager:
   serviceAccount:
     name: ""
     annotations: {}
+  tracing:
+    writeTimeout: 5s
+    flushInterval: 5s
+    batchSize: 50
   image:
     repository: "{{ .Values.global.origin.registry }}/db-manager"
     tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
@@ -1019,6 +1023,7 @@ dbManager:
     interval: 5s
     sslmode: "require"
     admindbname: ""
+    enableTracing: false
   skipMigrations: false
   migrationsPath: "/migrations"
   # When false, db-manager skips its Postgres pool and runs the legacy

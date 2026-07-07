@@ -15,6 +15,16 @@ data:
     startuptimeout: 1m0s
 
     GroundcoverVersion: "OVERRIDEN"
+    {{- if eq (include "telemetry.enabled" .) "true" }}
+    Tracing:
+      Enabled: true
+      Endpoint: {{ include "telemetry.traces.otlpUrl" . | quote }}
+      WriteTimeout: {{ .Values.dbManager.tracing.writeTimeout | default "5s" }}
+      FlushInterval: {{ .Values.dbManager.tracing.flushInterval | default "5s" }}
+      BatchSize: {{ .Values.dbManager.tracing.batchSize | default 50 }}
+      Headers:
+        apikey: "OVERRIDDEN"
+    {{- end }}
     {{- if .Values.tags.incloud }}
     StopMigrationOnFailure: true
     {{- else }}
@@ -153,6 +163,7 @@ data:
         timeout: {{ .Values.dbManager.db.timeout }}
         interval: {{ .Values.dbManager.db.interval }}
         sslmode: {{ .Values.dbManager.db.sslmode }}
+        enableTracing: {{ .Values.dbManager.db.enableTracing | default false }}
       MigrationsPath: {{ .Values.dbManager.migrationsPath }}
       SkipMigrations: {{ .Values.dbManager.skipMigrations }}
       EnableStorageMgmt: {{ .Values.dbManager.enableStorageMgmt | default false }}
