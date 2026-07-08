@@ -1,0 +1,25 @@
+{{- if eq .Values.cloud "azure" }}
+{{- range $key,$value := .Values.aksNodeClass }}
+{{- if (ne $value.enabled false)}}
+---
+apiVersion: karpenter.azure.com/v1beta1
+kind: AKSNodeClass
+metadata:
+  name: {{ $key }}
+spec:
+  imageFamily: {{ default (default "Ubuntu" $.Values.infrastructure.imageFamily) $value.imageFamily }}
+  {{- if or ($value.vnetSubnetID) ($.Values.infrastructure.vnetSubnetID) }}
+  vnetSubnetID: {{ default $.Values.infrastructure.vnetSubnetID $value.vnetSubnetID }}
+  {{- end }}
+  {{- if or ($value.osDiskSizeGB) ($.Values.infrastructure.osDiskSizeGB) }}
+  osDiskSizeGB: {{ default $.Values.infrastructure.osDiskSizeGB $value.osDiskSizeGB }}
+  {{- end }}
+  {{- with $value.kubelet }}
+  kubelet: {{ toYaml . | nindent 4 }}
+  {{- end }}
+  {{- if or ($value.tags) ($.Values.infrastructure.tags) }}
+  tags: {{ default $.Values.infrastructure.tags $value.tags | toYaml | nindent 4 }}
+  {{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

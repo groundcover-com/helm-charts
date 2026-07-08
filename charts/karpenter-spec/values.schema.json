@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "cloud": {
+      "type": "string",
+      "enum": ["aws", "azure"],
+      "description": "Cloud provider — selects EC2NodeClass (aws) or AKSNodeClass (azure)."
+    },
+    "infrastructure": {
+      "type": "object",
+      "properties": {
+        "osDiskSizeGB": {
+          "type": ["integer", "null"],
+          "description": "Azure only. Numeric GB — reject strings like \"256Gi\"."
+        }
+      },
+      "additionalProperties": true
+    },
+    "aksNodeClass": {
+      "type": ["object", "null"],
+      "additionalProperties": {
+        "type": ["object", "null"],
+        "properties": {
+          "osDiskSizeGB": {
+            "type": ["integer", "null"],
+            "description": "Numeric GB — reject strings like \"256Gi\"."
+          },
+          "kubelet": {
+            "type": ["object", "null"],
+            "description": "Must be a map — reject booleans/strings like kubelet: true."
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}

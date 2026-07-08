@@ -56,12 +56,135 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       expireAfter: {{ default "Never" $value.expireAfter }}
-      terminationGracePeriod: {{ default "null" $value.terminationGracePeriod }}
+      {{- if $value.terminationGracePeriod }}
+      terminationGracePeriod: {{ $value.terminationGracePeriod }}
+      {{- end }}
+      {{- if eq $.Values.cloud "azure" }}
+      nodeClassRef:
+        group: karpenter.azure.com
+        kind: AKSNodeClass
+        name: {{ $value.aksNodeClass }}
+      requirements:
+      {{- if and $value.instanceArch $value.instanceArch.values }}
+      {{- with $value.instanceArch }}
+      - key: "kubernetes.io/arch"
+        operator: {{ default "In" .operator }}
+        values: {{- range default (list "amd64") .values }}
+        - {{ . | quote }}
+        {{- end }}
+      {{- end }}
+      {{- else }}
+      - key: "kubernetes.io/arch"
+        operator: "In"
+        values: ["amd64"]
+      {{- end }}
+      {{- if and $value.capacityType $value.capacityType.values }}
+      {{- with $value.capacityType }}
+      - key: "karpenter.sh/capacity-type"
+        operator: {{ default "In" .operator }}
+        values: {{- range default (list "on-demand") .values }}
+        - {{ . | quote }}
+        {{- end }}
+      {{- end }}
+      {{- else }}
+      - key: "karpenter.sh/capacity-type"
+        operator: "In"
+        values: ["on-demand"]
+      {{- end }}
+      {{- if and $value.storagePremium $value.storagePremium.values }}
+      {{- with $value.storagePremium }}
+      - key: "karpenter.azure.com/sku-storage-premium-capable"
+        operator: {{ default "In" .operator }}
+        values: {{- range default (list "true") .values }}
+        - {{ . | quote }}
+        {{- end }}
+      {{- end }}
+      {{- else }}
+      # Default: only premium-storage-capable SKUs — groundcover backend uses
+      # managed-csi-premium (Premium_ZRS) PVCs, which A-series and other
+      # non-premium VM families cannot attach.
+      - key: "karpenter.azure.com/sku-storage-premium-capable"
+        operator: "In"
+        values: ["true"]
+      {{- end }}
+      {{- if and $value.instanceFamily $value.instanceFamily.values }}
+      {{- with $value.instanceFamily }}
+      - key: "karpenter.azure.com/sku-family"
+        operator: {{ default "In" .operator }}
+        values: {{- range .values }}
+        - {{ . | quote }}
+        {{- end }}
+      {{- end }}
+      {{- end }}
+      {{- if and $value.instanceCpu $value.instanceCpu.values }}
+      {{- with $value.instanceCpu }}
+      - key: "karpenter.azure.com/sku-cpu"
+        operator: {{ default "Gt" .operator }}
+        values: {{- range .values }}
+        - {{ . | quote }}
+        {{- end }}
+      {{- end }}
+      {{- end }}
+      {{- if and $value.instanceMemory $value.instanceMemory.values }}
+      {{- with $value.instanceMemory }}
+      - key: "karpenter.azure.com/sku-memory"
+        operator: {{ default "Gt" .operator }}
+        values: {{- range .values }}
+        - {{ . | quote }}
+        {{- end }}
+      {{- end }}
+      {{- end }}
+      {{- if and $value.instanceSize $value.instanceSize.values }}
+      {{- with $value.instanceSize }}
+      - key: "karpenter.azure.com/sku-name"
+        operator: {{ default "In" .operator }}
+        values: {{- range .values }}
+        - {{ . | quote }}
+        {{- end }}
+      {{- end }}
+      {{- end }}
+      {{- if and $value.instanceZone $value.instanceZone.values }}
+      {{- with $value.instanceZone }}
+      - key: "topology.kubernetes.io/zone"
+        operator: {{ default "In" .operator }}
+        values: {{- range .values }}
+        - {{ . | quote }}
+        {{- end }}
+      {{- end }}
+      {{- end }}
+      {{- if and $value.gpuName $value.gpuName.values }}
+      {{- with $value.gpuName }}
+      - key: "karpenter.azure.com/sku-gpu-name"
+        operator: {{ default "In" .operator }}
+        values: {{- range .values }}
+        - {{ . | quote }}
+        {{- end }}
+      {{- end }}
+      {{- end }}
+      {{- if and $value.gpuManufacturer $value.gpuManufacturer.values }}
+      {{- with $value.gpuManufacturer }}
+      - key: "karpenter.azure.com/sku-gpu-manufacturer"
+        operator: {{ default "In" .operator }}
+        values: {{- range .values }}
+        - {{ . | quote }}
+        {{- end }}
+      {{- end }}
+      {{- end }}
+      {{- if and $value.gpuCount $value.gpuCount.values }}
+      {{- with $value.gpuCount }}
+      - key: "karpenter.azure.com/sku-gpu-count"
+        operator: {{ default "In" .operator }}
+        values: {{- range .values }}
+        - {{ . | quote }}
+        {{- end }}
+      {{- end }}
+      {{- end }}
+      {{- else if eq $.Values.cloud "aws" }}
       nodeClassRef:
         group: karpenter.k8s.aws
         kind: EC2NodeClass
         name: {{ $value.ec2NodeClass }}
-      requirements: 
+      requirements:
       {{- if $value.instanceCategories.values }}
       {{- with $value.instanceCategories }}
       - key: "karpenter.k8s.aws/instance-category"
@@ -288,6 +411,9 @@ spec:
         - {{ . | quote }}
         {{- end }}
       {{- end }}
+      {{- end }}
+      {{- else }}
+      {{- fail (printf "karpenter-spec: invalid .Values.cloud %q — must be \"aws\" or \"azure\"" $.Values.cloud) }}
       {{- end }}
 {{- end }}
 {{- end }}

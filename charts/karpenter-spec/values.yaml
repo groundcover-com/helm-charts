@@ -1,15 +1,25 @@
+# Cloud provider switch: aws | azure. Picks nodeClassRef kind (EC2NodeClass vs
+# AKSNodeClass) and the per-cloud requirement selector keys.
+cloud: aws
+
 infrastructure:
+  # AWS (EC2NodeClass)
   securityGroupIds: []
   securityGroupTags: []
   securityGroupNames: []
   subnetIds: []
   subnetTags: []
-  amiSelectorAlias: 
+  amiSelectorAlias:
   - bottlerocket@v1.25.0
   amiSelectorName: []
   amiSelectorIds: []
-  role: 
-  instanceProfile: 
+  role:
+  instanceProfile:
+  # Azure (AKSNodeClass) — used when cloud: azure
+  imageFamily:
+  vnetSubnetID:
+  osDiskSizeGB:
+  tags:
 
 ec2NodeClass:
   default: 
@@ -49,11 +59,21 @@ ec2NodeClass:
       httpProtocolIPv6: 
       httpTokens:
       httpPutResponseHopLimit:
-    userData: 
+    userData:
+
+# Azure NAP node class (used when cloud: azure)
+aksNodeClass:
+  default:
+    imageFamily:
+    vnetSubnetID:
+    osDiskSizeGB:
+    tags:
+    kubelet:
 
 nodePools:
   default:
     ec2NodeClass: default
+    aksNodeClass: default
     disruption:
       consolidateAfter: 
       consolidationPolicy: 
@@ -136,5 +156,12 @@ nodePools:
       operator:
       values: []
     localNvme:
+      operator:
+      values: []
+    # Azure-only selectors (used when cloud: azure)
+    instanceSize:
+      operator:
+      values: []
+    storagePremium:
       operator:
       values: []
