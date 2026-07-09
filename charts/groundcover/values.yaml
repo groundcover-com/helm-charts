@@ -1507,9 +1507,19 @@ ingestor:
         - "10"
 
 metricsAggregator:
+  # Deploy the metrics-aggregator as a StatefulSet (true) or a Deployment (false).
+  # Deployment mode uses an emptyDir for the remote-write persistent queue (no per-pod PVC).
+  statefulset: true
   persistence:
+    # When false, the remote-write persistent queue uses an emptyDir instead of a PVC (no volumeClaimTemplate).
+    enabled: true
     size: 50Gi
     annotations: {}
+    # Controls the PVC retention policy on the StatefulSet (only applies when persistence.enabled is true).
+    # When unset, Kubernetes keeps its default behavior (Retain). Set to override whenDeleted/whenScaled.
+    # retentionPolicy:
+    #   whenDeleted: Retain
+    #   whenScaled: Retain
   image:
     repository: "{{ .Values.global.origin.registry }}/sensor"
     tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"

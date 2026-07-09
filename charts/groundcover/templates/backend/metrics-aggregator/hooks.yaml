@@ -1,9 +1,11 @@
-{{ if and .Values.global.backend.enabled .Values.global.metricsAggregator.enabled (index .Values "statefulset-modifier" "metrics-aggregator" "enabled") }}
 {{- $sensorValues := deepCopy .Values.metricsAggregator -}}
 {{- $sensorValues = mergeOverwrite $sensorValues (default (dict) .Values.global.metricsAggregator) -}}
+{{ if and .Values.global.backend.enabled .Values.global.metricsAggregator.enabled (index .Values "statefulset-modifier" "metrics-aggregator" "enabled") $sensorValues.statefulset }}
 {{- $persistence := merge (dict "annotations" (default dict $sensorValues.persistence.annotations)) $sensorValues.persistence -}}
 {{- $shouldPatchPvc := true -}}
 {{- $shouldPatchAnnotations := true -}}
+{{- $stsHasPvc := false -}}
+{{- $stsExists := false -}}
 {{- $shouldPatchSize := (index .Values "statefulset-modifier" "sizePatches") -}}
 {{- $pvcSize := $persistence.size -}}
 {{- $annotations := ($persistence.annotations | default dict) | toJson -}}
@@ -27,8 +29,14 @@
 {{- $stsPvcAnnotations := ($sts | dig "spec" "volumeClaimTemplates" (list dict) | first | dig "metadata" "annotations" dict) | toJson -}}
 {{- $shouldPatchPvc = (not (eq $pvcSize $pvcCapacitySize)) -}}
 {{- $shouldPatchAnnotations = (not (eq $stsPvcAnnotations $annotations)) -}}
+{{- $stsHasPvc = (gt (len ($sts | dig "spec" "volumeClaimTemplates" (list))) 0) -}}
+{{- $stsExists = (not (empty $sts)) -}}
 {{- end -}}
-{{ if or (and $shouldPatchPvc $shouldPatchSize) $shouldPatchAnnotations }}
+{{- $isExpansion := (and $persistence.enabled $stsHasPvc (or (and $shouldPatchPvc $shouldPatchSize) $shouldPatchAnnotations)) -}}
+{{- $isRecreate := (and $stsExists (ne $stsHasPvc $persistence.enabled)) -}}
+{{/* Expansion keeps pods (orphan); recreate changes the pod's volume, so pods must be deleted and recreated */}}
+{{- $cascade := ternary "foreground" "orphan" $isRecreate -}}
+{{ if or $isExpansion $isRecreate }}
 ---
 apiVersion: batch/v1
 kind: Job
@@ -55,7 +63,8 @@ spec:
           - -c
           - |
             set -e
-            kubectl delete sts {{ $stsName | quote }} --ignore-not-found --cascade=orphan
+            kubectl delete sts {{ $stsName | quote }} --ignore-not-found --cascade={{ $cascade }}
+{{- if and $persistence.enabled $stsHasPvc }}
 {{ if and $shouldPatchPvc $shouldPatchSize }}
       - name: pvc-patch
         imagePullPolicy: IfNotPresent
@@ -76,6 +85,7 @@ spec:
           - |
             set -e
             kubectl patch pvc {{ $pvcName | quote }} --type json --patch {{ $annotationsPvcPatch | quote }} || exit 0
+{{- end -}}
 {{- end -}}
 {{- end -}}
 {{- end -}}
