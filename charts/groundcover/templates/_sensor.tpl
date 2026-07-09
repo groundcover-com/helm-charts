@@ -767,6 +767,7 @@ telemetry:
       enabled: {{ .Values.global.telemetry.metrics.localStorage.enabled }}
       url: {{ default (include "metrics-ingester.promethues-exposition.http.url" .) .Values.global.telemetry.metrics.localStorage.url }}
       interval: {{ .Values.global.telemetry.metrics.localStorage.interval }}
+      tlsSkipVerify: {{ .Values.global.telemetry.metrics.localStorage.tlsSkipVerify }}
 
 {{ if $sensorValues.collectionEnabled }}
 k8sEntitiesWatch:

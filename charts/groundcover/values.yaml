@@ -285,6 +285,7 @@ global:
       localStorage:
         enabled: true
         interval: 5m
+        tlsSkipVerify: false
     traces:
       otlpUrl: https://traces.groundcover.com/v1/traces
       zipkinUrl: https://traces.groundcover.com/api/v2/spans
