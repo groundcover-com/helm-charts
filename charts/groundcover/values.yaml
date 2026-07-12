@@ -1264,6 +1264,9 @@ integrationsAgent:
         interval: 2s
   exporters:
     prometheus:
+      # Override the prometheus exporter target. When empty (default), the exporter
+      # points at the in-cluster metrics-ingester (<release>-metrics-ingester). 
+      overrideUrl: ""
       requestTimeout: 30s
       batchSize: 2000
       maxRetries: 3

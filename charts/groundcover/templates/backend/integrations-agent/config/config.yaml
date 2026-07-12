@@ -329,7 +329,7 @@ data:
     Exporters:
     - Type: "prometheus"
       Name: "prometheus"
-      Url: {{ include "metrics-ingester.cluster.http.base.url" . }}
+      Url: {{ dig "exporters" "prometheus" "overrideUrl" "" .Values.integrationsAgent | default (include "metrics-ingester.cluster.http.base.url" .) }}
       TlsSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
       {{- if .Values.integrationsAgent.exporters }}
       {{- if .Values.integrationsAgent.exporters.prometheus }}
