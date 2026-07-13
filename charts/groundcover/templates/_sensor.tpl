@@ -669,6 +669,7 @@ logs:
     dockerMaxLogSize: {{ .Values.maxLogSize }}
     journalConfig: {{ toYaml .Values.journalScraper | nindent 6 }}
     logFileTargets: {{ toYaml .Values.logFileTargets | nindent 6 }}
+    vl: {{ toYaml .Values.vlLogTailer | nindent 6 }}
   {{ end }}
   client:
     batchwait: 5000ms

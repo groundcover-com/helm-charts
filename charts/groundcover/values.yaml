@@ -1906,10 +1906,20 @@ journalScraper:
   checkInterval: 5s
 logFileTargets: []
 # - path: /var/log/syslog.*
-#   excludedPath: "*.gz"
+#   excludedPath: "*.gz" # matched against full path and base name; the vlagent backend (vlLogTailer) does not support "**" recursion
 #   labels:
 #     label1: "value1"
 #   workload: "syslog" # optional
+
+# Opt-in: tail the logFileTargets above with the vlagent (VictoriaLogs) tailer
+# instead of the promtail per-file tailer.
+vlLogTailer:
+  enabled: false
+  readConcurrency: 512 # max files read concurrently (0 = unbounded)
+  readBufferSize: 65536 # per-read buffer, bytes
+  checkpointsFile: "" # read-offset store; empty = next to positionsFile
+  discoverInterval: 1s # how often to look for new files
+  startAtEnd: false # start new files at the end instead of the beginning
 
 portal:
   configuration:
