@@ -10,6 +10,9 @@ metadata:
     app.kubernetes.io/name: comm-hub
 data:
   config.yaml: |
+    backendId: {{ .Values.global.backend.name | default "" | quote }}
+    tenantUuid: {{ .Values.global.backend.tenantUuid | default "" | quote }}
+
     temporal:
       address: {{ printf "%s:%v" (.Values.commHub.temporal.host | default (printf "%s-temporal-frontend" .Release.Name)) (.Values.commHub.temporal.port | default 7233) | quote }}
       namespace: {{ .Values.commHub.temporal.namespace | default "commhub" | quote }}

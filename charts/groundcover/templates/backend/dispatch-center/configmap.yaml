@@ -10,6 +10,9 @@ metadata:
     app.kubernetes.io/name: dispatch-center
 data:
   config.yaml: |
+    backendId: {{ .Values.global.backend.name | default "" | quote }}
+    tenantUuid: {{ .Values.global.backend.tenantUuid | default "" | quote }}
+
     temporal:
       address: {{ .Values.dispatchCenter.temporal.host | default (printf "%s-temporal-frontend:7233" .Release.Name) | quote }}
     

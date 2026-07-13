@@ -108,6 +108,10 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.annotations['groundcover_version']
+            - name: GC_BACKEND_ID
+              value: {{ .Values.global.backend.name | default "" | quote }}
+            - name: GC_TENANT_UUID
+              value: {{ .Values.global.backend.tenantUuid | default "" | quote }}
             - name: ROUTER_URL
               value: {{ $agentService.config.routerUrl | default (printf "https://%s" (.Values.router.frontendDomain | default "app.groundcover.com")) | quote }}
             {{- if .Values.global.commHub.enabled }}

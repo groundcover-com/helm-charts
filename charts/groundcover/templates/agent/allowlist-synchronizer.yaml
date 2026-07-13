@@ -1,0 +1,22 @@
+{{- if and .Values.global.agent.enabled .Values.agent.gke.autopilot.enabled .Values.agent.gke.autopilot.installAllowlistSynchronizer }}
+# Installs the groundcover sensor WorkloadAllowlist(s) from Google's managed
+# partner allowlist store into this Autopilot cluster. Required for non-partner
+# (customer) clusters, which cannot apply WorkloadAllowlists directly.
+# AllowlistSynchronizer is a cluster-scoped resource.
+apiVersion: auto.gke.io/v1
+kind: AllowlistSynchronizer
+metadata:
+  # AllowlistSynchronizer is cluster-scoped; include the namespace so multiple
+  # installs in different namespaces don't contend for one object.
+  name: {{ include "sensor.fullname" . }}-{{ .Release.Namespace }}-allowlist
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+spec:
+  allowlistPaths:
+  {{- range (splitList "," .Values.agent.gke.autopilot.allowlistRepoPath) }}
+    {{- $path := . | trim }}
+    {{- if $path }}
+    - {{ $path | quote }}
+    {{- end }}
+  {{- end }}
+{{- end }}

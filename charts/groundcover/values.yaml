@@ -56,6 +56,7 @@ global:
       enabled: false
   backend:
     name:
+    tenantUuid:
     enabled: true
     victoria-metrics-distributed:
       enabled: false
@@ -482,6 +483,25 @@ agent:
   podLabels:
   additionalAnnotations:
   podAnnotations:
+  # GKE Autopilot support. When enabled, the privileged sensor is made
+  # deployable on Autopilot clusters via a Google-approved WorkloadAllowlist:
+  #  - stamps the sensor pod with the cloud.google.com/matching-allowlist label
+  #  - drops the EKS-specific node affinity (rejected by Autopilot)
+  #  - uses a namespace-independent sensor-position hostPath so a single
+  #    approved allowlist matches regardless of install namespace
+  #  - splits the fluent-bit config into two single-file volumes so the
+  #    allowlist matcher can disambiguate them (it matches volumeMounts by name)
+  #  - optionally installs an AllowlistSynchronizer to pull the allowlist
+  gke:
+    autopilot:
+      enabled: false
+      # Name of the approved WorkloadAllowlist to match against.
+      allowlistName: groundcover-sensor-v1
+      # Install an AllowlistSynchronizer so non-partner clusters fetch the
+      # approved allowlist from Google's partner repo.
+      installAllowlistSynchronizer: true
+      # Path(s) to the allowlist in the partner repo (whole-dir path applies updates automatically).
+      allowlistRepoPath: "groundcover/sensor/*"
   tolerations:
   - operator: "Exists"
   affinity:

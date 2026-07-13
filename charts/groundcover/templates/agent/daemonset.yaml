@@ -47,6 +47,9 @@ spec:
         app: sensor
         app.kubernetes.io/name: sensor
         {{- include "groundcover.labels" . | nindent 8 }}
+        {{- if .Values.agent.gke.autopilot.enabled }}
+        cloud.google.com/matching-allowlist: {{ .Values.agent.gke.autopilot.allowlistName }}
+        {{- end }}
         {{- if .Values.agent.additionalLabels }}
 {{ toYaml .Values.agent.additionalLabels | indent 8 }}
         {{- end }}
@@ -60,8 +63,19 @@ spec:
 {{ toYaml .Values.agent.tolerations | indent 8 }}
 {{- end }}
 {{- if .Values.agent.affinity }}
+{{- if .Values.agent.gke.autopilot.enabled }}
+      # Autopilot: keep pod (anti)affinity, drop nodeAffinity. The chart default
+      # nodeAffinity targets an EKS label Autopilot rejects, and Autopilot restricts
+      # node affinity in general. Omitting only nodeAffinity preserves the rest.
+{{- $affinity := omit .Values.agent.affinity "nodeAffinity" }}
+{{- if $affinity }}
+      affinity:
+{{ toYaml $affinity | indent 8 }}
+{{- end }}
+{{- else }}
       affinity:
 {{ toYaml .Values.agent.affinity | indent 8 }}
+{{- end }}
 {{- end }}
 {{- if .Values.agent.nodeSelector }}
       nodeSelector:
@@ -190,6 +204,13 @@ spec:
               readOnly: false
             - mountPath: /var/run/positions
               name: sensor-position
+{{- if .Values.agent.gke.autopilot.enabled }}
+              # Autopilot uses a fixed hostPath (for allowlist matching); isolate
+              # per-namespace via subPath so multiple installs on one node don't
+              # clobber each other's position state. The allowlist omits subPath,
+              # which matches any value.
+              subPath: {{ .Release.Namespace }}
+{{- end }}
             - mountPath: /var/lib/docker/containers
               name: docker
               readOnly: true
@@ -218,12 +239,23 @@ spec:
             - name: varlog
               mountPath: /var/log
               readOnly: true
+{{- if .Values.agent.gke.autopilot.enabled }}
+            # Autopilot: two distinct volume names so the WorkloadAllowlist matcher
+            # (which matches volumeMounts by name) can disambiguate them.
+            - name: fluent-bit-config-main
+              mountPath: /fluent-bit/etc/fluent-bit.conf
+              subPath: fluent-bit.conf
+            - name: fluent-bit-config-parsers
+              mountPath: /fluent-bit/etc/custom_parsers.conf
+              subPath: custom_parsers.conf
+{{- else }}
             - name: fluent-bit-config
               mountPath: /fluent-bit/etc/fluent-bit.conf
               subPath: fluent-bit.conf
             - name: fluent-bit-config
               mountPath: /fluent-bit/etc/custom_parsers.conf
               subPath: custom_parsers.conf
+{{- end }}
             - name: docker
               readOnly: true
               mountPath: /var/lib/docker/containers
@@ -298,10 +330,21 @@ spec:
       terminationGracePeriodSeconds: 10
       volumes:
 {{- if eq (include "telemetry.enabled" .) "true" }}
+{{- if .Values.agent.gke.autopilot.enabled }}
+        - name: fluent-bit-config-main
+          configMap:
+            name: fluent-bit-config
+            defaultMode: 420
+        - name: fluent-bit-config-parsers
+          configMap:
+            name: fluent-bit-config
+            defaultMode: 420
+{{- else }}
         - name: fluent-bit-config
           configMap:
             name: fluent-bit-config
             defaultMode: 420
+{{- end }}
 {{- end }}
         - name: varlibdockercontainers
           hostPath:
@@ -329,7 +372,16 @@ spec:
         - emptyDir: {}
           name: comm
         - hostPath:
+{{- if .Values.agent.gke.autopilot.enabled }}
+            # Autopilot: fixed, namespace-independent path so one approved
+            # WorkloadAllowlist (which matches hostPath by exact path) works for
+            # any install namespace. DirectoryOrCreate so the base dir exists for
+            # the per-namespace subPath mount (kubelet won't create a subPath base).
+            path: /run/groundcover-sensor-position
+            type: DirectoryOrCreate
+{{- else }}
             path: /run/sensor-position-{{ .Release.Namespace }}
+{{- end }}
           name: sensor-position
         - hostPath:
             path: /var/lib/docker/containers
