@@ -2139,6 +2139,26 @@ commHub:
     oauthDiscoveryTimeout: "15s"
     oauthClientName: ""
     oauthSoftwareStatement: ""
+  # Declarative connector catalog (MCP-backed presets rendered as first-class
+  # connectors). Entries are the sole source of catalog defaults; an empty list
+  # disables the catalog. Entry fields: id, displayName, description, iconURL,
+  # iconDomain, mcpServerURL, authMode (oauth|none|token), customHeaders,
+  # setupHelp.
+  connectorCatalog:
+    entries:
+      - id: notion
+        displayName: Notion
+        description: Connect Notion to search and read your workspace pages and databases.
+        mcpServerURL: https://mcp.notion.com/mcp
+        authMode: oauth
+        iconDomain: notion.so
+      - id: pylon
+        displayName: Pylon
+        description: Connect Pylon to access your customer support issues and knowledge base.
+        mcpServerURL: https://mcp.usepylon.com
+        authMode: oauth
+        iconDomain: usepylon.com
+        setupHelp: A Pylon admin must first enable the MCP server in Pylon (Settings → AI Controls → MCP Server) before connecting.
   routeConfig:
     secretCacheTTL: "5m"
   tracing:

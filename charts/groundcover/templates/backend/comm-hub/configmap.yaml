@@ -142,6 +142,12 @@ data:
       oauthSoftwareStatement: {{ . | quote }}
       {{- end }}
 
+    # Declarative connector catalog (MCP-backed presets). Always rendered so an
+    # explicit empty list disables the catalog instead of omitting the section.
+    connectorCatalog:
+      entries:
+        {{- toYaml (.Values.commHub | dig "connectorCatalog" "entries" (list)) | nindent 8 }}
+
     routeConfig:
       secretCacheTTL: {{ .Values.commHub.routeConfig.secretCacheTTL | default "5m" }}
 
