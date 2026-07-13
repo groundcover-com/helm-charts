@@ -81,6 +81,10 @@ spec:
         {{- with .Values.k8sWatcher.builtinEnv }}
           {{ tpl (toYaml .) $ | nindent 8 }}
         {{- end }}
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         envFrom:
           - secretRef:
               name: {{include "groundcover.config.secretName" .}}

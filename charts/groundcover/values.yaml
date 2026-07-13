@@ -468,7 +468,15 @@ statefulset-modifier:
     tag: '20260601'
 
 agent:
-  imagePullPolicy: 
+  # Bind address for the sensor DaemonSet's own listeners. Defaults to "0.0.0.0"
+  # (IPv4). For IPv6 clusters, set to "[::]" — this flips the sensor's Prometheus
+  # metrics server, the APM/OTel direct receivers, and (unless overridden)
+  # fluent-bit. See agent.flb.bindAddress for a per-component override.
+  # Not covered: vector and the victoria-metrics deployments (separate workloads
+  # with their own settings), and the sourcemap upload server (already binds the
+  # dual-stack ":port", so it serves IPv6 regardless of this value).
+  listenAddress: "0.0.0.0"
+  imagePullPolicy:
   randomSuffixName: false
   additionalLabels:
   podLabels:
@@ -509,8 +517,8 @@ agent:
             name: '{{ template "groundcover.apikeySecretName" . }}' 
   flb:
     enabled: true
-    # for ipv6, change to "[::]"
-    bindAddress: 0.0.0.0
+    # Overrides agent.listenAddress for fluent-bit only. Leave empty to inherit it.
+    bindAddress: ""
     image:
       tag: 4.2.4-20260601-1
       repository: "{{ .Values.global.origin.registry }}/fluent/fluent-bit"

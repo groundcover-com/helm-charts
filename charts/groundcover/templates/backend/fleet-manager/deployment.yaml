@@ -94,6 +94,10 @@ spec:
         {{- with .Values.fleetManager.builtinEnv }}
           {{ tpl (toYaml .) $ | nindent 8 }}
         {{- end }}
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         envFrom:
           - secretRef:
               name: {{include "groundcover.config.secretName" .}}

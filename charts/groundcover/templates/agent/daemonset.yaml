@@ -71,6 +71,10 @@ spec:
         - env:
             - name: PROMETHEUS_PORT
               value: {{ (include "agent.monitoring.port" .) | quote }}
+            - name: PROMETHEUS_HOST
+              value: {{ .Values.agent.listenAddress | quote }}
+            - name: GC_LISTEN_ADDRESS
+              value: {{ .Values.agent.listenAddress | quote }}
             - name: FLORA_PROMETHEUSSERVER_ENABLED
               value: "false"
             - name: FLORA_SYSTEMINFO_HOSTMOUNTPATH
