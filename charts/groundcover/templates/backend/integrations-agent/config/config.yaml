@@ -12,6 +12,21 @@ data:
     LabelEnrichment:
     {{- .Values.global.labelEnrichment | toYaml | nindent 6 }}
     {{- end }}
+    {{- with .Values.awsCostReports.sink }}
+    {{- /* bucket AND region, matching db-manager's $awsCurHasSink gate — a looser gate here
+           would have the agent fill a sink that db-manager never creates the table/MV for. */}}
+    {{- if and .bucket .region }}
+    # Sink destination for all awscur integrations (single source of truth: root
+    # awsCostReports.sink, shared with db-manager's ClickHouse refresh). The per-export
+    # sink folder comes from each manifest's exportArn, so there is no per-agent report name.
+    AwsCurSink:
+      Bucket: "{{ .bucket }}"
+      Region: "{{ .region }}"
+      {{- if .prefix }}
+      Prefix: "{{ .prefix }}"
+      {{- end }}
+    {{- end }}
+    {{- end }}
     {{- if .Values.integrationsAgent }}
     {{- if .Values.integrationsAgent.targets }}
     Targets:

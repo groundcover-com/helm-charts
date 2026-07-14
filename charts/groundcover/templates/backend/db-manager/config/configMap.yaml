@@ -9,6 +9,14 @@ metadata:
 
 data:
   config.yaml: |-
+    {{- /* aws_cost_reports sink (single source of truth: root awsCostReports.sink, shared with
+           the integrations-agent). $awsCurHasSink is the enablement gate: the migration registers
+           the table only when a full sink URL resolves, so the shared-retention TTL entry must be
+           emitted under exactly the same condition (else db-manager would ALTER a non-existent
+           table on every install). */}}
+    {{- $curSink := .Values.awsCostReports.sink }}
+    {{- $awsCurHasSink := and (ne (toString $curSink.bucket) "") (ne (toString $curSink.region) "") }}
+    {{- $awsCurPath := ternary (printf "%s/**.parquet" $curSink.prefix) "**.parquet" (ne (toString $curSink.prefix) "") }}
 
     LogLevel: 4
 
@@ -36,6 +44,10 @@ data:
     DropPartitionTimeout: 5m
     httpPort: 8888
     tableDataRetention:
+      {{- if $awsCurHasSink }}
+      Aws_Cost_Reports:
+        retention: {{ .Values.awsCostReports.retention }}
+      {{- end }}
       Traces:
         retention: {{ include "traces.retention"  . }}
         cold_volume: {{ .Values.clickhouse.coldVolume }}
@@ -133,6 +145,14 @@ data:
       PricingFileURL: "https://{{ .Values.dbManager.llmPricing.bucket }}.s3.{{ .Values.dbManager.llmPricing.region }}.amazonaws.com/{{ .Values.dbManager.llmPricing.path }}"
       PricingFileURLV2: "https://{{ .Values.dbManager.llmPricing.bucket }}.s3.{{ .Values.dbManager.llmPricing.region }}.amazonaws.com/{{ .Values.dbManager.llmPricing.pathV2 }}"
       RefreshInterval: {{ .Values.dbManager.llmPricing.refreshInterval }}
+    {{- if $awsCurHasSink }}
+    AWSCostReports:
+      # s3() glob of the processed-CUR sink the agent writes (BE-2223); non-empty SinkURL
+      # is the only enablement gate. $awsCurHasSink is hoisted to the top of this config so
+      # it also gates the shared-retention TTL entry above.
+      SinkURL: "https://{{ $curSink.bucket }}.s3.{{ $curSink.region }}.amazonaws.com/{{ $awsCurPath }}"
+      RefreshInterval: {{ .Values.awsCostReports.refreshInterval }}
+    {{- end }}
     CustomAttributesIndexes:
       InvertedIndexLogsKeys:
         {{- toYaml .Values.dbManager.customAttributesIndexes.invertedIndexLogsKeys | nindent 8 }}

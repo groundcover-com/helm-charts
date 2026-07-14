@@ -1201,6 +1201,18 @@ chip:
       cpu: "2000m"
   resizePolicy: []
 
+# AWS cost reports (CUR, BE-2223/BE-2224). Single source of truth for the processed-CUR
+# S3 sink, shared by its writer (integrations-agent AwsCurSink) and its reader (db-manager's
+# aws_cost_reports_v1 refreshable MV). Set per-env by infra when the sink bucket is
+# provisioned; the feature is enabled exactly when sink.bucket AND sink.region are set.
+awsCostReports:
+  sink:
+    bucket: "" # e.g. "groundcover-cost-reports-<install-id>"
+    region: "" # sink bucket region; required to enable (the MV reads cross-region by URL)
+    prefix: "" # optional; each integration writes under <prefix>/<exportName>/
+  refreshInterval: 1d # {amount}[h(ours), d(ays), w(eeks), y(ears)]; integration commits to "up to 24h"
+  retention: 365d # TTL on line_item_usage_start_date, via shared TableDataRetention; {amount}[h/d/w/y]
+
 integrationsAgent:
   initContainers:
     checkIngestion:
