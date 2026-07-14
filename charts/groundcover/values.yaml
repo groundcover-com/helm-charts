@@ -1292,9 +1292,6 @@ integrationsAgent:
         interval: 2s
   exporters:
     prometheus:
-      # Override the prometheus exporter target. When empty (default), the exporter
-      # points at the in-cluster metrics-ingester (<release>-metrics-ingester). 
-      overrideUrl: ""
       requestTimeout: 30s
       batchSize: 2000
       maxRetries: 3
@@ -2149,8 +2146,6 @@ commHub:
     enabled: true
     authBaseURL: "https://linear.app"
     apiBaseURL: "https://api.linear.app"
-    # Public Linear OAuth client ID (PKCE flow — no client secret anywhere).
-    clientID: "e26a80502182d238d8c5b1311cc3eec4"
     maxConnsPerHost: 20
     requestTimeout: "30s"
   mcp:
