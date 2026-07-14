@@ -4,8 +4,20 @@
   "properties": {
     "cloud": {
       "type": "string",
-      "enum": ["aws", "azure"],
-      "description": "Cloud provider — selects EC2NodeClass (aws) or AKSNodeClass (azure)."
+      "enum": ["aws", "azure", "gcp"],
+      "description": "Cloud provider — selects EC2NodeClass (aws), AKSNodeClass (azure), or standalone ComputeClass CRs (gcp)."
+    },
+    "computeClasses": {
+      "type": ["object", "null"],
+      "propertyNames": {
+        "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+        "description": "Must be a valid Kubernetes resource name (becomes ComputeClass metadata.name)."
+      },
+      "additionalProperties": {
+        "type": "object",
+        "description": "Must be an object, not null -- reject computeClasses.<name>: null.",
+        "additionalProperties": true
+      }
     },
     "infrastructure": {
       "type": "object",

@@ -1,3 +1,4 @@
+{{- if ne .Values.cloud "gcp" }}
 {{- range $key,$value := .Values.nodePools }}
 {{- if (ne $value.enabled false)}}
 ---
@@ -413,7 +414,8 @@ spec:
       {{- end }}
       {{- end }}
       {{- else }}
-      {{- fail (printf "karpenter-spec: invalid .Values.cloud %q — must be \"aws\" or \"azure\"" $.Values.cloud) }}
+      {{- fail (printf "karpenter-spec: invalid .Values.cloud %q — must be \"aws\", \"azure\", or \"gcp\"" $.Values.cloud) }}
       {{- end }}
+{{- end }}
 {{- end }}
 {{- end }}

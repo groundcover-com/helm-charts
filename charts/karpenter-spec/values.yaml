@@ -1,5 +1,6 @@
-# Cloud provider switch: aws | azure. Picks nodeClassRef kind (EC2NodeClass vs
-# AKSNodeClass) and the per-cloud requirement selector keys.
+# Cloud provider switch: aws | azure | gcp. gcp renders standalone
+# ComputeClass CRs (computeClasses below) instead of NodePool/NodeClass --
+# GKE has no Karpenter-style split.
 cloud: aws
 
 infrastructure:
@@ -69,6 +70,35 @@ aksNodeClass:
     osDiskSizeGB:
     tags:
     kubelet:
+
+# GKE Compute Classes (used when cloud: gcp). Each key -> a standalone
+# ComputeClass CR; see templates/computeclass.yaml.
+computeClasses:
+  default:
+    nodePoolAutoCreation:
+      enabled: true
+    priorities:
+      - machineFamily: n4
+        minCores: 4
+      # Hyperdisk-compatible fallback (e2 supports none).
+      - machineFamily: c4
+        minCores: 4
+    whenUnsatisfiable: ScaleUpAnyway
+  stable:
+    nodePoolAutoCreation:
+      enabled: true
+    priorities:
+      - machineFamily: n4
+        minCores: 4
+      # Hyperdisk-compatible fallback; also suits db workloads well.
+      - machineFamily: c4
+        minCores: 4
+    whenUnsatisfiable: ScaleUpAnyway
+    nodePoolConfig:
+      taints:
+        - effect: "NoSchedule"
+          key: "compute-class"
+          value: "stable"
 
 nodePools:
   default:

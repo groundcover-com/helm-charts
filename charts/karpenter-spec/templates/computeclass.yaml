@@ -1,0 +1,29 @@
+{{- if eq .Values.cloud "gcp" }}
+{{- range $key, $value := .Values.computeClasses }}
+{{- if $value }}
+{{- if (ne $value.enabled false) }}
+---
+apiVersion: cloud.google.com/v1
+kind: ComputeClass
+metadata:
+  name: {{ $key | quote }}
+spec:
+  {{- with $value.nodePoolAutoCreation }}
+  nodePoolAutoCreation:
+    enabled: {{ default true .enabled }}
+  {{- end }}
+  {{- with $value.priorities }}
+  priorities:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- if $value.whenUnsatisfiable }}
+  whenUnsatisfiable: {{ $value.whenUnsatisfiable }}
+  {{- end }}
+  {{- with $value.nodePoolConfig }}
+  nodePoolConfig:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
