@@ -500,12 +500,6 @@ k8smetricsfetcher:
   fetchKubeletInfraMetrics: {{ .Values.fetchKubeletInfraMetrics }}
 {{ end }}
 
-{{ if $sensorValues.collectionEnabled }}
-piiDetector:
-  enabled: true
-  sizeLimit: 1024
-{{ end }}
-
 globallimiter:
   maxqueue: 20
   ageout: 100ms
