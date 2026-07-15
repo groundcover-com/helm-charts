@@ -115,6 +115,13 @@ spec:
               key: '{{ include "clickhouse.secretKey" . }}'
               name: '{{ include "clickhouse.secretName" . }}'
 {{ end }}
+        {{- if ((.Values.vmclusters).dualShipping).enabled }}
+        - name: GC_VICTORIAMETRICS_DUALSHIPPINGSTART
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "vmclusters.dualShipping.secretName" . }}
+              key: created-at
+        {{- end }}
 {{ with .Values.portal.env }}
             {{- tpl (toYaml .) $ | nindent 8 }}
 {{ end }}

@@ -20,3 +20,28 @@ Build the in-cluster vmselect read URL for a given VMCluster name.
 {{- define "vmclusters.vmselectUrl" -}}
 {{- printf "http://vmselect-%s:8481/select/0/prometheus" . -}}
 {{- end -}}
+
+{{/*
+Name of the Secret holding the dual-shipping creation timestamp (portal-consumed).
+*/}}
+{{- define "vmclusters.dualShipping.secretName" -}}
+{{- printf "%s-vmclusters-dualshipping" .Release.Name -}}
+{{- end -}}
+
+{{/*
+Dual-shipping creation timestamp. Generated once (now, RFC3339 UTC) on first install
+and preserved verbatim across upgrades by reading it back from the existing Secret via
+lookup, so it always reflects the moment the Secret was first created.
+*/}}
+{{- define "vmclusters.dualShipping.createdAt" -}}
+{{- $secret := (lookup "v1" "Secret" .Release.Namespace (include "vmclusters.dualShipping.secretName" .) | default dict) -}}
+{{- $existing := "" -}}
+{{- if and $secret (hasKey (default dict (index $secret "data")) "created-at") -}}
+{{- $existing = index $secret "data" "created-at" | b64dec -}}
+{{- end -}}
+{{- if $existing -}}
+{{- $existing -}}
+{{- else -}}
+{{- dateInZone "2006-01-02T15:04:05Z07:00" now "UTC" -}}
+{{- end -}}
+{{- end -}}

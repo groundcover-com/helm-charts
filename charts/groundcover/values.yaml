@@ -1551,6 +1551,9 @@ metricsAggregator:
   # Deploy the metrics-aggregator as a StatefulSet (true) or a Deployment (false).
   # Deployment mode uses an emptyDir for the remote-write persistent queue (no per-pod PVC).
   statefulset: true
+  # Deployment update strategy (only applies in Deployment mode, i.e. statefulset: false).
+  strategy:
+    type: Recreate
   persistence:
     # When false, the remote-write persistent queue uses an emptyDir instead of a PVC (no volumeClaimTemplate).
     enabled: true
@@ -1598,6 +1601,22 @@ metricsAggregator:
   healthProbe:
     port: 2021
     enabled: true
+  readinessProbe:
+    httpGet:
+      scheme: HTTP
+      path: /health
+      port: health-http
+    initialDelaySeconds: 10
+    periodSeconds: 15
+    failureThreshold: 20
+  livenessProbe:
+    httpGet:
+      scheme: HTTP
+      path: /health
+      port: health-http
+    initialDelaySeconds: 10
+    periodSeconds: 15
+    failureThreshold: 20
   receivers:
     remotewrite:
       enabled: true

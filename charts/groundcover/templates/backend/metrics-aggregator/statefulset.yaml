@@ -100,21 +100,9 @@ spec:
         {{- end }}
         {{- if $sensorValues.healthProbe.enabled }}
         readinessProbe:
-          httpGet:
-            scheme: HTTP
-            path: /health
-            port: health-http
-          initialDelaySeconds: 10
-          periodSeconds: 15
-          failureThreshold: 20
+        {{- toYaml $sensorValues.readinessProbe | nindent 10 }}
         livenessProbe:
-          httpGet:
-            scheme: HTTP
-            path: /health
-            port: health-http
-          initialDelaySeconds: 10
-          periodSeconds: 15
-          failureThreshold: 20
+        {{- toYaml $sensorValues.livenessProbe | nindent 10 }}
         {{- end }}
         resources:
 {{- toYaml $sensorValues.resources | nindent 10 }}
