@@ -47,10 +47,17 @@ data:
     DirectModeGRPCPort: "5555"
 
     VictoriaMetrics:
+      {{- $m := .Values.global.metrics | default dict }}
+      {{- $hasReadOverride := or (dig "overrideUrl" "" $m) (dig "read" "overrideHost" "" $m) }}
+      {{- $az := dig "victoria-metrics-distributed" "availabilityZones" (list) (.Values.backend | default dict) }}
+      {{- if and (not $hasReadOverride) ((.Values.vmclusters).dualShipping).enabled $az }}
+      {{- /* No explicit read override + dual shipping: base read URL is the vmselect of the
+             distributed-chart primary cluster (vmcluster-<availabilityZones[0].name>) rather than
+             vmauth. An explicit global.metrics.read override still wins. */}}
+      URL: {{ include "vmclusters.vmselectUrl" (printf "vmcluster-%s" (index $az 0).name) }}
+      {{- else }}
       URL: {{ include "victoria-metrics.read.http.url" . }}
-      {{- /* The base URL above should point at the dedup vmselect (via
-             global.metrics.read.overrideHost) so portal and monitors-manager share it.
-             VMSelectSkipSlow is the portal-only fast path, rendered only with dual shipping. */}}
+      {{- end }}
       {{- if ((.Values.vmclusters).dualShipping).enabled }}
       {{- $skipSlow := include "vmclusters.portalQuery.skipSlowCluster" . }}
       {{- if $skipSlow }}
