@@ -65,6 +65,9 @@ data:
       {{- end }}
       {{- /* Feature gate the portal reads to decide whether to use VMSelectSkipSlow. Default false. */}}
       VMSelectSkipSlowEnabled: {{ dig "skipSlowEnabled" false ((.Values.vmclusters).portalQuery | default dict) }}
+      {{- /* Seed the key so Viper registers it; the actual value is injected via
+             the GC_VICTORIAMETRICS_DUALSHIPPINGSTART env var at runtime. */}}
+      DualShippingStart: ""
       {{- end }}
       QueryUsageTracker:
         Enabled: {{ .Values.portal.queryUsageTracker.enabled }}
