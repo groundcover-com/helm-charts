@@ -2257,6 +2257,10 @@ commHub:
     port: '{{ splitList ":" (include "postgresql.base.url" .) | last }}'
     name: "comm_hub"
     user: '{{ include "postgresql.username" . }}'
+    # Database to connect to when creating the comm_hub database. Empty means
+    # the chart's global postgres database (managed postgres exposes only its
+    # own admin DB, e.g. defaultdb on Linode).
+    adminDatabase: ""
     sslMode: "require"
     timeout: "30s"
     interval: "2s"

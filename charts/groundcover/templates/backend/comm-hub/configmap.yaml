@@ -167,6 +167,7 @@ data:
       name: {{ .Values.commHub.postgresql.name | default "comm_hub" | quote }}
       user: {{ tpl (toString .Values.commHub.postgresql.user) . | quote }}
       pass: ""
+      admindbname: {{ .Values.commHub.postgresql.adminDatabase | default (include "postgresql.database" .) | quote }}
       sslMode: {{ .Values.commHub.postgresql.sslMode | default "require" | quote }}
       timeout: {{ .Values.commHub.postgresql.timeout | default "30s" }}
       interval: {{ .Values.commHub.postgresql.interval | default "2s" }}
