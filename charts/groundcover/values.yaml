@@ -2152,6 +2152,16 @@ commHub:
     maxConnsPerHost: 20
     requestTimeout: "30s"
     maxRetries: 5
+  # Claude Managed Agents connector. Off by default so environments that
+  # haven't opted in stay dark. requestTimeout is wider than other providers'
+  # because session create can attach resources; the official SDKs default to
+  # 10-minute or unbounded timeouts.
+  claude:
+    enabled: false
+    baseURL: "https://api.anthropic.com"
+    maxConnsPerHost: 20
+    requestTimeout: "600s"
+    maxRetries: 5
   providers:
     registrySyncInterval: "1s"
   oauthRefresh:

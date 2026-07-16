@@ -93,6 +93,13 @@ data:
       requestTimeout: {{ .Values.commHub.cursorCloud.requestTimeout | default "30s" }}
       maxRetries: {{ .Values.commHub.cursorCloud.maxRetries | default 5 }}
 
+    claude:
+      enabled: {{ .Values.commHub | dig "claude" "enabled" false }}
+      baseURL: {{ .Values.commHub | dig "claude" "baseURL" "https://api.anthropic.com" | quote }}
+      maxConnsPerHost: {{ .Values.commHub | dig "claude" "maxConnsPerHost" 20 }}
+      requestTimeout: {{ .Values.commHub | dig "claude" "requestTimeout" "600s" | quote }}
+      maxRetries: {{ .Values.commHub | dig "claude" "maxRetries" 5 }}
+
     providers:
       registrySyncInterval: {{ .Values.commHub.providers.registrySyncInterval | default "1s" }}
 
