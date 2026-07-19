@@ -1,0 +1,131 @@
+{{ if and .Values.global.backend.enabled .Values.global.monitorsService.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+    {{- if .Values.monitorsService.additionalAnnotations }}
+{{ toYaml .Values.monitorsService.additionalAnnotations | indent 4 }}
+    {{- end }}
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+    app: monitors-service
+    {{- if .Values.monitorsService.additionalLabels }}
+{{ toYaml .Values.monitorsService.additionalLabels | indent 4 }}
+    {{- end }}
+  name: {{ include "monitors-service.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ default 2 .Values.monitorsService.replicas }}
+  selector:
+    matchLabels:
+      app: monitors-service
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9102"
+        groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+        checksum/config: {{ include (print $.Template.BasePath "/backend/monitors-service/config/config.yaml") . | sha256sum }}
+        {{- if .Values.monitorsService.additionalAnnotations }}
+{{ toYaml .Values.monitorsService.additionalAnnotations | indent 8 }}
+        {{- end }}
+        {{- if .Values.monitorsService.podAnnotations }}
+{{ toYaml .Values.monitorsService.podAnnotations | indent 8 }}
+        {{- end }}
+      labels:
+        app: monitors-service
+        app.kubernetes.io/name: monitors-service
+        {{- include "groundcover.labels" . | nindent 8 }}
+        {{- if .Values.monitorsService.additionalLabels }}
+{{ toYaml .Values.monitorsService.additionalLabels | indent 8 }}
+        {{- end }}
+        {{- if .Values.monitorsService.podLabels }}
+{{ toYaml .Values.monitorsService.podLabels | indent 8 }}
+        {{- end }}
+    spec:
+{{- if .Values.monitorsService.tolerations }}
+      tolerations:
+{{ toYaml .Values.monitorsService.tolerations | indent 8 }}
+{{- end }}
+{{- if .Values.monitorsService.affinity }}
+      affinity:
+{{ toYaml .Values.monitorsService.affinity | indent 8 }}
+{{- end }}
+{{- if .Values.monitorsService.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.monitorsService.nodeSelector | indent 8 }}
+{{- end }}
+      imagePullSecrets: {{ include "imagePullSecrets" . }}
+{{- if .Values.monitorsService.topologySpreadConstraints }}
+      topologySpreadConstraints:
+{{ toYaml .Values.monitorsService.topologySpreadConstraints | indent 8 }}
+{{- end }}
+      containers:
+      - env:
+        - name: GC_GROUNDCOVERVERSION
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['groundcover_version']
+        {{- if eq (include "telemetry.enabled" .) "true" }}
+        - name: API_KEY
+          valueFrom:
+            secretKeyRef:
+              key: {{ template "groundcover.apikeySecretKey" . }}
+              name: {{ template "groundcover.apikeySecretName" . }}
+        {{- end }}
+        {{- with .Values.monitorsService.env }}
+          {{ tpl (toYaml .) $ | nindent 8 }}
+        {{- end }}
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        envFrom:
+          - secretRef:
+              name: {{include "groundcover.config.secretName" .}}
+        image: {{ tpl .Values.monitorsService.image.repository . }}:{{ tpl .Values.monitorsService.image.tag . }}
+        imagePullPolicy: Always
+        name: monitors-service
+        ports:
+        - containerPort: {{ .Values.monitorsService.httpPort }}
+          name: http
+        - containerPort: {{ .Values.monitorsService.healthProbePort }}
+          name: health-http
+        - containerPort: 9102
+          name: metrics
+        readinessProbe:
+          httpGet:
+            scheme: HTTP
+            path: /health
+            port: health-http
+          initialDelaySeconds: 10
+          periodSeconds: 15
+          failureThreshold: 20
+        livenessProbe:
+          httpGet:
+            scheme: HTTP
+            path: /health
+            port: health-http
+          initialDelaySeconds: 10
+          periodSeconds: 15
+          failureThreshold: 20
+        resources:
+{{- toYaml .Values.monitorsService.resources | nindent 10 }}
+{{- include "groundcover.containerResizePolicy" (dict "value" .Values.monitorsService.resizePolicy "path" "monitorsService.resizePolicy" "kubeVersion" .Capabilities.KubeVersion.GitVersion "indent" 8) }}
+        volumeMounts:
+        - mountPath: /etc/monitors-service
+          name: monitors-service-config-volume
+{{- if .Values.monitorsService.priorityClassName }}
+      priorityClassName: {{ .Values.monitorsService.priorityClassName }}
+{{- end }}
+      volumes:
+      - configMap:
+          name: monitors-service-config
+        name: monitors-service-config-volume
+{{ end -}}

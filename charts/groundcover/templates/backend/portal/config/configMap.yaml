@@ -218,6 +218,9 @@ data:
     DBManager:
       Enabled: {{ .Values.global.backend.enabled }}
       Endpoint: {{ include "db-manager.http.url" . }}
+    MonitorsService:
+      Enabled: {{ and .Values.global.backend.enabled .Values.global.monitorsService.enabled }}
+      Endpoint: http://{{ include "monitors-service.fullname" . }}:{{ .Values.monitorsService.httpPort }}
     {{- if .Values.portal.configuration.AgentService }}
     AgentService:
       Enabled: {{ .Values.portal.configuration.AgentService.Enabled | default (.Values.agentService.enabled | default false) }}

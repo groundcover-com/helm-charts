@@ -101,6 +101,8 @@ global:
     enabled: false
   commHub:
     enabled: false
+  monitorsService:
+    enabled: false
   pdfReportGenerator:
     enabled: false
   pdfReportWorker:
@@ -1792,7 +1794,47 @@ fleetManager:
     skipMigrations: false
     migrationsPath: "/migrations"
     cacheRefreshInterval: 2s
-    
+
+
+# BE-2460: monitors-service is the Monitors v2 write service. Skeleton only for
+# now — disabled by default everywhere.
+monitorsService:
+  image:
+    repository: "{{ .Values.global.origin.registry }}/monitors-service"
+    tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
+  replicas: 2
+  additionalLabels:
+  additionalAnnotations:
+  podLabels:
+  podAnnotations:
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/name: monitors-service
+  affinity:
+  nodeSelector:
+  tolerations: []
+  priorityClassName:
+  resources:
+    requests:
+      cpu: 500m
+      memory: 256Mi
+    limits:
+      cpu: 2000m
+      memory: 1024Mi
+  resizePolicy: []
+  env: []
+  logLevel: 4
+  httpPort: 8080
+  healthProbePort: 8081
+  tracing:
+    writeTimeout: 5s
+    flushInterval: 5s
+    batchSize: 50
+
 
 k8sWatcher:
   initContainers:

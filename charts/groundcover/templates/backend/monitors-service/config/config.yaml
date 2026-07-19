@@ -1,0 +1,30 @@
+{{ if and .Values.global.backend.enabled .Values.global.monitorsService.enabled }}
+apiVersion: v1
+kind: ConfigMap
+data:
+  config.yaml: |
+    httpPort: {{ .Values.monitorsService.httpPort }}
+    healthProbePort: {{ .Values.monitorsService.healthProbePort }}
+    logLevel: {{ .Values.monitorsService.logLevel }}
+    {{- if eq (include "telemetry.enabled" .) "true" }}
+    tracing:
+      enabled: true
+      endpoint: {{ include "telemetry.traces.otlpUrl" . | quote }}
+      writeTimeout: {{ .Values.monitorsService.tracing.writeTimeout | default "5s" }}
+      flushInterval: {{ .Values.monitorsService.tracing.flushInterval | default "5s" }}
+      batchSize: {{ .Values.monitorsService.tracing.batchSize | default 50 }}
+    {{- end }}
+metadata:
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+    {{- if .Values.monitorsService.additionalLabels }}
+{{ toYaml .Values.monitorsService.additionalLabels | indent 4 }}
+    {{- end }}
+  annotations:
+    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+    {{- if .Values.monitorsService.additionalAnnotations }}
+{{ toYaml .Values.monitorsService.additionalAnnotations | indent 4 }}
+    {{- end }}
+  name: monitors-service-config
+  namespace: {{ .Release.Namespace }}
+{{ end }}

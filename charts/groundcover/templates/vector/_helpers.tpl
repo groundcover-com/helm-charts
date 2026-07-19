@@ -464,12 +464,12 @@ custom:
         algorithm: zstd
         level: 3
   s3_measurements:
-    key_prefix: "v3/measurements_v1/"
+    key_prefix: "v3/measurements/"
     compression: "none"
     batch_encoding:
       codec: parquet
       schema_mode: relaxed
-      schema_file: /etc/vector/parquet-schemas/measurements_v1.schema
+      schema_file: /etc/vector/parquet-schemas/measurements.schema
       compression:
         algorithm: zstd
         level: 3
@@ -484,12 +484,12 @@ custom:
         algorithm: zstd
         level: 3
   s3_session_replay:
-    key_prefix: "v3/session_replay_v1/"
+    key_prefix: "v3/session_replay/"
     compression: "none"
     batch_encoding:
       codec: parquet
       schema_mode: relaxed
-      schema_file: /etc/vector/parquet-schemas/session_replay_v1.schema
+      schema_file: /etc/vector/parquet-schemas/session_replay.schema
       compression:
         algorithm: zstd
         level: 3
@@ -504,12 +504,12 @@ custom:
         algorithm: zstd
         level: 3
   s3_metrics_metadata:
-    key_prefix: "v3/metrics_metadata_v1/"
+    key_prefix: "v3/metrics_metadata/"
     compression: "none"
     batch_encoding:
       codec: parquet
       schema_mode: relaxed
-      schema_file: /etc/vector/parquet-schemas/metrics_metadata_v1.schema
+      schema_file: /etc/vector/parquet-schemas/metrics_metadata.schema
       compression:
         algorithm: zstd
         level: 3

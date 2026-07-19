@@ -1,0 +1,29 @@
+{{ if and .Values.global.backend.enabled .Values.global.monitorsService.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: monitors-service
+    app.kubernetes.io/name: monitors-service
+    {{- include "groundcover.labels" . | nindent 4 }}
+    {{- if .Values.monitorsService.additionalLabels }}
+{{ toYaml .Values.monitorsService.additionalLabels | indent 4 }}
+    {{- end }}
+  annotations:
+    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+    {{- if .Values.monitorsService.additionalAnnotations }}
+{{ toYaml .Values.monitorsService.additionalAnnotations | indent 4 }}
+    {{- end }}
+
+  name: {{ include "monitors-service.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  ports:
+  - name: http
+    port: {{ .Values.monitorsService.httpPort }}
+    protocol: TCP
+    targetPort: http
+  selector:
+    app: monitors-service
+  type: ClusterIP
+{{ end }}
