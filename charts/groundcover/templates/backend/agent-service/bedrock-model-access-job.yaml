@@ -23,7 +23,7 @@ spec:
       restartPolicy: OnFailure
       containers:
         - name: enable-bedrock-models
-          image: public.ecr.aws/groundcovercom/awscli:2.35.13-20260702-1
+          image: public.ecr.aws/groundcovercom/awscli:2.35.24-20260716-1
           imagePullPolicy: Always
           command:
             - /bin/sh
