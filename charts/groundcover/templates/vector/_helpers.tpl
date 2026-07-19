@@ -421,7 +421,113 @@ ingestion_metrics_sink:
 {{- end }}
 {{- end -}}
 
+{{/*
+Parquet encoding overrides merged onto the AWS s3 sinks when vector.parquetSchemas.enabled
+is true: switch each sink to its versioned v3 object-storage path, drop the gzip codec
+(parquet is self-compressed with zstd), and encode batches as Parquet against the mounted
+schema file. The key_prefix values MUST stay in lockstep with the s3QueueV3*Path constants
+in internal/schema_manager/tables (each carries the category's schema version, e.g. logs_v3).
+This is AWS-only: gcs/azure sinks stay JSON (vector cannot write parquet to them).
+*/}}
+{{- define "vector.parquetSinkOverrides" -}}
+logs:
+  s3_logs:
+    key_prefix: "v3/logs_v3/"
+    compression: "none"
+    batch_encoding:
+      codec: parquet
+      schema_mode: relaxed
+      schema_file: /etc/vector/parquet-schemas/logs_v3.schema
+      compression:
+        algorithm: zstd
+        level: 3
+traces:
+  s3_traces:
+    key_prefix: "v3/traces_v2/"
+    compression: "none"
+    batch_encoding:
+      codec: parquet
+      schema_mode: relaxed
+      schema_file: /etc/vector/parquet-schemas/traces_v2.schema
+      compression:
+        algorithm: zstd
+        level: 3
+custom:
+  s3_entities:
+    key_prefix: "v3/entities_v2/"
+    compression: "none"
+    batch_encoding:
+      codec: parquet
+      schema_mode: relaxed
+      schema_file: /etc/vector/parquet-schemas/entities_v2.schema
+      compression:
+        algorithm: zstd
+        level: 3
+  s3_measurements:
+    key_prefix: "v3/measurements_v1/"
+    compression: "none"
+    batch_encoding:
+      codec: parquet
+      schema_mode: relaxed
+      schema_file: /etc/vector/parquet-schemas/measurements_v1.schema
+      compression:
+        algorithm: zstd
+        level: 3
+  s3_events:
+    key_prefix: "v3/events_v2/"
+    compression: "none"
+    batch_encoding:
+      codec: parquet
+      schema_mode: relaxed
+      schema_file: /etc/vector/parquet-schemas/events_v2.schema
+      compression:
+        algorithm: zstd
+        level: 3
+  s3_session_replay:
+    key_prefix: "v3/session_replay_v1/"
+    compression: "none"
+    batch_encoding:
+      codec: parquet
+      schema_mode: relaxed
+      schema_file: /etc/vector/parquet-schemas/session_replay_v1.schema
+      compression:
+        algorithm: zstd
+        level: 3
+  s3_monitors:
+    key_prefix: "v3/monitors_v5/"
+    compression: "none"
+    batch_encoding:
+      codec: parquet
+      schema_mode: relaxed
+      schema_file: /etc/vector/parquet-schemas/monitors_v5.schema
+      compression:
+        algorithm: zstd
+        level: 3
+  s3_metrics_metadata:
+    key_prefix: "v3/metrics_metadata_v1/"
+    compression: "none"
+    batch_encoding:
+      codec: parquet
+      schema_mode: relaxed
+      schema_file: /etc/vector/parquet-schemas/metrics_metadata_v1.schema
+      compression:
+        algorithm: zstd
+        level: 3
+{{- end -}}
+
 {{- define "vector.config.customConfig" -}}
+{{- /* Parquet ingestion (vector.parquetSchemas.enabled): merge Parquet encoding onto the AWS
+       s3 sinks and drop api.playground/graphql, which vector >=0.55 rejects. Gated on the flag
+       so non-parquet clusters render exactly as before. */ -}}
+{{- if (dig "parquetSchemas" "enabled" false .Values.vector) -}}
+{{- if hasKey .Values.vector.customComponents.sinks "s3" -}}
+{{- $_ := mergeOverwrite .Values.vector.customComponents.sinks.s3 (fromYaml (include "vector.parquetSinkOverrides" .)) -}}
+{{- end -}}
+{{- if and .Values.vector.customGlobalConfig (hasKey .Values.vector.customGlobalConfig "api") -}}
+{{- $_ := unset (index .Values.vector.customGlobalConfig "api") "playground" -}}
+{{- $_ := unset (index .Values.vector.customGlobalConfig "api") "graphql" -}}
+{{- end -}}
+{{- end -}}
 
 {{ if .Values.vector.customGlobalConfig }}
 {{- tpl (toYaml .Values.vector.customGlobalConfig) $ }}

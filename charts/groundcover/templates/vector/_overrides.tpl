@@ -215,6 +215,11 @@ containers:
 {{- with .Values.extraVolumeMounts }}
 {{- toYaml . | nindent 6 }}
 {{- end }}
+{{- if (dig "enabled" false (.Values.parquetSchemas | default dict)) }}
+      - name: parquet-schemas
+        mountPath: /etc/vector/parquet-schemas
+        readOnly: true
+{{- end }}
 {{- with .Values.extraContainers }}
 {{ toYaml . | indent 2 }}
 {{- end }}
@@ -257,6 +262,11 @@ volumes:
 {{- else }}
         - configMap:
             name: {{ template "vector.fullname" . }}
+{{- end }}
+{{- if (dig "enabled" false (.Values.parquetSchemas | default dict)) }}
+  - name: parquet-schemas
+    configMap:
+      name: vector-parquet-schemas
 {{- end }}
 {{- if (eq .Values.role "Agent") }}
   - name: data

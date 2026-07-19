@@ -1,0 +1,27 @@
+message events {
+  optional int64 event_id (INTEGER(64, false));
+  optional int64 first_timestamp (TIMESTAMP(NANOS, true));
+  optional int64 last_timestamp (TIMESTAMP(NANOS, true));
+  optional int64 created_timestamp (TIMESTAMP(NANOS, true));
+  optional int64 seen_timestamp (TIMESTAMP(NANOS, true));
+  optional int64 timestamp (TIMESTAMP(NANOS, true));
+  optional binary env (STRING);
+  optional binary source (STRING);
+  optional boolean is_external;
+  optional binary entity_uid (STRING);
+  optional binary entity_name (STRING);
+  optional binary entity_kind (STRING);
+  optional binary entity_namespace (STRING);
+  optional binary entity_workload (STRING);
+  optional binary category (STRING);
+  optional binary type (STRING);
+  optional binary severity (STRING);
+  optional binary k8s_event_uid (STRING);
+  optional binary k8s_reason (STRING);
+  optional binary k8s_message (STRING);
+  optional int64 count;
+  optional binary raw (STRING);
+  optional binary cluster (STRING);
+  optional binary env_name (STRING);
+  optional binary replay_data (STRING);
+}

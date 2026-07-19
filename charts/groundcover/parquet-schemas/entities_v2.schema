@@ -1,0 +1,38 @@
+message entities {
+  optional int64 guid (INTEGER(64, false));
+  optional int64 id (INTEGER(64, false));
+  optional int64 creation_timestamp (TIMESTAMP(NANOS, true));
+  optional int64 seen_timestamp (TIMESTAMP(NANOS, true));
+  optional int64 k8s_resource_version;
+  optional binary k8s_uid (STRING);
+  optional binary workload (STRING);
+  optional binary name (STRING);
+  optional binary namespace (STRING);
+  optional boolean is_external;
+  optional binary type (STRING);
+  optional binary k8s_kind (STRING);
+  optional binary k8s_owner_uid (STRING);
+  optional binary k8s_owner_name (STRING);
+  optional binary k8s_owner_kind (STRING);
+  optional binary event_operation (STRING);
+  optional binary env (STRING);
+  optional binary raw (STRING);
+  optional binary attributes (STRING);
+  optional binary source (STRING);
+  optional binary status (STRING);
+  optional boolean ready;
+  optional binary node_name (STRING);
+  optional group ips (LIST) {
+    repeated group list {
+      optional binary element (STRING);
+    }
+  }
+  optional binary cluster (STRING);
+  optional binary env_name (STRING);
+  optional group identifiers (MAP) {
+    repeated group key_value {
+      required binary key (STRING);
+      optional binary value (STRING);
+    }
+  }
+}

@@ -1,0 +1,26 @@
+message monitors {
+  optional group labels (MAP) {
+    repeated group key_value {
+      required binary key (STRING);
+      optional binary value (STRING);
+    }
+  }
+  optional binary state (STRING);
+  optional binary previous_state (STRING);
+  optional int64 timestamp (TIMESTAMP(NANOS, true));
+  optional group values (MAP) {
+    repeated group key_value {
+      required binary key (STRING);
+      optional binary value (STRING);
+    }
+  }
+  optional binary fingerprint (STRING);
+  optional binary measurement_type (STRING);
+  optional binary evaluation_error (STRING);
+  optional double evaluation_duration_seconds;
+  optional group silence_ids (LIST) {
+    repeated group list {
+      optional binary element (STRING);
+    }
+  }
+}

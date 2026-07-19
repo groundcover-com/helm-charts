@@ -1,0 +1,12 @@
+{{- if and (ne (.Values.vector.enabled | toString) "false") (dig "parquetSchemas" "enabled" false .Values.vector) }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vector-parquet-schemas
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+    app: vector
+    app.kubernetes.io/name: vector
+data:
+{{ (.Files.Glob "parquet-schemas/*.schema").AsConfig | indent 2 }}
+{{- end }}

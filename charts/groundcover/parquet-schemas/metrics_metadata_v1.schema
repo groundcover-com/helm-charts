@@ -1,0 +1,13 @@
+message metrics_metadata {
+  optional int64 timestamp (TIMESTAMP(NANOS, true));
+  optional binary env (STRING);
+  optional binary cluster (STRING);
+  optional binary namespace (STRING);
+  optional binary name (STRING);
+  optional group tags (MAP) {
+    repeated group key_value {
+      required binary key (STRING);
+      optional binary value (STRING);
+    }
+  }
+}

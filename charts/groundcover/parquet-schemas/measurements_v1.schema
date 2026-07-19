@@ -1,0 +1,49 @@
+message measurements {
+  optional int64 id (INTEGER(64, false));
+  optional int64 start_timestamp (TIMESTAMP(NANOS, true));
+  optional int64 end_timestamp (TIMESTAMP(NANOS, true));
+  optional binary category (STRING);
+  optional binary type (STRING);
+  optional binary env (STRING);
+  optional binary cluster (STRING);
+  optional binary source (STRING);
+  optional binary entity_uid (STRING);
+  optional binary entity_name (STRING);
+  optional binary entity_kind (STRING);
+  optional binary namespace (STRING);
+  optional binary workload (STRING);
+  optional group resource_string_attributes (MAP) {
+    repeated group key_value {
+      required binary key (STRING);
+      optional binary value (STRING);
+    }
+  }
+  optional group resource_float_attributes (MAP) {
+    repeated group key_value {
+      required binary key (STRING);
+      optional double value;
+    }
+  }
+  optional group metrics (MAP) {
+    repeated group key_value {
+      required binary key (STRING);
+      optional double value;
+    }
+  }
+  optional group sketches (MAP) {
+    repeated group key_value {
+      required binary key (STRING);
+      optional group value (LIST) {
+        repeated group list {
+          optional double element;
+        }
+      }
+    }
+  }
+  optional group extra_data (MAP) {
+    repeated group key_value {
+      required binary key (STRING);
+      optional binary value (STRING);
+    }
+  }
+}

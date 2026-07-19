@@ -1,0 +1,16 @@
+message session_replay {
+  optional binary event_id (STRING);
+  optional int64 timestamp (TIMESTAMP(NANOS, true));
+  optional int64 session_start_time (TIMESTAMP(NANOS, true));
+  optional binary env (STRING);
+  optional binary cluster (STRING);
+  optional binary namespace (STRING);
+  optional binary session_id (STRING);
+  optional binary data (STRING);
+  optional group string_attributes (MAP) {
+    repeated group key_value {
+      required binary key (STRING);
+      optional binary value (STRING);
+    }
+  }
+}

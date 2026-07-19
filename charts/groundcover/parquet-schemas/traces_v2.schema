@@ -1,0 +1,209 @@
+message traces {
+  optional int64 guid (INTEGER(64, false));
+  optional int64 ttl_timestamp (TIMESTAMP(NANOS, true));
+  optional int64 start_timestamp (TIMESTAMP(NANOS, true));
+  optional int64 end_timestamp (TIMESTAMP(NANOS, true));
+  optional binary source (STRING);
+  optional binary protocol_type (STRING);
+  optional binary subtype (STRING);
+  optional binary cluster (STRING);
+  optional binary env (STRING);
+  optional binary env_type (STRING);
+  optional binary kind (STRING);
+  optional binary namespace (STRING);
+  optional binary workload (STRING);
+  optional binary pod_name (STRING);
+  optional binary pod_uid (STRING);
+  optional binary instance (STRING);
+  optional binary container_name (STRING);
+  optional boolean is_external;
+  optional binary return_code (STRING);
+  optional binary status (STRING);
+  optional boolean is_encrypted;
+  optional boolean is_pii;
+  optional binary clustered_resource (STRING);
+  optional binary partner_namespace (STRING);
+  optional binary partner_workload (STRING);
+  optional boolean partner_is_external;
+  optional binary client_entity_id (STRING);
+  optional binary client (STRING);
+  optional binary client_namespace (STRING);
+  optional boolean client_is_external;
+  optional binary server_entity_id (STRING);
+  optional binary server (STRING);
+  optional binary server_namespace (STRING);
+  optional boolean server_is_external;
+  optional binary normalized_partner_workload (STRING);
+  optional binary entity_id (STRING);
+  optional binary partner_entity_id (STRING);
+  optional binary issue_id (STRING);
+  optional binary resource_id (STRING);
+  optional binary perspective_entity_id (STRING);
+  optional binary perspective_workload (STRING);
+  optional binary perspective_namespace (STRING);
+  optional boolean perspective_is_external;
+  optional binary perspective_entity_issue_id (STRING);
+  optional binary perspective_entity_resource_id (STRING);
+  optional binary issue_description (STRING);
+  optional binary scope_name (STRING);
+  optional binary scope_version (STRING);
+  optional binary resource_name (STRING);
+  optional double duration_seconds;
+  optional binary trace_id (STRING);
+  optional binary span_id (STRING);
+  optional binary parent_id (STRING);
+  optional binary request_body (STRING);
+  optional binary response_body (STRING);
+  optional group flatten_string_keys (LIST) {
+    repeated group list {
+      optional binary element (STRING);
+    }
+  }
+  optional group flatten_string_values (LIST) {
+    repeated group list {
+      optional binary element (STRING);
+    }
+  }
+  optional group flatten_float_keys (LIST) {
+    repeated group list {
+      optional binary element (STRING);
+    }
+  }
+  optional group flatten_float_values (LIST) {
+    repeated group list {
+      optional double element;
+    }
+  }
+  optional group flatten_bool_keys (LIST) {
+    repeated group list {
+      optional binary element (STRING);
+    }
+  }
+  optional group flatten_bool_values (LIST) {
+    repeated group list {
+      optional boolean element;
+    }
+  }
+  optional binary object (STRING);
+  optional binary node_name (STRING);
+  optional int64 request_size_bytes (INTEGER(64, false));
+  optional int64 response_size_bytes (INTEGER(64, false));
+  optional binary issue_reason (STRING);
+  optional group http_request_headers (MAP) {
+    repeated group key_value {
+      required binary key (STRING);
+      optional binary value (STRING);
+    }
+  }
+  optional group http_response_headers (MAP) {
+    repeated group key_value {
+      required binary key (STRING);
+      optional binary value (STRING);
+    }
+  }
+  optional binary http_user_agent (STRING);
+  optional boolean request_truncated;
+  optional boolean response_truncated;
+  optional group query_parameters (MAP) {
+    repeated group key_value {
+      required binary key (STRING);
+      optional binary value (STRING);
+    }
+  }
+  optional group string_tags (MAP) {
+    repeated group key_value {
+      required binary key (STRING);
+      optional binary value (STRING);
+    }
+  }
+  optional group float_tags (MAP) {
+    repeated group key_value {
+      required binary key (STRING);
+      optional double value;
+    }
+  }
+  optional group string_attributes (MAP) {
+    repeated group key_value {
+      required binary key (STRING);
+      optional binary value (STRING);
+    }
+  }
+  optional group float_attributes (MAP) {
+    repeated group key_value {
+      required binary key (STRING);
+      optional double value;
+    }
+  }
+  optional binary client_availability_zone (STRING);
+  optional binary client_region (STRING);
+  optional binary server_availability_zone (STRING);
+  optional binary server_region (STRING);
+  optional binary availability_zone (STRING);
+  optional binary region (STRING);
+  optional binary remote_availability_zone (STRING);
+  optional binary remote_region (STRING);
+  optional boolean is_cross_az;
+  optional binary messaging_topic (STRING);
+  optional binary messaging_partition (STRING);
+  optional int64 messaging_partition_id (INTEGER(64, false));
+  optional double lag_seconds;
+  optional int64 lagged_messages (INTEGER(64, false));
+  optional group detected_pii (MAP) {
+    repeated group key_value {
+      required binary key (STRING);
+      optional binary value (STRING);
+    }
+  }
+  optional group metadata (MAP) {
+    repeated group key_value {
+      required binary key (STRING);
+      optional binary value (STRING);
+    }
+  }
+  optional binary resource (STRING);
+  optional boolean is_root_span;
+  optional binary span_name (STRING);
+  optional group events (LIST) {
+    repeated group list {
+      optional group element {
+        optional int64 timestamp (TIMESTAMP(NANOS, true));
+        optional binary name (STRING);
+        optional group attributes (MAP) {
+          repeated group key_value {
+            required binary key (STRING);
+            optional binary value (STRING);
+          }
+        }
+      }
+    }
+  }
+  optional group links (LIST) {
+    repeated group list {
+      optional group element {
+        optional binary trace_id (STRING);
+        optional binary span_id (STRING);
+        optional binary trace_state (STRING);
+        optional group attributes (MAP) {
+          repeated group key_value {
+            required binary key (STRING);
+            optional binary value (STRING);
+          }
+        }
+      }
+    }
+  }
+  optional binary operation_name (STRING);
+  optional binary status_code_message (STRING);
+  optional binary http_host (STRING);
+  optional binary http_path (STRING);
+  optional binary http_route (STRING);
+  optional int64 http_status_code (INTEGER(64, false));
+  optional binary db_query_text (STRING);
+  optional binary db_query_fingerprint (STRING);
+  optional binary db_system (STRING);
+  optional binary db_operation_name (STRING);
+  optional binary messaging_operation_name (STRING);
+  optional binary messaging_destination_name (STRING);
+  optional binary aws_s3_bucket (STRING);
+  optional binary dns_question_name (STRING);
+}

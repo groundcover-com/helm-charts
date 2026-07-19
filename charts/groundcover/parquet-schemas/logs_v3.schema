@@ -1,0 +1,88 @@
+message logs {
+  optional int64 guid (INTEGER(64, false));
+  optional int64 timestamp (TIMESTAMP(NANOS, true));
+  optional binary cluster (STRING);
+  optional binary source (STRING);
+  optional binary env_type (STRING);
+  optional binary pod_name (STRING);
+  optional binary pod_uid (STRING);
+  optional binary workload (STRING);
+  optional binary namespace (STRING);
+  optional binary level (STRING);
+  optional binary format (STRING);
+  optional binary container_name (STRING);
+  optional binary env (STRING);
+  optional binary instance (STRING);
+  optional boolean is_pii;
+  optional binary pattern (STRING);
+  optional binary trace_id (STRING);
+  optional binary span_id (STRING);
+  optional binary body (STRING);
+  optional group flatten_string_keys (LIST) {
+    repeated group list {
+      optional binary element (STRING);
+    }
+  }
+  optional group flatten_string_values (LIST) {
+    repeated group list {
+      optional binary element (STRING);
+    }
+  }
+  optional group flatten_float_keys (LIST) {
+    repeated group list {
+      optional binary element (STRING);
+    }
+  }
+  optional group flatten_float_values (LIST) {
+    repeated group list {
+      optional double element;
+    }
+  }
+  optional group flatten_bool_keys (LIST) {
+    repeated group list {
+      optional binary element (STRING);
+    }
+  }
+  optional group flatten_bool_values (LIST) {
+    repeated group list {
+      optional boolean element;
+    }
+  }
+  optional group string_attributes (MAP) {
+    repeated group key_value {
+      required binary key (STRING);
+      optional binary value (STRING);
+    }
+  }
+  optional group float_attributes (MAP) {
+    repeated group key_value {
+      required binary key (STRING);
+      optional double value;
+    }
+  }
+  optional group string_tags (MAP) {
+    repeated group key_value {
+      required binary key (STRING);
+      optional binary value (STRING);
+    }
+  }
+  optional group float_tags (MAP) {
+    repeated group key_value {
+      required binary key (STRING);
+      optional double value;
+    }
+  }
+  optional binary node_name (STRING);
+  optional binary host (STRING);
+  optional binary service (STRING);
+  optional binary instance_id (STRING);
+  optional binary function_name (STRING);
+  optional binary lambda_arn (STRING);
+  optional binary content (STRING);
+  optional group metadata (MAP) {
+    repeated group key_value {
+      required binary key (STRING);
+      optional binary value (STRING);
+    }
+  }
+}
