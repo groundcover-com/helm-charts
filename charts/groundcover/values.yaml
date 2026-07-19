@@ -468,7 +468,7 @@ statefulset-modifier:
   sizePatches: true
   image:
     repository: '{{ .Values.global.origin.registry }}/tools' 
-    tag: '20260601'
+    tag: '20260719'
 
 agent:
   # Bind address for the sensor DaemonSet's own listeners. Defaults to "0.0.0.0"
@@ -5073,7 +5073,7 @@ monitors-manager:
 curl:
   image:
     repository: '{{ .Values.global.origin.registry }}/tools' 
-    tag: '20260601'
+    tag: '20260719'
 
 rbac:
   pspEnabled: false
