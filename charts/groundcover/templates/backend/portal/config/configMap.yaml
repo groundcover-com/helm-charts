@@ -226,6 +226,10 @@ data:
       Enabled: {{ .Values.portal.configuration.AgentService.Enabled | default (.Values.agentService.enabled | default false) }}
       Endpoint: {{ .Values.portal.configuration.AgentService.Endpoint | default (printf "http://%s:8080" (include "agent-service.fullname" .)) }}
     {{- end }}
+    {{- $exportServiceEndpoint := printf "http://%s:3001" (printf "%s-export-service" .Release.Name | trunc 63 | trimSuffix "-") }}
+    ExportService:
+      Enabled: {{ dig "exportService" "enabled" false .Values.global }}
+      Endpoint: {{ dig "configuration" "ExportService" "Endpoint" $exportServiceEndpoint .Values.portal | default $exportServiceEndpoint }}
 
 kind: ConfigMap
 metadata:
