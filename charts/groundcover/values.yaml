@@ -2432,7 +2432,7 @@ clickhouse:
   statefulsetShardSelector:
     enabled: false
   image:
-    tag: 26.1.11.9-20260603-1
+    tag: 26.1.11.9-20260720-1
     registry: public.ecr.aws/groundcovercom
     repository: clickhouse
   coldVolume: ""
