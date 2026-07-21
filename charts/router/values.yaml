@@ -61,7 +61,7 @@ service:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.12.132
+  tag: 1.12.133
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/tools'
@@ -179,6 +179,11 @@ configuration:
     Frontend:
       DSN: ""
       APIKey: ""
+      # Cluster/Environment label this deployment's own RUM sessions. Leave empty
+      # to keep the build-time defaults; set Cluster to report sessions under this
+      # deployment's cluster name instead of the internal build default.
+      Cluster: ""
+      Environment: ""
   BackendConfig:
     Namespace: '{{ include "backendConfig.namespace" . }}'
     KongIngressClass: '{{ include "backendConfig.kongIngressClass" . }}'
