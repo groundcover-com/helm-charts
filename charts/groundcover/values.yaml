@@ -5037,7 +5037,9 @@ monitors-manager:
     unified_alerting:
       max_attempts: 2
       evaluation_timeout: 120s
-      
+    quota:
+      alerting_rule_evaluation_results: 500
+
     groundcover:
       alerting_overrides_checksum: '{{ .Values.alertingOverrides | quote | sha256sum }}'
       workflows_enabled: '{{ .Values.global.workflows.enabled }}'
