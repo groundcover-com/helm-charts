@@ -49,6 +49,23 @@ app.kubernetes.io/part-of: '{{ include "groundcover.labels.partOf" . }}'
 {{- end }}
 
 {{/*
+Default frontend domain used by backend services when rendering app links.
+*/}}
+{{- define "groundcover.frontendDomain" -}}
+{{- $globalFrontendDomain := .Values.global.frontendDomain | default "" -}}
+{{- $routerFrontendDomain := .Values.router.frontendDomain | default "" -}}
+{{- if and $routerFrontendDomain (eq $globalFrontendDomain "app.groundcover.com") -}}
+{{- $routerFrontendDomain -}}
+{{- else -}}
+{{- $globalFrontendDomain | default $routerFrontendDomain | default "app.groundcover.com" -}}
+{{- end -}}
+{{- end }}
+
+{{- define "groundcover.frontendUrl" -}}
+{{- printf "https://%s" (include "groundcover.frontendDomain" .) -}}
+{{- end }}
+
+{{/*
 Validate and render a container resizePolicy block.
 */}}
 {{- define "groundcover.containerResizePolicy" -}}

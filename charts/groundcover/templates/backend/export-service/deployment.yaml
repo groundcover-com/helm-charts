@@ -1,0 +1,107 @@
+{{ if and .Values.global.backend.enabled .Values.global.exportService.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+    {{- if .Values.exportService.additionalAnnotations }}
+{{ toYaml .Values.exportService.additionalAnnotations | indent 4 }}
+    {{- end }}
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+    app: export-service
+    app.kubernetes.io/name: export-service
+    {{- if .Values.exportService.additionalLabels }}
+{{ toYaml .Values.exportService.additionalLabels | indent 4 }}
+    {{- end }}
+  name: {{ include "export-service.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.exportService.replicas | default 1 }}
+  selector:
+    matchLabels:
+      app: export-service
+  {{- with .Values.exportService.strategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  template:
+    metadata:
+      annotations:
+        groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+        {{- if .Values.exportService.additionalAnnotations }}
+{{ toYaml .Values.exportService.additionalAnnotations | indent 8 }}
+        {{- end }}
+        {{- if .Values.exportService.podAnnotations }}
+{{ toYaml .Values.exportService.podAnnotations | indent 8 }}
+        {{- end }}
+      labels:
+        app: export-service
+        app.kubernetes.io/name: export-service
+        {{- include "groundcover.labels" . | nindent 8 }}
+        {{- if .Values.exportService.additionalLabels }}
+{{ toYaml .Values.exportService.additionalLabels | indent 8 }}
+        {{- end }}
+        {{- if .Values.exportService.podLabels }}
+{{ toYaml .Values.exportService.podLabels | indent 8 }}
+        {{- end }}
+    spec:
+{{- if .Values.exportService.tolerations }}
+      tolerations:
+{{ toYaml .Values.exportService.tolerations | indent 8 }}
+{{- end }}
+{{- if .Values.exportService.affinity }}
+      affinity:
+{{ toYaml .Values.exportService.affinity | indent 8 }}
+{{- end }}
+{{- if .Values.exportService.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.exportService.nodeSelector | indent 8 }}
+{{- end }}
+      imagePullSecrets: {{ include "imagePullSecrets" . }}
+      containers:
+      - name: export-service
+        image: {{ tpl .Values.exportService.image.repository . }}:{{ tpl .Values.exportService.image.tag . }}
+        imagePullPolicy: Always
+        env:
+        - name: PORT
+          value: "3001"
+        - name: NODE_ENV
+          value: "production"
+        - name: FRONTEND_URL
+          value: {{ tpl (required "exportService.frontendUrl is required" .Values.exportService.frontendUrl) . | quote }}
+        - name: LOG_LEVEL
+          value: {{ .Values.exportService.logLevel | default "info" | quote }}
+        - name: EXPORT_TIMEOUT
+          value: {{ .Values.exportService.exportTimeout | default "60000" | quote }}
+{{ with .Values.exportService.env }}
+            {{- tpl (toYaml .) $ | nindent 8 }}
+{{ end }}
+        ports:
+        - containerPort: 3001
+          name: http
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            scheme: HTTP
+            path: /health
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            scheme: HTTP
+            path: /health
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 15
+          timeoutSeconds: 5
+          failureThreshold: 3
+        resources:
+{{- toYaml .Values.exportService.resources | nindent 10 }}
+{{- include "groundcover.containerResizePolicy" (dict "value" .Values.exportService.resizePolicy "path" "exportService.resizePolicy" "kubeVersion" .Capabilities.KubeVersion.GitVersion "indent" 8) }}
+{{- if .Values.exportService.priorityClassName }}
+      priorityClassName: {{ .Values.exportService.priorityClassName }}
+{{- end }}
+{{ end -}}

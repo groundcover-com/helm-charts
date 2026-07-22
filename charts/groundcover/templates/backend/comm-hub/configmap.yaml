@@ -80,7 +80,7 @@ data:
     apiServer:
       port: 8080
 
-    frontendDomain: {{ .Values.router.frontendDomain | default "app.groundcover.com" | quote }}
+    frontendDomain: {{ include "groundcover.frontendDomain" . | quote }}
 
     # agent-service base URL the Slack inbound bridge dispatches runs to (direct, not via the
     # router). Defaults to the in-namespace agent-service; the bridge appends the in-cluster-only

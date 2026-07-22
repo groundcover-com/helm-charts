@@ -113,9 +113,9 @@ spec:
             - name: GC_TENANT_UUID
               value: {{ .Values.global.backend.tenantUuid | default "" | quote }}
             - name: ROUTER_URL
-              value: {{ $agentService.config.routerUrl | default (printf "https://%s" (.Values.router.frontendDomain | default "app.groundcover.com")) | quote }}
+              value: {{ $agentService.config.routerUrl | default (include "groundcover.frontendUrl" .) | quote }}
             - name: APP_URL
-              value: {{ printf "https://%s" (.Values.router.frontendDomain | default "app.groundcover.com") | quote }}
+              value: {{ include "groundcover.frontendUrl" . | quote }}
             {{- if .Values.global.commHub.enabled }}
             # comm-hub's in-cluster base. A Slack-initiated run posts its answer back to comm-hub's
             # chat.postMessage directly, and routes its tool/router calls through comm-hub's

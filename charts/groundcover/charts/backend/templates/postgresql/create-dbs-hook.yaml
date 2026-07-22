@@ -9,6 +9,8 @@ metadata:
   {{- if and .Values.global.postgresql.overrideUrl .Values.postgresql.jobs.createDbs.helmHooksEnabled }}
     helm.sh/hook-weight: "-2"
     helm.sh/hook: "pre-upgrade,pre-install"
+  {{- end }}
+  {{- if .Values.postgresql.jobs.createDbs.helmHooksEnabled }}
     helm.sh/hook-delete-policy: "before-hook-creation"
   {{- end }}
   {{- with .Values.postgresql.jobs.createDbs.annotations }}

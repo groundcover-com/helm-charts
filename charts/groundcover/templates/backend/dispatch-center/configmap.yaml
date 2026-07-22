@@ -101,7 +101,7 @@ data:
       port: 8080
 
     notification:
-      frontendDomain: {{ .Values.router.frontendDomain | default "app.groundcover.com" | quote }}
+      frontendDomain: {{ include "groundcover.frontendDomain" . | quote }}
       pagerdutyEventsURL: {{ .Values.dispatchCenter.notification.pagerdutyEventsURL | default "https://events.pagerduty.com/v2/enqueue" | quote }}
       opsgenieUSEndpoint: {{ .Values.dispatchCenter.notification.opsgenieUSEndpoint | default "https://api.opsgenie.com/v2/alerts" | quote }}
       opsgenieEUEndpoint: {{ .Values.dispatchCenter.notification.opsgenieEUEndpoint | default "https://api.eu.opsgenie.com/v2/alerts" | quote }}
@@ -126,4 +126,3 @@ data:
       []
 {{- end }}
 {{- end }}
-

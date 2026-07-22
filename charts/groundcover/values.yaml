@@ -107,6 +107,9 @@ global:
     enabled: false
   pdfReportWorker:
     enabled: false
+  exportService:
+    enabled: false
+  frontendDomain: app.groundcover.com
   syntheticsWorker:
     enabled: false
 
@@ -2336,6 +2339,39 @@ pdfReportGenerator:
   frontendUrl: '{{ printf "https://%s" (required "pdfReportGenerator.frontendUrl requires .Values.global.ingress.site to be set" .Values.global.ingress.site) }}'
   logLevel: "info"
   pdfTimeout: "60000"
+
+exportService:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  pdb:
+    enabled: true
+    maxUnavailable: 1
+  additionalLabels:
+  podLabels:
+  additionalAnnotations:
+  podAnnotations:
+  affinity:
+  nodeSelector:
+  tolerations: []
+  priorityClassName:
+  env: []
+  image:
+    repository: "{{ .Values.global.origin.registry }}/export-service"
+    tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
+  resources:
+    limits:
+      memory: 2Gi
+    requests:
+      cpu: 50m
+      memory: 256Mi
+  resizePolicy: []
+  frontendUrl: '{{ printf "https://%s" (.Values.global.frontendDomain | default "app.groundcover.com") }}'
+  logLevel: "info"
+  exportTimeout: "60000"
 
 pdfReportWorker:
   additionalLabels:

@@ -1,0 +1,21 @@
+{{ if and .Values.global.backend.enabled .Values.global.exportService.enabled .Values.exportService.pdb.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "export-service.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+    app: export-service
+    app.kubernetes.io/name: export-service
+spec:
+  {{- if .Values.exportService.pdb.minAvailable }}
+  minAvailable: {{ .Values.exportService.pdb.minAvailable }}
+  {{- end }}
+  {{- if .Values.exportService.pdb.maxUnavailable }}
+  maxUnavailable: {{ .Values.exportService.pdb.maxUnavailable }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app: export-service
+{{ end -}}
