@@ -11,7 +11,7 @@ message monitors {
   optional group values (MAP) {
     repeated group key_value {
       required binary key (STRING);
-      optional binary value (STRING);
+      optional double value;
     }
   }
   optional binary fingerprint (STRING);
@@ -23,4 +23,6 @@ message monitors {
       optional binary element (STRING);
     }
   }
+  optional binary state_change_reason (STRING);
+  optional int64 insert_time (TIMESTAMP(NANOS, true));
 }

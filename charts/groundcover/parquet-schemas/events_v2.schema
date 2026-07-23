@@ -24,4 +24,16 @@ message events {
   optional binary cluster (STRING);
   optional binary env_name (STRING);
   optional binary replay_data (STRING);
+  optional group string_attributes (MAP) {
+    repeated group key_value {
+      required binary key (STRING);
+      optional binary value (STRING);
+    }
+  }
+  optional group float_attributes (MAP) {
+    repeated group key_value {
+      required binary key (STRING);
+      optional double value;
+    }
+  }
 }

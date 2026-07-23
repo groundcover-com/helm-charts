@@ -515,13 +515,23 @@ custom:
         level: 3
 {{- end -}}
 
+{{/* Emit VRL coercing every value of the given Map(String,String) fields to a string (parquet encoding is strict). */}}
+{{- define "vector.parquetStringifyVRL" -}}
+{{- $lines := list -}}
+{{- range $f := .fields -}}
+{{- $lines = append $lines (printf "if is_object(.%s) {\n    .%s = map_values(object!(.%s)) -> |value| { to_string(value) ?? encode_json(value) }\n}" $f $f $f) -}}
+{{- end -}}
+{{- join "\n" $lines -}}
+{{- end -}}
+
 {{- define "vector.config.customConfig" -}}
-{{- /* Parquet ingestion (vector.parquetSchemas.enabled): merge Parquet encoding onto the AWS
-       s3 sinks and drop api.playground/graphql, which vector >=0.55 rejects. Gated on the flag
-       so non-parquet clusters render exactly as before. */ -}}
+{{- /* All gated on vector.parquetSchemas.enabled (the if below): parquet sink encoding + traces stringify step + drop api.playground/graphql (rejected by vector >=0.55). */ -}}
 {{- if (dig "parquetSchemas" "enabled" false .Values.vector) -}}
 {{- if hasKey .Values.vector.customComponents.sinks "s3" -}}
 {{- $_ := mergeOverwrite .Values.vector.customComponents.sinks.s3 (fromYaml (include "vector.parquetSinkOverrides" .)) -}}
+{{- /* Stringify traces string_attributes for the json_traces passthrough (Go handles the rest); appended as a traces-pipeline tail step feeding s3_traces. */ -}}
+{{- $tracesStep := dict "name" "parquet_stringify_traces" "transform" (dict "type" "remap" "source" (include "vector.parquetStringifyVRL" (dict "fields" (list "string_attributes")))) -}}
+{{- $_ := set .Values.vector.tracesPipeline "extraSteps" (append .Values.vector.tracesPipeline.extraSteps $tracesStep) -}}
 {{- end -}}
 {{- if and .Values.vector.customGlobalConfig (hasKey .Values.vector.customGlobalConfig "api") -}}
 {{- $_ := unset (index .Values.vector.customGlobalConfig "api") "playground" -}}
