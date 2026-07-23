@@ -838,6 +838,12 @@ agent:
       # pod:
       #   enabled: true  # must explicitly define
       #   fieldSelector: "metadata.namespace!=demo-ng"
+      # job:
+      #   enabled: true
+      #   workload:
+      #     nameFrom:
+      #       labels:
+      #         - "dagster/job"
       crd:
         enabled: true
         allowedKinds:
@@ -1858,6 +1864,12 @@ k8sWatcher:
   watch:
     cronjob:
       enabled: true
+    # job:
+    #   enabled: true
+    #   workload:
+    #     nameFrom:
+    #       labels:
+    #         - "dagster/job"
     configmap:
       enabled: true
     secret:
@@ -1988,7 +2000,10 @@ logFileTargets: []
 # instead of the promtail per-file tailer.
 vlLogTailer:
   enabled: false
-  readConcurrency: 512 # max files read concurrently (0 = unbounded)
+  # Leaves 24,288 descriptors for the rest of the sensor when LimitNOFILE=524288.
+  # Set below the process FD and memory budgets; extra matching files are retried. 0 = unbounded.
+  maxOpenFiles: 500000
+  readConcurrency: 512 # max readers holding a buffer; does not cap open FDs (0 = unbounded)
   readBufferSize: 65536 # per-read buffer, bytes
   checkpointsFile: "" # read-offset store; empty = next to positionsFile
   discoverInterval: 1s # how often to look for new files
