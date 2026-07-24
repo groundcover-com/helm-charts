@@ -2115,6 +2115,7 @@ dispatchCenter:
   providers:
     slackApp:
       interactiveNotifications: false
+      attachIssueGraph: false
   env: []
   image:
     repository: "{{ .Values.global.origin.registry }}/dispatch-center"

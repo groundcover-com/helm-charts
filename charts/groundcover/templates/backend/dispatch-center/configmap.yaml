@@ -109,6 +109,7 @@ data:
       providers:
         slackApp:
           interactiveNotifications: {{ .Values.dispatchCenter.providers.slackApp.interactiveNotifications | default false }}
+          attachIssueGraph: {{ .Values.dispatchCenter.providers.slackApp.attachIssueGraph | default false }}
 
     worker:
       taskQueue: "dispatch-center-worker"
@@ -118,6 +119,8 @@ data:
         lookback: {{ if and .Values.dispatchCenter .Values.dispatchCenter.worker .Values.dispatchCenter.worker.evaluationErrors .Values.dispatchCenter.worker.evaluationErrors.lookback }}{{ .Values.dispatchCenter.worker.evaluationErrors.lookback }}{{ else }}5m{{ end }}
       maxChildWorkflowsPerBatch: {{ if and .Values.dispatchCenter .Values.dispatchCenter.worker .Values.dispatchCenter.worker.maxChildWorkflowsPerBatch }}{{ .Values.dispatchCenter.worker.maxChildWorkflowsPerBatch }}{{ else }}5000{{ end }}
       maxActivityRetryAttempts: {{ if and .Values.dispatchCenter .Values.dispatchCenter.worker .Values.dispatchCenter.worker.maxActivityRetryAttempts }}{{ .Values.dispatchCenter.worker.maxActivityRetryAttempts }}{{ else }}1000{{ end }}
+      readDispatchActivityTimeout: {{ if and .Values.dispatchCenter .Values.dispatchCenter.worker .Values.dispatchCenter.worker.readDispatchActivityTimeout }}{{ .Values.dispatchCenter.worker.readDispatchActivityTimeout }}{{ else }}5m{{ end }}
+      countWorkflowTimeout: {{ if and .Values.dispatchCenter .Values.dispatchCenter.worker .Values.dispatchCenter.worker.countWorkflowTimeout }}{{ .Values.dispatchCenter.worker.countWorkflowTimeout }}{{ else }}30s{{ end }}
 
     policies:
 {{- if .Values.dispatchCenter.policies }}
