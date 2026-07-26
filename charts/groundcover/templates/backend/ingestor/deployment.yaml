@@ -24,10 +24,12 @@ spec:
     matchLabels:
       app: ingestor
   strategy:
-    type: RollingUpdate
+    type: {{ .Values.ingestor.updateStrategy.type }}
+    {{- if eq .Values.ingestor.updateStrategy.type "RollingUpdate" }}
     rollingUpdate:
-      maxUnavailable: 0
-      maxSurge: 1
+      maxUnavailable: {{ .Values.ingestor.updateStrategy.rollingUpdate.maxUnavailable }}
+      maxSurge: {{ .Values.ingestor.updateStrategy.rollingUpdate.maxSurge }}
+    {{- end }}
   template:
     metadata:
       annotations:

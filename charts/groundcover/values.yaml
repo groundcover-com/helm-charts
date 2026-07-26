@@ -1389,6 +1389,11 @@ ingestor:
   pdb:
     enabled: true
     maxUnavailable: 1
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
   topologySpreadConstraints:
     - maxSkew: 1
       topologyKey: kubernetes.io/hostname
