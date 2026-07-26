@@ -2266,12 +2266,35 @@ commHub:
     oauthDiscoveryTimeout: "15s"
     oauthClientName: ""
     oauthSoftwareStatement: ""
+    # Explicit (source host -> allowed issuer host) pairs that relax RFC 8414's
+    # same-host issuer check during OAuth discovery, for servers whose
+    # authorization-server metadata declares an issuer on a different host.
+    # Each pair is a deliberate trust exception, overridable per deployment.
+    # The PagerDuty pair ships enabled because PagerDuty is a shipped catalog
+    # connector whose mcp.pagerduty.com metadata declares issuer
+    # app.pagerduty.com — its OAuth mode is undiscoverable without it. The pair
+    # only has any effect once an admin actively switches a PagerDuty connector
+    # to OAuth; override this list (or set it to []) to drop or extend it.
+    oauthCrossHostIssuers:
+      - sourceHost: mcp.pagerduty.com
+        allowedIssuerHost: app.pagerduty.com
   # Declarative connector catalog (MCP-backed presets rendered as first-class
   # connectors). Entries are the sole source of catalog defaults; an empty list
   # disables the catalog. Entry fields: id, displayName, description, iconURL,
-  # iconDomain, mcpServerURL, authMode (oauth|none|token), customHeaders,
-  # setupHelp.
+  # iconDomain, mcpServerURL, authMode (oauth|oauth_static|none|token|
+  # token_or_oauth), customHeaders, tokenAuthHeader, setupHelp. authMode oauth
+  # registers an OAuth client dynamically; oauth_static requires an
+  # admin-supplied pre-registered client_id at install (for servers with no
+  # registration endpoint); token uses a per-user bearer token; token_or_oauth
+  # installs as token but lets an admin switch to a pre-registered OAuth client.
+  # tokenAuthHeader templates the token-mode Authorization header ("{token}"
+  # placeholder) for servers that reject the default Bearer scheme.
   connectorCatalog:
+    # When true, exposes catalog entries whose auth mode is gated (oauth_static,
+    # token, token_or_oauth). Default false hides them; set true per deployment
+    # on clusters cleared to use them (e.g. dev-incloud, demo, experiments,
+    # melody, test env). Ungated (oauth, none) entries are always available.
+    gatedAuthModesEnabled: false
     entries:
       - id: notion
         displayName: Notion
@@ -2286,6 +2309,52 @@ commHub:
         authMode: oauth
         iconDomain: usepylon.com
         setupHelp: A Pylon admin must first enable the MCP server in Pylon (Settings → AI Controls → MCP Server) before connecting.
+      - id: github
+        displayName: GitHub
+        description: Connect GitHub to read repositories, issues, and pull requests.
+        mcpServerURL: https://api.githubcopilot.com/mcp/
+        authMode: token_or_oauth
+        iconDomain: github.com
+        setupHelp: >-
+          Users connect with a GitHub personal access token. To enable one-click
+          OAuth instead, an admin registers a GitHub OAuth App and adds its
+          client_id/secret to this connector.
+      - id: pagerduty
+        displayName: PagerDuty
+        description: Connect PagerDuty to read incidents, services, schedules, and on-calls.
+        mcpServerURL: https://mcp.pagerduty.com/mcp
+        authMode: token_or_oauth
+        iconDomain: pagerduty.com
+        # PagerDuty REST API keys authenticate as "Authorization: Token token=<key>",
+        # not the default Bearer scheme. Applies only in token mode; if an admin
+        # switches this connector to OAuth, the access token is sent as Bearer.
+        tokenAuthHeader: "Token token={token}"
+        setupHelp: >-
+          Users connect with a PagerDuty API token. To enable OAuth instead, an
+          admin registers a PagerDuty OAuth client and adds its client_id/secret
+          here.
+      - id: rootly
+        displayName: Rootly
+        description: Connect Rootly to access incidents, alerts, on-call schedules, and retrospectives.
+        mcpServerURL: https://mcp.rootly.com/mcp
+        authMode: oauth
+        iconDomain: rootly.com
+      - id: incidentio
+        displayName: incident.io
+        description: Connect incident.io to access incidents, alerts, on-call, and catalog data.
+        mcpServerURL: https://mcp.incident.io/mcp
+        authMode: oauth
+        iconDomain: incident.io
+        setupHelp: An incident.io admin must first enable the MCP server (Settings → MCP). incident.io does not issue refresh tokens, so you may be asked to re-authorize periodically.
+      - id: atlassian
+        displayName: Atlassian Rovo
+        description: Connect Atlassian Rovo to access Jira issues and Confluence pages.
+        # The authv2 endpoint is required: the plain /v1/mcp endpoint publishes
+        # no RFC 9728 protected-resource metadata, so OAuth discovery fails.
+        mcpServerURL: https://mcp.atlassian.com/v1/mcp/authv2
+        authMode: oauth
+        iconDomain: atlassian.com
+        setupHelp: If your Atlassian organization restricts which AI tools may connect via OAuth (Atlassian Administration → Security → Rovo MCP server settings → allowed domains), an Atlassian admin must first allow the domain you use to access groundcover (the domain in this page's address bar, e.g. app.groundcover.com).
   routeConfig:
     secretCacheTTL: "5m"
   tracing:

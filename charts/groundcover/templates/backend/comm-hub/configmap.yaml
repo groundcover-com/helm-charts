@@ -148,12 +148,17 @@ data:
       {{- with .Values.commHub.mcp.oauthSoftwareStatement }}
       oauthSoftwareStatement: {{ . | quote }}
       {{- end }}
+      {{- with .Values.commHub.mcp.oauthCrossHostIssuers }}
+      oauthCrossHostIssuers:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
 
     # Declarative connector catalog (MCP-backed presets). Always rendered so an
     # explicit empty list disables the catalog instead of omitting the section.
     connectorCatalog:
       entries:
         {{- toYaml (.Values.commHub | dig "connectorCatalog" "entries" (list)) | nindent 8 }}
+      gatedAuthModesEnabled: {{ .Values.commHub | dig "connectorCatalog" "gatedAuthModesEnabled" false }}
 
     routeConfig:
       secretCacheTTL: {{ .Values.commHub.routeConfig.secretCacheTTL | default "5m" }}
