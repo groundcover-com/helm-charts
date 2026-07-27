@@ -74,6 +74,8 @@ spec:
           value: {{ .Values.exportService.logLevel | default "info" | quote }}
         - name: EXPORT_TIMEOUT
           value: {{ .Values.exportService.exportTimeout | default "60000" | quote }}
+        - name: EXPORT_QUEUE_CAPACITY
+          value: {{ .Values.exportService.queueCapacity | quote }}
 {{ with .Values.exportService.env }}
             {{- tpl (toYaml .) $ | nindent 8 }}
 {{ end }}

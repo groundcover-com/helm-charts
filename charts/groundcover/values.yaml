@@ -2462,6 +2462,7 @@ exportService:
   frontendUrl: '{{ printf "https://%s" (.Values.global.frontendDomain | default "app.groundcover.com") }}'
   logLevel: "info"
   exportTimeout: "60000"
+  queueCapacity: 10
 
 pdfReportWorker:
   additionalLabels:
