@@ -550,6 +550,9 @@ apmIngestor:
     tlsKeyFile: {{ .Values.global.ingestion.tlsKeyFile | default "" | quote }}
     tlsCAFile: {{ .Values.global.ingestion.tlsCAFile | default "" | quote }}
     maxSpansPerMarshal: {{ $sensorValues.apmIngestor.tracesOtlpEndpoint.maxSpansPerMarshal }}
+    maxIdleConns: {{ dig "apmIngestor" "otlpConnectionPool" "maxIdleConns" 0 $sensorValues }}
+    maxIdleConnsPerHost: {{ dig "apmIngestor" "otlpConnectionPool" "maxIdleConnsPerHost" 0 $sensorValues }}
+    idleConnTimeout: {{ dig "apmIngestor" "otlpConnectionPool" "idleConnTimeout" "0s" $sensorValues }}
   logsOtlpEndpoint:
     endpoint: {{ include "ingestion.logs.otlp.http.url" . }}
     insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
@@ -559,6 +562,9 @@ apmIngestor:
     tlsCertFile: {{ .Values.global.ingestion.tlsCertFile | default "" | quote }}
     tlsKeyFile: {{ .Values.global.ingestion.tlsKeyFile | default "" | quote }}
     tlsCAFile: {{ .Values.global.ingestion.tlsCAFile | default "" | quote }}
+    maxIdleConns: {{ dig "apmIngestor" "otlpConnectionPool" "maxIdleConns" 0 $sensorValues }}
+    maxIdleConnsPerHost: {{ dig "apmIngestor" "otlpConnectionPool" "maxIdleConnsPerHost" 0 $sensorValues }}
+    idleConnTimeout: {{ dig "apmIngestor" "otlpConnectionPool" "idleConnTimeout" "0s" $sensorValues }}
   measurements:
     enabled: {{ dig "apmIngestor" "measurements" "enabled" false $sensorValues }}
     flushInterval: {{ dig "apmIngestor" "measurements" "flushInterval" "30s" $sensorValues }}
@@ -716,6 +722,9 @@ tracesOtlpEndpoint:
   tlsKeyFile: {{ .Values.global.ingestion.tlsKeyFile | default "" | quote }}
   tlsCAFile: {{ .Values.global.ingestion.tlsCAFile | default "" | quote }}
   maxSpansPerMarshal: {{ $sensorValues.apmIngestor.tracesOtlpEndpoint.maxSpansPerMarshal }}
+  maxIdleConns: {{ dig "apmIngestor" "otlpConnectionPool" "maxIdleConns" 0 $sensorValues }}
+  maxIdleConnsPerHost: {{ dig "apmIngestor" "otlpConnectionPool" "maxIdleConnsPerHost" 0 $sensorValues }}
+  idleConnTimeout: {{ dig "apmIngestor" "otlpConnectionPool" "idleConnTimeout" "0s" $sensorValues }}
 logsOtlpEndpoint:
   endpoint: {{ include "ingestion.logs.otlp.http.url" . }}
   insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
@@ -723,6 +732,9 @@ logsOtlpEndpoint:
   tlsCertFile: {{ .Values.global.ingestion.tlsCertFile | default "" | quote }}
   tlsKeyFile: {{ .Values.global.ingestion.tlsKeyFile | default "" | quote }}
   tlsCAFile: {{ .Values.global.ingestion.tlsCAFile | default "" | quote }}
+  maxIdleConns: {{ dig "apmIngestor" "otlpConnectionPool" "maxIdleConns" 0 $sensorValues }}
+  maxIdleConnsPerHost: {{ dig "apmIngestor" "otlpConnectionPool" "maxIdleConnsPerHost" 0 $sensorValues }}
+  idleConnTimeout: {{ dig "apmIngestor" "otlpConnectionPool" "idleConnTimeout" "0s" $sensorValues }}
 customOtlpEndpoint:
   endpoint: {{ include "ingestion.custom.otlp.http.url" . }}
   insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
@@ -732,6 +744,9 @@ customOtlpEndpoint:
   tlsCertFile: {{ .Values.global.ingestion.tlsCertFile | default "" | quote }}
   tlsKeyFile: {{ .Values.global.ingestion.tlsKeyFile | default "" | quote }}
   tlsCAFile: {{ .Values.global.ingestion.tlsCAFile | default "" | quote }}
+  maxIdleConns: {{ dig "apmIngestor" "otlpConnectionPool" "maxIdleConns" 0 $sensorValues }}
+  maxIdleConnsPerHost: {{ dig "apmIngestor" "otlpConnectionPool" "maxIdleConnsPerHost" 0 $sensorValues }}
+  idleConnTimeout: {{ dig "apmIngestor" "otlpConnectionPool" "idleConnTimeout" "0s" $sensorValues }}
 
 {{ if $sensorValues.tracesStaticOttlRules }}
 tracesStaticOttlRules:

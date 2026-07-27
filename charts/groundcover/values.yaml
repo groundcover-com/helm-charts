@@ -688,6 +688,10 @@ agent:
     apmIngestor:
       tracesOtlpEndpoint:
         maxSpansPerMarshal: 300
+      otlpConnectionPool:
+        maxIdleConns: 100
+        maxIdleConnsPerHost: 100
+        idleConnTimeout: 90s
       measurements:
         enabled: false
         flushInterval: 30s
@@ -1473,6 +1477,10 @@ ingestor:
   apmIngestor:
     tracesOtlpEndpoint:
       maxSpansPerMarshal: 300
+    otlpConnectionPool:
+      maxIdleConns: 100
+      maxIdleConnsPerHost: 100
+      idleConnTimeout: 90s
     measurements:
       enabled: false
       flushInterval: 30s
@@ -1709,6 +1717,10 @@ metricsAggregator:
   apmIngestor:
     tracesOtlpEndpoint:
       maxSpansPerMarshal: 300
+    otlpConnectionPool:
+      maxIdleConns: 100
+      maxIdleConnsPerHost: 100
+      idleConnTimeout: 90s
     measurements:
       enabled: false
       flushInterval: 30s
