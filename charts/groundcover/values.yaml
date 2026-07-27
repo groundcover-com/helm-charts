@@ -2166,6 +2166,9 @@ dispatchCenter:
     evaluationErrors:
       interval: 5m
       lookback: 5m
+    # Fraction of maxConcurrentAlertWorkflows above which the best-effort Slack issue-graph
+    # attachment is skipped. Set to 0 to disable shedding.
+    issueGraphLoadShedThreshold: 0.3
   tracing:
     enabled: false
     writeTimeout: "5s"

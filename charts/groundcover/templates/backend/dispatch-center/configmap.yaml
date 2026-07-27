@@ -119,6 +119,8 @@ data:
         lookback: {{ if and .Values.dispatchCenter .Values.dispatchCenter.worker .Values.dispatchCenter.worker.evaluationErrors .Values.dispatchCenter.worker.evaluationErrors.lookback }}{{ .Values.dispatchCenter.worker.evaluationErrors.lookback }}{{ else }}5m{{ end }}
       maxChildWorkflowsPerBatch: {{ if and .Values.dispatchCenter .Values.dispatchCenter.worker .Values.dispatchCenter.worker.maxChildWorkflowsPerBatch }}{{ .Values.dispatchCenter.worker.maxChildWorkflowsPerBatch }}{{ else }}5000{{ end }}
       maxActivityRetryAttempts: {{ if and .Values.dispatchCenter .Values.dispatchCenter.worker .Values.dispatchCenter.worker.maxActivityRetryAttempts }}{{ .Values.dispatchCenter.worker.maxActivityRetryAttempts }}{{ else }}1000{{ end }}
+      {{- /* hasKey, not truthiness: an explicit 0 disables shedding and `if` would treat it as unset. */}}
+      issueGraphLoadShedThreshold: {{ if and .Values.dispatchCenter .Values.dispatchCenter.worker (hasKey .Values.dispatchCenter.worker "issueGraphLoadShedThreshold") }}{{ .Values.dispatchCenter.worker.issueGraphLoadShedThreshold }}{{ else }}0.3{{ end }}
       readDispatchActivityTimeout: {{ if and .Values.dispatchCenter .Values.dispatchCenter.worker .Values.dispatchCenter.worker.readDispatchActivityTimeout }}{{ .Values.dispatchCenter.worker.readDispatchActivityTimeout }}{{ else }}5m{{ end }}
       countWorkflowTimeout: {{ if and .Values.dispatchCenter .Values.dispatchCenter.worker .Values.dispatchCenter.worker.countWorkflowTimeout }}{{ .Values.dispatchCenter.worker.countWorkflowTimeout }}{{ else }}30s{{ end }}
 
