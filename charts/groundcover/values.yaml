@@ -5141,7 +5141,7 @@ monitors-manager:
       max_attempts: 2
       evaluation_timeout: 120s
     quota:
-      alerting_rule_evaluation_results: 500
+      alerting_rule_evaluation_results: 10000
 
     groundcover:
       alerting_overrides_checksum: '{{ .Values.alertingOverrides | quote | sha256sum }}'
