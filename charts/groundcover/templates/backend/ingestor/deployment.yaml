@@ -91,6 +91,9 @@ spec:
         {{- with .Values.ingestor.builtinEnv }}
           {{ tpl (toYaml .) $ | nindent 8 }}
         {{- end }}
+        {{- if (((.Values.ingestor.resources).limits).memory) }}
+        {{- include "groundcover.sensor.deployment.gomemlimitEnv" (dict "containerName" "ingestor") | nindent 8 }}
+        {{- end }}
         envFrom:
           - secretRef:
               name: {{include "groundcover.config.secretName" .}}

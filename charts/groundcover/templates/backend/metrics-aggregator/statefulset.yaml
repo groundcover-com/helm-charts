@@ -83,6 +83,9 @@ spec:
         {{- with $sensorValues.builtinEnv }}
           {{ tpl (toYaml .) $ | nindent 8 }}
         {{- end }}
+        {{- if ((($sensorValues.resources).limits).memory) }}
+        {{- include "groundcover.sensor.deployment.gomemlimitEnv" (dict "containerName" "metrics-aggregator") | nindent 8 }}
+        {{- end }}
         envFrom:
           - secretRef:
               name: {{include "groundcover.config.secretName" .}}

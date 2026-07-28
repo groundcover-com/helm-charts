@@ -905,6 +905,15 @@ sensitiveHeadersObfuscationConfig:
 {{- end }}
 {{- end -}}
 
+{{- define "groundcover.sensor.deployment.gomemlimitEnv" -}}
+- name: GC_MEMORY_LIMIT_BYTES
+  valueFrom:
+    resourceFieldRef:
+      containerName: {{ .containerName }}
+      resource: limits.memory
+      divisor: "1"
+{{- end -}}
+
 {{- define "groundcover.sensor.deployment.ingestion-ports" -}}
 {{- $sensorValues := .sensorValues -}}
 {{- if $sensorValues.ingestionEnabled }}

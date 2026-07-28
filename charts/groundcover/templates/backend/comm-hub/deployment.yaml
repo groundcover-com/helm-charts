@@ -72,7 +72,7 @@ spec:
 {{- end }}
       imagePullSecrets: {{ include "imagePullSecrets" . }}
       initContainers:
-      {{ if eq (include "comm-hub.oauthRefreshDisabled" .) "false" }}
+      {{ if or (eq (include "comm-hub.oauthRefreshDisabled" .) "false") (and (eq (include "comm-hub.temporalEnabled" .) "true") (.Values.commHub.slack.enabled | default false) (.Values.commHub.slack | dig "authResume" "enabled" true)) }}
       - name: wait-for-temporal
         image: '{{ tpl .Values.curl.image.repository . }}:{{ tpl .Values.curl.image.tag . }}'
         command:

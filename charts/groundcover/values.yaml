@@ -917,6 +917,7 @@ agent:
       - /v1/chat/completions
       - /v1/responses
       - /v1/messages
+      - /openai/deployments/
       - /model/
       - :generateContent
       - :streamGenerateContent
@@ -2264,6 +2265,16 @@ commHub:
     baseURL: "https://slack.com"
     maxConnsPerHost: 10
     requestTimeout: "30s"
+    # Retains the latest mention from an unlinked Slack user until they connect.
+    # timeout and activityTimeout use Go duration strings; a continuation expires
+    # after timeout, while activityTimeout bounds one resumed dispatch attempt.
+    authResume:
+      enabled: true
+      taskQueue: ""
+      timeout: "30m"
+      activityTimeout: "45s"
+      maxConcurrentWorkflowTaskPollers: 2
+      maxConcurrentActivityTaskPollers: 4
   linear:
     enabled: true
     authBaseURL: "https://linear.app"
