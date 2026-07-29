@@ -1101,7 +1101,7 @@ agentService:
       maxSurge: 1
   config:
     routerUrl: ""
-    llmProvider: "bedrock"  # "bedrock", "vertex", "azure", or "anthropic"
+    llmProvider: "bedrock"  # "bedrock", "vertex", "azure", "anthropic", or "anthropic_compatible_endpoint"
     awsRegion: ""
     bedrockModelId: "anthropic.claude-sonnet-4-6"
     bedrockLargeModelId: "anthropic.claude-sonnet-4-6"
@@ -1121,9 +1121,12 @@ agentService:
     # Requires azure-identity to be installed and the SA federated to a UAMI
     # with the "Azure AI User" role on the Foundry resource.
     azureFoundryUseEntra: false
-    # Direct Anthropic settings (used when llmProvider: "anthropic").
-    # Must be a Fleet Manager secret-store ref: secretRef::store::<id>.
+    # Direct Anthropic settings (used when llmProvider: "anthropic" or
+    # "anthropic_compatible_endpoint"). Must be a Fleet Manager secret-store ref:
+    # secretRef::store::<id>.
     anthropicApiKeySecretRef: ""
+    # Anthropic-compatible endpoint URL (used when llmProvider: "anthropic_compatible_endpoint").
+    anthropicCompatibleBaseUrl: ""
     anthropicModelId: "claude-haiku-4-5"
     anthropicLargeModelId: "claude-sonnet-4-6"
     otelTracingEnabled: "true"

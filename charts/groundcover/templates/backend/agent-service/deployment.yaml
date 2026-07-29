@@ -196,9 +196,13 @@ spec:
             - name: ANTHROPIC_LARGE_MODEL_ID
               value: {{ $agentService.config.anthropicLargeModelId | quote }}
             {{- end }}
-            {{- if eq ($agentService.config.llmProvider | default "bedrock") "anthropic" }}
+            {{- if or (eq ($agentService.config.llmProvider | default "bedrock") "anthropic") (eq ($agentService.config.llmProvider | default "bedrock") "anthropic_compatible_endpoint") }}
             - name: ANTHROPIC_API_KEY_SECRET_REF
-              value: {{ required "agentService.config.anthropicApiKeySecretRef is required when agentService.config.llmProvider=anthropic. Provide a Fleet Manager secret ref like secretRef::store::<id>." $agentService.config.anthropicApiKeySecretRef | quote }}
+              value: {{ required (printf "agentService.config.anthropicApiKeySecretRef is required when agentService.config.llmProvider=%s. Provide a Fleet Manager secret ref like secretRef::store::<id>." ($agentService.config.llmProvider | default "bedrock")) $agentService.config.anthropicApiKeySecretRef | quote }}
+            {{- end }}
+            {{- if eq ($agentService.config.llmProvider | default "bedrock") "anthropic_compatible_endpoint" }}
+            - name: ANTHROPIC_COMPATIBLE_BASE_URL
+              value: {{ required "agentService.config.anthropicCompatibleBaseUrl is required when agentService.config.llmProvider=anthropic_compatible_endpoint." $agentService.config.anthropicCompatibleBaseUrl | quote }}
             {{- end }}
             {{- if $agentService.gcpCredentials }}
             - name: GOOGLE_APPLICATION_CREDENTIALS
