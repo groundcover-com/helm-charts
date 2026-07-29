@@ -14,6 +14,7 @@ message logs {
   optional binary env (STRING);
   optional binary instance (STRING);
   optional boolean is_pii;
+  optional int64 pattern_id (INTEGER(64, false));
   optional binary pattern (STRING);
   optional binary trace_id (STRING);
   optional binary span_id (STRING);
