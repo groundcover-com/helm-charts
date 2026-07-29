@@ -2246,6 +2246,10 @@ commHub:
     maxRetries: 5
   providers:
     registrySyncInterval: "1s"
+    # Off by default so existing deployments are unaffected; a new-customer
+    # overlay enables org connectors by default for new backends.
+    installAllCatalogConnectors: false
+    defaultEnabledConnectors: false
   oauthRefresh:
     disabled: false
     # Empty values render release-scoped defaults so multiple CommHub releases

@@ -102,6 +102,8 @@ data:
 
     providers:
       registrySyncInterval: {{ .Values.commHub.providers.registrySyncInterval | default "1s" }}
+      installAllCatalogConnectors: {{ .Values.commHub | dig "providers" "installAllCatalogConnectors" false }}
+      defaultEnabledConnectors: {{ .Values.commHub | dig "providers" "defaultEnabledConnectors" false }}
 
     oauthRefresh:
       disabled: {{ include "comm-hub.oauthRefreshDisabled" . }}
