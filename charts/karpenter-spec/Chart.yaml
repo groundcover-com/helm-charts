@@ -1,6 +1,6 @@
 apiVersion: v2
-appVersion: 1.12.181
+appVersion: 1.12.182
 description: A Helm chart for groundcover karpenter CRs.
 name: karpenter-spec
 type: application
-version: 1.12.181
+version: 1.12.182
