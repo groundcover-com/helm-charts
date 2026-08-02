@@ -140,6 +140,9 @@ global:
     tlsCertFile: ""
     tlsKeyFile: ""
     tlsCAFile: ""
+    # Content-Encoding for OTLP HTTP export: gzip or zstd. Senders fall back to
+    # gzip if the receiver rejects zstd.
+    otlpCompression: gzip
     pdbs:
       enabled: true
   groundcover_token:

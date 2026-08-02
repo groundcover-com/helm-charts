@@ -542,6 +542,7 @@ sendKubeletInfraMetrics: {{ .Values.sendKubeletInfraMetrics }}
 apmIngestor: 
   tracesOtlpEndpoint:
     endpoint: {{ include "ingestion.traces.otlp.http.url" . }}
+    compression: {{ .Values.global.ingestion.otlpCompression | default "gzip" }}
     insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
     writeTimeout: 10s
     batchSize: 100
@@ -555,6 +556,7 @@ apmIngestor:
     idleConnTimeout: {{ dig "apmIngestor" "otlpConnectionPool" "idleConnTimeout" "0s" $sensorValues }}
   logsOtlpEndpoint:
     endpoint: {{ include "ingestion.logs.otlp.http.url" . }}
+    compression: {{ .Values.global.ingestion.otlpCompression | default "gzip" }}
     insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
     writeTimeout: 10s
     batchSize: 100
@@ -716,6 +718,7 @@ otelTracesAsLogs: true
 otelPreprocess: true
 tracesOtlpEndpoint:
   endpoint: {{ include "ingestion.traces.otlp.http.url" . }}
+  compression: {{ .Values.global.ingestion.otlpCompression | default "gzip" }}
   insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
   writeTimeout: 10s
   tlsCertFile: {{ .Values.global.ingestion.tlsCertFile | default "" | quote }}
@@ -727,6 +730,7 @@ tracesOtlpEndpoint:
   idleConnTimeout: {{ dig "apmIngestor" "otlpConnectionPool" "idleConnTimeout" "0s" $sensorValues }}
 logsOtlpEndpoint:
   endpoint: {{ include "ingestion.logs.otlp.http.url" . }}
+  compression: {{ .Values.global.ingestion.otlpCompression | default "gzip" }}
   insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
   writeTimeout: 10s
   tlsCertFile: {{ .Values.global.ingestion.tlsCertFile | default "" | quote }}
@@ -737,6 +741,7 @@ logsOtlpEndpoint:
   idleConnTimeout: {{ dig "apmIngestor" "otlpConnectionPool" "idleConnTimeout" "0s" $sensorValues }}
 customOtlpEndpoint:
   endpoint: {{ include "ingestion.custom.otlp.http.url" . }}
+  compression: {{ .Values.global.ingestion.otlpCompression | default "gzip" }}
   insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
   writeTimeout: 10s
   batchSize: 350
