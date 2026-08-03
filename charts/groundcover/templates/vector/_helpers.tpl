@@ -533,10 +533,6 @@ custom:
 {{- $tracesStep := dict "name" "parquet_stringify_traces" "transform" (dict "type" "remap" "source" (include "vector.parquetStringifyVRL" (dict "fields" (list "string_attributes")))) -}}
 {{- $_ := set .Values.vector.tracesPipeline "extraSteps" (append .Values.vector.tracesPipeline.extraSteps $tracesStep) -}}
 {{- end -}}
-{{- if and .Values.vector.customGlobalConfig (hasKey .Values.vector.customGlobalConfig "api") -}}
-{{- $_ := unset (index .Values.vector.customGlobalConfig "api") "playground" -}}
-{{- $_ := unset (index .Values.vector.customGlobalConfig "api") "graphql" -}}
-{{- end -}}
 {{- end -}}
 
 {{ if .Values.vector.customGlobalConfig }}

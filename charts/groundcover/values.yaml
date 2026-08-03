@@ -2241,7 +2241,7 @@ commHub:
     namespace: "commhub"
     adminToolsImage:
       repository: public.ecr.aws/groundcovercom/temporalio/admin-tools
-      tag: "1.29.7-20260706-1"
+      tag: "1.29.7-20260730-1"
       pullPolicy: IfNotPresent
   cursorCloud:
     baseURL: "https://api.cursor.com"
@@ -3108,7 +3108,7 @@ vector:
     #         .float_attributes.random_number = to_int!(res.number)
   image:
     repository: public.ecr.aws/groundcovercom/vector
-    tag: 0.54.0-debian-20260601-1
+    tag: 0.57.0-debian-20260730-1
   lifecycle: 
     preStop:
       exec:
@@ -3237,6 +3237,8 @@ vector:
       value: "true"
     - name: VECTOR_LOG_FORMAT
       value: "json"
+    - name: VECTOR_DANGEROUSLY_ALLOW_ENV_VAR_INTERPOLATION
+      value: "true"
   podAnnotations:
     prometheus.io/port: "9598"
     prometheus.io/scrape: "true"
@@ -3279,8 +3281,6 @@ vector:
   customGlobalConfig:
     api:
       enabled: true
-      playground: false
-      graphql: false
       address: "0.0.0.0:8686"
   customComponents:
     sources:
