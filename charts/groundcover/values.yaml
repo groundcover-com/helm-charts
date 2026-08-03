@@ -732,6 +732,10 @@ agent:
               from_context: x-groundcover-source
               action: upsert
           samplingRatio: 0.05
+          # 0 = unlimited; set a positive byte budget to enable export limiting.
+          maxConcurrentTraceExportBytes: 0
+          maxConcurrentLogExportBytes: 0
+          exportAcquireWait: 1s
           zipkin:
             enabled: true
             port: 9411
@@ -1528,6 +1532,10 @@ ingestor:
             from_context: x-groundcover-source
             action: upsert
         samplingRatio: 1
+        # 0 = unlimited; set a positive byte budget to enable export limiting.
+        maxConcurrentTraceExportBytes: 0
+        maxConcurrentLogExportBytes: 0
+        exportAcquireWait: 1s
         zipkin:
           enabled: true
           port: 9411
