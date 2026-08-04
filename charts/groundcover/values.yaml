@@ -40,6 +40,9 @@ global:
     # List of environment variable names whose values are replaced with
     # <REDACTED> in the Container Info tab. Matching is case-insensitive.
     envVariables: []
+    # List of regular expressions matched against environment variable names.
+    # Matching is case-insensitive. Example: ["_TOKEN$", "^AWS_.*_KEY$"]
+    envVariablePatterns: []
 
   # DEPRECATED: Use global.labelEnrichment instead. Kept for backward compatibility.
   metricLabels:
