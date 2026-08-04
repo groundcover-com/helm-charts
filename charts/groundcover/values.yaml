@@ -131,6 +131,9 @@ global:
         acme:
           server: https://acme-v02.api.letsencrypt.org/directory
     useIngestionTag: false
+    # restrict RUM ingestion keys (Kong credentials tagged type:rum) to the RUM endpoints
+    # (/json/rum, /rum/sourcemaps) only, rejecting them elsewhere
+    restrictRumIngestionKey: true
 
   airgap: false
 

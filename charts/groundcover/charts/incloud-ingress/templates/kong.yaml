@@ -181,6 +181,39 @@ config:
     kong.response.exit(403, "No read permissions") end
 plugin: post-function
 ---
+{{- if .Values.global.ingress.restrictRumIngestionKey }}
+apiVersion: configuration.konghq.com/v1
+kind: KongClusterPlugin
+metadata:
+  name: {{ printf "%s-deny-ingestion-token-rum" .Release.Name }}
+  annotations:
+    kubernetes.io/ingress.class: {{ include "incloud-ingress.ingressClass" . }}
+  labels:
+    global: "true"
+config:
+  access:
+  - |
+    local credential = kong.client.get_credential()
+
+    local is_rum_key = false
+    if credential and credential.tags then
+      for _, tag in ipairs(credential.tags) do
+        if tag == 'type:rum' then
+          is_rum_key = true
+          break
+        end
+      end
+    end
+
+    if not is_rum_key then return end
+
+    local rum_paths = { ['/json/rum'] = true, ['/rum/sourcemaps'] = true }
+    if not rum_paths[kong.request.get_path()] then
+      return kong.response.exit(403, "RUM keys may only be used against RUM endpoints")
+    end
+plugin: post-function
+{{- end }}
+---
 apiVersion: configuration.konghq.com/v1
 kind: KongPlugin
 metadata:

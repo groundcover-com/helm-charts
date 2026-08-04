@@ -29,7 +29,7 @@ kong:
             type: Utilization
             averageUtilization: 75
   image:
-    tag: 3.9.1-20260602-1
+    tag: 3.9.3-mini-20260804-1
     repository: public.ecr.aws/groundcovercom/kong
   ingressController:
     image:
