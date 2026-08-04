@@ -2181,9 +2181,19 @@ dispatchCenter:
     evaluationErrors:
       interval: 5m
       lookback: 5m
-    # Fraction of maxConcurrentAlertWorkflows above which the best-effort Slack issue-graph
-    # attachment is skipped. Set to 0 to disable shedding.
+    # Fraction of maxChildWorkflowsPerBatch (one scan iteration's dispatch burst) above which
+    # the best-effort Slack issue-graph attachment is skipped. Set to 0 to disable shedding.
+    # Deliberately NOT a fraction of maxConcurrentAlertWorkflows: that coupling moved the shed
+    # point every time the concurrency cap was retuned.
     issueGraphLoadShedThreshold: 0.3
+    # Notification-send concurrency & retry-backoff knobs. Defaults live in the
+    # dispatch-center configmap; uncomment to override (see BE-2638). Tuned via the
+    # sustained-throughput benchmark in services/dispatch-center/cmd/benchmark.
+    # maxConcurrentAlertWorkflows: 50000        # Temporal cap on concurrent alert workflows
+    # maxChildWorkflowsPerBatch: 5000           # cap on one scan iteration's dispatch burst
+    # maxConcurrentActivityExecutionSize: 10000 # Temporal worker activity-slot ceiling
+    # notificationInSlotRetryThreshold: 2s      # T: waits below this retry in-slot; at/above free the slot
+    # notificationInSlotRetryBudget: 5s         # C: max total in-slot time per activity attempt (sends included) before forcing a slot-free reschedule
   tracing:
     enabled: false
     writeTimeout: "5s"
