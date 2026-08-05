@@ -423,11 +423,11 @@ ingestion_metrics_sink:
 
 {{/*
 Parquet encoding overrides merged onto the AWS s3 sinks when vector.parquetSchemas.enabled
-is true: switch each sink to its versioned v3 object-storage path, drop the gzip codec
+is true: move each sink off its default v4 path and back onto the v3 one, drop the gzip codec
 (parquet is self-compressed with zstd), and encode batches as Parquet against the mounted
 schema file. The key_prefix values MUST stay in lockstep with the s3QueueV3*Path constants
 in internal/schema_manager/tables (each carries the category's schema version, e.g. logs_v3).
-This is AWS-only: gcs/azure sinks stay JSON (vector cannot write parquet to them).
+This is AWS-only: gcs/azure sinks stay JSON on v4 (vector cannot write parquet to them at all).
 */}}
 {{- define "vector.parquetSinkOverrides" -}}
 logs:

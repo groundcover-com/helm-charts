@@ -4015,13 +4015,18 @@ vector:
               timeout_secs: 2
             healthcheck:
               enabled: false
+      # The key_prefix/blob_prefix of every object-storage sink below names the queue generation
+      # whose ClickHouse tables drain it, and MUST stay in lockstep with the s3QueueV*Path constants
+      # in internal/schema_manager/tables. All three clouds are on v4, the JSON generation carrying
+      # tracked_file_ttl_sec. Setting vector.parquetSchemas.enabled re-points the AWS sinks to v3
+      # and encodes them as parquet - see vector.parquetSinkOverrides.
       s3:
         logs:
           s3_logs:
             type: "aws_s3"
             bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
             region: '{{ .Values.vector.objectStorage.region }}'
-            key_prefix: "v2/logs_v3/"
+            key_prefix: "v4/logs_v3/"
             encoding:
               codec: json
               timestamp_format: rfc3339
@@ -4036,7 +4041,7 @@ vector:
             type: "aws_s3"
             bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
             region: '{{ .Values.vector.objectStorage.region }}'
-            key_prefix: "v2/traces_v2/"
+            key_prefix: "v4/traces_v2/"
             encoding:
               codec: json
               timestamp_format: rfc3339
@@ -4054,7 +4059,7 @@ vector:
               - json_entities
             bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
             region: '{{ .Values.vector.objectStorage.region }}'
-            key_prefix: "v2/entities_v2/"
+            key_prefix: "v4/entities_v2/"
             encoding:
               codec: json
               timestamp_format: rfc3339
@@ -4071,7 +4076,7 @@ vector:
               - json_measurements
             bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
             region: '{{ .Values.vector.objectStorage.region }}'
-            key_prefix: "v2/measurements/"
+            key_prefix: "v4/measurements/"
             encoding:
               codec: json
               timestamp_format: rfc3339
@@ -4089,7 +4094,7 @@ vector:
             - logs_to_events_transform
             bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
             region: '{{ .Values.vector.objectStorage.region }}'
-            key_prefix: "v2/events_v2/"
+            key_prefix: "v4/events_v2/"
             encoding:
               codec: json
               timestamp_format: rfc3339
@@ -4105,7 +4110,7 @@ vector:
               - session_replay
             bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
             region: '{{ .Values.vector.objectStorage.region }}'
-            key_prefix: "v2/session_replay/"
+            key_prefix: "v4/session_replay/"
             encoding:
               codec: json
               timestamp_format: rfc3339
@@ -4122,7 +4127,7 @@ vector:
             - json_monitors
             bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
             region: '{{ .Values.vector.objectStorage.region }}'
-            key_prefix: "v2/monitors_v5/"
+            key_prefix: "v4/monitors_v5/"
             encoding:
               codec: json
               timestamp_format: rfc3339
@@ -4138,7 +4143,7 @@ vector:
               - table_write_routing.metrics_metadata
             bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
             region: '{{ .Values.vector.objectStorage.region }}'
-            key_prefix: "v2/metrics_metadata/"
+            key_prefix: "v4/metrics_metadata/"
             encoding:
               codec: json
               timestamp_format: rfc3339
@@ -4152,7 +4157,7 @@ vector:
         logs:
           gcs_logs:
             type: gcp_cloud_storage
-            key_prefix: v2/logs_v3/
+            key_prefix: v4/logs_v3/
             compression: zstd
             bucket: '{{ .Values.vector.objectStorage.gcsBucket }}'
             batch:
@@ -4167,7 +4172,7 @@ vector:
         traces:
           gcs_traces:
             type: gcp_cloud_storage
-            key_prefix: v2/traces_v2/
+            key_prefix: v4/traces_v2/
             compression: zstd
             bucket: '{{ .Values.vector.objectStorage.gcsBucket }}'
             batch:
@@ -4185,7 +4190,7 @@ vector:
             inputs:
               - entities
               - json_entities
-            key_prefix: v2/entities_v2/
+            key_prefix: v4/entities_v2/
             compression: zstd
             bucket: '{{ .Values.vector.objectStorage.gcsBucket }}'
             batch:
@@ -4202,7 +4207,7 @@ vector:
             inputs:
               - measurements
               - json_measurements
-            key_prefix: v2/measurements/
+            key_prefix: v4/measurements/
             compression: zstd
             bucket: '{{ .Values.vector.objectStorage.gcsBucket }}'
             batch:
@@ -4220,7 +4225,7 @@ vector:
               - events
               - json_events
               - logs_to_events_transform
-            key_prefix: v2/events_v2/
+            key_prefix: v4/events_v2/
             compression: zstd
             bucket: '{{ .Values.vector.objectStorage.gcsBucket }}'
             batch:
@@ -4236,7 +4241,7 @@ vector:
             type: gcp_cloud_storage
             inputs:
               - session_replay
-            key_prefix: v2/session_replay/
+            key_prefix: v4/session_replay/
             compression: zstd
             bucket: '{{ .Values.vector.objectStorage.gcsBucket }}'
             batch:
@@ -4253,7 +4258,7 @@ vector:
             inputs:
               - monitors
               - json_monitors
-            key_prefix: v2/monitors_v5/
+            key_prefix: v4/monitors_v5/
             compression: zstd
             bucket: '{{ .Values.vector.objectStorage.gcsBucket }}'
             batch:
@@ -4269,7 +4274,7 @@ vector:
             type: gcp_cloud_storage
             inputs:
               - table_write_routing.metrics_metadata
-            key_prefix: v2/metrics_metadata/
+            key_prefix: v4/metrics_metadata/
             compression: zstd
             bucket: '{{ .Values.vector.objectStorage.gcsBucket }}'
             batch:
@@ -4287,7 +4292,7 @@ vector:
             type: azure_blob
             container_name: '{{ .Values.vector.objectStorage.azureBlobContainer }}'
             connection_string: '{{ .Values.vector.objectStorage.azureConnectionString }}'
-            blob_prefix: v2/logs_v3/
+            blob_prefix: v4/logs_v3/
             compression: zstd
             encoding:
               codec: json
@@ -4303,7 +4308,7 @@ vector:
             type: azure_blob
             container_name: '{{ .Values.vector.objectStorage.azureBlobContainer }}'
             connection_string: '{{ .Values.vector.objectStorage.azureConnectionString }}'
-            blob_prefix: v2/traces_v2/
+            blob_prefix: v4/traces_v2/
             compression: zstd
             encoding:
               codec: json
@@ -4322,7 +4327,7 @@ vector:
               - json_entities
             container_name: '{{ .Values.vector.objectStorage.azureBlobContainer }}'
             connection_string: '{{ .Values.vector.objectStorage.azureConnectionString }}'
-            blob_prefix: v2/entities_v2/
+            blob_prefix: v4/entities_v2/
             compression: zstd
             encoding:
               codec: json
@@ -4340,7 +4345,7 @@ vector:
               - json_measurements
             container_name: '{{ .Values.vector.objectStorage.azureBlobContainer }}'
             connection_string: '{{ .Values.vector.objectStorage.azureConnectionString }}'
-            blob_prefix: v2/measurements/
+            blob_prefix: v4/measurements/
             compression: zstd
             encoding:
               codec: json
@@ -4359,7 +4364,7 @@ vector:
             - logs_to_events_transform
             container_name: '{{ .Values.vector.objectStorage.azureBlobContainer }}'
             connection_string: '{{ .Values.vector.objectStorage.azureConnectionString }}'
-            blob_prefix: v2/events_v2/
+            blob_prefix: v4/events_v2/
             compression: zstd
             encoding:
               codec: json
@@ -4376,7 +4381,7 @@ vector:
               - session_replay
             container_name: '{{ .Values.vector.objectStorage.azureBlobContainer }}'
             connection_string: '{{ .Values.vector.objectStorage.azureConnectionString }}'
-            blob_prefix: v2/session_replay/
+            blob_prefix: v4/session_replay/
             compression: zstd
             encoding:
               codec: json
@@ -4394,7 +4399,7 @@ vector:
             - json_monitors
             container_name: '{{ .Values.vector.objectStorage.azureBlobContainer }}'
             connection_string: '{{ .Values.vector.objectStorage.azureConnectionString }}'
-            blob_prefix: v2/monitors_v5/
+            blob_prefix: v4/monitors_v5/
             compression: zstd
             encoding:
               codec: json
@@ -4411,7 +4416,7 @@ vector:
               - table_write_routing.metrics_metadata
             container_name: '{{ .Values.vector.objectStorage.azureBlobContainer }}'
             connection_string: '{{ .Values.vector.objectStorage.azureConnectionString }}'
-            blob_prefix: v2/metrics_metadata/
+            blob_prefix: v4/metrics_metadata/
             compression: zstd
             encoding:
               codec: json
