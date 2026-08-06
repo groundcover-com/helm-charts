@@ -120,6 +120,7 @@ data:
 
     slack:
       enabled: {{ .Values.commHub.slack.enabled | default false }}
+      mcpEnabled: {{ .Values.commHub.slack.mcpEnabled | default false }}
       baseURL: {{ .Values.commHub.slack.baseURL | default "https://slack.com" | quote }}
       maxConnsPerHost: {{ .Values.commHub.slack.maxConnsPerHost | default 10 }}
       requestTimeout: {{ .Values.commHub.slack.requestTimeout | default "30s" }}
