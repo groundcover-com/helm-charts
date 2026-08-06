@@ -188,4 +188,18 @@ data:
       SkipMigrations: {{ .Values.dbManager.skipMigrations }}
       EnableStorageMgmt: {{ .Values.dbManager.enableStorageMgmt | default false }}
       MaxIndexTiers: {{ .Values.dbManager.maxIndexTiers | default 20 }}
+    {{- if .Values.global.monitorsStore.enabled }}
+    MonitorsStore:
+      Enabled: true
+      Db:
+        host: {{ tpl .Values.dbManager.db.host . }}
+        port: {{ tpl .Values.dbManager.db.port . }}
+        name: {{ .Values.global.monitorsStore.dbName }}
+        user: {{ tpl .Values.dbManager.db.user . }}
+        pass: ""
+        sslmode: {{ .Values.dbManager.db.sslmode }}
+        timeout: {{ .Values.dbManager.db.timeout }}
+        interval: {{ .Values.dbManager.db.interval }}
+      MigrationsPath: "/monitors-migrations"
+    {{- end }}
 {{- end -}}

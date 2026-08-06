@@ -63,6 +63,10 @@ global:
     enabled: true
     victoria-metrics-distributed:
       enabled: false
+  # Monitors v2 store; global because db-manager and the clickhouse chart both gate on it.
+  monitorsStore:
+    enabled: false
+    dbName: "monitors_service"
   debug:
     enabled: false
   workflows:
@@ -1089,7 +1093,6 @@ dbManager:
   enableStorageMgmt: false
   # Maximum number of index tiers (active + previously deleted) allowed per data type policy.
   maxIndexTiers: 20
-
 agentService:
   enabled: false
   replicas: 2
@@ -2752,6 +2755,11 @@ clickhouse:
                  dictionary user. This string is tpl-rendered inside the
                  clickhouse subchart, where globals are still reachable. */}}
           <access_management>1</access_management>
+          {{- end }}
+          {{- if .Values.global.monitorsStore.enabled }}
+          {{- /* Lets db-manager reconcile the pg_monitors named collection the
+                 monitors_pg proxy connects through. */}}
+          <named_collection_control>1</named_collection_control>
           {{- end }}
         </manager>
         <reader>

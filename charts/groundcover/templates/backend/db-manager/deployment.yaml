@@ -86,6 +86,13 @@ spec:
             secretKeyRef:
               name: {{ include "postgresql.secretName" . }}
               key: {{ include "postgresql.adminPasswordKey" . }}
+        {{- if .Values.global.monitorsStore.enabled }}
+        - name: GC_MONITORSSTORE_DB_PASS
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "postgresql.secretName" . }}
+              key: {{ include "postgresql.adminPasswordKey" . }}
+        {{- end }}
         {{- if eq (include "telemetry.enabled" .) "true" }}
         - name: GC_TRACING_HEADERS_APIKEY
           valueFrom:
