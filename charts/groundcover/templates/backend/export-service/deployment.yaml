@@ -1,4 +1,20 @@
 {{ if and .Values.global.backend.enabled .Values.global.exportService.enabled }}
+{{- $exportTimeoutMilliseconds := int (.Values.exportService.exportTimeout | default "60000") }}
+{{- if le $exportTimeoutMilliseconds 0 }}
+{{- fail (printf "exportService.exportTimeout must be a positive integer in milliseconds, got %q" (toString .Values.exportService.exportTimeout)) }}
+{{- end }}
+{{- $preStopDelaySeconds := 5 }}
+{{- $shutdownCleanupGraceSeconds := 10 }}
+{{- $terminationMarginSeconds := 15 }}
+{{- $exportTimeoutSeconds := div (add $exportTimeoutMilliseconds 999) 1000 }}
+{{- $defaultTerminationGracePeriodSeconds := add $exportTimeoutSeconds $preStopDelaySeconds $shutdownCleanupGraceSeconds $terminationMarginSeconds }}
+{{- $terminationGracePeriodSeconds := $defaultTerminationGracePeriodSeconds }}
+{{- if not (kindIs "invalid" .Values.exportService.terminationGracePeriodSeconds) }}
+{{- $terminationGracePeriodSeconds = int .Values.exportService.terminationGracePeriodSeconds }}
+{{- if lt $terminationGracePeriodSeconds $defaultTerminationGracePeriodSeconds }}
+{{- fail (printf "exportService.terminationGracePeriodSeconds must be at least %d for exportService.exportTimeout %dms" $defaultTerminationGracePeriodSeconds $exportTimeoutMilliseconds) }}
+{{- end }}
+{{- end }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -46,6 +62,7 @@ spec:
 {{ toYaml .Values.exportService.podLabels | indent 8 }}
         {{- end }}
     spec:
+      terminationGracePeriodSeconds: {{ $terminationGracePeriodSeconds }}
 {{- if .Values.exportService.tolerations }}
       tolerations:
 {{ toYaml .Values.exportService.tolerations | indent 8 }}
@@ -83,6 +100,10 @@ spec:
         - containerPort: 3001
           name: http
           protocol: TCP
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/bin/sleep", {{ $preStopDelaySeconds | quote }}]
         readinessProbe:
           httpGet:
             scheme: HTTP

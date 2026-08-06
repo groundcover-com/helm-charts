@@ -1,22 +1,165 @@
 {{- if and .Values.global.agent.enabled .Values.agent.gke.autopilot.enabled .Values.agent.gke.autopilot.installAllowlistSynchronizer }}
-# Installs the groundcover sensor WorkloadAllowlist(s) from Google's managed
-# partner allowlist store into this Autopilot cluster. Required for non-partner
-# (customer) clusters, which cannot apply WorkloadAllowlists directly.
-# AllowlistSynchronizer is a cluster-scoped resource.
-apiVersion: auto.gke.io/v1
-kind: AllowlistSynchronizer
+{{- $syncName := printf "%s-%s-allowlist-sync" (include "sensor.fullname" .) .Release.Namespace }}
+{{- $legacySyncName := printf "%s-%s-allowlist" (include "sensor.fullname" .) .Release.Namespace }}
+{{- $hookName := printf "%s-allowlist-hook" (include "sensor.fullname" .) }}
+{{- $clusterHookName := printf "%s-%s-allowlist-hook" (include "sensor.fullname" .) .Release.Namespace }}
+{{- $allowlistName := .Values.agent.gke.autopilot.allowlistName }}
+{{- if not (regexMatch "^[a-z0-9]([-a-z0-9]{0,61}[a-z0-9])?$" $allowlistName) }}
+{{- fail "agent.gke.autopilot.allowlistName must be a valid RFC 1123 label (lowercase alphanumerics and '-', max 63 chars)" }}
+{{- end }}
+{{- $paths := list }}
+{{- range (splitList "," .Values.agent.gke.autopilot.allowlistRepoPath) }}
+{{- $path := . | trim }}
+{{- if $path }}
+{{- $paths = append $paths $path }}
+{{- end }}
+{{- end }}
+{{- if not $paths }}
+{{- fail "agent.gke.autopilot.allowlistRepoPath must contain at least one path" }}
+{{- end }}
+apiVersion: v1
+kind: ServiceAccount
 metadata:
-  # AllowlistSynchronizer is cluster-scoped; include the namespace so multiple
-  # installs in different namespaces don't contend for one object.
-  name: {{ include "sensor.fullname" . }}-{{ .Release.Namespace }}-allowlist
+  name: {{ $hookName }}
   labels:
     {{- include "groundcover.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-1"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ $clusterHookName }}
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-1"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+rules:
+  - apiGroups:
+      - "auto.gke.io"
+    resources:
+      - "allowlistsynchronizers"
+    verbs:
+      - "create"
+  - apiGroups:
+      - "auto.gke.io"
+    resources:
+      - "allowlistsynchronizers"
+    resourceNames:
+      - {{ $syncName | quote }}
+    verbs:
+      - "get"
+      - "patch"
+  - apiGroups:
+      - "auto.gke.io"
+    resources:
+      - "allowlistsynchronizers"
+    resourceNames:
+      - {{ $legacySyncName | quote }}
+    verbs:
+      - "get"
+      - "delete"
+  - apiGroups:
+      - "auto.gke.io"
+    resources:
+      - "workloadallowlists"
+    resourceNames:
+      - {{ $allowlistName | quote }}
+    verbs:
+      - "get"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ $clusterHookName }}
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-1"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ $clusterHookName }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ $hookName }}
+    namespace: {{ .Release.Namespace }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ $hookName }}
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
 spec:
-  allowlistPaths:
-  {{- range (splitList "," .Values.agent.gke.autopilot.allowlistRepoPath) }}
-    {{- $path := . | trim }}
-    {{- if $path }}
-    - {{ $path | quote }}
-    {{- end }}
-  {{- end }}
+  backoffLimit: 1
+  template:
+    spec:
+      restartPolicy: Never
+      imagePullSecrets: {{ include "imagePullSecrets" $ }}
+      serviceAccountName: {{ $hookName }}
+      containers:
+        - name: allowlist-sync
+          image: {{ include "statefulset-modifier.job.image" $ }}
+          env:
+            - name: SYNC_NAME
+              value: {{ $syncName | quote }}
+            - name: LEGACY_SYNC_NAME
+              value: {{ $legacySyncName | quote }}
+            - name: ALLOWLIST_NAME
+              value: {{ $allowlistName | quote }}
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              kubectl delete allowlistsynchronizer "$LEGACY_SYNC_NAME" --ignore-not-found
+              cat <<'EOF' | kubectl apply -f -
+              apiVersion: auto.gke.io/v1
+              kind: AllowlistSynchronizer
+              metadata:
+                name: {{ $syncName }}
+              spec:
+                allowlistPaths:
+              {{- range $paths }}
+                - {{ . | quote }}
+              {{- end }}
+              EOF
+              generation=$(kubectl get allowlistsynchronizer "$SYNC_NAME" -o jsonpath='{.metadata.generation}')
+              allowlist_present() {
+                err=$(kubectl get workloadallowlist "$ALLOWLIST_NAME" 2>&1 >/dev/null) && return 0
+                case "$err" in
+                  *NotFound*|*"not found"*) ;;
+                  *) echo "warning: checking WorkloadAllowlist $ALLOWLIST_NAME: $err" ;;
+                esac
+                return 1
+              }
+              echo "Waiting for WorkloadAllowlist $ALLOWLIST_NAME to sync (can take a few minutes)..."
+              elapsed=0
+              while true; do
+                ready=$(kubectl get allowlistsynchronizer "$SYNC_NAME" -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}' 2>/dev/null || true)
+                observed=$(kubectl get allowlistsynchronizer "$SYNC_NAME" -o jsonpath='{.status.conditions[?(@.type=="Ready")].observedGeneration}' 2>/dev/null || true)
+                if [ "$ready" = "True" ] && [ "$observed" = "$generation" ] && allowlist_present; then
+                  echo "WorkloadAllowlist $ALLOWLIST_NAME is synced and active"
+                  exit 0
+                fi
+                if [ "$elapsed" -ge 600 ]; then
+                  echo "Timed out waiting for WorkloadAllowlist $ALLOWLIST_NAME"
+                  echo "AllowlistSynchronizer state:"
+                  kubectl get allowlistsynchronizer "$SYNC_NAME" -o yaml || true
+                  exit 1
+                fi
+                sleep 10
+                elapsed=$((elapsed + 10))
+              done
 {{- end }}

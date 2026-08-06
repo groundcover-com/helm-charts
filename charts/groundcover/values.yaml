@@ -2495,6 +2495,10 @@ pdfReportGenerator:
 
 exportService:
   replicas: 2
+  # Defaults to exportTimeout rounded up to seconds, plus 5 seconds for preStop,
+  # 10 seconds for application cleanup, and a 15-second termination margin.
+  # Any override must be at least this computed value.
+  terminationGracePeriodSeconds:
   strategy:
     type: RollingUpdate
     rollingUpdate:
