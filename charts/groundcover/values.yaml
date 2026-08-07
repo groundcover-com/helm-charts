@@ -436,7 +436,7 @@ logBatchSendQueueMaxSize: 10
 maxLogLinesPerBatch: 20000
 jsonFlattenMaxDepth: 6
 jsonFlattenMaxAttributes: 300
-dropRawBody: false
+dropRawBody: true
 shouldDropRunningNamespaces: 
 commitHashKeyName:
 repositoryUrlKeyName:
@@ -3593,6 +3593,10 @@ vector:
             repeat_disabled, err = get(value: .annotations, path: ["_gc_repeat_disabled"])
             if err == null && repeat_disabled != null {
               .labels._gc_repeat_disabled = repeat_disabled
+            }
+            hide_slack_preview_graph, err = get(value: .annotations, path: ["_gc_hide_slack_preview_graph"])
+            if err == null && hide_slack_preview_graph != null {
+              .labels._gc_hide_slack_preview_graph = hide_slack_preview_graph
             }
             data_type, err = get(value: .annotations, path: ["_gc_data_type"])
             if err == null && data_type != null {
