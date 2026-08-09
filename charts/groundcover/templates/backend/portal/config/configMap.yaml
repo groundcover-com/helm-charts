@@ -98,7 +98,8 @@ data:
     BackendSettingsEnabled: {{ .Values.portal.backendSettings.enabled }}
 
     BackendSigningKey:
-      Enabled: {{ .Values.portal.backendSigningKey.enabled }}
+      Enabled: {{ (.Values.portal | dig "backendSigningKey" "enabled" false) }}
+      SecretNameSuffix: {{ .Values.portal | dig "backendSigningKey" "secretNameSuffix" "" | default "" | quote }}
 
     {{- if eq (include "telemetry.enabled" .) "true" }}
     Tracing:

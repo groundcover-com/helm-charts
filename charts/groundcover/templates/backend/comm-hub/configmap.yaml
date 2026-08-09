@@ -196,6 +196,8 @@ data:
 
     routerProxy:
       fleetManagerUrl: {{ include "fleet-manager.base.url" . }}
+      # Single source of truth: portal.backendSigningKey.secretNameSuffix (dig-safe).
+      signingKeySecretNameSuffix: {{ .Values.portal | dig "backendSigningKey" "secretNameSuffix" "" | default "" | quote }}
 
     postgresql:
       host: {{ tpl (toString .Values.commHub.postgresql.host) . | quote }}

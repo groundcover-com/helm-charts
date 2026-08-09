@@ -2108,8 +2108,13 @@ portal:
   # Portal-scoped gate for backend signing key generation/rotation over the
   # reverse tunnel (backend-to-router auth). Router announces its known key_id on
   # connect; when disabled portal responds with a no-op and generates nothing.
+  # secretNameSuffix isolates the fleet-manager secret id for standalone/preview
+  # deploys that share a fleet-manager (groundcover-backend-signing-key-<suffix>).
+  # Comm-hub copies this into routerProxy.signingKeySecretNameSuffix (single source).
+  # Empty = production default.
   backendSigningKey:
     enabled: false
+    secretNameSuffix: ""
   autodiscovery: false
   maxResponseSizeBytes: 33554432
   
