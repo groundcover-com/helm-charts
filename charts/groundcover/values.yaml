@@ -2312,6 +2312,21 @@ commHub:
       activityTimeout: "45s"
       maxConcurrentWorkflowTaskPollers: 2
       maxConcurrentActivityTaskPollers: 4
+    # Materialized Slack channel-list cache. Off by default so environments that
+    # haven't opted in keep the live conversations.list passthrough. Note that a warm
+    # cache orders the channel picker alphabetically, where the live path returns
+    # Slack's native order.
+    channelCacheEnabled: false
+    # Tuning, all optional — an unset value uses the code default shown. Durations are
+    # Go duration strings and must stay quoted; a bare number decodes as nanoseconds.
+    channelCache: {}
+      # refreshTtl: "30m"     # freshness budget: how stale a snapshot may get. This is
+      #                       # what closes the is_private and missed-event gaps, so it
+      #                       # is the knob to lower if a picker looks out of date.
+      # healInterval: "10m"   # how often freshness is checked (not how often it crawls)
+      # leaseTtl: "10m"       # how long a crawl stays claimed by a pod that died
+      # crawlTimeout: "30m"   # overall deadline for one crawl, including 429 backoff
+      # crawlPageLimit: 1000  # conversations.list page size during a crawl
   linear:
     enabled: true
     authBaseURL: "https://linear.app"

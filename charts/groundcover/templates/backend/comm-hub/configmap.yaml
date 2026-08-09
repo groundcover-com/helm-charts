@@ -131,6 +131,27 @@ data:
         activityTimeout: {{ .Values.commHub.slack | dig "authResume" "activityTimeout" "45s" | quote }}
         maxConcurrentWorkflowTaskPollers: {{ .Values.commHub.slack | dig "authResume" "maxConcurrentWorkflowTaskPollers" 2 }}
         maxConcurrentActivityTaskPollers: {{ .Values.commHub.slack | dig "authResume" "maxConcurrentActivityTaskPollers" 4 }}
+      channelCacheEnabled: {{ .Values.commHub.slack.channelCacheEnabled | default false }}
+      # Channel-cache tuning. Each key is emitted only when set, so an unset knob is
+      # absent from the config rather than an empty string — config.Load parses these
+      # as durations and "" is not one. Durations are quoted so a numeric override
+      # (e.g. 30) fails loudly instead of decoding as nanoseconds.
+      channelCache:
+        {{- with .Values.commHub.slack | dig "channelCache" "refreshTtl" "" }}
+        refreshTtl: {{ . | quote }}
+        {{- end }}
+        {{- with .Values.commHub.slack | dig "channelCache" "healInterval" "" }}
+        healInterval: {{ . | quote }}
+        {{- end }}
+        {{- with .Values.commHub.slack | dig "channelCache" "leaseTtl" "" }}
+        leaseTtl: {{ . | quote }}
+        {{- end }}
+        {{- with .Values.commHub.slack | dig "channelCache" "crawlTimeout" "" }}
+        crawlTimeout: {{ . | quote }}
+        {{- end }}
+        {{- with .Values.commHub.slack | dig "channelCache" "crawlPageLimit" 0 }}
+        crawlPageLimit: {{ . }}
+        {{- end }}
 
     linear:
       enabled: {{ .Values.commHub.linear.enabled | default false }}
