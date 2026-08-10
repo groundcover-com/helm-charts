@@ -3615,6 +3615,9 @@ vector:
             if err == null && repeat_disabled != null {
               .labels._gc_repeat_disabled = repeat_disabled
             }
+            # _gc_hide_slack_preview_graph is monitor-owned: remove any stale or
+            # client-supplied label, then set it only from the annotation.
+            del(.labels._gc_hide_slack_preview_graph)
             hide_slack_preview_graph, err = get(value: .annotations, path: ["_gc_hide_slack_preview_graph"])
             if err == null && hide_slack_preview_graph != null {
               .labels._gc_hide_slack_preview_graph = hide_slack_preview_graph
