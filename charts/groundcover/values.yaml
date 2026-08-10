@@ -745,6 +745,7 @@ agent:
           # 0 = unlimited; set a positive byte budget to enable export limiting.
           maxConcurrentTraceExportBytes: 0
           maxConcurrentLogExportBytes: 0
+          maxConcurrentMetricExportBytes: 0
           exportAcquireWait: 1s
           zipkin:
             enabled: true
@@ -1544,6 +1545,7 @@ ingestor:
         # 0 = unlimited; set a positive byte budget to enable export limiting.
         maxConcurrentTraceExportBytes: 0
         maxConcurrentLogExportBytes: 0
+        maxConcurrentMetricExportBytes: 0
         exportAcquireWait: 1s
         zipkin:
           enabled: true

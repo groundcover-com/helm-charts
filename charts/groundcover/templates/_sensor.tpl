@@ -593,6 +593,7 @@ apmIngestor:
       {{- /* int64 forces integer rendering; large values otherwise render in scientific notation (e.g. 1.048576e+06) */}}
       maxConcurrentTraceExportBytes: {{ $sensorValues.apmIngestor.otel.direct.maxConcurrentTraceExportBytes | default 0 | int64 }}
       maxConcurrentLogExportBytes: {{ $sensorValues.apmIngestor.otel.direct.maxConcurrentLogExportBytes | default 0 | int64 }}
+      maxConcurrentMetricExportBytes: {{ $sensorValues.apmIngestor.otel.direct.maxConcurrentMetricExportBytes | default 0 | int64 }}
       exportAcquireWait: {{ $sensorValues.apmIngestor.otel.direct.exportAcquireWait | default "1s" }}
       zipkin:
         enabled: {{ $sensorValues.apmIngestor.otel.direct.zipkin.enabled }}
