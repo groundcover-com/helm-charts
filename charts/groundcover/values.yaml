@@ -2325,12 +2325,13 @@ commHub:
     # Tuning, all optional — an unset value uses the code default shown. Durations are
     # Go duration strings and must stay quoted; a bare number decodes as nanoseconds.
     channelCache: {}
-      # refreshTtl: "30m"     # freshness budget: how stale a snapshot may get. This is
+      # refreshTtl: "10m"     # freshness budget: how stale a snapshot may get. This is
       #                       # what closes the is_private and missed-event gaps, so it
       #                       # is the knob to lower if a picker looks out of date.
-      # healInterval: "10m"   # how often freshness is checked (not how often it crawls)
-      # leaseTtl: "10m"       # how long a crawl stays claimed by a pod that died
-      # crawlTimeout: "30m"   # overall deadline for one crawl, including 429 backoff
+      # healInterval: "5m"    # how often freshness is checked (not how often it crawls).
+      #                       # Keep below refreshTtl: worst-case staleness is the sum.
+      # leaseTtl: "5m"        # how long a crawl stays claimed by a pod that died
+      # crawlTimeout: "10m"   # overall deadline for one crawl, including 429 backoff
       # crawlPageLimit: 1000  # conversations.list page size during a crawl
   linear:
     enabled: true
