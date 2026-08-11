@@ -2034,7 +2034,7 @@ journalScraper:
   checkInterval: 5s
 logFileTargets: []
 # - path: /var/log/syslog.*
-#   excludedPath: "*.gz" # matched against full path and base name; the vlagent backend (vlLogTailer) does not support "**" recursion
+#   excludedPath: "*.gz" # doublestar glob ("**" supported) matched against the full path or base name; also accepts full-path patterns like "/var/log/*.gz"
 #   labels:
 #     label1: "value1"
 #   workload: "syslog" # optional
@@ -2051,6 +2051,13 @@ vlLogTailer:
   checkpointsFile: "" # read-offset store; empty = next to positionsFile
   discoverInterval: 1s # how often to look for new files
   startAtEnd: false # start new files at the end instead of the beginning
+  # Opt-in (k8s only): also collect Kubernetes pod logs with the vlagent tailer
+  # instead of promtail. Discovery reuses the sensor's existing k8smetadata pod watch
+  # (the one that already backs enrichment) via its container add/delete events — no
+  # second Kubernetes watch, no Prometheus service-discovery / promtail relabel. Emits
+  # the same identity labels + goes through the same enrichment; the promtail pod-log
+  # job is disabled to avoid double-tailing.
+  collectPodLogs: false
 
 portal:
   configuration:
