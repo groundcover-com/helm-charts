@@ -56,12 +56,15 @@ gitbook:
   organizationIdKey: "organization-id"
   siteIdKey: "site-id"
   spaceIdKey: "space-id"
+vayu:
+  secretName: ""
+  tokenKey: "vayu-token"
 service:
   annotations: {}
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.12.225
+  tag: 1.12.226
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/tools'

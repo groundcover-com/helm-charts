@@ -152,6 +152,14 @@ spec:
                   key: {{ .Values.gitbook.spaceIdKey | quote }}
                   optional: true
             {{- end }}
+            {{- if .Values.vayu.secretName }}
+            - name: GC_BILLING_VAYU_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.vayu.secretName | quote }}
+                  key: {{ .Values.vayu.tokenKey | default "vayu-token" | quote }}
+                  optional: true
+            {{- end }}
             {{- if .Values.configurationSecretName }}
             - name: CONFIG_OVERRIDES_PATH
               value: /config-secret/config.yaml
