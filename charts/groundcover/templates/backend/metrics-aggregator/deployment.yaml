@@ -5,7 +5,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
-    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+    groundcover_version: {{ tpl (toString (default (default .Chart.AppVersion .Values.global.origin.tag) $sensorValues.image.tag)) . | quote }}
     {{- if $sensorValues.additionalAnnotations }}
 {{ toYaml $sensorValues.additionalAnnotations | indent 4 }}
     {{- end }}
@@ -30,7 +30,7 @@ spec:
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: {{ (include "metrics-aggregator.monitoring.port" .) | quote }}
-        groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+        groundcover_version: {{ tpl (toString (default (default .Chart.AppVersion .Values.global.origin.tag) $sensorValues.image.tag)) . | quote }}
         checksum/config: {{ include (print $.Template.BasePath "/backend/metrics-aggregator/config/config.yaml") . | sha256sum }}
         {{- if $sensorValues.additionalAnnotations }}
 {{ toYaml $sensorValues.additionalAnnotations | indent 8 }}

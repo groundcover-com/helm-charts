@@ -1626,7 +1626,7 @@ metricsAggregator:
     #   whenScaled: Retain
   image:
     repository: "{{ .Values.global.origin.registry }}/sensor"
-    tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
+    tag: "1.12.227"
   additionalLabels:
   additionalAnnotations:
   podLabels:

@@ -5,7 +5,7 @@ kind: Service
 apiVersion: v1
 metadata:
   annotations:
-    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+    groundcover_version: {{ tpl (toString (default (default .Chart.AppVersion .Values.global.origin.tag) $sensorValues.image.tag)) . | quote }}
     {{- if $sensorValues.additionalAnnotations }}
 {{ toYaml $sensorValues.additionalAnnotations | indent 4 }}
     {{- end }}
