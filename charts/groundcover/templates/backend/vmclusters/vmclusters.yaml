@@ -27,6 +27,11 @@
 {{- end -}}
 {{- $_ := set $spec $comp $merged -}}
 {{- end -}}
+{{- end -}}
+{{- /* per-cluster vmstorage replicaCount override from the distributed chart's zoneTpl.vmclusterStorageReplicas (wins over vmclusters.clusters.<name>.vmstorage.replicaCount) */ -}}
+{{- $storageReplicas := dig "victoria-metrics-distributed" "zoneTpl" "vmclusterStorageReplicas" dict ($.Values.backend | default dict) -}}
+{{- if and (hasKey $spec "vmstorage") (hasKey $storageReplicas $name) -}}
+{{- $_ := set (index $spec "vmstorage") "replicaCount" (index $storageReplicas $name) -}}
 {{- end }}
 ---
 apiVersion: operator.victoriametrics.com/v1beta1
