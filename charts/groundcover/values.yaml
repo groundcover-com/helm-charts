@@ -742,10 +742,15 @@ agent:
               from_context: x-groundcover-source
               action: upsert
           samplingRatio: 0.05
-          # 0 = unlimited; set a positive byte budget to enable export limiting.
-          maxConcurrentTraceExportBytes: 0
-          maxConcurrentLogExportBytes: 0
-          maxConcurrentMetricExportBytes: 0
+          # Explicit byte budgets take precedence and should be quoted to preserve int64 precision.
+          # Otherwise set an integer pod-memory percentage from 0 to 100.
+          # Zero for both leaves the signal unlimited.
+          maxConcurrentTraceExportBytes: "0"
+          maxConcurrentTraceExportPodMemoryPercentage: 0
+          maxConcurrentLogExportBytes: "0"
+          maxConcurrentLogExportPodMemoryPercentage: 0
+          maxConcurrentMetricExportBytes: "0"
+          maxConcurrentMetricExportPodMemoryPercentage: 0
           exportAcquireWait: 1s
           zipkin:
             enabled: true
@@ -1542,10 +1547,15 @@ ingestor:
             from_context: x-groundcover-source
             action: upsert
         samplingRatio: 1
-        # 0 = unlimited; set a positive byte budget to enable export limiting.
-        maxConcurrentTraceExportBytes: 0
-        maxConcurrentLogExportBytes: 0
-        maxConcurrentMetricExportBytes: 0
+        # Explicit byte budgets take precedence and should be quoted to preserve int64 precision.
+        # Otherwise set an integer pod-memory percentage from 0 to 100.
+        # Zero for both leaves the signal unlimited.
+        maxConcurrentTraceExportBytes: "0"
+        maxConcurrentTraceExportPodMemoryPercentage: 0
+        maxConcurrentLogExportBytes: "0"
+        maxConcurrentLogExportPodMemoryPercentage: 0
+        maxConcurrentMetricExportBytes: "0"
+        maxConcurrentMetricExportPodMemoryPercentage: 0
         exportAcquireWait: 1s
         zipkin:
           enabled: true

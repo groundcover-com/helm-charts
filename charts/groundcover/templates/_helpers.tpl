@@ -105,6 +105,29 @@ Validate and render a container resizePolicy block.
 {{- end -}}
 
 {{/*
+Render a non-negative integer as a quoted decimal string. Quoting preserves
+int64 precision through Helm/YAML, while the decimal-only check rejects values
+that YAML has already converted to a fractional or scientific-notation float.
+*/}}
+{{- define "groundcover.nonNegativeInteger" -}}
+{{- $value := .value -}}
+{{- $rendered := toString $value -}}
+{{- if kindIs "float64" $value -}}
+{{- if or (lt $value 0.0) (ne $value (floor $value)) (gt $value (float64 "9007199254740991")) -}}
+{{- fail (printf "%s must be a non-negative integer written in decimal form, got %q" .path $rendered) -}}
+{{- end -}}
+{{- $rendered = printf "%.0f" $value -}}
+{{- end -}}
+{{- if not (regexMatch "^(0|[1-9][0-9]*)$" $rendered) -}}
+{{- fail (printf "%s must be a non-negative integer written in decimal form, got %q" .path $rendered) -}}
+{{- end -}}
+{{- if or (gt (len $rendered) 19) (and (eq (len $rendered) 19) (gt $rendered "9223372036854775807")) -}}
+{{- fail (printf "%s must not exceed 9223372036854775807, got %q" .path $rendered) -}}
+{{- end -}}
+{{- $rendered | quote -}}
+{{- end -}}
+
+{{/*
 Selector labels
 */}}
 {{- define "groundcover.selectorLabels" -}}

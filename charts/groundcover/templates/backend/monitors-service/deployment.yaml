@@ -73,12 +73,17 @@ spec:
             fieldRef:
               fieldPath: metadata.annotations['groundcover_version']
         {{- if eq (include "telemetry.enabled" .) "true" }}
-        - name: API_KEY
+        - name: GC_TRACING_HEADERS_APIKEY
           valueFrom:
             secretKeyRef:
               key: {{ template "groundcover.apikeySecretKey" . }}
               name: {{ template "groundcover.apikeySecretName" . }}
         {{- end }}
+        - name: GC_POSTGRES_PASS
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "postgresql.secretName" . }}
+              key: {{ include "postgresql.adminPasswordKey" . }}
         {{- with .Values.monitorsService.env }}
           {{ tpl (toYaml .) $ | nindent 8 }}
         {{- end }}

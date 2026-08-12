@@ -10,10 +10,28 @@ data:
     tracing:
       enabled: true
       endpoint: {{ include "telemetry.traces.otlpUrl" . | quote }}
-      writeTimeout: {{ .Values.monitorsService.tracing.writeTimeout | default "5s" }}
-      flushInterval: {{ .Values.monitorsService.tracing.flushInterval | default "5s" }}
-      batchSize: {{ .Values.monitorsService.tracing.batchSize | default 50 }}
+      writeTimeout: {{ .Values.monitorsService.tracing.writeTimeout }}
+      flushInterval: {{ .Values.monitorsService.tracing.flushInterval }}
+      batchSize: {{ .Values.monitorsService.tracing.batchSize }}
+      # Placeholder: declaring the key is what lets GC_TRACING_HEADERS_APIKEY
+      # (secretRef in the deployment) override it.
+      headers:
+        apikey: "OVERRIDDEN"
     {{- end }}
+    # Same Postgres as db-manager's MonitorsStore (db-manager owns the schema and
+    # migrations); this service only reads/writes. Password via GC_POSTGRES_PASS.
+    # Rendered unconditionally with the service so it always has connection config
+    # (the service connects at startup); request-time compatibility is a router
+    # version guard, not a runtime toggle here.
+    postgres:
+      host: {{ tpl .Values.dbManager.db.host . }}
+      port: {{ tpl .Values.dbManager.db.port . }}
+      name: {{ .Values.global.monitorsStore.dbName }}
+      user: {{ tpl .Values.dbManager.db.user . }}
+      pass: ""
+      sslmode: {{ .Values.dbManager.db.sslmode }}
+      timeout: {{ .Values.dbManager.db.timeout }}
+      interval: {{ .Values.dbManager.db.interval }}
 metadata:
   labels:
     {{- include "groundcover.labels" . | nindent 4 }}

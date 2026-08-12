@@ -590,10 +590,12 @@ apmIngestor:
 {{ toYaml $sensorValues.apmIngestor.otel.direct.resourceProcessor | indent 8 }}
       {{- end }}
       samplingRatio: {{ $sensorValues.apmIngestor.otel.direct.samplingRatio }}
-      {{- /* int64 forces integer rendering; large values otherwise render in scientific notation (e.g. 1.048576e+06) */}}
-      maxConcurrentTraceExportBytes: {{ $sensorValues.apmIngestor.otel.direct.maxConcurrentTraceExportBytes | default 0 | int64 }}
-      maxConcurrentLogExportBytes: {{ $sensorValues.apmIngestor.otel.direct.maxConcurrentLogExportBytes | default 0 | int64 }}
-      maxConcurrentMetricExportBytes: {{ $sensorValues.apmIngestor.otel.direct.maxConcurrentMetricExportBytes | default 0 | int64 }}
+      maxConcurrentTraceExportBytes: {{ include "groundcover.nonNegativeInteger" (dict "path" "maxConcurrentTraceExportBytes" "value" ($sensorValues.apmIngestor.otel.direct.maxConcurrentTraceExportBytes | default 0)) }}
+      maxConcurrentTraceExportPodMemoryPercentage: {{ include "groundcover.nonNegativeInteger" (dict "path" "maxConcurrentTraceExportPodMemoryPercentage" "value" ($sensorValues.apmIngestor.otel.direct.maxConcurrentTraceExportPodMemoryPercentage | default 0)) }}
+      maxConcurrentLogExportBytes: {{ include "groundcover.nonNegativeInteger" (dict "path" "maxConcurrentLogExportBytes" "value" ($sensorValues.apmIngestor.otel.direct.maxConcurrentLogExportBytes | default 0)) }}
+      maxConcurrentLogExportPodMemoryPercentage: {{ include "groundcover.nonNegativeInteger" (dict "path" "maxConcurrentLogExportPodMemoryPercentage" "value" ($sensorValues.apmIngestor.otel.direct.maxConcurrentLogExportPodMemoryPercentage | default 0)) }}
+      maxConcurrentMetricExportBytes: {{ include "groundcover.nonNegativeInteger" (dict "path" "maxConcurrentMetricExportBytes" "value" ($sensorValues.apmIngestor.otel.direct.maxConcurrentMetricExportBytes | default 0)) }}
+      maxConcurrentMetricExportPodMemoryPercentage: {{ include "groundcover.nonNegativeInteger" (dict "path" "maxConcurrentMetricExportPodMemoryPercentage" "value" ($sensorValues.apmIngestor.otel.direct.maxConcurrentMetricExportPodMemoryPercentage | default 0)) }}
       exportAcquireWait: {{ $sensorValues.apmIngestor.otel.direct.exportAcquireWait | default "1s" }}
       zipkin:
         enabled: {{ $sensorValues.apmIngestor.otel.direct.zipkin.enabled }}
