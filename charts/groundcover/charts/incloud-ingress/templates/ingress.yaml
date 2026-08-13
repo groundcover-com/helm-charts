@@ -141,6 +141,15 @@ spec:
                 name: {{ .Values.global.ingestor.enabled | ternary (include "ingestor.fullname" .) (include "opentelemetry-collector.fullname" .) }}
                 port:
                   number: {{ index .Values.global "opentelemetry-collector" "ports" "zipkin" "servicePort" | int }}            
+          {{- if and .Values.global.ingestor.enabled .Values.profileIngestion.enabled }}
+          - path: /profiling/upload
+            pathType: Exact
+            backend:
+              service:
+                name: {{ include "ingestor.fullname" . }}
+                port:
+                  name: profiles
+          {{- end }}
 ---
 
 apiVersion: networking.k8s.io/v1

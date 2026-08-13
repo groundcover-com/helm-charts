@@ -85,6 +85,12 @@ datasource:
 
 ingress:
   annotations:
+
+# Exposes the ingestor's raw pprof upload endpoint through the inCloud HTTP
+# ingress. Requests use the same API-key authentication as other ingestion
+# routes. Enable only together with ingestor.receivers.profiles.enabled.
+profileIngestion:
+  enabled: false
   
 cert-manager:
   enabled: false
