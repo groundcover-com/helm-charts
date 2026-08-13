@@ -25,6 +25,10 @@ data:
       {{- if .prefix }}
       Prefix: "{{ .prefix }}"
       {{- end }}
+      {{- /* toString-eq so the string "false" doesn't enable it (non-empty = truthy in `if`) */}}
+      {{- if eq (toString .sourceTagDedup) "true" }}
+      SourceTagDedup: true
+      {{- end }}
     {{- end }}
     {{- end }}
     {{- if .Values.integrationsAgent }}

@@ -1255,6 +1255,10 @@ awsCostReports:
     bucket: "" # e.g. "groundcover-cost-reports-<install-id>"
     region: "" # sink bucket region; required to enable (the MV reads cross-region by URL)
     prefix: "" # optional; each integration writes under <prefix>/<exportName>/
+    # false = dedup deliveries on the sink object's manifest-last-modified metadata.
+    # true = dedup on per-source-file S3 object tags (BE-2800), which also requires
+    # s3:GetObjectTagging/s3:PutObjectTagging on the customer's CUR reader role.
+    sourceTagDedup: false
   refreshInterval: 1d # {amount}[h(ours), d(ays), w(eeks), y(ears)]; integration commits to "up to 24h"
   retention: 365d # TTL on line_item_usage_start_date, via shared TableDataRetention; {amount}[h/d/w/y]
 
