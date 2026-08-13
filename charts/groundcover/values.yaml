@@ -270,6 +270,10 @@ global:
     retention: 24h # {amount}[h(ours), d(ays), w(eeks), y(ears)]
     cold_move_duration: 7d
 
+  profiling:
+    retention: 3d # {amount}[h(ours), d(ays), w(eeks), y(ears)]
+    cold_move_duration: 7d
+
   events:
     retention: 7d # {amount}[h(ours), d(ays), w(eeks), y(ears)]
     cold_move_duration: 7d
@@ -1460,6 +1464,12 @@ ingestor:
     prometheusimport:
       enabled: true
       port: 8430
+    profiles:
+      enabled: false
+      # Dedicated raw-pprof HTTP port; 8028 follows RUM (8026) and source maps (8027).
+      # Native OTLP profiles share the OTLP ports above instead of using this receiver.
+      port: 8028
+      maxUploadSize: 33554432
   exporters:
     remotewrite:
       usePrometheusCompatibleNaming: true
@@ -3515,6 +3525,7 @@ vector:
             entities: .log_type == "entity"
             measurements: .log_type == "measurement"
             session_replay: .log_type == "session_replay"
+            profiling: .log_type == "profiling"
         entities:
           inputs:
             - custom_from_logs_routing.entities
@@ -3541,6 +3552,12 @@ vector:
           type: "remap"
           source: |-
 
+        profiling:
+          inputs:
+            - custom_from_logs_routing.profiling
+          type: "remap"
+          source: |-
+            del(.log_type)
         events:
           inputs:
             - custom_from_logs_routing._unmatched
@@ -3923,6 +3940,31 @@ vector:
             endpoint: '{{ include "clickhouse.httpEndpoint" . }}'
             database: "groundcover"
             table: "measurements"
+            request:
+              retry_attempts: 5
+            auth:
+              user: '{{ include "clickhouse.username" . }}'
+              password: $CLICKHOUSE_PASSWORD
+              strategy: "basic"
+            format: "json_each_row"
+            encoding:
+              timestamp_format: rfc3339
+            date_time_best_effort: true
+            buffer:
+                type: memory
+                max_events: 5000
+                when_full: drop_newest
+            batch:
+              max_bytes: 100000000
+              max_events: 10000
+              timeout_secs: 2
+          clickhouse_profiling:
+            type: clickhouse
+            inputs:
+              - profiling
+            endpoint: '{{ include "clickhouse.httpEndpoint" . }}'
+            database: "groundcover"
+            table: "profiling"
             request:
               retry_attempts: 5
             auth:

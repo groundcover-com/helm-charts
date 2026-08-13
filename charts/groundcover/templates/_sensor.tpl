@@ -49,6 +49,10 @@ receivers:
   prometheusimport:
     enabled: {{ $sensorValues.receivers.prometheusimport.enabled }}
     port: {{ $sensorValues.receivers.prometheusimport.port }}
+  profiles:
+    enabled: {{ dig "receivers" "profiles" "enabled" false $sensorValues }}
+    port: {{ dig "receivers" "profiles" "port" 8028 $sensorValues }}
+    maxUploadSize: {{ dig "receivers" "profiles" "maxUploadSize" 33554432 $sensorValues }}
   {{ end }}
   {{ if $sensorValues.collectionEnabled }}
   metricsscraper:
@@ -896,6 +900,12 @@ sensitiveHeadersObfuscationConfig:
   port: {{ $sensorValues.rum.sourceMaps.port }}
   targetPort: {{ $sensorValues.rum.sourceMaps.port }}
 {{- end }}
+{{- if and (dig "receivers" "profiles" "enabled" false $sensorValues) (dig "receivers" "profiles" "port" 0 $sensorValues) }}
+- protocol: TCP
+  name: profiles
+  port: {{ dig "receivers" "profiles" "port" 8028 $sensorValues }}
+  targetPort: {{ dig "receivers" "profiles" "port" 8028 $sensorValues }}
+{{- end }}
 {{- if and (eq "true" (include "groundcover.sensor.receivers.remotewrite.enabled" .)) (include "groundcover.sensor.receivers.remotewrite.port" .) }}
 - protocol: TCP
   name: prometheus-remote-write
@@ -997,6 +1007,11 @@ sensitiveHeadersObfuscationConfig:
 {{- if and ($sensorValues.rum) $sensorValues.rum.sourceMaps.enabled $sensorValues.rum.sourceMaps.port }}
 - containerPort: {{ $sensorValues.rum.sourceMaps.port }}
   name: rum-sourcemaps
+  protocol: TCP
+{{- end }}
+{{- if and (dig "receivers" "profiles" "enabled" false $sensorValues) (dig "receivers" "profiles" "port" 0 $sensorValues) }}
+- containerPort: {{ dig "receivers" "profiles" "port" 8028 $sensorValues }}
+  name: profiles
   protocol: TCP
 {{- end }}
 {{- if and (eq "true" (include "groundcover.sensor.receivers.remotewrite.enabled" .)) (include "groundcover.sensor.receivers.remotewrite.port" .) }}

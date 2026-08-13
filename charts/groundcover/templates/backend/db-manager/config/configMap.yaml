@@ -59,6 +59,10 @@ data:
         cold_volume: {{ .Values.clickhouse.coldVolume }}
         cold_move_duration: {{ .Values.global.traces.cold_move_duration }}
         custom_retention_overrides:
+      Profiling:
+        retention: {{ .Values.global.profiling.retention }}
+        cold_volume: {{ .Values.clickhouse.coldVolume }}
+        cold_move_duration: {{ .Values.global.profiling.cold_move_duration }}
       Logs:
         retention: {{ include "logs.retention" . }}
         cold_volume: {{ .Values.clickhouse.coldVolume }}
