@@ -283,6 +283,9 @@ spec:
               value: {{ $temporal.namespace | default "default" | quote }}
             - name: TEMPORAL_TASK_QUEUE
               value: {{ $temporal.taskQueue | default "agent-service-runs" | quote }}
+            # Stage 2 only: turn on after all old workers have drained from this queue.
+            - name: RUN_ADMISSION_ENABLED
+              value: {{ $temporal.runAdmissionEnabled | default false | quote }}
             {{- end }}
             {{- with $agentService.env }}
             {{- toYaml . | nindent 12 }}

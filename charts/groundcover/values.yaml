@@ -1166,6 +1166,9 @@ agentService:
     address: ""
     namespace: "default"
     taskQueue: "agent-service-runs"
+    # Enable only after a completed rollout has drained every worker binary that
+    # predates the run-admission v1 signal/activity protocol.
+    runAdmissionEnabled: false
   postgres:
     secretName: "managed-postgres-credentials"
     hostKey: "host"
