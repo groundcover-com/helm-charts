@@ -2340,6 +2340,8 @@ commHub:
     baseURL: "https://slack.com"
     maxConnsPerHost: 10
     requestTimeout: "30s"
+    # Keep false outside explicit development/debug environments.
+    emitRawTelemetryIDs: false
     # Retains the latest mention from an unlinked Slack user until they connect.
     # timeout and activityTimeout use Go duration strings; a continuation expires
     # after timeout, while activityTimeout bounds one resumed dispatch attempt.

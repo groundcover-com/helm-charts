@@ -124,6 +124,7 @@ data:
       baseURL: {{ .Values.commHub.slack.baseURL | default "https://slack.com" | quote }}
       maxConnsPerHost: {{ .Values.commHub.slack.maxConnsPerHost | default 10 }}
       requestTimeout: {{ .Values.commHub.slack.requestTimeout | default "30s" }}
+      emitRawTelemetryIDs: {{ .Values.commHub.slack | dig "emitRawTelemetryIDs" false }}
       authResume:
         enabled: {{ and (.Values.commHub.slack.enabled | default false) (.Values.commHub.slack | dig "authResume" "enabled" true) }}
         taskQueue: {{ .Values.commHub.slack | dig "authResume" "taskQueue" "" | default (printf "%s-%s-comm-hub-slack-auth-resume" .Release.Namespace .Release.Name) | quote }}
