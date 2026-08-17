@@ -755,6 +755,7 @@ agent:
           maxConcurrentLogExportPodMemoryPercentage: 0
           maxConcurrentMetricExportBytes: "0"
           maxConcurrentMetricExportPodMemoryPercentage: 0
+          # Set to 0s to reject immediately when the export budget is full.
           exportAcquireWait: 1s
           zipkin:
             enabled: true
@@ -1573,6 +1574,7 @@ ingestor:
         maxConcurrentLogExportPodMemoryPercentage: 0
         maxConcurrentMetricExportBytes: "0"
         maxConcurrentMetricExportPodMemoryPercentage: 0
+        # Set to 0s to reject immediately when the export budget is full.
         exportAcquireWait: 1s
         zipkin:
           enabled: true
