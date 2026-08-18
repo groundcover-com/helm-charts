@@ -283,6 +283,15 @@ data:
         - "{{ . }}"
       {{- end }}
       {{- end }}
+      {{- if .resourceTags }}
+      {{- /* quote, not the bare "{{ . }}" the lists above use: a tag may carry
+             ?name=/?source= options, and Azure allows quotes in tag names, either
+             of which would corrupt the ConfigMap unescaped */}}
+      AzureResourceTags:
+      {{- range .resourceTags }}
+        - {{ . | quote }}
+      {{- end }}
+      {{- end }}
       {{- if .metrics }}
       AzureMetrics:
         {{- range $index, $resourceTypeMetrics := .metrics }}
