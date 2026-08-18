@@ -1154,6 +1154,10 @@ agentService:
     anthropicApiKeySecretRef: ""
     # Anthropic-compatible endpoint URL (used when llmProvider: "anthropic_compatible_endpoint").
     anthropicCompatibleBaseUrl: ""
+    # Authentication header used by direct and compatible Anthropic clients.
+    # x-api-key sends the secret as-is. Every other header receives "Bearer <secret>"
+    # in addition to the SDK-managed x-api-key header.
+    anthropicAuthHeaderName: "x-api-key"
     anthropicModelId: "claude-haiku-4-5"
     anthropicLargeModelId: "claude-sonnet-4-6"
     otelTracingEnabled: "true"

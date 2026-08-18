@@ -196,6 +196,8 @@ spec:
             - name: ANTHROPIC_LARGE_MODEL_ID
               value: {{ $agentService.config.anthropicLargeModelId | quote }}
             {{- end }}
+            - name: ANTHROPIC_AUTH_HEADER_NAME
+              value: {{ $agentService.config.anthropicAuthHeaderName | quote }}
             {{- if or (eq ($agentService.config.llmProvider | default "bedrock") "anthropic") (eq ($agentService.config.llmProvider | default "bedrock") "anthropic_compatible_endpoint") }}
             - name: ANTHROPIC_API_KEY_SECRET_REF
               value: {{ required (printf "agentService.config.anthropicApiKeySecretRef is required when agentService.config.llmProvider=%s. Provide a Fleet Manager secret ref like secretRef::store::<id>." ($agentService.config.llmProvider | default "bedrock")) $agentService.config.anthropicApiKeySecretRef | quote }}
