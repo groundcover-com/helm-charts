@@ -603,6 +603,7 @@ sinks:
 {{- tpl (toYaml (dict "clickhouse_profiling" .Values.vector.customComponents.sinks.local.custom.clickhouse_profiling)) $ | nindent 2 }}
 {{- tpl (toYaml (dict "clickhouse_session_replay" .Values.vector.customComponents.sinks.local.custom.clickhouse_session_replay)) $ | nindent 2 }}
 {{- tpl (toYaml (dict "clickhouse_k8s_events" .Values.vector.customComponents.sinks.local.custom.clickhouse_k8s_events)) $ | nindent 2 }}
+{{- tpl (toYaml (dict "clickhouse_rum_events" .Values.vector.customComponents.sinks.local.custom.clickhouse_rum_events)) $ | nindent 2 }}
 {{- tpl (toYaml (dict "clickhouse_monitors" .Values.vector.customComponents.sinks.local.custom.clickhouse_monitors)) $ | nindent 2 }}
 {{- tpl (toYaml (dict "clickhouse_metrics_metadata" .Values.vector.customComponents.sinks.local.custom.clickhouse_metrics_metadata)) $ | nindent 2 }}
 {{ else }} {{- /* remote ingestion over ingress */}}

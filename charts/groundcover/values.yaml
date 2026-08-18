@@ -3541,6 +3541,7 @@ vector:
             measurements: .log_type == "measurement"
             session_replay: .log_type == "session_replay"
             profiling: .log_type == "profiling"
+            rum_events: .log_type == "rum_events"
         entities:
           inputs:
             - custom_from_logs_routing.entities
@@ -3567,6 +3568,12 @@ vector:
           type: "remap"
           source: |-
 
+        rum_events:
+          inputs:
+            - custom_from_logs_routing.rum_events
+          type: "remap"
+          source: |-
+            del(.log_type)
         events:
           inputs:
             - custom_from_logs_routing._unmatched
@@ -4047,6 +4054,31 @@ vector:
               max_bytes: 100000000
               max_events: 10000
               timeout_secs: 2
+          clickhouse_rum_events:
+            type: clickhouse
+            inputs:
+              - rum_events
+            endpoint: '{{ include "clickhouse.shard0HttpEndpoint" . }}'
+            database: "groundcover"
+            table: "rum_events_v1"
+            request:
+              retry_attempts: 5
+            auth:
+              user: '{{ include "clickhouse.username" . }}'
+              password: $CLICKHOUSE_PASSWORD
+              strategy: "basic"
+            format: "json_each_row"
+            encoding:
+              timestamp_format: rfc3339
+            date_time_best_effort: true
+            buffer:
+                type: memory
+                max_events: 5000
+                when_full: drop_newest
+            batch:
+              max_bytes: 100000000
+              max_events: 10000
+              timeout_secs: 2
           clickhouse_monitors:
             type: clickhouse
             inputs:
@@ -4250,6 +4282,22 @@ vector:
               timeout_secs: 5
             healthcheck:
               enabled: false
+          s3_rum_events:
+            type: "aws_s3"
+            inputs:
+              - rum_events
+            bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
+            region: '{{ .Values.vector.objectStorage.region }}'
+            key_prefix: "v4/rum_events/"
+            encoding:
+              codec: json
+              timestamp_format: rfc3339
+            batch:
+              max_bytes: 25000000
+              max_events: 25000
+              timeout_secs: 5
+            healthcheck:
+              enabled: false
           s3_monitors:
             type: "aws_s3"
             inputs:
@@ -4390,6 +4438,22 @@ vector:
             inputs:
               - session_replay
             key_prefix: v4/session_replay/
+            compression: zstd
+            bucket: '{{ .Values.vector.objectStorage.gcsBucket }}'
+            batch:
+              max_bytes: 25000000
+              max_events: 25000
+              timeout_secs: 5
+            encoding:
+              codec: json
+              timestamp_format: rfc3339
+            healthcheck:
+              enabled: false
+          gcs_rum_events:
+            type: gcp_cloud_storage
+            inputs:
+              - rum_events
+            key_prefix: v4/rum_events/
             compression: zstd
             bucket: '{{ .Values.vector.objectStorage.gcsBucket }}'
             batch:
@@ -4549,6 +4613,23 @@ vector:
             container_name: '{{ .Values.vector.objectStorage.azureBlobContainer }}'
             connection_string: '{{ .Values.vector.objectStorage.azureConnectionString }}'
             blob_prefix: v4/session_replay/
+            compression: zstd
+            encoding:
+              codec: json
+              timestamp_format: rfc3339
+            batch:
+              max_bytes: 25000000
+              max_events: 25000
+              timeout_secs: 5
+            healthcheck:
+              enabled: false
+          azure_rum_events:
+            type: azure_blob
+            inputs:
+              - rum_events
+            container_name: '{{ .Values.vector.objectStorage.azureBlobContainer }}'
+            connection_string: '{{ .Values.vector.objectStorage.azureConnectionString }}'
+            blob_prefix: v4/rum_events/
             compression: zstd
             encoding:
               codec: json
