@@ -3567,12 +3567,6 @@ vector:
           type: "remap"
           source: |-
 
-        profiling:
-          inputs:
-            - custom_from_logs_routing.profiling
-          type: "remap"
-          source: |-
-            del(.log_type)
         events:
           inputs:
             - custom_from_logs_routing._unmatched
@@ -3976,7 +3970,7 @@ vector:
           clickhouse_profiling:
             type: clickhouse
             inputs:
-              - profiling
+              - custom_from_logs_routing.profiling
             endpoint: '{{ include "clickhouse.httpEndpoint" . }}'
             database: "groundcover"
             table: "profiling"
@@ -3988,6 +3982,8 @@ vector:
               strategy: "basic"
             format: "json_each_row"
             encoding:
+              except_fields:
+                - log_type
               timestamp_format: rfc3339
             date_time_best_effort: true
             buffer:
@@ -4202,6 +4198,24 @@ vector:
               timeout_secs: 5
             healthcheck:
               enabled: false
+          s3_profiling:
+            type: "aws_s3"
+            inputs:
+              - custom_from_logs_routing.profiling
+            bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
+            region: '{{ .Values.vector.objectStorage.region }}'
+            key_prefix: "v4/profiling/"
+            encoding:
+              codec: json
+              except_fields:
+                - log_type
+              timestamp_format: rfc3339
+            batch:
+              max_bytes: 25000000
+              max_events: 25000
+              timeout_secs: 5
+            healthcheck:
+              enabled: false
           s3_events:
             type: "aws_s3"
             inputs:
@@ -4335,6 +4349,24 @@ vector:
               timestamp_format: rfc3339
             healthcheck:
               enabled: false
+          gcs_profiling:
+            type: gcp_cloud_storage
+            inputs:
+              - custom_from_logs_routing.profiling
+            key_prefix: v4/profiling/
+            compression: zstd
+            bucket: '{{ .Values.vector.objectStorage.gcsBucket }}'
+            batch:
+              max_bytes: 25000000
+              max_events: 25000
+              timeout_secs: 5
+            encoding:
+              codec: json
+              except_fields:
+                - log_type
+              timestamp_format: rfc3339
+            healthcheck:
+              enabled: false
           gcs_events:
             type: gcp_cloud_storage
             inputs:
@@ -4465,6 +4497,25 @@ vector:
             compression: zstd
             encoding:
               codec: json
+              timestamp_format: rfc3339
+            batch:
+              max_bytes: 25000000
+              max_events: 25000
+              timeout_secs: 5
+            healthcheck:
+              enabled: false
+          azure_profiling:
+            type: azure_blob
+            inputs:
+              - custom_from_logs_routing.profiling
+            container_name: '{{ .Values.vector.objectStorage.azureBlobContainer }}'
+            connection_string: '{{ .Values.vector.objectStorage.azureConnectionString }}'
+            blob_prefix: v4/profiling/
+            compression: zstd
+            encoding:
+              codec: json
+              except_fields:
+                - log_type
               timestamp_format: rfc3339
             batch:
               max_bytes: 25000000
