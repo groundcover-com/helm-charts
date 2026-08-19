@@ -1,7 +1,7 @@
 {{- $agentService := include "agent-service.values" . | fromYaml }}
 {{- if $agentService.enabled | default false }}
-{{- $llmProvider := $agentService.config.llmProvider | default "bedrock" }}
-{{- if and (ne $llmProvider "vertex") (ne $llmProvider "azure") (ne $llmProvider "anthropic") (ne $llmProvider "anthropic_compatible_endpoint") }}
+{{- $llmProvider := $agentService.config.llmProvider }}
+{{- if eq $llmProvider "bedrock" }}
 {{- if $agentService.bedrock }}
 {{- if $agentService.bedrock.enableModelAccess }}
 apiVersion: batch/v1
