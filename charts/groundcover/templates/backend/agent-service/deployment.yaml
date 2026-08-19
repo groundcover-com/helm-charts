@@ -43,7 +43,7 @@ spec:
         runAsUser: 1000
         fsGroup: 1000
       initContainers:
-        # Create the agent_service database if it doesn't exist
+        # Create the configured agent-service database if it doesn't exist
         - name: init-postgres-db
           image: '{{ include "postgresql.initContainers.image" . }}'
           securityContext:
@@ -64,8 +64,8 @@ spec:
             - |
               POSTGRES_PORT="${POSTGRES_PORT:-5432}"
               echo "Checking if database ${POSTGRES_DATABASE} exists..."
-              PGPASSWORD="${POSTGRES_PASSWORD}" psql -h "${POSTGRES_HOST}" -p "${POSTGRES_PORT}" -U "${POSTGRES_USERNAME}" -d postgres -tc "SELECT 1 FROM pg_database WHERE datname = '${POSTGRES_DATABASE}'" | grep -q 1 || \
-              PGPASSWORD="${POSTGRES_PASSWORD}" psql -h "${POSTGRES_HOST}" -p "${POSTGRES_PORT}" -U "${POSTGRES_USERNAME}" -d postgres -c "CREATE DATABASE ${POSTGRES_DATABASE}"
+              PGPASSWORD="${POSTGRES_PASSWORD}" psql -h "${POSTGRES_HOST}" -p "${POSTGRES_PORT}" -U "${POSTGRES_USERNAME}" -d "$ADMIN_DB" -tc "SELECT 1 FROM pg_database WHERE datname = '${POSTGRES_DATABASE}'" | grep -q 1 || \
+              PGPASSWORD="${POSTGRES_PASSWORD}" psql -h "${POSTGRES_HOST}" -p "${POSTGRES_PORT}" -U "${POSTGRES_USERNAME}" -d "$ADMIN_DB" -c "CREATE DATABASE ${POSTGRES_DATABASE}"
               echo "Database ${POSTGRES_DATABASE} is ready"
           env:
             - name: POSTGRES_HOST
@@ -91,6 +91,8 @@ spec:
                   key: {{ $postgres.passwordKey | default "password" }}
             - name: POSTGRES_DATABASE
               value: {{ $postgres.database | default "agent_service" | quote }}
+            - name: ADMIN_DB
+              value: {{ $postgres.adminDatabase | default "postgres" | quote }}
       containers:
         - name: agent-service
           image: "{{ tpl $agentService.image.repository $ }}:{{ tpl $agentService.image.tag $ }}"

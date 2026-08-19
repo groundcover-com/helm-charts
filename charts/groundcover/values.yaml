@@ -1180,6 +1180,7 @@ agentService:
     portKey: "port"
     usernameKey: "username"
     passwordKey: "password"
+    adminDatabase: "postgres"
     database: "agent_service"
   longTermMemory:
     enabled: false
