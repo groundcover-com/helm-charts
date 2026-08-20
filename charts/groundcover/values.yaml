@@ -1126,6 +1126,8 @@ agentService:
     rollingUpdate:
       maxUnavailable: 0
       maxSurge: 1
+  extraVolumes: []
+  extraVolumeMounts: []
   config:
     routerUrl: ""
     llmProvider: "bedrock"  # "bedrock", "vertex", "azure", "anthropic", or "anthropic_compatible_endpoint"
@@ -1531,7 +1533,7 @@ ingestor:
       maxIdleConnsPerHost: 100
       idleConnTimeout: 90s
     measurements:
-      enabled: false
+      enabled: true
       flushInterval: 30s
     dataDog:
       enabled: true

@@ -297,14 +297,19 @@ spec:
             {{- with $agentService.extraEnv }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
-          {{- if $agentService.gcpCredentials }}
+          {{- if or $agentService.gcpCredentials $agentService.extraVolumeMounts }}
           volumeMounts:
+            {{- if $agentService.gcpCredentials }}
             - name: gcp-credentials
               mountPath: /var/run/secrets/gcp
               readOnly: true
             - name: gcp-token
               mountPath: /var/run/secrets/tokens
               readOnly: true
+            {{- end }}
+            {{- with $agentService.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
           {{- end }}
           lifecycle:
             preStop:
@@ -337,8 +342,9 @@ spec:
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if $agentService.gcpCredentials }}
+      {{- if or $agentService.gcpCredentials $agentService.extraVolumes }}
       volumes:
+        {{- if $agentService.gcpCredentials }}
         - name: gcp-credentials
           configMap:
             name: {{ $agentService.gcpCredentials.configMapName }}
@@ -349,5 +355,9 @@ spec:
                   audience: {{ $agentService.gcpCredentials.audience | quote }}
                   expirationSeconds: 3600
                   path: gcp-token
+        {{- end }}
+        {{- with $agentService.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       {{- end }}
 {{- end }}
