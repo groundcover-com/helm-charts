@@ -1131,6 +1131,9 @@ agentService:
   config:
     routerUrl: ""
     llmProvider: "bedrock"  # "bedrock", "vertex", "azure", "anthropic", or "anthropic_compatible_endpoint"
+    llmProviderTlsCertificate:
+      certificatePath: ""
+      privateKeyPath: ""
     awsRegion: ""
     bedrockModelId: "anthropic.claude-sonnet-4-6"
     bedrockLargeModelId: "anthropic.claude-sonnet-4-6"

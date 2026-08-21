@@ -3,6 +3,9 @@
 {{- $postgres := $agentService.postgres }}
 {{- $longTermMemory := $agentService.longTermMemory }}
 {{- $temporal := $agentService.temporal | default dict }}
+{{- if ne (empty $agentService.config.llmProviderTlsCertificate.certificatePath) (empty $agentService.config.llmProviderTlsCertificate.privateKeyPath) }}
+{{- fail "agentService.config.llmProviderTlsCertificate.certificatePath and privateKeyPath must be configured together" }}
+{{- end }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -207,6 +210,12 @@ spec:
             {{- if eq ($agentService.config.llmProvider | default "bedrock") "anthropic_compatible_endpoint" }}
             - name: ANTHROPIC_COMPATIBLE_BASE_URL
               value: {{ required "agentService.config.anthropicCompatibleBaseUrl is required when agentService.config.llmProvider=anthropic_compatible_endpoint." $agentService.config.anthropicCompatibleBaseUrl | quote }}
+            {{- end }}
+            {{- if $agentService.config.llmProviderTlsCertificate.certificatePath }}
+            - name: LLM_CLIENT_CERTIFICATE_PATH
+              value: {{ $agentService.config.llmProviderTlsCertificate.certificatePath | quote }}
+            - name: LLM_PRIVATE_KEY_PATH
+              value: {{ $agentService.config.llmProviderTlsCertificate.privateKeyPath | quote }}
             {{- end }}
             {{- if $agentService.gcpCredentials }}
             - name: GOOGLE_APPLICATION_CREDENTIALS
