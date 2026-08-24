@@ -64,7 +64,7 @@ service:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.12.276
+  tag: 1.12.277
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/tools'
@@ -165,6 +165,18 @@ configuration:
       Name: "monitors"
       User: '{{ include "postgresql.username" . }}'
       Pass: ""
+      Timeout: 150s
+      Interval: 5s
+      SSLMode: "disable"
+  MonitorsV2:
+    Enabled: false
+    MigrationsPath: /monitors-v2-migrations
+    DB:
+      Host: '{{ splitList ":" (include "postgresql.base.url" .) | first }}'
+      Port: '{{ splitList ":" (include "postgresql.base.url" .) | last }}'
+      Name: "monitors_v2"
+      User: '{{ include "postgresql.username" . }}'
+      Pass: "" # injected as GC_MONITORSV2_DB_PASS from the postgres secret
       Timeout: 150s
       Interval: 5s
       SSLMode: "disable"
