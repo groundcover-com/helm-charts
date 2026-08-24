@@ -125,6 +125,11 @@ spec:
                 secretKeyRef:
                   name: {{ include "postgresql.secretName" . }}
                   key: {{ include "postgresql.adminPasswordKey" . }}
+            - name: GC_MONITORSV2_DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "postgresql.secretName" . }}
+                  key: {{ include "postgresql.adminPasswordKey" . }}
             {{- end }}
             {{- if .Values.gitbook.enabled }}
             - name: GITBOOK_API_TOKEN
