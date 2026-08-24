@@ -64,7 +64,7 @@ service:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.12.275
+  tag: 1.12.276
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/tools'
@@ -191,6 +191,8 @@ configuration:
     Namespace: '{{ include "backendConfig.namespace" . }}'
     KongIngressClass: '{{ include "backendConfig.kongIngressClass" . }}'
     ShouldUpdateKongRouter: '{{ include "backendConfig.shouldUpdateKongRouter" . }}'
+  BackendSigningKey:
+    Enabled: true
   ExportService:
     Enabled: '{{ dig "exportService" "enabled" false .Values.global }}'
     Endpoint: '{{ printf "http://%s:3001" (printf "%s-export-service" .Release.Name | trunc 63 | trimSuffix "-") }}'

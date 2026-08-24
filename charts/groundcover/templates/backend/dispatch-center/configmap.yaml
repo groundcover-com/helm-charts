@@ -126,7 +126,15 @@ data:
       {{- /* hasKey, not truthiness: an explicit 0 disables shedding and `if` would treat it as unset. */}}
       issueGraphLoadShedThreshold: {{ if and .Values.dispatchCenter .Values.dispatchCenter.worker (hasKey .Values.dispatchCenter.worker "issueGraphLoadShedThreshold") }}{{ .Values.dispatchCenter.worker.issueGraphLoadShedThreshold }}{{ else }}0.3{{ end }}
       readDispatchActivityTimeout: {{ if and .Values.dispatchCenter .Values.dispatchCenter.worker .Values.dispatchCenter.worker.readDispatchActivityTimeout }}{{ .Values.dispatchCenter.worker.readDispatchActivityTimeout }}{{ else }}5m{{ end }}
+      {{- /* Omit when unset so Go applyDefaults can pick min(30s, activityTimeout/2).
+           Emitting a hard-coded 30s here would reject an explicit shorter activity timeout. */}}
+      {{- if and .Values.dispatchCenter .Values.dispatchCenter.worker (hasKey .Values.dispatchCenter.worker "readDispatchHeartbeatTimeout") }}
+      readDispatchHeartbeatTimeout: {{ .Values.dispatchCenter.worker.readDispatchHeartbeatTimeout }}
+      {{- end }}
       countWorkflowTimeout: {{ if and .Values.dispatchCenter .Values.dispatchCenter.worker .Values.dispatchCenter.worker.countWorkflowTimeout }}{{ .Values.dispatchCenter.worker.countWorkflowTimeout }}{{ else }}30s{{ end }}
+      {{- /* hasKey, not truthiness: an explicit 0 disables high-cardinality demotion. */}}
+      highCardinalityAlertingThreshold: {{ if and .Values.dispatchCenter .Values.dispatchCenter.worker (hasKey .Values.dispatchCenter.worker "highCardinalityAlertingThreshold") }}{{ .Values.dispatchCenter.worker.highCardinalityAlertingThreshold }}{{ else }}1000{{ end }}
+      highCardinalityLowPriorityKey: {{ if and .Values.dispatchCenter .Values.dispatchCenter.worker .Values.dispatchCenter.worker.highCardinalityLowPriorityKey }}{{ .Values.dispatchCenter.worker.highCardinalityLowPriorityKey }}{{ else }}4{{ end }}
 
     policies:
 {{- if .Values.dispatchCenter.policies }}

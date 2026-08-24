@@ -2159,9 +2159,9 @@ portal:
   # secretNameSuffix isolates the fleet-manager secret id for standalone/preview
   # deploys that share a fleet-manager (groundcover-backend-signing-key-<suffix>).
   # Comm-hub copies this into routerProxy.signingKeySecretNameSuffix (single source).
-  # Empty = production default.
+  # Empty = unsuffixed production default.
   backendSigningKey:
-    enabled: false
+    enabled: true
     secretNameSuffix: ""
   autodiscovery: false
   maxResponseSizeBytes: 33554432
@@ -2208,8 +2208,11 @@ dispatchCenter:
   replicas: 2
   providers:
     slackApp:
-      interactiveNotifications: false
-      attachIssueGraph: false
+      # interactiveNotifications turns alerts into interactive Slack messages
+      # (ack/resolve buttons, Investigate-with-Agent). attachIssueGraph adds an
+      # issue-graph image to those alerts and does nothing without it.
+      interactiveNotifications: true
+      attachIssueGraph: true
   env: []
   image:
     repository: "{{ .Values.global.origin.registry }}/dispatch-center"
@@ -2248,6 +2251,16 @@ dispatchCenter:
     # Deliberately NOT a fraction of maxConcurrentAlertWorkflows: that coupling moved the shed
     # point every time the concurrency cap was retuned.
     issueGraphLoadShedThreshold: 0.3
+    # Max silence between ReadAndDispatchActivity heartbeats. Must be strictly shorter than
+    # readDispatchActivityTimeout (equality is invalid). When omitted, Go defaults to
+    # min(30s, readDispatchActivityTimeout/2). Uncomment to override.
+    # readDispatchHeartbeatTimeout: 30s
+    # Distinct alerting fingerprints for one monitor in a single scan batch at/above which that
+    # monitor's alert workflows start with a lower Temporal PriorityKey. Set to 0 to disable
+    # demotion entirely (hasKey in the configmap preserves an explicit 0).
+    highCardinalityAlertingThreshold: 1000
+    # PriorityKey used for those monitors. Smaller = higher priority; 1..5.
+    highCardinalityLowPriorityKey: 4
     # Notification-send concurrency & retry-backoff knobs. Defaults live in the
     # dispatch-center configmap; uncomment to override (see BE-2638). Tuned via the
     # sustained-throughput benchmark in services/dispatch-center/cmd/benchmark.
@@ -2320,22 +2333,23 @@ commHub:
     maxConnsPerHost: 20
     requestTimeout: "30s"
     maxRetries: 5
-  # Claude Managed Agents connector. Off by default so environments that
-  # haven't opted in stay dark. requestTimeout is wider than other providers'
-  # because session create can attach resources; the official SDKs default to
-  # 10-minute or unbounded timeouts.
+  # Claude Managed Agents connector. requestTimeout is wider than other
+  # providers' because session create can attach resources; the official SDKs
+  # default to 10-minute or unbounded timeouts.
   claude:
-    enabled: false
+    enabled: true
     baseURL: "https://api.anthropic.com"
     maxConnsPerHost: 20
     requestTimeout: "600s"
     maxRetries: 5
   providers:
     registrySyncInterval: "1s"
-    # Off by default so existing deployments are unaffected; a new-customer
-    # overlay enables org connectors by default for new backends.
-    installAllCatalogConnectors: false
-    defaultEnabledConnectors: false
+    # Installs catalog connectors that are not already installed and have not
+    # been deleted by an admin. Entries requiring OAuth are skipped while MCP
+    # OAuth is disabled.
+    installAllCatalogConnectors: true
+    # Enables each provider once; a later admin disable is not reverted.
+    defaultEnabledConnectors: true
   oauthRefresh:
     disabled: false
     # Empty values render release-scoped defaults so multiple CommHub releases
@@ -2351,7 +2365,7 @@ commHub:
     maxConcurrentWorkflowTaskPollers: 2
     maxConcurrentActivityTaskPollers: 4
   slack:
-    enabled: false
+    enabled: true
     baseURL: "https://slack.com"
     maxConnsPerHost: 10
     requestTimeout: "30s"
@@ -2367,11 +2381,9 @@ commHub:
       activityTimeout: "45s"
       maxConcurrentWorkflowTaskPollers: 2
       maxConcurrentActivityTaskPollers: 4
-    # Materialized Slack channel-list cache. Off by default so environments that
-    # haven't opted in keep the live conversations.list passthrough. Note that a warm
-    # cache orders the channel picker alphabetically, where the live path returns
-    # Slack's native order.
-    channelCacheEnabled: false
+    # Materialized Slack channel-list cache. A warm cache orders the channel
+    # picker alphabetically; the live path returns Slack's native order.
+    channelCacheEnabled: true
     # Tuning, all optional — an unset value uses the code default shown. Durations are
     # Go duration strings and must stay quoted; a bare number decodes as nanoseconds.
     channelCache: {}
@@ -2390,18 +2402,17 @@ commHub:
     maxConnsPerHost: 20
     requestTimeout: "30s"
   mcp:
-    # Gates the MCP connector. Off by default so environments that haven't
-    # opted in stay dark. AllowInsecureURLs permits http:// MCP server URLs
-    # for local dev only — must remain false in production.
-    enabled: false
+    # Registers the MCP provider (catalog + Remote MCP Servers). AllowInsecureURLs
+    # permits http:// MCP server URLs for local dev only — must remain false in
+    # production.
+    enabled: true
     allowInsecureURLs: false
     proxyTimeout: "30s"
-    # Gates the OAuth 2.1 auth mode (discovery/DCR/PKCE/refresh) for MCP
-    # connectors. Off by default until GA. oauthDiscoveryTimeout is the per-call
-    # timeout for the shared OAuth HTTP client — it caps discovery, DCR, token
-    # exchange, and refresh. oauthClientName and oauthSoftwareStatement are
-    # optional dynamic-client-registration (DCR) metadata.
-    enableOAuth: false
+    # OAuth 2.1 auth mode (discovery/DCR/PKCE/refresh) for MCP connectors.
+    # oauthDiscoveryTimeout is the per-call timeout for the shared OAuth HTTP
+    # client — it caps discovery, DCR, token exchange, and refresh.
+    # oauthClientName and oauthSoftwareStatement are optional DCR metadata.
+    enableOAuth: true
     oauthDiscoveryTimeout: "15s"
     oauthClientName: ""
     oauthSoftwareStatement: ""
@@ -2429,11 +2440,10 @@ commHub:
   # tokenAuthHeader templates the token-mode Authorization header ("{token}"
   # placeholder) for servers that reject the default Bearer scheme.
   connectorCatalog:
-    # When true, exposes catalog entries whose auth mode is gated (oauth_static,
-    # token, token_or_oauth). Default false hides them; set true per deployment
-    # on clusters cleared to use them (e.g. dev-incloud, demo, experiments,
-    # melody, test env). Ungated (oauth, none) entries are always available.
-    gatedAuthModesEnabled: false
+    # Exposes catalog entries whose auth mode is gated (oauth_static, token,
+    # token_or_oauth). Ungated (oauth, none) entries are always available.
+    # Set false to hide gated entries from a deployment.
+    gatedAuthModesEnabled: true
     entries:
       - id: notion
         displayName: Notion
