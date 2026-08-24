@@ -23,7 +23,7 @@
 apiVersion: operator.victoriametrics.com/v1beta1
 kind: VMAgent
 metadata:
-  name: vmcluster-dual-shipping
+  name: {{ include "vmclusters.dualShipping.vmagentName" $ }}
   namespace: {{ $ns }}
   labels: {{ include "groundcover.labels" $ | nindent 4 }}
 spec: {{ tpl (toYaml $spec) $ | nindent 2 }}

@@ -5805,6 +5805,19 @@ vmclusters:
         remoteWrite.maxDiskUsagePerURL: "100GB"
         remoteWrite.queues: "200"
 
+    # VMAuth LB for the vmagent replicas above; additive, not wired in automatically.
+    # `spec` is passed through to the VMAuth CR verbatim.
+    vmauth:
+      spec:
+        replicaCount: 3
+        resources:
+          requests:
+            cpu: 200m
+            memory: 300Mi
+          limits:
+            cpu: "3"
+            memory: 1.5Gi
+
   # Shared baseline deep-merged under every entry in `clusters` (per-cluster wins).
   # Mirrors the defaults of the distributed victoria-metrics chart, plus prometheus
   # scrape annotations on each component's pods.

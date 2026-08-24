@@ -22,6 +22,21 @@ Build the in-cluster vmselect read URL for a given VMCluster name.
 {{- end -}}
 
 {{/*
+Name of the dual-shipping VMAgent CR.
+*/}}
+{{- define "vmclusters.dualShipping.vmagentName" -}}
+vmcluster-dual-shipping
+{{- end -}}
+
+{{/*
+Name of the dual-shipping VMAgent's operator-generated Service (already headless, since
+statefulMode is enabled) - what vmauth-vmcluster-dual-shipping discovers backend IPs from.
+*/}}
+{{- define "vmclusters.dualShipping.vmagentServiceName" -}}
+{{- printf "vmagent-%s" (include "vmclusters.dualShipping.vmagentName" .) -}}
+{{- end -}}
+
+{{/*
 Name of the Secret holding the dual-shipping creation timestamp (portal-consumed).
 */}}
 {{- define "vmclusters.dualShipping.secretName" -}}

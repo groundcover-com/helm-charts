@@ -1,0 +1,27 @@
+{{- $ds := (.Values.vmclusters).dualShipping | default dict -}}
+{{- if $ds.enabled -}}
+{{- $ns := .Release.Namespace -}}
+{{- $vmagentName := include "vmclusters.dualShipping.vmagentName" $ -}}
+{{- $vmagentSvc := include "vmclusters.dualShipping.vmagentServiceName" $ -}}
+{{- /* spec is passed through as-is */ -}}
+{{- $spec := deepCopy (($ds.vmauth).spec | default dict) -}}
+
+{{- $uua := $spec.unauthorizedUserAccessSpec | default dict -}}
+{{- $urlMap := $uua.url_map | default list -}}
+{{- $urlMap = append $urlMap (dict
+      "src_paths" (list "/.*")
+      "url_prefix" (list (printf "http://%s.%s:8429/" $vmagentSvc $ns))
+      "discover_backend_ips" true
+      "load_balancing_policy" "least_loaded"
+    ) -}}
+{{- $_ := set $uua "url_map" $urlMap -}}
+{{- $_ := set $spec "unauthorizedUserAccessSpec" $uua -}}
+---
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMAuth
+metadata:
+  name: vmauth-{{ $vmagentName }}
+  namespace: {{ $ns }}
+  labels: {{ include "groundcover.labels" $ | nindent 4 }}
+spec: {{ tpl (toYaml $spec) $ | nindent 2 }}
+{{- end }}
