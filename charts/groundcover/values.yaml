@@ -56,7 +56,7 @@ global:
     enabled: true
   integrations:
     agent:
-      enabled: false
+      enabled: true
   backend:
     name:
     tenantUuid:
@@ -1220,6 +1220,10 @@ agentService:
   nodeSelector: {}
   tolerations: []
   affinity: {}
+  profiling:
+    enabled: false
+    serverAddress: ""
+    apiKeySecret: {}
 
 chip:
   enabled: false
