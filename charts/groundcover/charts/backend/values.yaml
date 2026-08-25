@@ -364,6 +364,25 @@ victoria-metrics-distributed:
     common:
       spec:
         topologySpreadConstraints: []
+    write:
+      vmauth:
+        spec:
+          hpa:
+            minReplicas: 2
+            maxReplicas: 6
+            metrics:
+              - type: Resource
+                resource:
+                  name: cpu
+                  target:
+                    type: Utilization
+                    averageUtilization: 75
+              - type: Resource
+                resource:
+                  name: memory
+                  target:
+                    type: Utilization
+                    averageUtilization: 75
     vmagent:
       spec:
         configReloaderImageTag: public.ecr.aws/groundcovercom/victoriametrics/operator:config-reloader-v0.68.2

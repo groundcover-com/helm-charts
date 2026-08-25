@@ -5831,6 +5831,22 @@ vmclusters:
           limits:
             cpu: "3"
             memory: 1.5Gi
+        hpa:
+          minReplicas: 3
+          maxReplicas: 6
+          metrics:
+            - type: Resource
+              resource:
+                name: cpu
+                target:
+                  type: Utilization
+                  averageUtilization: 75
+            - type: Resource
+              resource:
+                name: memory
+                target:
+                  type: Utilization
+                  averageUtilization: 75
 
   # Shared baseline deep-merged under every entry in `clusters` (per-cluster wins).
   # Mirrors the defaults of the distributed victoria-metrics chart, plus prometheus
