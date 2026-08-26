@@ -746,6 +746,7 @@ agent:
               from_context: x-groundcover-source
               action: upsert
           samplingRatio: 0.05
+          maxConcurrentRequests: 0
           # Explicit byte budgets take precedence and should be quoted to preserve int64 precision.
           # Otherwise set an integer pod-memory percentage from 0 to 100.
           # Zero for both leaves the signal unlimited.
@@ -1579,6 +1580,7 @@ ingestor:
             from_context: x-groundcover-source
             action: upsert
         samplingRatio: 1
+        maxConcurrentRequests: 0
         # Explicit byte budgets take precedence and should be quoted to preserve int64 precision.
         # Otherwise set an integer pod-memory percentage from 0 to 100.
         # Zero for both leaves the signal unlimited.

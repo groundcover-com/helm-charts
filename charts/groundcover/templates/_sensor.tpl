@@ -594,6 +594,7 @@ apmIngestor:
 {{ toYaml $sensorValues.apmIngestor.otel.direct.resourceProcessor | indent 8 }}
       {{- end }}
       samplingRatio: {{ $sensorValues.apmIngestor.otel.direct.samplingRatio }}
+      maxConcurrentRequests: {{ include "groundcover.nonNegativeInteger" (dict "path" "maxConcurrentRequests" "value" (dig "apmIngestor" "otel" "direct" "maxConcurrentRequests" 0 $sensorValues)) }}
       maxConcurrentTraceExportBytes: {{ include "groundcover.nonNegativeInteger" (dict "path" "maxConcurrentTraceExportBytes" "value" ($sensorValues.apmIngestor.otel.direct.maxConcurrentTraceExportBytes | default 0)) }}
       maxConcurrentTraceExportPodMemoryPercentage: {{ include "groundcover.nonNegativeInteger" (dict "path" "maxConcurrentTraceExportPodMemoryPercentage" "value" ($sensorValues.apmIngestor.otel.direct.maxConcurrentTraceExportPodMemoryPercentage | default 0)) }}
       maxConcurrentLogExportBytes: {{ include "groundcover.nonNegativeInteger" (dict "path" "maxConcurrentLogExportBytes" "value" ($sensorValues.apmIngestor.otel.direct.maxConcurrentLogExportBytes | default 0)) }}
