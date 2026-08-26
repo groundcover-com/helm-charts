@@ -346,6 +346,7 @@ data:
 
     DebugExporters: {{ .Values.integrationsAgent.debugExporters | default false }}
     AddStaleMarkerToCloudwatchMetric: {{ .Values.integrationsAgent.addStaleMarkerToCloudwatchMetric | default false }}
+    AzureMetricDefinitionsEnabled: {{ .Values.integrationsAgent.azureMetricDefinitionsEnabled | default false }}
 
     Integrations:
       Clickhouse:
