@@ -2,9 +2,11 @@
 {{- printf "%s-clickhouse" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{- define "clickhouse.headlessServiceName" -}}
-{{- printf "%s-headless" (include "clickhouse.fullname" .) -}}
-{{- end -}}
+{{- /*
+  Do NOT define "clickhouse.headlessServiceName" here: named templates are
+  global, and this would shadow the Bitnami subchart's own definition of it,
+  breaking the aliased standby instance's headless Service DNS.
+*/ -}}
 
 {{- define "clickhouse.database" -}}
 {{-  print "groundcover" -}}
@@ -78,11 +80,42 @@ password rotations never invalidate dictionary credentials.
 {{- end -}}
 
 {{- define "clickhouse.shard0Name" -}}
-{{ printf "%s-shard0-0-external" (include "clickhouse.fullname" $) }}
+{{ printf "%s-shard0-0-external" (include "clickhouse.fullname" $) | trunc 63 | trimSuffix "-" }}
 {{- end -}}
 
 {{- define "clickhouse.shard0HttpEndpoint" -}}
 {{ printf "http://%s:%d" (include "clickhouse.shard0Name" $) (.Values.global.clickhouse.containerPorts.http | int ) }}
+{{- end -}}
+
+{{- define "clickhouse.proxyServiceName" -}}
+{{- $name := "" -}}
+{{- if .Values.clickhouseProxy -}}
+{{- $name = (.Values.clickhouseProxy.service | default dict).name -}}
+{{- end -}}
+{{- if $name -}}
+{{- if or (gt (len $name) 63) (not (regexMatch "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$" $name)) -}}
+{{- fail (printf "clickhouseProxy.service.name %q must be a valid RFC 1123 DNS label (lowercase alphanumerics and '-', starting/ending with an alphanumeric, max 63 chars)" $name) -}}
+{{- end -}}
+{{- $name -}}
+{{- else -}}
+{{- printf "%s-clickhouse-proxy" .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "clickhouse.readHost" -}}
+{{- if (.Values.global.clickhouse.ha | default dict).enabled -}}
+{{- include "clickhouse.proxyServiceName" . -}}
+{{- else -}}
+{{- include "clickhouse.fullname" . -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "clickhouse.readHostShard0" -}}
+{{- if (.Values.global.clickhouse.ha | default dict).enabled -}}
+{{- include "clickhouse.proxyServiceName" . -}}
+{{- else -}}
+{{- include "clickhouse.shard0Name" . | trim -}}
+{{- end -}}
 {{- end -}}
 
 {{- define "clickhouse.extraShardsList" -}}
@@ -93,7 +126,7 @@ password rotations never invalidate dictionary credentials.
 {{- $list := list -}}
 {{- range $shard, $e := until $shards }}
 {{- if ne $e 0}}
-{{- $item := printf "%s-shard%d-%d-external" (include "clickhouse.fullname" $) $shard 0 }}
+{{- $item := printf "%s-shard%d-%d-external" (include "clickhouse.fullname" $) $shard 0 | trunc 63 | trimSuffix "-" }}
 {{- $list = append $list $item }}
 {{- end -}}
 {{- end -}}

@@ -232,6 +232,9 @@ global:
       # existingSecret is empty.
       existingSecret: ""
       existingSecretKey: dictionary-user-password
+    # Enables the standby ClickHouse cluster + HAProxy failover switch.
+    ha:
+      enabled: false
 
   logs:
     overrideUrl: ""
@@ -969,6 +972,12 @@ agent:
 dbManager:
   replicas: 1
   extraShardsOverride: 
+  # Standby cluster config for db-manager (gated by global.clickhouse.ha.enabled).
+  # objectStoragePathPrefix MUST match the prefix Vector writes the standby
+  # copy to, or both clusters share one S3 path with after_processing=delete.
+  standbyCluster:
+    keeperPathPrefix: "standby"
+    objectStoragePathPrefix: "standby"
   additionalLabels:
   podLabels:
   additionalAnnotations: {}
@@ -1069,6 +1078,12 @@ dbManager:
     maxKeysPerDomain: 50
     # How often to run the sync (e.g., "1h", "30m", "6h")
     syncInterval: "1h"
+  ingestionRowCountGap:
+    checkInterval: "15s"
+    windowWidth: "2m"
+    windowSettle: "15s"
+    minSampleSize: 20
+    queryTimeout: "30s"
   workloadScheduling:
     Resources:
       - Name: cpu
@@ -2120,7 +2135,7 @@ portal:
   priorityClassName:
   env:
     - name: GC_CLICKHOUSE_HOST
-      value: '{{ include "clickhouse.shard0Name" . }}'
+      value: '{{ include "clickhouse.readHostShard0" . }}'
   features: []
   extraHeaders:
   # - Key: "Header Key"
@@ -2667,7 +2682,7 @@ pdfReportWorker:
     batchSize: 50
   webhookTimeout: "30s"
 
-keeper:
+keeper: &keeperDefaults
   enabled: false
   replicas: 3
   podManagementPolicy: OrderedReady
@@ -2723,7 +2738,19 @@ keeper:
   tolerations: []
   priorityClassName:
 
-clickhouse:
+# Dedicated keeper for the standby cluster (templates/clickhouse/standby/keeper/),
+# gated by global.clickhouse.ha.enabled. Inherits keeper: via anchor merge.
+standbyKeeper:
+  <<: *keeperDefaults
+  additionalLabels: {}
+  podLabels: {}
+  podAnnotations: {}
+  affinity: {}
+  nodeSelector: {}
+  tolerations: []
+  priorityClassName:
+
+clickhouse: &primary
   enabled: true
   shards: 1
   replicaCount: 1
@@ -2957,6 +2984,73 @@ clickhouse:
   extraVolumeMounts:
     - name: clickhouse-client-config
       mountPath: /etc/clickhouse-client/
+
+clickhouse-standby:
+  <<: *primary
+  serviceAccount:
+    create: false
+  podLabels:
+    app.kubernetes.io/part-of: '{{ include "groundcover.labels.partOf" . }}'
+  persistence:
+    accessModes:
+      - ReadWriteOnce
+    size: 128Gi
+  affinity:
+    podAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchLabels:
+                app.kubernetes.io/name: clickhouse
+                shard: '{{ .Shard }}'
+            topologyKey: kubernetes.io/hostname
+  priorityClassName: ""
+
+# HAProxy-based ClickHouse switch (templates/clickhouse/proxy/*). Fronts both the
+# HTTP (8123) and native (9000) protocols behind one Service; failover flips the
+# active upstream via the HAProxy Runtime API (no reload).
+clickhouseProxy:
+  replicas: 2
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 75
+    targetMemoryUtilizationPercentage: ""
+    behavior: {}
+  clusterDomain: cluster.local
+  imagePullSecrets: []
+  image:
+    registry: ""
+    repository: haproxytech/haproxy-alpine
+    tag: "3.0.26"
+    pullPolicy: IfNotPresent
+  # No built-in auth.
+  runtimeApi:
+    port: 9999
+  service:
+    name: ""
+    type: ClusterIP
+    annotations: {}
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 1.5Gi
+  podLabels: {}
+  podAnnotations: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  config:
+    timeoutConnect: 10s
+    timeoutClient: 600s
+    timeoutServer: 600s
+    checkInterval: 5s
+    checkFall: 2
+    checkRise: 2
 
 opentelemetry-collector:
   enabled: true
@@ -5416,11 +5510,11 @@ monitors-manager:
         - name: Clickhouse
           type: grafana-clickhouse-datasource
           uid: clickhouse
-          url: '{{ include "clickhouse.shard0Name" . }}:{{ .Values.global.clickhouse.containerPorts.tcp | int }}'
+          url: '{{ include "clickhouse.readHostShard0" . }}:{{ .Values.global.clickhouse.containerPorts.tcp | int }}'
           jsonData:
             defaultDatabase: '{{ include "clickhouse.database" . }}'
             port: "{{ .Values.global.clickhouse.containerPorts.tcp | int }}"
-            server: '{{ include "clickhouse.shard0Name" . }}'
+            server: '{{ include "clickhouse.readHostShard0" . }}'
             username: '{{ include "clickhouse.readerUsername" . }}'
             queryTimeout: "60"
             customSettings:

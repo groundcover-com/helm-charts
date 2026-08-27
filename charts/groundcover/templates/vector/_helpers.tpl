@@ -587,14 +587,27 @@ sinks:
 {{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.logsPipeline "sinks" .Values.vector.customComponents.sinks.s3.logs)) $ -}}
 {{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.tracesPipeline "sinks" .Values.vector.customComponents.sinks.s3.traces)) $ -}}
 {{- tpl (toYaml .Values.vector.customComponents.sinks.s3.custom) $ | nindent 2 }}
+{{- /* Standby duplicate writes: same bucket, but every sink's key_prefix
+       gets the standby prefix prepended. The prefix is required non-empty
+       so we don't accidentally re-emit to the primary path. Backups are
+       intentionally NOT duplicated for the standby. */ -}}
+{{ if and .Values.global.clickhouse.ha.enabled (not (empty .Values.dbManager.standbyCluster.objectStoragePathPrefix)) }}
+{{- tpl (include "vector.renderStandbySinks" (dict "root" $ "sourceKey" "s3" "prefixField" "key_prefix")) $ }}
+{{ end }}
 {{ else if and (not (empty .Values.vector.objectStorage.gcsBucket)) .Values.vector.objectStorage.allowed }} {{- /* ingestion using gcs */}}
 {{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.logsPipeline "sinks" .Values.vector.customComponents.sinks.gcs.logs)) $ -}}
 {{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.tracesPipeline "sinks" .Values.vector.customComponents.sinks.gcs.traces )) $ -}}
 {{- tpl (toYaml .Values.vector.customComponents.sinks.gcs.custom) $ | nindent 2 }}
+{{ if and .Values.global.clickhouse.ha.enabled (not (empty .Values.dbManager.standbyCluster.objectStoragePathPrefix)) }}
+{{- tpl (include "vector.renderStandbySinks" (dict "root" $ "sourceKey" "gcs" "prefixField" "key_prefix")) $ }}
+{{ end }}
 {{ else if and (not (empty .Values.vector.objectStorage.azureBlobContainer)) (not (empty .Values.vector.objectStorage.azureConnectionString)) .Values.vector.objectStorage.allowed }} {{- /* ingestion using azure blob */}}
 {{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.logsPipeline "sinks" .Values.vector.customComponents.sinks.azure.logs)) $ -}}
 {{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.tracesPipeline "sinks" .Values.vector.customComponents.sinks.azure.traces)) $ -}}
 {{- tpl (toYaml .Values.vector.customComponents.sinks.azure.custom) $ | nindent 2 }}
+{{ if and .Values.global.clickhouse.ha.enabled (not (empty .Values.dbManager.standbyCluster.objectStoragePathPrefix)) }}
+{{- tpl (include "vector.renderStandbySinks" (dict "root" $ "sourceKey" "azure" "prefixField" "blob_prefix")) $ }}
+{{ end }}
 {{ else if .Values.global.backend.enabled }} {{- /* ingestion to local DB */}}
 {{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.logsPipeline "sinks" .Values.vector.customComponents.sinks.local.logs)) $ -}}
 {{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.tracesPipeline "sinks" .Values.vector.customComponents.sinks.local.traces)) $ -}}
@@ -693,7 +706,47 @@ sinks:
 {{ end }}
 {{end}}
 
-{{ define "logsToEventsTransform" }} 
+{{/*
+Mirrors each primary object-storage sink (S3/GCS/Azure) as a "_standby"
+sink with the standby path prefix prepended - other fields inherited via
+deepCopy, so primary overrides (e.g. batch size) apply to standby too.
+Prefix join must mirror schema_manager's applyObjectStorageQueueOverrides
+(Trim then Join) - drift here silently misroutes standby reads/writes.
+Backup sinks are intentionally not duplicated. Callers guard on
+global.clickhouse.ha.enabled, a non-empty standby path prefix, and the
+matching ingestion mode being active.
+*/}}
+{{- define "vector.renderStandbySinks" -}}
+{{- $prefix := trimAll "/" .root.Values.dbManager.standbyCluster.objectStoragePathPrefix -}}
+{{- $source := index .root.Values.vector.customComponents.sinks .sourceKey -}}
+{{- $field := .prefixField -}}
+{{- $standbyLogs := dict -}}
+{{- range $name, $sink := $source.logs -}}
+  {{- $copy := deepCopy $sink -}}
+  {{- $orig := trimPrefix "/" (default "" (index $sink $field)) -}}
+  {{- $_ := set $copy $field (printf "%s/%s" $prefix $orig) -}}
+  {{- $_ := set $standbyLogs (printf "%s_standby" $name) $copy -}}
+{{- end -}}
+{{- include "createSinksOutput" (dict "pipeline" .root.Values.vector.logsPipeline "sinks" $standbyLogs) -}}
+{{- $standbyTraces := dict -}}
+{{- range $name, $sink := $source.traces -}}
+  {{- $copy := deepCopy $sink -}}
+  {{- $orig := trimPrefix "/" (default "" (index $sink $field)) -}}
+  {{- $_ := set $copy $field (printf "%s/%s" $prefix $orig) -}}
+  {{- $_ := set $standbyTraces (printf "%s_standby" $name) $copy -}}
+{{- end -}}
+{{- include "createSinksOutput" (dict "pipeline" .root.Values.vector.tracesPipeline "sinks" $standbyTraces) -}}
+{{- $standbyCustom := dict -}}
+{{- range $name, $sink := $source.custom -}}
+  {{- $copy := deepCopy $sink -}}
+  {{- $orig := trimPrefix "/" (default "" (index $sink $field)) -}}
+  {{- $_ := set $copy $field (printf "%s/%s" $prefix $orig) -}}
+  {{- $_ := set $standbyCustom (printf "%s_standby" $name) $copy -}}
+{{- end -}}
+{{- toYaml $standbyCustom | nindent 2 -}}
+{{- end -}}
+
+{{ define "logsToEventsTransform" }}
   logs_to_events_transform:
     inputs:
     - emptySource

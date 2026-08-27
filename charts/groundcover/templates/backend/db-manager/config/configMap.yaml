@@ -136,6 +136,14 @@ data:
       Password: "OVERRIDEN"
     ExtraShards:
       {{- (include "clickhouse.extraShardsList" .) | nindent 6  }}
+    {{- if (.Values.global.clickhouse.ha | default dict).enabled }}
+    StandbyCluster:
+      Host: {{ include "clickhouse.standby.shard0Name" . | trim }}
+      ExtraShards:
+        {{- (include "clickhouse.standby.extraShardsList" .) | nindent 8 }}
+      KeeperPathPrefix: {{ required "dbManager.standbyCluster.keeperPathPrefix must be set when global.clickhouse.ha.enabled is true - an empty prefix makes the standby share the primary's S3Queue keeper path" .Values.dbManager.standbyCluster.keeperPathPrefix | quote }}
+      ObjectStoragePathPrefix: {{ required "dbManager.standbyCluster.objectStoragePathPrefix must be set when global.clickhouse.ha.enabled is true - an empty prefix makes both clusters consume the same S3 path with after_processing=delete, causing data loss" .Values.dbManager.standbyCluster.objectStoragePathPrefix | quote }}
+    {{- end }}
     ObjectStorageQueues:
       {{- toYaml .Values.dbManager.objectStorageQueues | nindent 6 }}
     ObjectStorageDestTables:
@@ -174,6 +182,12 @@ data:
       MinThreshold: {{ .Values.dbManager.popularAttributes.minThreshold | default 2 }}
       MaxKeysPerDomain: {{ .Values.dbManager.popularAttributes.maxKeysPerDomain | default 50 }}
       SyncInterval: {{ .Values.dbManager.popularAttributes.syncInterval | default "1h" }}
+    IngestionRowCountGap:
+      CheckInterval: {{ .Values.dbManager.ingestionRowCountGap.checkInterval | default "15s" }}
+      WindowWidth: {{ .Values.dbManager.ingestionRowCountGap.windowWidth | default "2m" }}
+      WindowSettle: {{ .Values.dbManager.ingestionRowCountGap.windowSettle | default "15s" }}
+      MinSampleSize: {{ .Values.dbManager.ingestionRowCountGap.minSampleSize | default 20 }}
+      QueryTimeout: {{ .Values.dbManager.ingestionRowCountGap.queryTimeout | default "30s" }}
     WorkloadScheduling:
       {{- toYaml .Values.dbManager.workloadScheduling | nindent 6 }}
     StorageManagement:

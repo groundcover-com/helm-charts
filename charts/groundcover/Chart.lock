@@ -20,6 +20,9 @@ dependencies:
 - name: clickhouse
   repository: ""
   version: 6.3.1
+- name: clickhouse
+  repository: ""
+  version: 6.3.1
 - name: opentelemetry-collector
   repository: https://open-telemetry.github.io/opentelemetry-helm-charts
   version: 0.122.0
@@ -38,5 +41,5 @@ dependencies:
 - name: vector
   repository: https://helm.vector.dev
   version: 0.37.0
-digest: sha256:6318f16ba0caa22dc2102017ddc7de27cbe5adfbaf70dbaf29842e601d715780
-generated: "2026-03-10T15:02:51.635881724Z"
+digest: sha256:ed1cb9116ff8e547d3f0e6bca78c3cb000c8e4604d8a3f06facdbcee67b1eade
+generated: "2026-07-06T09:46:37.130554+03:00"

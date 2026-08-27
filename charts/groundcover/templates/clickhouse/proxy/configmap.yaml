@@ -1,0 +1,85 @@
+{{- if (.Values.global.clickhouse.ha | default dict).enabled }}
+{{- $cfg := .Values.clickhouseProxy.config }}
+{{- /* FQDN required: HAProxy's resolvers don't apply /etc/resolv.conf search
+       domains, so a short name resolves once via libc at boot but fails
+       runtime re-resolution, parking the server in MAINT. */}}
+{{- /* Target shard0, not the cluster-wide Service, which load-balances
+       across every shard/replica - wrong for a proxy fronting exactly one
+       coordinator endpoint per cluster. */}}
+{{- $clusterDomain := .Values.clickhouseProxy.clusterDomain | default "cluster.local" }}
+{{- $primary := printf "%s.%s.svc.%s" (include "clickhouse.shard0Name" . | trim) .Release.Namespace $clusterDomain }}
+{{- $standby := printf "%s.%s.svc.%s" (include "clickhouse.standby.shard0Name" . | trim) .Release.Namespace $clusterDomain }}
+{{- $httpPort := .Values.global.clickhouse.containerPorts.http | int }}
+{{- $nativePort := .Values.global.clickhouse.containerPorts.tcp | int }}
+{{- $runtimeApiPort := .Values.clickhouseProxy.runtimeApi.port | int }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "clickhouse.proxyServiceName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "clickhouse-proxy.labels" . | nindent 4 }}
+data:
+  # Both backends read this same file, so one `set map` flips them atomically -
+  # never a moment where http and native select different clusters. In-memory
+  # only; restart reverts to this on-disk default, self-healed by the operator.
+  active.map: |
+    active primary
+  haproxy.cfg: |
+    global
+      log stdout format raw local0
+      # `level admin` required for `set map`/`show map`. TCP so the operator can reach each
+      # replica Pod directly; no built-in auth.
+      stats socket *:{{ $runtimeApiPort }} level admin
+      stats timeout 30s
+
+    defaults
+      log global
+      option dontlognull
+      timeout connect {{ $cfg.timeoutConnect }}
+      timeout client {{ $cfg.timeoutClient }}
+      timeout server {{ $cfg.timeoutServer }}
+      # Mandatory for k8s: Service ClusterIPs may not be resolvable at pod
+      # start; without this HAProxy refuses to boot until DNS is published.
+      default-server init-addr last,libc,none
+
+    # Track Service ClusterIP churn (CoreDNS restarts / Service recreates).
+    # Without a resolvers section HAProxy resolves once at startup via libc.
+    resolvers k8s
+      parse-resolv-conf
+      hold valid 10s
+
+    frontend fe_ch_http
+      bind *:{{ $httpPort }}
+      mode http
+      option httplog
+      default_backend be_ch_http
+
+    backend be_ch_http
+      mode http
+      option httpchk
+      http-check send meth GET uri /ping
+      http-check expect status 200
+      use-server standby if { str(active),map_str(/usr/local/etc/haproxy/active.map) -m str standby }
+      use-server primary if { str(active),map_str(/usr/local/etc/haproxy/active.map) -m str primary }
+      server primary {{ $primary }}:{{ $httpPort }} check inter {{ $cfg.checkInterval }} fall {{ $cfg.checkFall }} rise {{ $cfg.checkRise }} resolvers k8s
+      server standby {{ $standby }}:{{ $httpPort }} check inter {{ $cfg.checkInterval }} fall {{ $cfg.checkFall }} rise {{ $cfg.checkRise }} resolvers k8s
+
+    frontend fe_ch_native
+      bind *:{{ $nativePort }}
+      mode tcp
+      option tcplog
+      default_backend be_ch_native
+
+    backend be_ch_native
+      mode tcp
+      # Health check still goes over HTTP /ping on 8123 (check port), so both
+      # backends share one liveness signal and flip together via active.map.
+      option httpchk
+      http-check send meth GET uri /ping
+      http-check expect status 200
+      use-server standby if { str(active),map_str(/usr/local/etc/haproxy/active.map) -m str standby }
+      use-server primary if { str(active),map_str(/usr/local/etc/haproxy/active.map) -m str primary }
+      server primary {{ $primary }}:{{ $nativePort }} check port {{ $httpPort }} inter {{ $cfg.checkInterval }} fall {{ $cfg.checkFall }} rise {{ $cfg.checkRise }} resolvers k8s
+      server standby {{ $standby }}:{{ $nativePort }} check port {{ $httpPort }} inter {{ $cfg.checkInterval }} fall {{ $cfg.checkFall }} rise {{ $cfg.checkRise }} resolvers k8s
+{{- end }}

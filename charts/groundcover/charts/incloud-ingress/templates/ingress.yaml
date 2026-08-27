@@ -603,7 +603,7 @@ spec:
             pathType: ImplementationSpecific
             backend:
               service:
-                name: {{ include "clickhouse.fullname" . }}
+                name: {{ include "clickhouse.readHost" . }}
                 port:
                   name: http
 

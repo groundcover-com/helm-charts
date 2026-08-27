@@ -181,6 +181,48 @@ spec:
               sleep 2
             done
 {{- end }}
+{{- if (.Values.global.clickhouse.ha | default dict).enabled }}
+            
+            STANDBY_CLICKHOUSE_URL="{{ include "clickhouse.standby.httpEndpoint" . }}"
+            
+            # db-manager migrates standby right after primary, so it must be reachable here too.
+            while [ $(curl -sw '%{http_code}' "${STANDBY_CLICKHOUSE_URL}/ping" -o /dev/null) -ne 200 ]; do
+              echo 'Waiting for standby ClickHouse...'
+              sleep 2
+            done
+            echo 'Standby ClickHouse is up'
+{{- if .Values.dbManager.minClickhouseVersion }}
+
+            MIN_VERSION="{{ .Values.dbManager.minClickhouseVersion }}"
+            echo "Checking standby ClickHouse version (minimum required: $MIN_VERSION)..."
+            
+            while true; do
+              ACTUAL_VERSION=$(curl -s -u "${CLICKHOUSE_USER}:${CLICKHOUSE_PASS}" "$STANDBY_CLICKHOUSE_URL/?query=SELECT+version()" 2>&1 | tr -d '\n' | tr -d ' ')
+              
+              if [ -n "$ACTUAL_VERSION" ] && ! echo "$ACTUAL_VERSION" | grep -q "Exception\|Error\|error"; then
+                echo "Standby ClickHouse version: $ACTUAL_VERSION"
+                
+                ACTUAL_MAJOR_MINOR=$(echo "$ACTUAL_VERSION" | cut -d'.' -f1,2)
+                MIN_MAJOR_MINOR=$(echo "$MIN_VERSION" | cut -d'.' -f1,2)
+                ACTUAL_NUM=$(echo "$ACTUAL_MAJOR_MINOR" | awk -F. '{printf "%d%02d", $1, $2}')
+                MIN_NUM=$(echo "$MIN_MAJOR_MINOR" | awk -F. '{printf "%d%02d", $1, $2}')
+                
+                if [ "$ACTUAL_NUM" -lt "$MIN_NUM" ]; then
+                  echo "ERROR: standby ClickHouse version $ACTUAL_VERSION is below minimum required version $MIN_VERSION"
+                  echo "  Required: >= $MIN_VERSION"
+                  echo "  Got: $ACTUAL_MAJOR_MINOR (full version: $ACTUAL_VERSION)"
+                  exit 1
+                fi
+                
+                echo "Standby ClickHouse version check passed"
+                break
+              fi
+              
+              echo "Waiting for standby ClickHouse version info..."
+              sleep 2
+            done
+{{- end }}
+{{- end }}
       - name: wait-for-db
         image: {{ include "postgresql.initContainers.image" . }}
         env:

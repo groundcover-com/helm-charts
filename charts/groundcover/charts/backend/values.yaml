@@ -192,7 +192,7 @@ keep:
         authentication:
           username: '{{ include "clickhouse.username" . }}'
           password: '{{ include "clickhouse.password" . }}'
-          host: '{{ include "clickhouse.fullname" . }}'
+          host: '{{ include "clickhouse.readHost" . }}'
           port: '{{ .Values.global.clickhouse.containerPorts.tcp }}'
           database: '{{ include "clickhouse.database" . }}'
     enabled: true

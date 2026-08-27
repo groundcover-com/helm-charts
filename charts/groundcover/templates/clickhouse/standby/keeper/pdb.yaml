@@ -1,0 +1,3 @@
+{{- if (and (.Values.global.clickhouse.ha | default dict).enabled .Values.standbyKeeper.pdb.enabled) }}
+{{ include "clickhouseKeeper.pdb" (dict "root" . "values" .Values.standbyKeeper "valuesPath" "standbyKeeper" "nameSuffix" "clickhouse-standby-keeper") }}
+{{- end }}

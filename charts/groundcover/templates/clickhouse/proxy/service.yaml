@@ -1,0 +1,30 @@
+{{- if (.Values.global.clickhouse.ha | default dict).enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "clickhouse.proxyServiceName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "clickhouse-proxy.labels" . | nindent 4 }}
+  {{- with .Values.clickhouseProxy.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.clickhouseProxy.service.type }}
+  selector:
+    {{- include "clickhouse-proxy.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: http
+      port: {{ .Values.global.clickhouse.containerPorts.http | int }}
+      targetPort: http
+      protocol: TCP
+    - name: native
+      port: {{ .Values.global.clickhouse.containerPorts.tcp | int }}
+      targetPort: native
+      protocol: TCP
+    - name: runtime-api
+      port: {{ .Values.clickhouseProxy.runtimeApi.port | int }}
+      targetPort: runtime-api
+      protocol: TCP
+{{- end }}

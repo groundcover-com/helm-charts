@@ -17,7 +17,7 @@ data:
       address: {{ .Values.dispatchCenter.temporal.host | default (printf "%s-temporal-frontend:7233" .Release.Name) | quote }}
     
     clickhouse:
-      host: {{ include "clickhouse.fullname" . | quote }}
+      host: {{ include "clickhouse.readHost" . | quote }}
       port: {{ include "clickhouse.nativePort" . | quote }}
       database: {{ include "clickhouse.database" . | quote }}
       user: {{ include "clickhouse.username" . | quote }}

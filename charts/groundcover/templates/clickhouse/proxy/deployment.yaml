@@ -1,0 +1,89 @@
+{{- if (.Values.global.clickhouse.ha | default dict).enabled }}
+{{- $proxy := .Values.clickhouseProxy }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "clickhouse.proxyServiceName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "clickhouse-proxy.labels" . | nindent 4 }}
+spec:
+  # Omitted when autoscaling.enabled: leaving it out lets the HPA own replica
+  # count instead of fighting it back to $proxy.replicas on every helm upgrade.
+  {{- if not $proxy.autoscaling.enabled }}
+  replicas: {{ $proxy.replicas }}
+  {{- end }}
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      {{- include "clickhouse-proxy.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "clickhouse-proxy.selectorLabels" . | nindent 8 }}
+        {{- with $proxy.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/clickhouse/proxy/configmap.yaml") . | sha256sum }}
+        {{- with $proxy.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "clickhouse.proxyServiceName" . }}
+      automountServiceAccountToken: false
+      {{- $pullSecrets := $proxy.imagePullSecrets | default (.Values.global.imagePullSecrets | default list) }}
+      {{- with $pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $proxy.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $proxy.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $proxy.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: haproxy
+          image: {{ include "clickhouse-proxy.image" . | quote }}
+          imagePullPolicy: {{ $proxy.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.global.clickhouse.containerPorts.http | int }}
+              protocol: TCP
+            - name: native
+              containerPort: {{ .Values.global.clickhouse.containerPorts.tcp | int }}
+              protocol: TCP
+            - name: runtime-api
+              containerPort: {{ .Values.clickhouseProxy.runtimeApi.port | int }}
+              protocol: TCP
+          # Probe the proxy's OWN listener, never /ping (which would forward to
+          # whichever upstream is active and couple readiness to the backend).
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          resources:
+            {{- toYaml $proxy.resources | nindent 12 }}
+          volumeMounts:
+            - name: config
+              mountPath: /usr/local/etc/haproxy
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "clickhouse.proxyServiceName" . }}
+{{- end }}
