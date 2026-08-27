@@ -195,6 +195,16 @@ spec:
               name: {{ include "comm-hub.encryptionSecretName" . }}
               key: {{ include "comm-hub.encryptionSecretKeyName" . }}
               optional: true
+        {{- if include "comm-hub.backendKeyConfigured" . }}
+        {{/* Deliberately not optional: a deployment that configures a key here has
+             a router that rejects unkeyed requests, and starting without the key
+             turns that into a stream of 401s instead of a failed rollout. */}}
+        - name: GC_ROUTERPROXY_BACKENDKEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "comm-hub.backendKeySecretName" . | quote }}
+              key: {{ include "comm-hub.backendKeySecretKeyName" . | quote }}
+        {{- end }}
         {{- with .Values.commHub.env }}
         {{- tpl (toYaml .) $ | nindent 8 }}
         {{- end }}

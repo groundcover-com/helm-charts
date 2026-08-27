@@ -40,6 +40,33 @@ Release-scoped OAuth refresh singleton workflow ID.
 {{- end -}}
 
 {{/*
+Comm Hub router backend key. Never generated: the value has to match router's
+BACKEND_KEY, and a key the chart invents can only ever be wrong.
+
+`default dict` rather than `dig`: backendKey is undeclared in values.yaml, so a
+values file writing a bare `backendKey:` yields nil, and dig walks into it and
+dies with an interface-conversion error.
+*/}}
+{{- define "comm-hub.backendKeySecretName" -}}
+{{- $bk := default dict (.Values.commHub).backendKey -}}
+{{- $existing := $bk.existingSecret | default "" -}}
+{{- if and $existing ($bk.value | default "") -}}
+{{- fail "commHub.backendKey: set existingSecret or value, not both — existingSecret would win and value would be silently ignored." -}}
+{{- end -}}
+{{- $existing | default (printf "%s-comm-hub-backend-key" .Release.Name) -}}
+{{- end -}}
+
+{{- define "comm-hub.backendKeySecretKeyName" -}}
+{{- $bk := default dict (.Values.commHub).backendKey -}}
+{{- $bk.secretKey | default "backend-key" -}}
+{{- end -}}
+
+{{- define "comm-hub.backendKeyConfigured" -}}
+{{- $bk := default dict (.Values.commHub).backendKey -}}
+{{- if or ($bk.existingSecret | default "") ($bk.value | default "") -}}true{{- end -}}
+{{- end -}}
+
+{{/*
 Comm Hub encryption secret name
 */}}
 {{- define "comm-hub.encryptionSecretName" -}}

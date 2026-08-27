@@ -367,6 +367,9 @@ victoria-metrics-distributed:
     write:
       vmauth:
         spec:
+          resources:
+            requests:
+              cpu: 250m
           hpa:
             minReplicas: 2
             maxReplicas: 6
@@ -376,13 +379,7 @@ victoria-metrics-distributed:
                   name: cpu
                   target:
                     type: Utilization
-                    averageUtilization: 75
-              - type: Resource
-                resource:
-                  name: memory
-                  target:
-                    type: Utilization
-                    averageUtilization: 75
+                    averageUtilization: 90
     vmagent:
       spec:
         configReloaderImageTag: public.ecr.aws/groundcovercom/victoriametrics/operator:config-reloader-v0.68.2
@@ -445,6 +442,8 @@ victoria-metrics-distributed:
             requests:
               cpu: 500m
               memory: 2Gi
+          serviceSpec:
+            useAsDefault: true
         vmselect:
           image:
             repository: public.ecr.aws/groundcovercom/victoriametrics/vmselect

@@ -926,6 +926,7 @@ agent:
           "api_key",
           "Api-Key",
           "X-Api-Key",
+          "dd-api-key",
           "X-Csrf-Token",
           "X-XSRF-TOKEN",
           "X-Google-Api-Key",
@@ -2302,6 +2303,22 @@ dispatchCenter:
 
 commHub:
   replicas: 2
+  # Router base URL for comm-hub's /router-proxy (server-to-server, backend-auth
+  # signed). Empty derives https://<frontendDomain>, the browser edge — behind an
+  # auth proxy that returns a login redirect, so point it at something reaching
+  # router directly: http://router:8080 when co-located, else a host whose /api
+  # routes to router. Mirrors agentService.config.routerUrl.
+  routerUrl: ""
+  # Router's BACKEND_KEY, sent as x-webauth-backend-key on every /router-proxy
+  # call. Set only where router runs with one; all empty is no key at all, which
+  # is the default. Reaches the container as GC_ROUTERPROXY_BACKENDKEY from a
+  # secret, never from this file: name one you manage, or set value and let the
+  # chart create one. Setting both fails the render. secretKey falls back to
+  # backend-key.
+  backendKey:
+    existingSecret: ""
+    value: ""
+    secretKey: ""
   additionalLabels:
   podLabels:
   additionalAnnotations:

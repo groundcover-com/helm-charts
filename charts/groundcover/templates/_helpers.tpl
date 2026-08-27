@@ -151,6 +151,7 @@ Create the name of the service account to use
 {{- print "groundcover-config" -}}
 {{- end -}}
 
+
 {{/*
 Get cluster_id from values or generate random one
 */}}
