@@ -1083,7 +1083,6 @@ dbManager:
     checkInterval: "15s"
     windowWidth: "2m"
     windowSettle: "15s"
-    minSampleSize: 20
     queryTimeout: "30s"
   workloadScheduling:
     Resources:

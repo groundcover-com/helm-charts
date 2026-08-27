@@ -186,7 +186,6 @@ data:
       CheckInterval: {{ .Values.dbManager.ingestionRowCountGap.checkInterval | default "15s" }}
       WindowWidth: {{ .Values.dbManager.ingestionRowCountGap.windowWidth | default "2m" }}
       WindowSettle: {{ .Values.dbManager.ingestionRowCountGap.windowSettle | default "15s" }}
-      MinSampleSize: {{ .Values.dbManager.ingestionRowCountGap.minSampleSize | default 20 }}
       QueryTimeout: {{ .Values.dbManager.ingestionRowCountGap.queryTimeout | default "30s" }}
     WorkloadScheduling:
       {{- toYaml .Values.dbManager.workloadScheduling | nindent 6 }}
