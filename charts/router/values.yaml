@@ -64,7 +64,7 @@ service:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.12.299
+  tag: 1.12.300
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/tools'
@@ -179,6 +179,7 @@ configuration:
       Pass: "" # injected as GC_MONITORSV2_DB_PASS from the postgres secret
       Timeout: 150s
       Interval: 5s
+      StatementTimeout: 10s
       SSLMode: "disable"
   DatasourceRetryAttempts: 10
   DatasourceRetryInterval: 5s
