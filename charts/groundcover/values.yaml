@@ -929,6 +929,7 @@ agent:
           "api_key",
           "Api-Key",
           "X-Api-Key",
+          "X-ClickHouse-Key",
           "dd-api-key",
           "X-Csrf-Token",
           "X-XSRF-TOKEN",

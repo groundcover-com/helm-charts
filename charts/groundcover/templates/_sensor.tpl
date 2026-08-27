@@ -781,6 +781,11 @@ postgreSqlConfig:
   KeepSQLAlias: true
   ReplaceDigits: true
   CollectCommands: true
+
+clickHouseSQLConfig:
+  KeepSQLAlias: true
+  ReplaceDigits: true
+  CollectCommands: true
 {{ end }}
 
 telemetry:
