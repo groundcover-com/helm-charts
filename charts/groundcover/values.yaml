@@ -1157,14 +1157,14 @@ agentService:
     # GCP Vertex AI settings (used when llmProvider: "vertex")
     gcpProjectId: ""
     gcpRegion: "global"
-    vertexModelId: "claude-haiku-4-5@20251001"
+    vertexModelId: "claude-sonnet-4-6@default"
     vertexLargeModelId: "claude-sonnet-4-6@default"
     # Azure Foundry settings (used when llmProvider: "azure")
     # Provide either azureFoundryBaseUrl (full https://<resource>.services.ai.azure.com/anthropic)
     # or azureFoundryResource (just the resource name; SDK constructs the URL).
     azureFoundryBaseUrl: ""
     azureFoundryResource: ""
-    azureModelId: "claude-haiku-4-5"
+    azureModelId: "claude-sonnet-4-6"
     azureOrchestratorModelId: "claude-sonnet-4-6"
     # Set true to use AKS workload identity + Entra ID instead of an API key.
     # Requires azure-identity to be installed and the SA federated to a UAMI
@@ -1180,7 +1180,7 @@ agentService:
     # x-api-key sends the secret as-is. Every other header receives "Bearer <secret>"
     # in addition to the SDK-managed x-api-key header.
     anthropicAuthHeaderName: "x-api-key"
-    anthropicModelId: "claude-haiku-4-5"
+    anthropicModelId: "claude-sonnet-4-6"
     anthropicLargeModelId: "claude-sonnet-4-6"
     otelTracingEnabled: "true"
     otelServiceName: "agent-service"
