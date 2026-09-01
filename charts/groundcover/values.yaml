@@ -3024,7 +3024,7 @@ clickhouseProxy:
   image:
     registry: ""
     repository: haproxytech/haproxy-alpine
-    tag: "3.0.26"
+    tag: "3.0.26-20260827-1"
     pullPolicy: IfNotPresent
   # No built-in auth.
   runtimeApi:
