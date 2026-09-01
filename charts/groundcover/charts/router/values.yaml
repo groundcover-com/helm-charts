@@ -64,7 +64,7 @@ service:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.12.314
+  tag: 1.12.315
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/tools'
@@ -123,6 +123,8 @@ configuration:
     MCPOAuthClientId: "groundcover-mcp-client-id"
     # Default https redirect hosts the MCP OAuth proxy accepts (loopback http and
     # native schemes are always allowed). Override per-environment to add a host.
+    # An entry is an exact host, or a *.domain wildcard covering that domain and
+    # its subdomains.
     MCPOAuthAllowedRedirectHosts:
       - "claude.ai"
       - "vscode.dev"

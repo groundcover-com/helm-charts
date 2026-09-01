@@ -1,5 +1,5 @@
 apiVersion: v2
-appVersion: 1.12.314
+appVersion: 1.12.315
 dependencies:
 - condition: router.enabled
   import-values:
@@ -102,4 +102,4 @@ dependencies:
 description: Cloud Native Observability
 name: groundcover
 type: application
-version: 1.12.314
+version: 1.12.315
