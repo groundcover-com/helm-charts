@@ -64,7 +64,7 @@ service:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.12.319
+  tag: 1.12.321
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/tools'
@@ -176,7 +176,11 @@ configuration:
     DB:
       Host: '{{ splitList ":" (include "postgresql.base.url" .) | first }}'
       Port: '{{ splitList ":" (include "postgresql.base.url" .) | last }}'
-      Name: "monitors_v2"
+      # Shares the v1 monitors database; monitors_v2 is a separate table in it.
+      Name: "monitors"
+      # Own golang-migrate bookkeeping table, so v1's schema_migrations row in
+      # this same database does not make these migrations look already applied.
+      MigrationsTable: "monitors_v2_schema_migrations"
       User: '{{ include "postgresql.username" . }}'
       Pass: "" # injected as GC_MONITORSV2_DB_PASS from the postgres secret
       Timeout: 150s
