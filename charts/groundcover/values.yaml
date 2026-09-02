@@ -32,7 +32,14 @@ global:
         traces: []
         events: []
     nodes:
+      # Node labels to copy onto the metrics the sensor GENERATES itself, each
+      # arriving as node_label_<key>. Does not reach metrics the sensor receives.
       labels: []
+      # Adds `host` to the metrics the sensor RECEIVES, holding the node of the
+      # sensor that received them. StatsD and DogStatsD only; no other receiver
+      # honours it. A `host` tag already on the metric is never overwritten.
+      nameLabel:
+        enabled: false
 
   # Obfuscation of collected entity metadata. Applied by the k8s-watcher (k8s
   # container/pod entities) and the sensor (Linux/Docker container entities).
@@ -979,6 +986,9 @@ dbManager:
   standbyCluster:
     keeperPathPrefix: "standby"
     objectStoragePathPrefix: "standby"
+    parallelQueues:
+    parallelQueuesPerSignal: {}
+    maxProcessedFilesBeforeCommit: {}
   additionalLabels:
   podLabels:
   additionalAnnotations: {}

@@ -338,6 +338,10 @@ victoria-metrics-distributed:
     vmstorage:
       enabled: false
       annotations:
+  pvcResizeJob:
+    image: "{{ .Values.global.origin.registry }}/tools:20260719"
+    vmselect:
+      enabled: false
   common:
     vmauth:
       spec:

@@ -143,6 +143,17 @@ data:
         {{- (include "clickhouse.standby.extraShardsList" .) | nindent 8 }}
       KeeperPathPrefix: {{ required "dbManager.standbyCluster.keeperPathPrefix must be set when global.clickhouse.ha.enabled is true - an empty prefix makes the standby share the primary's S3Queue keeper path" .Values.dbManager.standbyCluster.keeperPathPrefix | quote }}
       ObjectStoragePathPrefix: {{ required "dbManager.standbyCluster.objectStoragePathPrefix must be set when global.clickhouse.ha.enabled is true - an empty prefix makes both clusters consume the same S3 path with after_processing=delete, causing data loss" .Values.dbManager.standbyCluster.objectStoragePathPrefix | quote }}
+      {{- if .Values.dbManager.standbyCluster.parallelQueues }}
+      ParallelQueues: {{ .Values.dbManager.standbyCluster.parallelQueues }}
+      {{- end }}
+      {{- if .Values.dbManager.standbyCluster.parallelQueuesPerSignal }}
+      ParallelQueuesPerSignal:
+        {{- toYaml .Values.dbManager.standbyCluster.parallelQueuesPerSignal | nindent 8 }}
+      {{- end }}
+      {{- if .Values.dbManager.standbyCluster.maxProcessedFilesBeforeCommit }}
+      MaxProcessedFilesBeforeCommit:
+        {{- toYaml .Values.dbManager.standbyCluster.maxProcessedFilesBeforeCommit | nindent 8 }}
+      {{- end }}
     {{- end }}
     ObjectStorageQueues:
       {{- toYaml .Values.dbManager.objectStorageQueues | nindent 6 }}

@@ -1,0 +1,99 @@
+{{- $vmConfig := index .Values "victoria-metrics-distributed" -}}
+{{- if and (.Values.global.backend.enabled) ($vmConfig.pvcResizeJob) ($vmConfig.pvcResizeJob.vmselect) ($vmConfig.pvcResizeJob.vmselect.enabled) -}}
+{{- $vmselect := $vmConfig.zoneTpl.vmcluster.spec.vmselect -}}
+{{- $target := "" -}}
+{{- if and $vmselect.storage $vmselect.storage.volumeClaimTemplate -}}
+{{- $target = dig "spec" "resources" "requests" "storage" "" $vmselect.storage.volumeClaimTemplate -}}
+{{- end -}}
+{{- if and $vmConfig.availabilityZones $target -}}
+{{- $replicaCount := $vmselect.replicaCount | default 2 -}}
+{{- range $zoneIndex, $zone := $vmConfig.availabilityZones -}}
+{{- $zoneName := $zone.name -}}
+{{- $stsName := printf "vmselect-vmcluster-%s" $zoneName -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ printf "vmselect-pvc-resize-%s" $zoneName }}
+  namespace: {{ $.Release.Namespace }}
+  annotations:
+    helm.sh/hook-weight: "0"
+    helm.sh/hook: "post-upgrade"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+  labels:
+    app.kubernetes.io/component: vmselect-pvc-resize
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: vmselect-pvc-resize
+    spec:
+      restartPolicy: Never
+      {{- if $.Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml $.Values.global.imagePullSecrets | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "statefulset-modifier.fullname" $ }}
+      containers:
+        - name: kubectl-pvc-resizer
+          image: {{ tpl $vmConfig.pvcResizeJob.image $ }}
+          command:
+            - sh
+            - -c
+            - |
+              set -u
+              NS="{{ $.Release.Namespace }}"
+              STS="{{ $stsName }}"
+              TARGET="{{ $target }}"
+
+              CUR=$(kubectl get sts "$STS" -n "$NS" -o jsonpath='{.spec.volumeClaimTemplates[0].spec.resources.requests.storage}' 2>/dev/null || true)
+              if [ -z "$CUR" ]; then
+                echo "statefulset $STS not found - nothing to do"
+                exit 0
+              fi
+              if [ "$CUR" = "$TARGET" ]; then
+                echo "$STS volumeClaimTemplate already $TARGET - nothing to do"
+                exit 0
+              fi
+
+              # Only ever grow, and only whole Gi values. Volumes cannot shrink, and a
+              # smaller template would leave the statefulset and its PVCs inconsistent.
+              cur_n=${CUR%Gi}
+              tgt_n=${TARGET%Gi}
+              case "$cur_n$tgt_n" in
+                ''|*[!0-9]*)
+                  echo "refusing: sizes must be whole Gi values (current=$CUR target=$TARGET)"
+                  exit 0
+                  ;;
+              esac
+              if [ "$tgt_n" -le "$cur_n" ]; then
+                echo "refusing: target $TARGET is not larger than current $CUR"
+                exit 0
+              fi
+
+              # A statefulset's volumeClaimTemplate is immutable, so the operator cannot
+              # resize it in place - it retries a forbidden update forever. An orphan
+              # delete lets the operator recreate the statefulset from the new spec while
+              # pods and PVCs keep running. That template only governs newly created PVCs,
+              # so existing ones are then patched to trigger the CSI expansion.
+              echo "resizing $STS volumeClaimTemplate $CUR -> $TARGET"
+              if ! kubectl delete sts "$STS" -n "$NS" --cascade=orphan; then
+                echo "orphan delete of $STS failed - leaving PVCs untouched"
+                exit 0
+              fi
+
+              {{- range $replicaIndex := until ($replicaCount | int) }}
+              PVC="vmselect-cachedir-{{ $stsName }}-{{ $replicaIndex }}"
+              if kubectl patch pvc "$PVC" -n "$NS" --type=merge \
+                   -p '{"spec":{"resources":{"requests":{"storage":"'"$TARGET"'"}}}}'; then
+                echo "patched $PVC to $TARGET"
+              else
+                echo "patching $PVC failed - resize it manually"
+              fi
+              {{- end }}
+
+              echo "done"
+---
+{{- end }}
+{{- end }}
+{{- end }}
