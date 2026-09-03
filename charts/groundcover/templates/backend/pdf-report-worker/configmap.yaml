@@ -10,6 +10,8 @@ metadata:
     app.kubernetes.io/name: pdf-report-worker
 data:
   config.yaml: |
+    clusterId: {{ include "groundcover.clusterId" . | quote }}
+
     temporal:
       address: {{ .Values.pdfReportWorker.temporal.host | default (printf "%s-temporal-frontend:7233" .Release.Name) | quote }}
 

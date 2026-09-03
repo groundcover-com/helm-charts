@@ -23,6 +23,7 @@ data:
     startuptimeout: 1m0s
 
     GroundcoverVersion: "OVERRIDEN"
+    ClusterId: {{ include "groundcover.clusterId" . | quote }}
     {{- if eq (include "telemetry.enabled" .) "true" }}
     Tracing:
       Enabled: true

@@ -6,6 +6,7 @@ data:
     httpPort: {{ .Values.monitorsService.httpPort }}
     healthProbePort: {{ .Values.monitorsService.healthProbePort }}
     logLevel: {{ .Values.monitorsService.logLevel }}
+    clusterId: {{ include "groundcover.clusterId" . | quote }}
     {{- if eq (include "telemetry.enabled" .) "true" }}
     tracing:
       enabled: true
