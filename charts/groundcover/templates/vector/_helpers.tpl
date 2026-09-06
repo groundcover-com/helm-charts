@@ -590,22 +590,24 @@ sinks:
 {{- /* Standby duplicate writes: same bucket, but every sink's key_prefix
        gets the standby prefix prepended. The prefix is required non-empty
        so we don't accidentally re-emit to the primary path. Backups are
-       intentionally NOT duplicated for the standby. */ -}}
-{{ if and .Values.global.clickhouse.ha.enabled (not (empty .Values.dbManager.standbyCluster.objectStoragePathPrefix)) }}
+       intentionally NOT duplicated for the standby. vector.standbyCluster.disableSinks
+       skips this independently of the required prefix, for a customer whose
+       db-manager standby ingestion doesn't need vector's duplicated copies. */ -}}
+{{ if and .Values.global.clickhouse.ha.enabled (not (empty .Values.dbManager.standbyCluster.objectStoragePathPrefix)) (not .Values.vector.standbyCluster.disableSinks) }}
 {{- tpl (include "vector.renderStandbySinks" (dict "root" $ "sourceKey" "s3" "prefixField" "key_prefix")) $ }}
 {{ end }}
 {{ else if and (not (empty .Values.vector.objectStorage.gcsBucket)) .Values.vector.objectStorage.allowed }} {{- /* ingestion using gcs */}}
 {{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.logsPipeline "sinks" .Values.vector.customComponents.sinks.gcs.logs)) $ -}}
 {{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.tracesPipeline "sinks" .Values.vector.customComponents.sinks.gcs.traces )) $ -}}
 {{- tpl (toYaml .Values.vector.customComponents.sinks.gcs.custom) $ | nindent 2 }}
-{{ if and .Values.global.clickhouse.ha.enabled (not (empty .Values.dbManager.standbyCluster.objectStoragePathPrefix)) }}
+{{ if and .Values.global.clickhouse.ha.enabled (not (empty .Values.dbManager.standbyCluster.objectStoragePathPrefix)) (not .Values.vector.standbyCluster.disableSinks) }}
 {{- tpl (include "vector.renderStandbySinks" (dict "root" $ "sourceKey" "gcs" "prefixField" "key_prefix")) $ }}
 {{ end }}
 {{ else if and (not (empty .Values.vector.objectStorage.azureBlobContainer)) (not (empty .Values.vector.objectStorage.azureConnectionString)) .Values.vector.objectStorage.allowed }} {{- /* ingestion using azure blob */}}
 {{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.logsPipeline "sinks" .Values.vector.customComponents.sinks.azure.logs)) $ -}}
 {{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.tracesPipeline "sinks" .Values.vector.customComponents.sinks.azure.traces)) $ -}}
 {{- tpl (toYaml .Values.vector.customComponents.sinks.azure.custom) $ | nindent 2 }}
-{{ if and .Values.global.clickhouse.ha.enabled (not (empty .Values.dbManager.standbyCluster.objectStoragePathPrefix)) }}
+{{ if and .Values.global.clickhouse.ha.enabled (not (empty .Values.dbManager.standbyCluster.objectStoragePathPrefix)) (not .Values.vector.standbyCluster.disableSinks) }}
 {{- tpl (include "vector.renderStandbySinks" (dict "root" $ "sourceKey" "azure" "prefixField" "blob_prefix")) $ }}
 {{ end }}
 {{ else if .Values.global.backend.enabled }} {{- /* ingestion to local DB */}}
