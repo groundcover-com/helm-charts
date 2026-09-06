@@ -558,6 +558,12 @@ apmIngestor:
     maxIdleConns: {{ dig "apmIngestor" "otlpConnectionPool" "maxIdleConns" 0 $sensorValues }}
     maxIdleConnsPerHost: {{ dig "apmIngestor" "otlpConnectionPool" "maxIdleConnsPerHost" 0 $sensorValues }}
     idleConnTimeout: {{ dig "apmIngestor" "otlpConnectionPool" "idleConnTimeout" "0s" $sensorValues }}
+    batchSendQueueWorkerCount: {{ dig "apmIngestor" "tracesOtlpEndpoint" "batchSendQueueWorkerCount" 0 $sensorValues }}
+    batchSendQueueMaxSize: {{ dig "apmIngestor" "tracesOtlpEndpoint" "batchSendQueueMaxSize" 0 $sensorValues }}
+    batchSendQueueMaxBytes: {{ include "groundcover.nonNegativeInteger" (dict "path" "batchSendQueueMaxBytes" "value" (dig "apmIngestor" "tracesOtlpEndpoint" "batchSendQueueMaxBytes" 0 $sensorValues)) }}
+    {{- with dig "apmIngestor" "tracesOtlpEndpoint" "backoffConfig" nil $sensorValues }}
+    backoffConfig: {{ toYaml . | nindent 6 }}
+    {{- end }}
   logsOtlpEndpoint:
     endpoint: {{ include "ingestion.logs.otlp.http.url" . }}
     compression: {{ .Values.global.ingestion.otlpCompression | default "gzip" }}
@@ -601,7 +607,7 @@ apmIngestor:
       maxConcurrentLogExportPodMemoryPercentage: {{ include "groundcover.nonNegativeInteger" (dict "path" "maxConcurrentLogExportPodMemoryPercentage" "value" ($sensorValues.apmIngestor.otel.direct.maxConcurrentLogExportPodMemoryPercentage | default 0)) }}
       maxConcurrentMetricExportBytes: {{ include "groundcover.nonNegativeInteger" (dict "path" "maxConcurrentMetricExportBytes" "value" ($sensorValues.apmIngestor.otel.direct.maxConcurrentMetricExportBytes | default 0)) }}
       maxConcurrentMetricExportPodMemoryPercentage: {{ include "groundcover.nonNegativeInteger" (dict "path" "maxConcurrentMetricExportPodMemoryPercentage" "value" ($sensorValues.apmIngestor.otel.direct.maxConcurrentMetricExportPodMemoryPercentage | default 0)) }}
-      exportAcquireWait: {{ $sensorValues.apmIngestor.otel.direct.exportAcquireWait | default "1s" }}
+      exportAcquireWait: {{ $sensorValues.apmIngestor.otel.direct.exportAcquireWait | default "0s" }}
       zipkin:
         enabled: {{ $sensorValues.apmIngestor.otel.direct.zipkin.enabled }}
         port: {{ $sensorValues.apmIngestor.otel.direct.zipkin.port }}
@@ -687,11 +693,11 @@ logs:
   {{ end }}
   client:
     batchwait: 5000ms
-    batchsize: {{ .Values.logBatchSize }}
+    batchsize: {{ int64 .Values.logBatchSize }}
     backoffConfig:
-      minBackoff: 500ms
+      minBackoff: {{ .Values.logBatchMinBackoff }}
       maxBackoff: {{ .Values.logBatchMaxBackoff }}
-      maxRetries: 10
+      maxRetries: {{ .Values.logBatchMaxRetries }}
     timeout: 10s
     useRingBuffer: false
     dropRunningNamespaceLogs: {{  include "groundcover.dropRunningNamespaceLogs" .}}

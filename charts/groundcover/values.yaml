@@ -444,7 +444,9 @@ decolorizeLogs: false
 maxLogSize: 102400 # 100KB
 maxLogContentSize: 15360 # 15KB
 logBatchSize: 20971520 # 20MB
+logBatchMinBackoff: 500ms
 logBatchMaxBackoff: 30s
+logBatchMaxRetries: 10
 logBatchSendQueueWorkerCount: 5
 logBatchSendQueueMaxSize: 10
 maxLogLinesPerBatch: 20000
@@ -714,7 +716,25 @@ agent:
           delayStart: 2m
     apmIngestor:
       tracesOtlpEndpoint:
+        # Spans handed to the processors at a time. Bounds the transient per-worker
+        # expansion, not the serialized chunks retained for the whole batch.
         maxSpansPerMarshal: 300
+        # Bounded trace export: a worker pool drains a bounded queue and a request that
+        # finds no room is rejected with a retryable 503 instead of growing memory. The
+        # worker count and the batch backstop derive from the cores available.
+        # This is a per-pipeline admission budget in *input* bytes — each batch's OTLP
+        # proto size as received, before the processors expand it — and NOT a hard cap
+        # on resident memory. An admitted batch costs that weight times an expansion set
+        # by your attribute cardinality; an idle queue admits one over-budget batch on
+        # purpose and reports the overshoot; request bodies being decoded before
+        # admission and the chunks a worker retains for a whole batch are both outside
+        # it. 0 derives the budget from the pod's memory limit.
+        batchSendQueueMaxBytes: 0
+        # Failed exports are retried with exponential backoff (500ms doubling to 30s) like
+        # log batches; maxRetries is the total number of attempts, 0 keeps a single
+        # attempt. 10 attempts wait about 90s in total, plus the write timeout per attempt.
+        backoffConfig:
+          maxRetries: 10
       otlpConnectionPool:
         maxIdleConns: 100
         maxIdleConnsPerHost: 100
@@ -759,15 +779,18 @@ agent:
           maxConcurrentRequests: 0
           # Explicit byte budgets take precedence and should be quoted to preserve int64 precision.
           # Otherwise set an integer pod-memory percentage from 0 to 100.
-          # Zero for both leaves the signal unlimited.
+          # Zero for both leaves the signal unlimited. For traces this only tightens what the
+          # send queue's own byte bound already enforces, so the smaller of the two governs;
+          # for logs and metrics it is the only byte bound.
           maxConcurrentTraceExportBytes: "0"
           maxConcurrentTraceExportPodMemoryPercentage: 0
           maxConcurrentLogExportBytes: "0"
           maxConcurrentLogExportPodMemoryPercentage: 0
           maxConcurrentMetricExportBytes: "0"
           maxConcurrentMetricExportPodMemoryPercentage: 0
-          # Set to 0s to reject immediately when the export budget is full.
-          exportAcquireWait: 1s
+          # How long a request may wait for export budget before it is refused with a
+          # retryable 503. Waiting holds the decoded request in memory, so refuse at once.
+          exportAcquireWait: 0s
           zipkin:
             enabled: true
             port: 9411
@@ -1561,7 +1584,26 @@ ingestor:
   setLocalTrafficPolicy: false
   apmIngestor:
     tracesOtlpEndpoint:
+      # Spans handed to the processors at a time. Bounds the transient per-worker
+      # expansion, not the serialized chunks retained for the whole batch.
       maxSpansPerMarshal: 300
+      # Bounded trace export: a worker pool drains a bounded queue and a request that
+      # finds no room is rejected with a retryable 503 instead of growing memory. The
+      # worker count and the batch backstop derive from the cores available.
+      # This is a per-pipeline admission budget in *input* bytes — each batch's OTLP
+      # proto size as received, before the processors expand it — and NOT a hard cap on
+      # resident memory. An admitted batch costs that weight times an expansion set by
+      # the sender's attribute cardinality; an idle queue admits one over-budget batch
+      # on purpose and reports the overshoot; request bodies being decoded before
+      # admission (see maxConcurrentRequests, which counts requests, not bytes) and the
+      # chunks a worker retains for a whole batch are both outside it.
+      # 0 derives the budget from the pod's memory limit.
+      batchSendQueueMaxBytes: 0
+      # Failed exports are retried with exponential backoff (500ms doubling to 30s) like
+      # log batches; maxRetries is the total number of attempts, 0 keeps a single
+      # attempt. 10 attempts wait about 90s in total, plus the write timeout per attempt.
+      backoffConfig:
+        maxRetries: 10
     otlpConnectionPool:
       maxIdleConns: 100
       maxIdleConnsPerHost: 100
@@ -1609,15 +1651,20 @@ ingestor:
         maxConcurrentRequests: 0
         # Explicit byte budgets take precedence and should be quoted to preserve int64 precision.
         # Otherwise set an integer pod-memory percentage from 0 to 100.
-        # Zero for both leaves the signal unlimited.
+        # Zero for both leaves the signal unlimited. For traces this only tightens what the
+        # send queue's own byte bound already enforces, so the smaller of the two governs;
+        # for logs and metrics it is the only byte bound.
         maxConcurrentTraceExportBytes: "0"
-        maxConcurrentTraceExportPodMemoryPercentage: 0
+        # In-flight trace bytes, held from decode until the send queue has delivered the
+        # batch, may use this share of the pod memory; the rest is refused with a retryable 503.
+        maxConcurrentTraceExportPodMemoryPercentage: 10
         maxConcurrentLogExportBytes: "0"
         maxConcurrentLogExportPodMemoryPercentage: 0
         maxConcurrentMetricExportBytes: "0"
         maxConcurrentMetricExportPodMemoryPercentage: 0
-        # Set to 0s to reject immediately when the export budget is full.
-        exportAcquireWait: 1s
+        # How long a request may wait for export budget before it is refused with a
+        # retryable 503. Waiting holds the decoded request in memory, so refuse at once.
+        exportAcquireWait: 0s
         zipkin:
           enabled: true
           port: 9411
@@ -1813,7 +1860,23 @@ metricsAggregator:
   setLocalTrafficPolicy: false
   apmIngestor:
     tracesOtlpEndpoint:
+      # Spans handed to the processors at a time. Bounds the transient per-worker
+      # expansion, not the serialized chunks retained for the whole batch.
       maxSpansPerMarshal: 300
+      # Bounded trace export: a worker pool drains a bounded queue and a request that
+      # finds no room is rejected with a retryable 503 instead of growing memory. The
+      # worker count and the batch backstop derive from the cores available; the byte
+      # budget below is the bound that governs memory, since a sender chooses its
+      # batch size.
+      # The queue's memory bound: total marshaled bytes of the batches it holds, waiting
+      # and in flight. This is the bound that matters — the batch count above cannot,
+      # since a sender chooses its batch size. 0 derives it from the pod's memory limit.
+      batchSendQueueMaxBytes: 0
+      # Failed exports are retried with exponential backoff (500ms doubling to 30s) like
+      # log batches; maxRetries is the total number of attempts, 0 keeps a single
+      # attempt. 10 attempts wait about 90s in total, plus the write timeout per attempt.
+      backoffConfig:
+        maxRetries: 10
     otlpConnectionPool:
       maxIdleConns: 100
       maxIdleConnsPerHost: 100
