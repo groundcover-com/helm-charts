@@ -3124,6 +3124,7 @@ clickhouseProxy:
     checkInterval: 5s
     checkFall: 2
     checkRise: 2
+    logLevel: notice
 
 opentelemetry-collector:
   enabled: true

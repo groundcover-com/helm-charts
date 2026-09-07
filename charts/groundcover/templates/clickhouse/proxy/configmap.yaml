@@ -27,7 +27,7 @@ data:
     active primary
   haproxy.cfg: |
     global
-      log stdout format raw local0
+      log stdout format raw local0 {{ $cfg.logLevel }}
       # `level admin` required for `set map`/`show map`. TCP so the operator can reach each
       # replica Pod directly; no built-in auth.
       stats socket *:{{ $runtimeApiPort }} level admin
@@ -53,6 +53,7 @@ data:
       bind *:{{ $httpPort }}
       mode http
       option httplog
+      option log-separate-errors
       default_backend be_ch_http
 
     backend be_ch_http
@@ -69,6 +70,7 @@ data:
       bind *:{{ $nativePort }}
       mode tcp
       option tcplog
+      option log-separate-errors
       default_backend be_ch_native
 
     backend be_ch_native
