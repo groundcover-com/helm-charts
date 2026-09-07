@@ -8,19 +8,18 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/require"
+
+	"groundcover.com/internal/testpath"
 )
 
 func renderGroundcoverChart(t *testing.T, values string) ([]byte, error) {
 	t.Helper()
 
-	_, filename, _, ok := runtime.Caller(0)
-	require.True(t, ok)
-	chartDir := filepath.Dir(filename)
+	chartDir := testpath.Join(t, "k8s", "groundcover")
 	valuesPath := filepath.Join(t.TempDir(), "values.yaml")
 	require.NoError(t, os.WriteFile(valuesPath, []byte(values), 0o600))
 
