@@ -252,6 +252,28 @@ http
 {{- end -}}
 {{- end -}}
 
+{{- define "vector.json.tables.write.aws_cost_reports.path" -}}
+{{-  printf "%s/aws_cost_reports" (include "vector.cluster.json.tables.write.path" .) -}}
+{{- end -}}
+
+{{- define "vector.cluster.json.table.write.aws_cost_reports.url" -}}
+{{-  printf "%s%s" (include "vector.cluster.json.table.write.endpoint" .) (include "vector.json.tables.write.aws_cost_reports.path" . )  -}}
+{{- end -}}
+
+{{- define "vector.incloud.json.table.write.aws_cost_reports.url" -}}
+{{- printf "https://%s%s" .Values.global.ingress.site (include "vector.json.tables.write.aws_cost_reports.path" . )  -}}
+{{- end -}}
+
+{{- define "vector.json.table.write.aws_cost_reports.url" -}}
+{{- if .Values.global.backend.enabled -}}
+    {{- include "vector.cluster.json.table.write.aws_cost_reports.url" . -}}
+{{- else if .Values.global.ingress.site -}}
+    {{- include "vector.incloud.json.table.write.aws_cost_reports.url" . -}}
+{{- else if not .Values.global.backend.enabled -}}
+    {{- fail "A valid global.ingress.site is required!" -}}
+{{- end -}}
+{{- end -}}
+
 {{- define "vector.health.http.url" -}}
 {{- if .Values.global.vector.health.overrideHttpURL -}}
     {{- print .Values.global.vector.health.overrideHttpURL -}}
@@ -579,8 +601,9 @@ sinks:
 {{- tpl (toYaml .Values.vector.customComponents.sinks.extraSinks) $ | nindent 2 }}
 {{ end }}
 {{- tpl (toYaml .Values.vector.customComponents.sinks.metrics) $ | nindent 2 }}
-{{ if .Values.global.backend.enabled }} {{- /* this sink is always local only, no matter of ingestion mode */ -}}
+{{ if .Values.global.backend.enabled }} {{- /* these sinks are always local only, no matter of ingestion mode */ -}}
 {{- tpl (toYaml (dict "clickhouse_aws_billing_report" .Values.vector.customComponents.sinks.local.custom.clickhouse_aws_billing_report)) $ | nindent 2 }}
+{{- tpl (toYaml (dict "clickhouse_aws_cost_reports" .Values.vector.customComponents.sinks.local.custom.clickhouse_aws_cost_reports)) $ | nindent 2 }}
 {{ end }}
 {{- /* ingestion modes */ -}}
 {{ if and (not (empty .Values.vector.objectStorage.s3Bucket)) .Values.vector.objectStorage.allowed }} {{- /* ingestion using s3 */}}

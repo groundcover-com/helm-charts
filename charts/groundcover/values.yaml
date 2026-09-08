@@ -1317,7 +1317,8 @@ chip:
 # AWS cost reports (CUR, BE-2223/BE-2224). Single source of truth for the processed-CUR
 # S3 sink, shared by its writer (integrations-agent AwsCurSink) and its reader (db-manager's
 # aws_cost_reports_v1 refreshable MV). Set per-env by infra when the sink bucket is
-# provisioned; the feature is enabled exactly when sink.bucket AND sink.region are set.
+# provisioned; sink.bucket AND sink.region enable only the legacy v1 s3() MV. The
+# aws_cost_reports tables, their retention, and the v2 raw/fold chain exist regardless.
 awsCostReports:
   sink:
     bucket: "" # e.g. "groundcover-cost-reports-<install-id>"
@@ -1327,6 +1328,11 @@ awsCostReports:
     # true = dedup on per-source-file S3 object tags (BE-2800), which also requires
     # s3:GetObjectTagging/s3:PutObjectTagging on the customer's CUR reader role.
     sourceTagDedup: false
+  # true = the agent streams CUR rows to Vector (table aws_cost_reports_raw_v2) instead of
+  # writing the S3 sink (BE-2906). Requires sink.sourceTagDedup: true — with no sink object,
+  # the source files' tags are the only ingest commit record. sink.bucket/region are unused
+  # in this mode (the legacy v1 MV is simply never created without them).
+  vectorWrite: false
   refreshInterval: 1d # {amount}[h(ours), d(ays), w(eeks), y(ears)]; integration commits to "up to 24h"
   retention: 365d # TTL on line_item_usage_start_date, via shared TableDataRetention; {amount}[h/d/w/y]
 
@@ -3770,6 +3776,7 @@ vector:
           route:
             metrics_metadata: .path == {{ include "vector.json.tables.write.metrics_metadata.path" . | quote}}
             aws_billing_report: .path == {{ include "vector.json.tables.write.aws_billing_report.path" . | quote}}
+            aws_cost_reports: .path == {{ include "vector.json.tables.write.aws_cost_reports.path" . | quote}}
         measurements:
           inputs:
             - custom_from_logs_routing.measurements
@@ -4370,6 +4377,36 @@ vector:
             batch:
               max_bytes: 100000000
               max_events: 10000
+              timeout_secs: 2
+            healthcheck:
+              enabled: false
+          clickhouse_aws_cost_reports:
+            type: clickhouse
+            inputs:
+              - table_write_routing.aws_cost_reports
+            endpoint: '{{ include "clickhouse.shard0HttpEndpoint" . }}'
+            database: "groundcover"
+            table: "aws_cost_reports_raw_v2"
+            request:
+              retry_attempts: 5
+            auth:
+              user: '{{ include "clickhouse.username" . }}'
+              password: $CLICKHOUSE_PASSWORD
+              strategy: "basic"
+            format: "json_each_row"
+            encoding:
+              timestamp_format: rfc3339
+            date_time_best_effort: true
+            buffer:
+                type: memory
+                max_events: 10000
+                # block (not drop_newest): the CUR agent tags source files as ingested on
+                # HTTP 2xx, so a dropped event here is silent data loss until the next
+                # delivery — backpressure the agent's retrying POST instead (BE-2906).
+                when_full: block
+            batch:
+              max_bytes: 100000000
+              max_events: 5000
               timeout_secs: 2
             healthcheck:
               enabled: false
