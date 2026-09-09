@@ -1180,7 +1180,8 @@ agentService:
   extraVolumeMounts: []
   config:
     routerUrl: ""
-    llmProvider: "bedrock"  # "bedrock", "vertex", "azure", "anthropic", or "anthropic_compatible_endpoint"
+    # Use "dummy_provider" only for deployments without a managed static default.
+    llmProvider: "bedrock"  # "bedrock", "vertex", "azure", "anthropic", "anthropic_compatible_endpoint", or "dummy_provider"
     llmProviderTlsCertificate:
       certificatePath: ""
       privateKeyPath: ""
