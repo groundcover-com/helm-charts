@@ -641,6 +641,9 @@ apmIngestor:
 pprof:
   enabled: {{ include "telemetry.enabled" . }}
   cpuSamplingDuration: {{ $sensorValues.pprof.cpuSamplingDuration }}
+  mutexProfiler:
+    enabled: {{ dig "pprof" "mutexProfiler" "enabled" false $sensorValues }}
+    fraction: {{ dig "pprof" "mutexProfiler" "fraction" 10 $sensorValues }}
   httpUploader:
     enabled: {{ eq $sensorValues.pprof.uploaderType "http" }}
     pushURL: {{ printf "%s/upload/pprof" (include "telemetry.metrics.base.url" .) }}

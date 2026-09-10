@@ -1847,6 +1847,11 @@ metricsAggregator:
     enabled: '{{ include "telemetry.enabled" . }}'
     uploaderType: pyroscope
     cpuSamplingDuration: 60s
+    # Continuously sample one out of every N contended mutex events and include
+    # delta mutex profiles in the existing auto-profiler uploads to OBS.
+    mutexProfiler:
+      enabled: false
+      fraction: 10
     backoffTicker:
       interval: 10s
       exponent: 40
