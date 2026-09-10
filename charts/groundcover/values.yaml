@@ -3124,6 +3124,9 @@ clickhouseProxy:
   nodeSelector: {}
   tolerations: []
   affinity: {}
+  pdb:
+    enabled: true
+    minAvailable: 1
   config:
     timeoutConnect: 10s
     timeoutClient: 600s

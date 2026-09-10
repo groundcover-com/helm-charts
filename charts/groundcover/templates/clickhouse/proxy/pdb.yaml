@@ -1,0 +1,19 @@
+{{- if and (.Values.global.clickhouse.ha | default dict).enabled .Values.clickhouseProxy.pdb.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "clickhouse.proxyServiceName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "clickhouse-proxy.labels" . | nindent 4 }}
+spec:
+  {{- if .Values.clickhouseProxy.pdb.minAvailable }}
+  minAvailable: {{ .Values.clickhouseProxy.pdb.minAvailable }}
+  {{- end }}
+  {{- if .Values.clickhouseProxy.pdb.maxUnavailable }}
+  maxUnavailable: {{ .Values.clickhouseProxy.pdb.maxUnavailable }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "clickhouse-proxy.selectorLabels" . | nindent 6 }}
+{{- end }}
