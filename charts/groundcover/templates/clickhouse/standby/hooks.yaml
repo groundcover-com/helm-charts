@@ -1,0 +1,3 @@
+{{- if (.Values.global.clickhouse.ha | default dict).enabled -}}
+{{- include "clickhouse.statefulsetModifierHooks" (dict "root" $ "valuesKey" "clickhouse-standby" "fullnameTemplate" "clickhouse.standby.fullname" "jobSuffix" "ch-standby" "nameOverrideDefault" "clickhouse-standby") -}}
+{{- end -}}

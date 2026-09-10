@@ -2,6 +2,16 @@
 {{- printf "%s-statefulset-modifier" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
+{{- define "statefulset-modifier.jobName" -}}
+{{- $name := .name -}}
+{{- if le (len $name) 63 -}}
+{{- $name -}}
+{{- else -}}
+{{- $hash := sha256sum $name | trunc 8 -}}
+{{- printf "%s-%s" ($name | trunc 54 | trimSuffix "-") $hash -}}
+{{- end -}}
+{{- end -}}
+
 {{- define "volume-expansion.annotations-patches" -}}
 sts:
 - op: add
