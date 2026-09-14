@@ -1495,6 +1495,7 @@ ingestor:
     repository: "{{ .Values.global.origin.registry }}/sensor"
     tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
   replicas: 2
+  logBatchSendQueueMaxSize: 30
   additionalLabels:
   additionalAnnotations:
   podLabels:

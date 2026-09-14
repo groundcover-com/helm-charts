@@ -705,7 +705,7 @@ logs:
     useRingBuffer: false
     dropRunningNamespaceLogs: {{  include "groundcover.dropRunningNamespaceLogs" .}}
     logBatchSendQueueWorkerCount: {{ .Values.logBatchSendQueueWorkerCount }} 
-    logBatchSendQueueMaxSize : {{ .Values.logBatchSendQueueMaxSize }}
+    logBatchSendQueueMaxSize : {{ dig "logBatchSendQueueMaxSize" .Values.logBatchSendQueueMaxSize $sensorValues }}
     maxLogLinesPerBatch: {{ .Values.maxLogLinesPerBatch }}
     otlpExportLimits:
       jsonFlattenMaxDepth: {{ .Values.jsonFlattenMaxDepth }}
