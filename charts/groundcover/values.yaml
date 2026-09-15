@@ -2575,6 +2575,13 @@ commHub:
         mcpServerURL: https://mcp.notion.com/mcp
         authMode: oauth
         iconDomain: notion.so
+      - id: monday
+        displayName: monday.com
+        description: Connect monday.com to access boards, items, workspaces, and updates.
+        mcpServerURL: https://mcp.monday.com/mcp
+        authMode: oauth
+        iconDomain: monday.com
+        setupHelp: A monday.com admin must allow MCP access under Administration → Permissions → AI Connectors before users can connect.
       - id: pylon
         displayName: Pylon
         description: Connect Pylon to access your customer support issues and knowledge base.
