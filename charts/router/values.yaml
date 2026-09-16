@@ -64,7 +64,7 @@ service:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.12.367
+  tag: 1.12.368
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/tools'
@@ -194,6 +194,14 @@ configuration:
       Enabled: true
     Logs:
       Enabled: true
+    IndexTier:
+      # Emit an OTEL span with the deduced tier on every query so the
+      # optimization can be evaluated without affecting query results.
+      Suggest: true
+      # When true, inject the deduced index_tier condition into queries so
+      # ClickHouse skips unneeded partitions. Requires Suggest: true to be
+      # meaningful; set Apply: false to observe before enabling.
+      Apply: false
   UseStaticAssets: false
   RUM:
     SourceMaps:
