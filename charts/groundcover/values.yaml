@@ -721,17 +721,19 @@ agent:
         # Spans handed to the processors at a time. Bounds the transient per-worker
         # expansion, not the serialized chunks retained for the whole batch.
         maxSpansPerMarshal: 300
-        # Bounded trace export: a worker pool drains a bounded queue and a request that
-        # finds no room is rejected with a retryable 503 instead of growing memory. The
-        # worker count and the batch backstop derive from the cores available.
-        # This is a per-pipeline admission budget in *input* bytes — each batch's OTLP
-        # proto size as received, before the processors expand it — and NOT a hard cap
-        # on resident memory. An admitted batch costs that weight times an expansion set
-        # by your attribute cardinality; an idle queue admits one over-budget batch on
-        # purpose and reports the overshoot; request bodies being decoded before
-        # admission and the chunks a worker retains for a whole batch are both outside
-        # it. 0 derives the budget from the pod's memory limit.
-        batchSendQueueMaxBytes: 0
+        # Each trace-export queue limit is independent: -1 is unlimited, 0 selects
+        # the automatic default, and a positive value sets an explicit limit.
+        # Sensors start every admitted batch immediately and do not cap batch count
+        # or input bytes. Accounting, retries and shutdown draining remain active.
+        # Under a slow backend, concurrent exports and retained memory can grow.
+        # Automatic workers use GOMAXPROCS. Automatic batch count is 4 * workers
+        # for finite workers, or 4 * GOMAXPROCS when workers are unlimited.
+        batchSendQueueWorkerCount: -1
+        batchSendQueueMaxSize: -1
+        # A positive budget measures input protobuf bytes, not resident memory.
+        # 0 derives it from the pod memory limit; -1 leaves it unlimited.
+        # Quote decimal byte counts to preserve int64 precision; units such as "1KB" are not supported.
+        batchSendQueueMaxBytes: "-1"
         # Failed exports are retried with exponential backoff (500ms doubling to 30s) like
         # log batches; maxRetries is the total number of attempts, 0 keeps a single
         # attempt. 10 attempts wait about 90s in total, plus the write timeout per attempt.
@@ -779,11 +781,12 @@ agent:
               action: upsert
           samplingRatio: 0.05
           maxConcurrentRequests: 0
-          # Explicit byte budgets take precedence and should be quoted to preserve int64 precision.
+          # Explicit byte budgets take precedence; quote decimal byte counts to preserve int64 precision.
+          # Units such as "1KB" are not supported.
           # Otherwise set an integer pod-memory percentage from 0 to 100.
-          # Zero for both leaves the signal unlimited. For traces this only tightens what the
-          # send queue's own byte bound already enforces, so the smaller of the two governs;
-          # for logs and metrics it is the only byte bound.
+          # Zero for both leaves the signal unlimited. If a trace send-queue byte
+          # budget is also configured, the smaller budget governs. Sensors default
+          # both budgets to unlimited; these receiver limits do not cover Datadog traces.
           maxConcurrentTraceExportBytes: "0"
           maxConcurrentTraceExportPodMemoryPercentage: 0
           maxConcurrentLogExportBytes: "0"
@@ -1789,7 +1792,8 @@ ingestor:
       # admission (see maxConcurrentRequests, which counts requests, not bytes) and the
       # chunks a worker retains for a whole batch are both outside it.
       # 0 derives the budget from the pod's memory limit.
-      batchSendQueueMaxBytes: 0
+      # Quote decimal byte counts to preserve int64 precision; units such as "1KB" are not supported.
+      batchSendQueueMaxBytes: "0"
       # Failed exports are retried with exponential backoff (500ms doubling to 30s) like
       # log batches; maxRetries is the total number of attempts, 0 keeps a single
       # attempt. 10 attempts wait about 90s in total, plus the write timeout per attempt.
@@ -2067,7 +2071,8 @@ metricsAggregator:
       # The queue's memory bound: total marshaled bytes of the batches it holds, waiting
       # and in flight. This is the bound that matters — the batch count above cannot,
       # since a sender chooses its batch size. 0 derives it from the pod's memory limit.
-      batchSendQueueMaxBytes: 0
+      # Quote decimal byte counts to preserve int64 precision; units such as "1KB" are not supported.
+      batchSendQueueMaxBytes: "0"
       # Failed exports are retried with exponential backoff (500ms doubling to 30s) like
       # log batches; maxRetries is the total number of attempts, 0 keeps a single
       # attempt. 10 attempts wait about 90s in total, plus the write timeout per attempt.

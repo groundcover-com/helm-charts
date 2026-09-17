@@ -8,7 +8,39 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"gopkg.in/yaml.v3"
 )
+
+type traceQueueSettings struct {
+	Workers int    `yaml:"batchSendQueueWorkerCount"`
+	Batches int    `yaml:"batchSendQueueMaxSize"`
+	Bytes   string `yaml:"batchSendQueueMaxBytes"`
+}
+
+func TestTraceSendQueueLimitsDefaultToUnlimitedOnlyOnSensors(t *testing.T) {
+	for _, tc := range []struct {
+		name      string
+		configMap string
+		values    string
+		expected  traceQueueSettings
+	}{
+		{name: "sensor limits are unlimited", configMap: "sensor-configuration", expected: traceQueueSettings{-1, -1, "-1"}},
+		{name: "ingestor keeps automatic limits", configMap: "ingestor-config", expected: traceQueueSettings{0, 0, "0"}},
+		{name: "metrics aggregator keeps automatic limits", configMap: "export-limits-test-metrics-aggregator-config", expected: traceQueueSettings{0, 0, "0"}},
+		{name: "sensor can opt into automatic limits", configMap: "sensor-configuration", values: "agent:\n  sensor:\n    apmIngestor:\n      tracesOtlpEndpoint:\n        batchSendQueueWorkerCount: 0\n        batchSendQueueMaxSize: 0\n        batchSendQueueMaxBytes: 0\n", expected: traceQueueSettings{0, 0, "0"}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			configYAML := renderConfigMapData(t, tc.values, tc.configMap, "config.yaml")
+			var config struct {
+				APMIngestor struct {
+					TracesOTLPEndpoint traceQueueSettings `yaml:"tracesOtlpEndpoint"`
+				} `yaml:"apmIngestor"`
+			}
+			require.NoError(t, yaml.Unmarshal([]byte(configYAML), &config))
+			require.Equal(t, tc.expected, config.APMIngestor.TracesOTLPEndpoint)
+		})
+	}
+}
 
 // The trace send queue and retry settings are rendered key by key, so a value that is
 // not passed through would silently fall back to the binary's defaults.
@@ -19,12 +51,22 @@ func TestTracesSendQueueSettingsReachEveryOtlpReceiver(t *testing.T) {
 	require.NoError(t, err, string(output))
 	rendered := string(output)
 	// The ingestor, the metrics aggregator and the sensor each run an OTLP receiver.
-	require.Equal(t, 3, strings.Count(rendered, "batchSendQueueWorkerCount: 0"), "worker count left to the binary, which derives it from the cores available")
-	require.Equal(t, 3, strings.Count(rendered, "batchSendQueueMaxSize: 0"), "batch backstop likewise derived")
-	require.Equal(t, 3, strings.Count(rendered, `batchSendQueueMaxBytes: "0"`), "default byte budget, derived from the pod memory limit")
+	require.Equal(t, 2, strings.Count(rendered, "batchSendQueueWorkerCount: 0"), "non-sensor worker counts remain automatic")
+	require.Equal(t, 2, strings.Count(rendered, "batchSendQueueMaxSize: 0"), "non-sensor batch limits remain automatic")
+	require.Equal(t, 2, strings.Count(rendered, `batchSendQueueMaxBytes: "0"`), "non-sensor byte budgets remain automatic")
 	// The logs client renders a backoffConfig of its own, so anchor on the traces block.
-	tracesRetries := regexp.MustCompile(`batchSendQueueMaxSize: 0\n\s+batchSendQueueMaxBytes: "0"\n\s+backoffConfig: ?\n\s+maxRetries: 10`)
+	tracesRetries := regexp.MustCompile(`batchSendQueueMaxSize: (?:-1|0)\n\s+batchSendQueueMaxBytes: "(?:-1|0)"\n\s+backoffConfig: ?\n\s+maxRetries: 10`)
 	require.Len(t, tracesRetries.FindAllString(rendered, -1), 3, "default retry schedule")
+}
+
+func TestTraceSendQueueByteBudgetAcceptsMinusOneAsUnlimited(t *testing.T) {
+	for _, value := range []string{"-1", `"-1"`} {
+		t.Run(value, func(t *testing.T) {
+			output, err := renderGroundcoverChart(t, "agent:\n  sensor:\n    apmIngestor:\n      tracesOtlpEndpoint:\n        batchSendQueueMaxBytes: "+value+"\n")
+			require.NoError(t, err, string(output))
+			require.Contains(t, string(output), `batchSendQueueMaxBytes: "-1"`)
+		})
+	}
 }
 
 func TestTracesSendQueueOverridesReachTheIngestorConfig(t *testing.T) {

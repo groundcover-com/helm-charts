@@ -560,7 +560,12 @@ apmIngestor:
     idleConnTimeout: {{ dig "apmIngestor" "otlpConnectionPool" "idleConnTimeout" "0s" $sensorValues }}
     batchSendQueueWorkerCount: {{ dig "apmIngestor" "tracesOtlpEndpoint" "batchSendQueueWorkerCount" 0 $sensorValues }}
     batchSendQueueMaxSize: {{ dig "apmIngestor" "tracesOtlpEndpoint" "batchSendQueueMaxSize" 0 $sensorValues }}
-    batchSendQueueMaxBytes: {{ include "groundcover.nonNegativeInteger" (dict "path" "batchSendQueueMaxBytes" "value" (dig "apmIngestor" "tracesOtlpEndpoint" "batchSendQueueMaxBytes" 0 $sensorValues)) }}
+    {{- $traceQueueMaxBytes := dig "apmIngestor" "tracesOtlpEndpoint" "batchSendQueueMaxBytes" 0 $sensorValues }}
+    {{- if eq (toString $traceQueueMaxBytes) "-1" }}
+    batchSendQueueMaxBytes: "-1"
+    {{- else }}
+    batchSendQueueMaxBytes: {{ include "groundcover.nonNegativeInteger" (dict "path" "batchSendQueueMaxBytes" "value" $traceQueueMaxBytes) }}
+    {{- end }}
     {{- with dig "apmIngestor" "tracesOtlpEndpoint" "backoffConfig" nil $sensorValues }}
     backoffConfig: {{ toYaml . | nindent 6 }}
     {{- end }}
