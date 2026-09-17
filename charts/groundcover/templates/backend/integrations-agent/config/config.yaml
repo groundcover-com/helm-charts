@@ -433,6 +433,12 @@ data:
       {{- end }}
     {{- end }}
 
+    - Type: "measurements_otlp_http"
+      Name: "measurements_otlp_http"
+      Url: {{ include "ingestion.custom.otlp.http.url" . | quote }}
+      TlsSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
+      RequestTimeout: {{ dig "measurements" "requestTimeout" "10s" (.Values.integrationsAgent.exporters | default dict) }}
+
     - Type: "otlp_http_traces"
       Name: "otlp_http_traces"
       TlsSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}

@@ -1,0 +1,193 @@
+{{- if eq (include "bucket-streamer.enabled" .) "true" }}
+{{- $bs := .Values.bucketStreamer }}
+{{- $provider := include "bucket-streamer.objectStore.provider" . }}
+{{- $pgUrl := printf "postgres://%s@%s/%s?sslmode=%s" (include "postgresql.username" .) (include "postgresql.base.url" .) (include "postgresql.database" .) $bs.postgres.sslmode }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "bucket-streamer.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+    {{- with $bs.additionalAnnotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  labels:
+    {{- include "bucket-streamer.labels" . | nindent 4 }}
+spec:
+  replicas: {{ $bs.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "bucket-streamer.selectorLabels" . | nindent 6 }}
+  {{- with $bs.updateStrategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  template:
+    metadata:
+      annotations:
+        groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+        prometheus.io/scrape: "true"
+        prometheus.io/port: {{ include "bucket-streamer.port" . | quote }}
+        # The init container renders the config at startup, so an edited
+        # ConfigMap only reaches a pod through a roll.
+        checksum/config: {{ include (print $.Template.BasePath "/backend/bucket-streamer/configmap.yaml") . | sha256sum }}
+        {{- if .Values.global.clickhouse.dictionaryUser.enabled }}
+        # The init container bakes the ClickHouse password into the rendered
+        # config, so a rotation only reaches the pod through a roll (same
+        # annotation the other in-tree ClickHouse consumers carry).
+        checksum/clickhouse-secret: {{ include "clickhouse.password" . | sha256sum }}
+        {{- end }}
+        {{- with $bs.additionalAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with $bs.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "bucket-streamer.labels" . | nindent 8 }}
+        {{- with $bs.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "bucket-streamer.serviceAccountName" . }}
+      # In-flight batches get this long to finish on SIGTERM; workers cancel and
+      # roll back past worker.drain_timeout, and the bucket buffers meanwhile.
+      terminationGracePeriodSeconds: {{ $bs.terminationGracePeriodSeconds }}
+      imagePullSecrets: {{ include "imagePullSecrets" . }}
+      {{- with $bs.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
+      {{- with $bs.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $bs.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $bs.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $bs.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $bs.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        # Creates the coordination database on first boot and renders the
+        # ClickHouse password into the config. Both need psql/sed, so they
+        # share the release's Postgres init image.
+        - name: init-db-and-config
+          image: {{ include "postgresql.initContainers.image" . }}
+          imagePullPolicy: {{ .Values.global.postgresql.initContainers.image.pullPolicy | default "IfNotPresent" }}
+          env:
+            - name: PG_URL
+              value: {{ $pgUrl | quote }}
+            - name: PG_DATABASE
+              value: {{ $bs.postgres.database | quote }}
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "postgresql.secretName" . | quote }}
+                  key: {{ include "postgresql.adminPasswordKey" . | quote }}
+            - name: CH_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "clickhouse.secretName" . | quote }}
+                  key: {{ include "clickhouse.secretKey" . | quote }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -e
+              until pg_isready -q -d "$PG_URL"; do
+                echo "waiting for postgres"
+                sleep 2
+              done
+              exists() {
+                [ -n "$(psql "$PG_URL" -tAc "SELECT 1 FROM pg_database WHERE datname = '$PG_DATABASE'")" ]
+              }
+              if ! exists; then
+                # Replicas race here on a fresh install; the loser's CREATE fails on
+                # pg_database's unique index, which is fine as long as it exists after.
+                psql "$PG_URL" -c "CREATE DATABASE \"$PG_DATABASE\"" || exists
+              fi
+              # Escape for a double-quoted YAML scalar, then for the sed replacement
+              # (backslashes from the first pass included).
+              esc=$(printf '%s' "$CH_PASSWORD" | sed -e 's/[\\"]/\\&/g' -e 's/[\\&|]/\\&/g')
+              sed -e "s|__CH_PASSWORD__|$esc|g" /template/config.yaml.template > /etc/bucket-streamer/config.yaml
+          volumeMounts:
+            - name: config-template
+              mountPath: /template
+              readOnly: true
+            - name: config
+              mountPath: /etc/bucket-streamer
+      containers:
+        - name: bucket-streamer
+          image: {{ include "bucket-streamer.image" . }}
+          imagePullPolicy: {{ $bs.image.pullPolicy }}
+          # No args: the image defaults to -config /etc/bucket-streamer/config.yaml.
+          env:
+            # Read by pgx (libpq-compatible); keeps the password out of the DSN.
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "postgresql.secretName" . | quote }}
+                  key: {{ include "postgresql.adminPasswordKey" . | quote }}
+            - name: INSTANCE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            {{- if eq $provider "s3" }}
+            {{- with include "bucket-streamer.objectStore.region" . }}
+            # Credentials come from the ServiceAccount's web identity; the SDK
+            # still needs the region.
+            - name: AWS_REGION
+              value: {{ . | quote }}
+            {{- end }}
+            {{- end }}
+            {{- if and (eq $provider "azure") .Values.vector.objectStorage.azureConnectionString (not $bs.objectStore.azureAccountUrl) }}
+            - name: AZURE_CONNECTION_STRING
+              value: {{ .Values.vector.objectStorage.azureConnectionString | quote }}
+            {{- end }}
+            {{- if and (eq $provider "azure") $bs.objectStore.azureAccountUrl }}
+            - name: AZURE_ACCOUNT_URL
+              value: {{ $bs.objectStore.azureAccountUrl | quote }}
+            {{- end }}
+            {{- with $bs.env }}
+            {{- tpl (toYaml .) $ | nindent 12 }}
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ include "bucket-streamer.port" . }}
+              protocol: TCP
+          {{- with $bs.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with $bs.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml $bs.resources | nindent 12 }}
+          {{- include "groundcover.containerResizePolicy" (dict "value" $bs.resizePolicy "path" "bucketStreamer.resizePolicy" "kubeVersion" .Capabilities.KubeVersion.GitVersion "indent" 10) }}
+          {{- with $bs.containerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: config
+              mountPath: /etc/bucket-streamer
+              readOnly: true
+      volumes:
+        - name: config-template
+          configMap:
+            name: {{ include "bucket-streamer.configMapName" . }}
+        - name: config
+          emptyDir: {}
+{{- end }}

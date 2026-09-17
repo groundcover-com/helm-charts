@@ -126,6 +126,8 @@ global:
   frontendDomain: app.groundcover.com
   syntheticsWorker:
     enabled: false
+  bucketStreamer:
+    enabled: false
 
   ingress:
     # set ingress site for inCloud / on-prem sensor only deployments
@@ -1154,6 +1156,9 @@ dbManager:
   enableStorageMgmt: false
   # Maximum number of index tiers (active + previously deleted) allowed per data type policy.
   maxIndexTiers: 20
+  # Set ttl_only_drop_parts on the index-tier tables (logs_v9/traces_v5/events_v4 + subtables).
+  # Only applied on the storage-management path. Set to false to explicitly reset the setting to 0.
+  ttlOnlyDropParts: true
 agentService:
   enabled: false
   replicas: 2
@@ -1275,6 +1280,182 @@ agentService:
     enabled: false
     serverAddress: ""
     apiKeySecret: {}
+
+# bucket-streamer drains the queue bucket's v5/ prefixes into ClickHouse, replacing
+# the S3Queue engine tables (dbManager.objectStorageQueues). Enable with
+# global.bucketStreamer.enabled. It uses the release's Postgres (its own database)
+# and ClickHouse admin credentials; object-store access is ambient through the
+# ServiceAccount (IRSA / workload identity) unless the provider needs a
+# connection string. Inert until the sensor's vector sinks write v5/ prefixes.
+bucketStreamer:
+  replicaCount: 2
+  image:
+    registry: public.ecr.aws/groundcovercom
+    repository: bucket-streamer
+    tag: "0.0.2"
+    pullPolicy: IfNotPresent
+  serviceAccount:
+    # A dedicated ServiceAccount is created by default. To run under an existing
+    # one (e.g. the ClickHouse SA whose cloud role already covers the queue
+    # bucket) set create: false and name it here.
+    create: true
+    name: ""
+    # Cloud identity binding, e.g. eks.amazonaws.com/role-arn or
+    # iam.gke.io/gcp-service-account.
+    annotations: {}
+  postgres:
+    # Created by the init container on first boot; holds the coordination schema.
+    database: bucket_streamer
+    sslmode: require
+    # Every in-flight batch holds one pooled connection for the whole insert.
+    # Size above sum(max_concurrent x destination shards) across signals plus
+    # a few for the scanner and reaper. An undersized pool does not fail loudly:
+    # workers block on Acquire (bucket_streamer_postgres_empty_acquires_total).
+    maxConns: 80
+  objectStore:
+    # Empty values follow vector.objectStorage: s3Bucket -> s3, gcsBucket -> gcs,
+    # azureBlobContainer -> azure, with the same bucket/container and region.
+    provider: ""
+    bucket: ""
+    region: ""
+    # Provider endpoint override (e.g. MinIO / a private S3 endpoint).
+    endpoint: ""
+    # Azure: prefer workload identity via account URL over the connection string
+    # that vector.objectStorage.azureConnectionString carries. AKS workload
+    # identity also needs `azure.workload.identity/use: "true"` in podLabels
+    # below, the same way the chart's sibling services take it.
+    azureAccountUrl: ""
+  # With global.clickhouse.ha.enabled the standby cluster can be added as a
+  # second destination (a mirror, not extra shards). Off by default: a standby
+  # outage stalls finalize until it catches up, which is intended for a mirror
+  # but couples ingestion to the standby's health. If it is enabled and then
+  # gone for good, set dead: true so its pending work is admin-completed and
+  # batches finalize (those batches then need an out-of-band replay into the
+  # standby).
+  standbyDestination:
+    enabled: false
+    dead: false
+  # Additional ClickHouse destinations beyond the release's own cluster. Every batch fans out to each destination and
+  # files leave the live prefix only once all committed. Each entry needs `id`
+  # and `shards: [{id, endpoint}]`; endpoint goes through tpl, database and
+  # username default to the release's ClickHouse values, and password defaults
+  # to the same admin password the primary uses. Optional `draining` / `dead`
+  # per shard and `dead` per destination follow the streamer's semantics.
+  # An explicit `password` is rendered verbatim into the ConfigMap (only the
+  # default placeholder is substituted from a Secret at pod start), so set one
+  # only for a credential you accept storing there.
+  extraDestinations: []
+  # Raw sections of the streamer's config.yaml (scanner, worker, reaper,
+  # clickhouse). Rendered through tpl and emitted as-is; see the
+  # bucket-streamer config.example.yaml for every key. An object_store section
+  # merges into the generated one (provider/bucket/region stay generated), so
+  # put only tuning keys there.
+  config:
+    scanner:
+      interval: 100ms
+      # Default is 1000. Raised so backpressure does not cap the ingest rate.
+      max_pending_per_signal: 10000
+    worker: {}
+    clickhouse:
+      # Per-INSERT settings. Empty min_insert_block_size_* lets the server
+      # profile squash parsed blocks before they become parts.
+      insert_settings:
+        min_insert_block_size_rows: ""
+        min_insert_block_size_bytes: ""
+        input_format_parallel_parsing: 0
+        async_insert: 1
+        wait_for_async_insert: 1
+  # Defaults merged under every signals entry (an entry's own keys win).
+  # min_batch_size / max_age: a scan batches a signal's fresh files once they
+  # total min_batch_size listed (compressed) bytes, or max_age has passed since
+  # its last enqueued batch; set both to 0 for immediate one-scan batching.
+  # max_concurrent is the per-shard in-flight insert cap of the signal's
+  # (signal, destination) pool; see postgres.maxConns above.
+  signalDefaults:
+    format: JSONEachRow
+    min_batch_size: 1048576
+    max_age: 10s
+    max_batch_bytes: 10485760
+    max_batch_files: 50
+    max_concurrent: 8
+  # One drained signal per key, merged over signalDefaults. The key is the
+  # signal name unless the entry sets `name`. A map so a single signal can be
+  # tuned without restating the rest (`--set bucketStreamer.signals.logs.max_concurrent=16`);
+  # set `enabled: false` on an entry to drop it. prefix and input_table go
+  # through tpl, so the tables follow dbManager.objectStorageDestTables where a
+  # key exists. Signals without extra_shards are pinned to the main shard
+  # (shard-0).
+  signals:
+    logs:
+      prefix: v5/logs_v3/
+      input_table: "{{ .Values.dbManager.objectStorageDestTables.logs }}"
+      extra_shards: true
+    traces:
+      prefix: v5/traces_v2/
+      input_table: "{{ .Values.dbManager.objectStorageDestTables.traces }}"
+      extra_shards: true
+    measurements:
+      prefix: v5/measurements/
+      input_table: measurements
+      extra_shards: true
+    events:
+      prefix: v5/events_v2/
+      input_table: "{{ .Values.dbManager.objectStorageDestTables.events }}"
+    entities:
+      prefix: v5/entities_v2/
+      input_table: entities_v1
+    session_replay:
+      prefix: v5/session_replay/
+      input_table: session_replay_v1
+    monitors:
+      prefix: v5/monitors_v5/
+      input_table: monitor_state_v1
+    metrics_metadata:
+      prefix: v5/metrics_metadata/
+      input_table: "{{ .Values.dbManager.objectStorageDestTables.metricsMetadata }}"
+  # Extra environment variables for the streamer container (rendered through tpl).
+  env: []
+  resources:
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      memory: 2Gi
+  resizePolicy: []
+  livenessProbe:
+    # Process-alive only, so a Postgres blip does not restart the pod.
+    httpGet:
+      path: /healthz
+      port: http
+    initialDelaySeconds: 5
+    periodSeconds: 10
+  readinessProbe:
+    # Reflects Postgres connectivity: NotReady while the bucket buffers.
+    httpGet:
+      path: /readyz
+      port: http
+    initialDelaySeconds: 3
+    periodSeconds: 5
+  terminationGracePeriodSeconds: 90
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  pdb:
+    enabled: true
+    minAvailable: 1
+  additionalLabels: {}
+  additionalAnnotations: {}
+  podLabels: {}
+  podAnnotations: {}
+  podSecurityContext: {}
+  containerSecurityContext: {}
+  priorityClassName: ""
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  topologySpreadConstraints: []
 
 chip:
   enabled: false
@@ -1427,6 +1608,8 @@ integrationsAgent:
         requests: 1
         interval: 2s
   exporters:
+    measurements:
+      requestTimeout: 10s
     prometheus:
       requestTimeout: 30s
       batchSize: 2000

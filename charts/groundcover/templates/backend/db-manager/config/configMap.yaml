@@ -213,6 +213,7 @@ data:
       SkipMigrations: {{ .Values.dbManager.skipMigrations }}
       EnableStorageMgmt: {{ .Values.dbManager.enableStorageMgmt | default false }}
       MaxIndexTiers: {{ .Values.dbManager.maxIndexTiers | default 20 }}
+      TTLOnlyDropParts: {{ .Values.dbManager.ttlOnlyDropParts | default false }}
     {{- if .Values.global.monitorsStore.enabled }}
     MonitorsStore:
       Enabled: true

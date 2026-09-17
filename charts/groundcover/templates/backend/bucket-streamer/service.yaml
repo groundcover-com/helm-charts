@@ -1,0 +1,23 @@
+{{- if eq (include "bucket-streamer.enabled" .) "true" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "bucket-streamer.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+    {{- with .Values.bucketStreamer.additionalAnnotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  labels:
+    {{- include "bucket-streamer.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: {{ include "bucket-streamer.port" . }}
+      protocol: TCP
+      targetPort: http
+  selector:
+    {{- include "bucket-streamer.selectorLabels" . | nindent 4 }}
+{{- end }}
