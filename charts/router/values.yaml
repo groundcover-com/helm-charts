@@ -64,7 +64,7 @@ service:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.12.374
+  tag: 1.12.375
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/tools'
@@ -129,6 +129,14 @@ configuration:
       - "claude.ai"
       - "vscode.dev"
       - "www.cursor.com"
+    # Google as the MCP OAuth IdP; off by default, every other IdP unaffected.
+    # Enabling it pins Issuer/Audience/EmailClaimKey/DiscoveryEnabled/
+    # RequiredScope and requires a client secret — the router refuses to start
+    # otherwise. See the mcpoauth package docs.
+    MCPOAuthGoogleIdP: false
+    # Sent as client_secret_post on IdP token calls. Never set here: deliver it
+    # as GC_JWT_MCPOAUTHCLIENTSECRET from a k8s Secret (router.extraEnv).
+    MCPOAuthClientSecret: ""
   RBAC:
     DB:
       Host: '{{ splitList ":" (include "postgresql.base.url" .) | first }}'
@@ -223,6 +231,7 @@ configuration:
   ExportService:
     Enabled: '{{ dig "exportService" "enabled" false .Values.global }}'
     Endpoint: '{{ printf "http://%s:3001" (printf "%s-export-service" .Release.Name | trunc 63 | trimSuffix "-") }}'
+  AllowReadersToEditDashboards: false
 strategy:
   type: RollingUpdate
   rollingUpdate:
