@@ -132,6 +132,8 @@ spec:
             {{- end }}
             - name: LLM_PROVIDER
               value: {{ $agentService.config.llmProvider | default "bedrock" | quote }}
+            - name: PROVIDER_REASONING_EFFORT
+              value: {{ $agentService.config.providerReasoningEffort | default "medium" | quote }}
             {{- if $agentService.config.awsRegion }}
             - name: AWS_REGION
               value: {{ $agentService.config.awsRegion | quote }}

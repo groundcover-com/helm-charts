@@ -1224,6 +1224,7 @@ agentService:
     anthropicAuthHeaderName: "x-api-key"
     anthropicModelId: "claude-sonnet-4-6"
     anthropicLargeModelId: "claude-sonnet-4-6"
+    providerReasoningEffort: "medium"
     otelTracingEnabled: "true"
     otelServiceName: "agent-service"
     otelExporterOtlpEndpoint: ""
