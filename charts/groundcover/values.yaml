@@ -1500,25 +1500,9 @@ chip:
       cpu: "2000m"
   resizePolicy: []
 
-# AWS cost reports (CUR, BE-2223/BE-2224). Single source of truth for the processed-CUR
-# S3 sink, shared by its writer (integrations-agent AwsCurSink) and its reader (db-manager's
-# aws_cost_reports_v1 refreshable MV). Set per-env by infra when the sink bucket is
-# provisioned; sink.bucket AND sink.region enable only the legacy v1 s3() MV. The
-# aws_cost_reports tables, their retention, and the v2 raw/fold chain exist regardless.
+# AWS cost reports (CUR). The integrations-agent streams CUR rows to Vector, which writes
+# aws_cost_reports_raw_v2; the fold MV rewrites aws_cost_reports_v2 every refreshInterval.
 awsCostReports:
-  sink:
-    bucket: "" # e.g. "groundcover-cost-reports-<install-id>"
-    region: "" # sink bucket region; required to enable (the MV reads cross-region by URL)
-    prefix: "" # optional; each integration writes under <prefix>/<exportName>/
-    # false = dedup deliveries on the sink object's manifest-last-modified metadata.
-    # true = dedup on per-source-file S3 object tags (BE-2800), which also requires
-    # s3:GetObjectTagging/s3:PutObjectTagging on the customer's CUR reader role.
-    sourceTagDedup: false
-  # true = the agent streams CUR rows to Vector (table aws_cost_reports_raw_v2) instead of
-  # writing the S3 sink (BE-2906). Requires sink.sourceTagDedup: true — with no sink object,
-  # the source files' tags are the only ingest commit record. sink.bucket/region are unused
-  # in this mode (the legacy v1 MV is simply never created without them).
-  vectorWrite: false
   refreshInterval: 1d # {amount}[h(ours), d(ays), w(eeks), y(ears)]; integration commits to "up to 24h"
   retention: 365d # TTL on line_item_usage_start_date, via shared TableDataRetention; {amount}[h/d/w/y]
 

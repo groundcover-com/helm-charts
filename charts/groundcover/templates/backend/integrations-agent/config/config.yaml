@@ -12,36 +12,6 @@ data:
     LabelEnrichment:
     {{- .Values.global.labelEnrichment | toYaml | nindent 6 }}
     {{- end }}
-    {{- if eq (toString .Values.awsCostReports.vectorWrite) "true" }}
-    {{- /* Vector write (BE-2906): no S3 sink; the source files' dedup tags are the only
-           ingest commit record, so tag dedup is mandatory. */}}
-    {{- if ne (toString .Values.awsCostReports.sink.sourceTagDedup) "true" }}
-    {{- fail "awsCostReports.vectorWrite requires awsCostReports.sink.sourceTagDedup: true" }}
-    {{- end }}
-    AwsCurSink:
-      VectorWrite: true
-      SourceTagDedup: true
-    {{- else }}
-    {{- with .Values.awsCostReports.sink }}
-    {{- /* bucket AND region, matching db-manager's $awsCurHasSink gate — a looser gate here
-           would have the agent fill a sink that db-manager never creates the table/MV for. */}}
-    {{- if and .bucket .region }}
-    # Sink destination for all awscur integrations (single source of truth: root
-    # awsCostReports.sink, shared with db-manager's ClickHouse refresh). The per-export
-    # sink folder comes from each manifest's exportArn, so there is no per-agent report name.
-    AwsCurSink:
-      Bucket: "{{ .bucket }}"
-      Region: "{{ .region }}"
-      {{- if .prefix }}
-      Prefix: "{{ .prefix }}"
-      {{- end }}
-      {{- /* toString-eq so the string "false" doesn't enable it (non-empty = truthy in `if`) */}}
-      {{- if eq (toString .sourceTagDedup) "true" }}
-      SourceTagDedup: true
-      {{- end }}
-    {{- end }}
-    {{- end }}
-    {{- end }}
     {{- if .Values.integrationsAgent }}
     {{- if .Values.integrationsAgent.targets }}
     Targets:
@@ -410,7 +380,6 @@ data:
       {{- end }}
       {{- end }}
       {{- end }}
-    {{- if eq (toString .Values.awsCostReports.vectorWrite) "true" }}
     - Type: "awscur_http_json"
       Name: "awscur_http_json"
       Url: {{ include "vector.json.table.write.aws_cost_reports.url" . }}
@@ -431,7 +400,6 @@ data:
       {{- end }}
       {{- end }}
       {{- end }}
-    {{- end }}
 
     - Type: "measurements_otlp_http"
       Name: "measurements_otlp_http"

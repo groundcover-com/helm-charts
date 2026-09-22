@@ -9,13 +9,6 @@ metadata:
 
 data:
   config.yaml: |-
-    {{- /* aws_cost_reports sink (single source of truth: root awsCostReports.sink, shared with
-           the integrations-agent). The aws_cost_reports tables always exist; $awsCurHasSink only
-           gates the legacy v1 s3() refreshable MV, so the retention entry below is unconditional. */}}
-    {{- $curSink := .Values.awsCostReports.sink }}
-    {{- $awsCurHasSink := and (ne (toString $curSink.bucket) "") (ne (toString $curSink.region) "") }}
-    {{- $awsCurPath := ternary (printf "%s/**.parquet" $curSink.prefix) "**.parquet" (ne (toString $curSink.prefix) "") }}
-
     LogLevel: 4
 
     startuptimeout: 1m0s
@@ -166,13 +159,7 @@ data:
       PricingFileURLV2: "https://{{ .Values.dbManager.llmPricing.bucket }}.s3.{{ .Values.dbManager.llmPricing.region }}.amazonaws.com/{{ .Values.dbManager.llmPricing.pathV2 }}"
       RefreshInterval: {{ .Values.dbManager.llmPricing.refreshInterval }}
     AWSCostReports:
-      # RefreshInterval drives the v2 fold MV too, which exists on every install, so gating
-      # it on the sink would silently drop a configured cadence in vector-write mode.
-      # SinkURL alone stays sink-gated — it enables only the legacy v1 s3() MV.
       RefreshInterval: {{ .Values.awsCostReports.refreshInterval }}
-      {{- if $awsCurHasSink }}
-      SinkURL: "https://{{ $curSink.bucket }}.s3.{{ $curSink.region }}.amazonaws.com/{{ $awsCurPath }}"
-      {{- end }}
     CustomAttributesIndexes:
       InvertedIndexLogsKeys:
         {{- toYaml .Values.dbManager.customAttributesIndexes.invertedIndexLogsKeys | nindent 8 }}
