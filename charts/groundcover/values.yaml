@@ -5239,6 +5239,11 @@ router:
 # Chart.yaml condition uses metricsIngester.enabled (no hyphen in path); keep in sync with metrics-ingester.enabled.
 metricsIngester:
   enabled: true
+curl: &curlImage
+  image:
+    repository: '{{ .Values.global.origin.registry }}/tools'
+    tag: '20260719'
+
 metrics-ingester:
   enabled: true
   # Horizontal scaling for metrics-ingester (signals ingestion / batching is horizontally
@@ -5277,6 +5282,19 @@ metrics-ingester:
     - maxSkew: 1
       topologyKey: topology.kubernetes.io/zone
       whenUnsatisfiable: ScheduleAnyway
+  # wait for the metrics write endpoint to accept the current API key before starting, like the
+  # sensor daemonset, so a bad secret surfaces as a stuck init instead of a Running pod that 401s
+  # forever. Off by default when the backend runs in-cluster: that endpoint does not validate the key.
+  initContainers: &vmagentInitContainers
+    checkMetrics:
+      enabled: '{{ not .Values.global.backend.enabled }}'
+      builtinEnv:
+        - name: API_KEY
+          valueFrom:
+            secretKeyRef:
+              key: '{{ include "groundcover.apikeySecretKey" . }}'
+              name: '{{ include "groundcover.apikeySecretName" . }}'
+  curl: *curlImage
   extraArgs:
     remoteWrite.url: '{{ include "ingester.buildRemoteWriteURLTargets" . }}'
     remoteWrite.rateLimit: '{{ include "ingester.buildRemoteWriteRateLimit" . }}'
@@ -5567,6 +5585,8 @@ custom-metrics:
       cpu: 100m
       memory: 256Mi
   resizePolicy: []
+  initContainers: *vmagentInitContainers
+  curl: *curlImage
   extraArgs:
     remoteWrite.url: '{{ include "ingester.buildRemoteWriteURLTargets" . }}'
     remoteWrite.rateLimit: '{{ include "ingester.buildRemoteWriteRateLimit" . }}'
@@ -5953,10 +5973,6 @@ monitors-manager:
     - "-c"
     - "grafana cli --homepath=\"${GF_PATHS_HOME}\" --config=\"${GF_PATHS_CONFIG}\" admin reset-admin-password \"${GF_SECURITY_ADMIN_PASSWORD}\" && /run.sh"
 
-curl:
-  image:
-    repository: '{{ .Values.global.origin.registry }}/tools' 
-    tag: '20260719'
 
 rbac:
   pspEnabled: false
