@@ -34,6 +34,7 @@ spec:
         checksum/config_secret: {{ .Values.configurationSecretName | sha256sum }}
         {{- end }}
     spec:
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds | default 30 }}
       serviceAccountName: router
       {{- if .Values.onprem.enabled }}
       initContainers:
