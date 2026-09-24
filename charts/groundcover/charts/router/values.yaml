@@ -64,7 +64,7 @@ service:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.12.388
+  tag: 1.12.389
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/tools'
@@ -180,7 +180,7 @@ configuration:
       SSLMode: "disable"
   MonitorsV2:
     Enabled: false
-    # Listing a tenant serves them the v2 endpoints and, once the v1 side dual-writes, grows twins for their v1 writes.
+    # Listing a tenant serves them the v2 endpoints and grows twins for their v1 writes. Every v2-side failure then fails their v1 write, including a monitor shape the converter cannot represent — so before listing a tenant, dump their live monitors to CSV and run internal/monitors' TestConvertV2Fleet with TO_V2_FLEET_DUMP pointed at it. It reports which of their monitors would start failing.
     # Matched case-insensitively; a non-uuid entry fails the render.
     MonitorsV2Tenants: []
     MigrationsPath: /monitors-v2-migrations
