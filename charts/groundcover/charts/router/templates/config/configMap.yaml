@@ -1,4 +1,16 @@
 {{ if .Values.enabled }}
+{{- /*
+  A typo in MonitorsV2.MonitorsV2Tenants would silently serve nobody, so it
+  is rejected at render time. Not a values.schema.json: a chart's schema is
+  all-or-nothing and would drop every other value.
+*/ -}}
+{{- $tenantUUID := "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$" -}}
+{{- $monitorsV2 := get (.Values.configuration | default dict) "MonitorsV2" | default dict -}}
+{{- range $index, $tenant := (get $monitorsV2 "MonitorsV2Tenants" | default list) -}}
+{{- if not (regexMatch $tenantUUID (toString $tenant)) -}}
+{{- fail (printf "MonitorsV2.MonitorsV2Tenants[%d] %q is not a UUID" $index (toString $tenant)) -}}
+{{- end -}}
+{{- end -}}
 apiVersion: v1
 data:
   config.yaml: |

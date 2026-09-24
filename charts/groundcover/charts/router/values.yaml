@@ -64,7 +64,7 @@ service:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.12.386
+  tag: 1.12.387
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/tools'
@@ -180,6 +180,9 @@ configuration:
       SSLMode: "disable"
   MonitorsV2:
     Enabled: false
+    # Listing a tenant serves them the v2 endpoints and, once the v1 side dual-writes, grows twins for their v1 writes.
+    # Matched case-insensitively; a non-uuid entry fails the render.
+    MonitorsV2Tenants: []
     MigrationsPath: /monitors-v2-migrations
     DB:
       Host: '{{ splitList ":" (include "postgresql.base.url" .) | first }}'
