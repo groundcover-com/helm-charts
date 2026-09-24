@@ -1,6 +1,38 @@
-{{ if and .Values.global.ingestor.enabled .Values.global.backend.enabled }}
 {{- $sensorValues := deepCopy .Values.ingestor -}}
 {{- $sensorValues = mergeOverwrite $sensorValues (default (dict) .Values.global.ingestor) -}}
+{{- $incloudIngress := index .Values "incloud-ingress" | default (dict) -}}
+{{- $profileIngress := dig "profileIngestion" (dict) $incloudIngress -}}
+{{- $profileIngressEnabled := dig "enabled" false $profileIngress -}}
+{{- $otlpIngress := dig "otlp" (dict) $profileIngress -}}
+{{- $otlpIngressEnabled := dig "enabled" false $otlpIngress -}}
+{{- if and .Values.global.ingestor.enabled (dig "enabled" false $incloudIngress) -}}
+  {{- if not (kindIs "bool" $profileIngressEnabled) -}}
+    {{- fail "incloud-ingress.profileIngestion.enabled must be a boolean" -}}
+  {{- end -}}
+  {{- if not (kindIs "bool" $otlpIngressEnabled) -}}
+    {{- fail "incloud-ingress.profileIngestion.otlp.enabled must be a boolean" -}}
+  {{- end -}}
+{{- end -}}
+{{- if and .Values.global.ingestor.enabled (dig "enabled" false $incloudIngress) (eq $profileIngressEnabled true) -}}
+  {{- if not (dig "receivers" "profiles" "enabled" false $sensorValues) -}}
+    {{- fail "incloud-ingress.profileIngestion.enabled requires ingestor.receivers.profiles.enabled=true" -}}
+  {{- end -}}
+  {{- if le (dig "receivers" "profiles" "port" 0 $sensorValues | int) 0 -}}
+    {{- fail "incloud-ingress.profileIngestion.enabled requires ingestor.receivers.profiles.port to be greater than zero" -}}
+  {{- end -}}
+  {{- if eq $otlpIngressEnabled true -}}
+    {{- if not (dig "apmIngestor" "otel" "direct" "otlp" "enabled" false $sensorValues) -}}
+      {{- fail "incloud-ingress.profileIngestion.otlp.enabled requires ingestor.apmIngestor.otel.direct.otlp.enabled=true" -}}
+    {{- end -}}
+    {{- if le (dig "apmIngestor" "otel" "direct" "otlp" "httpPort" 0 $sensorValues | int) 0 -}}
+      {{- fail "incloud-ingress.profileIngestion.otlp.enabled requires ingestor.apmIngestor.otel.direct.otlp.httpPort to be greater than zero" -}}
+    {{- end -}}
+    {{- if le (dig "apmIngestor" "otel" "direct" "otlp" "grpcPort" 0 $sensorValues | int) 0 -}}
+      {{- fail "incloud-ingress.profileIngestion.otlp.enabled requires ingestor.apmIngestor.otel.direct.otlp.grpcPort to be greater than zero" -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{ if and .Values.global.ingestor.enabled .Values.global.backend.enabled }}
 kind: Service
 apiVersion: v1
 metadata:

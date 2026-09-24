@@ -1,3 +1,9 @@
+{{- if not (kindIs "bool" .Values.profileIngestion.enabled) -}}
+  {{- fail "incloud-ingress.profileIngestion.enabled must be a boolean" -}}
+{{- end -}}
+{{- if not (kindIs "bool" .Values.profileIngestion.otlp.enabled) -}}
+  {{- fail "incloud-ingress.profileIngestion.otlp.enabled must be a boolean" -}}
+{{- end -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -141,7 +147,7 @@ spec:
                 name: {{ .Values.global.ingestor.enabled | ternary (include "ingestor.fullname" .) (include "opentelemetry-collector.fullname" .) }}
                 port:
                   number: {{ index .Values.global "opentelemetry-collector" "ports" "zipkin" "servicePort" | int }}            
-          {{- if and .Values.global.ingestor.enabled .Values.profileIngestion.enabled }}
+          {{- if and .Values.global.ingestor.enabled (eq .Values.profileIngestion.enabled true) }}
           - path: /profiling/upload
             pathType: Exact
             backend:
@@ -149,6 +155,15 @@ spec:
                 name: {{ include "ingestor.fullname" . }}
                 port:
                   name: profiles
+          {{- if eq .Values.profileIngestion.otlp.enabled true }}
+          - path: /v1development/profiles
+            pathType: Exact
+            backend:
+              service:
+                name: {{ include "ingestor.fullname" . }}
+                port:
+                  name: otlp-http
+          {{- end }}
           {{- end }}
 ---
 
@@ -458,6 +473,15 @@ spec:
                 name: {{ .Values.global.ingestor.enabled | ternary (printf "%s-grpc" (include "ingestor.fullname" .)) (printf "%s-grpc" (include "opentelemetry-collector.fullname" .)) }}
                 port:
                   number: {{ index .Values.global "opentelemetry-collector" "ports" "otlp" "servicePort" | int }}
+          {{- if and .Values.global.ingestor.enabled (eq .Values.profileIngestion.enabled true) (eq .Values.profileIngestion.otlp.enabled true) }}
+          - path: /opentelemetry.proto.collector.profiles.v1development.ProfilesService/Export
+            pathType: Exact
+            backend:
+              service:
+                name: {{ printf "%s-grpc" (include "ingestor.fullname" .) }}
+                port:
+                  name: otlp-grpc
+          {{- end }}
 
 ---
 
