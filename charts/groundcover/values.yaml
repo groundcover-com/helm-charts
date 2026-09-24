@@ -5506,6 +5506,12 @@ victoria-metrics-operator:
   image:
     registry: public.ecr.aws/groundcovercom  
   enabled: false
+  crds:
+    upgrade:
+      kubectl:
+        image:
+          # rancher/kubectl lags k8s patch releases; tag defaults to cluster version
+          repository: registry.k8s.io/kubectl
   # https://github.com/VictoriaMetrics/operator/blob/master/docs/vars.md
   extraArgs:
     leader-elect-lease-duration: "35s"
