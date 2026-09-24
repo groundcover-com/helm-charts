@@ -50,6 +50,12 @@ rules:
   {{- if .Values.k8sWatcher.watch.secret.enabled }}
   - secrets
   {{- end }}
+  {{- if .Values.k8sWatcher.watch.resourceQuota.enabled }}
+  - resourcequotas
+  {{- end }}
+  {{- if .Values.k8sWatcher.watch.limitRange.enabled }}
+  - limitranges
+  {{- end }}
   verbs:
   - list
   - watch
@@ -59,6 +65,36 @@ rules:
   - "autoscaling.k8s.io"
   resources:  
   - verticalpodautoscalers
+  verbs:
+  - list
+  - get
+  - watch
+{{- end }}
+{{- if .Values.k8sWatcher.watch.horizontalPodAutoscaler.enabled }}
+- apiGroups:
+  - "autoscaling"
+  resources:
+  - horizontalpodautoscalers
+  verbs:
+  - list
+  - get
+  - watch
+{{- end }}
+{{- if .Values.k8sWatcher.watch.ingress.enabled }}
+- apiGroups:
+  - "networking.k8s.io"
+  resources:
+  - ingresses
+  verbs:
+  - list
+  - get
+  - watch
+{{- end }}
+{{- if .Values.k8sWatcher.watch.mutatingWebhookConfiguration.enabled }}
+- apiGroups:
+  - "admissionregistration.k8s.io"
+  resources:
+  - mutatingwebhookconfigurations
   verbs:
   - list
   - get

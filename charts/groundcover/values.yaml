@@ -945,6 +945,75 @@ agent:
           runner:
             group: "actions.summerwind.dev"
             kindPlural: "runners"
+          scaledobject:
+            group: "keda.sh"
+            kindPlural: "scaledobjects"
+          helmrelease:
+            group: "helm.toolkit.fluxcd.io"
+            kindPlural: "helmreleases"
+          ec2nodeclass:
+            group: "karpenter.k8s.aws"
+            kindPlural: "ec2nodeclasses"
+          nodeclaim:
+            group: "karpenter.sh"
+            kindPlural: "nodeclaims"
+          nodepool:
+            group: "karpenter.sh"
+            kindPlural: "nodepools"
+          kustomization:
+            group: "kustomize.toolkit.fluxcd.io"
+            kindPlural: "kustomizations"
+          autoscaler:
+            group: "operator.groundcover.com"
+            kindPlural: "autoscalers"
+          persistentvolumeclaimexpander:
+            group: "operator.groundcover.com"
+            kindPlural: "persistentvolumeclaimexpanders"
+          horizontalautoscaler:
+            group: "operator.groundcover.com"
+            kindPlural: "horizontalautoscalers"
+          computeclass:
+            group: "cloud.google.com"
+            kindPlural: "computeclasses"
+          aksnodeclass:
+            group: "karpenter.azure.com"
+            kindPlural: "aksnodeclasses"
+          bucket:
+            group: "source.toolkit.fluxcd.io"
+            kindPlural: "buckets"
+          gitrepository:
+            group: "source.toolkit.fluxcd.io"
+            kindPlural: "gitrepositories"
+          helmrepository:
+            group: "source.toolkit.fluxcd.io"
+            kindPlural: "helmrepositories"
+          helmchart:
+            group: "source.toolkit.fluxcd.io"
+            kindPlural: "helmcharts"
+          ocirepository:
+            group: "source.toolkit.fluxcd.io"
+            kindPlural: "ocirepositories"
+          certificaterequest:
+            group: "cert-manager.io"
+            kindPlural: "certificaterequests"
+          certificate:
+            group: "cert-manager.io"
+            kindPlural: "certificates"
+          challenge:
+            group: "acme.cert-manager.io"
+            kindPlural: "challenges"
+          clusterissuer:
+            group: "cert-manager.io"
+            kindPlural: "clusterissuers"
+          issuer:
+            group: "cert-manager.io"
+            kindPlural: "issuers"
+          order:
+            group: "acme.cert-manager.io"
+            kindPlural: "orders"
+          managedcertificate:
+            group: "networking.gke.io"
+            kindPlural: "managedcertificates"
     sensitiveHeadersObfuscationConfig:
       enabled: true
       mode: "ObfuscateSpecificValues"
@@ -2237,6 +2306,18 @@ k8sWatcher:
       enabled: true
     secret:
       enabled: false
+    resourceQuota:
+      enabled: true
+    limitRange:
+      enabled: true
+    service:
+      enabled: true
+    ingress:
+      enabled: true
+    mutatingWebhookConfiguration:
+      enabled: true
+    horizontalPodAutoscaler:
+      enabled: true
     verticalPodAutoscaler:
       enabled: false
     crd:
@@ -2268,6 +2349,75 @@ k8sWatcher:
         runner:
           group: "actions.summerwind.dev"
           kindPlural: "runners"
+        scaledobject:
+          group: "keda.sh"
+          kindPlural: "scaledobjects"
+        helmrelease:
+          group: "helm.toolkit.fluxcd.io"
+          kindPlural: "helmreleases"
+        ec2nodeclass:
+          group: "karpenter.k8s.aws"
+          kindPlural: "ec2nodeclasses"
+        nodeclaim:
+          group: "karpenter.sh"
+          kindPlural: "nodeclaims"
+        nodepool:
+          group: "karpenter.sh"
+          kindPlural: "nodepools"
+        kustomization:
+          group: "kustomize.toolkit.fluxcd.io"
+          kindPlural: "kustomizations"
+        autoscaler:
+          group: "operator.groundcover.com"
+          kindPlural: "autoscalers"
+        persistentvolumeclaimexpander:
+          group: "operator.groundcover.com"
+          kindPlural: "persistentvolumeclaimexpanders"
+        horizontalautoscaler:
+          group: "operator.groundcover.com"
+          kindPlural: "horizontalautoscalers"
+        computeclass:
+          group: "cloud.google.com"
+          kindPlural: "computeclasses"
+        aksnodeclass:
+          group: "karpenter.azure.com"
+          kindPlural: "aksnodeclasses"
+        bucket:
+          group: "source.toolkit.fluxcd.io"
+          kindPlural: "buckets"
+        gitrepository:
+          group: "source.toolkit.fluxcd.io"
+          kindPlural: "gitrepositories"
+        helmrepository:
+          group: "source.toolkit.fluxcd.io"
+          kindPlural: "helmrepositories"
+        helmchart:
+          group: "source.toolkit.fluxcd.io"
+          kindPlural: "helmcharts"
+        ocirepository:
+          group: "source.toolkit.fluxcd.io"
+          kindPlural: "ocirepositories"
+        certificaterequest:
+          group: "cert-manager.io"
+          kindPlural: "certificaterequests"
+        certificate:
+          group: "cert-manager.io"
+          kindPlural: "certificates"
+        challenge:
+          group: "acme.cert-manager.io"
+          kindPlural: "challenges"
+        clusterissuer:
+          group: "cert-manager.io"
+          kindPlural: "clusterissuers"
+        issuer:
+          group: "cert-manager.io"
+          kindPlural: "issuers"
+        order:
+          group: "acme.cert-manager.io"
+          kindPlural: "orders"
+        managedcertificate:
+          group: "networking.gke.io"
+          kindPlural: "managedcertificates"
   image:
     repository: "{{ .Values.global.origin.registry }}/k8s-watcher"
     tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
