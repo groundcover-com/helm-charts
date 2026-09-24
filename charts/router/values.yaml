@@ -38,6 +38,8 @@ global:
     enableTLS: false
     customDomains: []
 enabled: true
+# Must cover preStop + router graceful drain (20s) + cleanup (5s) + safety margin.
+terminationGracePeriodSeconds: 30
 auth:
   proxyService: "oauth2proxy-oauth2-proxy"
   proxyPort: 80
@@ -64,7 +66,7 @@ service:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.12.390
+  tag: 1.12.391
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/tools'
