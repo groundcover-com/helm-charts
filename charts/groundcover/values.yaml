@@ -3307,11 +3307,6 @@ clickhouse: &primary
                  clickhouse subchart, where globals are still reachable. */}}
           <access_management>1</access_management>
           {{- end }}
-          {{- if .Values.global.monitorsStore.enabled }}
-          {{- /* Lets db-manager reconcile the pg_monitors named collection the
-                 monitors_pg proxy connects through. */}}
-          <named_collection_control>1</named_collection_control>
-          {{- end }}
         </manager>
         <reader>
           <password from_env="CLICKHOUSE_PASSWORD" />
@@ -3420,6 +3415,27 @@ clickhouse-standby:
               matchLabels:
                 app.kubernetes.io/name: clickhouse
                 shard: '{{ .Shard }}'
+            topologyKey: kubernetes.io/hostname
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchLabels:
+              app.kubernetes.io/instance: '{{ .Release.Name }}'
+              app.kubernetes.io/name: '{{ include "common.names.name" . }}'
+          topologyKey: kubernetes.io/hostname
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchExpressions:
+                - key: app.kubernetes.io/name
+                  operator: In
+                  values:
+                    - clickhouse
+                - key: shard
+                  operator: NotIn
+                  values:
+                    - '{{ .Shard }}'
             topologyKey: kubernetes.io/hostname
   priorityClassName: ""
 

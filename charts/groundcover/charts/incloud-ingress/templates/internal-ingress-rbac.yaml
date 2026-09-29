@@ -1,0 +1,179 @@
+{{- if .Values.internalIngress.enabled }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "incloud-ingress.fullname" . }}
+  labels:
+    {{- include "incloud-ingress.labels" . | nindent 4 }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "incloud-ingress.fullname" . }}-internal
+  labels:
+    {{- include "incloud-ingress.labels" . | nindent 4 }}
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - endpoints
+      - nodes
+      - pods
+      - secrets
+      - services
+      - configmaps
+    verbs:
+      - list
+      - watch
+  - apiGroups:
+      - discovery.k8s.io
+    resources:
+      - endpointslices
+    verbs:
+      - list
+      - watch
+  - apiGroups:
+      - apiextensions.k8s.io
+    resources:
+      - customresourcedefinitions
+    verbs:
+      - list
+      - watch
+  - apiGroups:
+      - configuration.konghq.com
+    resources:
+      - kongvaults
+      - kongupstreampolicies
+      - kongcustomentities
+      - konglicenses
+      - kongconsumergroups
+      - ingressclassparameterses
+    verbs:
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - nodes
+    verbs:
+      - get
+  - apiGroups:
+      - ""
+    resources:
+      - services
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - networking.k8s.io
+    resources:
+      - ingresses
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+      - patch
+  - apiGroups:
+      - networking.k8s.io
+    resources:
+      - ingresses/status
+    verbs:
+      - update
+  - apiGroups:
+      - networking.k8s.io
+    resources:
+      - ingressclasses
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - configuration.konghq.com
+    resources:
+      - tcpingresses/status
+    verbs:
+      - update
+  - apiGroups:
+      - configuration.konghq.com
+    resources:
+      - kongplugins
+      - kongclusterplugins
+      - kongcredentials
+      - kongconsumers
+      - kongingresses
+      - tcpingresses
+      - udpingresses
+    verbs:
+      - get
+      - list
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "incloud-ingress.fullname" . }}-internal
+  labels:
+    {{- include "incloud-ingress.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "incloud-ingress.fullname" . }}-internal
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "incloud-ingress.fullname" . }}
+    namespace: {{ .Release.Namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "incloud-ingress.fullname" . }}-internal
+  labels:
+    {{- include "incloud-ingress.labels" . | nindent 4 }}
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+      - pods
+      - secrets
+      - namespaces
+    verbs:
+      - get
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    verbs:
+      - get
+      - update
+  - apiGroups:
+      - coordination.k8s.io
+    resources:
+      - leases
+    verbs:
+      - get
+      - create
+      - update
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "incloud-ingress.fullname" . }}-internal
+  labels:
+    {{- include "incloud-ingress.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "incloud-ingress.fullname" . }}-internal
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "incloud-ingress.fullname" . }}
+{{- end }}

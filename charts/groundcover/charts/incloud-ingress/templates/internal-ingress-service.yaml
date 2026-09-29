@@ -1,0 +1,32 @@
+{{- if .Values.internalIngress.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.internalIngress.service.name }}
+  labels:
+    {{- include "incloud-ingress.labels" . | nindent 4 }}
+    app.kubernetes.io/name: kong-internal
+    app.kubernetes.io/component: proxy
+  {{- if .Values.internalIngress.service.annotations }}
+  annotations:
+    {{- toYaml .Values.internalIngress.service.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.internalIngress.service.type }}
+  ports:
+    {{- if .Values.internalIngress.service.http.enabled }}
+    - name: http
+      port: {{ .Values.internalIngress.service.http.port }}
+      targetPort: {{ .Values.internalIngress.service.http.targetPort }}
+      protocol: TCP
+    {{- end }}
+    {{- if .Values.internalIngress.service.https.enabled }}
+    - name: https
+      port: {{ .Values.internalIngress.service.https.port }}
+      targetPort: {{ .Values.internalIngress.service.https.targetPort }}
+      protocol: TCP
+    {{- end }}
+  selector:
+    app.kubernetes.io/name: kong-internal
+    app.kubernetes.io/component: proxy
+{{- end }}

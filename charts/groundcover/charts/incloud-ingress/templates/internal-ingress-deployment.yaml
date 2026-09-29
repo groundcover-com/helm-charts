@@ -1,0 +1,135 @@
+{{- if .Values.internalIngress.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ printf "%s-internal" (include "incloud-ingress.fullname" .) }}
+  labels:
+    {{- include "incloud-ingress.labels" . | nindent 4 }}
+    app.kubernetes.io/name: kong-internal
+    app.kubernetes.io/component: ingress-controller
+spec:
+  {{- if not .Values.internalIngress.kong.autoscaling.enabled }}
+  replicas: {{ .Values.internalIngress.kong.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kong-internal
+      app.kubernetes.io/component: proxy
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 50%
+      maxSurge: 50%
+  minReadySeconds: 15
+  template:
+    metadata:
+      labels:
+        {{- include "incloud-ingress.labels" . | nindent 8 }}
+        app.kubernetes.io/name: kong-internal
+        app.kubernetes.io/component: proxy
+    spec:
+      serviceAccountName: {{ include "incloud-ingress.fullname" . }}
+      {{- if .Values.internalIngress.kong.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml .Values.internalIngress.kong.topologySpreadConstraints | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: proxy
+          image: "{{ .Values.internalIngress.kong.image.repository }}:{{ .Values.internalIngress.kong.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          env:
+            {{- range $key, $value := .Values.internalIngress.kong.env }}
+            - name: KONG_{{ $key | upper }}
+              value: {{ $value | quote }}
+            {{- end }}
+            - name: KONG_PROXY_LISTEN
+              value: "0.0.0.0:8000"
+            - name: KONG_ADMIN_LISTEN
+              value: "127.0.0.1:8444"
+            - name: KONG_STATUS_LISTEN
+              value: "0.0.0.0:8100"
+            - name: KONG_DATABASE
+              value: "off"
+            - name: KONG_NGINX_WORKER_PROCESSES
+              value: "2"
+            - name: KONG_KIC
+              value: "on"
+            - name: KONG_PLUGINS
+              value: "bundled"
+            - name: KONG_LUA_PACKAGE_PATH
+              value: "/opt/?.lua;/opt/?/init.lua;;"
+          ports:
+            - name: proxy
+              containerPort: 8000
+              protocol: TCP
+            - name: status
+              containerPort: 8100
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /status
+              port: 8100
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /status
+              port: 8100
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
+          {{- if .Values.internalIngress.kong.resources }}
+          resources:
+            {{- toYaml .Values.internalIngress.kong.resources | nindent 12 }}
+          {{- end }}
+        - name: ingress-controller
+          image: "{{ .Values.internalIngress.kong.ingressController.image.repository }}:{{ .Values.internalIngress.kong.ingressController.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: CONTROLLER_KONG_ADMIN_URL
+              value: "http://127.0.0.1:8444"
+            - name: CONTROLLER_PUBLISH_SERVICE
+              value: "{{ .Release.Namespace }}/{{ .Values.internalIngress.service.name }}"
+            - name: CONTROLLER_INGRESS_CLASS
+              value: {{ .Values.internalIngress.ingressClassName | quote }}
+            - name: CONTROLLER_ELECTION_ID
+              value: "kong-internal-ingress-controller-leader"
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          ports:
+            - name: webhook
+              containerPort: 8080
+              protocol: TCP
+            - name: cmetrics
+              containerPort: 10255
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 10254
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 10254
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
+{{- end }}

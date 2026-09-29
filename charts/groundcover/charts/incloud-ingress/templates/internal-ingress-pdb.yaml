@@ -1,0 +1,15 @@
+{{- if and .Values.internalIngress.enabled .Values.internalIngress.kong.podDisruptionBudget.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ printf "%s-internal" (include "incloud-ingress.fullname" .) }}
+  labels:
+    {{- include "incloud-ingress.labels" . | nindent 4 }}
+    app.kubernetes.io/name: kong-internal
+spec:
+  minAvailable: {{ .Values.internalIngress.kong.podDisruptionBudget.minAvailable }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kong-internal
+      app.kubernetes.io/component: proxy
+{{- end }}

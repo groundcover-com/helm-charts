@@ -111,3 +111,106 @@ cert-manager-crds:
   image:
     repository: public.ecr.aws/groundcovercom/tools
     tag: "20260719"
+
+# Internal ingress configuration for routing to cluster-internal services
+internalIngress:
+  enabled: false
+  # Name for the internal ingress class
+  ingressClassName: kong-internal
+  # Service configuration for internal cluster access
+  service:
+    # Service name for the internal ingress
+    name: kong-internal
+    # Service type - ClusterIP for cluster-internal access only
+    type: ClusterIP
+    # Annotations for the service
+    annotations: {}
+    # HTTP port configuration
+    http:
+      enabled: true
+      port: 80
+      targetPort: 8000
+    # HTTPS/TLS port configuration - disabled for internal ingress (no TLS required)
+    https:
+      enabled: false
+      port: 443
+      targetPort: 8443
+  # Kong deployment configuration for internal ingress
+  kong:
+    replicaCount: 2
+    image:
+      tag: 3.9.3-mini-20260804-1
+      repository: public.ecr.aws/groundcovercom/kong
+    ingressController:
+      image:
+        tag: "3.5.3-20260205"
+        repository: public.ecr.aws/groundcovercom/kong/kubernetes-ingress-controller
+    env:
+      anonymous_reports: "off"
+      dump_config: "true"
+      headers: "off"
+      mem_cache_size: "128m"
+      upstream_keepalive_max_requests: "0"
+      nginx_http_client_body_buffer_size: "10m"
+      nginx_mem_cache_size: "128m"
+      proxy_access_log: "/dev/stdout"
+    # Resource limits for internal ingress
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+      requests:
+        cpu: 500m
+        memory: 512Mi
+    # Pod topology spread for high availability
+    topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: kong-internal
+      - maxSkew: 1
+        topologyKey: topology.kubernetes.io/zone
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: kong-internal
+    # Pod disruption budget
+    podDisruptionBudget:
+      enabled: true
+      minAvailable: 1
+    # Disabled by default; when enabled, replicaCount below is ignored (HPA owns it)
+    autoscaling:
+      enabled: false
+      minReplicas: 2
+      maxReplicas: 10
+      metrics:
+        - type: ContainerResource
+          containerResource:
+            name: cpu
+            container: proxy
+            target:
+              type: Utilization
+              averageUtilization: 35
+        - type: ContainerResource
+          containerResource:
+            name: memory
+            container: proxy
+            target:
+              type: Utilization
+              averageUtilization: 75
+  # Routes configuration - define your internal routes here
+  routes: []
+  # Example route configuration:
+  # routes:
+  #   - name: example-service
+  #     paths:
+  #       - path: /api/example
+  #         pathType: Prefix
+  #     service:
+  #       name: example-service  # must be in the same namespace as this release
+  #       port: 8080
+  #     plugins: []
+  #     # Optional: strip path before forwarding
+  #     stripPath: false

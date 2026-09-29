@@ -1,0 +1,44 @@
+{{- if .Values.internalIngress.enabled }}
+{{- range $route := .Values.internalIngress.routes }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ printf "%s-internal-%s" (include "incloud-ingress.fullname" $) $route.name | trunc 63 | trimSuffix "-" }}
+  labels:
+    {{- include "incloud-ingress.labels" $ | nindent 4 }}
+    app.kubernetes.io/name: kong-internal
+  annotations:
+    {{- if $route.stripPath }}
+    konghq.com/strip-path: "true"
+    {{- end }}
+    {{- if $route.plugins }}
+    konghq.com/plugins: {{ join "," $route.plugins }}
+    {{- end }}
+    {{- if $route.annotations }}
+    {{- toYaml $route.annotations | nindent 4 }}
+    {{- end }}
+spec:
+  ingressClassName: {{ $.Values.internalIngress.ingressClassName }}
+  {{- if $route.tls }}
+  tls:
+    {{- toYaml $route.tls | nindent 4 }}
+  {{- end }}
+  rules:
+    - http:
+        paths:
+          {{- range $path := $route.paths }}
+          - path: {{ $path.path }}
+            pathType: {{ $path.pathType | default "Prefix" }}
+            backend:
+              service:
+                name: {{ $route.service.name }}
+                port:
+                  {{- if $route.service.portName }}
+                  name: {{ $route.service.portName }}
+                  {{- else }}
+                  number: {{ $route.service.port }}
+                  {{- end }}
+          {{- end }}
+{{- end }}
+{{- end }}
