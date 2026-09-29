@@ -200,6 +200,39 @@ http
 {{- end -}}
 {{- end -}}
 
+{{/* Internal-Kong variants, used only by callers that explicitly opt in (see _sensor.tpl) - path must match the routes configured under incloud-ingress.internalIngress.routes */}}
+{{- define "vector.internalIngress.url.base" -}}
+{{- $internalIngress := (index .Values "incloud-ingress" "internalIngress") -}}
+{{- if not $internalIngress.enabled -}}
+{{- fail "internalIngress is enabled on a caller (e.g. global.ingestor.internalIngress.enabled) but incloud-ingress.internalIngress.enabled is false - both must be enabled together" -}}
+{{- end -}}
+{{- if not $internalIngress.service.http.enabled -}}
+{{- fail "vector.internalIngress.url.base requires incloud-ingress.internalIngress.service.http.enabled (HTTPS-only internal ingress is not supported)" -}}
+{{- end -}}
+{{- printf "http://%s.%s.svc.cluster.local:%d" $internalIngress.service.name .Release.Namespace ($internalIngress.service.http.port | int) -}}
+{{- end -}}
+
+{{- define "vector.internalIngress.tracesAsLogs.otlp.http.url" -}}
+{{- if .Values.global.vector.tracesAsLogs.otlp.overrideHttpURL -}}
+{{- fail "global.vector.tracesAsLogs.otlp.overrideHttpURL is set but this caller also has internalIngress enabled - the override would be silently ignored; unset one of them" -}}
+{{- end -}}
+{{- printf "%s%s" (include "vector.internalIngress.url.base" .) (get (urlParse (include "incloud.ingestion.otlp.http.traces-as-logs.url" .)) "path") -}}
+{{- end -}}
+
+{{- define "vector.internalIngress.logs.otlp.http.url" -}}
+{{- if .Values.global.vector.logs.otlp.overrideHttpURL -}}
+{{- fail "global.vector.logs.otlp.overrideHttpURL is set but this caller also has internalIngress enabled - the override would be silently ignored; unset one of them" -}}
+{{- end -}}
+{{- printf "%s%s" (include "vector.internalIngress.url.base" .) (get (urlParse (include "incloud.ingestion.otlp.http.logs.url" .)) "path") -}}
+{{- end -}}
+
+{{- define "vector.internalIngress.custom.otlp.http.url" -}}
+{{- if .Values.global.vector.custom.otlp.overrideHttpURL -}}
+{{- fail "global.vector.custom.otlp.overrideHttpURL is set but this caller also has internalIngress enabled - the override would be silently ignored; unset one of them" -}}
+{{- end -}}
+{{- printf "%s%s" (include "vector.internalIngress.url.base" .) (get (urlParse (include "incloud.ingestion.otlp.http.custom.url" .)) "path") -}}
+{{- end -}}
+
 {{- define "vector.cluster.json.table.write.port" -}}
 {{-  printf "4350"  -}}
 {{- end -}}

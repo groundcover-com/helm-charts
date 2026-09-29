@@ -543,9 +543,9 @@ sendKubeletInfraMetrics: {{ .Values.sendKubeletInfraMetrics }}
 {{ end }}
 
 {{ if $sensorValues.ingestionEnabled }}
-apmIngestor: 
+apmIngestor:
   tracesOtlpEndpoint:
-    endpoint: {{ include "ingestion.traces.otlp.http.url" . }}
+    endpoint: {{ if dig "internalIngress" "enabled" false $sensorValues }}{{ include "vector.internalIngress.tracesAsLogs.otlp.http.url" . }}{{ else }}{{ include "ingestion.traces.otlp.http.url" . }}{{ end }}
     compression: {{ .Values.global.ingestion.otlpCompression | default "gzip" }}
     insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
     writeTimeout: 10s
@@ -570,7 +570,7 @@ apmIngestor:
     backoffConfig: {{ toYaml . | nindent 6 }}
     {{- end }}
   logsOtlpEndpoint:
-    endpoint: {{ include "ingestion.logs.otlp.http.url" . }}
+    endpoint: {{ if dig "internalIngress" "enabled" false $sensorValues }}{{ include "vector.internalIngress.logs.otlp.http.url" . }}{{ else }}{{ include "ingestion.logs.otlp.http.url" . }}{{ end }}
     compression: {{ .Values.global.ingestion.otlpCompression | default "gzip" }}
     insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
     writeTimeout: 10s
@@ -743,7 +743,7 @@ logs:
 otelTracesAsLogs: true
 otelPreprocess: true
 tracesOtlpEndpoint:
-  endpoint: {{ include "ingestion.traces.otlp.http.url" . }}
+  endpoint: {{ if dig "internalIngress" "enabled" false $sensorValues }}{{ include "vector.internalIngress.tracesAsLogs.otlp.http.url" . }}{{ else }}{{ include "ingestion.traces.otlp.http.url" . }}{{ end }}
   compression: {{ .Values.global.ingestion.otlpCompression | default "gzip" }}
   insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
   writeTimeout: 10s
@@ -755,7 +755,7 @@ tracesOtlpEndpoint:
   maxIdleConnsPerHost: {{ dig "apmIngestor" "otlpConnectionPool" "maxIdleConnsPerHost" 0 $sensorValues }}
   idleConnTimeout: {{ dig "apmIngestor" "otlpConnectionPool" "idleConnTimeout" "0s" $sensorValues }}
 logsOtlpEndpoint:
-  endpoint: {{ include "ingestion.logs.otlp.http.url" . }}
+  endpoint: {{ if dig "internalIngress" "enabled" false $sensorValues }}{{ include "vector.internalIngress.logs.otlp.http.url" . }}{{ else }}{{ include "ingestion.logs.otlp.http.url" . }}{{ end }}
   compression: {{ .Values.global.ingestion.otlpCompression | default "gzip" }}
   insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
   writeTimeout: 10s
@@ -766,7 +766,7 @@ logsOtlpEndpoint:
   maxIdleConnsPerHost: {{ dig "apmIngestor" "otlpConnectionPool" "maxIdleConnsPerHost" 0 $sensorValues }}
   idleConnTimeout: {{ dig "apmIngestor" "otlpConnectionPool" "idleConnTimeout" "0s" $sensorValues }}
 customOtlpEndpoint:
-  endpoint: {{ include "ingestion.custom.otlp.http.url" . }}
+  endpoint: {{ if dig "internalIngress" "enabled" false $sensorValues }}{{ include "vector.internalIngress.custom.otlp.http.url" . }}{{ else }}{{ include "ingestion.custom.otlp.http.url" . }}{{ end }}
   compression: {{ .Values.global.ingestion.otlpCompression | default "gzip" }}
   insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
   writeTimeout: 10s

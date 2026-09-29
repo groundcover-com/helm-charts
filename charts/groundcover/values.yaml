@@ -104,6 +104,8 @@ global:
     enabled: true
   ingestor:
     enabled: true
+    internalIngress:
+      enabled: false
     routeSeriesToIngestor: false
     routeSketchesToIngestor: false
     routeLogsToIngestor: false
