@@ -4,7 +4,7 @@ kind: Deployment
 metadata:
   name: {{ printf "%s-internal" (include "incloud-ingress.fullname" .) }}
   labels:
-    {{- include "incloud-ingress.labels" . | nindent 4 }}
+    {{- include "incloud-ingress.internalIngress.commonLabels" . | nindent 4 }}
     app.kubernetes.io/name: kong-internal
     app.kubernetes.io/component: ingress-controller
 spec:
@@ -24,7 +24,7 @@ spec:
   template:
     metadata:
       labels:
-        {{- include "incloud-ingress.labels" . | nindent 8 }}
+        {{- include "incloud-ingress.internalIngress.commonLabels" . | nindent 8 }}
         app.kubernetes.io/name: kong-internal
         app.kubernetes.io/component: proxy
     spec:

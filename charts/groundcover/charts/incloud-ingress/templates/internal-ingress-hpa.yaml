@@ -4,7 +4,7 @@ kind: HorizontalPodAutoscaler
 metadata:
   name: {{ printf "%s-internal" (include "incloud-ingress.fullname" .) }}
   labels:
-    {{- include "incloud-ingress.labels" . | nindent 4 }}
+    {{- include "incloud-ingress.internalIngress.commonLabels" . | nindent 4 }}
     app.kubernetes.io/name: kong-internal
 spec:
   scaleTargetRef:

@@ -4,7 +4,7 @@ kind: IngressClass
 metadata:
   name: {{ .Values.internalIngress.ingressClassName }}
   labels:
-    {{- include "incloud-ingress.labels" . | nindent 4 }}
+    {{- include "incloud-ingress.internalIngress.commonLabels" . | nindent 4 }}
     app.kubernetes.io/name: kong-internal
 spec:
   controller: ingress-controllers.konghq.com/kong-internal

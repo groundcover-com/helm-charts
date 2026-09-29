@@ -62,3 +62,16 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
+
+{{/*
+Common labels for internal-ingress resources, excluding app.kubernetes.io/name
+so callers can set their own (kong-internal) without a duplicate key.
+*/}}
+{{- define "incloud-ingress.internalIngress.commonLabels" -}}
+helm.sh/chart: {{ include "incloud-ingress.chart" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}

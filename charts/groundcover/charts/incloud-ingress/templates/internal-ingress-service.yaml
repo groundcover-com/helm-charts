@@ -4,7 +4,7 @@ kind: Service
 metadata:
   name: {{ .Values.internalIngress.service.name }}
   labels:
-    {{- include "incloud-ingress.labels" . | nindent 4 }}
+    {{- include "incloud-ingress.internalIngress.commonLabels" . | nindent 4 }}
     app.kubernetes.io/name: kong-internal
     app.kubernetes.io/component: proxy
   {{- if .Values.internalIngress.service.annotations }}

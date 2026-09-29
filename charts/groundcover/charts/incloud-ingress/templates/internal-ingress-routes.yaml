@@ -6,7 +6,7 @@ kind: Ingress
 metadata:
   name: {{ printf "%s-internal-%s" (include "incloud-ingress.fullname" $) $route.name | trunc 63 | trimSuffix "-" }}
   labels:
-    {{- include "incloud-ingress.labels" $ | nindent 4 }}
+    {{- include "incloud-ingress.internalIngress.commonLabels" $ | nindent 4 }}
     app.kubernetes.io/name: kong-internal
   annotations:
     {{- if $route.stripPath }}
