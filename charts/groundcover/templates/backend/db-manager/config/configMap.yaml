@@ -124,6 +124,11 @@ data:
       Enabled: {{ .Values.global.clickhouse.dictionaryUser.enabled }}
       User: {{ include "clickhouse.dictionaryUsername" . }}
       Password: "OVERRIDEN"
+    SensitiveRole:
+      Enabled: {{ (.Values.global.clickhouse.sensitiveRole | default dict).enabled | default false }}
+      RoleName: {{ (.Values.global.clickhouse.sensitiveRole | default dict).roleName | default "sensitive_data_reader" }}
+      RouterUser: {{ (.Values.global.clickhouse.sensitiveRole | default dict).routerUser | default "router_reader" }}
+      GrafanaUser: {{ (.Values.global.clickhouse.sensitiveRole | default dict).grafanaUser | default "grafana_reader" }}
     ExtraShards:
       {{- (include "clickhouse.extraShardsList" .) | nindent 6  }}
     {{- if (.Values.global.clickhouse.ha | default dict).enabled }}

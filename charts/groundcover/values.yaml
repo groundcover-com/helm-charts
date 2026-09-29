@@ -243,6 +243,33 @@ global:
       # existingSecret is empty.
       existingSecret: ""
       existingSecretKey: dictionary-user-password
+    # Opt-in feature flag for the dedicated ClickHouse role that alone may
+    # SELECT the logs `sensitive_attributes` column (the real, unmasked
+    # attribute values). When true, db-manager (per shard, after migrations)
+    # creates the role, grants it SELECT on the column for every logs table
+    # that carries it, grants the role to the query-serving ClickHouse user as
+    # a NON-default role, and revokes the column from that user directly — so
+    # the plaintext is readable only when the role is explicitly assumed.
+    # Requires access_management on the `manager` user (already enabled
+    # alongside dictionaryUser via clickhouse.usersExtraOverrides).
+    #
+    # Keep this false until the router side (SELECT-* EXCEPT rewrite +
+    # per-request role injection) ships: revoking the column without those
+    # changes makes logs `SELECT *` fail for the query user.
+    sensitiveRole:
+      enabled: false
+      # ClickHouse role name granted SELECT on sensitive_attributes. Must be a
+      # plain identifier ([a-zA-Z_][a-zA-Z0-9_]*); db-manager refuses anything
+      # else.
+      roleName: sensitive_data_reader
+      # Dedicated SQL-created reader users db-manager creates (in writable access
+      # storage, with the shared ClickHouse password) and gates the column on.
+      # routerUser is granted the role (non-default) so the portal can reveal on
+      # authorized queries; grafanaUser never gets the role. The portal and the
+      # Grafana datasource are repointed to these users when the feature is on.
+      # Must be plain identifiers.
+      routerUser: router_reader
+      grafanaUser: grafana_reader
     # Enables the standby ClickHouse cluster + HAProxy failover switch.
     ha:
       enabled: false
@@ -3303,10 +3330,11 @@ clickhouse: &primary
           <networks>
             <ip>::/0</ip>
           </networks>
-          {{- if .Values.global.clickhouse.dictionaryUser.enabled }}
-          {{- /* Lets db-manager CREATE USER / GRANT the dedicated read-only
-                 dictionary user. This string is tpl-rendered inside the
-                 clickhouse subchart, where globals are still reachable. */}}
+          {{- if or .Values.global.clickhouse.dictionaryUser.enabled (.Values.global.clickhouse.sensitiveRole | default dict).enabled }}
+          {{- /* Lets db-manager manage access entities: CREATE USER / GRANT for
+                 the dedicated read-only dictionary user, and CREATE ROLE / GRANT
+                 / REVOKE for the sensitive-data role. This string is tpl-rendered
+                 inside the clickhouse subchart, where globals are still reachable. */}}
           <access_management>1</access_management>
           {{- end }}
         </manager>
@@ -6017,7 +6045,7 @@ monitors-manager:
             defaultDatabase: '{{ include "clickhouse.database" . }}'
             port: "{{ .Values.global.clickhouse.containerPorts.tcp | int }}"
             server: '{{ include "clickhouse.readHostShard0" . }}'
-            username: '{{ include "clickhouse.readerUsername" . }}'
+            username: '{{ include "clickhouse.grafanaReaderUsername" . }}'
             queryTimeout: "60"
             customSettings:
               - setting: enable_analyzer

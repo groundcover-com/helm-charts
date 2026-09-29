@@ -20,6 +20,35 @@
 {{-  print "reader" -}}
 {{- end -}}
 
+{{- /*
+clickhouse.portalUsername is the ClickHouse user the portal connects as. When
+global.clickhouse.sensitiveRole.enabled, it is the dedicated gated router_reader
+(sensitive_attributes revoked; the sensitive_data_reader role assumable for
+authorized reveals) that db-manager creates; otherwise the built-in default user.
+Password is unchanged either way (both authenticate with clickhouse.secretKey).
+*/}}
+{{- define "clickhouse.portalUsername" -}}
+{{- if (.Values.global.clickhouse.sensitiveRole | default dict).enabled -}}
+{{- (.Values.global.clickhouse.sensitiveRole).routerUser | default "router_reader" -}}
+{{- else -}}
+{{- include "clickhouse.username" . -}}
+{{- end -}}
+{{- end -}}
+
+{{- /*
+clickhouse.grafanaReaderUsername is the ClickHouse user the Grafana datasource
+connects as. When global.clickhouse.sensitiveRole.enabled, it is the dedicated
+gated grafana_reader (sensitive_attributes revoked, no reveal role) that
+db-manager creates; otherwise the built-in reader user. Password is unchanged.
+*/}}
+{{- define "clickhouse.grafanaReaderUsername" -}}
+{{- if (.Values.global.clickhouse.sensitiveRole | default dict).enabled -}}
+{{- (.Values.global.clickhouse.sensitiveRole).grafanaUser | default "grafana_reader" -}}
+{{- else -}}
+{{- include "clickhouse.readerUsername" . -}}
+{{- end -}}
+{{- end -}}
+
 {{- define "clickhouse.nativePort" -}}
 {{- .Values.global.clickhouse.containerPorts.tcp | default "9000" -}}
 {{- end -}}
