@@ -657,7 +657,7 @@ agent:
     trafficDistribution:
     collectionEnabled: true
     ingestionEnabled: true
-    enableLegacyApmMetrics: true
+    enableLegacyApmMetrics: false
     useOldTracefsMountPath: false
     customEntityTags: # DEPRECATED: Use global.labelEnrichment.pods instead
       labels:
@@ -6434,8 +6434,8 @@ backend:
 
 vmclusters:
   # Opt-in dual-shipping VMAgent (vmcluster-dual-shipping). When enabled it remote-writes
-  # to the vminsert of every cluster under `clusters` plus the default distributed-chart
-  # cluster (vminsert-vmcluster-<first availabilityZone>).
+  # to every cluster under `clusters` (via its vmauth write balancer) plus the default
+  # distributed-chart cluster (vminsert-vmcluster-<first availabilityZone>).
   #
   # `spec` is passed through to the VMAgent CR verbatim - edit/add any field here.
   # `remoteWrite` is computed from the clusters above and appended to whatever you set.
@@ -6541,6 +6541,39 @@ vmclusters:
           prometheus.io/scrape: "true"
           prometheus.io/port: "8480"
           prometheus.io/path: "/metrics"
+    # VMAuth write balancer in front of vminsert-<cluster>, like the distributed chart's per-zone one.
+    vmauth:
+      enabled: true
+      replicaCount: 2
+      image:
+        repository: "{{ .Values.global.origin.registry }}/victoriametrics/vmauth"
+        tag: v1.151.0-20260930-1
+      configReloaderImageTag: "{{ .Values.global.origin.registry }}/victoriametrics/operator:config-reloader-v0.70-20260525-1"
+      resources:
+        requests:
+          cpu: 250m
+        limits:
+          cpu: 500m
+      extraArgs:
+        discoverBackendIPs: "true"
+      hpa:
+        minReplicas: 2
+        maxReplicas: 6
+        metrics:
+          - type: Resource
+            resource:
+              name: cpu
+              target:
+                type: Utilization
+                averageUtilization: 90
+      podMetadata:
+        annotations:
+          prometheus.io/scrape: "true"
+          prometheus.io/port: "8427"
+          prometheus.io/path: "/metrics"
+        labels:
+          app.groundcover.com/pipeline: metrics
+          app.kubernetes.io/part-of: groundcover
   clusters: {}
 
   # Portal skip-slow query selector for the 2-vmcluster + dual-shipping setup.

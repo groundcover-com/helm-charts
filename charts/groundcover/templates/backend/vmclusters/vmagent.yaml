@@ -6,7 +6,7 @@
 {{- /* remoteWrite is computed dynamically and appended to anything set in values */ -}}
 {{- $rw := $spec.remoteWrite | default list -}}
 {{- range $name, $_ := (.Values.vmclusters).clusters -}}
-{{- $rw = append $rw (dict "url" (printf "http://vminsert-%s.%s:8480/insert/0/prometheus/api/v1/write" $name $ns)) -}}
+{{- $rw = append $rw (dict "url" (include "vmclusters.writeUrl" (dict "root" $ "name" $name))) -}}
 {{- end -}}
 {{- /* the default backend write path - reuses the chart's routing helper, which
        returns the vmauth write balancer when distributed mode is enabled and the

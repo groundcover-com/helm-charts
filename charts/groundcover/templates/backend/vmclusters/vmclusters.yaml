@@ -10,7 +10,7 @@
 {{- end -}}
 {{- $clusterPdb := $cluster.pdb | default dict -}}
 {{- /* base spec = everything that is not a component / helper key */ -}}
-{{- $spec := omit $cluster "pdb" "nodeSelector" "tolerations" "affinity" "topologySpreadConstraints" -}}
+{{- $spec := omit $cluster "pdb" "vmauth" "nodeSelector" "tolerations" "affinity" "topologySpreadConstraints" -}}
 {{- range $comp := $components -}}
 {{- if hasKey $cluster $comp -}}
 {{- $compSpec := index $cluster $comp | default dict -}}
@@ -41,4 +41,27 @@ metadata:
   namespace: {{ $.Release.Namespace }}
   labels: {{ include "groundcover.labels" $ | nindent 4 }}
 spec: {{ tpl (toYaml $spec) $ | nindent 2 }}
+{{- /* write balancer in front of this cluster's vminsert; same scheduling/pdb merge as the components */ -}}
+{{- $vmauth := $cluster.vmauth | default dict -}}
+{{- if $vmauth.enabled }}
+{{- $authSpec := merge (deepCopy (omit $vmauth "enabled" "pdb")) (deepCopy $commonSpec) -}}
+{{- $authPdb := merge (deepCopy ($vmauth.pdb | default dict)) (deepCopy $clusterPdb) -}}
+{{- if $authPdb.enable -}}
+{{- $pdbSpec := dict -}}
+{{- if hasKey $authPdb "minAvailable" }}{{- $_ := set $pdbSpec "minAvailable" $authPdb.minAvailable -}}{{- end -}}
+{{- if hasKey $authPdb "maxUnavailable" }}{{- $_ := set $pdbSpec "maxUnavailable" $authPdb.maxUnavailable -}}{{- end -}}
+{{- $_ := set $authSpec "podDisruptionBudget" $pdbSpec -}}
+{{- end -}}
+{{- $uua := $authSpec.unauthorizedUserAccessSpec | default dict -}}
+{{- $_ := set $uua "url_map" (append ($uua.url_map | default list) (dict "src_paths" (list "/insert/.+") "url_prefix" (list (printf "http://vminsert-%s.%s:8480" $name $.Release.Namespace)))) -}}
+{{- $_ := set $authSpec "unauthorizedUserAccessSpec" $uua }}
+---
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMAuth
+metadata:
+  name: {{ include "vmclusters.vmauthWriteName" $name }}
+  namespace: {{ $.Release.Namespace }}
+  labels: {{ include "groundcover.labels" $ | nindent 4 }}
+spec: {{ tpl (toYaml $authSpec) $ | nindent 2 }}
+{{- end }}
 {{- end }}

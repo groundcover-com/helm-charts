@@ -22,6 +22,27 @@ Build the in-cluster vmselect read URL for a given VMCluster name.
 {{- end -}}
 
 {{/*
+Write-balancer VMAuth CR name for a cluster; the operator prefixes its Deployment/Service with vmauth-.
+*/}}
+{{- define "vmclusters.vmauthWriteName" -}}
+{{- printf "vmauth-write-balancer-%s" . -}}
+{{- end -}}
+
+{{/*
+Remote-write URL for a cluster: its vmauth write balancer when enabled, else vminsert directly. Args: root, name.
+*/}}
+{{- define "vmclusters.writeUrl" -}}
+{{- $ns := .root.Release.Namespace -}}
+{{- $vmc := .root.Values.vmclusters | default dict -}}
+{{- $cluster := mergeOverwrite (deepCopy ($vmc.defaults | default dict)) (deepCopy (index ($vmc.clusters | default dict) .name | default dict)) -}}
+{{- if ($cluster.vmauth).enabled -}}
+{{- printf "http://vmauth-%s.%s:8427/insert/0/prometheus/api/v1/write" (include "vmclusters.vmauthWriteName" .name) $ns -}}
+{{- else -}}
+{{- printf "http://vminsert-%s.%s:8480/insert/0/prometheus/api/v1/write" .name $ns -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Name of the dual-shipping VMAgent CR.
 */}}
 {{- define "vmclusters.dualShipping.vmagentName" -}}

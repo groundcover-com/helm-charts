@@ -86,15 +86,13 @@ datasource:
 ingress:
   annotations:
 
-# Exposes the ingestor's raw pprof endpoint through the inCloud HTTP ingress.
+# Exposes the ingestor's profile endpoints through the authenticated inCloud ingress.
 # Requests use the same API-key authentication as other ingestion routes.
-# Enable only together with ingestor.receivers.profiles.enabled.
 profileIngestion:
-  enabled: false
+  enabled: true
   otlp:
-    # Exposes the OTLP Profiles HTTP and gRPC endpoints. This additionally
-    # requires the ingestor's OTLP receiver and both OTLP listeners.
-    enabled: false
+    # Exposes the OTLP Profiles HTTP and gRPC endpoints.
+    enabled: true
   
 cert-manager:
   enabled: false
