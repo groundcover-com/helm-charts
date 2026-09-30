@@ -291,9 +291,6 @@ spec:
               value: {{ $longTermMemory.enableDirectMemoryManagementTools | default false | quote }}
             {{- end }}
             {{- end }}
-            {{- if $temporal.enabled }}
-            - name: TEMPORAL_ENABLED
-              value: "true"
             - name: TEMPORAL_ADDRESS
               value: {{ $temporal.address | default (printf "%s-temporal-frontend:7233" .Release.Name) | quote }}
             - name: TEMPORAL_NAMESPACE
@@ -303,7 +300,6 @@ spec:
             # Stage 2 only: turn on after all old workers have drained from this queue.
             - name: RUN_ADMISSION_ENABLED
               value: {{ $temporal.runAdmissionEnabled | default false | quote }}
-            {{- end }}
             {{- if $profilingEnabled }}
             - name: PROFILING_API_KEY
               valueFrom:

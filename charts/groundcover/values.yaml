@@ -682,6 +682,12 @@ agent:
       prometheusimport:
         enabled: true
         port: 8430
+      profiles:
+        enabled: true
+        # Dedicated, unauthenticated in-cluster profile HTTP receiver; do not expose publicly.
+        # Port 8028 follows RUM (8026) and source maps (8027).
+        # Native OTLP profiles share the OTLP ports above instead of using this receiver.
+        port: 8028
       metricsscraper:
         enabled: false
         maxScrapeSize: 67108864
@@ -1330,7 +1336,6 @@ agentService:
     devShowTraceId: "false"
   # address defaults to the in-cluster frontend service (<release>-temporal-frontend:7233).
   temporal:
-    enabled: false
     address: ""
     namespace: "default"
     taskQueue: "agent-service-runs"
@@ -1814,8 +1819,9 @@ ingestor:
       enabled: true
       port: 8430
     profiles:
-      enabled: false
-      # Dedicated raw-pprof HTTP port; 8028 follows RUM (8026) and source maps (8027).
+      enabled: true
+      # Dedicated, unauthenticated in-cluster profile HTTP receiver; do not expose publicly.
+      # Port 8028 follows RUM (8026) and source maps (8027).
       # Native OTLP profiles share the OTLP ports above instead of using this receiver.
       port: 8028
       maxUploadSize: 33554432
