@@ -5,7 +5,7 @@ kong-crds:
   upgradeCRDs: true
   image:
     repository: 'public.ecr.aws/groundcovercom/tools' 
-    tag: '20260719'
+    tag: '20260929'
 
 kong:
   replicaCount: 2
@@ -29,7 +29,7 @@ kong:
             type: Utilization
             averageUtilization: 75
   image:
-    tag: 3.9.3-mini-20260804-1
+    tag: 3.9.3-mini-20260929-1
     repository: public.ecr.aws/groundcovercom/kong
   ingressController:
     image:
@@ -110,7 +110,7 @@ cert-manager-crds:
   upgradeCRDs: true
   image:
     repository: public.ecr.aws/groundcovercom/tools
-    tag: "20260719"
+    tag: "20260929"
 
 # Internal ingress configuration for routing to cluster-internal services
 internalIngress:
@@ -139,7 +139,7 @@ internalIngress:
   kong:
     replicaCount: 2
     image:
-      tag: 3.9.3-mini-20260804-1
+      tag: 3.9.3-mini-20260929-1
       repository: public.ecr.aws/groundcovercom/kong
     ingressController:
       image:

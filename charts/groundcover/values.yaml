@@ -531,7 +531,7 @@ statefulset-modifier:
   sizePatches: true
   image:
     repository: '{{ .Values.global.origin.registry }}/tools' 
-    tag: '20260719'
+    tag: '20260929'
 
 agent:
   # Bind address for the sensor DaemonSet's own listeners. Defaults to "0.0.0.0"
@@ -2290,11 +2290,10 @@ monitorsService:
   priorityClassName:
   resources:
     requests:
-      cpu: 500m
-      memory: 256Mi
+      cpu: 1
+      memory: 512Mi
     limits:
-      cpu: 2000m
-      memory: 1024Mi
+      memory: 1Gi
   resizePolicy: []
   env: []
   logLevel: 4
@@ -2802,7 +2801,7 @@ commHub:
     namespace: "commhub"
     adminToolsImage:
       repository: public.ecr.aws/groundcovercom/temporalio/admin-tools
-      tag: "1.29.7-20260730-1"
+      tag: "1.29.7-20260929-1"
       pullPolicy: IfNotPresent
   cursorCloud:
     baseURL: "https://api.cursor.com"
@@ -5438,7 +5437,7 @@ metricsIngester:
 curl: &curlImage
   image:
     repository: '{{ .Values.global.origin.registry }}/tools'
-    tag: '20260719'
+    tag: '20260929'
 
 metrics-ingester:
   enabled: true
