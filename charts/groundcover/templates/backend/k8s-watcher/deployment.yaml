@@ -115,6 +115,11 @@ spec:
           name: ingestion-mtls-certs
           readOnly: true
 {{- end }}
+{{- if .Values.fleetClientConfig.mtlsSecretName }}
+        - mountPath: /etc/fleet-mtls-certs
+          name: fleet-mtls-certs
+          readOnly: true
+{{- end }}
         {{- with .Values.k8sWatcher.extraVolumeMounts }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -150,5 +155,10 @@ spec:
       - name: ingestion-mtls-certs
         secret:
           secretName: {{ .Values.global.ingestion.mtlsSecretName }}
+{{- end }}
+{{- if .Values.fleetClientConfig.mtlsSecretName }}
+      - name: fleet-mtls-certs
+        secret:
+          secretName: {{ .Values.fleetClientConfig.mtlsSecretName }}
 {{- end }}
 {{ end }}

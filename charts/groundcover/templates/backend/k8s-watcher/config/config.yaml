@@ -45,6 +45,14 @@ data:
     clusterId: {{ include "groundcover.clusterId" . }}
     region: {{ .Values.region }}
     env: {{ include "groundcover.env" . }}
+    fleetClientConfig:
+      enabled: {{ .Values.global.fleetmanager.enabled }}
+      url: {{ include "fleet-manager.url" . }}
+      insecureSkipVerify: {{ .Values.fleetClientConfig.insecureSkipVerify }}
+      tlsCertFile: {{ .Values.fleetClientConfig.tlsCertFile | default "" | quote }}
+      tlsKeyFile: {{ .Values.fleetClientConfig.tlsKeyFile | default "" | quote }}
+      tlsCAFile: {{ .Values.fleetClientConfig.tlsCAFile | default "" | quote }}
+      e2eDesiredStateFile: ""
     tracesNamespaceFilters: {{ toYaml .Values.tracesNamespaceFilters | nindent 6 }}
     tracesWorkloadFilters: {{ toYaml .Values.tracesWorkloadFilters | nindent 6 }}
     commitHashKeyName: {{ .Values.commitHashKeyName }}
