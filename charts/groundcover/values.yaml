@@ -1820,6 +1820,13 @@ ingestor:
       port: 8430
     profiles:
       enabled: true
+      # Dedicated, unauthenticated in-cluster HTTP receiver; do not expose this port publicly.
+      # POST /ingest accepts the legacy Pyroscope pprof contract: required name/from/until
+      # query parameters and either multipart profile/sample_type_config fields or a raw
+      # body with format=pprof. prev_profile is rejected. maxUploadSize bounds both the
+      # encoded profile part and the decompressed pprof payload.
+      # Embedded pprof timestamps are authoritative; from/until are legacy fallbacks.
+      # POST /profiling/upload accepts Groundcover's native raw-pprof contract.
       # Dedicated, unauthenticated in-cluster profile HTTP receiver; do not expose publicly.
       # Port 8028 follows RUM (8026) and source maps (8027).
       # Native OTLP profiles share the OTLP ports above instead of using this receiver.
