@@ -21,18 +21,25 @@
 {{- end -}}
 
 {{- /*
-clickhouse.portalUsername is the ClickHouse user the portal connects as. When
-global.clickhouse.sensitiveRole.enabled, it is the dedicated gated router_reader
-(sensitive_attributes revoked; the sensitive_data_reader role assumable for
-authorized reveals) that db-manager creates; otherwise the built-in default user.
-Password is unchanged either way (both authenticate with clickhouse.secretKey).
+clickhouse.portalUsername is the ClickHouse user the portal connects as at rest:
+always the built-in default. When global.clickhouse.sensitiveRole.enabled the
+portal ADDITIONALLY holds the gated router_reader (see the portal SensitiveRole
+config) and switches to it at RUNTIME, but only once its readiness probe confirms
+db-manager has provisioned that user + the reveal role on every shard. Keeping the
+static user as default means a not-yet-provisioned (or never-provisioned, e.g.
+standalone) backend never fails auth. Password is unchanged (clickhouse.secretKey).
 */}}
 {{- define "clickhouse.portalUsername" -}}
-{{- if (.Values.global.clickhouse.sensitiveRole | default dict).enabled -}}
-{{- (.Values.global.clickhouse.sensitiveRole).routerUser | default "router_reader" -}}
-{{- else -}}
 {{- include "clickhouse.username" . -}}
 {{- end -}}
+
+{{- /*
+clickhouse.sensitiveRouterUser is the gated ClickHouse user the portal switches to
+at runtime once the sensitive-data role is verified provisioned. db-manager creates
+it; the portal never uses it until its readiness probe passes.
+*/}}
+{{- define "clickhouse.sensitiveRouterUser" -}}
+{{- (.Values.global.clickhouse.sensitiveRole | default dict).routerUser | default "router_reader" -}}
 {{- end -}}
 
 {{- /*

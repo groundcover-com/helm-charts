@@ -79,7 +79,18 @@ data:
       Database: {{ include "clickhouse.database" . }}
       HTTPPort: {{ .Values.global.clickhouse.containerPorts.http | int }}
       NativePort: {{ .Values.global.clickhouse.containerPorts.tcp | int }}
-    
+
+    {{- /* Runtime activation of the RBAC-gated reveal. The portal serves ClickHouse
+           as the built-in default (ClickHouse.User above) and advertises no
+           sensitive-data feature until its probe confirms these gated entities are
+           provisioned on every shard, then switches to GatedUser and advertises. */}}
+    SensitiveRole:
+    {{- $sr := .Values.global.clickhouse.sensitiveRole | default dict }}
+      Intent: {{ $sr.enabled | default false }}
+      GatedUser: {{ include "clickhouse.sensitiveRouterUser" . }}
+      GrafanaUser: {{ $sr.grafanaUser | default "grafana_reader" }}
+      RoleName: {{ $sr.roleName | default "sensitive_data_reader" }}
+
     MonitorsManager:
       Enabled: false
       URL: "OVERRIDEN"
