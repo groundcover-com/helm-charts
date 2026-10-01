@@ -72,7 +72,9 @@ data:
   metrics-scrape-config.yaml: |-
     global:
       scrape_interval: 10s
+{{- if or .Values.isk8s .Values.agent.sensor.receivers.metricsscraper.extraScrapeConfigs }}
     scrape_configs:
+{{- if .Values.isk8s }}
       - job_name: "kubernetes-pods"
         honor_labels: true
         kubernetes_sd_configs:
@@ -133,8 +135,12 @@ data:
         metric_relabel_configs:
 {{ toYaml .Values.agent.sensor.receivers.metricsscraper.customMetricRelabelConfigs | indent 10 }}
 {{- end }}
+{{- end }}
 {{- if .Values.agent.sensor.receivers.metricsscraper.extraScrapeConfigs }}
 {{ toYaml .Values.agent.sensor.receivers.metricsscraper.extraScrapeConfigs | indent 6 }}
+{{- end }}
+{{- else }}
+    scrape_configs: []
 {{- end }}
 kind: ConfigMap
 metadata:
