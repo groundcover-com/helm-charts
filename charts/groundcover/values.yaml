@@ -2286,6 +2286,16 @@ monitorsService:
     repository: "{{ .Values.global.origin.registry }}/monitors-service"
     tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
   replicas: 2
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 4
+    targetCPUUtilizationPercentage: 75
+    targetMemoryUtilizationPercentage: 75
+    behavior: {}
+  pdb:
+    enabled: true
+    maxUnavailable: 1
   additionalLabels:
   additionalAnnotations:
   podLabels:

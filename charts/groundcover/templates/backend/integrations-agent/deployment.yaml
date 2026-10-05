@@ -27,6 +27,8 @@ spec:
         prometheus.io/port: "9102"
         groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
         checksum/config: {{ include (print $.Template.BasePath "/backend/integrations-agent/config/config.yaml") . | sha256sum }}
+        {{- /* API_KEY env is read once at start, while Kong applies a new token live: roll the pod with it */}}
+        checksum/apikey: {{ .Values.global.groundcover_token | default "" | toString | sha256sum }}
         {{- if .Values.integrationsAgent.additionalAnnotations }}
 {{ toYaml .Values.integrationsAgent.additionalAnnotations | indent 8 }}
         {{- end }}

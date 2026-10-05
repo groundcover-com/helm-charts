@@ -1,0 +1,15 @@
+{{- if and .Values.global.backend.enabled .Values.global.monitorsService.enabled .Values.monitorsService.pdb.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "monitors-service.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+    app: monitors-service
+spec:
+  maxUnavailable: {{ .Values.monitorsService.pdb.maxUnavailable }}
+  selector:
+    matchLabels:
+      app: monitors-service
+{{- end }}
