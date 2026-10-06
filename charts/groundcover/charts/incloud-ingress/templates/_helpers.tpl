@@ -31,6 +31,13 @@ If release name contains chart name it will be used as a full name.
 {{- end }}
 {{- end }}
 
+{{/*
+Name of the internal Kong deployment, matching the external Kong's <release>-kong naming.
+*/}}
+{{- define "incloud-ingress.internalKongName" -}}
+{{- printf "%s-kong-internal" .Release.Name | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
 {{- define "incloud-ingress.secure" -}}
 {{- if (and .Values.kong.proxy.tls.enabled (not .Values.global.airgap)) }}
 {{- true -}}

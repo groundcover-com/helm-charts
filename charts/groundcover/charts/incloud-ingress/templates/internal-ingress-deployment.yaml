@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ printf "%s-internal" (include "incloud-ingress.fullname" .) }}
+  name: {{ include "incloud-ingress.internalKongName" . }}
   labels:
     {{- include "incloud-ingress.internalIngress.commonLabels" . | nindent 4 }}
     app.kubernetes.io/name: kong-internal
@@ -18,8 +18,8 @@ spec:
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxUnavailable: 50%
-      maxSurge: 50%
+      maxUnavailable: {{ .Values.internalIngress.kong.strategy.rollingUpdate.maxUnavailable }}
+      maxSurge: {{ .Values.internalIngress.kong.strategy.rollingUpdate.maxSurge }}
   minReadySeconds: 15
   template:
     metadata:
@@ -114,6 +114,10 @@ spec:
             - name: cmetrics
               containerPort: 10255
               protocol: TCP
+          {{- if .Values.internalIngress.kong.ingressController.resources }}
+          resources:
+            {{- toYaml .Values.internalIngress.kong.ingressController.resources | nindent 12 }}
+          {{- end }}
           livenessProbe:
             httpGet:
               path: /healthz

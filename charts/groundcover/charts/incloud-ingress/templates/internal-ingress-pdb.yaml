@@ -2,7 +2,7 @@
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
-  name: {{ printf "%s-internal" (include "incloud-ingress.fullname" .) }}
+  name: {{ include "incloud-ingress.internalKongName" . }}
   labels:
     {{- include "incloud-ingress.internalIngress.commonLabels" . | nindent 4 }}
     app.kubernetes.io/name: kong-internal

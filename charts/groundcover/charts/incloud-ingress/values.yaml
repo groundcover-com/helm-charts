@@ -139,10 +139,22 @@ internalIngress:
     image:
       tag: 3.9.3-mini-20260929-1
       repository: public.ecr.aws/groundcovercom/kong
+    strategy:
+      rollingUpdate:
+        maxUnavailable: 33%
+        maxSurge: 50%
     ingressController:
       image:
         tag: "3.5.3-20260205"
         repository: public.ecr.aws/groundcovercom/kong/kubernetes-ingress-controller
+      # requests == limits for Guaranteed QoS; sized above the external Kong's 14d fleet peak (265Mi, 610m)
+      resources:
+        limits:
+          cpu: 500m
+          memory: 512Mi
+        requests:
+          cpu: 500m
+          memory: 512Mi
     env:
       anonymous_reports: "off"
       dump_config: "true"
@@ -152,14 +164,14 @@ internalIngress:
       nginx_http_client_body_buffer_size: "10m"
       nginx_mem_cache_size: "128m"
       proxy_access_log: "/dev/stdout"
-    # Resource limits for internal ingress
+    # requests == limits for Guaranteed QoS; keeping the prior 1000m/1Gi ceiling for both
     resources:
       limits:
         cpu: 1000m
         memory: 1Gi
       requests:
-        cpu: 500m
-        memory: 512Mi
+        cpu: 1000m
+        memory: 1Gi
     # Pod topology spread for high availability
     topologySpreadConstraints:
       - maxSkew: 1
