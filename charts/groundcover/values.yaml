@@ -119,10 +119,6 @@ global:
     enabled: false
   monitorsService:
     enabled: false
-  pdfReportGenerator:
-    enabled: false
-  pdfReportWorker:
-    enabled: false
   exportService:
     enabled: false
   frontendDomain: app.groundcover.com
@@ -3055,30 +3051,6 @@ commHub:
     existingSecret: ""
     secretKey: "encryption-key"
 
-pdfReportGenerator:
-  additionalLabels:
-  podLabels:
-  additionalAnnotations:
-  podAnnotations:
-  affinity:
-  nodeSelector:
-  tolerations: []
-  priorityClassName:
-  env: []
-  image:
-    repository: "{{ .Values.global.origin.registry }}/pdf-report-generator"
-    tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
-  resources:
-    limits:
-      memory: 2Gi
-    requests:
-      cpu: 500m
-      memory: 1Gi
-  resizePolicy: []
-  frontendUrl: '{{ printf "https://%s" (required "pdfReportGenerator.frontendUrl requires .Values.global.ingress.site to be set" .Values.global.ingress.site) }}'
-  logLevel: "info"
-  pdfTimeout: "60000"
-
 exportService:
   replicas: 2
   # Defaults to exportTimeout rounded up to seconds, plus 5 seconds for preStop,
@@ -3116,38 +3088,6 @@ exportService:
   logLevel: "info"
   exportTimeout: "60000"
   queueCapacity: 10
-
-pdfReportWorker:
-  additionalLabels:
-  podLabels:
-  additionalAnnotations:
-  podAnnotations:
-  affinity:
-  nodeSelector:
-  tolerations: []
-  priorityClassName:
-  env: []
-  image:
-    repository: "{{ .Values.global.origin.registry }}/pdf-report-worker"
-    tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
-  resources:
-    limits:
-      memory: 512Mi
-    requests:
-      cpu: 100m
-      memory: 256Mi
-  resizePolicy: []
-  healthProbe:
-    enabled: true
-    port: 8090
-  temporal:
-    host: ""
-  tracing:
-    enabled: false
-    writeTimeout: "5s"
-    flushInterval: "5s"
-    batchSize: 50
-  webhookTimeout: "30s"
 
 keeper: &keeperDefaults
   enabled: false

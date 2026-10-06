@@ -13,8 +13,12 @@ data:
     MultipleClusterIds: 
     {{- with .Values.multipleClusterIds }}{{ toYaml . | nindent 6 }}{{- end }}  
     Features:
-    {{- if .Values.portal.features }}
-    {{ toYaml .Values.portal.features | nindent 6 }}
+    {{- $features := .Values.portal.features | default list }}
+    {{- if and .Values.global.backend.enabled .Values.global.monitorsService.enabled }}
+    {{- $features = append $features "monitors-v2" }}
+    {{- end }}
+    {{- if $features }}
+    {{ toYaml $features | nindent 6 }}
     {{- else }}
       []
     {{- end }}
