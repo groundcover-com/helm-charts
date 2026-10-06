@@ -66,7 +66,7 @@ service:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.13.30
+  tag: 1.13.31
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/tools'
@@ -181,6 +181,10 @@ configuration:
       Timeout: 150s
       Interval: 5s
       SSLMode: "disable"
+    # Tenant backends whose reconcile rewrites, in place, Grafana rules stored without the round_timestamp prune. Empty = nowhere.
+    RoundTimestampRewrite:
+      - TenantUUID: f038dbeb-8971-42fa-aede-b50ad4734d86
+        BackendID: groundcover
   MonitorsV2:
     Enabled: false
     # Tenant uuid -> the backend ids monitors v2 is on for, e.g.

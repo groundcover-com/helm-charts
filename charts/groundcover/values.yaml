@@ -948,6 +948,9 @@ agent:
       #         - "dagster/job"
       crd:
         enabled: true
+        # Periodic CRD relist interval for workload-name resolution.
+        # Omitted or nonpositive values use the 60-minute default.
+        resyncPeriod: 60m
         allowedKinds:
           workflow:
             group: "argoproj.io"
@@ -2369,6 +2372,9 @@ k8sWatcher:
       enabled: false
     crd:
       enabled: true
+      # Periodic CRD relist interval for Kubernetes entity collection.
+      # Omitted or nonpositive values use the 60-minute default.
+      resyncPeriod: 60m
       allowedKinds:
         workflow:
           group: "argoproj.io"
