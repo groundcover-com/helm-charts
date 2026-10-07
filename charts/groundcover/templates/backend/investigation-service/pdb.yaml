@@ -1,0 +1,16 @@
+{{- if and .Values.global.backend.enabled .Values.global.investigationService.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "investigation-service.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+    app: investigation-service
+    app.kubernetes.io/name: investigation-service
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: investigation-service
+{{- end }}

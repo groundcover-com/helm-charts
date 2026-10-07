@@ -1,0 +1,92 @@
+{{- if and .Values.global.backend.enabled .Values.global.investigationService.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "investigation-service.configMapName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+    app: investigation-service
+    app.kubernetes.io/name: investigation-service
+data:
+  config.yaml: |
+    tenantUuid: {{ .Values.global.backend.tenantUuid | default "" | quote }}
+    backendId: {{ .Values.global.backend.name | default "" | quote }}
+
+    server:
+      port: 8080
+      healthPort: 8089
+      metricsPort: 9102
+
+    # Password via GC_POSTGRES_PASS (secretRef in the deployment).
+    postgres:
+      host: {{ tpl .Values.dbManager.db.host . | quote }}
+      port: {{ tpl .Values.dbManager.db.port . | quote }}
+      name: {{ .Values.investigationService.postgresql.database | quote }}
+      adminDbName: {{ .Values.dbManager.db.admindbname | quote }}
+      user: {{ tpl .Values.dbManager.db.user . | quote }}
+      pass: ""
+      sslmode: {{ .Values.dbManager.db.sslmode | quote }}
+      timeout: {{ .Values.dbManager.db.timeout }}
+      interval: {{ .Values.dbManager.db.interval }}
+      maxConns: {{ .Values.investigationService.postgresql.maxConns }}
+      enableTracing: {{ include "telemetry.enabled" . }}
+    migrationsPath: "/migrations"
+
+    temporal:
+      host: {{ include "investigation-service.temporalHost" . | quote }}
+      port: {{ .Values.investigationService.temporal.port }}
+      namespace: {{ .Values.investigationService.temporal.namespace | quote }}
+
+    telemetry:
+      traces:
+        {{- if eq (include "telemetry.enabled" .) "true" }}
+        enabled: true
+        endpoint: {{ include "telemetry.traces.otlpUrl" . | quote }}
+        writeTimeout: {{ .Values.investigationService.tracing.writeTimeout }}
+        flushInterval: {{ .Values.investigationService.tracing.flushInterval }}
+        batchSize: {{ .Values.investigationService.tracing.batchSize }}
+        # Declared empty so GC_TELEMETRY_TRACES_HEADERS_APIKEY (secretRef in the
+        # deployment) can override it; startup fails if it stays empty.
+        headers:
+          apikey: ""
+        {{- else }}
+        enabled: false
+        {{- end }}
+      instrumentation:
+        serviceName: "investigation-service"
+        originCluster: {{ include "groundcover.clusterId" . | quote }}
+        {{- if eq (include "telemetry.enabled" .) "true" }}
+        tracingTargets:
+          - endpoint: {{ include "ingestor.otlptraces.cluster.http.url" . | quote }}
+          {{- with .Values.investigationService.instrumentation.additionalTraceTargets }}
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
+        metricsTargets:
+          - endpoint: {{ include "metrics-ingester.promethues-exposition.http.url" . | quote }}
+        {{- end }}
+      pprof:
+        enabled: {{ include "telemetry.enabled" . }}
+        cpuSamplingDuration: {{ .Values.investigationService.pprof.cpuSamplingDuration }}
+        httpUploader:
+          enabled: {{ eq .Values.investigationService.pprof.uploaderType "http" }}
+          pushURL: {{ printf "%s/upload/pprof" (include "telemetry.metrics.base.url" .) | quote }}
+        pyroscopeUploader:
+          enabled: {{ eq .Values.investigationService.pprof.uploaderType "pyroscope" }}
+          pushURL: {{ include "telemetry.metrics.base.url" . | quote }}
+        backoffTicker:
+          interval: 10s
+          exponent: 40
+        memoryTicker:
+          enabled: true
+          interval: 60s
+          jumpSizeInBytes: 100000000
+          windowSize: 12h
+          initialWait: 10m
+        cpuTicker:
+          enabled: true
+          interval: 60s
+          jumpSizeInMCPU: 100
+          windowSize: 12h
+          initialWait: 10m
+{{- end }}

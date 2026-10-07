@@ -66,7 +66,7 @@ service:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.13.32
+  tag: 1.13.33
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/tools'
@@ -246,7 +246,8 @@ configuration:
     Enabled: true
   ExportService:
     Enabled: '{{ dig "exportService" "enabled" false .Values.global }}'
-    Endpoint: '{{ printf "http://%s:3001" (printf "%s-export-service" .Release.Name | trunc 63 | trimSuffix "-") }}'
+    Endpoint: '{{ printf "http://%s:3001" (printf "%s-export-service" .Release.Name
+      | trunc 63 | trimSuffix "-") }}'
   AllowReadersToEditDashboards: false
 strategy:
   type: RollingUpdate
@@ -419,8 +420,11 @@ grafana:
       username_claim: "https://client.info/email"
       email_claim: "https://client.info/email"
       org_claim: "https://client.info/org"
-      key_file: '{{ ternary "/certs/public_key.pem" "" ( or (eq .Values.global.auth.type "no-auth") ( eq .Values.global.airgap true) ) }}'
-      jwk_set_url: '{{ ternary "https://auth.groundcover.com/.well-known/jwks.json" "" ( and (eq .Values.global.auth.type "auth0") ( not .Values.global.airgap) ) }}'
+      key_file: '{{ ternary "/certs/public_key.pem" "" ( or (eq .Values.global.auth.type
+        "no-auth") ( eq .Values.global.airgap true) ) }}'
+      jwk_set_url: '{{ ternary "https://auth.groundcover.com/.well-known/jwks.json"
+        "" ( and (eq .Values.global.auth.type "auth0") ( not .Values.global.airgap)
+        ) }}'
       cache_ttl: 60m
       auto_sign_up: false
       skip_org_role_sync: true

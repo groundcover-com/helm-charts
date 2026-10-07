@@ -117,6 +117,8 @@ global:
     enabled: false
   commHub:
     enabled: false
+  investigationService:
+    enabled: false
   monitorsService:
     enabled: false
   exportService:
@@ -2777,6 +2779,48 @@ dispatchCenter:
       jumpSizeInMCPU: 100
       windowSize: 12h
       initialWait: 10m
+
+investigationService:
+  additionalLabels:
+  podLabels:
+  additionalAnnotations:
+  podAnnotations:
+  affinity:
+  nodeSelector:
+  tolerations: []
+  priorityClassName:
+  replicas: 2
+  env: []
+  image:
+    repository: "{{ .Values.global.origin.registry }}/investigation-service"
+    tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
+  resources:
+    limits:
+      memory: 1Gi
+    requests:
+      cpu: 250m
+      memory: 512Mi
+  resizePolicy: []
+  postgresql:
+    database: "investigations"
+    maxConns: 10
+  tracing:
+    writeTimeout: 5s
+    flushInterval: 5s
+    batchSize: 50
+  temporal:
+    host: ""
+    port: 7233
+    namespace: "investigations"
+    adminToolsImage:
+      repository: public.ecr.aws/groundcovercom/temporalio/admin-tools
+      tag: "1.29.7-20260929-1"
+      pullPolicy: IfNotPresent
+  instrumentation:
+    additionalTraceTargets: []
+  pprof:
+    uploaderType: pyroscope
+    cpuSamplingDuration: 60s
 
 commHub:
   replicas: 2

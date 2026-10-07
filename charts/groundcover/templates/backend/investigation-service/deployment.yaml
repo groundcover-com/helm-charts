@@ -1,0 +1,216 @@
+{{- if and .Values.global.backend.enabled .Values.global.investigationService.enabled }}
+{{- $temporalHost := include "investigation-service.temporalHost" . }}
+{{- $temporalPort := .Values.investigationService.temporal.port }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+    {{- with .Values.investigationService.additionalAnnotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+    app: investigation-service
+    app.kubernetes.io/name: investigation-service
+    {{- with .Values.investigationService.additionalLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  name: {{ include "investigation-service.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.investigationService.replicas }}
+  selector:
+    matchLabels:
+      app: investigation-service
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9102"
+        groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+        checksum/config: {{ include (print $.Template.BasePath "/backend/investigation-service/configmap.yaml") . | sha256sum }}
+        {{- with .Values.investigationService.additionalAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with .Values.investigationService.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        app: investigation-service
+        app.kubernetes.io/name: investigation-service
+        {{- include "groundcover.labels" . | nindent 8 }}
+        {{- with .Values.investigationService.additionalLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with .Values.investigationService.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.investigationService.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.investigationService.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.investigationService.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.investigationService.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
+      automountServiceAccountToken: false
+      imagePullSecrets: {{ include "imagePullSecrets" . }}
+      initContainers:
+      - name: wait-for-db
+        image: {{ include "postgresql.initContainers.image" . }}
+        env:
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "postgresql.secretName" . }}
+              key: {{ include "postgresql.adminPasswordKey" . }}
+        - name: POSTGRES_USER
+          value: '{{ tpl .Values.dbManager.db.user . }}'
+        - name: POSTGRES_DATABASE
+          value: '{{ include "postgresql.database" . }}'
+        command:
+        - /bin/sh
+        - -c
+        args:
+        - |
+          until pg_isready \
+            -U "$POSTGRES_USER" \
+            -d "dbname=$POSTGRES_DATABASE" \
+            -h {{ tpl .Values.dbManager.db.host . }} \
+            -p {{ tpl .Values.dbManager.db.port . }}; do
+            echo "Postgres is unavailable - sleeping"
+            sleep 2
+          done
+      - name: wait-for-temporal
+        image: '{{ tpl .Values.curl.image.repository . }}:{{ tpl .Values.curl.image.tag . }}'
+        command:
+        - /bin/sh
+        - -c
+        args:
+        - |
+          echo "Waiting for Temporal at {{ $temporalHost }}:{{ $temporalPort }}..."
+          while ! nc -z {{ $temporalHost }} {{ $temporalPort }}; do
+            echo "Temporal is unavailable - sleeping"
+            sleep 2
+          done
+          echo "Temporal is up"
+      - name: ensure-temporal-namespace
+        image: '{{ tpl .Values.investigationService.temporal.adminToolsImage.repository . }}:{{ tpl .Values.investigationService.temporal.adminToolsImage.tag . }}'
+        imagePullPolicy: {{ .Values.investigationService.temporal.adminToolsImage.pullPolicy }}
+        command:
+        - /bin/bash
+        - -c
+        args:
+        - |
+          set -e
+
+          TEMPORAL_ADDRESS="{{ $temporalHost }}:{{ $temporalPort }}"
+          TEMPORAL_NAMESPACE="{{ .Values.investigationService.temporal.namespace }}"
+
+          echo "Ensuring Temporal namespace ${TEMPORAL_NAMESPACE} exists at ${TEMPORAL_ADDRESS}..."
+          TEMPORAL_READY=false
+          for i in {1..60}; do
+            if tctl --address "${TEMPORAL_ADDRESS}" cluster health 2>/dev/null | grep -q SERVING; then
+              TEMPORAL_READY=true
+              break
+            fi
+            echo "Temporal is not healthy yet - sleeping"
+            sleep 2
+          done
+          if [ "${TEMPORAL_READY}" != "true" ]; then
+            echo "Temporal did not become healthy at ${TEMPORAL_ADDRESS}"
+            exit 1
+          fi
+
+          if tctl --address "${TEMPORAL_ADDRESS}" --namespace "${TEMPORAL_NAMESPACE}" namespace describe >/dev/null 2>&1; then
+            echo "Temporal namespace ${TEMPORAL_NAMESPACE} already exists"
+            exit 0
+          fi
+
+          tctl --address "${TEMPORAL_ADDRESS}" --namespace "${TEMPORAL_NAMESPACE}" namespace register \
+            --description "investigation-service namespace for Temporal workflows" \
+            --retention 7d \
+            --active_cluster active || {
+              echo "Namespace registration failed, checking if another pod created it..."
+              tctl --address "${TEMPORAL_ADDRESS}" --namespace "${TEMPORAL_NAMESPACE}" namespace describe >/dev/null 2>&1
+            }
+
+          echo "Temporal namespace ${TEMPORAL_NAMESPACE} is ready"
+      containers:
+      - name: investigation-service
+        image: {{ tpl .Values.investigationService.image.repository . }}:{{ tpl .Values.investigationService.image.tag . }}
+        imagePullPolicy: Always
+        env:
+        - name: GC_GROUNDCOVERVERSION
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['groundcover_version']
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: GC_POSTGRES_PASS
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "postgresql.secretName" . }}
+              key: {{ include "postgresql.adminPasswordKey" . }}
+        {{- if eq (include "telemetry.enabled" .) "true" }}
+        - name: GC_TELEMETRY_TRACES_HEADERS_APIKEY
+          valueFrom:
+            secretKeyRef:
+              key: {{ template "groundcover.apikeySecretKey" . }}
+              name: {{ template "groundcover.apikeySecretName" . }}
+        {{- end }}
+        {{- with .Values.investigationService.env }}
+        {{- tpl (toYaml .) $ | nindent 8 }}
+        {{- end }}
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        - containerPort: 9102
+          name: metrics
+          protocol: TCP
+        - containerPort: 8089
+          name: health-http
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            scheme: HTTP
+            path: /ready
+            port: health-http
+          initialDelaySeconds: 5
+          periodSeconds: 15
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            scheme: HTTP
+            path: /health
+            port: health-http
+          initialDelaySeconds: 10
+          periodSeconds: 15
+          timeoutSeconds: 5
+          failureThreshold: 3
+        volumeMounts:
+        - name: config
+          mountPath: /etc/investigation-service
+          readOnly: true
+        resources:
+          {{- toYaml .Values.investigationService.resources | nindent 10 }}
+{{- include "groundcover.containerResizePolicy" (dict "value" .Values.investigationService.resizePolicy "path" "investigationService.resizePolicy" "kubeVersion" .Capabilities.KubeVersion.GitVersion "indent" 8) }}
+      volumes:
+      - name: config
+        configMap:
+          name: {{ include "investigation-service.configMapName" . }}
+{{- end }}

@@ -1,0 +1,31 @@
+{{- if and .Values.global.backend.enabled .Values.global.investigationService.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  {{- with .Values.investigationService.additionalAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+    app: investigation-service
+    app.kubernetes.io/name: investigation-service
+    {{- with .Values.investigationService.additionalLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  name: {{ include "investigation-service.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  ports:
+  - name: http
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  - name: metrics
+    port: 9102
+    protocol: TCP
+    targetPort: 9102
+  selector:
+    app: investigation-service
+  type: ClusterIP
+{{- end }}
