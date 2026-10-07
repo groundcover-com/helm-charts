@@ -237,6 +237,9 @@ data:
     MonitorsService:
       Enabled: {{ and .Values.global.backend.enabled .Values.global.monitorsService.enabled }}
       Endpoint: http://{{ include "monitors-service.fullname" . }}:{{ .Values.monitorsService.httpPort }}
+    InvestigationService:
+      Enabled: {{ and .Values.global.backend.enabled .Values.global.investigationService.enabled }}
+      Endpoint: http://{{ include "investigation-service.fullname" . }}:8080
     {{- if .Values.portal.configuration.AgentService }}
     AgentService:
       Enabled: {{ .Values.portal.configuration.AgentService.Enabled | default (.Values.agentService.enabled | default false) }}

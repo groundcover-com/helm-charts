@@ -143,6 +143,54 @@ func TestInvestigationService_EnablingItRendersTheService(t *testing.T) {
 	requireInvestigationServiceRendered(t, objects)
 }
 
+func TestInvestigationService_DevValuesEnableTheService(t *testing.T) {
+	t.Parallel()
+	valueSets := map[string][]string{
+		"dev": {"k8s/values/dev.yaml"},
+		"dev-incloud": {
+			"k8s/values/incloud-dev/dev-incloud-images-overrides.yaml",
+			"k8s/values/incloud-dev/dev-incloud-tf-values.yaml",
+			"k8s/values/incloud-dev/dev-incloud-backend-values.yaml",
+		},
+	}
+	for name, files := range valueSets {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			var args []string
+			for _, f := range files {
+				args = append(args, "-f", testpath.Join(t, f))
+			}
+
+			objects := investigationServiceObjects(renderInvestigationChart(t, args...))
+
+			requireInvestigationServiceRendered(t, objects)
+		})
+	}
+}
+
+func TestInvestigationService_PortalForwardsToTheServiceOnlyWhenEnabled(t *testing.T) {
+	t.Parallel()
+	portalConfig := func(objects []renderedObject) string {
+		for _, obj := range objects {
+			if obj.Kind == "ConfigMap" && strings.Contains(obj.Metadata.Name, "portal") {
+				for _, v := range obj.Data {
+					if strings.Contains(v, "DispatchCenter:") {
+						return v
+					}
+				}
+			}
+		}
+		t.Fatal("portal config not rendered")
+		return ""
+	}
+
+	enabled := portalConfig(renderInvestigationChart(t, "--set", "global.investigationService.enabled=true"))
+	require.Contains(t, enabled, "InvestigationService:\n  Enabled: true\n  Endpoint: http://"+investigationRelease+"-investigation-service:8080")
+
+	disabled := portalConfig(renderInvestigationChart(t))
+	require.Contains(t, disabled, "InvestigationService:\n  Enabled: false")
+}
+
 func renderedConfig(t *testing.T, objects map[string]renderedObject) map[string]any {
 	t.Helper()
 	var config map[string]any
