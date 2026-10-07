@@ -128,6 +128,8 @@ global:
     enabled: false
   bucketStreamer:
     enabled: false
+  autonomousInfrastructure:
+    enabled: false
 
   ingress:
     # set ingress site for inCloud / on-prem sensor only deployments

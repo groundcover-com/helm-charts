@@ -30,6 +30,8 @@ data:
     {{- else }}
     StopMigrationOnFailure:
     {{- end }}
+    FeatureFlags:
+      autonomous_infrastructure: {{ .Values.global.autonomousInfrastructure.enabled }}
     Incluster: true
     Namespace: {{ .Release.Namespace }}
     DropPartitionInterval: 6h
