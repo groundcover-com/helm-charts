@@ -27,6 +27,10 @@ spec:
         {{- include "incloud-ingress.internalIngress.commonLabels" . | nindent 8 }}
         app.kubernetes.io/name: kong-internal
         app.kubernetes.io/component: proxy
+      {{- with .Values.internalIngress.kong.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
     spec:
       serviceAccountName: {{ include "incloud-ingress.fullname" . }}
       {{- if .Values.internalIngress.kong.topologySpreadConstraints }}

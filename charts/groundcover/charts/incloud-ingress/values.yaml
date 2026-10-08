@@ -135,6 +135,8 @@ internalIngress:
       targetPort: 8443
   # Kong deployment configuration for internal ingress
   kong:
+    # Annotations applied to internal Kong pods.
+    podAnnotations: {}
     replicaCount: 2
     image:
       tag: 3.9.3-mini-20260929-1
