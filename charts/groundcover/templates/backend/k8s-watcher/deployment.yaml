@@ -75,6 +75,8 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.annotations['groundcover_version']              
+        - name: GC_AUTONOMOUSINFRASTRUCTURE_OPTIN
+          value: {{ .Values.global.autonomousInfrastructure.enabled | quote }}
         {{- with .Values.k8sWatcher.env }}
           {{ tpl (toYaml .) $ | nindent 8 }}
         {{- end }}
