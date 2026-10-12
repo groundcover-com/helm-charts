@@ -1,0 +1,38 @@
+{{- if and .Values.global.backend.enabled .Values.global.autonomousInfrastructure.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "autonomous-infrastructure.configMapName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "autonomous-infrastructure.labels" . | nindent 4 }}
+data:
+  # ClickHouse over HTTP (clickhouse-connect). readHost follows the HA proxy on failover.
+  CLICKHOUSE_HOST: {{ include "clickhouse.readHost" . | quote }}
+  CLICKHOUSE_PORT: {{ .Values.global.clickhouse.containerPorts.http | default 8123 | quote }}
+  CLICKHOUSE_DATABASE: {{ include "clickhouse.database" . | quote }}
+  CLICKHOUSE_USER: {{ include "clickhouse.username" . | quote }}
+
+  # Backfill only applies to a cluster's first run; later ticks resume from the picks watermark.
+  BACKFILL_DAYS: {{ .Values.autonomousInfrastructure.config.backfillDays | quote }}
+  # Memory knob: one batch of facts is held in a dataframe.
+  BATCH_MINUTES: {{ .Values.autonomousInfrastructure.config.batchMinutes | quote }}
+  # Newer buckets may still receive late rows.
+  SEAL_DELAY_SECONDS: {{ .Values.autonomousInfrastructure.config.sealDelaySeconds | quote }}
+  # Capped by the rollup's 30-day TTL.
+  ARRAYS_LOOKBACK_DAYS: {{ .Values.autonomousInfrastructure.config.arraysLookbackDays | quote }}
+  DISCOVERY_LOOKBACK_MINUTES: {{ .Values.autonomousInfrastructure.config.discoveryLookbackMinutes | quote }}
+  RUN_LABEL: "cron"
+  LOG_LEVEL: {{ .Values.autonomousInfrastructure.logLevel | quote }}
+
+  OTEL_SERVICE_NAME: "autonomous-infrastructure"
+  {{- if eq (include "telemetry.enabled" . | trim) "false" }}
+  OTEL_SDK_DISABLED: "true"
+  {{- else }}
+  OTEL_EXPORTER_OTLP_ENDPOINT: {{ include "autonomous-infrastructure.otlpEndpoint" . | quote }}
+  # Pinned: the SDK default is a fresh UUID per process, i.e. a new metric series every tick.
+  OTEL_SERVICE_INSTANCE_ID: {{ include "autonomous-infrastructure.fullname" . | quote }}
+  {{- end }}
+  # The only writable mount.
+  TMPDIR: "/tmp"
+{{- end }}

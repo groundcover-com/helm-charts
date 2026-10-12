@@ -2327,6 +2327,95 @@ monitorsService:
     batchSize: 50
 
 
+# Autonomous Infrastructure workers, gated on global.autonomousInfrastructure.enabled.
+# Both need the ClickHouse objects from the autonomous_infrastructure migration domain.
+# Table names, telemetry and ClickHouse wiring are not values: see the ConfigMaps.
+autonomousInfrastructure:
+  image:
+    repository: "{{ .Values.global.origin.registry }}/autonomous-infrastructure"
+    tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
+    pullPolicy: IfNotPresent
+  schedule: "*/2 * * * *"
+  # Keep below the schedule period.
+  startingDeadlineSeconds: 60
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  backoffLimit: 1
+  # Long on purpose: a cluster's first run backfills `backfillDays` of history.
+  activeDeadlineSeconds: 1800
+  ttlSecondsAfterFinished: 3600
+  config:
+    backfillDays: 7
+    # Peak memory scales with this; a wider window OOMs a large tenant's backfill.
+    batchMinutes: 10
+    sealDelaySeconds: 90
+    arraysLookbackDays: 14
+    discoveryLookbackMinutes: 60
+  logLevel: INFO
+  env:
+    - name: POLARS_MAX_THREADS
+      value: "2"
+  # No CPU limit on purpose: polars sizes its threads from visible cores, so a CFS
+  # quota makes it slower rather than smaller. POLARS_MAX_THREADS bounds it instead.
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      memory: 3Gi
+  additionalLabels:
+  additionalAnnotations:
+  podLabels:
+  podAnnotations:
+  nodeSelector:
+  affinity:
+  tolerations: []
+  priorityClassName:
+
+workloadRecommendations:
+  image:
+    repository: "{{ .Values.global.origin.registry }}/workload-recommendations"
+    tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
+    pullPolicy: IfNotPresent
+  schedule: "*/2 * * * *"
+  # Keep below the schedule period.
+  startingDeadlineSeconds: 60
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  backoffLimit: 1
+  activeDeadlineSeconds: 600
+  ttlSecondsAfterFinished: 3600
+  config:
+    discoveryLookbackMinutes: 60
+    lowPoolDays: 7
+    highPoolDays: 1
+    # A sample count, not a duration.
+    minDataPoints: 120
+    # DaemonSet is deliberately absent.
+    kinds:
+      - Deployment
+      - StatefulSet
+      - CronJob
+  logLevel: INFO
+  env:
+    - name: POLARS_MAX_THREADS
+      value: "2"
+  # No CPU limit, same reason as autonomousInfrastructure.
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      memory: 2Gi
+  additionalLabels:
+  additionalAnnotations:
+  podLabels:
+  podAnnotations:
+  nodeSelector:
+  affinity:
+  tolerations: []
+  priorityClassName:
+
 k8sWatcher:
   initContainers:
     checkIngestion:

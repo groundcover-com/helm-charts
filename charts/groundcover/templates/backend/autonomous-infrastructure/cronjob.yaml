@@ -1,0 +1,117 @@
+{{- if and .Values.global.backend.enabled .Values.global.autonomousInfrastructure.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "autonomous-infrastructure.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag | quote }}
+    {{- with .Values.autonomousInfrastructure.additionalAnnotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  labels:
+    {{- include "autonomous-infrastructure.labels" . | nindent 4 }}
+    {{- with .Values.autonomousInfrastructure.additionalLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  schedule: {{ .Values.autonomousInfrastructure.schedule | quote }}
+  # A run must never overlap itself. Batches are ordered by a watermark that the
+  # previous run advances, and the sink is append-only — two concurrent runs read
+  # the same watermark and write the same window twice.
+  concurrencyPolicy: Forbid
+  # If the controller misses a window (node pressure, API outage), skip it rather
+  # than firing a burst of catch-up jobs: the watermark makes the next run resume
+  # exactly where this one would have. Keep below the schedule period so a late
+  # start cannot collide with the following tick.
+  startingDeadlineSeconds: {{ .Values.autonomousInfrastructure.startingDeadlineSeconds }}
+  successfulJobsHistoryLimit: {{ .Values.autonomousInfrastructure.successfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ .Values.autonomousInfrastructure.failedJobsHistoryLimit }}
+  jobTemplate:
+    spec:
+      backoffLimit: {{ .Values.autonomousInfrastructure.backoffLimit }}
+      # Bounded so a hung run cannot hold the Forbid lock forever and stall every
+      # later tick. A cluster's first run backfills and takes the longest.
+      activeDeadlineSeconds: {{ .Values.autonomousInfrastructure.activeDeadlineSeconds }}
+      ttlSecondsAfterFinished: {{ .Values.autonomousInfrastructure.ttlSecondsAfterFinished }}
+      template:
+        metadata:
+          annotations:
+            groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag | quote }}
+            checksum/config: {{ include (print $.Template.BasePath "/backend/autonomous-infrastructure/configmap.yaml") . | sha256sum }}
+            {{- with .Values.autonomousInfrastructure.podAnnotations }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          labels:
+            {{- include "autonomous-infrastructure.labels" . | nindent 12 }}
+            {{- with .Values.autonomousInfrastructure.podLabels }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+        spec:
+          restartPolicy: Never
+          imagePullSecrets: {{ include "imagePullSecrets" . }}
+          # The worker talks to ClickHouse and an OTLP endpoint. It never calls
+          # the Kubernetes API, so it gets no token to lose.
+          automountServiceAccountToken: false
+          {{- with .Values.autonomousInfrastructure.priorityClassName }}
+          priorityClassName: {{ . }}
+          {{- end }}
+          {{- with .Values.autonomousInfrastructure.nodeSelector }}
+          nodeSelector:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.autonomousInfrastructure.affinity }}
+          affinity:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.autonomousInfrastructure.tolerations }}
+          tolerations:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          containers:
+            - name: autonomous-infrastructure
+              image: {{ tpl .Values.autonomousInfrastructure.image.repository . }}:{{ tpl .Values.autonomousInfrastructure.image.tag . }}
+              imagePullPolicy: {{ .Values.autonomousInfrastructure.image.pullPolicy }}
+              # Invoke the module directly rather than through the image's uv
+              # entrypoint: the venv is already built and on PATH, and uv would
+              # want to write a cache and re-check the lockfile at start, which a
+              # read-only root filesystem does not allow.
+              command: ["python", "-u", "-m", "autonomous_infrastructure"]
+              envFrom:
+                - configMapRef:
+                    name: {{ include "autonomous-infrastructure.configMapName" . }}
+              env:
+                - name: CLICKHOUSE_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: '{{ include "clickhouse.secretName" . }}'
+                      key: '{{ include "clickhouse.secretKey" . }}'
+                {{- with .Values.autonomousInfrastructure.env }}
+                {{- /* CLICKHOUSE_PASSWORD comes from the secret above. A container's
+                       `env` wins over `envFrom` AND over an earlier entry in the same
+                       list, so a custom entry of that name would quietly replace the
+                       secret reference with a literal. Fail the render instead. */ -}}
+                {{- range . }}
+                {{- if has .name (list "CLICKHOUSE_PASSWORD") }}
+                {{- fail (printf "autonomousInfrastructure.env: %s is set by the chart and cannot be overridden" .name) }}
+                {{- end }}
+                {{- end }}
+                {{- tpl (toYaml .) $ | nindent 16 }}
+                {{- end }}
+              resources:
+                {{- toYaml .Values.autonomousInfrastructure.resources | nindent 16 }}
+              volumeMounts:
+                - name: tmp
+                  mountPath: /tmp
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                runAsNonRoot: true
+                runAsUser: 65532
+                capabilities:
+                  drop: ["ALL"]
+          volumes:
+            # The only writable path the process needs.
+            - name: tmp
+              emptyDir: {}
+{{- end }}

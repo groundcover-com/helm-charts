@@ -1,0 +1,36 @@
+{{- if and .Values.global.backend.enabled .Values.global.autonomousInfrastructure.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "workload-recommendations.configMapName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "workload-recommendations.labels" . | nindent 4 }}
+data:
+  # ClickHouse over HTTP (clickhouse-connect). readHost follows the HA proxy on failover.
+  CLICKHOUSE_HOST: {{ include "clickhouse.readHost" . | quote }}
+  CLICKHOUSE_PORT: {{ .Values.global.clickhouse.containerPorts.http | default 8123 | quote }}
+  CLICKHOUSE_DATABASE: {{ include "clickhouse.database" . | quote }}
+  CLICKHOUSE_USER: {{ include "clickhouse.username" . | quote }}
+
+  DISCOVERY_LOOKBACK_MINUTES: {{ .Values.workloadRecommendations.config.discoveryLookbackMinutes | quote }}
+  LOW_POOL_DAYS: {{ .Values.workloadRecommendations.config.lowPoolDays | quote }}
+  HIGH_POOL_DAYS: {{ .Values.workloadRecommendations.config.highPoolDays | quote }}
+  MIN_DATA_POINTS: {{ .Values.workloadRecommendations.config.minDataPoints | quote }}
+  # JSON, not comma-separated: pydantic-settings parses tuples from the env as JSON.
+  KINDS: {{ toJson .Values.workloadRecommendations.config.kinds | quote }}
+
+  # Empty when fleet-manager is off: recommendations are stored but not published.
+  FLEET_MANAGER_URL: {{ if .Values.global.fleetmanager.enabled }}{{ include "fleet-manager.base.url" . | quote }}{{ else }}""{{ end }}
+  RUN_LABEL: "cron"
+  LOG_LEVEL: {{ .Values.workloadRecommendations.logLevel | quote }}
+
+  OTEL_SERVICE_NAME: "workload-recommendations"
+  {{- if eq (include "telemetry.enabled" . | trim) "false" }}
+  OTEL_SDK_DISABLED: "true"
+  {{- else }}
+  OTEL_EXPORTER_OTLP_ENDPOINT: {{ include "autonomous-infrastructure.otlpEndpoint" . | quote }}
+  OTEL_SERVICE_INSTANCE_ID: {{ include "workload-recommendations.fullname" . | quote }}
+  {{- end }}
+  TMPDIR: "/tmp"
+{{- end }}

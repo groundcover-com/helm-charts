@@ -34,3 +34,23 @@ func TestK8sWatcherOptsIntoAutonomousInfrastructureWithItsChartFlag(t *testing.T
 		})
 	}
 }
+
+// The workers push their own telemetry, so the chart-wide telemetry switch has to silence them too.
+func TestAutonomousInfrastructureWorkersFollowTheGlobalTelemetrySwitch(t *testing.T) {
+	t.Parallel()
+
+	const enabled = "global:\n  autonomousInfrastructure:\n    enabled: true\n"
+	const disabled = enabled + "  telemetry:\n    enabled: false\n"
+
+	for _, configMap := range []string{
+		"export-limits-test-autoinfra-config",
+		"export-limits-test-workload-recommendations-config",
+	} {
+		t.Run(configMap, func(t *testing.T) {
+			t.Parallel()
+
+			require.Equal(t, "true", renderConfigMapData(t, disabled, configMap, "OTEL_SDK_DISABLED"))
+			require.Contains(t, renderConfigMapData(t, enabled, configMap, "OTEL_EXPORTER_OTLP_ENDPOINT"), ":4318")
+		})
+	}
+}

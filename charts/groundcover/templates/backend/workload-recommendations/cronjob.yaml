@@ -1,0 +1,118 @@
+{{- if and .Values.global.backend.enabled .Values.global.autonomousInfrastructure.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "workload-recommendations.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag | quote }}
+    {{- with .Values.workloadRecommendations.additionalAnnotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  labels:
+    {{- include "workload-recommendations.labels" . | nindent 4 }}
+    {{- with .Values.workloadRecommendations.additionalLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  schedule: {{ .Values.workloadRecommendations.schedule | quote }}
+  # A run must never overlap itself. Unlike the picks worker this one holds no
+  # watermark — each tick recomputes from the current classification — so two
+  # concurrent runs would write two rows for the same container at the same
+  # instant and leave argMax picking between them arbitrarily.
+  concurrencyPolicy: Forbid
+  # Skip a missed window rather than firing catch-up jobs. There is no history to
+  # walk: the next tick recomputes the same answer from current state, so a
+  # backlog of catch-up runs would all write the same thing.
+  startingDeadlineSeconds: {{ .Values.workloadRecommendations.startingDeadlineSeconds }}
+  successfulJobsHistoryLimit: {{ .Values.workloadRecommendations.successfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ .Values.workloadRecommendations.failedJobsHistoryLimit }}
+  jobTemplate:
+    spec:
+      backoffLimit: {{ .Values.workloadRecommendations.backoffLimit }}
+      # Every tick does the same bounded work — no first-run backfill — so this
+      # is far tighter than the picks worker's. If a run exceeds it, something is
+      # wrong rather than merely large.
+      activeDeadlineSeconds: {{ .Values.workloadRecommendations.activeDeadlineSeconds }}
+      ttlSecondsAfterFinished: {{ .Values.workloadRecommendations.ttlSecondsAfterFinished }}
+      template:
+        metadata:
+          annotations:
+            groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag | quote }}
+            checksum/config: {{ include (print $.Template.BasePath "/backend/workload-recommendations/configmap.yaml") . | sha256sum }}
+            {{- with .Values.workloadRecommendations.podAnnotations }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          labels:
+            {{- include "workload-recommendations.labels" . | nindent 12 }}
+            {{- with .Values.workloadRecommendations.podLabels }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+        spec:
+          restartPolicy: Never
+          imagePullSecrets: {{ include "imagePullSecrets" . }}
+          # Talks to ClickHouse and an OTLP endpoint only. It never calls the
+          # Kubernetes API, so it gets no token to lose.
+          automountServiceAccountToken: false
+          {{- with .Values.workloadRecommendations.priorityClassName }}
+          priorityClassName: {{ . }}
+          {{- end }}
+          {{- with .Values.workloadRecommendations.nodeSelector }}
+          nodeSelector:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.workloadRecommendations.affinity }}
+          affinity:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.workloadRecommendations.tolerations }}
+          tolerations:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          containers:
+            - name: workload-recommendations
+              image: {{ tpl .Values.workloadRecommendations.image.repository . }}:{{ tpl .Values.workloadRecommendations.image.tag . }}
+              imagePullPolicy: {{ .Values.workloadRecommendations.image.pullPolicy }}
+              # Invoke the module directly rather than through the image's uv
+              # entrypoint: the venv is already built and on PATH, and uv would
+              # want to write a cache and re-check the lockfile at start, which a
+              # read-only root filesystem does not allow.
+              command: ["python", "-u", "-m", "workload_recommendations"]
+              envFrom:
+                - configMapRef:
+                    name: {{ include "workload-recommendations.configMapName" . }}
+              env:
+                - name: CLICKHOUSE_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: '{{ include "clickhouse.secretName" . }}'
+                      key: '{{ include "clickhouse.secretKey" . }}'
+                {{- with .Values.workloadRecommendations.env }}
+                {{- /* CLICKHOUSE_PASSWORD comes from the secret above. A container's
+                       `env` wins over `envFrom` AND over an earlier entry in the same
+                       list, so a custom entry of that name would quietly replace the
+                       secret reference with a literal. Fail the render instead. */ -}}
+                {{- range . }}
+                {{- if has .name (list "CLICKHOUSE_PASSWORD") }}
+                {{- fail (printf "workloadRecommendations.env: %s is set by the chart and cannot be overridden" .name) }}
+                {{- end }}
+                {{- end }}
+                {{- tpl (toYaml .) $ | nindent 16 }}
+                {{- end }}
+              resources:
+                {{- toYaml .Values.workloadRecommendations.resources | nindent 16 }}
+              volumeMounts:
+                - name: tmp
+                  mountPath: /tmp
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                runAsNonRoot: true
+                runAsUser: 65532
+                capabilities:
+                  drop: ["ALL"]
+          volumes:
+            # The only writable path the process needs.
+            - name: tmp
+              emptyDir: {}
+{{- end }}
