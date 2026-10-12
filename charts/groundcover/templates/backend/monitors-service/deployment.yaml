@@ -51,53 +51,13 @@ spec:
 {{ toYaml .Values.monitorsService.podLabels | indent 8 }}
         {{- end }}
     spec:
-{{- if .Values.monitorsService.tolerations }}
-      tolerations:
-{{ toYaml .Values.monitorsService.tolerations | indent 8 }}
-{{- end }}
-{{- if .Values.monitorsService.affinity }}
-      affinity:
-{{ toYaml .Values.monitorsService.affinity | indent 8 }}
-{{- end }}
-{{- if .Values.monitorsService.nodeSelector }}
-      nodeSelector:
-{{ toYaml .Values.monitorsService.nodeSelector | indent 8 }}
-{{- end }}
-      imagePullSecrets: {{ include "imagePullSecrets" . }}
+      {{- include "monitors-service.podPlacement" . | trim | nindent 6 }}
 {{- if .Values.monitorsService.topologySpreadConstraints }}
       topologySpreadConstraints:
 {{ toYaml .Values.monitorsService.topologySpreadConstraints | indent 8 }}
 {{- end }}
       containers:
-      - env:
-        - name: GC_GROUNDCOVERVERSION
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.annotations['groundcover_version']
-        {{- if eq (include "telemetry.enabled" .) "true" }}
-        - name: GC_TRACING_HEADERS_APIKEY
-          valueFrom:
-            secretKeyRef:
-              key: {{ template "groundcover.apikeySecretKey" . }}
-              name: {{ template "groundcover.apikeySecretName" . }}
-        {{- end }}
-        - name: GC_POSTGRES_PASS
-          valueFrom:
-            secretKeyRef:
-              name: {{ include "postgresql.secretName" . }}
-              key: {{ include "postgresql.adminPasswordKey" . }}
-        {{- with .Values.monitorsService.env }}
-          {{ tpl (toYaml .) $ | nindent 8 }}
-        {{- end }}
-        - name: POD_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.name
-        envFrom:
-          - secretRef:
-              name: {{include "groundcover.config.secretName" .}}
-        image: {{ tpl .Values.monitorsService.image.repository . }}:{{ tpl .Values.monitorsService.image.tag . }}
-        imagePullPolicy: Always
+      - {{ include "monitors-service.containerEnv" . | trim | indent 8 | trim }}
         name: monitors-service
         ports:
         - containerPort: {{ .Values.monitorsService.httpPort }}
@@ -126,13 +86,7 @@ spec:
 {{- toYaml .Values.monitorsService.resources | nindent 10 }}
 {{- include "groundcover.containerResizePolicy" (dict "value" .Values.monitorsService.resizePolicy "path" "monitorsService.resizePolicy" "kubeVersion" .Capabilities.KubeVersion.GitVersion "indent" 8) }}
         volumeMounts:
-        - mountPath: /etc/monitors-service
-          name: monitors-service-config-volume
-{{- if .Values.monitorsService.priorityClassName }}
-      priorityClassName: {{ .Values.monitorsService.priorityClassName }}
-{{- end }}
+        {{- include "monitors-service.configVolumeMount" . | nindent 8 }}
       volumes:
-      - configMap:
-          name: monitors-service-config
-        name: monitors-service-config-volume
+      {{- include "monitors-service.configVolume" . | nindent 6 }}
 {{ end -}}

@@ -33,6 +33,8 @@ data:
       sslmode: {{ .Values.dbManager.db.sslmode }}
       timeout: {{ .Values.dbManager.db.timeout }}
       interval: {{ .Values.dbManager.db.interval }}
+    # The reconcile reaches the router through comm-hub's /router-proxy.
+    commHubBaseURL: {{ printf "http://%s:8080" (include "comm-hub.fullname" .) | quote }}
 metadata:
   labels:
     {{- include "groundcover.labels" . | nindent 4 }}

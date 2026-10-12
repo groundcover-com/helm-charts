@@ -3447,37 +3447,6 @@ clickhouse-standby:
     accessModes:
       - ReadWriteOnce
     size: 128Gi
-  affinity:
-    podAffinity:
-      preferredDuringSchedulingIgnoredDuringExecution:
-        - weight: 100
-          podAffinityTerm:
-            labelSelector:
-              matchLabels:
-                app.kubernetes.io/name: clickhouse
-                shard: '{{ .Shard }}'
-            topologyKey: kubernetes.io/hostname
-    podAntiAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        - labelSelector:
-            matchLabels:
-              app.kubernetes.io/instance: '{{ .Release.Name }}'
-              app.kubernetes.io/name: '{{ include "common.names.name" . }}'
-          topologyKey: kubernetes.io/hostname
-      preferredDuringSchedulingIgnoredDuringExecution:
-        - weight: 100
-          podAffinityTerm:
-            labelSelector:
-              matchExpressions:
-                - key: app.kubernetes.io/name
-                  operator: In
-                  values:
-                    - clickhouse
-                - key: shard
-                  operator: NotIn
-                  values:
-                    - '{{ .Shard }}'
-            topologyKey: kubernetes.io/hostname
   priorityClassName: ""
 
 # HAProxy-based ClickHouse switch (templates/clickhouse/proxy/*). Fronts both the

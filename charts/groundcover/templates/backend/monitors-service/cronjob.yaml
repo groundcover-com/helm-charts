@@ -1,0 +1,47 @@
+{{ if and .Values.global.backend.enabled .Values.global.monitorsService.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  # CronJob names are capped at 52 characters (the controller appends a suffix).
+  name: {{ printf "%s-monitors-service-reconcile" (.Release.Name | trunc 25 | trimSuffix "-") }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+    app: monitors-service-reconcile
+spec:
+  # A stable minute per backend, so clusters don't all call the router at once.
+  {{- $tenant := .Values.global.backend.tenantUuid | default "" }}
+  {{- $backend := .Values.global.backend.name | default "" }}
+  {{- $seed := ternary (printf "%s/%s" .Release.Namespace .Release.Name) (printf "%s/%s" $tenant $backend) (and (eq $tenant "") (eq $backend "")) }}
+  schedule: "{{ mod (adler32sum $seed) 60 }} * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      # The next hour is the retry.
+      backoffLimit: 0
+      # Just above reconcile.CycleTimeout (15m).
+      activeDeadlineSeconds: 960
+      template:
+        metadata:
+          annotations:
+            groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+            checksum/config: {{ include (print $.Template.BasePath "/backend/monitors-service/config/config.yaml") . | sha256sum }}
+          labels:
+            app: monitors-service-reconcile
+            {{- include "groundcover.labels" . | nindent 12 }}
+        spec:
+          restartPolicy: Never
+          {{- include "monitors-service.podPlacement" . | trim | nindent 10 }}
+          containers:
+          - {{ include "monitors-service.containerEnv" . | trim | indent 12 | trim }}
+            name: monitors-service-reconcile
+            args: ["reconcile"]
+            resources:
+{{- toYaml .Values.monitorsService.resources | nindent 14 }}
+            volumeMounts:
+            {{- include "monitors-service.configVolumeMount" . | nindent 12 }}
+          volumes:
+          {{- include "monitors-service.configVolume" . | nindent 10 }}
+{{ end -}}
