@@ -178,6 +178,22 @@ password rotations never invalidate dictionary credentials.
 {{- end -}}
 
 {{/*
+Restores pre-26.8 behavior our writers and S3Queue tables depend on. These
+settings don't exist on older servers, and an unknown profile setting is
+rejected, so gate on the tag.
+- DateTime64: bare JSON integers are now read as seconds; we send raw ticks.
+- S3: server (IRSA) credentials are now blocked for S3Queue tables, which then
+  reload with an anonymous client after a restart and fail with AccessDenied.
+*/}}
+{{- define "clickhouse.versionCompatProfileSettings" -}}
+{{- $version := regexFind "^[0-9]+\\.[0-9]+" (toString .Values.image.tag) -}}
+{{- if and $version (semverCompare ">=26.8" $version) -}}
+<input_format_read_datetime_number_as_raw_value>1</input_format_read_datetime_number_as_raw_value>
+<s3_allow_server_credentials_in_user_queries>1</s3_allow_server_credentials_in_user_queries>
+{{- end -}}
+{{- end -}}
+
+{{/*
 Generalized statefulset-modifier pre-upgrade hooks for a clickhouse-shaped
 StatefulSet (primary or the standby alias). Extracted from what used to be
 templates/clickhouse/hooks.yaml verbatim - only variable references were

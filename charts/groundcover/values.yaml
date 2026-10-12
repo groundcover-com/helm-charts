@@ -3291,6 +3291,7 @@ clickhouse: &primary
           <allow_simdjson>{{ .Values.allowSimdjson }}</allow_simdjson>
           <allow_experimental_analyzer>0</allow_experimental_analyzer>
           <date_time_input_format>best_effort</date_time_input_format>
+          {{- with include "clickhouse.versionCompatProfileSettings" . }}{{ . | nindent 6 }}{{ end }}
           <async_insert>true</async_insert>
           <max_execution_time>60</max_execution_time>
           <wait_for_async_insert>true</wait_for_async_insert>
