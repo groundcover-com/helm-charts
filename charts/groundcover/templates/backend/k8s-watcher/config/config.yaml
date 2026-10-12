@@ -53,6 +53,9 @@ data:
       tlsKeyFile: {{ .Values.fleetClientConfig.tlsKeyFile | default "" | quote }}
       tlsCAFile: {{ .Values.fleetClientConfig.tlsCAFile | default "" | quote }}
       e2eDesiredStateFile: ""
+    autonomousInfrastructure:
+      enabled: {{ .Values.global.autonomousInfrastructure.enabled }}
+      mutatorDeployment: autoinfra-mutator
     tracesNamespaceFilters: {{ toYaml .Values.tracesNamespaceFilters | nindent 6 }}
     tracesWorkloadFilters: {{ toYaml .Values.tracesWorkloadFilters | nindent 6 }}
     commitHashKeyName: {{ .Values.commitHashKeyName }}
