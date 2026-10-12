@@ -17,6 +17,9 @@ data:
     {{- if and .Values.global.backend.enabled .Values.global.monitorsService.enabled }}
     {{- $features = append $features "monitors-v2" }}
     {{- end }}
+    {{- if (.Values.global.clickhouse.textIndex | default dict).enabled }}
+    {{- $features = append $features "text-index" }}
+    {{- end }}
     {{- if $features }}
     {{ toYaml $features | nindent 6 }}
     {{- else }}

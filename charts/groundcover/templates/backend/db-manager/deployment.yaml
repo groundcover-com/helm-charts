@@ -120,7 +120,7 @@ spec:
       initContainers:
       - name: check-ch-ready
         image: '{{ tpl .Values.curl.image.repository . }}:{{ tpl .Values.curl.image.tag . }}'
-{{- if .Values.dbManager.minClickhouseVersion }}
+{{- if (include "db-manager.minClickhouseVersion" .) }}
         env:
         - name: CLICKHOUSE_USER
           value: "manager"
@@ -146,10 +146,10 @@ spec:
               done
             done
             echo 'ClickHouse is up'
-{{- if .Values.dbManager.minClickhouseVersion }}
+{{- if (include "db-manager.minClickhouseVersion" .) }}
             
             # Check ClickHouse version
-            MIN_VERSION="{{ .Values.dbManager.minClickhouseVersion }}"
+            MIN_VERSION="{{ include "db-manager.minClickhouseVersion" . }}"
             echo "Checking ClickHouse version (minimum required: $MIN_VERSION)..."
             
             while true; do
@@ -195,9 +195,9 @@ spec:
               done
             done
             echo 'Standby ClickHouse is up'
-{{- if .Values.dbManager.minClickhouseVersion }}
+{{- if (include "db-manager.minClickhouseVersion" .) }}
 
-            MIN_VERSION="{{ .Values.dbManager.minClickhouseVersion }}"
+            MIN_VERSION="{{ include "db-manager.minClickhouseVersion" . }}"
             echo "Checking standby ClickHouse version (minimum required: $MIN_VERSION)..."
             
             while true; do

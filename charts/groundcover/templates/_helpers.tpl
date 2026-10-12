@@ -325,6 +325,22 @@ Get cluster_id from values or generate random one
 {{- print "http://db-manager:8888" -}}
 {{- end -}}
 
+{{/*
+Minimum ClickHouse major.minor the db-manager init container enforces:
+dbManager.minClickhouseVersion, raised to 26.8 when global.clickhouse.textIndex
+is enabled (its text index postprocessor needs it). Empty disables the check.
+*/}}
+{{- define "db-manager.minClickhouseVersion" -}}
+{{- $min := .Values.dbManager.minClickhouseVersion | default "" -}}
+{{- if (.Values.global.clickhouse.textIndex | default dict).enabled -}}
+{{- $textIndexMin := "26.8" -}}
+{{- if or (not $min) (semverCompare (printf "<%s.0" $textIndexMin) (printf "%s.0" $min)) -}}
+{{- $min = $textIndexMin -}}
+{{- end -}}
+{{- end -}}
+{{- $min -}}
+{{- end -}}
+
 {{- define "fleet-manager.url" -}}
 {{- if .Values.fleetClientConfig.overrideURL -}}
     {{- .Values.fleetClientConfig.overrideURL -}}

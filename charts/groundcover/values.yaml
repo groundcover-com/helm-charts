@@ -270,6 +270,9 @@ global:
       # Must be plain identifiers.
       routerUser: router_reader
       grafanaUser: grafana_reader
+    # Requires ClickHouse >= 26.8.
+    textIndex:
+      enabled: false
     # Enables the standby ClickHouse cluster + HAProxy failover switch.
     ha:
       enabled: false
