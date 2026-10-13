@@ -66,7 +66,7 @@ service:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.13.79
+  tag: 1.13.80
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/tools'
@@ -187,15 +187,10 @@ configuration:
         BackendID: groundcover
   MonitorsV2:
     Enabled: false
-    # Tenant uuid -> the backend ids monitors v2 is on for, e.g.
-    #   26f05b8c-9fc9-487e-8291-181f8f504470: [dev-incloud]
-    # Listing a backend serves it the v2 endpoints and grows twins for its v1 writes. Every v2-side failure then fails its v1 write, including a replica push to a backend without monitors-service and a monitor shape the converter cannot represent — so list only backends that run monitors-service, and before listing one, dump its live monitors to CSV and run internal/monitors' TestConvertV2Fleet with TO_V2_FLEET_DUMP pointed at it. It reports which of its monitors would start failing. Keep the map empty until every verb dual-writes: a listed backend gets the verbs that do and silently skips the rest.
-    # Tenant keys match case-insensitively and must be uuids; backend ids match exactly (they are list values, not keys, because the router's config loader lowercases keys). A non-uuid key or a blank backend id fails the render.
-    MonitorsV2Backends: {}
-    # Startup backfill attempts: each reruns the pass while a backend was skipped or an insert failed.
-    BackfillAttempts: 3
-    # Wait before each backfill attempt, so portals can reconnect after a router restart.
+    # Wait before the first backfill pass, so portals can reconnect after a router restart.
     BackfillGracePeriod: 30s
+    # Wait between backfill passes.
+    BackfillInterval: 5m
     MigrationsPath: /monitors-v2-migrations
     DB:
       Host: '{{ splitList ":" (include "postgresql.base.url" .) | first }}'
