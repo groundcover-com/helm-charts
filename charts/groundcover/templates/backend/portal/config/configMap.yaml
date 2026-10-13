@@ -20,6 +20,9 @@ data:
     {{- if (.Values.global.clickhouse.textIndex | default dict).enabled }}
     {{- $features = append $features "text-index" }}
     {{- end }}
+    {{- if and .Values.global.backend.enabled .Values.global.autonomousInfrastructure.enabled }}
+    {{- $features = append $features "autonomous_infrastructure" }}
+    {{- end }}
     {{- if $features }}
     {{ toYaml $features | nindent 6 }}
     {{- else }}

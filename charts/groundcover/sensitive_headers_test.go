@@ -44,3 +44,18 @@ func TestDefaultSensitiveHeadersObfuscateDatadogAPIKey(t *testing.T) {
 	require.Contains(t, defaultSensitiveHeaderKeys(t), "dd-api-key",
 		"default sensor header obfuscation must redact Datadog API keys")
 }
+
+// Customer traces held live IMDS credentials and Secrets Manager secrets.
+func TestDefaultHostHeadersToDropIncludesCloudCredentialEndpoints(t *testing.T) {
+	t.Parallel()
+
+	configYAML := renderConfigMapData(t, "", "sensor-configuration", "config.yaml")
+	var config struct {
+		HostHeadersToDrop []string `yaml:"hostHeadersToDrop"`
+	}
+	require.NoError(t, yaml.Unmarshal([]byte(configYAML), &config))
+	require.Subset(t, config.HostHeadersToDrop, []string{
+		"169.254.169.254", "metadata.google.internal", "169.254.170.2", "169.254.170.23",
+		"secretsmanager.*.amazonaws.com", "secretsmanager-fips.*.amazonaws.com", "secretsmanager.*.amazonaws.com.cn",
+	})
+}

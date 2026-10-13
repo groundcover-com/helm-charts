@@ -641,7 +641,15 @@ agent:
     nodelabels: [] # DEPRECATED: Use global.labelEnrichment.nodes.labels instead
     contentTypesToDrop: []
     contentTypesWithoutClustering: []
-    hostHeadersToDrop: []
+    # Endpoints that return credentials and secrets. Overriding the list replaces them. Entries may use one '*'.
+    hostHeadersToDrop:
+      - "169.254.169.254" # instance metadata
+      - "metadata.google.internal"
+      - "169.254.170.2" # ECS task role credentials
+      - "169.254.170.23" # EKS Pod Identity
+      - "secretsmanager.*.amazonaws.com"
+      - "secretsmanager-fips.*.amazonaws.com"
+      - "secretsmanager.*.amazonaws.com.cn"
     headersForceSampling:
       gcForceSample: true
       w3cForceSample: true
