@@ -119,6 +119,8 @@ global:
     enabled: false
   investigationService:
     enabled: false
+  # Turns monitors v2 on for this backend: v1 monitor writes also write v2, and a v2 failure fails the v1 write.
+  # Don't turn it off and on again: v1 changes made while off never reach v2.
   monitorsService:
     enabled: false
   exportService:
