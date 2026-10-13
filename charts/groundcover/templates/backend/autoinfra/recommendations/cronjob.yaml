@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: {{ include "workload-recommendations.fullname" . }}
+  name: {{ include "autoinfra-recommendations.fullname" . }}
   namespace: {{ .Release.Namespace }}
   annotations:
     groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag | quote }}
@@ -10,7 +10,7 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
   labels:
-    {{- include "workload-recommendations.labels" . | nindent 4 }}
+    {{- include "autoinfra-recommendations.labels" . | nindent 4 }}
     {{- with .Values.workloadRecommendations.additionalLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
@@ -39,12 +39,12 @@ spec:
         metadata:
           annotations:
             groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag | quote }}
-            checksum/config: {{ include (print $.Template.BasePath "/backend/workload-recommendations/configmap.yaml") . | sha256sum }}
+            checksum/config: {{ include (print $.Template.BasePath "/backend/autoinfra/recommendations/configmap.yaml") . | sha256sum }}
             {{- with .Values.workloadRecommendations.podAnnotations }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
           labels:
-            {{- include "workload-recommendations.labels" . | nindent 12 }}
+            {{- include "autoinfra-recommendations.labels" . | nindent 12 }}
             {{- with .Values.workloadRecommendations.podLabels }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -70,17 +70,17 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           containers:
-            - name: workload-recommendations
+            - name: autoinfra-recommendations
               image: {{ tpl .Values.workloadRecommendations.image.repository . }}:{{ tpl .Values.workloadRecommendations.image.tag . }}
               imagePullPolicy: {{ .Values.workloadRecommendations.image.pullPolicy }}
               # Invoke the module directly rather than through the image's uv
               # entrypoint: the venv is already built and on PATH, and uv would
               # want to write a cache and re-check the lockfile at start, which a
               # read-only root filesystem does not allow.
-              command: ["python", "-u", "-m", "workload_recommendations"]
+              command: ["python", "-u", "-m", "autoinfra_recommendations"]
               envFrom:
                 - configMapRef:
-                    name: {{ include "workload-recommendations.configMapName" . }}
+                    name: {{ include "autoinfra-recommendations.configMapName" . }}
               env:
                 - name: CLICKHOUSE_PASSWORD
                   valueFrom:

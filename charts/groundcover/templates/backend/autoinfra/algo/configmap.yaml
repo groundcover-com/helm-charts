@@ -2,10 +2,10 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "autonomous-infrastructure.configMapName" . }}
+  name: {{ include "autoinfra-algo.configMapName" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "autonomous-infrastructure.labels" . | nindent 4 }}
+    {{- include "autoinfra-algo.labels" . | nindent 4 }}
 data:
   # ClickHouse over HTTP (clickhouse-connect). readHost follows the HA proxy on failover.
   CLICKHOUSE_HOST: {{ include "clickhouse.readHost" . | quote }}
@@ -25,13 +25,13 @@ data:
   RUN_LABEL: "cron"
   LOG_LEVEL: {{ .Values.autonomousInfrastructure.logLevel | quote }}
 
-  OTEL_SERVICE_NAME: "autonomous-infrastructure"
+  OTEL_SERVICE_NAME: "autoinfra-algo"
   {{- if eq (include "telemetry.enabled" . | trim) "false" }}
   OTEL_SDK_DISABLED: "true"
   {{- else }}
-  OTEL_EXPORTER_OTLP_ENDPOINT: {{ include "autonomous-infrastructure.otlpEndpoint" . | quote }}
+  OTEL_EXPORTER_OTLP_ENDPOINT: {{ include "autoinfra.otlpEndpoint" . | quote }}
   # Pinned: the SDK default is a fresh UUID per process, i.e. a new metric series every tick.
-  OTEL_SERVICE_INSTANCE_ID: {{ include "autonomous-infrastructure.fullname" . | quote }}
+  OTEL_SERVICE_INSTANCE_ID: {{ include "autoinfra-algo.fullname" . | quote }}
   {{- end }}
   # The only writable mount.
   TMPDIR: "/tmp"

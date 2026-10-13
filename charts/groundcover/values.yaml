@@ -608,7 +608,7 @@ agent:
     # Overrides agent.listenAddress for fluent-bit only. Leave empty to inherit it.
     bindAddress: ""
     image:
-      tag: 4.2.7-20260716-1
+      tag: 4.2.8-20261013-1
       repository: "{{ .Values.global.origin.registry }}/fluent/fluent-bit"
     resources:
       requests:
@@ -2335,7 +2335,7 @@ monitorsService:
 # Table names, telemetry and ClickHouse wiring are not values: see the ConfigMaps.
 autonomousInfrastructure:
   image:
-    repository: "{{ .Values.global.origin.registry }}/autonomous-infrastructure"
+    repository: "{{ .Values.global.origin.registry }}/autoinfra-algo"
     tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
     pullPolicy: IfNotPresent
   schedule: "*/2 * * * *"
@@ -2377,7 +2377,7 @@ autonomousInfrastructure:
 
 workloadRecommendations:
   image:
-    repository: "{{ .Values.global.origin.registry }}/workload-recommendations"
+    repository: "{{ .Values.global.origin.registry }}/autoinfra-recommendations"
     tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
     pullPolicy: IfNotPresent
   schedule: "*/2 * * * *"

@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: {{ include "autonomous-infrastructure.fullname" . }}
+  name: {{ include "autoinfra-algo.fullname" . }}
   namespace: {{ .Release.Namespace }}
   annotations:
     groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag | quote }}
@@ -10,7 +10,7 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
   labels:
-    {{- include "autonomous-infrastructure.labels" . | nindent 4 }}
+    {{- include "autoinfra-algo.labels" . | nindent 4 }}
     {{- with .Values.autonomousInfrastructure.additionalLabels }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
@@ -38,12 +38,12 @@ spec:
         metadata:
           annotations:
             groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag | quote }}
-            checksum/config: {{ include (print $.Template.BasePath "/backend/autonomous-infrastructure/configmap.yaml") . | sha256sum }}
+            checksum/config: {{ include (print $.Template.BasePath "/backend/autoinfra/algo/configmap.yaml") . | sha256sum }}
             {{- with .Values.autonomousInfrastructure.podAnnotations }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
           labels:
-            {{- include "autonomous-infrastructure.labels" . | nindent 12 }}
+            {{- include "autoinfra-algo.labels" . | nindent 12 }}
             {{- with .Values.autonomousInfrastructure.podLabels }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -69,17 +69,17 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           containers:
-            - name: autonomous-infrastructure
+            - name: autoinfra-algo
               image: {{ tpl .Values.autonomousInfrastructure.image.repository . }}:{{ tpl .Values.autonomousInfrastructure.image.tag . }}
               imagePullPolicy: {{ .Values.autonomousInfrastructure.image.pullPolicy }}
               # Invoke the module directly rather than through the image's uv
               # entrypoint: the venv is already built and on PATH, and uv would
               # want to write a cache and re-check the lockfile at start, which a
               # read-only root filesystem does not allow.
-              command: ["python", "-u", "-m", "autonomous_infrastructure"]
+              command: ["python", "-u", "-m", "autoinfra_algo"]
               envFrom:
                 - configMapRef:
-                    name: {{ include "autonomous-infrastructure.configMapName" . }}
+                    name: {{ include "autoinfra-algo.configMapName" . }}
               env:
                 - name: CLICKHOUSE_PASSWORD
                   valueFrom:
