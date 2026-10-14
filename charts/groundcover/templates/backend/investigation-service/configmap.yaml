@@ -33,6 +33,10 @@ data:
       enableTracing: {{ include "telemetry.enabled" . }}
     migrationsPath: "/migrations"
 
+    evidence:
+      findingScopeKeys: {{ .Values.investigationService.evidence.findingScopeKeys | toJson }}
+      scopedSignals: {{ .Values.investigationService.evidence.scopedSignals | toJson }}
+
     temporal:
       host: {{ include "investigation-service.temporalHost" . | quote }}
       port: {{ .Values.investigationService.temporal.port }}

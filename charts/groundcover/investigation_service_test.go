@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"os/exec"
 	"strings"
@@ -57,7 +58,13 @@ type renderedObject struct {
 
 func renderInvestigationChart(t *testing.T, args ...string) []renderedObject {
 	t.Helper()
-	args = append([]string{"template", investigationRelease, testpath.Join(t, "k8s", "groundcover"), "--set", "clusterId=inv-test"}, args...)
+	args = append([]string{
+		"template",
+		investigationRelease,
+		testpath.Join(t, "k8s", "groundcover"),
+		"--set",
+		"clusterId=inv-test",
+	}, args...)
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 	out, err := exec.CommandContext(ctx, "helm", args...).CombinedOutput()
@@ -108,6 +115,7 @@ func requireInvestigationServiceRendered(t *testing.T, objects map[string]render
 		"server.port", "server.healthPort", "server.metricsPort",
 		"postgres.host", "postgres.port", "postgres.name", "postgres.adminDbName", "postgres.user", "postgres.pass",
 		"postgres.sslmode", "postgres.timeout", "postgres.interval", "postgres.maxConns", "postgres.enableTracing",
+		"evidence.findingScopeKeys", "evidence.scopedSignals",
 		"migrationsPath", "temporal.host", "temporal.port", "temporal.namespace",
 		"telemetry.traces.enabled", "telemetry.instrumentation.serviceName", "telemetry.instrumentation.originCluster",
 		"telemetry.pprof.enabled",
@@ -185,7 +193,11 @@ func TestInvestigationService_PortalForwardsToTheServiceOnlyWhenEnabled(t *testi
 	}
 
 	enabled := portalConfig(renderInvestigationChart(t, "--set", "global.investigationService.enabled=true"))
-	require.Contains(t, enabled, "InvestigationService:\n  Enabled: true\n  Endpoint: http://"+investigationRelease+"-investigation-service:8080")
+	require.Contains(
+		t,
+		enabled,
+		"InvestigationService:\n  Enabled: true\n  Endpoint: http://"+investigationRelease+"-investigation-service:8080",
+	)
 
 	disabled := portalConfig(renderInvestigationChart(t))
 	require.Contains(t, disabled, "InvestigationService:\n  Enabled: false")
@@ -254,7 +266,11 @@ func TestInvestigationService_TelemetryOffExportsNothing(t *testing.T) {
 	require.Equal(t, false, enabled)
 	pgTracing, _ := lookup(config, "postgres.enableTracing")
 	require.Equal(t, false, pgTracing)
-	for _, key := range []string{"telemetry.traces.headers", "telemetry.instrumentation.tracingTargets", "telemetry.instrumentation.metricsTargets"} {
+	for _, key := range []string{
+		"telemetry.traces.headers",
+		"telemetry.instrumentation.tracingTargets",
+		"telemetry.instrumentation.metricsTargets",
+	} {
 		_, ok := lookup(config, key)
 		require.False(t, ok, "telemetry off renders no %s", key)
 	}
@@ -284,4 +300,30 @@ func keys(m map[string]renderedObject) []string {
 		out = append(out, k)
 	}
 	return out
+}
+
+func TestInvestigationService_EvidenceDefaultsAndOverrides(t *testing.T) {
+	for _, override := range []bool{false, true} {
+		t.Run(fmt.Sprintf("override=%t", override), func(t *testing.T) {
+			args := []string{"--set", "global.backend.enabled=true", "--set", "global.investigationService.enabled=true"}
+			expectedKeys := []any{"cluster"}
+			expectedSignals := []any{"logs", "traces", "metrics", "events"}
+			if override {
+				args = append(
+					args,
+					"--set-json",
+					`investigationService.evidence.findingScopeKeys=["namespace"]`,
+					"--set-json",
+					`investigationService.evidence.scopedSignals=["profiling","rum","db_measurements"]`,
+				)
+				expectedKeys = []any{"namespace"}
+				expectedSignals = []any{"profiling", "rum", "db_measurements"}
+			}
+			cfg := renderedConfig(t, investigationServiceObjects(renderInvestigationChart(t, args...)))
+			keys, _ := lookup(cfg, "evidence.findingScopeKeys")
+			signals, _ := lookup(cfg, "evidence.scopedSignals")
+			require.Equal(t, expectedKeys, keys)
+			require.Equal(t, expectedSignals, signals)
+		})
+	}
 }

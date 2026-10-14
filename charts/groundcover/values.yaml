@@ -893,6 +893,9 @@ agent:
           statsd:
             enabled: true
             port: 8125
+            aggregationInterval: 60s
+            # Nonempty bounds enable native h/d histograms, in the incoming metric's units.
+            histogramBuckets: []
     pprof:
       enabled: true
       uploaderType: pyroscope
@@ -2017,6 +2020,9 @@ ingestor:
         statsd:
           enabled: true
           port: 8125
+          aggregationInterval: 60s
+          # Nonempty bounds enable native h/d histograms, in the incoming metric's units.
+          histogramBuckets: []
   rum:
     sourceMaps:
       enabled: true
@@ -2901,6 +2907,9 @@ dispatchCenter:
       initialWait: 10m
 
 investigationService:
+  evidence:
+    findingScopeKeys: [cluster]
+    scopedSignals: [logs, traces, metrics, events]
   additionalLabels:
   podLabels:
   additionalAnnotations:

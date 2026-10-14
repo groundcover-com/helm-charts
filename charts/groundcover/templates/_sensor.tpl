@@ -655,6 +655,8 @@ apmIngestor:
       statsd:
         enabled: {{ dig "apmIngestor" "otel" "direct" "statsd" "enabled" false $sensorValues }}
         port: {{ dig "apmIngestor" "otel" "direct" "statsd" "port" 8125 $sensorValues }}
+        aggregationInterval: {{ dig "apmIngestor" "otel" "direct" "statsd" "aggregationInterval" "60s" $sensorValues }}
+        histogramBuckets: {{ dig "apmIngestor" "otel" "direct" "statsd" "histogramBuckets" (list) $sensorValues | toJson }}
 {{ end }}
 pprof:
   enabled: {{ include "telemetry.enabled" . }}
