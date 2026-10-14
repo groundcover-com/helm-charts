@@ -701,6 +701,26 @@ agent:
         # Port 8028 follows RUM (8026) and source maps (8027).
         # Native OTLP profiles share the OTLP ports above instead of using this receiver.
         port: 8028
+        # Pull pprof from pods on each sensor's own node. Pods opt in per profile type with
+        # profiles.groundcover.com/<type>.scrape: "true" and the port net/http/pprof listens
+        # on: <type>.port: "6060", or <type>.port_name: "pprof"; optional <type>.path and
+        # <type>.scheme (http or https) override the request. Types: cpu (10s window), memory
+        # (heap in use and allocated since start), goroutine, block and mutex (30s windows; empty
+        # unless the app sets runtime.SetBlockProfileRate / runtime.SetMutexProfileFraction). pprof
+        # must listen on the pod IP, not localhost. Windowed totals cover their window of every
+        # interval, and a type whose window does not fit the interval (block and mutex below 40s)
+        # is skipped.
+        scrape:
+          enabled: false
+          interval: 1m
+          # Domains pods may annotate under besides profiles.groundcover.com, e.g. com.acme.corp for
+          # com.acme.corp/cpu.scrape. A pod using several is scraped once per type, with all settings
+          # from the first: profiles.groundcover.com, then this list in order. Listing
+          # profiles.grafana.com fails CPU scrapes of pods Grafana Alloy also profiles.
+          extraAnnotationPrefixes: []
+          # Used when a pod sets neither .port nor .port_name; 0 falls back to a container
+          # port named *-profiles, then *-metrics, then http2.
+          defaultPort: 0
       metricsscraper:
         enabled: false
         maxScrapeSize: 67108864

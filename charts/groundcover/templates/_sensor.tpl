@@ -49,11 +49,24 @@ receivers:
   prometheusimport:
     enabled: {{ $sensorValues.receivers.prometheusimport.enabled }}
     port: {{ $sensorValues.receivers.prometheusimport.port }}
+  {{ end }}
+  {{- /* The raw pprof receiver is ingestion; scraping the node's pods is collection. */}}
+  {{- if or $sensorValues.ingestionEnabled $sensorValues.collectionEnabled }}
   profiles:
+    {{- if $sensorValues.ingestionEnabled }}
     enabled: {{ dig "receivers" "profiles" "enabled" false $sensorValues }}
     port: {{ dig "receivers" "profiles" "port" 8028 $sensorValues }}
     maxUploadSize: {{ dig "receivers" "profiles" "maxUploadSize" 33554432 $sensorValues }}
-  {{ end }}
+    {{- end }}
+    {{- if $sensorValues.collectionEnabled }}
+    {{- $scrape := dig "receivers" "profiles" "scrape" dict $sensorValues }}
+    scrape:
+      enabled: {{ dig "enabled" false $scrape }}
+      interval: {{ dig "interval" "1m" $scrape }}
+      extraAnnotationPrefixes: {{- dig "extraAnnotationPrefixes" list $scrape | toYaml | nindent 8 }}
+      defaultPort: {{ dig "defaultPort" 0 $scrape }}
+    {{- end }}
+  {{- end }}
   {{ if $sensorValues.collectionEnabled }}
   metricsscraper:
     enabled: {{ $sensorValues.receivers.metricsscraper.enabled }}
@@ -1044,10 +1057,11 @@ sensitiveHeadersObfuscationConfig:
   name: prom-import
   protocol: TCP
 {{- end }}
+{{- end }}
+{{- /* Health is probed whether or not the sensor ingests. */}}
 {{- if $sensorValues.healthProbe.enabled }}
 - containerPort: {{ $sensorValues.healthProbe.port }}
   name: health-http
-{{- end }}
 {{- end }}
 {{- end -}}
 
