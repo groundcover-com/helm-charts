@@ -17,6 +17,9 @@ data:
     {{- if and .Values.global.backend.enabled .Values.global.monitorsService.enabled }}
     {{- $features = append $features "monitors-v2" }}
     {{- end }}
+    {{- if and .Values.global.backend.enabled .Values.global.investigationService.enabled }}
+    {{- $features = append $features "investigations" }}
+    {{- end }}
     {{- if and .Values.global.backend.enabled .Values.global.autonomousInfrastructure.enabled }}
     {{- $features = append $features "autonomous_infrastructure" }}
     {{- end }}
