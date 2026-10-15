@@ -1149,6 +1149,10 @@ agent:
     value: 1000000000
     preemptionPolicy: PreemptLowerPriority
 dbManager:
+  partitionDropping:
+    audit: false
+    interval: 6h
+    queryTimeout: 60s
   replicas: 1
   extraShardsOverride: 
   # Standby cluster config for db-manager (gated by global.clickhouse.ha.enabled).

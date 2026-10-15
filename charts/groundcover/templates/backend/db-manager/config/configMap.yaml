@@ -193,6 +193,10 @@ data:
     WorkloadScheduling:
       {{- toYaml .Values.dbManager.workloadScheduling | nindent 6 }}
     StorageManagement:
+      PartitionDropping:
+        Audit: {{ .Values.dbManager.partitionDropping.audit }}
+        Interval: {{ .Values.dbManager.partitionDropping.interval | quote }}
+        QueryTimeout: {{ .Values.dbManager.partitionDropping.queryTimeout | quote }}
       Db:
         host: {{ tpl .Values.dbManager.db.host . }}
         port: {{ tpl .Values.dbManager.db.port . }}
