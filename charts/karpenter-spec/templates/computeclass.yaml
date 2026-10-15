@@ -11,6 +11,10 @@ spec:
   {{- with $value.nodePoolAutoCreation }}
   nodePoolAutoCreation:
     enabled: {{ default true .enabled }}
+    {{- with .shieldedInstanceConfig }}
+    shieldedInstanceConfig:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
   {{- end }}
   {{- with $value.priorities }}
   priorities:
@@ -21,6 +25,14 @@ spec:
   {{- end }}
   {{- with $value.nodePoolConfig }}
   nodePoolConfig:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with $value.autoscalingPolicy }}
+  autoscalingPolicy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with $value.activeMigration }}
+  activeMigration:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 {{- end }}
