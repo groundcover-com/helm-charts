@@ -539,6 +539,10 @@ statefulset-modifier:
     tag: '20260929'
 
 agent:
+  # Set to false to disable the automatic injection of service environment variables
+  # into the sensor DaemonSet pods. This reduces the number of environment variables
+  # in pods and can be required by some platforms that remove webhook-based injection.
+  # enableServiceLinks: false
   # Bind address for the sensor DaemonSet's own listeners. Defaults to "0.0.0.0"
   # (IPv4). For IPv6 clusters, set to "[::]" — this flips the sensor's Prometheus
   # metrics server, the APM/OTel direct receivers, and (unless overridden)
@@ -2460,6 +2464,9 @@ workloadRecommendations:
   priorityClassName:
 
 k8sWatcher:
+  # Set to false to disable the automatic injection of service environment variables
+  # into the k8s-watcher deployment pods.
+  # enableServiceLinks: false
   initContainers:
     checkIngestion:
       builtinEnv:
@@ -3839,6 +3846,9 @@ opentelemetry-collector:
 
 # When false, vector subchart and parent vector templates are not created (e.g. standalone).
 vector:
+  # Set to false to disable the automatic injection of service environment variables
+  # into the vector deployment pods.
+  # enableServiceLinks: false
   enabled: true
   # Create vector-config-map ConfigMap. Set to false when not running vector (e.g. standalone).
   configMap:
@@ -5556,6 +5566,9 @@ curl: &curlImage
     tag: '20260929'
 
 metrics-ingester:
+  # Set to false to disable the automatic injection of service environment variables
+  # into the metrics-ingester deployment pods.
+  # enableServiceLinks: false
   enabled: true
   # Horizontal scaling for metrics-ingester (signals ingestion / batching is horizontally
   # scalable). Additive and disabled by default. When autoscaling.enabled is true the static
@@ -5766,6 +5779,9 @@ victoria-metrics-agent:
           insecure_skip_verify: true
 
 kube-state-metrics:
+  # Set to false to disable the automatic injection of service environment variables
+  # into the kube-state-metrics deployment pods.
+  # enableServiceLinks: false
   # Set to false to disable prometheus.io/scrape annotation on the service
   # This prevents external Prometheus instances from scraping kube-state-metrics
   prometheusScrape: true

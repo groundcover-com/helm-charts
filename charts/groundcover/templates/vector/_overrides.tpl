@@ -41,6 +41,9 @@ If release name contains chart name it will be used as a full name.
 Defines the PodSpec for Vector.
 */}}
 {{- define "vector.pod" -}}
+{{- if hasKey .Values "enableServiceLinks" }}
+enableServiceLinks: {{ .Values.enableServiceLinks }}
+{{- end }}
 serviceAccountName: {{ include "vector.serviceAccountName" . }}
 {{- with .Values.podHostNetwork }}
 hostNetwork: {{ . }}

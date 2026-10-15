@@ -45,6 +45,9 @@ spec:
         {{ $key }}: {{ $value | quote }}
         {{- end }}
     spec:
+    {{- if hasKey .Values "enableServiceLinks" }}
+      enableServiceLinks: {{ .Values.enableServiceLinks }}
+    {{- end }}
     {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}

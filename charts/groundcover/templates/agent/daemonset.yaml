@@ -57,6 +57,9 @@ spec:
 {{ toYaml .Values.agent.podLabels | indent 8 }}
         {{- end }}
     spec:
+{{- if hasKey .Values.agent "enableServiceLinks" }}
+      enableServiceLinks: {{ .Values.agent.enableServiceLinks }}
+{{- end }}
       imagePullSecrets: {{ include "imagePullSecrets" . }}
 {{- if .Values.agent.tolerations }}
       tolerations:

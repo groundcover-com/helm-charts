@@ -44,6 +44,9 @@ spec:
 {{ toYaml .Values.k8sWatcher.podLabels | indent 8 }}
         {{- end }}
     spec:
+{{- if hasKey .Values.k8sWatcher "enableServiceLinks" }}
+      enableServiceLinks: {{ .Values.k8sWatcher.enableServiceLinks }}
+{{- end }}
 {{- if .Values.k8sWatcher.tolerations }}
       tolerations:
 {{ toYaml .Values.k8sWatcher.tolerations | indent 8 }}
