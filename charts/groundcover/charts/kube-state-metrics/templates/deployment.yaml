@@ -42,6 +42,9 @@ spec:
       {{ toYaml .Values.podAnnotations | nindent 8 }}
       {{- end }}
     spec:
+      {{- if hasKey .Values "enableServiceLinks" }}
+      enableServiceLinks: {{ .Values.enableServiceLinks }}
+      {{- end }}
       automountServiceAccountToken: {{ .Values.automountServiceAccountToken }}
       hostNetwork: {{ .Values.hostNetwork }}
       serviceAccountName: {{ template "kube-state-metrics.serviceAccountName" . }}

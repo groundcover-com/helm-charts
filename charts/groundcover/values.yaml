@@ -1653,6 +1653,9 @@ awsCostReports:
   retention: 365d # TTL on line_item_usage_start_date, via shared TableDataRetention; {amount}[h/d/w/y]
 
 integrationsAgent:
+  # Set to false to disable the automatic injection of service environment variables
+  # into the integrations-agent deployment pods.
+  # enableServiceLinks: false
   initContainers:
     checkIngestion:
       builtinEnv:
@@ -5672,6 +5675,10 @@ metrics-ingester:
         - /bin/sleep
         - "10"
 victoria-metrics-agent:
+  # Set to false to disable the automatic injection of service environment variables
+  # into the telemetry victoria-metrics-agent pods. metrics-ingester and custom-metrics
+  # are separate aliases and have their own enableServiceLinks values.
+  # enableServiceLinks: false
   podSecurityContext:
     runAsUser: 1000
     runAsNonRoot: true
@@ -5899,6 +5906,9 @@ victoria-metrics-operator:
               key: GC_ENV
 
 custom-metrics:
+  # Set to false to disable the automatic injection of service environment variables
+  # into the custom-metrics pods.
+  # enableServiceLinks: false
   enabled: false
   useSensorAsEndpoint: false
   service:

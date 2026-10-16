@@ -46,6 +46,9 @@ spec:
 {{ toYaml .Values.integrationsAgent.podLabels | indent 8 }}
         {{- end }}
     spec:
+{{- if hasKey .Values.integrationsAgent "enableServiceLinks" }}
+      enableServiceLinks: {{ .Values.integrationsAgent.enableServiceLinks }}
+{{- end }}
 {{- if .Values.integrationsAgent.tolerations }}
       tolerations:
 {{ toYaml .Values.integrationsAgent.tolerations | indent 8 }}
