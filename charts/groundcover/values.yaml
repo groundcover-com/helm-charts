@@ -2713,6 +2713,15 @@ k8sWatcher:
 
 journalScraper:
   serviceNames: ["kubelet", "kernel"]
+  # Additional journal services with the same workload/labels metadata as logFileTargets.
+  # Bare and .service-suffixed names match equivalently; serviceNames remains supported.
+  serviceTargets: []
+  # - serviceName: example-worker
+  #   workload: example-backend
+  #   labels:
+  #     service: example-worker
+  #     role: worker
+  #     zone: zone-a
   historyDuration: 10m
   journalFilter: "system.journal"
   includeRemoteJournals: true
