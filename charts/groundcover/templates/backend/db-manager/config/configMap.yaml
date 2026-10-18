@@ -123,6 +123,9 @@ data:
       Database: {{ include "clickhouse.database" . }}
       HTTPPort: {{ .Values.global.clickhouse.containerPorts.http | int }}
       NativePort: {{ .Values.global.clickhouse.containerPorts.tcp | int }}
+    InsertDeduplication:
+      Window: {{ .Values.dbManager.insertDeduplication.window | int }}
+      ExcludeTables: {{ .Values.dbManager.insertDeduplication.excludeTables | toJson }}
     DictionaryUser:
       Enabled: {{ .Values.global.clickhouse.dictionaryUser.enabled }}
       User: {{ include "clickhouse.dictionaryUsername" . }}

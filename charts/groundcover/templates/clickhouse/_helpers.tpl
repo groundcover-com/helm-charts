@@ -184,12 +184,15 @@ rejected, so gate on the tag.
 - DateTime64: bare JSON integers are now read as seconds; we send raw ticks.
 - S3: server (IRSA) credentials are now blocked for S3Queue tables, which then
   reload with an anonymous client after a restart and fail with AccessDenied.
+- Statistics: every column now gets auto-built statistics; loading them at plan
+  time waits on the parts lock and S3 and dominates query latency.
 */}}
 {{- define "clickhouse.versionCompatProfileSettings" -}}
 {{- $version := regexFind "^[0-9]+\\.[0-9]+" (toString .Values.image.tag) -}}
 {{- if and $version (semverCompare ">=26.8" $version) -}}
 <input_format_read_datetime_number_as_raw_value>1</input_format_read_datetime_number_as_raw_value>
 <s3_allow_server_credentials_in_user_queries>1</s3_allow_server_credentials_in_user_queries>
+<use_statistics>0</use_statistics>
 {{- end -}}
 {{- end -}}
 

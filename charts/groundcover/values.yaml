@@ -1209,6 +1209,16 @@ dbManager:
     traces: "traces_v2"
     metricsMetadata: "metrics_metadata"
     events: "events_v3"
+  # non_replicated_deduplication_window db-manager keeps on every MergeTree table, so a
+  # retried bucket-streamer batch is dropped instead of duplicated; 0 unsets it. Only set
+  # it (e.g. 10000) where the bucket-streamer ingests: vector's direct inserts can't opt
+  # out of dedup on ClickHouse 26.2+, so excludeTables are the ones vector still writes.
+  insertDeduplication:
+    window: 0
+    excludeTables:
+      - aws_billing_report
+      - aws_billing_report_one_day
+      - aws_cost_reports_raw_v2
   cloudPricing:
     enabled: true
     pricingFileURL: "https://groundcover-public-assets.s3.amazonaws.com/cloud_pricing_v1.csv"
@@ -1513,8 +1523,11 @@ bucketStreamer:
         min_insert_block_size_rows: ""
         min_insert_block_size_bytes: ""
         input_format_parallel_parsing: 0
-        async_insert: 1
-        wait_for_async_insert: 1
+        # Synchronous and deduplicated, so a retried batch is dropped by the
+        # tables' non_replicated_deduplication_window, its rollup MVs included.
+        async_insert: 0
+        insert_deduplicate: 1
+        deduplicate_blocks_in_dependent_materialized_views: 1
   # Defaults merged under every signals entry (an entry's own keys win).
   # min_batch_size / max_age: a scan batches a signal's fresh files once they
   # total min_batch_size listed (compressed) bytes, or max_age has passed since
@@ -1563,6 +1576,13 @@ bucketStreamer:
     metrics_metadata:
       prefix: v5/metrics_metadata/
       input_table: "{{ .Values.dbManager.objectStorageDestTables.metricsMetadata }}"
+    profiling:
+      prefix: v5/profiling/
+      input_table: profiling
+      extra_shards: true
+    rum_events:
+      prefix: v5/rum_events/
+      input_table: rum_events_v1
   # Extra environment variables for the streamer container (rendered through tpl).
   env: []
   resources:
@@ -4621,6 +4641,12 @@ vector:
               password: $CLICKHOUSE_PASSWORD
               strategy: "basic"
             format: "json_each_row"
+            # Vector's inserts must never be deduped. From ClickHouse 26.2 these settings
+            # are overridden, so dbManager.insertDeduplication keeps vector's tables windowless.
+            query_settings: &vectorClickhouseQuerySettings
+              async_insert_settings:
+                enabled: true
+                deduplicate: false
             encoding:
               timestamp_format: rfc3339
             date_time_best_effort: true
@@ -4645,6 +4671,7 @@ vector:
               password: $CLICKHOUSE_PASSWORD
               strategy: "basic"
             format: "json_each_row"
+            query_settings: *vectorClickhouseQuerySettings
             encoding:
               timestamp_format: rfc3339
             date_time_best_effort: true
@@ -4672,6 +4699,7 @@ vector:
               password: $CLICKHOUSE_PASSWORD
               strategy: "basic"
             format: "json_each_row"
+            query_settings: *vectorClickhouseQuerySettings
             encoding:
               timestamp_format: rfc3339
             date_time_best_effort: true
@@ -4698,6 +4726,7 @@ vector:
               password: $CLICKHOUSE_PASSWORD
               strategy: "basic"
             format: "json_each_row"
+            query_settings: *vectorClickhouseQuerySettings
             encoding:
               timestamp_format: rfc3339
             date_time_best_effort: true
@@ -4723,6 +4752,7 @@ vector:
               password: $CLICKHOUSE_PASSWORD
               strategy: "basic"
             format: "json_each_row"
+            query_settings: *vectorClickhouseQuerySettings
             encoding:
               except_fields:
                 - log_type
@@ -4751,6 +4781,7 @@ vector:
               password: $CLICKHOUSE_PASSWORD
               strategy: "basic"
             format: "json_each_row"
+            query_settings: *vectorClickhouseQuerySettings
             encoding:
               timestamp_format: rfc3339
             date_time_best_effort: true
@@ -4778,6 +4809,7 @@ vector:
               password: $CLICKHOUSE_PASSWORD
               strategy: "basic"
             format: "json_each_row"
+            query_settings: *vectorClickhouseQuerySettings
             encoding:
               timestamp_format: rfc3339
             date_time_best_effort: true
@@ -4803,6 +4835,7 @@ vector:
               password: $CLICKHOUSE_PASSWORD
               strategy: "basic"
             format: "json_each_row"
+            query_settings: *vectorClickhouseQuerySettings
             encoding:
               timestamp_format: rfc3339
             date_time_best_effort: true
@@ -4829,6 +4862,7 @@ vector:
               password: $CLICKHOUSE_PASSWORD
               strategy: "basic"
             format: "json_each_row"
+            query_settings: *vectorClickhouseQuerySettings
             encoding:
               timestamp_format: rfc3339
             date_time_best_effort: true
@@ -4854,6 +4888,7 @@ vector:
               password: $CLICKHOUSE_PASSWORD
               strategy: "basic"
             format: "json_each_row"
+            query_settings: *vectorClickhouseQuerySettings
             encoding:
               timestamp_format: rfc3339
             date_time_best_effort: true
@@ -4881,6 +4916,7 @@ vector:
               password: $CLICKHOUSE_PASSWORD
               strategy: "basic"
             format: "json_each_row"
+            query_settings: *vectorClickhouseQuerySettings
             encoding:
               timestamp_format: rfc3339
             date_time_best_effort: true
@@ -4908,6 +4944,7 @@ vector:
               password: $CLICKHOUSE_PASSWORD
               strategy: "basic"
             format: "json_each_row"
+            query_settings: *vectorClickhouseQuerySettings
             encoding:
               timestamp_format: rfc3339
             date_time_best_effort: true
