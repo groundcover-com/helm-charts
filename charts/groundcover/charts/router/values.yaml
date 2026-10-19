@@ -66,7 +66,7 @@ service:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.13.111
+  tag: 1.13.112
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/tools'
@@ -76,6 +76,9 @@ serviceAccount:
 deployedIngresses:
   ui: true
   grafana: true
+  # no-auth only: send frontendDomain/api calls carrying an API key
+  # (Authorization: Bearer gcsa_...) straight to the router, not the auth proxy.
+  noAuthApiKey: false
 ingress:
   enabled: false
 ingresses:
