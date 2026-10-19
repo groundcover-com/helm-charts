@@ -46,4 +46,38 @@ spec:
               number: 8080
         path: /api
         pathType: Prefix
+{{- if .Values.deployedIngresses.noAuthApiKey }}
+---
+{{- /*
+API-key calls on the frontend domain go straight to the router. Without this,
+router-no-auth-ingress (host + /) sends <frontendDomain>/api/* to the auth proxy,
+which answers API clients with a redirect to the IdP. The header match keeps
+browser traffic (no auth or a router JWT) and MCP OAuth (IdP id_token) on the
+auth proxy; it also outranks host + /. Pattern must be lowercase: Kong
+lowercases the header value before the regex runs.
+*/}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  {{- $noAuthAnnotations := mergeOverwrite (dict) $globalKongIngressAnnotations (dict "konghq.com/plugins" "api-ingeress-plugin" "konghq.com/headers.authorization" "~*^bearer gcsa_") }}
+  annotations:
+    {{- range $key, $value := $noAuthAnnotations }}
+    {{- printf "%s: %s" $key ($value | quote) | nindent 4 }}
+    {{- end }}
+  name: router-no-auth-apikey-ingress
+  namespace: {{ .Release.Namespace }}
+spec:
+  ingressClassName: {{ .Values.kong.ingressController.ingressClass }}
+  rules:
+  - host: {{ .Values.frontendDomain }}
+    http:
+      paths:
+      - backend:
+          service:
+            name: router
+            port:
+              number: 8080
+        path: /api
+        pathType: Prefix
+{{- end }}
 {{- end -}}
