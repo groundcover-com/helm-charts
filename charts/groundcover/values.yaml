@@ -2441,6 +2441,30 @@ autonomousInfrastructure:
   affinity:
   tolerations: []
   priorityClassName:
+  mutator:
+    replicas: 3
+    image:
+      repository: "{{ .Values.global.origin.registry }}/autoinfra-mutator"
+      tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
+    port: 443
+    metricsPort: 9102
+    hostNetwork: false
+    disableAntiAffinity: false
+    podLabels: {}
+    podAnnotations: {}
+    nodeSelector: {}
+    tolerations: []
+    priorityClassName:
+    podSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+      runAsGroup: 1000
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        memory: 256Mi
 
 workloadRecommendations:
   image:

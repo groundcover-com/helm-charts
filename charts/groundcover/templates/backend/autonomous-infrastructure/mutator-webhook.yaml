@@ -1,0 +1,32 @@
+{{- if include "groundcover.autonomousInfrastructure.enabled" . }}
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: {{ include "groundcover.autonomousInfrastructure.webhookConfigurationName" . }}
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+webhooks:
+- name: pods.autoinfra.groundcover.com
+  admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: {{ include "groundcover.autonomousInfrastructure.mutatorName" . }}
+      namespace: {{ .Release.Namespace }}
+      path: /mutate
+      port: {{ include "groundcover.autonomousInfrastructure.mutatorServicePort" . }}
+  rules:
+  - operations:
+    - CREATE
+    apiGroups:
+    - ""
+    apiVersions:
+    - v1
+    resources:
+    - pods
+    scope: Namespaced
+  failurePolicy: Ignore
+  sideEffects: NoneOnDryRun
+  timeoutSeconds: 5
+  reinvocationPolicy: IfNeeded
+{{- end }}

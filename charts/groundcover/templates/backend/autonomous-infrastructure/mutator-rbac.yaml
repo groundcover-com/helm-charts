@@ -1,0 +1,140 @@
+{{- if include "groundcover.autonomousInfrastructure.enabled" . }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "groundcover.autonomousInfrastructure.mutatorName" . }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+    {{- if .Values.rbac.annotations }}
+{{ toYaml .Values.rbac.annotations | indent 4 }}
+    {{- end }}
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+    {{- if .Values.rbac.labels }}
+{{ toYaml .Values.rbac.labels | indent 4 }}
+    {{- end }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ template "groundcover.fullname" . }}-autoinfra-mutator
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+    {{- if .Values.rbac.annotations }}
+{{ toYaml .Values.rbac.annotations | indent 4 }}
+    {{- end }}
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+    {{- if .Values.rbac.labels }}
+{{ toYaml .Values.rbac.labels | indent 4 }}
+    {{- end }}
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  resourceNames:
+  - {{ include "groundcover.autonomousInfrastructure.mutatorSecretName" . | quote }}
+  verbs:
+  - get
+  - list
+  - watch
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ template "groundcover.fullname" . }}-autoinfra-mutator
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+    {{- if .Values.rbac.annotations }}
+{{ toYaml .Values.rbac.annotations | indent 4 }}
+    {{- end }}
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+    {{- if .Values.rbac.labels }}
+{{ toYaml .Values.rbac.labels | indent 4 }}
+    {{- end }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ template "groundcover.fullname" . }}-autoinfra-mutator
+subjects:
+- kind: ServiceAccount
+  name: {{ include "groundcover.autonomousInfrastructure.mutatorName" . }}
+  namespace: {{ .Release.Namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ template "groundcover.fullname" . }}-autoinfra-mutator
+  annotations:
+    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+    {{- if .Values.rbac.annotations }}
+{{ toYaml .Values.rbac.annotations | indent 4 }}
+    {{- end }}
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+    {{- if .Values.rbac.labels }}
+{{ toYaml .Values.rbac.labels | indent 4 }}
+    {{- end }}
+rules:
+- apiGroups:
+  - admissionregistration.k8s.io
+  resources:
+  - mutatingwebhookconfigurations
+  resourceNames:
+  - {{ include "groundcover.autonomousInfrastructure.webhookConfigurationName" . | quote }}
+  verbs:
+  - get
+  - list
+  - watch
+  - patch
+- apiGroups:
+  - apps
+  resources:
+  - replicasets
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  verbs:
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ template "groundcover.fullname" . }}-autoinfra-mutator
+  annotations:
+    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+    {{- if .Values.rbac.annotations }}
+{{ toYaml .Values.rbac.annotations | indent 4 }}
+    {{- end }}
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+    {{- if .Values.rbac.labels }}
+{{ toYaml .Values.rbac.labels | indent 4 }}
+    {{- end }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ template "groundcover.fullname" . }}-autoinfra-mutator
+subjects:
+- kind: ServiceAccount
+  name: {{ include "groundcover.autonomousInfrastructure.mutatorName" . }}
+  namespace: {{ .Release.Namespace }}
+{{- end }}

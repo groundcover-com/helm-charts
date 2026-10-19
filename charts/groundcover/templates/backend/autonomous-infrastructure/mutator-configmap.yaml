@@ -1,0 +1,21 @@
+{{- if include "groundcover.autonomousInfrastructure.enabled" . }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "groundcover.autonomousInfrastructure.mutatorName" . }}-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+data:
+  config.yaml: |
+    LogLevel: 4
+    port: {{ .Values.autonomousInfrastructure.mutator.port }}
+    runningNamespace: ""
+    webhookConfigurationName: {{ include "groundcover.autonomousInfrastructure.webhookConfigurationName" . | quote }}
+    secretName: {{ include "groundcover.autonomousInfrastructure.mutatorSecretName" . | quote }}
+    serviceName: {{ include "groundcover.autonomousInfrastructure.mutatorName" . | quote }}
+    clusterId: {{ include "groundcover.clusterId" . | quote }}
+    env: {{ include "groundcover.env" . | quote }}
+    fleetClientConfig:
+      {{- include "groundcover.fleetClientConfig" . | nindent 6 }}
+{{- end }}

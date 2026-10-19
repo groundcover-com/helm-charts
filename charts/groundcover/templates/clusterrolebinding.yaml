@@ -19,7 +19,7 @@ roleRef:
   name: {{ template "groundcover.fullname" . }}-groundcover-metadata-fetcher
 subjects:
 - kind: ServiceAccount
-  name: k8s-watcher
+  name: {{ include "k8s-watcher.serviceAccountName" . }}
   namespace: {{ .Release.Namespace }}
 - kind: ServiceAccount
   name: {{ include "sensor.fullname" . }}

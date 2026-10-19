@@ -143,7 +143,7 @@ spec:
           "expectedCode" "204"
           "serviceName" "VictoriaMetrics Agent"
       ) | nindent 6 }}
-      serviceAccountName: k8s-watcher
+      serviceAccountName: {{ include "k8s-watcher.serviceAccountName" . }}
 {{- if .Values.k8sWatcher.priorityClassName }}
       priorityClassName: {{ .Values.k8sWatcher.priorityClassName }}
 {{- end }}

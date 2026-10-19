@@ -1,0 +1,140 @@
+{{- if include "groundcover.autonomousInfrastructure.enabled" . }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "groundcover.autonomousInfrastructure.mutatorName" . }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+    {{- include "groundcover.autonomousInfrastructure.mutatorSelectorLabels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.autonomousInfrastructure.mutator.replicas }}
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      {{- include "groundcover.autonomousInfrastructure.mutatorSelectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: {{ .Values.autonomousInfrastructure.mutator.metricsPort | quote }}
+        groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+        checksum/config: {{ include (print $.Template.BasePath "/backend/autonomous-infrastructure/mutator-configmap.yaml") . | sha256sum }}
+        {{- with .Values.autonomousInfrastructure.mutator.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "groundcover.labels" . | nindent 8 }}
+        {{- include "groundcover.autonomousInfrastructure.mutatorSelectorLabels" . | nindent 8 }}
+        {{- with .Values.autonomousInfrastructure.mutator.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "groundcover.autonomousInfrastructure.mutatorName" . }}
+      imagePullSecrets: {{ include "imagePullSecrets" . }}
+      {{- if .Values.autonomousInfrastructure.mutator.hostNetwork }}
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      {{- end }}
+      {{- if not .Values.autonomousInfrastructure.mutator.disableAntiAffinity }}
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                {{- include "groundcover.autonomousInfrastructure.mutatorSelectorLabels" . | nindent 16 }}
+            topologyKey: kubernetes.io/hostname
+      {{- end }}
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: topology.kubernetes.io/zone
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            {{- include "groundcover.autonomousInfrastructure.mutatorSelectorLabels" . | nindent 12 }}
+      {{- with .Values.autonomousInfrastructure.mutator.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.autonomousInfrastructure.mutator.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.autonomousInfrastructure.mutator.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
+      {{- with .Values.autonomousInfrastructure.mutator.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: mutator
+        image: {{ tpl .Values.autonomousInfrastructure.mutator.image.repository . }}:{{ tpl .Values.autonomousInfrastructure.mutator.image.tag . }}
+        imagePullPolicy: Always
+        env:
+        - name: GC_RUNNINGNAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: PROMETHEUS_PORT
+          value: {{ .Values.autonomousInfrastructure.mutator.metricsPort | quote }}
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: API_KEY
+          valueFrom:
+            secretKeyRef:
+              key: {{ template "groundcover.apikeySecretKey" . }}
+              name: {{ template "groundcover.apikeySecretName" . }}
+        volumeMounts:
+        - mountPath: /config
+          name: config
+          readOnly: true
+        {{- if .Values.fleetClientConfig.mtlsSecretName }}
+        - mountPath: /etc/fleet-mtls-certs
+          name: fleet-mtls-certs
+          readOnly: true
+        {{- end }}
+        ports:
+        - name: webhook
+          containerPort: {{ .Values.autonomousInfrastructure.mutator.port }}
+        - name: metrics
+          containerPort: {{ .Values.autonomousInfrastructure.mutator.metricsPort }}
+        readinessProbe:
+          httpGet:
+            scheme: HTTPS
+            path: /readyz
+            port: webhook
+          periodSeconds: 5
+          failureThreshold: 3
+        {{- if semverCompare ">=1.30.0-0" .Capabilities.KubeVersion.GitVersion }}
+        lifecycle:
+          preStop:
+            sleep:
+              seconds: 5
+        {{- end }}
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+            add:
+            - NET_BIND_SERVICE
+        resources:
+          {{- toYaml .Values.autonomousInfrastructure.mutator.resources | nindent 10 }}
+      volumes:
+      - name: config
+        configMap:
+          name: {{ include "groundcover.autonomousInfrastructure.mutatorName" . }}-config
+      {{- if .Values.fleetClientConfig.mtlsSecretName }}
+      - name: fleet-mtls-certs
+        secret:
+          secretName: {{ .Values.fleetClientConfig.mtlsSecretName }}
+      {{- end }}
+{{- end }}

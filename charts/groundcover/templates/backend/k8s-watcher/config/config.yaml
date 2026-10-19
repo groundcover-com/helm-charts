@@ -46,16 +46,10 @@ data:
     region: {{ .Values.region }}
     env: {{ include "groundcover.env" . }}
     fleetClientConfig:
-      enabled: {{ .Values.global.fleetmanager.enabled }}
-      url: {{ include "fleet-manager.url" . }}
-      insecureSkipVerify: {{ .Values.fleetClientConfig.insecureSkipVerify }}
-      tlsCertFile: {{ .Values.fleetClientConfig.tlsCertFile | default "" | quote }}
-      tlsKeyFile: {{ .Values.fleetClientConfig.tlsKeyFile | default "" | quote }}
-      tlsCAFile: {{ .Values.fleetClientConfig.tlsCAFile | default "" | quote }}
-      e2eDesiredStateFile: ""
+      {{- include "groundcover.fleetClientConfig" . | nindent 6 }}
     autonomousInfrastructure:
-      enabled: {{ .Values.global.autonomousInfrastructure.enabled }}
-      mutatorDeployment: autoinfra-mutator
+      enabled: {{ include "groundcover.autonomousInfrastructure.enabled" . | eq "true" }}
+      mutatorDeployment: {{ include "groundcover.autonomousInfrastructure.mutatorName" . }}
     tracesNamespaceFilters: {{ toYaml .Values.tracesNamespaceFilters | nindent 6 }}
     tracesWorkloadFilters: {{ toYaml .Values.tracesWorkloadFilters | nindent 6 }}
     commitHashKeyName: {{ .Values.commitHashKeyName }}

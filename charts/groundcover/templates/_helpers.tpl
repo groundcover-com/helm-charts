@@ -469,3 +469,57 @@ Create the name of the agent priority class to use
 {{- printf "http://%s:8080" (include "keep.backend.fullname" .) -}}
 {{- end -}}
 {{- end -}}
+
+{{- define "groundcover.fleetClientConfig" -}}
+enabled: {{ .Values.global.fleetmanager.enabled }}
+url: {{ include "fleet-manager.url" . }}
+insecureSkipVerify: {{ .Values.fleetClientConfig.insecureSkipVerify }}
+tlsCertFile: {{ .Values.fleetClientConfig.tlsCertFile | default "" | quote }}
+tlsKeyFile: {{ .Values.fleetClientConfig.tlsKeyFile | default "" | quote }}
+tlsCAFile: {{ .Values.fleetClientConfig.tlsCAFile | default "" | quote }}
+e2eDesiredStateFile: ""
+{{- end }}
+
+{{- define "groundcover.autonomousInfrastructure.watcherRules" -}}
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - pods/resize
+  verbs:
+  - patch
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  verbs:
+  - patch
+{{- end }}
+
+{{- define "groundcover.autonomousInfrastructure.enabled" -}}
+{{- if not (kindIs "bool" .Values.global.autonomousInfrastructure.enabled) }}
+{{- fail "global.autonomousInfrastructure.enabled must be an unquoted boolean" }}
+{{- end }}
+{{- if and .Values.global.agent.enabled .Values.global.autonomousInfrastructure.enabled }}true{{ end }}
+{{- end }}
+
+{{- define "groundcover.autonomousInfrastructure.mutatorName" -}}
+autoinfra-mutator
+{{- end }}
+
+{{- define "groundcover.autonomousInfrastructure.mutatorSecretName" -}}
+autoinfra-mutator-webhook-cert
+{{- end }}
+
+{{- define "groundcover.autonomousInfrastructure.webhookConfigurationName" -}}
+{{- printf "z-%s-autoinfra" (include "groundcover.fullname" .) | trunc 253 | trimSuffix "-" }}
+{{- end }}
+
+{{- define "groundcover.autonomousInfrastructure.mutatorServicePort" -}}
+8443
+{{- end }}
+
+{{- define "groundcover.autonomousInfrastructure.mutatorSelectorLabels" -}}
+app: autoinfra-mutator
+app.kubernetes.io/name: autoinfra-mutator
+{{- end }}

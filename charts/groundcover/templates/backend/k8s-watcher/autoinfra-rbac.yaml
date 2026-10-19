@@ -1,0 +1,41 @@
+{{- if include "groundcover.autonomousInfrastructure.enabled" . }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ template "groundcover.fullname" . }}-autoinfra-watcher
+  annotations:
+    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+    {{- if .Values.rbac.annotations }}
+{{ toYaml .Values.rbac.annotations | indent 4 }}
+    {{- end }}
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+    {{- if .Values.rbac.labels }}
+{{ toYaml .Values.rbac.labels | indent 4 }}
+    {{- end }}
+rules:
+{{ include "groundcover.autonomousInfrastructure.watcherRules" . | indent 2 }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ template "groundcover.fullname" . }}-autoinfra-watcher
+  annotations:
+    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+    {{- if .Values.rbac.annotations }}
+{{ toYaml .Values.rbac.annotations | indent 4 }}
+    {{- end }}
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+    {{- if .Values.rbac.labels }}
+{{ toYaml .Values.rbac.labels | indent 4 }}
+    {{- end }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ template "groundcover.fullname" . }}-autoinfra-watcher
+subjects:
+- kind: ServiceAccount
+  name: {{ include "k8s-watcher.serviceAccountName" . }}
+  namespace: {{ .Release.Namespace }}
+{{- end }}

@@ -1,0 +1,17 @@
+{{- if include "groundcover.autonomousInfrastructure.enabled" . }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "groundcover.autonomousInfrastructure.mutatorName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+    {{- include "groundcover.autonomousInfrastructure.mutatorSelectorLabels" . | nindent 4 }}
+spec:
+  selector:
+    {{- include "groundcover.autonomousInfrastructure.mutatorSelectorLabels" . | nindent 4 }}
+  ports:
+  - name: webhook
+    port: {{ include "groundcover.autonomousInfrastructure.mutatorServicePort" . }}
+    targetPort: webhook
+{{- end }}

@@ -1,0 +1,17 @@
+{{- if and (include "groundcover.autonomousInfrastructure.enabled" .) (ge (int .Values.autonomousInfrastructure.mutator.replicas) 2) }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "groundcover.autonomousInfrastructure.mutatorName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+spec:
+  minAvailable: 1
+  {{- if semverCompare ">=1.27.0-0" .Capabilities.KubeVersion.GitVersion }}
+  unhealthyPodEvictionPolicy: AlwaysAllow
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "groundcover.autonomousInfrastructure.mutatorSelectorLabels" . | nindent 6 }}
+{{- end }}
