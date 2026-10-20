@@ -53,6 +53,7 @@ receivers:
   {{- /* The raw pprof receiver is ingestion; scraping the node's pods is collection. */}}
   {{- if or $sensorValues.ingestionEnabled $sensorValues.collectionEnabled }}
   profiles:
+    maxDecodedSampleRows: {{ include "groundcover.nonNegativeInteger" (dict "path" "maxDecodedSampleRows" "value" (dig "receivers" "profiles" "maxDecodedSampleRows" 10000 $sensorValues)) | trimAll "\"" }}
     {{- if $sensorValues.ingestionEnabled }}
     enabled: {{ dig "receivers" "profiles" "enabled" false $sensorValues }}
     port: {{ dig "receivers" "profiles" "port" 8028 $sensorValues }}

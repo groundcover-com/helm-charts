@@ -708,10 +708,17 @@ agent:
         # Port 8028 follows RUM (8026) and source maps (8027).
         # Native OTLP profiles share the OTLP ports above instead of using this receiver.
         port: 8028
+        # Maximum decoded sample rows per profile scrape or upload (including OTLP).
+        # Applied after sample_types selection on scrapes. Zero uses 10000; negative values
+        # are invalid. Higher values increase the per-request memory budget.
+        maxDecodedSampleRows: 10000
         # Pull pprof from pods on each sensor's own node. Pods opt in per profile type with
         # profiles.groundcover.com/<type>.scrape: "true" and the port net/http/pprof listens
         # on: <type>.port: "6060", or <type>.port_name: "pprof"; optional <type>.path and
-        # <type>.scheme (http or https) override the request. Types: cpu (10s window), memory
+        # <type>.scheme (http or https) override the request. <type>.sample_types selects a
+        # comma-separated list of pprof sample types, e.g. memory.sample_types: "inuse_space".
+        # Unset/empty selects all types; unknown names reject the scrape. Zero and negative
+        # values are retained. Types: cpu (10s window), memory
         # (heap in use and allocated since start), goroutine, block and mutex (30s windows; empty
         # unless the app sets runtime.SetBlockProfileRate / runtime.SetMutexProfileFraction). pprof
         # must listen on the pod IP, not localhost. Windowed totals cover their window of every
@@ -1901,6 +1908,9 @@ ingestor:
       # Native OTLP profiles share the OTLP ports above instead of using this receiver.
       port: 8028
       maxUploadSize: 33554432
+      # Maximum decoded sample rows per raw pprof, Pyroscope or native OTLP upload.
+      # Zero uses 10000; negative values are invalid. Other payload/normalization limits still apply.
+      maxDecodedSampleRows: 10000
   exporters:
     remotewrite:
       usePrometheusCompatibleNaming: true
