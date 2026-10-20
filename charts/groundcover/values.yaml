@@ -674,6 +674,13 @@ agent:
     watchOnlyLocalNode: false
     resolveRemoteFromEndpoint: false
     setLocalTrafficPolicy: true
+    # Drop repeated log lines from the same call site and level. Each call site writes
+    # `burst` lines, then one more per `every`; the next written line carries suppressed_count.
+    logRateLimit:
+      enabled: true
+      every: 1s
+      burst: 10
+      ttl: 5m
     trafficDistribution:
     collectionEnabled: true
     ingestionEnabled: true

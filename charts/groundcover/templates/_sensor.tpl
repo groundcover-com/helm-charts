@@ -505,6 +505,9 @@ cluster:
   childcountruleoverrides: {{ toJson $sensorValues.childcountruleoverrides }}
 
 loglevel: 4 # INFO
+{{- with $sensorValues.logRateLimit }}
+logRateLimit: {{- toYaml . | nindent 2 }}
+{{- end }}
 
 {{ if $sensorValues.collectionEnabled }}
 isk8s: {{.Values.isk8s }}
