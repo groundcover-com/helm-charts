@@ -3028,6 +3028,12 @@ investigationService:
     sweepLimit: 100
     # A backstop: each agent-service call and Postgres statement has its own timeout.
     handleTimeout: 2m
+    # A running review that has not decided by then times out, and the group is retried.
+    reviewTimeout: 10m
+    # Per cycle of a decision group (until its next proposal or decision): reviews rerun after a
+    # discarded one, and after one that timed out or failed.
+    maxRejudgments: 3
+    retries: 1
   tracing:
     writeTimeout: 5s
     flushInterval: 5s

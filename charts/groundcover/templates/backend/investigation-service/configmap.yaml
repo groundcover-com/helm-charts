@@ -55,6 +55,9 @@ data:
       sweepJitter: {{ .Values.investigationService.moderation.sweepJitter }}
       sweepLimit: {{ .Values.investigationService.moderation.sweepLimit }}
       handleTimeout: {{ .Values.investigationService.moderation.handleTimeout }}
+      reviewTimeout: {{ .Values.investigationService.moderation.reviewTimeout }}
+      maxRejudgments: {{ .Values.investigationService.moderation.maxRejudgments }}
+      retries: {{ .Values.investigationService.moderation.retries }}
 
     telemetry:
       traces:
