@@ -93,6 +93,13 @@ spec:
               name: {{ include "postgresql.secretName" . }}
               key: {{ include "postgresql.adminPasswordKey" . }}
         {{- end }}
+        {{- if .Values.global.autoInfraConfig.enabled }}
+        - name: GC_AUTOINFRACONFIGSTORE_DB_PASS
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "postgresql.secretName" . }}
+              key: {{ include "postgresql.adminPasswordKey" . }}
+        {{- end }}
         {{- if eq (include "telemetry.enabled" .) "true" }}
         - name: GC_TRACING_HEADERS_APIKEY
           valueFrom:

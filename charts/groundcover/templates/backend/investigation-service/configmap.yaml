@@ -31,6 +31,7 @@ data:
       interval: {{ .Values.dbManager.db.interval }}
       maxConns: {{ .Values.investigationService.postgresql.maxConns }}
       enableTracing: {{ include "telemetry.enabled" . }}
+      statementTimeout: {{ .Values.investigationService.postgresql.statementTimeout }}
     migrationsPath: "/migrations"
 
     evidence:
@@ -41,6 +42,19 @@ data:
       host: {{ include "investigation-service.temporalHost" . | quote }}
       port: {{ .Values.investigationService.temporal.port }}
       namespace: {{ .Values.investigationService.temporal.namespace | quote }}
+
+    agentService:
+      baseURL: {{ .Values.investigationService.agentService.baseURL | default (printf "http://%s:8080" (include "agent-service.fullname" .)) | quote }}
+      moderatorAgent: {{ .Values.investigationService.agentService.moderatorAgent | quote }}
+      requestTimeout: {{ .Values.investigationService.agentService.requestTimeout }}
+
+    moderation:
+      workers: {{ .Values.investigationService.moderation.workers }}
+      queueSize: {{ .Values.investigationService.moderation.queueSize }}
+      sweepInterval: {{ .Values.investigationService.moderation.sweepInterval }}
+      sweepJitter: {{ .Values.investigationService.moderation.sweepJitter }}
+      sweepLimit: {{ .Values.investigationService.moderation.sweepLimit }}
+      handleTimeout: {{ .Values.investigationService.moderation.handleTimeout }}
 
     telemetry:
       traces:
