@@ -1,0 +1,15 @@
+{{- if and .Values.global.backend.enabled .Values.global.autonomousInfrastructure.enabled .Values.global.fleetmanager.enabled .Values.autoInfraConfig.pdb.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "autoinfra-config.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+    app: autoinfra-config
+spec:
+  maxUnavailable: {{ .Values.autoInfraConfig.pdb.maxUnavailable }}
+  selector:
+    matchLabels:
+      app: autoinfra-config
+{{- end }}

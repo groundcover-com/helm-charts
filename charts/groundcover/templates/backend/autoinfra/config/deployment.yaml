@@ -1,0 +1,117 @@
+{{- if and .Values.global.backend.enabled .Values.global.autonomousInfrastructure.enabled .Values.global.fleetmanager.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+    app: autoinfra-config
+  name: {{ include "autoinfra-config.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.autoInfraConfig.replicas }}
+  selector:
+    matchLabels:
+      app: autoinfra-config
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9102"
+        groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+        checksum/config: {{ include (print $.Template.BasePath "/backend/autoinfra/config/configmap.yaml") . | sha256sum }}
+        {{- with .Values.autoInfraConfig.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        app: autoinfra-config
+        app.kubernetes.io/name: autoinfra-config
+        {{- include "groundcover.labels" . | nindent 8 }}
+        {{- with .Values.autoInfraConfig.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      imagePullSecrets: {{ include "imagePullSecrets" . }}
+      {{- with .Values.autoInfraConfig.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.autoInfraConfig.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.autoInfraConfig.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.autoInfraConfig.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
+      {{- with .Values.autoInfraConfig.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: autoinfra-config
+        image: {{ tpl .Values.autoInfraConfig.image.repository . }}:{{ tpl .Values.autoInfraConfig.image.tag . }}
+        imagePullPolicy: Always
+        env:
+        - name: GC_GROUNDCOVERVERSION
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['groundcover_version']
+        {{- if eq (include "telemetry.enabled" .) "true" }}
+        - name: GC_TRACING_HEADERS_APIKEY
+          valueFrom:
+            secretKeyRef:
+              key: {{ template "groundcover.apikeySecretKey" . }}
+              name: {{ template "groundcover.apikeySecretName" . }}
+        {{- end }}
+        - name: GC_POSTGRES_PASS
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "postgresql.secretName" . }}
+              key: {{ include "postgresql.adminPasswordKey" . }}
+        {{- with .Values.autoInfraConfig.env }}
+        {{- tpl (toYaml .) $ | nindent 8 }}
+        {{- end }}
+        envFrom:
+        - secretRef:
+            name: {{ include "groundcover.config.secretName" . }}
+        ports:
+        - containerPort: {{ .Values.autoInfraConfig.httpPort }}
+          name: http
+        - containerPort: {{ .Values.autoInfraConfig.healthProbePort }}
+          name: health-http
+        - containerPort: 9102
+          name: metrics
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: health-http
+          initialDelaySeconds: 10
+          periodSeconds: 15
+          failureThreshold: 20
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: health-http
+          initialDelaySeconds: 10
+          periodSeconds: 15
+          failureThreshold: 20
+        resources:
+          {{- toYaml .Values.autoInfraConfig.resources | nindent 10 }}
+        volumeMounts:
+        - mountPath: /etc/autoinfra-config
+          name: config
+      volumes:
+      - configMap:
+          name: autoinfra-config-config
+        name: config
+{{- end }}

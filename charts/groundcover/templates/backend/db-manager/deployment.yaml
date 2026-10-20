@@ -93,7 +93,7 @@ spec:
               name: {{ include "postgresql.secretName" . }}
               key: {{ include "postgresql.adminPasswordKey" . }}
         {{- end }}
-        {{- if .Values.global.autoInfraConfig.enabled }}
+        {{- if .Values.global.autonomousInfrastructure.enabled }}
         - name: GC_AUTOINFRACONFIGSTORE_DB_PASS
           valueFrom:
             secretKeyRef:

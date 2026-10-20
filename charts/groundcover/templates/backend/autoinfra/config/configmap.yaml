@@ -1,0 +1,41 @@
+{{- if and .Values.global.backend.enabled .Values.global.autonomousInfrastructure.enabled .Values.global.fleetmanager.enabled }}
+apiVersion: v1
+kind: ConfigMap
+data:
+  config.yaml: |
+    httpPort: {{ .Values.autoInfraConfig.httpPort }}
+    healthProbePort: {{ .Values.autoInfraConfig.healthProbePort }}
+    logLevel: {{ .Values.autoInfraConfig.logLevel }}
+    clusterId: {{ include "groundcover.clusterId" . | quote }}
+    {{- if eq (include "telemetry.enabled" .) "true" }}
+    tracing:
+      enabled: true
+      endpoint: {{ include "telemetry.traces.otlpUrl" . | quote }}
+      writeTimeout: {{ .Values.autoInfraConfig.tracing.writeTimeout }}
+      flushInterval: {{ .Values.autoInfraConfig.tracing.flushInterval }}
+      batchSize: {{ .Values.autoInfraConfig.tracing.batchSize }}
+      # Declaring the key lets GC_TRACING_HEADERS_APIKEY override it.
+      headers:
+        apikey: "OVERRIDDEN"
+    {{- end }}
+    # Each write publishes the touched settings sections to fleet manager, which serves them to sensors.
+    # The service is not deployed without fleet manager: a stored row it could not deliver would be lost.
+    fleetManagerUrl: {{ include "fleet-manager.base.url" . | quote }}
+    # db-manager's AutoInfraConfigStore database; db-manager owns its schema. Password via GC_POSTGRES_PASS.
+    postgres:
+      host: {{ tpl .Values.dbManager.db.host . }}
+      port: {{ tpl .Values.dbManager.db.port . }}
+      name: auto_infra_config
+      user: {{ tpl .Values.dbManager.db.user . }}
+      pass: ""
+      sslmode: {{ .Values.dbManager.db.sslmode }}
+      timeout: {{ .Values.dbManager.db.timeout }}
+      interval: {{ .Values.dbManager.db.interval }}
+metadata:
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+  annotations:
+    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+  name: autoinfra-config-config
+  namespace: {{ .Release.Namespace }}
+{{- end }}

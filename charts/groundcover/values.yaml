@@ -74,9 +74,6 @@ global:
   monitorsStore:
     enabled: false
     dbName: "monitors_service"
-  # AutoInfra config store; db-manager creates and migrates its Postgres database when enabled.
-  autoInfraConfig:
-    enabled: false
   debug:
     enabled: false
   workflows:
@@ -133,6 +130,7 @@ global:
     enabled: false
   bucketStreamer:
     enabled: false
+  # AutoInfra: its workers, autoinfra-config, and the auto_infra_config database db-manager creates.
   autonomousInfrastructure:
     enabled: false
 
@@ -2409,6 +2407,44 @@ monitorsService:
     flushInterval: 5s
     batchSize: 50
 
+
+# autoinfra-config: stores AutoInfra workload configs in db-manager's auto_infra_config database and publishes them to
+# fleet manager; deployed with global.autonomousInfrastructure.enabled, with db-manager's database.
+autoInfraConfig:
+  image:
+    repository: "{{ .Values.global.origin.registry }}/autoinfra-config"
+    tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
+  replicas: 2
+  pdb:
+    enabled: true
+    maxUnavailable: 1
+  podLabels:
+  podAnnotations:
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/name: autoinfra-config
+  affinity:
+  nodeSelector:
+  tolerations: []
+  priorityClassName:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      memory: 512Mi
+  env: []
+  logLevel: 4
+  httpPort: 8080
+  healthProbePort: 8081
+  tracing:
+    writeTimeout: 5s
+    flushInterval: 5s
+    batchSize: 50
 
 # Autonomous Infrastructure workers, gated on global.autonomousInfrastructure.enabled.
 # Both need the ClickHouse objects from the autonomous_infrastructure migration domain.

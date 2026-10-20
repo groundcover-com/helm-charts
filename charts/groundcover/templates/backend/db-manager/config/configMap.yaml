@@ -230,7 +230,7 @@ data:
         interval: {{ .Values.dbManager.db.interval }}
       MigrationsPath: "/monitors-migrations"
     {{- end }}
-    {{- if .Values.global.autoInfraConfig.enabled }}
+    {{- if .Values.global.autonomousInfrastructure.enabled }}
     AutoInfraConfigStore:
       Enabled: true
       Db:

@@ -1,0 +1,20 @@
+{{- if and .Values.global.backend.enabled .Values.global.autonomousInfrastructure.enabled .Values.global.fleetmanager.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: autoinfra-config
+    app.kubernetes.io/name: autoinfra-config
+    {{- include "groundcover.labels" . | nindent 4 }}
+  name: {{ include "autoinfra-config.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  ports:
+  - name: http
+    port: {{ .Values.autoInfraConfig.httpPort }}
+    protocol: TCP
+    targetPort: http
+  selector:
+    app: autoinfra-config
+  type: ClusterIP
+{{- end }}
