@@ -726,6 +726,8 @@ agent:
         # comma-separated list of pprof sample types, e.g. memory.sample_types: "inuse_space".
         scrape:
           enabled: false
+          # A pod overrides this per type with <type>.interval, e.g. cpu.interval: "5m". The
+          # interval is at least 10s and the type's timeout (CPU 20s, block and mutex 40s).
           interval: 1m
           # Domains pods may annotate under besides profiles.groundcover.com, e.g. com.acme.corp for
           # com.acme.corp/cpu.scrape. A pod using several is scraped once per type, with all settings
