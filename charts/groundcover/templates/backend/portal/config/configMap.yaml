@@ -251,6 +251,9 @@ data:
     InvestigationService:
       Enabled: {{ and .Values.global.backend.enabled .Values.global.investigationService.enabled }}
       Endpoint: http://{{ include "investigation-service.fullname" . }}:8080
+    AutoInfraConfig:
+      Enabled: {{ and .Values.global.backend.enabled .Values.global.autonomousInfrastructure.enabled }}
+      Endpoint: http://{{ include "autoinfra-config.fullname" . }}:{{ .Values.autoInfraConfig.httpPort }}
     {{- if .Values.portal.configuration.AgentService }}
     AgentService:
       Enabled: {{ .Values.portal.configuration.AgentService.Enabled | default (.Values.agentService.enabled | default false) }}
