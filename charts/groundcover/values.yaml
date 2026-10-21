@@ -130,6 +130,8 @@ global:
     enabled: false
   bucketStreamer:
     enabled: false
+  queue:
+    enabled: false
   # AutoInfra: its workers, autoinfra-config, and the auto_infra_config database db-manager creates.
   autonomousInfrastructure:
     enabled: false
@@ -1604,6 +1606,224 @@ bucketStreamer:
       memory: 512Mi
     limits:
       memory: 2Gi
+  resizePolicy: []
+  livenessProbe:
+    # Process-alive only, so a Postgres blip does not restart the pod.
+    httpGet:
+      path: /healthz
+      port: http
+    initialDelaySeconds: 5
+    periodSeconds: 10
+  readinessProbe:
+    # Reflects Postgres connectivity: NotReady while the bucket buffers.
+    httpGet:
+      path: /readyz
+      port: http
+    initialDelaySeconds: 3
+    periodSeconds: 5
+  terminationGracePeriodSeconds: 90
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  pdb:
+    enabled: true
+    minAvailable: 1
+  additionalLabels: {}
+  additionalAnnotations: {}
+  podLabels: {}
+  podAnnotations: {}
+  podSecurityContext: {}
+  containerSecurityContext: {}
+  priorityClassName: ""
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  topologySpreadConstraints: []
+
+
+queue:
+  replicaCount: 2
+  image:
+    registry: public.ecr.aws/groundcovercom
+    repository: queue
+    tag: "0.0.1"
+    pullPolicy: IfNotPresent
+  logLevel: info
+  serviceAccount:
+    create: true
+    name: ""
+    # Cloud identity binding, e.g. eks.amazonaws.com/role-arn for a role with
+    # s3:PutObject and s3:ListBucket (readiness probes the bucket) on the bucket.
+    annotations: {}
+  objectStore:
+    # Empty follows vector.objectStorage.s3Bucket / region (when allowed: true).
+    # S3 and S3-compatible stores only.
+    bucket: ""
+    region: ""
+    # S3-compatible endpoint (MinIO, private S3 endpoint). Empty selects AWS.
+    endpoint: ""
+    # endpoint/bucket/key addressing; enable for MinIO.
+    pathStyle: false
+    # Static credentials for stores without workload identity. Leave name empty
+    # to use the AWS SDK default chain (ServiceAccount web identity).
+    existingSecret:
+      name: ""
+      accessKeyKey: access-key
+      secretKeyKey: secret-key
+
+  config:
+    chunk:
+      max_age: 2s
+    store:
+      # Key prefixes in the bucket; MUST differ from each other. Objects land
+      # beside vector's v3/ / v5/ prefixes without colliding with them.
+      prefix: logs
+      traces_prefix: traces
+    observability:
+      # /debug/pprof/ shares the ingest port; keep it off where producers can
+      # reach that port.
+      pprof: false
+  # Extra environment variables for the queue container (rendered through tpl).
+  env: []
+  resources:
+    # Memory admission sizes the request buffers and chunk pipeline from the
+    # cgroup limit, so requests equal limits to avoid surprise evictions.
+    requests:
+      cpu: "1"
+      memory: 1Gi
+    limits:
+      memory: 1Gi
+  resizePolicy: []
+  livenessProbe:
+    # Process-alive only.
+    httpGet:
+      path: /health
+      port: http
+    periodSeconds: 5
+  readinessProbe:
+    # NotReady while the bucket fails its periodic check or the process drains.
+    httpGet:
+      path: /ready
+      port: http
+    periodSeconds: 2
+  # MUST exceed config.server.shutdown_timeout (30s by default).
+  terminationGracePeriodSeconds: 45
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  pdb:
+    enabled: true
+    minAvailable: 1
+  additionalLabels: {}
+  additionalAnnotations: {}
+  podLabels: {}
+  podAnnotations: {}
+  podSecurityContext: {}
+  containerSecurityContext: {}
+  priorityClassName: ""
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  topologySpreadConstraints: []
+
+# queue-bucket-streamer drains the queue's objects (zstd OTLP protobuf under
+# logs/v1/ and traces/v1/ in the queue bucket) into the ingestor as regular
+# OTLP/HTTP requests, so the queue's data joins the same pipeline as every other
+# OTLP request. It is a second bucket-streamer instance next to bucketStreamer
+# (ClickHouse sink), because one streamer process runs one sink kind. It is
+# enabled together with the queue by global.queue.enabled. Every default follows
+# what the queue writes: bucket, region, endpoint, addressing and credentials
+# follow queue.objectStore, prefixes follow queue.config.store, and the
+# destination is the release's ingestor. It has its own Postgres database.
+queueBucketStreamer:
+  replicaCount: 2
+  image:
+    registry: public.ecr.aws/groundcovercom
+    repository: bucket-streamer
+    # The first tag with the http sink.
+    tag: "0.0.6"
+    pullPolicy: IfNotPresent
+  serviceAccount:
+    create: true
+    name: ""
+    # Cloud identity binding, e.g. eks.amazonaws.com/role-arn for a role with
+    # s3:GetObject, s3:ListBucket and s3:DeleteObject on the queue bucket (the
+    # streamer deletes objects once the ingestor has them).
+    annotations: {}
+  postgres:
+    # Created by the init container on first boot; holds the coordination schema.
+    database: queue_bucket_streamer
+    sslmode: require
+    # Every in-flight batch holds one pooled connection for the whole delivery.
+    # Size above sum(max_concurrent) across signals plus a few for the scanner
+    # and reaper; an undersized pool blocks workers on Acquire.
+    maxConns: 20
+  objectStore:
+    # Empty values follow queue.objectStore (and its vector.objectStorage
+    # fallback), so the streamer reads the bucket the queue writes.
+    bucket: ""
+    region: ""
+    endpoint: ""
+  ingestor:
+    # OTLP/HTTP base URL batches are POSTed to (/v1/logs and /v1/traces are
+    # appended). Empty selects the release's own ingestor Service.
+    url: ""
+  sink:
+    # Passed to the streamer's sink.http (headers, timeouts, tls) and rendered
+    # through tpl.
+    http: {}
+  # Raw sections of the streamer's config.yaml (scanner, worker, reaper),
+  # rendered through tpl and emitted as-is. An object_store section merges into
+  # the generated one (provider/bucket/region stay generated), so put only
+  # tuning keys there.
+  config:
+    scanner:
+      # Each scan lists the live prefix per signal, so this sets the idle LIST
+      # rate; the queue seals chunks every few seconds anyway.
+      interval: 2s
+      max_pending_per_signal: 1000
+    worker: {}
+  # Defaults merged under every signals entry (an entry's own keys win).
+  # Batching is by the listed (compressed) object size: zstd OTLP inflates about
+  # 3x, and the ingestor bounds the decompressed request body, so keep
+  # max_batch_bytes modest. A scan batches a signal's fresh files once they
+  # total min_batch_size, or max_age has passed since its last batch.
+  signalDefaults:
+    format: OTLPProtobuf
+    compression: zstd
+    on_complete: delete
+    min_batch_size: 2097152
+    max_age: 10s
+    max_batch_bytes: 4194304
+    max_batch_files: 500
+    max_concurrent: 4
+  # One drained signal per key, merged over signalDefaults. An OTLP receiver
+  # serves one path per signal, so each signal names its own destination
+  # (ingestor-logs -> /v1/logs, ingestor-traces -> /v1/traces); a signal without
+  # `destinations` would fan out to both. prefix goes through tpl and follows
+  # the queue's store.prefix / store.traces_prefix. Set `enabled: false` on an
+  # entry to drop it.
+  signals:
+    logs:
+      prefix: '{{ include "queue-bucket-streamer.signalPrefix" (dict "root" . "key" "prefix" "default" "logs") }}'
+      destinations:
+        - ingestor-logs
+    traces:
+      prefix: '{{ include "queue-bucket-streamer.signalPrefix" (dict "root" . "key" "traces_prefix" "default" "traces") }}'
+      destinations:
+        - ingestor-traces
+  # Extra environment variables for the streamer container (rendered through tpl).
+  env: []
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      memory: 1Gi
   resizePolicy: []
   livenessProbe:
     # Process-alive only, so a Postgres blip does not restart the pod.

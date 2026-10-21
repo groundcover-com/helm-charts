@@ -1,0 +1,23 @@
+{{- if eq (include "queue-bucket-streamer.enabled" .) "true" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "queue-bucket-streamer.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+    {{- with .Values.queueBucketStreamer.additionalAnnotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  labels:
+    {{- include "queue-bucket-streamer.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: {{ include "queue-bucket-streamer.port" . }}
+      protocol: TCP
+      targetPort: http
+  selector:
+    {{- include "queue-bucket-streamer.selectorLabels" . | nindent 4 }}
+{{- end }}

@@ -1,0 +1,12 @@
+{{- if eq (include "queue-bucket-streamer.enabled" .) "true" }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "queue-bucket-streamer.configMapName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "queue-bucket-streamer.labels" . | nindent 4 }}
+data:
+  config.yaml: |
+{{ include "queue-bucket-streamer.config" . | indent 4 }}
+{{- end }}

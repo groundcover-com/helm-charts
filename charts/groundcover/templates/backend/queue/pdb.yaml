@@ -1,0 +1,18 @@
+{{- if and (eq (include "queue.enabled" .) "true") .Values.queue.pdb.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "queue.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "queue.labels" . | nindent 4 }}
+spec:
+  {{- if .Values.queue.pdb.minAvailable }}
+  minAvailable: {{ .Values.queue.pdb.minAvailable }}
+  {{- else }}
+  maxUnavailable: {{ .Values.queue.pdb.maxUnavailable | default 1 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "queue.selectorLabels" . | nindent 6 }}
+{{- end }}

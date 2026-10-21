@@ -1,0 +1,28 @@
+{{- if eq (include "queue.enabled" .) "true" }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "queue.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+    {{- with .Values.queue.additionalAnnotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  labels:
+    {{- include "queue.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: {{ include "queue.httpPort" . }}
+      protocol: TCP
+      targetPort: http
+    - name: grpc
+      port: {{ include "queue.grpcPort" . }}
+      protocol: TCP
+      targetPort: grpc
+      appProtocol: grpc
+  selector:
+    {{- include "queue.selectorLabels" . | nindent 4 }}
+{{- end }}

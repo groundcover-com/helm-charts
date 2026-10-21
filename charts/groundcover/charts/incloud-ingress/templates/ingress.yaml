@@ -4,6 +4,13 @@
 {{- if not (kindIs "bool" .Values.profileIngestion.otlp.enabled) -}}
   {{- fail "incloud-ingress.profileIngestion.otlp.enabled must be a boolean" -}}
 {{- end -}}
+{{- if not (kindIs "bool" .Values.queueIngestion.enabled) -}}
+  {{- fail "incloud-ingress.queueIngestion.enabled must be a boolean" -}}
+{{- end -}}
+{{- if and .Values.queueIngestion.enabled (not (include "queue.enabled" .)) -}}
+  {{- fail "incloud-ingress.queueIngestion.enabled requires global.queue.enabled and global.backend.enabled" -}}
+{{- end -}}
+{{- $queueIngestion := .Values.queueIngestion.enabled -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -93,16 +100,16 @@ spec:
             pathType: Exact
             backend:
               service:
-                name: {{ .Values.global.ingestor.enabled | ternary (include "ingestor.fullname" .) (include "opentelemetry-collector.fullname" .) }}
+                name: {{ $queueIngestion | ternary (include "queue.fullname" .) (.Values.global.ingestor.enabled | ternary (include "ingestor.fullname" .) (include "opentelemetry-collector.fullname" .)) }}
                 port:
-                  number: {{ index .Values.global "opentelemetry-collector" "ports" "otlp-http" "servicePort" | int }}
+                  number: {{ $queueIngestion | ternary (include "queue.httpPort" . | int) (index .Values.global "opentelemetry-collector" "ports" "otlp-http" "servicePort" | int) }}
           - path: {{ get (urlParse (include "opentelemetry-collector.otlplogs.http.url" .)) "path" }} 
             pathType: Exact
             backend:
               service:
-                name: {{ .Values.global.ingestor.enabled | ternary (include "ingestor.fullname" .) (include "opentelemetry-collector.fullname" .) }}
+                name: {{ $queueIngestion | ternary (include "queue.fullname" .) (.Values.global.ingestor.enabled | ternary (include "ingestor.fullname" .) (include "opentelemetry-collector.fullname" .)) }}
                 port:
-                  number: {{ index .Values.global "opentelemetry-collector" "ports" "otlp-http" "servicePort" | int }}
+                  number: {{ $queueIngestion | ternary (include "queue.httpPort" . | int) (index .Values.global "opentelemetry-collector" "ports" "otlp-http" "servicePort" | int) }}
           - path: {{ get (urlParse (include "opentelemetry-collector.otlpmetrics.http.url" .)) "path" }} 
             pathType: Exact
             backend:

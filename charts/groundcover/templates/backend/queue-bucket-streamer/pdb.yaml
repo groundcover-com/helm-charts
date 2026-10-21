@@ -1,0 +1,18 @@
+{{- if and (eq (include "queue-bucket-streamer.enabled" .) "true") .Values.queueBucketStreamer.pdb.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "queue-bucket-streamer.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "queue-bucket-streamer.labels" . | nindent 4 }}
+spec:
+  {{- if .Values.queueBucketStreamer.pdb.minAvailable }}
+  minAvailable: {{ .Values.queueBucketStreamer.pdb.minAvailable }}
+  {{- else }}
+  maxUnavailable: {{ .Values.queueBucketStreamer.pdb.maxUnavailable | default 1 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "queue-bucket-streamer.selectorLabels" . | nindent 6 }}
+{{- end }}

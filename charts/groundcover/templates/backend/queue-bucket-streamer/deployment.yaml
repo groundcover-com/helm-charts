@@ -1,0 +1,162 @@
+{{- if eq (include "queue-bucket-streamer.enabled" .) "true" }}
+{{- $bs := .Values.queueBucketStreamer }}
+{{- $pgUrl := printf "postgres://%s@%s/%s?sslmode=%s" (include "postgresql.username" .) (include "postgresql.base.url" .) (include "postgresql.database" .) $bs.postgres.sslmode }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "queue-bucket-streamer.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+    {{- with $bs.additionalAnnotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  labels:
+    {{- include "queue-bucket-streamer.labels" . | nindent 4 }}
+spec:
+  replicas: {{ $bs.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "queue-bucket-streamer.selectorLabels" . | nindent 6 }}
+  {{- with $bs.updateStrategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  template:
+    metadata:
+      annotations:
+        groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+        prometheus.io/scrape: "true"
+        prometheus.io/port: {{ include "queue-bucket-streamer.port" . | quote }}
+        # Config is read once at startup, so a changed ConfigMap needs a roll.
+        checksum/config: {{ include (print $.Template.BasePath "/backend/queue-bucket-streamer/configmap.yaml") . | sha256sum }}
+        {{- with $bs.additionalAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with $bs.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "queue-bucket-streamer.labels" . | nindent 8 }}
+        {{- with $bs.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "queue-bucket-streamer.serviceAccountName" . }}
+      terminationGracePeriodSeconds: {{ $bs.terminationGracePeriodSeconds }}
+      imagePullSecrets: {{ include "imagePullSecrets" . }}
+      {{- with $bs.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
+      {{- with $bs.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $bs.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $bs.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $bs.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $bs.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        - name: init-db
+          image: {{ include "postgresql.initContainers.image" . }}
+          imagePullPolicy: {{ .Values.global.postgresql.initContainers.image.pullPolicy | default "IfNotPresent" }}
+          env:
+            - name: PG_URL
+              value: {{ $pgUrl | quote }}
+            - name: PG_DATABASE
+              value: {{ $bs.postgres.database | quote }}
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "postgresql.secretName" . | quote }}
+                  key: {{ include "postgresql.adminPasswordKey" . | quote }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -e
+              until pg_isready -q -d "$PG_URL"; do
+                echo "waiting for postgres"
+                sleep 2
+              done
+              exists() {
+                [ -n "$(psql "$PG_URL" -tAc "SELECT 1 FROM pg_database WHERE datname = '$PG_DATABASE'")" ]
+              }
+              if ! exists; then
+                # Replicas race here on a fresh install; the loser's CREATE fails, which is fine if the database exists.
+                psql "$PG_URL" -c "CREATE DATABASE \"$PG_DATABASE\"" || exists
+              fi
+      containers:
+        - name: queue-bucket-streamer
+          image: {{ include "queue-bucket-streamer.image" . }}
+          imagePullPolicy: {{ $bs.image.pullPolicy }}
+          env:
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "postgresql.secretName" . | quote }}
+                  key: {{ include "postgresql.adminPasswordKey" . | quote }}
+            - name: INSTANCE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            {{- with include "queue-bucket-streamer.objectStore.region" . }}
+            - name: AWS_REGION
+              value: {{ . | quote }}
+            {{- end }}
+            {{- with .Values.queue.objectStore.existingSecret }}
+            {{- if .name }}
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .name | quote }}
+                  key: {{ .accessKeyKey | quote }}
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .name | quote }}
+                  key: {{ .secretKeyKey | quote }}
+            {{- end }}
+            {{- end }}
+            {{- with $bs.env }}
+            {{- tpl (toYaml .) $ | nindent 12 }}
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ include "queue-bucket-streamer.port" . }}
+              protocol: TCP
+          {{- with $bs.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with $bs.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml $bs.resources | nindent 12 }}
+          {{- include "groundcover.containerResizePolicy" (dict "value" $bs.resizePolicy "path" "queueBucketStreamer.resizePolicy" "kubeVersion" .Capabilities.KubeVersion.GitVersion "indent" 10) }}
+          {{- with $bs.containerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: config
+              mountPath: /etc/bucket-streamer
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "queue-bucket-streamer.configMapName" . }}
+{{- end }}

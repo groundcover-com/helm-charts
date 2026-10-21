@@ -1,0 +1,140 @@
+{{- if eq (include "queue.enabled" .) "true" }}
+{{- $q := .Values.queue }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "queue.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+    {{- with $q.additionalAnnotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  labels:
+    {{- include "queue.labels" . | nindent 4 }}
+spec:
+  replicas: {{ $q.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "queue.selectorLabels" . | nindent 6 }}
+  {{- with $q.updateStrategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  template:
+    metadata:
+      annotations:
+        groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+        prometheus.io/scrape: "true"
+        prometheus.io/port: {{ include "queue.httpPort" . | quote }}
+        prometheus.io/path: /metrics
+        # The config is read once at startup, so an edited ConfigMap only
+        # reaches a pod through a roll.
+        checksum/config: {{ include (print $.Template.BasePath "/backend/queue/configmap.yaml") . | sha256sum }}
+        {{- with $q.additionalAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- with $q.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "queue.labels" . | nindent 8 }}
+        {{- with $q.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "queue.serviceAccountName" . }}
+      # MUST exceed config.server.shutdown_timeout (30s by default): on SIGTERM
+      # the queue stops accepting, seals open chunks and waits for their
+      # uploads so in-flight requests still get their ACK.
+      terminationGracePeriodSeconds: {{ $q.terminationGracePeriodSeconds }}
+      imagePullSecrets: {{ include "imagePullSecrets" . }}
+      {{- with $q.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
+      {{- with $q.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $q.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $q.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $q.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $q.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: queue
+          image: {{ include "queue.image" . }}
+          imagePullPolicy: {{ $q.image.pullPolicy }}
+          # The image entrypoint is /otlplogs.
+          args:
+            - -config=/etc/queue/config.yaml
+            - -log-level={{ $q.logLevel }}
+          env:
+            # Object-key writer identity; unique per pod so concurrent writers
+            # never collide without coordination.
+            - name: QUEUE_INSTANCE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            {{- with $q.objectStore.existingSecret }}
+            {{- if .name }}
+            # Static credentials for S3-compatible stores without workload
+            # identity (MinIO, on-prem). Otherwise the AWS SDK default chain
+            # picks up the ServiceAccount's web identity.
+            - name: QUEUE_S3_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .name | quote }}
+                  key: {{ .accessKeyKey | quote }}
+            - name: QUEUE_S3_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .name | quote }}
+                  key: {{ .secretKeyKey | quote }}
+            {{- end }}
+            {{- end }}
+            {{- with $q.env }}
+            {{- tpl (toYaml .) $ | nindent 12 }}
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ include "queue.httpPort" . }}
+              protocol: TCP
+            - name: grpc
+              containerPort: {{ include "queue.grpcPort" . }}
+              protocol: TCP
+          {{- with $q.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with $q.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml $q.resources | nindent 12 }}
+          {{- include "groundcover.containerResizePolicy" (dict "value" $q.resizePolicy "path" "queue.resizePolicy" "kubeVersion" .Capabilities.KubeVersion.GitVersion "indent" 10) }}
+          {{- with $q.containerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: config
+              mountPath: /etc/queue
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "queue.configMapName" . }}
+{{- end }}

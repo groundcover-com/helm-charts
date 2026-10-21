@@ -1,0 +1,14 @@
+{{- if eq (include "queue.enabled" .) "true" }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "queue.configMapName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "queue.labels" . | nindent 4 }}
+data:
+  # No secrets here: S3 credentials are ambient (ServiceAccount web identity)
+  # or injected as QUEUE_S3_* env from queue.objectStore.existingSecret.
+  config.yaml: |
+{{ include "queue.config" . | indent 4 }}
+{{- end }}

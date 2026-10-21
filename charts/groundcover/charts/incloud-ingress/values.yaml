@@ -93,7 +93,13 @@ profileIngestion:
   otlp:
     # Exposes the OTLP Profiles HTTP and gRPC endpoints.
     enabled: true
-  
+
+# Sends the OTLP HTTP /v1/traces and /v1/logs routes to the queue instead of the
+# ingestor. Requires global.queue.enabled. /v1/metrics, /json/logs and every
+# other receiver route stay on the ingestor
+queueIngestion:
+  enabled: false
+
 cert-manager:
   enabled: false
   crds:
