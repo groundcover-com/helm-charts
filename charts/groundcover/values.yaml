@@ -3062,11 +3062,12 @@ investigationService:
     maxConns: 10
     # Bounds every statement, including lock waits, so a stuck write fails instead of holding a worker.
     statementTimeout: 30s
-  # Moderator runs start in agent-service; the base URL defaults to the in-namespace agent-service.
+  # Moderator and investigator runs start in agent-service; the base URL defaults to the in-namespace agent-service.
   agentService:
     baseURL: ""
     moderatorAgent: "investigations_moderator"
-    requestTimeout: 5s
+    investigatorAgent: "investigator"
+    requestTimeout: 10s
   moderation:
     workers: 4
     queueSize: 100
@@ -3081,6 +3082,15 @@ investigationService:
     # discarded one, and after one that timed out or failed.
     maxRejudgments: 3
     retries: 1
+  # Starts one investigator run for each new root; the sweep resends launches backed off by agent-service.
+  launch:
+    workers: 2
+    queueSize: 100
+    sweepInterval: 30s
+    sweepJitter: 5s
+    sweepLimit: 100
+    # A backstop: each agent-service call and Postgres statement has its own timeout.
+    handleTimeout: 2m
   tracing:
     writeTimeout: 5s
     flushInterval: 5s

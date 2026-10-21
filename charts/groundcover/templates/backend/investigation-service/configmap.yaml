@@ -41,6 +41,7 @@ data:
     agentService:
       baseURL: {{ .Values.investigationService.agentService.baseURL | default (printf "http://%s:8080" (include "agent-service.fullname" .)) | quote }}
       moderatorAgent: {{ .Values.investigationService.agentService.moderatorAgent | quote }}
+      investigatorAgent: {{ .Values.investigationService.agentService.investigatorAgent | quote }}
       requestTimeout: {{ .Values.investigationService.agentService.requestTimeout }}
 
     moderation:
@@ -53,6 +54,14 @@ data:
       reviewTimeout: {{ .Values.investigationService.moderation.reviewTimeout }}
       maxRejudgments: {{ .Values.investigationService.moderation.maxRejudgments }}
       retries: {{ .Values.investigationService.moderation.retries }}
+
+    launch:
+      workers: {{ .Values.investigationService.launch.workers }}
+      queueSize: {{ .Values.investigationService.launch.queueSize }}
+      sweepInterval: {{ .Values.investigationService.launch.sweepInterval }}
+      sweepJitter: {{ .Values.investigationService.launch.sweepJitter }}
+      sweepLimit: {{ .Values.investigationService.launch.sweepLimit }}
+      handleTimeout: {{ .Values.investigationService.launch.handleTimeout }}
 
     telemetry:
       traces:
