@@ -826,6 +826,8 @@ agent:
       measurements:
         enabled: false
         flushInterval: 30s
+        # Exact trace source values eligible for APM measurements. [] disables all sources.
+        allowedSources: [opentelemetry, Datadog]
       dataDog:
         enabled: true
         tracesPort: 8126
@@ -1979,6 +1981,8 @@ ingestor:
     measurements:
       enabled: true
       flushInterval: 30s
+      # Exact trace source values eligible for APM measurements. [] disables all sources.
+      allowedSources: [opentelemetry, Datadog]
     dataDog:
       enabled: true
       tracesPort: 8126
@@ -2261,6 +2265,8 @@ metricsAggregator:
     measurements:
       enabled: false
       flushInterval: 30s
+      # Exact trace source values eligible for APM measurements. [] disables all sources.
+      allowedSources: [opentelemetry, Datadog]
     dataDog:
       enabled: false
     otel:

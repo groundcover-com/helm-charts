@@ -602,6 +602,7 @@ apmIngestor:
   measurements:
     enabled: {{ dig "apmIngestor" "measurements" "enabled" false $sensorValues }}
     flushInterval: {{ dig "apmIngestor" "measurements" "flushInterval" "30s" $sensorValues }}
+    allowedSources: {{ dig "apmIngestor" "measurements" "allowedSources" (list "opentelemetry" "Datadog") $sensorValues | toJson }}
   dataDog:
     enabled: {{ $sensorValues.apmIngestor.dataDog.enabled }}
     tracesPort: {{ $sensorValues.apmIngestor.dataDog.tracesPort }}
