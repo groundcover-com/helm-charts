@@ -1,6 +1,4 @@
 {{- if and .Values.global.backend.enabled .Values.global.investigationService.enabled }}
-{{- $temporalHost := include "investigation-service.temporalHost" . }}
-{{- $temporalPort := .Values.investigationService.temporal.port }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -92,61 +90,6 @@ spec:
             echo "Postgres is unavailable - sleeping"
             sleep 2
           done
-      - name: wait-for-temporal
-        image: '{{ tpl .Values.curl.image.repository . }}:{{ tpl .Values.curl.image.tag . }}'
-        command:
-        - /bin/sh
-        - -c
-        args:
-        - |
-          echo "Waiting for Temporal at {{ $temporalHost }}:{{ $temporalPort }}..."
-          while ! nc -z {{ $temporalHost }} {{ $temporalPort }}; do
-            echo "Temporal is unavailable - sleeping"
-            sleep 2
-          done
-          echo "Temporal is up"
-      - name: ensure-temporal-namespace
-        image: '{{ tpl .Values.investigationService.temporal.adminToolsImage.repository . }}:{{ tpl .Values.investigationService.temporal.adminToolsImage.tag . }}'
-        imagePullPolicy: {{ .Values.investigationService.temporal.adminToolsImage.pullPolicy }}
-        command:
-        - /bin/bash
-        - -c
-        args:
-        - |
-          set -e
-
-          TEMPORAL_ADDRESS="{{ $temporalHost }}:{{ $temporalPort }}"
-          TEMPORAL_NAMESPACE="{{ .Values.investigationService.temporal.namespace }}"
-
-          echo "Ensuring Temporal namespace ${TEMPORAL_NAMESPACE} exists at ${TEMPORAL_ADDRESS}..."
-          TEMPORAL_READY=false
-          for i in {1..60}; do
-            if tctl --address "${TEMPORAL_ADDRESS}" cluster health 2>/dev/null | grep -q SERVING; then
-              TEMPORAL_READY=true
-              break
-            fi
-            echo "Temporal is not healthy yet - sleeping"
-            sleep 2
-          done
-          if [ "${TEMPORAL_READY}" != "true" ]; then
-            echo "Temporal did not become healthy at ${TEMPORAL_ADDRESS}"
-            exit 1
-          fi
-
-          if tctl --address "${TEMPORAL_ADDRESS}" --namespace "${TEMPORAL_NAMESPACE}" namespace describe >/dev/null 2>&1; then
-            echo "Temporal namespace ${TEMPORAL_NAMESPACE} already exists"
-            exit 0
-          fi
-
-          tctl --address "${TEMPORAL_ADDRESS}" --namespace "${TEMPORAL_NAMESPACE}" namespace register \
-            --description "investigation-service namespace for Temporal workflows" \
-            --retention 7d \
-            --active_cluster active || {
-              echo "Namespace registration failed, checking if another pod created it..."
-              tctl --address "${TEMPORAL_ADDRESS}" --namespace "${TEMPORAL_NAMESPACE}" namespace describe >/dev/null 2>&1
-            }
-
-          echo "Temporal namespace ${TEMPORAL_NAMESPACE} is ready"
       containers:
       - name: investigation-service
         image: {{ tpl .Values.investigationService.image.repository . }}:{{ tpl .Values.investigationService.image.tag . }}

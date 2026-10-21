@@ -1214,6 +1214,11 @@ dbManager:
           key: '{{ include "clickhouse.secretKey" . }}'
           name: '{{ include "clickhouse.secretName" . }}'
   objectStorageQueues: {}
+  # Merged over every objectStorageQueues entry (parallelQueues, parallelQueuesPerSignal,
+  # maxProcessedFilesBeforeCommit), so a value can apply to all queues without knowing
+  # their install-id-based keys. The standby uses the merged entries unless
+  # standbyCluster sets its own values.
+  objectStorageQueueOverrides: {}
   objectStorageDestTables:
     logs: "logs_v8"
     traces: "traces_v2"
@@ -3080,14 +3085,6 @@ investigationService:
     writeTimeout: 5s
     flushInterval: 5s
     batchSize: 50
-  temporal:
-    host: ""
-    port: 7233
-    namespace: "investigations"
-    adminToolsImage:
-      repository: public.ecr.aws/groundcovercom/temporalio/admin-tools
-      tag: "1.29.7-20260929-1"
-      pullPolicy: IfNotPresent
   instrumentation:
     additionalTraceTargets: []
   pprof:

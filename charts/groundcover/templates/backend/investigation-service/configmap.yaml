@@ -38,11 +38,6 @@ data:
       findingScopeKeys: {{ .Values.investigationService.evidence.findingScopeKeys | toJson }}
       scopedSignals: {{ .Values.investigationService.evidence.scopedSignals | toJson }}
 
-    temporal:
-      host: {{ include "investigation-service.temporalHost" . | quote }}
-      port: {{ .Values.investigationService.temporal.port }}
-      namespace: {{ .Values.investigationService.temporal.namespace | quote }}
-
     agentService:
       baseURL: {{ .Values.investigationService.agentService.baseURL | default (printf "http://%s:8080" (include "agent-service.fullname" .)) | quote }}
       moderatorAgent: {{ .Values.investigationService.agentService.moderatorAgent | quote }}

@@ -156,8 +156,15 @@ data:
         {{- toYaml .Values.dbManager.standbyCluster.maxProcessedFilesBeforeCommit | nindent 8 }}
       {{- end }}
     {{- end }}
+    {{- $queues := deepCopy (.Values.dbManager.objectStorageQueues | default dict) }}
+    {{- $queueOverrides := .Values.dbManager.objectStorageQueueOverrides | default dict }}
+    {{- range $name, $queue := $queues }}
+    {{- if kindIs "map" $queue }}
+    {{- $_ := set $queues $name (mergeOverwrite $queue (deepCopy $queueOverrides)) }}
+    {{- end }}
+    {{- end }}
     ObjectStorageQueues:
-      {{- toYaml .Values.dbManager.objectStorageQueues | nindent 6 }}
+      {{- toYaml $queues | nindent 6 }}
     ObjectStorageDestTables:
       {{- toYaml .Values.dbManager.objectStorageDestTables | nindent 6 }}
     CloudPricing:
