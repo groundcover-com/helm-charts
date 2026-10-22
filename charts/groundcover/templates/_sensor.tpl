@@ -648,6 +648,9 @@ apmIngestor:
       httpjson:
         enabled: {{ $sensorValues.apmIngestor.otel.direct.httpjson.enabled }}
         port: {{ $sensorValues.apmIngestor.otel.direct.httpjson.port }}
+        maxAttributeValueSize: {{ include "groundcover.nonNegativeInteger" (dict "path" "httpjson.maxAttributeValueSize" "value" (dig "apmIngestor" "otel" "direct" "httpjson" "maxAttributeValueSize" 0 $sensorValues)) }}
+        maxFlattenAttributes: {{ include "groundcover.nonNegativeInteger" (dict "path" "httpjson.maxFlattenAttributes" "value" (dig "apmIngestor" "otel" "direct" "httpjson" "maxFlattenAttributes" 0 $sensorValues)) }}
+        maxRequestBodySize: {{ include "groundcover.nonNegativeInteger" (dict "path" "httpjson.maxRequestBodySize" "value" (dig "apmIngestor" "otel" "direct" "httpjson" "maxRequestBodySize" 0 $sensorValues)) }}
       firehose:
         enabled: {{ $sensorValues.apmIngestor.otel.direct.firehose.enabled }}
         port: {{ $sensorValues.apmIngestor.otel.direct.firehose.port }}
