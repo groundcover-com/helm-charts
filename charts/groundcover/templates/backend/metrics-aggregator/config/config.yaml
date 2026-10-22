@@ -6,7 +6,7 @@ apiVersion: v1
 kind: ConfigMap
 data:
   config.yaml: |
-{{ include "groundcover.sensor.config" (merge (dict "sensorValues" $sensorValues) .) | indent 4 }}
+{{ include "metrics-aggregator.config" (merge (dict "sensorValues" $sensorValues) .) | indent 4 }}
 metadata:
   labels:
     {{- include "groundcover.labels" . | nindent 4 }}

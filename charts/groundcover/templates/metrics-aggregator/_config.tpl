@@ -1,0 +1,837 @@
+{{- /* Copied from groundcover.sensor.config so sensor-only changes do not roll the aggregator; see k8s/groundcover/AGENTS.md. */ -}}
+{{- define "metrics-aggregator.config.deprecated" -}}
+{{- if .sensorValues.metricIngestor -}}
+metricIngestor:
+  {{ if .sensorValues.ingestionEnabled }}
+  serverEnabled: {{ .sensorValues.metricIngestor.serverEnabled }}
+  serverPort: {{ .sensorValues.metricIngestor.serverPort }}
+  {{ end }}
+  {{ if .sensorValues.collectionEnabled }}
+  scraperEnabled: {{ .sensorValues.metricIngestor.scraperEnabled }}
+  maxScrapeSize: {{ .sensorValues.metricIngestor.maxScrapeSize }}
+  {{ end }}
+  usePrometheusCompatibleNaming: {{ .sensorValues.metricIngestor.usePrometheusCompatibleNaming }}
+{{- end -}}
+{{- end -}}
+
+{{- define "metrics-aggregator.config" -}}
+{{- $sensorValues := .sensorValues -}}
+
+# Include the deprecated configuration to make sensor log and metricate when deprecated config is used
+{{ include "metrics-aggregator.config.deprecated" . }}
+
+serviceName: {{ $sensorValues.serviceName }}
+alligatorConfigurationExists: {{ or $sensorValues.alligatorConfigurationExists false }} 
+healthProbe:
+  enabled: {{ $sensorValues.healthProbe.enabled }}
+  port: {{ $sensorValues.healthProbe.port }}
+receivers:
+  {{ if $sensorValues.ingestionEnabled }}
+  remotewrite:
+    enabled: {{ $sensorValues.receivers.remotewrite.enabled }}
+    port: {{ $sensorValues.receivers.remotewrite.port }}
+    maxConcurrentInserts: {{ $sensorValues.receivers.remotewrite.maxConcurrentInserts }}
+  prometheusimport:
+    enabled: {{ $sensorValues.receivers.prometheusimport.enabled }}
+    port: {{ $sensorValues.receivers.prometheusimport.port }}
+  {{ end }}
+  {{- /* The raw pprof receiver is ingestion; scraping the node's pods is collection. */}}
+  {{- if or $sensorValues.ingestionEnabled $sensorValues.collectionEnabled }}
+  profiles:
+    maxDecodedSampleRows: {{ include "groundcover.nonNegativeInteger" (dict "path" "maxDecodedSampleRows" "value" (dig "receivers" "profiles" "maxDecodedSampleRows" 10000 $sensorValues)) | trimAll "\"" }}
+    {{- if $sensorValues.ingestionEnabled }}
+    enabled: {{ dig "receivers" "profiles" "enabled" false $sensorValues }}
+    port: {{ dig "receivers" "profiles" "port" 8028 $sensorValues }}
+    maxUploadSize: {{ dig "receivers" "profiles" "maxUploadSize" 33554432 $sensorValues }}
+    {{- end }}
+    {{- if $sensorValues.collectionEnabled }}
+    {{- $scrape := dig "receivers" "profiles" "scrape" dict $sensorValues }}
+    scrape:
+      enabled: {{ dig "enabled" false $scrape }}
+      interval: {{ dig "interval" "1m" $scrape }}
+      extraAnnotationPrefixes: {{- dig "extraAnnotationPrefixes" list $scrape | toYaml | nindent 8 }}
+      defaultPort: {{ dig "defaultPort" 0 $scrape }}
+    {{- end }}
+  {{- end }}
+  {{ if $sensorValues.collectionEnabled }}
+  metricsscraper:
+    enabled: {{ $sensorValues.receivers.metricsscraper.enabled }}
+    maxScrapeSize: {{ $sensorValues.receivers.metricsscraper.maxScrapeSize }}
+    enableTCP6: {{ $sensorValues.receivers.metricsscraper.enableTCP6 }}
+  {{ end }}
+  {{- if $sensorValues.rum }}
+  rum:
+    sourceMaps:
+      enabled: {{ $sensorValues.rum.sourceMaps.enabled }}
+      port: {{ $sensorValues.rum.sourceMaps.port }}
+      provider: {{ $sensorValues.rum.sourceMaps.provider }}
+      bucket: {{ $sensorValues.rum.sourceMaps.bucket }}
+      region: {{ $sensorValues.rum.sourceMaps.region }}
+      storageAccount: {{ $sensorValues.rum.sourceMaps.storageAccount }}
+      assetPath: {{ $sensorValues.rum.sourceMaps.assetPath }}
+      maxUploadSize: {{ $sensorValues.rum.sourceMaps.maxUploadSize }}
+      cacheCapacity: {{ $sensorValues.rum.sourceMaps.cacheCapacity }}
+      cacheTTL: {{ $sensorValues.rum.sourceMaps.cacheTTL }}
+      stackTraceCacheCapacity: {{ $sensorValues.rum.sourceMaps.stackTraceCacheCapacity }}
+      stackTraceCacheTTL: {{ $sensorValues.rum.sourceMaps.stackTraceCacheTTL }}
+  {{- end }}
+exporters:
+  remotewrite:
+    url: {{ if $sensorValues.exporters.remotewrite.url }}{{ tpl $sensorValues.exporters.remotewrite.url . }}{{ else }}{{ include "metrics-ingester.write.http.url" . }}{{ end }}
+    usePrometheusCompatibleNaming: {{ $sensorValues.exporters.remotewrite.usePrometheusCompatibleNaming }}
+    tlsSkipVerify: {{ $sensorValues.exporters.remotewrite.tlsSkipVerify }}
+    tlsCertFile: {{ $sensorValues.exporters.remotewrite.tlsCertFile | default "" | quote }}
+    tlsKeyFile: {{ $sensorValues.exporters.remotewrite.tlsKeyFile | default "" | quote }}
+    tlsCAFile: {{ $sensorValues.exporters.remotewrite.tlsCAFile | default "" | quote }}
+    maxDiskUsagePerURL: {{ $sensorValues.exporters.remotewrite.maxDiskUsagePerURL }}
+    tmpDataPath: {{ $sensorValues.exporters.remotewrite.tmpDataPath }}
+    numberOfConcurrentQueues: {{ $sensorValues.exporters.remotewrite.numberOfConcurrentQueues }}
+    forcePrometheusProtocol: {{ $sensorValues.exporters.remotewrite.forcePrometheusProtocol }}
+    memoryAllowedBytes: {{ $sensorValues.exporters.remotewrite.memoryAllowedBytes }}
+    maxBlockSize: {{ $sensorValues.exporters.remotewrite.maxBlockSize }}
+pipelines:
+  metrics:
+    enricherEnabled: {{ $sensorValues.pipelines.metrics.enricherEnabled }}
+    {{- if $sensorValues.pipelines.metrics.additionalMetricLabels }}
+    additionalMetricLabels: {{ toYaml $sensorValues.pipelines.metrics.additionalMetricLabels | nindent 6 }}
+    {{- end }}
+    {{- if $sensorValues.pipelines.metrics.aggregation }}
+    aggregation:
+      enabled: {{ $sensorValues.pipelines.metrics.aggregation.enabled }}
+      {{- if $sensorValues.pipelines.metrics.aggregation.configuration }}
+      configuration:
+        dedupInterval: {{ $sensorValues.pipelines.metrics.aggregation.configuration.dedupInterval }}
+        dropInput: {{ $sensorValues.pipelines.metrics.aggregation.configuration.dropInput }}
+        {{- if $sensorValues.pipelines.metrics.aggregation.configuration.dropInputLabels }}
+        dropInputLabels: {{ toYaml $sensorValues.pipelines.metrics.aggregation.configuration.dropInputLabels | nindent 10 }}
+        {{- end }}
+        ignoreOldSamples: {{ $sensorValues.pipelines.metrics.aggregation.configuration.ignoreOldSamples }}
+        ignoreFirstIntervals: {{ $sensorValues.pipelines.metrics.aggregation.configuration.ignoreFirstIntervals }}
+        keepInput: {{ $sensorValues.pipelines.metrics.aggregation.configuration.keepInput }}
+        enableWindows: {{ $sensorValues.pipelines.metrics.aggregation.configuration.enableWindows }}
+        noAlignFlushToInterval: {{ $sensorValues.pipelines.metrics.aggregation.configuration.noAlignFlushToInterval }}
+        flushOnShutdown: {{ $sensorValues.pipelines.metrics.aggregation.configuration.flushOnShutdown }}
+        content: {{ $sensorValues.pipelines.metrics.aggregation.configuration.content | quote }}
+      {{- end }}
+    {{- end }}
+    {{- if $sensorValues.pipelines.metrics.relabeling }}
+    relabeling:
+      enabled: {{ $sensorValues.pipelines.metrics.relabeling.enabled }}
+      {{- if $sensorValues.pipelines.metrics.relabeling.configuration }}
+      configuration:
+        {{- $sensorValues.pipelines.metrics.relabeling.configuration | toYaml | nindent 8 }}
+      {{- end }}
+    {{- end }}
+    {{- if $sensorValues.pipelines.metrics.summary }}
+    summary:
+      shards: {{ $sensorValues.pipelines.metrics.summary.shards }}
+      writer:
+        url: {{ tpl $sensorValues.pipelines.metrics.summary.writer.url . }}
+        compress: {{ $sensorValues.pipelines.metrics.summary.writer.compress }}
+        tlsSkipVerify: {{ $sensorValues.pipelines.metrics.summary.writer.tlsSkipVerify }}
+        maxRetries: {{ $sensorValues.pipelines.metrics.summary.writer.maxRetries }}
+        maxDelay: {{ $sensorValues.pipelines.metrics.summary.writer.maxDelay }}
+        baseDelay: {{ $sensorValues.pipelines.metrics.summary.writer.baseDelay }}
+      rotator:
+        handleSummaryTimeout: {{ $sensorValues.pipelines.metrics.summary.rotator.handleSummaryTimeout }}
+        interval: {{ $sensorValues.pipelines.metrics.summary.rotator.interval }}
+        maximumInitialJitter: {{ $sensorValues.pipelines.metrics.summary.rotator.maximumInitialJitter }}
+        cache:
+          numWindows: {{ $sensorValues.pipelines.metrics.summary.rotator.cache.numWindows }}
+          rollInterval: {{ $sensorValues.pipelines.metrics.summary.rotator.cache.rollInterval }}
+          capacity: {{ $sensorValues.pipelines.metrics.summary.rotator.cache.capacity }}
+          jitterLambda: {{ $sensorValues.pipelines.metrics.summary.rotator.cache.jitterLambda }}
+        budget:
+          initialBudget: {{ $sensorValues.pipelines.metrics.summary.rotator.budget.initialBudget }}
+          multiplicativeDecrease: {{ $sensorValues.pipelines.metrics.summary.rotator.budget.multiplicativeDecrease }}
+          additiveIncrease: {{ $sensorValues.pipelines.metrics.summary.rotator.budget.additiveIncrease }}
+          minBudget: {{ $sensorValues.pipelines.metrics.summary.rotator.budget.minBudget }}
+          maxBudget: {{ $sensorValues.pipelines.metrics.summary.rotator.budget.maxBudget }}
+          highUtilization: {{ $sensorValues.pipelines.metrics.summary.rotator.budget.highUtilization }}
+          lowUtilization: {{ $sensorValues.pipelines.metrics.summary.rotator.budget.lowUtilization }}
+    {{- end }}
+startuptimeout: 120s
+{{ if $sensorValues.collectionEnabled }}
+productchansize: 512
+pushsummaries: true
+enablelegacyapmmetrics: {{ $sensorValues.enableLegacyApmMetrics }}
+productmetricsflushmintotalcounter:
+  http: 1
+  redis: 1
+  amqp: 1
+  sql: 1
+  kafka: 1
+  dns: 1
+  sip: 1
+  grpc: 1
+  mongodb: 1
+  node_info: 1
+  container_crash: 1
+  container_info: 1
+  container_state: 1
+  container_oomkill: 1
+  pvc_info: 1
+
+httphandler:
+  samplesthreshold: 10
+  issuesthreshold: 10
+  sampling:
+    samplingmode: 1 # DefaultSample
+    samplingLimitMaxQueue: 0
+    samplingLimitAgeOut: 0s
+  {{ if and $sensorValues.httphandler $sensorValues.httphandler.truncationConfig }}
+  truncationConfig:
+    enabled: {{ coalesce $sensorValues.noPayloadsMode $sensorValues.httphandler.truncationConfig.enabled }}
+    payloadSizeLimit: {{ ternary 0 $sensorValues.httphandler.truncationConfig.payloadSizeLimit $sensorValues.noPayloadsMode }}
+  {{ end }}
+  {{ if and $sensorValues.httphandler $sensorValues.httphandler.obfuscationConfig }}
+  obfuscationConfig:
+    {{ if and $sensorValues.httphandler $sensorValues.httphandler.obfuscationConfig.keyValueConfig }}
+    keyValueConfig:
+      enabled: {{ coalesce $sensorValues.obfuscateData $sensorValues.httphandler.obfuscationConfig.keyValueConfig.enabled }}
+      caseSensitive: {{ $sensorValues.httphandler.obfuscationConfig.keyValueConfig.caseSensitive }}
+      mode: {{ $sensorValues.httphandler.obfuscationConfig.keyValueConfig.mode }} 
+      specificKeys: {{ $sensorValues.httphandler.obfuscationConfig.keyValueConfig.specificKeys | toJson }}
+    {{ end }}
+    {{ if and $sensorValues.httphandler $sensorValues.httphandler.obfuscationConfig.unstructuredConfig }}
+    unstructuredConfig: 
+      enabled: {{ coalesce $sensorValues.obfuscateData $sensorValues.httphandler.obfuscationConfig.unstructuredConfig.enabled }}
+    {{ end }}
+  {{ end }}
+  interval: 30s
+  summarizerActiveTtl: 45s
+  aggregationCacheSize: 4096
+  includeHostInAPMMetrics: {{ (default dict $sensorValues.httphandler).includeHostInAPMMetrics | default false }}
+
+grpchandler:
+  samplesthreshold: 10
+  issuesthreshold: 10
+  sampling:
+    samplingmode: 1 # DefaultSample
+    samplingLimitMaxQueue: 0
+    samplingLimitAgeOut: 0s
+  {{ if and $sensorValues.grpchandler $sensorValues.grpchandler.truncationConfig }}
+  truncationConfig:
+    enabled: {{ coalesce $sensorValues.noPayloadsMode $sensorValues.grpchandler.truncationConfig.enabled }}
+    payloadSizeLimit: {{ ternary 0 $sensorValues.grpchandler.truncationConfig.payloadSizeLimit $sensorValues.noPayloadsMode }}
+  {{ end }}
+  {{ if and $sensorValues.grpchandler $sensorValues.grpchandler.obfuscationConfig }}
+  obfuscationConfig:
+    {{ if and $sensorValues.grpchandler $sensorValues.grpchandler.obfuscationConfig.keyValueConfig }}
+    keyValueConfig:
+      enabled: {{ coalesce $sensorValues.obfuscateData $sensorValues.grpchandler.obfuscationConfig.keyValueConfig.enabled }}
+      caseSensitive: {{ $sensorValues.grpchandler.obfuscationConfig.keyValueConfig.caseSensitive }}
+      mode: {{ $sensorValues.grpchandler.obfuscationConfig.keyValueConfig.mode }}
+      specificKeys: {{ $sensorValues.grpchandler.obfuscationConfig.keyValueConfig.specificKeys | toJson }}
+    {{ end }}
+    {{ if and $sensorValues.grpchandler $sensorValues.grpchandler.obfuscationConfig.unstructuredConfig }}
+    unstructuredConfig: 
+      enabled: {{ coalesce $sensorValues.obfuscateData $sensorValues.grpchandler.obfuscationConfig.unstructuredConfig.enabled }}
+    {{ end }}
+  {{ end }}
+  interval: 30s
+  summarizerActiveTtl: 45s
+  aggregationCacheSize: 4096
+
+redishandler:
+  samplesthreshold: 10
+  issuesthreshold: 10
+  sampling:
+    samplingmode: 1 # DefaultSample
+    samplingLimitMaxQueue: 0
+    samplingLimitAgeOut: 0s
+  {{ if and $sensorValues.redishandler $sensorValues.redishandler.truncationConfig }}
+  truncationConfig:
+    enabled: {{ coalesce $sensorValues.noPayloadsMode $sensorValues.redishandler.truncationConfig.enabled }}
+    payloadSizeLimit: {{ ternary 0 $sensorValues.redishandler.truncationConfig.payloadSizeLimit $sensorValues.noPayloadsMode }}
+  {{ end }}
+  {{ if and $sensorValues.redishandler $sensorValues.redishandler.obfuscationConfig }}
+  obfuscationConfig:
+    {{ if and $sensorValues.redishandler $sensorValues.redishandler.obfuscationConfig.keyValueConfig }}
+    keyValueConfig:
+      enabled: {{ coalesce $sensorValues.obfuscateData $sensorValues.redishandler.obfuscationConfig.keyValueConfig.enabled }}
+      caseSensitive: {{ $sensorValues.redishandler.obfuscationConfig.keyValueConfig.caseSensitive }}
+      mode: {{ $sensorValues.redishandler.obfuscationConfig.keyValueConfig.mode }} 
+      specificKeys: {{ $sensorValues.redishandler.obfuscationConfig.keyValueConfig.specificKeys | toJson }}
+    {{ end }}
+    {{ if and $sensorValues.redishandler $sensorValues.redishandler.obfuscationConfig.unstructuredConfig }}
+    unstructuredConfig: 
+      enabled: {{ coalesce $sensorValues.obfuscateData $sensorValues.redishandler.obfuscationConfig.unstructuredConfig.enabled }}
+    {{ end }}
+  {{ end }}
+  interval: 30s
+  summarizerActiveTtl: 45s
+  aggregationCacheSize: 4096
+  obfuscateSensitiveValues: {{ $sensorValues.redishandler.obfuscateSensitiveValues }}
+
+amqphandler:
+  samplesthreshold: 10
+  issuesthreshold: 10
+  sampling:
+    samplingmode: 1 # DefaultSample
+    samplingLimitMaxQueue: 0
+    samplingLimitAgeOut: 0s
+  {{ if and $sensorValues.amqphandler $sensorValues.amqphandler.truncationConfig }}
+  truncationConfig:
+    enabled: {{ coalesce $sensorValues.noPayloadsMode $sensorValues.amqphandler.truncationConfig.enabled }}
+    payloadSizeLimit: {{ ternary 0 $sensorValues.amqphandler.truncationConfig.payloadSizeLimit $sensorValues.noPayloadsMode }}
+  {{ end }}
+  {{ if and $sensorValues.amqphandler $sensorValues.amqphandler.obfuscationConfig }}
+  obfuscationConfig:
+    {{ if and $sensorValues.amqphandler $sensorValues.amqphandler.obfuscationConfig.keyValueConfig }}
+    keyValueConfig:
+      enabled: {{ coalesce $sensorValues.obfuscateData $sensorValues.amqphandler.obfuscationConfig.keyValueConfig.enabled }}
+      caseSensitive: {{ $sensorValues.amqphandler.obfuscationConfig.keyValueConfig.caseSensitive }}
+      mode: {{ $sensorValues.amqphandler.obfuscationConfig.keyValueConfig.mode }} 
+      specificKeys: {{ $sensorValues.amqphandler.obfuscationConfig.keyValueConfig.specificKeys | toJson }}
+    {{ end }}
+    {{ if and $sensorValues.amqphandler $sensorValues.amqphandler.obfuscationConfig.unstructuredConfig }}
+    unstructuredConfig: 
+      enabled: {{ coalesce $sensorValues.obfuscateData $sensorValues.amqphandler.obfuscationConfig.unstructuredConfig.enabled }}
+    {{ end }}
+  {{ end }}
+  interval: 30s
+  summarizerActiveTtl: 45s
+  aggregationCacheSize: 4096
+
+sqlhandler:
+  samplesthreshold: 10
+  issuesthreshold: 10
+  sampling:
+    samplingmode: 1 # DefaultSample
+    samplingLimitMaxQueue: 0
+    samplingLimitAgeOut: 0s
+  {{ if and $sensorValues.sqlhandler $sensorValues.sqlhandler.truncationConfig }}
+  truncationConfig:
+    enabled: {{ coalesce $sensorValues.noPayloadsMode $sensorValues.sqlhandler.truncationConfig.enabled }}
+    payloadSizeLimit: {{ ternary 0 $sensorValues.sqlhandler.truncationConfig.payloadSizeLimit $sensorValues.noPayloadsMode }}
+  {{ end }}
+  {{ if and $sensorValues.sqlhandler $sensorValues.sqlhandler.obfuscationConfig }}
+  obfuscationConfig:
+    {{ if and $sensorValues.sqlhandler $sensorValues.sqlhandler.obfuscationConfig.keyValueConfig }}
+    keyValueConfig:
+      enabled: {{ coalesce $sensorValues.obfuscateData $sensorValues.sqlhandler.obfuscationConfig.keyValueConfig.enabled }}
+      caseSensitive: {{ $sensorValues.sqlhandler.obfuscationConfig.keyValueConfig.caseSensitive }}
+      mode: {{ $sensorValues.sqlhandler.obfuscationConfig.keyValueConfig.mode }} 
+      specificKeys: {{ $sensorValues.sqlhandler.obfuscationConfig.keyValueConfig.specificKeys | toJson }}
+    {{ end }}
+    {{ if and $sensorValues.sqlhandler $sensorValues.sqlhandler.obfuscationConfig.unstructuredConfig }}
+    unstructuredConfig: 
+      enabled: {{ coalesce $sensorValues.obfuscateData $sensorValues.sqlhandler.obfuscationConfig.unstructuredConfig.enabled }}
+    {{ end }}
+  {{ end }}
+  interval: 30s
+  summarizerActiveTtl: 45s
+  aggregationCacheSize: 4096
+
+kafkahandler:
+  samplesthreshold: 10
+  issuesthreshold: 10
+  sampling:
+    samplingmode: 1 # DefaultSample
+    samplingLimitMaxQueue: 10
+    samplingLimitAgeOut: 1s
+  {{ if and $sensorValues.kafkahandler $sensorValues.kafkahandler.truncationConfig }}
+  truncationConfig:
+    enabled: {{ coalesce $sensorValues.noPayloadsMode $sensorValues.kafkahandler.truncationConfig.enabled }}
+    payloadSizeLimit: {{ ternary 0 $sensorValues.kafkahandler.truncationConfig.payloadSizeLimit $sensorValues.noPayloadsMode }}
+  {{ end }}
+  {{ if and $sensorValues.kafkahandler $sensorValues.kafkahandler.obfuscationConfig }}
+  obfuscationConfig:
+    {{ if and $sensorValues.kafkahandler $sensorValues.kafkahandler.obfuscationConfig.keyValueConfig }}
+    keyValueConfig:
+      enabled: {{ coalesce $sensorValues.obfuscateData $sensorValues.kafkahandler.obfuscationConfig.keyValueConfig.enabled }}
+      caseSensitive: {{ $sensorValues.kafkahandler.obfuscationConfig.keyValueConfig.caseSensitive }}
+      mode: {{ $sensorValues.kafkahandler.obfuscationConfig.keyValueConfig.mode }} 
+      specificKeys: {{ $sensorValues.kafkahandler.obfuscationConfig.keyValueConfig.specificKeys | toJson }}
+    {{ end }}
+    {{ if and $sensorValues.kafkahandler $sensorValues.kafkahandler.obfuscationConfig.unstructuredConfig }}
+    unstructuredConfig: 
+      enabled: {{ coalesce $sensorValues.obfuscateData $sensorValues.kafkahandler.obfuscationConfig.unstructuredConfig.enabled }}
+    {{ end }}
+  {{ end }}
+  interval: 30s
+  summarizerActiveTtl: 45s
+  aggregationCacheSize: 4096
+
+dnshandler:
+  samplesthreshold: 10
+  issuesthreshold: 10
+  sampling:
+    samplingmode: 1 # DefaultSample
+    samplingLimitMaxQueue: 10
+    samplingLimitAgeOut: 1s
+  {{ if and $sensorValues.dnshandler $sensorValues.dnshandler.truncationConfig }}
+  truncationConfig:
+    enabled: {{ coalesce $sensorValues.noPayloadsMode $sensorValues.dnshandler.truncationConfig.enabled }}
+    payloadSizeLimit: {{ ternary 0 $sensorValues.dnshandler.truncationConfig.payloadSizeLimit $sensorValues.noPayloadsMode }}
+  {{ end }}
+  {{ if and $sensorValues.dnshandler $sensorValues.dnshandler.obfuscationConfig }}
+  obfuscationConfig:
+    {{ if and $sensorValues.dnshandler $sensorValues.dnshandler.obfuscationConfig.keyValueConfig }}
+    keyValueConfig:
+      enabled: {{ coalesce $sensorValues.obfuscateData $sensorValues.dnshandler.obfuscationConfig.keyValueConfig.enabled }}
+      caseSensitive: {{ $sensorValues.dnshandler.obfuscationConfig.keyValueConfig.caseSensitive }}
+      mode: {{ $sensorValues.dnshandler.obfuscationConfig.keyValueConfig.mode }} 
+      specificKeys: {{ $sensorValues.dnshandler.obfuscationConfig.keyValueConfig.specificKeys | toJson }}
+    {{ end }}
+    {{ if and $sensorValues.dnshandler $sensorValues.dnshandler.obfuscationConfig.unstructuredConfig }}
+    unstructuredConfig: 
+      enabled: {{ coalesce $sensorValues.obfuscateData $sensorValues.dnshandler.obfuscationConfig.unstructuredConfig.enabled }}
+    {{ end }}
+  {{ end }}
+  interval: 30s
+  summarizerActiveTtl: 45s
+  aggregationCacheSize: 300
+
+siphandler:
+  samplesthreshold: 10
+  issuesthreshold: 10
+  sampling:
+    samplingmode: 1 # DefaultSample
+    samplingLimitMaxQueue: 10
+    samplingLimitAgeOut: 1s
+  interval: 30s
+  summarizerActiveTtl: 45s
+  aggregationCacheSize: 300
+
+mongodbhandler:
+  samplesthreshold: 10
+  issuesthreshold: 10
+  sampling:
+    samplingmode: 1 # DefaultSample
+    samplingLimitMaxQueue: 0
+    samplingLimitAgeOut: 0s
+  {{ if and $sensorValues.mongodbhandler $sensorValues.mongodbhandler.truncationConfig }}
+  truncationConfig:
+    enabled: {{ coalesce $sensorValues.noPayloadsMode $sensorValues.mongodbhandler.truncationConfig.enabled }}
+    payloadSizeLimit: {{ ternary 0 $sensorValues.mongodbhandler.truncationConfig.payloadSizeLimit $sensorValues.noPayloadsMode }}
+  {{ end }}
+  {{ if and $sensorValues.mongodbhandler $sensorValues.mongodbhandler.obfuscationConfig }}
+  obfuscationConfig:
+    {{ if and $sensorValues.mongodbhandler $sensorValues.mongodbhandler.obfuscationConfig.keyValueConfig }}
+    keyValueConfig:
+      enabled: {{ coalesce $sensorValues.obfuscateData $sensorValues.mongodbhandler.obfuscationConfig.keyValueConfig.enabled }}
+      caseSensitive: {{ $sensorValues.mongodbhandler.obfuscationConfig.keyValueConfig.caseSensitive }}
+      mode: {{ $sensorValues.mongodbhandler.obfuscationConfig.keyValueConfig.mode }} 
+      specificKeys: {{ $sensorValues.mongodbhandler.obfuscationConfig.keyValueConfig.specificKeys | toJson }}
+    {{ end }}
+    {{ if and $sensorValues.mongodbhandler $sensorValues.mongodbhandler.obfuscationConfig.unstructuredConfig }}
+    unstructuredConfig: 
+      enabled: {{ coalesce $sensorValues.obfuscateData $sensorValues.mongodbhandler.obfuscationConfig.unstructuredConfig.enabled }}
+    {{ end }}
+  {{ end }}
+  interval: 30s
+  summarizerActiveTtl: 45s
+  aggregationCacheSize: 4096
+
+containerInfoHandler:
+  samplesthreshold: 10
+  issuesthreshold: 10
+  sampling:
+    samplingmode: 0 # DontSample
+    samplingLimitMaxQueue: 0
+    samplingLimitAgeOut: 0s
+  interval: 30s
+  summarizerActiveTtl: 45s
+  aggregationCacheSize: 4096
+
+pvcIoHandler:
+  sampling:
+    samplingmode: 0 # DontSample
+  interval: 10s
+  summarizerActiveTtl: 90s
+  aggregationCacheSize: 4096
+
+l4MetricsHandler:
+  sampling:
+    samplingmode: 0 # DontSample
+  interval: 10s
+  summarizerActiveTtl: 90s
+  aggregationCacheSize: 10240
+
+containerStateHandler:
+  samplesthreshold: 10
+  issuesthreshold: 10
+  sampling:
+    samplingmode: 0 # DontSample
+    samplingLimitMaxQueue: 0
+    samplingLimitAgeOut: 0s
+  interval: 30s
+  summarizerActiveTtl: 45s
+  aggregationCacheSize: 4096
+
+containercrashhandler:
+  sampling:
+    samplingmode: 0 # DontSample
+  interval: 30s
+  summarizerActiveTtl: 0
+  aggregationCacheSize: 1024
+
+pvcinfohandler:
+  samplesthreshold: 20
+  issuesthreshold: 20
+  sampling:
+    samplingmode: 0 # DontSample
+    samplingLimitMaxQueue: 0
+    samplingLimitAgeOut: 0s
+  interval: 1m0s
+  summarizerActiveTtl: 45s
+  aggregationCacheSize: 1024
+
+pidcache:
+  expiration: 5m
+  purge: 20s
+{{ end }}
+
+cluster:
+  maxhosts: 10000
+  maxchildrens: 40
+  childcountruleoverrides: {{ toJson $sensorValues.childcountruleoverrides }}
+
+loglevel: 4 # INFO
+{{- with $sensorValues.logRateLimit }}
+logRateLimit: {{- toYaml . | nindent 2 }}
+{{- end }}
+
+{{ if $sensorValues.collectionEnabled }}
+isk8s: {{.Values.isk8s }}
+{{ end }}
+
+allowedportspercontainer: 20
+{{ if $sensorValues.collectionEnabled }}
+k8smetricsfetcher:
+  fetchinterval: 15s
+  requesttimeout: 10s
+  fetchKubeletInfraMetrics: {{ .Values.fetchKubeletInfraMetrics }}
+{{ end }}
+
+globallimiter:
+  maxqueue: 20
+  ageout: 100ms
+  sampleeverything: false
+
+watchOnlyLocalNode: {{ $sensorValues.watchOnlyLocalNode }}
+resolveRemoteFromEndpoint: {{ $sensorValues.resolveRemoteFromEndpoint }}
+{{ if $sensorValues.collectionEnabled }}
+floraEnabled: true
+{{ end }}
+collectionEnabled: {{ $sensorValues.collectionEnabled }}
+ingestionEnabled: {{ $sensorValues.ingestionEnabled }}
+runningNamespace: ""
+{{ if $sensorValues.collectionEnabled }}
+shouldDropRunningNamespaces: {{ include "groundcover.shouldDropRunningNamespaces" . }}
+tracesNamespaceFilters: {{ toYaml .Values.tracesNamespaceFilters | nindent 2 }}
+tracesWorkloadFilters: {{ toYaml .Values.tracesWorkloadFilters | nindent 2 }}
+{{- if .Values.global.labelEnrichment }}
+LabelEnrichment: {{ toYaml .Values.global.labelEnrichment | nindent 2 }}
+{{- end }}
+{{- if .Values.global.obfuscationConfig }}
+ObfuscationConfig: {{ toYaml .Values.global.obfuscationConfig | nindent 2 }}
+{{- end }}
+tracesContainerFilters: {{ toYaml .Values.tracesContainerFilters | nindent 2 }}
+nodelabels: {{ toYaml $sensorValues.nodelabels | nindent 2 }}
+{{- if .Values.global.metricLabels }}
+MetricLabels:
+{{- .Values.global.metricLabels | toYaml | nindent 2 }}
+{{- end }}
+contentTypesToDrop: {{ toYaml $sensorValues.contentTypesToDrop | nindent 2 }}
+contentTypesWithoutClustering: {{ toYaml $sensorValues.contentTypesWithoutClustering | nindent 2 }}
+hostHeadersToDrop: {{ toYaml $sensorValues.hostHeadersToDrop | nindent 2 }}
+headersForceSampling: {{ toYaml $sensorValues.headersForceSampling | nindent 2 }}
+forceSamplingByProductType: {{ toYaml $sensorValues.forceSamplingByProductType | nindent 2 }}
+customEntityTags: {{ toYaml $sensorValues.customEntityTags | nindent 2 }}
+sendKubeletInfraMetrics: {{ .Values.sendKubeletInfraMetrics }}
+{{ end }}
+
+{{ if $sensorValues.ingestionEnabled }}
+apmIngestor:
+  tracesOtlpEndpoint:
+    endpoint: {{ if dig "internalIngress" "enabled" false $sensorValues }}{{ include "vector.internalIngress.tracesAsLogs.otlp.http.url" . }}{{ else }}{{ include "ingestion.traces.otlp.http.url" . }}{{ end }}
+    compression: {{ .Values.global.ingestion.otlpCompression | default "gzip" }}
+    insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
+    writeTimeout: 10s
+    batchSize: 100
+    flushInterval: 30s
+    tlsCertFile: {{ .Values.global.ingestion.tlsCertFile | default "" | quote }}
+    tlsKeyFile: {{ .Values.global.ingestion.tlsKeyFile | default "" | quote }}
+    tlsCAFile: {{ .Values.global.ingestion.tlsCAFile | default "" | quote }}
+    maxSpansPerMarshal: {{ $sensorValues.apmIngestor.tracesOtlpEndpoint.maxSpansPerMarshal }}
+    maxIdleConns: {{ dig "apmIngestor" "otlpConnectionPool" "maxIdleConns" 0 $sensorValues }}
+    maxIdleConnsPerHost: {{ dig "apmIngestor" "otlpConnectionPool" "maxIdleConnsPerHost" 0 $sensorValues }}
+    idleConnTimeout: {{ dig "apmIngestor" "otlpConnectionPool" "idleConnTimeout" "0s" $sensorValues }}
+    batchSendQueueWorkerCount: {{ dig "apmIngestor" "tracesOtlpEndpoint" "batchSendQueueWorkerCount" 0 $sensorValues }}
+    batchSendQueueMaxSize: {{ dig "apmIngestor" "tracesOtlpEndpoint" "batchSendQueueMaxSize" 0 $sensorValues }}
+    {{- $traceQueueMaxBytes := dig "apmIngestor" "tracesOtlpEndpoint" "batchSendQueueMaxBytes" 0 $sensorValues }}
+    {{- if eq (toString $traceQueueMaxBytes) "-1" }}
+    batchSendQueueMaxBytes: "-1"
+    {{- else }}
+    batchSendQueueMaxBytes: {{ include "groundcover.nonNegativeInteger" (dict "path" "batchSendQueueMaxBytes" "value" $traceQueueMaxBytes) }}
+    {{- end }}
+    {{- with dig "apmIngestor" "tracesOtlpEndpoint" "backoffConfig" nil $sensorValues }}
+    backoffConfig: {{ toYaml . | nindent 6 }}
+    {{- end }}
+  logsOtlpEndpoint:
+    endpoint: {{ if dig "internalIngress" "enabled" false $sensorValues }}{{ include "vector.internalIngress.logs.otlp.http.url" . }}{{ else }}{{ include "ingestion.logs.otlp.http.url" . }}{{ end }}
+    compression: {{ .Values.global.ingestion.otlpCompression | default "gzip" }}
+    insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
+    writeTimeout: 10s
+    batchSize: 100
+    flushInterval: 30s
+    tlsCertFile: {{ .Values.global.ingestion.tlsCertFile | default "" | quote }}
+    tlsKeyFile: {{ .Values.global.ingestion.tlsKeyFile | default "" | quote }}
+    tlsCAFile: {{ .Values.global.ingestion.tlsCAFile | default "" | quote }}
+    maxIdleConns: {{ dig "apmIngestor" "otlpConnectionPool" "maxIdleConns" 0 $sensorValues }}
+    maxIdleConnsPerHost: {{ dig "apmIngestor" "otlpConnectionPool" "maxIdleConnsPerHost" 0 $sensorValues }}
+    idleConnTimeout: {{ dig "apmIngestor" "otlpConnectionPool" "idleConnTimeout" "0s" $sensorValues }}
+  measurements:
+    enabled: {{ dig "apmIngestor" "measurements" "enabled" false $sensorValues }}
+    flushInterval: {{ dig "apmIngestor" "measurements" "flushInterval" "30s" $sensorValues }}
+    allowedSources: {{ dig "apmIngestor" "measurements" "allowedSources" (list "opentelemetry" "Datadog") $sensorValues | toJson }}
+  dataDog:
+    enabled: {{ $sensorValues.apmIngestor.dataDog.enabled }}
+    tracesPort: {{ $sensorValues.apmIngestor.dataDog.tracesPort }}
+    samplingRatio: {{ $sensorValues.apmIngestor.dataDog.samplingRatio }}
+    handleTraces: {{ $sensorValues.apmIngestor.dataDog.handleTraces }}
+    handleStats: {{ $sensorValues.apmIngestor.dataDog.handleStats }}
+    handleSeries: {{ $sensorValues.apmIngestor.dataDog.handleSeries }}
+    handleSketches: {{ $sensorValues.apmIngestor.dataDog.handleSketches }}
+    handleLogs: {{ $sensorValues.apmIngestor.dataDog.handleLogs }}
+    innerPort: {{ dig "apmIngestor" "dataDog" "innerPort" 0 $sensorValues }}
+    envFilterValues: {{ $sensorValues.apmIngestor.dataDog.envFilterValues | default list | toJson }}
+    statsCacheTTL: {{ $sensorValues.apmIngestor.dataDog.statsCacheTTL | default "5m" }}
+  otel:
+    direct:
+      enabled: {{ $sensorValues.apmIngestor.otel.direct.enabled }}
+      {{- if $sensorValues.apmIngestor.otel.direct.resourceProcessor }}
+      resourceProcessor:
+{{ toYaml $sensorValues.apmIngestor.otel.direct.resourceProcessor | indent 8 }}
+      {{- end }}
+      samplingRatio: {{ $sensorValues.apmIngestor.otel.direct.samplingRatio }}
+      maxConcurrentRequests: {{ include "groundcover.nonNegativeInteger" (dict "path" "maxConcurrentRequests" "value" (dig "apmIngestor" "otel" "direct" "maxConcurrentRequests" 0 $sensorValues)) }}
+      maxConcurrentTraceExportBytes: {{ include "groundcover.nonNegativeInteger" (dict "path" "maxConcurrentTraceExportBytes" "value" ($sensorValues.apmIngestor.otel.direct.maxConcurrentTraceExportBytes | default 0)) }}
+      maxConcurrentTraceExportPodMemoryPercentage: {{ include "groundcover.nonNegativeInteger" (dict "path" "maxConcurrentTraceExportPodMemoryPercentage" "value" ($sensorValues.apmIngestor.otel.direct.maxConcurrentTraceExportPodMemoryPercentage | default 0)) }}
+      maxConcurrentLogExportBytes: {{ include "groundcover.nonNegativeInteger" (dict "path" "maxConcurrentLogExportBytes" "value" ($sensorValues.apmIngestor.otel.direct.maxConcurrentLogExportBytes | default 0)) }}
+      maxConcurrentLogExportPodMemoryPercentage: {{ include "groundcover.nonNegativeInteger" (dict "path" "maxConcurrentLogExportPodMemoryPercentage" "value" ($sensorValues.apmIngestor.otel.direct.maxConcurrentLogExportPodMemoryPercentage | default 0)) }}
+      maxConcurrentMetricExportBytes: {{ include "groundcover.nonNegativeInteger" (dict "path" "maxConcurrentMetricExportBytes" "value" ($sensorValues.apmIngestor.otel.direct.maxConcurrentMetricExportBytes | default 0)) }}
+      maxConcurrentMetricExportPodMemoryPercentage: {{ include "groundcover.nonNegativeInteger" (dict "path" "maxConcurrentMetricExportPodMemoryPercentage" "value" ($sensorValues.apmIngestor.otel.direct.maxConcurrentMetricExportPodMemoryPercentage | default 0)) }}
+      exportAcquireWait: {{ $sensorValues.apmIngestor.otel.direct.exportAcquireWait | default "0s" }}
+      zipkin:
+        enabled: {{ $sensorValues.apmIngestor.otel.direct.zipkin.enabled }}
+        port: {{ $sensorValues.apmIngestor.otel.direct.zipkin.port }}
+      otlp:
+        enabled: {{ $sensorValues.apmIngestor.otel.direct.otlp.enabled }}
+        grpcPort: {{ $sensorValues.apmIngestor.otel.direct.otlp.grpcPort }}
+        httpPort: {{ $sensorValues.apmIngestor.otel.direct.otlp.httpPort }}
+        maxRecvMsgSizeMiB: {{ $sensorValues.apmIngestor.otel.direct.otlp.maxRecvMsgSizeMiB }}
+      jaeger:
+        enabled: {{ $sensorValues.apmIngestor.otel.direct.jaeger.enabled }}
+        grpcPort: {{ $sensorValues.apmIngestor.otel.direct.jaeger.grpcPort }}
+        thriftHttpPort: {{ $sensorValues.apmIngestor.otel.direct.jaeger.thriftHttpPort }}
+        thriftBinaryPort: {{ $sensorValues.apmIngestor.otel.direct.jaeger.thriftBinaryPort }}
+        thriftCompactPort: {{ $sensorValues.apmIngestor.otel.direct.jaeger.thriftCompactPort }}
+      httpjson:
+        enabled: {{ $sensorValues.apmIngestor.otel.direct.httpjson.enabled }}
+        port: {{ $sensorValues.apmIngestor.otel.direct.httpjson.port }}
+      firehose:
+        enabled: {{ $sensorValues.apmIngestor.otel.direct.firehose.enabled }}
+        port: {{ $sensorValues.apmIngestor.otel.direct.firehose.port }}
+      loki:
+        enabled: {{ $sensorValues.apmIngestor.otel.direct.loki.enabled }}
+        port: {{ $sensorValues.apmIngestor.otel.direct.loki.port }}
+      rum:
+        enabled: {{ $sensorValues.apmIngestor.otel.direct.rum.enabled }}
+        port: {{ $sensorValues.apmIngestor.otel.direct.rum.port }}
+      statsd:
+        enabled: {{ dig "apmIngestor" "otel" "direct" "statsd" "enabled" false $sensorValues }}
+        port: {{ dig "apmIngestor" "otel" "direct" "statsd" "port" 8125 $sensorValues }}
+        aggregationInterval: {{ dig "apmIngestor" "otel" "direct" "statsd" "aggregationInterval" "60s" $sensorValues }}
+        histogramBuckets: {{ dig "apmIngestor" "otel" "direct" "statsd" "histogramBuckets" (list) $sensorValues | toJson }}
+{{ end }}
+pprof:
+  enabled: {{ include "telemetry.enabled" . }}
+  cpuSamplingDuration: {{ $sensorValues.pprof.cpuSamplingDuration }}
+  mutexProfiler:
+    enabled: {{ dig "pprof" "mutexProfiler" "enabled" false $sensorValues }}
+    fraction: {{ dig "pprof" "mutexProfiler" "fraction" 10 $sensorValues }}
+  httpUploader:
+    enabled: {{ eq $sensorValues.pprof.uploaderType "http" }}
+    pushURL: {{ printf "%s/upload/pprof" (include "telemetry.metrics.base.url" .) }}
+  pyroscopeUploader:
+    enabled: {{ eq $sensorValues.pprof.uploaderType "pyroscope" }}
+    pushURL: {{ include "telemetry.metrics.base.url" . }}
+  backoffTicker:
+    interval: {{ $sensorValues.pprof.backoffTicker.interval }}
+    exponent: {{ $sensorValues.pprof.backoffTicker.exponent }}
+  memoryTicker:
+    enabled: {{ $sensorValues.pprof.memoryTicker.enabled }}
+    interval: {{ $sensorValues.pprof.memoryTicker.interval }}
+    jumpSizeInBytes: {{ $sensorValues.pprof.memoryTicker.jumpSizeInBytes }}
+    windowSize: {{ $sensorValues.pprof.memoryTicker.windowSize }}
+    initialWait: {{ $sensorValues.pprof.memoryTicker.initialWait }}
+  cpuTicker:
+    enabled: {{ $sensorValues.pprof.cpuTicker.enabled }}
+    interval: {{ $sensorValues.pprof.cpuTicker.interval }}
+    jumpSizeInMCPU: {{ $sensorValues.pprof.cpuTicker.jumpSizeInMCPU }}
+    windowSize: {{ $sensorValues.pprof.cpuTicker.windowSize }}
+    initialWait: {{ $sensorValues.pprof.cpuTicker.initialWait }}
+
+clusterId: {{ include "groundcover.clusterId" . }}
+region: {{ .Values.region }}
+env: {{ include "groundcover.env" . }}
+envType: {{ .Values.env_type }}
+
+fleetClientConfig:
+  enabled: {{ .Values.global.fleetmanager.enabled }}
+  url: {{ include "fleet-manager.url" . }}
+  requestIntervalEnabled: {{ .Values.fleetClientConfig.requestIntervalEnabled }}
+  maximumInitialJitter: {{ .Values.fleetClientConfig.maximumInitialJitter }}
+  requestInterval: {{ .Values.fleetClientConfig.requestInterval }}
+  initialUpdateTimeout: {{ .Values.fleetClientConfig.initialUpdateTimeout }}
+  insecureSkipVerify: {{ .Values.fleetClientConfig.insecureSkipVerify }}
+  tlsCertFile: {{ .Values.fleetClientConfig.tlsCertFile | default "" | quote }}
+  tlsKeyFile: {{ .Values.fleetClientConfig.tlsKeyFile | default "" | quote }}
+  tlsCAFile: {{ .Values.fleetClientConfig.tlsCAFile | default "" | quote }}
+
+logs:
+  {{ if $sensorValues.collectionEnabled }}
+  scraper:
+    positionsFile: {{ .Values.positionsFile }}
+    positionsSyncInterval: 10s
+    targetSyncInterval: 5s
+    dockerMaxLogSize: {{ .Values.maxLogSize }}
+    journalConfig: {{ toYaml .Values.journalScraper | nindent 6 }}
+    logFileTargets: {{ toYaml .Values.logFileTargets | nindent 6 }}
+    vl: {{ toYaml .Values.vlLogTailer | nindent 6 }}
+  {{ end }}
+  client:
+    batchwait: 5000ms
+    batchsize: {{ int64 .Values.logBatchSize }}
+    backoffConfig:
+      minBackoff: {{ .Values.logBatchMinBackoff }}
+      maxBackoff: {{ .Values.logBatchMaxBackoff }}
+      maxRetries: {{ .Values.logBatchMaxRetries }}
+    timeout: 10s
+    useRingBuffer: false
+    dropRunningNamespaceLogs: {{  include "groundcover.dropRunningNamespaceLogs" .}}
+    logBatchSendQueueWorkerCount: {{ .Values.logBatchSendQueueWorkerCount }} 
+    logBatchSendQueueMaxSize : {{ dig "logBatchSendQueueMaxSize" .Values.logBatchSendQueueMaxSize $sensorValues }}
+    maxLogLinesPerBatch: {{ .Values.maxLogLinesPerBatch }}
+    otlpExportLimits:
+      jsonFlattenMaxDepth: {{ .Values.jsonFlattenMaxDepth }}
+      jsonFlattenMaxAttributes: {{ .Values.jsonFlattenMaxAttributes }}
+      maxLogContentSize: {{ .Values.maxLogContentSize }}
+      dropRawBody: {{ .Values.dropRawBody }}
+    logPatternsConfig:
+      enabled: {{ .Values.logPatternsConfig.enabled }}
+      logClusterDepth: {{ .Values.logPatternsConfig.logClusterDepth }}
+      similarityThreshold: {{ .Values.logPatternsConfig.similarityThreshold }}
+      maxChildren: {{ .Values.logPatternsConfig.maxChildren }}
+      maxClusters: {{ .Values.logPatternsConfig.maxClusters }}
+      paramString: {{ .Values.logPatternsConfig.paramString }}
+      maxEvictionRatio: {{ .Values.logPatternsConfig.maxEvictionRatio }}
+      maxTokens: {{ .Values.logPatternsConfig.maxTokens }}
+      maxContentLength : {{ .Values.logPatternsConfig.maxContentLength }}
+      containerIdCacheMaxSize : {{ .Values.logPatternsConfig.containerIdCacheMaxSize }}
+      containerIdCacheTTL : {{ .Values.logPatternsConfig.containerIdCacheTTL }}
+      summarizerConfig: {{ toYaml .Values.logPatternsConfig.summarizerConfig | nindent 8 }}
+    ottlRules: {{ toYaml .Values.ottlRules | nindent 6 }}
+  pipeline:
+    logDropFilters: {{ toYaml .Values.logsDropFilters | nindent 6}}
+    multiLineConfigs: {{ toYaml .Values.logsMultiLines | nindent 6}}
+    grokParserConfig: {{ toYaml .Values.grokParserConfig | nindent 6}}
+    decolorize: {{ .Values.decolorizeLogs }}
+    maxLogSize: {{ .Values.maxLogSize }}
+    oldLogDropThreshold: {{ .sensorValues.logs.pipeline.dropOldLogs.dropThreshold }} 
+    oldLogDropAlwaysThreshold: {{ .sensorValues.logs.pipeline.dropOldLogs.dropAlwaysThreshold }}
+    oldLogDelayStart: {{ .sensorValues.logs.pipeline.dropOldLogs.delayStart }} 
+otelTracesAsLogs: true
+otelPreprocess: true
+tracesOtlpEndpoint:
+  endpoint: {{ if dig "internalIngress" "enabled" false $sensorValues }}{{ include "vector.internalIngress.tracesAsLogs.otlp.http.url" . }}{{ else }}{{ include "ingestion.traces.otlp.http.url" . }}{{ end }}
+  compression: {{ .Values.global.ingestion.otlpCompression | default "gzip" }}
+  insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
+  writeTimeout: 10s
+  tlsCertFile: {{ .Values.global.ingestion.tlsCertFile | default "" | quote }}
+  tlsKeyFile: {{ .Values.global.ingestion.tlsKeyFile | default "" | quote }}
+  tlsCAFile: {{ .Values.global.ingestion.tlsCAFile | default "" | quote }}
+  maxSpansPerMarshal: {{ $sensorValues.apmIngestor.tracesOtlpEndpoint.maxSpansPerMarshal }}
+  maxIdleConns: {{ dig "apmIngestor" "otlpConnectionPool" "maxIdleConns" 0 $sensorValues }}
+  maxIdleConnsPerHost: {{ dig "apmIngestor" "otlpConnectionPool" "maxIdleConnsPerHost" 0 $sensorValues }}
+  idleConnTimeout: {{ dig "apmIngestor" "otlpConnectionPool" "idleConnTimeout" "0s" $sensorValues }}
+logsOtlpEndpoint:
+  endpoint: {{ if dig "internalIngress" "enabled" false $sensorValues }}{{ include "vector.internalIngress.logs.otlp.http.url" . }}{{ else }}{{ include "ingestion.logs.otlp.http.url" . }}{{ end }}
+  compression: {{ .Values.global.ingestion.otlpCompression | default "gzip" }}
+  insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
+  writeTimeout: 10s
+  tlsCertFile: {{ .Values.global.ingestion.tlsCertFile | default "" | quote }}
+  tlsKeyFile: {{ .Values.global.ingestion.tlsKeyFile | default "" | quote }}
+  tlsCAFile: {{ .Values.global.ingestion.tlsCAFile | default "" | quote }}
+  maxIdleConns: {{ dig "apmIngestor" "otlpConnectionPool" "maxIdleConns" 0 $sensorValues }}
+  maxIdleConnsPerHost: {{ dig "apmIngestor" "otlpConnectionPool" "maxIdleConnsPerHost" 0 $sensorValues }}
+  idleConnTimeout: {{ dig "apmIngestor" "otlpConnectionPool" "idleConnTimeout" "0s" $sensorValues }}
+customOtlpEndpoint:
+  endpoint: {{ if dig "internalIngress" "enabled" false $sensorValues }}{{ include "vector.internalIngress.custom.otlp.http.url" . }}{{ else }}{{ include "ingestion.custom.otlp.http.url" . }}{{ end }}
+  compression: {{ .Values.global.ingestion.otlpCompression | default "gzip" }}
+  insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
+  writeTimeout: 10s
+  batchSize: 350
+  flushInterval: 1s
+  tlsCertFile: {{ .Values.global.ingestion.tlsCertFile | default "" | quote }}
+  tlsKeyFile: {{ .Values.global.ingestion.tlsKeyFile | default "" | quote }}
+  tlsCAFile: {{ .Values.global.ingestion.tlsCAFile | default "" | quote }}
+  maxIdleConns: {{ dig "apmIngestor" "otlpConnectionPool" "maxIdleConns" 0 $sensorValues }}
+  maxIdleConnsPerHost: {{ dig "apmIngestor" "otlpConnectionPool" "maxIdleConnsPerHost" 0 $sensorValues }}
+  idleConnTimeout: {{ dig "apmIngestor" "otlpConnectionPool" "idleConnTimeout" "0s" $sensorValues }}
+
+{{ if $sensorValues.tracesStaticOttlRules }}
+tracesStaticOttlRules:
+{{- $sensorValues.tracesStaticOttlRules | toYaml | nindent 2 }}
+{{ end }}
+
+{{ if $sensorValues.collectionEnabled }}
+mySqlConfig:
+  KeepSQLAlias: true
+  ReplaceDigits: true
+  CollectCommands: true
+
+postgreSqlConfig:
+  DBMS: "postgresql"
+  KeepSQLAlias: true
+  ReplaceDigits: true
+  CollectCommands: true
+
+clickHouseSQLConfig:
+  KeepSQLAlias: true
+  ReplaceDigits: true
+  CollectCommands: true
+{{ end }}
+
+telemetry:
+  enabled: {{ include "telemetry.enabled" . }}
+  metrics:
+    remoteStorage:
+      enabled: {{ not .Values.tags.incloud }}
+      url: {{ include "sensor.telemetry.metrics.url" . }}
+      interval: {{ include "telemetry.metrics.interval" . }}
+    localStorage:
+      enabled: {{ .Values.global.telemetry.metrics.localStorage.enabled }}
+      url: {{ default (include "metrics-ingester.promethues-exposition.http.url" .) .Values.global.telemetry.metrics.localStorage.url }}
+      interval: {{ .Values.global.telemetry.metrics.localStorage.interval }}
+      tlsSkipVerify: {{ .Values.global.telemetry.metrics.localStorage.tlsSkipVerify }}
+
+{{ if $sensorValues.collectionEnabled }}
+k8sEntitiesWatch:
+{{- $sensorValues.k8sEntitiesWatch | toYaml | nindent 6 }}
+{{ end }}
+
+{{ if $sensorValues.collectionEnabled }}
+{{ if $sensorValues.sensitiveHeadersObfuscationConfig }}
+sensitiveHeadersObfuscationConfig: 
+  enabled: {{ coalesce $sensorValues.obfuscateData $sensorValues.sensitiveHeadersObfuscationConfig.enabled }}
+  caseSensitive: false
+  mode: {{ $sensorValues.sensitiveHeadersObfuscationConfig.mode }}
+  specificKeys: {{ $sensorValues.sensitiveHeadersObfuscationConfig.specificKeys | toJson }}
+{{ end }}
+{{ end }}
+{{- end -}}

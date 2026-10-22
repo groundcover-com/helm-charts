@@ -80,4 +80,38 @@ spec:
         path: /api
         pathType: Prefix
 {{- end }}
+{{- if .Values.deployedIngresses.noAuthRum }}
+---
+{{- /*
+RUM ingestion on the frontend domain goes straight to the ingestor. Without this,
+router-no-auth-ingress (host + /) sends <frontendDomain>/json/rum to the auth
+proxy, since a host match outranks the host-less incloud-ingress RUM route.
+Uses the same plugin chain as that route; the plugins are defined by
+incloud-ingress, so it must be enabled.
+*/}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  {{- $rumPlugins := printf "%s-strip-authorization-prefix,%s-auth,%s-basic-auth,cors-allow-all" .Release.Name .Release.Name .Release.Name }}
+  {{- $noAuthAnnotations := mergeOverwrite (dict) $globalKongIngressAnnotations (dict "konghq.com/plugins" $rumPlugins) }}
+  annotations:
+    {{- range $key, $value := $noAuthAnnotations }}
+    {{- printf "%s: %s" $key ($value | quote) | nindent 4 }}
+    {{- end }}
+  name: ingestor-no-auth-rum-ingress
+  namespace: {{ .Release.Namespace }}
+spec:
+  ingressClassName: {{ .Values.kong.ingressController.ingressClass }}
+  rules:
+  - host: {{ .Values.frontendDomain }}
+    http:
+      paths:
+      - backend:
+          service:
+            name: {{ include "ingestor.fullname" . }}
+            port:
+              number: {{ index .Values.global "opentelemetry-collector" "ports" "rum" "servicePort" | int }}
+        path: /json/rum
+        pathType: Exact
+{{- end }}
 {{- end -}}
