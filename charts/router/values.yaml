@@ -66,7 +66,7 @@ service:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.13.132
+  tag: 1.13.133
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/tools'
@@ -79,6 +79,9 @@ deployedIngresses:
   # no-auth only: send frontendDomain/api calls carrying an API key
   # (Authorization: Bearer gcsa_...) straight to the router, not the auth proxy.
   noAuthApiKey: false
+  # no-auth only: send frontendDomain/json/rum straight to the ingestor, not the
+  # auth proxy. Needs incloud-ingress enabled (it defines the RUM Kong plugins).
+  noAuthRum: false
 ingress:
   enabled: false
 ingresses:
