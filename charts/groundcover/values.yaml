@@ -135,6 +135,8 @@ global:
   # AutoInfra: its workers, autoinfra-config, and the auto_infra_config database db-manager creates.
   autonomousInfrastructure:
     enabled: false
+    ui:
+      enabled: false
 
   ingress:
     # set ingress site for inCloud / on-prem sensor only deployments

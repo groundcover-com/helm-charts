@@ -22,6 +22,9 @@ data:
     {{- end }}
     {{- if and .Values.global.backend.enabled .Values.global.autonomousInfrastructure.enabled }}
     {{- $features = append $features "autonomous_infrastructure" }}
+    {{- if .Values.global.autonomousInfrastructure.ui.enabled }}
+    {{- $features = append $features "autonomous_infrastructure_ui" }}
+    {{- end }}
     {{- end }}
     {{- if $features }}
     {{ toYaml $features | nindent 6 }}
@@ -101,10 +104,12 @@ data:
       GrafanaUser: {{ $sr.grafanaUser | default "grafana_reader" }}
       RoleName: {{ $sr.roleName | default "sensitive_data_reader" }}
 
-    {{- /* The portal probes scheme_version for when db-manager added the logs text
-           indexes and publishes it as the logsTextIndex backend property. */}}
+    {{- /* The portal probes scheme_version for when db-manager added each signal's text
+           indexes and publishes it as the logsTextIndex / tracesTextIndex backend property. */}}
     LogsTextIndex:
       Enabled: {{ (.Values.global.clickhouse.logsTextIndex | default dict).enabled | default false }}
+    TracesTextIndex:
+      Enabled: {{ (.Values.global.clickhouse.tracesTextIndex | default dict).enabled | default false }}
 
     MonitorsManager:
       Enabled: false
