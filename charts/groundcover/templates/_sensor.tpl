@@ -83,12 +83,16 @@ receivers:
       bucket: {{ $sensorValues.rum.sourceMaps.bucket }}
       region: {{ $sensorValues.rum.sourceMaps.region }}
       storageAccount: {{ $sensorValues.rum.sourceMaps.storageAccount }}
-      assetPath: {{ $sensorValues.rum.sourceMaps.assetPath }}
       maxUploadSize: {{ $sensorValues.rum.sourceMaps.maxUploadSize }}
-      cacheCapacity: {{ $sensorValues.rum.sourceMaps.cacheCapacity }}
-      cacheTTL: {{ $sensorValues.rum.sourceMaps.cacheTTL }}
-      stackTraceCacheCapacity: {{ $sensorValues.rum.sourceMaps.stackTraceCacheCapacity }}
-      stackTraceCacheTTL: {{ $sensorValues.rum.sourceMaps.stackTraceCacheTTL }}
+      symbols:
+        assetPath: {{ $sensorValues.rum.sourceMaps.assetPath }}
+        sourceMapCache:
+          capacity: {{ $sensorValues.rum.sourceMaps.cacheCapacity }}
+          ttl: {{ $sensorValues.rum.sourceMaps.cacheTTL }}
+          notFoundCooldown: {{ $sensorValues.rum.sourceMaps.notFoundCooldown }}
+        stackTraceCache:
+          capacity: {{ $sensorValues.rum.sourceMaps.stackTraceCacheCapacity }}
+          ttl: {{ $sensorValues.rum.sourceMaps.stackTraceCacheTTL }}
   {{- end }}
 exporters:
   remotewrite:

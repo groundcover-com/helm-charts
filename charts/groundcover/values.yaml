@@ -2306,6 +2306,7 @@ ingestor:
       maxUploadSize: 0
       cacheCapacity: 1000
       cacheTTL: "1h"
+      notFoundCooldown: "5m"
       stackTraceCacheCapacity: 1000
       stackTraceCacheTTL: "1h"
   lifecycleHooks: 
