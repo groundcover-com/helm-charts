@@ -278,6 +278,9 @@ global:
     # Requires ClickHouse >= 26.8.
     logsTextIndex:
       enabled: false
+    # Requires ClickHouse >= 26.8.
+    tracesTextIndex:
+      enabled: false
     # Enables the standby ClickHouse cluster + HAProxy failover switch.
     ha:
       enabled: false

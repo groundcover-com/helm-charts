@@ -33,6 +33,7 @@ data:
     FeatureFlags:
       autonomous_infrastructure: {{ .Values.global.autonomousInfrastructure.enabled }}
       logs_text_index: {{ (.Values.global.clickhouse.logsTextIndex | default dict).enabled | default false }}
+      traces_text_index: {{ (.Values.global.clickhouse.tracesTextIndex | default dict).enabled | default false }}
     Incluster: true
     Namespace: {{ .Release.Namespace }}
     DropPartitionInterval: 6h

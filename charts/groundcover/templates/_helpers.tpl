@@ -328,11 +328,12 @@ Get cluster_id from values or generate random one
 {{/*
 Minimum ClickHouse major.minor the db-manager init container enforces:
 dbManager.minClickhouseVersion, raised to 26.8 when global.clickhouse.logsTextIndex
-is enabled (its text index postprocessor needs it). Empty disables the check.
+or global.clickhouse.tracesTextIndex is enabled (their text index postprocessors
+need it). Empty disables the check.
 */}}
 {{- define "db-manager.minClickhouseVersion" -}}
 {{- $min := .Values.dbManager.minClickhouseVersion | default "" -}}
-{{- if (.Values.global.clickhouse.logsTextIndex | default dict).enabled -}}
+{{- if or (.Values.global.clickhouse.logsTextIndex | default dict).enabled (.Values.global.clickhouse.tracesTextIndex | default dict).enabled -}}
 {{- $logsTextIndexMin := "26.8" -}}
 {{- if or (not $min) (semverCompare (printf "<%s.0" $logsTextIndexMin) (printf "%s.0" $min)) -}}
 {{- $min = $logsTextIndexMin -}}
