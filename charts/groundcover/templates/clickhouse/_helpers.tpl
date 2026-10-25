@@ -187,12 +187,28 @@ rejected, so gate on the tag.
 - Statistics: every column now gets auto-built statistics; loading them at plan
   time waits on the parts lock and S3 and dominates query latency.
 */}}
-{{- define "clickhouse.versionCompatProfileSettings" -}}
+{{- define "clickhouse.isAtLeast268" -}}
 {{- $version := regexFind "^[0-9]+\\.[0-9]+" (toString .Values.image.tag) -}}
-{{- if and $version (semverCompare ">=26.8" $version) -}}
+{{- if and $version (semverCompare ">=26.8" $version) -}}true{{- end -}}
+{{- end -}}
+
+{{- define "clickhouse.versionCompatProfileSettings" -}}
+{{- if include "clickhouse.isAtLeast268" . -}}
 <input_format_read_datetime_number_as_raw_value>1</input_format_read_datetime_number_as_raw_value>
 <s3_allow_server_credentials_in_user_queries>1</s3_allow_server_credentials_in_user_queries>
 <use_statistics>0</use_statistics>
+<allow_statistics_optimize>0</allow_statistics_optimize>
+<use_statistics_cache>0</use_statistics_cache>
+<use_statistics_for_part_pruning>0</use_statistics_for_part_pruning>
+<materialize_statistics_on_insert>0</materialize_statistics_on_insert>
+{{- end -}}
+{{- end -}}
+
+{{- define "clickhouse.versionCompatMergeTreeSettings" -}}
+{{- if include "clickhouse.isAtLeast268" . -}}
+<auto_statistics_types></auto_statistics_types>
+<materialize_statistics_on_merge>0</materialize_statistics_on_merge>
+<refresh_statistics_interval>0</refresh_statistics_interval>
 {{- end -}}
 {{- end -}}
 

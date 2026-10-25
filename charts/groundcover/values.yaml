@@ -3782,6 +3782,7 @@ clickhouse: &primary
         <materialize_ttl_recalculate_only>0</materialize_ttl_recalculate_only>
         <max_suspicious_broken_parts_bytes>5368709120</max_suspicious_broken_parts_bytes>
         <max_suspicious_broken_parts>1000</max_suspicious_broken_parts>
+        {{- with include "clickhouse.versionCompatMergeTreeSettings" . }}{{ . | nindent 4 }}{{ end }}
       </merge_tree>
       <profiles>
         <default>
