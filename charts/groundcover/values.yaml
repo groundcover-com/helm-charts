@@ -2436,6 +2436,9 @@ metricsAggregator:
             maxBudget: 16777216           # 16 * 1024 * 1024
             highUtilization: 0.95
             lowUtilization: 0.70
+        ingestionMeasurements:
+          enabled: false
+          flushInterval: 1m
   logs:
     pipeline:
       dropOldLogs:
