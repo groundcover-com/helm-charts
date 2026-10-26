@@ -858,6 +858,9 @@ agent:
             - key: env_name
               from_context: x-groundcover-env-name
               action: upsert
+            - key: env
+              from_context: x-groundcover-env-name
+              action: upsert
             - key: service.name
               from_context: x-groundcover-service-name
               action: upsert
@@ -865,6 +868,9 @@ agent:
               from_context: x-groundcover-env-type
               action: upsert
             - key: cluster
+              from_context: x-groundcover-cluster
+              action: upsert
+            - key: clusterId
               from_context: x-groundcover-cluster
               action: upsert
             - key: source
@@ -2234,6 +2240,9 @@ ingestor:
           - key: env_name
             from_context: x-groundcover-env-name
             action: upsert
+          - key: env
+            from_context: x-groundcover-env-name
+            action: upsert
           - key: service.name
             from_context: x-groundcover-service-name
             action: upsert
@@ -2244,6 +2253,9 @@ ingestor:
             from_context: x-groundcover-ingestion-key
             action: upsert
           - key: cluster
+            from_context: x-groundcover-cluster
+            action: upsert
+          - key: clusterId
             from_context: x-groundcover-cluster
             action: upsert
           - key: source
