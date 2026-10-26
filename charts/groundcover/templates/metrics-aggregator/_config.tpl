@@ -149,6 +149,9 @@ pipelines:
           maxBudget: {{ $sensorValues.pipelines.metrics.summary.rotator.budget.maxBudget }}
           highUtilization: {{ $sensorValues.pipelines.metrics.summary.rotator.budget.highUtilization }}
           lowUtilization: {{ $sensorValues.pipelines.metrics.summary.rotator.budget.lowUtilization }}
+      ingestionMeasurements:
+        enabled: {{ dig "ingestionMeasurements" "enabled" false $sensorValues.pipelines.metrics.summary }}
+        flushInterval: {{ dig "ingestionMeasurements" "flushInterval" "1m" $sensorValues.pipelines.metrics.summary }}          
     {{- end }}
 startuptimeout: 120s
 {{ if $sensorValues.collectionEnabled }}
