@@ -1,0 +1,38 @@
+{{- if and .Values.global.backend.enabled .Values.global.aiO11yService.enabled }}
+apiVersion: v1
+kind: ConfigMap
+data:
+  config.yaml: |
+    httpPort: {{ .Values.aiO11yService.httpPort }}
+    healthProbePort: {{ .Values.aiO11yService.healthProbePort }}
+    logLevel: {{ .Values.aiO11yService.logLevel }}
+    migrationsPath: /ai-o11y-migrations
+    clusterId: {{ include "groundcover.clusterId" . | quote }}
+    {{- if eq (include "telemetry.enabled" .) "true" }}
+    tracing:
+      enabled: true
+      endpoint: {{ include "telemetry.traces.otlpUrl" . | quote }}
+      writeTimeout: {{ .Values.aiO11yService.tracing.writeTimeout }}
+      flushInterval: {{ .Values.aiO11yService.tracing.flushInterval }}
+      batchSize: {{ .Values.aiO11yService.tracing.batchSize }}
+      headers:
+        apikey: "OVERRIDDEN"
+    {{- end }}
+    postgres:
+      host: {{ tpl .Values.dbManager.db.host . }}
+      port: {{ tpl .Values.dbManager.db.port . }}
+      name: {{ .Values.aiO11yService.postgres.name | quote }}
+      admindbname: {{ .Values.dbManager.db.admindbname | quote }}
+      user: {{ tpl .Values.dbManager.db.user . }}
+      pass: ""
+      sslmode: {{ .Values.dbManager.db.sslmode }}
+      timeout: {{ .Values.dbManager.db.timeout }}
+      interval: {{ .Values.dbManager.db.interval }}
+metadata:
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+  annotations:
+    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+  name: ai-o11y-service-config
+  namespace: {{ .Release.Namespace }}
+{{- end }}

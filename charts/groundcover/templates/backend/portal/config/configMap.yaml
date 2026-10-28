@@ -259,6 +259,9 @@ data:
     AutoInfraConfig:
       Enabled: {{ and .Values.global.backend.enabled .Values.global.autonomousInfrastructure.enabled }}
       Endpoint: http://{{ include "autoinfra-config.fullname" . }}:{{ .Values.autoInfraConfig.httpPort }}
+    AiO11yService:
+      Enabled: {{ and .Values.global.backend.enabled .Values.global.aiO11yService.enabled }}
+      Endpoint: http://{{ include "ai-o11y-service.fullname" . }}:{{ .Values.aiO11yService.httpPort }}
     {{- if .Values.portal.configuration.AgentService }}
     AgentService:
       Enabled: {{ .Values.portal.configuration.AgentService.Enabled | default (.Values.agentService.enabled | default false) }}

@@ -1,0 +1,15 @@
+{{- if and .Values.global.backend.enabled .Values.global.aiO11yService.enabled .Values.aiO11yService.pdb.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "ai-o11y-service.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+    app: ai-o11y-service
+spec:
+  maxUnavailable: {{ .Values.aiO11yService.pdb.maxUnavailable }}
+  selector:
+    matchLabels:
+      app: ai-o11y-service
+{{- end }}

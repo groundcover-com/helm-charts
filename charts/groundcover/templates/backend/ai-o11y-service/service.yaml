@@ -1,0 +1,20 @@
+{{- if and .Values.global.backend.enabled .Values.global.aiO11yService.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: ai-o11y-service
+    app.kubernetes.io/name: ai-o11y-service
+    {{- include "groundcover.labels" . | nindent 4 }}
+  name: {{ include "ai-o11y-service.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  ports:
+  - name: http
+    port: {{ .Values.aiO11yService.httpPort }}
+    protocol: TCP
+    targetPort: http
+  selector:
+    app: ai-o11y-service
+  type: ClusterIP
+{{- end }}

@@ -251,6 +251,10 @@ spec:
             {{- end }}
             {{- end }}
           envFrom:
+            {{- if and $.Values.global.backend.enabled $.Values.global.aiO11yService.enabled }}
+            - configMapRef:
+                name: clickhouse-postgres-config
+            {{- end }}
             {{- if $.Values.extraEnvVarsCM }}
             - configMapRef:
                 name: {{ include "common.tplvalues.render" (dict "value" $.Values.extraEnvVarsCM "context" $) }}

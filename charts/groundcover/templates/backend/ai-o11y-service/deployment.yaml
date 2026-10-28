@@ -1,0 +1,117 @@
+{{- if and .Values.global.backend.enabled .Values.global.aiO11yService.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+  labels:
+    {{- include "groundcover.labels" . | nindent 4 }}
+    app: ai-o11y-service
+  name: {{ include "ai-o11y-service.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.aiO11yService.replicas }}
+  selector:
+    matchLabels:
+      app: ai-o11y-service
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9102"
+        groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
+        checksum/config: {{ include (print $.Template.BasePath "/backend/ai-o11y-service/configmap.yaml") . | sha256sum }}
+        {{- with .Values.aiO11yService.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        app: ai-o11y-service
+        app.kubernetes.io/name: ai-o11y-service
+        {{- include "groundcover.labels" . | nindent 8 }}
+        {{- with .Values.aiO11yService.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      imagePullSecrets: {{ include "imagePullSecrets" . }}
+      {{- with .Values.aiO11yService.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.aiO11yService.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.aiO11yService.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.aiO11yService.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
+      {{- with .Values.aiO11yService.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: ai-o11y-service
+        image: {{ tpl .Values.aiO11yService.image.repository . }}:{{ tpl .Values.aiO11yService.image.tag . }}
+        imagePullPolicy: Always
+        env:
+        - name: GC_GROUNDCOVERVERSION
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['groundcover_version']
+        {{- if eq (include "telemetry.enabled" .) "true" }}
+        - name: GC_TRACING_HEADERS_APIKEY
+          valueFrom:
+            secretKeyRef:
+              key: {{ template "groundcover.apikeySecretKey" . }}
+              name: {{ template "groundcover.apikeySecretName" . }}
+        {{- end }}
+        - name: GC_POSTGRES_PASS
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "postgresql.secretName" . }}
+              key: {{ include "postgresql.adminPasswordKey" . }}
+        {{- with .Values.aiO11yService.env }}
+        {{- tpl (toYaml .) $ | nindent 8 }}
+        {{- end }}
+        envFrom:
+        - secretRef:
+            name: {{ include "groundcover.config.secretName" . }}
+        ports:
+        - containerPort: {{ .Values.aiO11yService.httpPort }}
+          name: http
+        - containerPort: {{ .Values.aiO11yService.healthProbePort }}
+          name: health-http
+        - containerPort: 9102
+          name: metrics
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: health-http
+          initialDelaySeconds: 10
+          periodSeconds: 15
+          failureThreshold: 20
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: health-http
+          initialDelaySeconds: 10
+          periodSeconds: 15
+          failureThreshold: 20
+        resources:
+          {{- toYaml .Values.aiO11yService.resources | nindent 10 }}
+        volumeMounts:
+        - mountPath: /etc/ai-o11y-service
+          name: config
+      volumes:
+      - configMap:
+          name: ai-o11y-service-config
+        name: config
+{{- end }}

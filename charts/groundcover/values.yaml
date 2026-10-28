@@ -119,6 +119,8 @@ global:
     enabled: false
   investigationService:
     enabled: false
+  aiO11yService:
+    enabled: true
   # Turns monitors v2 on for this backend: v1 monitor writes also write v2, and a v2 failure fails the v1 write.
   # Don't turn it off and on again: v1 changes made while off never reach v2.
   monitorsService:
@@ -2681,6 +2683,44 @@ autoInfraConfig:
   logLevel: 4
   httpPort: 8080
   healthProbePort: 8081
+  tracing:
+    writeTimeout: 5s
+    flushInterval: 5s
+    batchSize: 50
+
+aiO11yService:
+  image:
+    repository: "{{ .Values.global.origin.registry }}/ai-o11y-service"
+    tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
+  replicas: 2
+  pdb:
+    enabled: true
+    maxUnavailable: 1
+  podLabels:
+  podAnnotations:
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/name: ai-o11y-service
+  affinity:
+  nodeSelector:
+  tolerations: []
+  priorityClassName:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      memory: 512Mi
+  env: []
+  logLevel: 4
+  httpPort: 8080
+  healthProbePort: 8081
+  postgres:
+    name: ai_o11y
   tracing:
     writeTimeout: 5s
     flushInterval: 5s
