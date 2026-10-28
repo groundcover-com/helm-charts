@@ -92,7 +92,7 @@ spec:
           - secretRef:
               name: {{include "groundcover.config.secretName" .}}
         image: {{ tpl .Values.k8sWatcher.image.repository . }}:{{ tpl .Values.k8sWatcher.image.tag . }}
-        imagePullPolicy: Always
+        imagePullPolicy: {{ .Values.k8sWatcher.image.pullPolicy | default "Always" }}
         name: k8s-watcher
 {{- with .Values.k8sWatcher.containerSecurityContext }}
         securityContext:
@@ -126,6 +126,7 @@ spec:
         {{- with .Values.k8sWatcher.extraVolumeMounts }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
+      {{- if .Values.k8sWatcher.initContainers.enabled }}
       initContainers:
       {{- include "groundcover.initContainer.waitForEndpoint" (dict 
           "root" $ 
@@ -143,6 +144,7 @@ spec:
           "expectedCode" "204"
           "serviceName" "VictoriaMetrics Agent"
       ) | nindent 6 }}
+      {{- end }}
       serviceAccountName: {{ include "k8s-watcher.serviceAccountName" . }}
 {{- if .Values.k8sWatcher.priorityClassName }}
       priorityClassName: {{ .Values.k8sWatcher.priorityClassName }}

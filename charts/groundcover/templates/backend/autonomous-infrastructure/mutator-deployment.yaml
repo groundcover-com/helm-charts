@@ -74,7 +74,7 @@ spec:
       containers:
       - name: mutator
         image: {{ tpl .Values.autonomousInfrastructure.mutator.image.repository . }}:{{ tpl .Values.autonomousInfrastructure.mutator.image.tag . }}
-        imagePullPolicy: Always
+        imagePullPolicy: {{ .Values.autonomousInfrastructure.mutator.image.pullPolicy | default "Always" }}
         env:
         - name: GC_RUNNINGNAMESPACE
           valueFrom:
@@ -99,6 +99,9 @@ spec:
         - mountPath: /etc/fleet-mtls-certs
           name: fleet-mtls-certs
           readOnly: true
+        {{- end }}
+        {{- with .Values.autonomousInfrastructure.mutator.extraVolumeMounts }}
+          {{- toYaml . | nindent 8 }}
         {{- end }}
         ports:
         - name: webhook
@@ -136,5 +139,8 @@ spec:
       - name: fleet-mtls-certs
         secret:
           secretName: {{ .Values.fleetClientConfig.mtlsSecretName }}
+      {{- end }}
+      {{- with .Values.autonomousInfrastructure.mutator.extraVolumes }}
+        {{- toYaml . | nindent 6 }}
       {{- end }}
 {{- end }}

@@ -478,7 +478,7 @@ insecureSkipVerify: {{ .Values.fleetClientConfig.insecureSkipVerify }}
 tlsCertFile: {{ .Values.fleetClientConfig.tlsCertFile | default "" | quote }}
 tlsKeyFile: {{ .Values.fleetClientConfig.tlsKeyFile | default "" | quote }}
 tlsCAFile: {{ .Values.fleetClientConfig.tlsCAFile | default "" | quote }}
-e2eDesiredStateFile: ""
+e2eDesiredStateFile: {{ .Values.fleetClientConfig.e2eDesiredStateFile | default "" | quote }}
 {{- end }}
 
 {{- define "groundcover.autonomousInfrastructure.watcherRules" -}}
