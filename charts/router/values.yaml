@@ -45,6 +45,7 @@ auth:
   proxyPort: 80
 frontendDomain: ""
 additionalLabels:
+podAnnotations: {}
 onprem:
   enabled: true
   # Applied to user-defined ingresses rendered from templates/ingress.yaml
@@ -66,7 +67,7 @@ service:
 origin:
   registry: quay.io/groundcover
   repository: '{{ include "router.repository" . }}'
-  tag: 1.13.168
+  tag: 1.13.170
 curl:
   image:
     repository: '{{ .Values.origin.registry }}/tools'
