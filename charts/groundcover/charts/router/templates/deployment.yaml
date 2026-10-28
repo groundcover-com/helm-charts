@@ -33,6 +33,9 @@ spec:
         {{- if .Values.configurationSecretName }}
         checksum/config_secret: {{ .Values.configurationSecretName | sha256sum }}
         {{- end }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds | default 30 }}
       serviceAccountName: router
