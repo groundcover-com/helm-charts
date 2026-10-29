@@ -291,6 +291,115 @@ entries:
     version: 0.0.1
   groundcover:
   - apiVersion: v2
+    appVersion: 1.13.184
+    created: "2026-10-29T17:01:35.602852559Z"
+    dependencies:
+    - condition: router.enabled
+      import-values:
+      - child: dbs
+        parent: backend.postgresql.dbs
+      name: router
+      repository: ""
+      version: '>0.0.0'
+    - condition: global.backend.enabled
+      import-values:
+      - child: server.service
+        parent: global.victoria-metrics.service
+      name: victoria-metrics-single
+      repository: https://victoriametrics.github.io/helm-charts
+      version: 0.9.15
+    - condition: global.telemetry.enabled
+      name: victoria-metrics-agent
+      repository: ""
+      version: 0.9.17
+    - alias: custom-metrics
+      condition: custom-metrics.enabled
+      name: victoria-metrics-agent
+      repository: ""
+      version: 0.9.17
+    - condition: victoria-metrics-operator.enabled
+      name: victoria-metrics-operator
+      repository: https://victoriametrics.github.io/helm-charts
+      version: 0.59.2
+    - alias: metrics-ingester
+      condition: metricsIngester.enabled
+      import-values:
+      - child: service
+        parent: global.metrics-ingester.service
+      name: victoria-metrics-agent
+      repository: ""
+      version: 0.9.17
+    - condition: global.backend.enabled
+      import-values:
+      - child: auth
+        parent: global.clickhouse.auth
+      - child: containerPorts
+        parent: global.clickhouse.containerPorts
+      - child: serviceAccount
+        parent: global.clickhouse.serviceAccount
+      name: clickhouse
+      repository: ""
+      version: 6.3.1
+    - alias: clickhouse-standby
+      condition: global.clickhouse.ha.enabled
+      import-values:
+      - child: auth
+        parent: global.clickhouse.auth
+      - child: containerPorts
+        parent: global.clickhouse.containerPorts
+      - child: serviceAccount
+        parent: global.clickhouse.serviceAccount
+      name: clickhouse
+      repository: ""
+      version: 6.3.1
+    - condition: global.backend.enabled
+      import-values:
+      - child: ports
+        parent: global.opentelemetry-collector.ports
+      - child: service
+        parent: global.opentelemetry-collector.service
+      name: opentelemetry-collector
+      repository: https://open-telemetry.github.io/opentelemetry-helm-charts
+      version: 0.122.0
+    - condition: global.agent.enabled
+      import-values:
+      - child: serviceAccount
+        parent: global.kube-state-metrics.serviceAccount
+      name: kube-state-metrics
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 6.4.1
+    - alias: monitors-manager
+      condition: global.backend.enabled
+      name: grafana
+      repository: https://grafana.github.io/helm-charts
+      version: 7.2.0
+    - condition: incloud-ingress.enabled
+      name: incloud-ingress
+      repository: ""
+      tags:
+      - incloud
+      version: '>0.0.0'
+    - condition: global.backend.enabled
+      import-values:
+      - child: postgresql.image
+        parent: global.postgresql.image
+      - child: postgresql.auth
+        parent: global.postgresql.auth
+      name: backend
+      repository: ""
+      version: '>=0.0.0'
+    - condition: vector.enabled
+      name: vector
+      repository: https://helm.vector.dev
+      version: 0.37.0
+    description: Cloud Native Observability
+    digest: 80a0c308d3eed3075f1245140cc6f6fdde3ec9394a80bc5b2fc11aa335cb7c4d
+    name: groundcover
+    type: application
+    urls:
+    - https://github.com/groundcover-com/helm-charts/releases/download/groundcover-1.13.184/groundcover-1.13.184.tgz
+    version: 1.13.184
+  - apiVersion: v2
     appVersion: 1.13.183
     created: "2026-10-29T16:41:58.973411951Z"
     dependencies:
@@ -291077,6 +291186,16 @@ entries:
     version: 0.28.1
   karpenter-spec:
   - apiVersion: v2
+    appVersion: 1.13.184
+    created: "2026-10-29T17:01:35.983181586Z"
+    description: A Helm chart for groundcover karpenter CRs.
+    digest: a9b19f6b54c4fb6a4ccfd22785ed9e4032e69cab0332afa4bbc0945a1e7cf0fc
+    name: karpenter-spec
+    type: application
+    urls:
+    - https://github.com/groundcover-com/helm-charts/releases/download/karpenter-spec-1.13.184/karpenter-spec-1.13.184.tgz
+    version: 1.13.184
+  - apiVersion: v2
     appVersion: 1.13.183
     created: "2026-10-29T16:41:59.230985232Z"
     description: A Helm chart for groundcover karpenter CRs.
@@ -316008,6 +316127,32 @@ entries:
     - https://github.com/groundcover-com/helm-charts/releases/download/loki-proxy-0.1.0/loki-proxy-0.1.0.tgz
     version: 0.1.0
   router:
+  - apiVersion: v2
+    appVersion: 1.13.184
+    created: "2026-10-29T17:01:36.239718122Z"
+    dependencies:
+    - condition: onprem.enabled
+      import-values:
+      - child: serviceAccount
+        parent: global.grafana.serviceAccount
+      name: grafana
+      repository: https://grafana.github.io/helm-charts
+      version: 7.2.0
+    - condition: onprem.enabled
+      name: kong
+      repository: https://charts.konghq.com
+      version: 2.52.0
+    - condition: onprem.enabled
+      name: kong-crds
+      repository: file://../../../kong-crds
+      version: 2.52.0
+    description: groundcover's router helm chart
+    digest: 18b76b17034a27628abae1863f33232fbab4eb44f7f4b03a309e8e7c91b7bb64
+    name: router
+    type: application
+    urls:
+    - https://github.com/groundcover-com/helm-charts/releases/download/router-1.13.184/router-1.13.184.tgz
+    version: 1.13.184
   - apiVersion: v2
     appVersion: 1.13.183
     created: "2026-10-29T16:41:59.508235964Z"
@@ -395186,6 +395331,21 @@ entries:
     version: 0.33.4
   temporal:
   - apiVersion: v2
+    appVersion: 1.13.184
+    created: "2026-10-29T17:01:36.547332315Z"
+    dependencies:
+    - condition: global.temporal.enabled
+      name: temporal
+      repository: https://go.temporal.io/helm-charts
+      version: 0.72.0
+    description: groundcover's Temporal Helm chart
+    digest: 7d0ce857f8786d5b6e2f75ba1a72fb5cb037a30fa17b2b8bef15e24893fc75d5
+    name: temporal
+    type: application
+    urls:
+    - https://github.com/groundcover-com/helm-charts/releases/download/temporal-1.13.184/temporal-1.13.184.tgz
+    version: 1.13.184
+  - apiVersion: v2
     appVersion: 1.13.183
     created: "2026-10-29T16:41:59.76911058Z"
     dependencies:
@@ -417355,4 +417515,4 @@ entries:
     urls:
     - https://github.com/groundcover-com/helm-charts/releases/download/temporal-1.11.131/temporal-1.11.131.tgz
     version: 1.11.131
-generated: "2026-10-29T16:41:59.783218869Z"
+generated: "2026-10-29T17:01:36.581147026Z"
