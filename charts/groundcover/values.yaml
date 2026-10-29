@@ -2752,6 +2752,10 @@ autonomousInfrastructure:
     sealDelaySeconds: 90
     arraysLookbackDays: 14
     discoveryLookbackMinutes: 60
+    # Raise while the per-step ClickHouse latency and pod RSS stay flat. Peak
+    # memory scales with it: each in-flight cluster holds its arrays, its
+    # recommendations and one batch of facts. The limit below is sized for 1.
+    clusterConcurrency: 1
   logLevel: INFO
   env:
     - name: POLARS_MAX_THREADS
@@ -2815,6 +2819,9 @@ workloadRecommendations:
   ttlSecondsAfterFinished: 3600
   config:
     discoveryLookbackMinutes: 60
+    # Raise while the per-step ClickHouse latency and pod RSS stay flat; each
+    # in-flight cluster holds its own frames.
+    clusterConcurrency: 1
     lowPoolDays: 7
     highPoolDays: 1
     # A sample count, not a duration.

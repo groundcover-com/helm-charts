@@ -22,6 +22,8 @@ data:
   # Capped by the rollup's 30-day TTL.
   ARRAYS_LOOKBACK_DAYS: {{ .Values.autonomousInfrastructure.config.arraysLookbackDays | quote }}
   DISCOVERY_LOOKBACK_MINUTES: {{ .Values.autonomousInfrastructure.config.discoveryLookbackMinutes | quote }}
+  # Clusters in flight at once, sharing the run's ClickHouse client.
+  CLUSTER_CONCURRENCY: {{ .Values.autonomousInfrastructure.config.clusterConcurrency | quote }}
   RUN_LABEL: "cron"
   LOG_LEVEL: {{ .Values.autonomousInfrastructure.logLevel | quote }}
 

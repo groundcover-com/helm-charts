@@ -14,6 +14,8 @@ data:
   CLICKHOUSE_USER: {{ include "clickhouse.username" . | quote }}
 
   DISCOVERY_LOOKBACK_MINUTES: {{ .Values.workloadRecommendations.config.discoveryLookbackMinutes | quote }}
+  # Clusters in flight at once, sharing the run's ClickHouse client.
+  CLUSTER_CONCURRENCY: {{ .Values.workloadRecommendations.config.clusterConcurrency | quote }}
   LOW_POOL_DAYS: {{ .Values.workloadRecommendations.config.lowPoolDays | quote }}
   HIGH_POOL_DAYS: {{ .Values.workloadRecommendations.config.highPoolDays | quote }}
   MIN_DATA_POINTS: {{ .Values.workloadRecommendations.config.minDataPoints | quote }}
