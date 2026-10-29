@@ -3086,6 +3086,10 @@ journalScraper:
   journalFilter: "system.journal"
   includeRemoteJournals: true
   checkInterval: 5s
+  # Opt-in: move journal read positions only past entries the receiver accepted.
+  # First activation replays all retained matching journals; multiline is unsupported.
+  reliableDelivery:
+    enabled: false
 logFileTargets: []
 # - path: /var/log/syslog.*
 #   excludedPath: "*.gz" # doublestar glob ("**" supported) matched against the full path or base name; also accepts full-path patterns like "/var/log/*.gz"
