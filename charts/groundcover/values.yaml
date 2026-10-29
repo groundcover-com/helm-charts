@@ -6748,6 +6748,9 @@ monitors-manager:
 
 
 rbac:
+  # Preserve node-proxy access for existing custom sensor scrapes.
+  # Set false when custom scrapes do not need it. Built-in collection uses other permissions.
+  allowNodesProxy: true
   pspEnabled: false
   sccEnabled: true
   labels:

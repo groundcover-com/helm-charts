@@ -36,7 +36,9 @@ rules:
   - statefulsets
   - events
   - nodes/metrics
+  {{- if .Values.rbac.allowNodesProxy }}
   - nodes/proxy
+  {{- end }}
   - nodes/stats
   - replicationcontrollers
   - persistentvolumeclaims
