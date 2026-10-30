@@ -3080,6 +3080,10 @@ k8sWatcher:
 
 journalScraper:
   serviceNames: ["kubelet", "kernel"]
+  # Exact SYSLOG_IDENTIFIER matches, ORed with serviceNames/serviceTargets (also without a unit).
+  syslogIdentifiers: []
+  # Collect every eligible record in the configured journal files; targets still add metadata.
+  collectAll: false
   # Additional journal services with the same workload/labels metadata as logFileTargets.
   # Bare and .service-suffixed names match equivalently; serviceNames remains supported.
   serviceTargets: []
@@ -3094,9 +3098,11 @@ journalScraper:
   includeRemoteJournals: true
   checkInterval: 5s
   # Opt-in: move journal read positions only past entries the receiver accepted.
-  # First activation replays all retained matching journals; multiline is unsupported.
+  # Fresh installs replay the initial history window; multiline is unsupported.
   reliableDelivery:
     enabled: false
+    # First install only; the saved cutoff/checkpoints take precedence on restart.
+    initialHistoryDuration: 24h
 logFileTargets: []
 # - path: /var/log/syslog.*
 #   excludedPath: "*.gz" # doublestar glob ("**" supported) matched against the full path or base name; also accepts full-path patterns like "/var/log/*.gz"
