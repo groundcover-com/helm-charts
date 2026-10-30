@@ -535,6 +535,8 @@ globallimiter:
 
 watchOnlyLocalNode: {{ $sensorValues.watchOnlyLocalNode }}
 resolveRemoteFromEndpoint: {{ $sensorValues.resolveRemoteFromEndpoint }}
+cloudMetadata:
+  enabled: {{ dig "cloudMetadata" "enabled" true $sensorValues }}
 {{ if $sensorValues.collectionEnabled }}
 floraEnabled: true
 {{ end }}

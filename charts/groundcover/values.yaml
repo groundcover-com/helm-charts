@@ -643,6 +643,8 @@ agent:
           key: '{{ template "groundcover.apikeySecretKey" . }}'
           name: '{{ template "groundcover.apikeySecretName" . }}' 
   sensor:
+    cloudMetadata:
+      enabled: true
     image:
       repository: "{{ .Values.global.origin.registry }}/sensor"
       tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
