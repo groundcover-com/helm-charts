@@ -25,7 +25,6 @@ rules:
 - apiGroups: [""]
   resources:
   - nodes
-  - nodes/proxy
   - nodes/metrics
   - services
   - endpoints
