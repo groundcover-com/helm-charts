@@ -1,4 +1,4 @@
-{{- if and .Values.global.backend.enabled .Values.global.investigationService.enabled }}
+{{- if .Values.global.investigationService.enabled }}
 apiVersion: v1
 kind: Service
 metadata:

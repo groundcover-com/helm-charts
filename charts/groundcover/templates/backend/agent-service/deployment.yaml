@@ -130,7 +130,7 @@ spec:
             - name: COMM_HUB_URL
               value: {{ printf "http://%s:8080" (include "comm-hub.fullname" .) | quote }}
             {{- end }}
-            {{- if and .Values.global.backend.enabled .Values.global.investigationService.enabled }}
+            {{- if .Values.global.investigationService.enabled }}
             - name: INVESTIGATION_SERVICE_URL
               value: {{ printf "http://%s:8080" (include "investigation-service.fullname" .) | quote }}
             {{- end }}

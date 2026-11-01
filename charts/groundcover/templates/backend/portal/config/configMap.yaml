@@ -17,7 +17,7 @@ data:
     {{- if and .Values.global.backend.enabled .Values.global.monitorsService.enabled }}
     {{- $features = append $features "monitors-v2" }}
     {{- end }}
-    {{- if and .Values.global.backend.enabled .Values.global.investigationService.enabled }}
+    {{- if .Values.global.investigationService.enabled }}
     {{- $features = append $features "investigations" }}
     {{- end }}
     {{- if and .Values.global.backend.enabled .Values.global.autonomousInfrastructure.enabled }}
@@ -254,7 +254,7 @@ data:
       Enabled: {{ and .Values.global.backend.enabled .Values.global.monitorsService.enabled }}
       Endpoint: http://{{ include "monitors-service.fullname" . }}:{{ .Values.monitorsService.httpPort }}
     InvestigationService:
-      Enabled: {{ and .Values.global.backend.enabled .Values.global.investigationService.enabled }}
+      Enabled: {{ .Values.global.investigationService.enabled }}
       Endpoint: http://{{ include "investigation-service.fullname" . }}:8080
     AutoInfraConfig:
       Enabled: {{ and .Values.global.backend.enabled .Values.global.autonomousInfrastructure.enabled }}
