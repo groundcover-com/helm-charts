@@ -648,7 +648,8 @@ agent:
     image:
       repository: "{{ .Values.global.origin.registry }}/sensor"
       tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
-    maxUnavailable: 100%
+    # Percentage only; a plain number fails DaemonSet validation because the template quotes it.
+    maxUnavailable: 25%
     resources:
       requests:
         memory: 300Mi
