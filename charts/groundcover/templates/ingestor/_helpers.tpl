@@ -22,6 +22,10 @@
 {{- end -}}
 {{- end -}}
 
+{{- define "ingestor.otlp.cluster.http.url" -}}
+    {{- printf "http://%s:%s" (include "ingestor.fullname" .) (include "ingestor.otlphttp.port" .) -}}
+{{- end -}}
+
 {{- define "ingestor.otlptraces.cluster.http.url" -}}
     {{- printf "http://%s:%s/v1/traces" (include "ingestor.fullname" .) (include "ingestor.otlphttp.port" .) -}}
 {{- end -}}

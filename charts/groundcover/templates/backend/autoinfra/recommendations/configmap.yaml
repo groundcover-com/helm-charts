@@ -21,6 +21,7 @@ data:
   MIN_DATA_POINTS: {{ .Values.workloadRecommendations.config.minDataPoints | quote }}
   # JSON, not comma-separated: pydantic-settings parses tuples from the env as JSON.
   KINDS: {{ toJson .Values.workloadRecommendations.config.kinds | quote }}
+  PRODUCT_METRICS_OTLP_ENDPOINT: {{ if .Values.global.ingestor.enabled }}{{ include "ingestor.otlp.cluster.http.url" . | quote }}{{ else }}""{{ end }}
 
   # Empty when fleet-manager is off: recommendations are stored but not published.
   FLEET_MANAGER_URL: {{ if .Values.global.fleetmanager.enabled }}{{ include "fleet-manager.base.url" . | quote }}{{ else }}""{{ end }}
@@ -29,7 +30,7 @@ data:
 
   OTEL_SERVICE_NAME: "autoinfra-recommendations"
   {{- if eq (include "telemetry.enabled" . | trim) "false" }}
-  OTEL_SDK_DISABLED: "true"
+  AUTOINFRA_TELEMETRY_DISABLED: "true"
   {{- else }}
   OTEL_EXPORTER_OTLP_ENDPOINT: {{ include "telemetry.traces.otlpUrl" . | quote }}
   OTEL_SERVICE_INSTANCE_ID: {{ include "autoinfra-recommendations.fullname" . | quote }}

@@ -29,7 +29,7 @@ data:
 
   OTEL_SERVICE_NAME: "autoinfra-algo"
   {{- if eq (include "telemetry.enabled" . | trim) "false" }}
-  OTEL_SDK_DISABLED: "true"
+  AUTOINFRA_TELEMETRY_DISABLED: "true"
   {{- else }}
   OTEL_EXPORTER_OTLP_ENDPOINT: {{ include "telemetry.traces.otlpUrl" . | quote }}
   # Pinned: the SDK default is a fresh UUID per process, i.e. a new metric series every tick.
