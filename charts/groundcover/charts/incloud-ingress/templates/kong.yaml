@@ -231,3 +231,12 @@ config:
   replace:
     uri: '/api/client/v2/config'
 plugin: request-transformer
+---
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: {{ printf "%s-fleet-manager-rewrite-cluster-info" .Release.Name }}
+config:
+  replace:
+    uri: '/api/client/v1/cluster-info'
+plugin: request-transformer

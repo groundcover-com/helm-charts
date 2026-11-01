@@ -600,6 +600,39 @@ spec:
                 name: {{ include "fleet-manager.fullname" . }}
                 port:
                   name: manage-http        
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ printf "%s-cluster-info" (include "incloud-ingress.name" .) | trunc 63 | trimSuffix "-" }}
+  annotations:
+    konghq.com/protocols: {{ ternary "https" "http" ( eq (tpl .Values.secure . ) "true" ) | quote }}
+    konghq.com/strip-path: "true"
+    konghq.com/plugins: {{ printf "%s-strip-authorization-prefix" .Release.Name }},{{ printf "%s-auth" .Release.Name }},allow-ingestion-token-remoteconfig,{{ printf "%s-fleet-manager-rewrite-cluster-info" .Release.Name }}
+    {{- with .Values.ingress.annotations }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  ingressClassName: {{ include "incloud-ingress.ingressClass" .}}
+  {{- if .Values.global.ingress.enableTLS }}
+  tls:
+    - secretName: {{ include "incloud-ingress.certificate.name" . }}
+      hosts: {{ include "incloud-ingress.certificate.dnsNames" .  | nindent 8 }}
+    {{- if not (empty .Values.global.ingress.customDomains) }}
+    - secretName: {{ include "incloud-ingress.customCertificate.name" . }}
+      hosts: {{ include "incloud-ingress.customCertificate.dnsNames" .  | nindent 8 }}
+    {{- end }}
+  {{- end }}
+  rules:
+    - http:
+        paths:
+          - path: /fleet-manager/api/client/v1/cluster-info
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ include "fleet-manager.fullname" . }}
+                port:
+                  name: manage-http
 {{- end }}
 ---
 
