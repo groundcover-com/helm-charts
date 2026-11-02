@@ -3330,7 +3330,7 @@ dispatchCenter:
 
 investigationService:
   evidence:
-    findingScopeKeys: [cluster]
+    findingScopeKeys: [env, cluster]
     scopedSignals: [logs, traces, metrics, events]
   additionalLabels:
   podLabels:
