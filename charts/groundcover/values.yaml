@@ -495,6 +495,7 @@ logBatchMaxBackoff: 30s
 logBatchMaxRetries: 10
 logBatchSendQueueWorkerCount: 5
 logBatchSendQueueMaxSize: 10
+logBatchSendQueuePodMemoryPercentage: 0
 maxLogLinesPerBatch: 20000
 jsonFlattenMaxDepth: 6
 jsonFlattenMaxAttributes: 300
@@ -747,6 +748,19 @@ agent:
           # Used when a pod sets neither .port nor .port_name; 0 falls back to a container
           # port named *-profiles, then *-metrics, then http2.
           defaultPort: 0
+        ebpfProfiler:
+          enabled: false
+          image:
+            repository: "{{ .Values.global.origin.registry }}/ebpf-profiler"
+            tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
+          samplesPerSecond: 20
+          reportInterval: 5s
+          resources:
+            requests:
+              cpu: 50m
+              memory: 100Mi
+            limits:
+              memory: 512Mi
       metricsscraper:
         enabled: false
         maxScrapeSize: 67108864
@@ -810,6 +824,8 @@ agent:
           dropThreshold: 3h
           dropAlwaysThreshold: 12h
           delayStart: 2m
+        parallelProcessing:
+          enabled: false
     apmIngestor:
       tracesOtlpEndpoint:
         # Spans handed to the processors at a time. Bounds the transient per-worker
@@ -877,6 +893,7 @@ agent:
               action: upsert
           samplingRatio: 0.05
           maxConcurrentRequests: 0
+          maxConcurrentLogExports: 0
           # Explicit byte budgets take precedence; quote decimal byte counts to preserve int64 precision.
           # Units such as "1KB" are not supported.
           # Otherwise set an integer pod-memory percentage from 0 to 100.
@@ -2082,6 +2099,9 @@ ingestor:
     tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
   replicas: 2
   logBatchSendQueueMaxSize: 30
+  logBatchSendQueuePodMemoryPercentage: 3
+  # Overrides the top-level logBatchSize while parallel log processing is enabled.
+  logBatchSize: 4194304 # 4MB
   additionalLabels:
   additionalAnnotations:
   podLabels:
@@ -2165,6 +2185,8 @@ ingestor:
         dropThreshold: 12h
         dropAlwaysThreshold: 12h
         delayStart: 2m
+      parallelProcessing:
+        enabled: false
   pprof:
     enabled: '{{ include "telemetry.enabled" . }}'
     uploaderType: pyroscope
@@ -2257,6 +2279,11 @@ ingestor:
             action: upsert
         samplingRatio: 1
         maxConcurrentRequests: 0
+        # Both apply only with logs.pipeline.parallelProcessing.enabled.
+        maxConcurrentLogExports: 64
+        # Records of admitted log requests not yet in the pipeline; past it a log request
+        # gets a retryable 503. It bounds how long an admitted request waits for its 200.
+        maxLogRecordsInFlight: 600000
         # Explicit byte budgets take precedence and should be quoted to preserve int64 precision.
         # Otherwise set an integer pod-memory percentage from 0 to 100.
         # Zero for both leaves the signal unlimited. For traces this only tightens what the

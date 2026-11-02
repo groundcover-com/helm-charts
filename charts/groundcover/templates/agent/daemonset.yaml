@@ -302,7 +302,10 @@ spec:
           resources:
             {{- toYaml .Values.agent.flb.resources | nindent 12 }}
           {{- include "groundcover.containerResizePolicy" (dict "value" .Values.agent.flb.resizePolicy "path" "agent.flb.resizePolicy" "kubeVersion" .Capabilities.KubeVersion.GitVersion "indent" 10) }}
-{{- end }}              
+{{- end }}
+{{- with include "groundcover.ebpfProfiler.container" (dict "root" $ "sensorValues" $sensorValues) }}
+{{- . | nindent 8 }}
+{{- end }}
       dnsPolicy: ClusterFirstWithHostNet
       hostNetwork: {{ default false .Values.agent.hostNetwork }}
       hostPID: true

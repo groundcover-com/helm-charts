@@ -633,6 +633,10 @@ apmIngestor:
       {{- end }}
       samplingRatio: {{ $sensorValues.apmIngestor.otel.direct.samplingRatio }}
       maxConcurrentRequests: {{ include "groundcover.nonNegativeInteger" (dict "path" "maxConcurrentRequests" "value" (dig "apmIngestor" "otel" "direct" "maxConcurrentRequests" 0 $sensorValues)) }}
+      {{- $syncLogExport := dig "logs" "pipeline" "parallelProcessing" "enabled" false $sensorValues }}
+      maxConcurrentLogExports: {{ include "groundcover.nonNegativeInteger" (dict "path" "maxConcurrentLogExports" "value" (ternary (dig "apmIngestor" "otel" "direct" "maxConcurrentLogExports" 0 $sensorValues) 0 $syncLogExport)) }}
+      maxLogRecordsInFlight: {{ include "groundcover.nonNegativeInteger" (dict "path" "maxLogRecordsInFlight" "value" (ternary (dig "apmIngestor" "otel" "direct" "maxLogRecordsInFlight" 0 $sensorValues) 0 $syncLogExport)) }}
+      syncLogExport: {{ $syncLogExport }}
       maxConcurrentTraceExportBytes: {{ include "groundcover.nonNegativeInteger" (dict "path" "maxConcurrentTraceExportBytes" "value" ($sensorValues.apmIngestor.otel.direct.maxConcurrentTraceExportBytes | default 0)) }}
       maxConcurrentTraceExportPodMemoryPercentage: {{ include "groundcover.nonNegativeInteger" (dict "path" "maxConcurrentTraceExportPodMemoryPercentage" "value" ($sensorValues.apmIngestor.otel.direct.maxConcurrentTraceExportPodMemoryPercentage | default 0)) }}
       maxConcurrentLogExportBytes: {{ include "groundcover.nonNegativeInteger" (dict "path" "maxConcurrentLogExportBytes" "value" ($sensorValues.apmIngestor.otel.direct.maxConcurrentLogExportBytes | default 0)) }}
@@ -733,7 +737,11 @@ logs:
   {{ end }}
   client:
     batchwait: 5000ms
-    batchsize: {{ int64 .Values.logBatchSize }}
+    {{- $logBatchSize := .Values.logBatchSize }}
+    {{- if dig "logs" "pipeline" "parallelProcessing" "enabled" false $sensorValues }}
+    {{- $logBatchSize = dig "logBatchSize" .Values.logBatchSize $sensorValues }}
+    {{- end }}
+    batchsize: {{ int64 $logBatchSize }}
     backoffConfig:
       minBackoff: {{ .Values.logBatchMinBackoff }}
       maxBackoff: {{ .Values.logBatchMaxBackoff }}
@@ -743,6 +751,8 @@ logs:
     dropRunningNamespaceLogs: {{  include "groundcover.dropRunningNamespaceLogs" .}}
     logBatchSendQueueWorkerCount: {{ .Values.logBatchSendQueueWorkerCount }} 
     logBatchSendQueueMaxSize : {{ dig "logBatchSendQueueMaxSize" .Values.logBatchSendQueueMaxSize $sensorValues }}
+    {{- $logQueueMemoryPercentage := dig "logBatchSendQueuePodMemoryPercentage" .Values.logBatchSendQueuePodMemoryPercentage $sensorValues }}
+    logBatchSendQueuePodMemoryPercentage: {{ include "groundcover.nonNegativeInteger" (dict "path" "logBatchSendQueuePodMemoryPercentage" "value" $logQueueMemoryPercentage) }}
     maxLogLinesPerBatch: {{ .Values.maxLogLinesPerBatch }}
     otlpExportLimits:
       jsonFlattenMaxDepth: {{ .Values.jsonFlattenMaxDepth }}
@@ -771,7 +781,9 @@ logs:
     maxLogSize: {{ .Values.maxLogSize }}
     oldLogDropThreshold: {{ .sensorValues.logs.pipeline.dropOldLogs.dropThreshold }} 
     oldLogDropAlwaysThreshold: {{ .sensorValues.logs.pipeline.dropOldLogs.dropAlwaysThreshold }}
-    oldLogDelayStart: {{ .sensorValues.logs.pipeline.dropOldLogs.delayStart }} 
+    oldLogDelayStart: {{ .sensorValues.logs.pipeline.dropOldLogs.delayStart }}
+    parallelProcessing:
+      enabled: {{ dig "logs" "pipeline" "parallelProcessing" "enabled" false $sensorValues }}
 otelTracesAsLogs: true
 otelPreprocess: true
 tracesOtlpEndpoint:
