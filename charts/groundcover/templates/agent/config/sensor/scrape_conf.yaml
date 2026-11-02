@@ -1,4 +1,12 @@
-{{ if .Values.global.agent.enabled }}
+{{- define "sensor.scrape.configmap" -}}
+{{- $profile := .profile -}}
+{{- with .root -}}
+{{- $sensorValues := .Values.agent.sensor -}}
+{{- if $profile.name -}}
+{{- $out := dict -}}
+{{- include "sensor.profile.values" (dict "root" . "profile" $profile "out" $out) -}}
+{{- $sensorValues = $out.sensorValues -}}
+{{- end -}}
 apiVersion: v1
 data:
   logs-scrape-config.yaml: |-
@@ -50,8 +58,8 @@ data:
         target_label: __path__
       - target_label: source_type
         replacement: "k8s"
-{{- if .Values.agent.sensor.logs.customRelabelConfigs }}
-{{ toYaml .Values.agent.sensor.logs.customRelabelConfigs | indent 6 }}
+{{- if $sensorValues.logs.customRelabelConfigs }}
+{{ toYaml $sensorValues.logs.customRelabelConfigs | indent 6 }}
 {{- end }}
     - job_name: docker-logs
       docker_sd_configs:
@@ -72,7 +80,7 @@ data:
   metrics-scrape-config.yaml: |-
     global:
       scrape_interval: 10s
-{{- if or .Values.isk8s .Values.agent.sensor.receivers.metricsscraper.extraScrapeConfigs }}
+{{- if or .Values.isk8s $sensorValues.receivers.metricsscraper.extraScrapeConfigs }}
     scrape_configs:
 {{- if .Values.isk8s }}
       - job_name: "kubernetes-pods"
@@ -128,16 +136,16 @@ data:
           - source_labels: [__meta_kubernetes_pod_node_name]
             action: replace
             target_label: node
-{{- if .Values.agent.sensor.receivers.metricsscraper.customRelabelConfigs }}
-{{ toYaml .Values.agent.sensor.receivers.metricsscraper.customRelabelConfigs | indent 10 }}
+{{- if $sensorValues.receivers.metricsscraper.customRelabelConfigs }}
+{{ toYaml $sensorValues.receivers.metricsscraper.customRelabelConfigs | indent 10 }}
 {{- end }}
-{{- if .Values.agent.sensor.receivers.metricsscraper.customMetricRelabelConfigs }}
+{{- if $sensorValues.receivers.metricsscraper.customMetricRelabelConfigs }}
         metric_relabel_configs:
-{{ toYaml .Values.agent.sensor.receivers.metricsscraper.customMetricRelabelConfigs | indent 10 }}
+{{ toYaml $sensorValues.receivers.metricsscraper.customMetricRelabelConfigs | indent 10 }}
 {{- end }}
 {{- end }}
-{{- if .Values.agent.sensor.receivers.metricsscraper.extraScrapeConfigs }}
-{{ toYaml .Values.agent.sensor.receivers.metricsscraper.extraScrapeConfigs | indent 6 }}
+{{- if $sensorValues.receivers.metricsscraper.extraScrapeConfigs }}
+{{ toYaml $sensorValues.receivers.metricsscraper.extraScrapeConfigs | indent 6 }}
 {{- end }}
 {{- else }}
     scrape_configs: []
@@ -154,6 +162,15 @@ metadata:
     {{- if .Values.agent.additionalAnnotations }}
 {{ toYaml .Values.agent.additionalAnnotations | indent 4 }}
     {{- end }}
-  name: sensor-scrape-configuration
+  name: sensor-scrape-configuration{{ include "sensor.profile.suffix" $profile }}
   namespace: {{ .Release.Namespace }}
+{{- end -}}
+{{- end -}}
+{{ if .Values.global.agent.enabled }}
+{{- range $index, $profile := (.Values.agent.extraSensorProfiles | default (list (dict "name" ""))) }}
+{{- if $index }}
+---
+{{- end }}
+{{ include "sensor.scrape.configmap" (dict "root" $ "profile" $profile) }}
+{{- end }}
 {{ end }}

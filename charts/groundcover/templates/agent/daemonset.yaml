@@ -1,8 +1,14 @@
 {{ if .Values.global.agent.enabled }}
-{{- $sensorValues := deepCopy .Values.agent.sensor -}}
-{{- if .Values.agent.alligator -}}
-{{ $sensorValues = mergeOverwrite $sensorValues .Values.agent.alligator }}
-{{- end -}}
+{{- include "sensor.profiles.validate" . -}}
+{{- range $profile := (.Values.agent.extraSensorProfiles | default (list (dict "name" ""))) }}
+{{- with $ }}
+{{- $out := dict -}}
+{{- include "sensor.profile.values" (dict "root" . "profile" $profile "out" $out) -}}
+{{- $sensorValues := $out.sensorValues -}}
+{{- $suffix := include "sensor.profile.suffix" $profile -}}
+{{- if $profile.name }}
+---
+{{- end }}
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -11,11 +17,11 @@ metadata:
     {{- if .Values.agent.additionalAnnotations }}
 {{ toYaml .Values.agent.additionalAnnotations | indent 4 }}
     {{- end }}
-  name: {{ include "sensorDaemonSet.fullname" . }}
+  name: {{ include "sensorDaemonSet.fullname" . }}{{ $suffix }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "groundcover.labels" . | nindent 4 }}
-    app: sensor
+    app: sensor{{ $suffix }}
     app.kubernetes.io/name: sensor
     {{- if .Values.agent.additionalLabels }}
 {{ toYaml .Values.agent.additionalLabels | indent 4 }}
@@ -27,7 +33,7 @@ spec:
       maxUnavailable: {{ $sensorValues.maxUnavailable | quote }}
   selector:
     matchLabels:
-      app: sensor
+      app: sensor{{ $suffix }}
   template:
     metadata:
       annotations:
@@ -36,7 +42,10 @@ spec:
         vm.io/path: "vmetrics"
         vm.io/port: {{ (include "agent.monitoring.port" .) | quote  }}
         groundcover_version: {{ default .Chart.AppVersion .Values.global.origin.tag }}
-        checksum/sensor_config: {{ include (print $.Template.BasePath "/agent/config/sensor/config.yaml") . | sha256sum }}
+        checksum/sensor_config: {{ include "sensor.configmap" (dict "root" . "profile" $profile) | sha256sum }}
+        {{- if $profile.name }}
+        checksum/sensor_scrape_config: {{ include "sensor.scrape.configmap" (dict "root" . "profile" $profile) | sha256sum }}
+        {{- end }}
         {{- if .Values.agent.additionalAnnotations }}
 {{ toYaml .Values.agent.additionalAnnotations | indent 8 }}
         {{- end }}
@@ -44,7 +53,7 @@ spec:
 {{ toYaml .Values.agent.podAnnotations | indent 8 }}
         {{- end }}
       labels:
-        app: sensor
+        app: sensor{{ $suffix }}
         app.kubernetes.io/name: sensor
         {{- include "groundcover.labels" . | nindent 8 }}
         {{- if .Values.agent.gke.autopilot.enabled }}
@@ -61,11 +70,11 @@ spec:
       enableServiceLinks: {{ .Values.agent.enableServiceLinks }}
 {{- end }}
       imagePullSecrets: {{ include "imagePullSecrets" . }}
-{{- if .Values.agent.tolerations }}
+{{- with ($profile.tolerations | default .Values.agent.tolerations) }}
       tolerations:
-{{ toYaml .Values.agent.tolerations | indent 8 }}
+{{ toYaml . | indent 8 }}
 {{- end }}
-{{- if .Values.agent.affinity }}
+{{- if or .Values.agent.affinity $profile.affinity }}
 {{- if .Values.agent.gke.autopilot.enabled }}
       # Autopilot: keep pod (anti)affinity, drop nodeAffinity. The chart default
       # nodeAffinity targets an EKS label Autopilot rejects, and Autopilot restricts
@@ -77,12 +86,12 @@ spec:
 {{- end }}
 {{- else }}
       affinity:
-{{ toYaml .Values.agent.affinity | indent 8 }}
+{{ include "sensor.profile.affinity" (dict "root" . "profile" $profile) | indent 8 }}
 {{- end }}
 {{- end }}
-{{- if .Values.agent.nodeSelector }}
+{{- with (include "sensor.profile.nodeSelector" (dict "root" . "profile" $profile)) }}
       nodeSelector:
-{{ toYaml .Values.agent.nodeSelector | indent 8 }}
+{{ . | indent 8 }}
 {{- end }}
       containers:
         - env:
@@ -370,11 +379,11 @@ spec:
           name: sys-kernel-tracing
         - configMap:
             defaultMode: 420
-            name: sensor-configuration
+            name: sensor-configuration{{ $suffix }}
           name: sensor-configuration
         - configMap:
             defaultMode: 420
-            name: sensor-scrape-configuration
+            name: sensor-scrape-configuration{{ $suffix }}
           name: sensor-scrape-configuration
         - emptyDir: {}
           name: comm
@@ -410,5 +419,7 @@ spec:
 {{- end }}
 {{- with .Values.agent.extraVolumes }}
         {{- toYaml . | nindent 8 }}
+{{- end }}
+{{- end }}
 {{- end }}
 {{- end }}

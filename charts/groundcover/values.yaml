@@ -600,6 +600,7 @@ agent:
             values:
             - fargate
   nodeSelector:
+  extraSensorProfiles: []
   priorityClassName:
   extraVolumes: []
   extraVolumeMounts: []

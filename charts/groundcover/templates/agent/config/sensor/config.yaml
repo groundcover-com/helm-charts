@@ -1,10 +1,10 @@
-{{ if .Values.global.agent.enabled }}
-{{- $sensorValues := deepCopy .Values.agent.sensor -}}
-{{- $sensorValues = set $sensorValues "alligatorConfigurationExists" false -}}
-{{- if .Values.agent.alligator -}}
-{{ $sensorValues = mergeOverwrite $sensorValues .Values.agent.alligator }}
-{{- $sensorValues = set $sensorValues "alligatorConfigurationExists" true -}}
-{{- end -}}
+{{- define "sensor.configmap" -}}
+{{- $profile := .profile -}}
+{{- with .root -}}
+{{- $out := dict -}}
+{{- include "sensor.profile.values" (dict "root" . "profile" $profile "out" $out) -}}
+{{- $sensorValues := $out.sensorValues -}}
+{{- $sensorValues = set $sensorValues "alligatorConfigurationExists" (not (empty .Values.agent.alligator)) -}}
 {{- $sensorValues = set $sensorValues "serviceName" "sensor" -}}
 apiVersion: v1
 data:
@@ -22,6 +22,14 @@ metadata:
     {{- if .Values.agent.additionalAnnotations }}
 {{ toYaml .Values.agent.additionalAnnotations | indent 4 }}
     {{- end }}
-  name: sensor-configuration
+  name: sensor-configuration{{ include "sensor.profile.suffix" $profile }}
   namespace: {{ .Release.Namespace }}
-{{ end }}
+
+{{ end -}}
+{{- end -}}
+{{ if .Values.global.agent.enabled }}
+{{- range $profile := (.Values.agent.extraSensorProfiles | default (list (dict "name" ""))) }}
+---
+{{ include "sensor.configmap" (dict "root" $ "profile" $profile) }}
+{{- end -}}
+{{- end -}}
