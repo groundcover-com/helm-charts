@@ -6100,6 +6100,7 @@ metrics-ingester:
               name: '{{ include "groundcover.apikeySecretName" . }}'
   curl: *curlImage
   extraArgs:
+    sortLabels: "true"
     remoteWrite.url: '{{ include "ingester.buildRemoteWriteURLTargets" . }}'
     remoteWrite.rateLimit: '{{ include "ingester.buildRemoteWriteRateLimit" . }}'
     remoteWrite.maxDiskUsagePerURL: '{{ include "ingester.buildRemoteWriteMaxDiskUsagePerURL" . }}'
