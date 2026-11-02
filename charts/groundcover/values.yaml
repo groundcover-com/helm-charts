@@ -1170,7 +1170,7 @@ agent:
     natEntriesMaxSize: 131072
     childcountruleoverrides:
     - depth: 0
-      maxChildren: 100
+      maxChildren: 200
   priorityClass:
     create: true
     fullname:
