@@ -47,6 +47,7 @@ data:
     env: {{ include "groundcover.env" . }}
     fleetClientConfig:
       {{- include "groundcover.fleetClientConfig" . | nindent 6 }}
+    clusterInfoReportURL: {{ include "fleet-manager.cluster-info.url" . }}
     autonomousInfrastructure:
       enabled: {{ include "groundcover.autonomousInfrastructure.enabled" . | eq "true" }}
       mutatorDeployment: {{ include "groundcover.autonomousInfrastructure.mutatorName" . }}

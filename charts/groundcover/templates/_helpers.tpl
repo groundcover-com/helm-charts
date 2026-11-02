@@ -352,6 +352,10 @@ need it). Empty disables the check.
 {{- end -}}
 {{- end -}}
 
+{{- define "fleet-manager.cluster-info.url" -}}
+{{- printf "%s/api/client/v1/cluster-info" (include "fleet-manager.url" . | trimSuffix "/api/client/v2/config") -}}
+{{- end -}}
+
 {{- define "fleet-manager.base.url" -}}
 {{- if .Values.fleetClientConfig.overrideBaseURL -}}
     {{- .Values.fleetClientConfig.overrideBaseURL -}}
