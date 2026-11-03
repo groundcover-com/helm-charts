@@ -731,6 +731,7 @@ agent:
         # Applied after sample_types selection on scrapes. Zero uses 10000; negative values
         # are invalid. Higher values increase the per-request memory budget.
         maxDecodedSampleRows: 10000
+        minSamplePercent: 0.01
         # Pull pprof from pods on each sensor's own node. Pods opt in per profile type with
         # profiles.groundcover.com/<type>.scrape: "true" and the port net/http/pprof listens
         # on: <type>.port: "6060", or <type>.port_name: "pprof"; optional <type>.path and
@@ -2168,6 +2169,7 @@ ingestor:
       # Maximum decoded sample rows per raw pprof, Pyroscope or native OTLP upload.
       # Zero uses 10000; negative values are invalid. Other payload/normalization limits still apply.
       maxDecodedSampleRows: 10000
+      minSamplePercent: 0.01
   exporters:
     remotewrite:
       usePrometheusCompatibleNaming: true

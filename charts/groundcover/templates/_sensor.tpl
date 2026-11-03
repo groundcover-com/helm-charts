@@ -54,6 +54,7 @@ receivers:
   {{- if or $sensorValues.ingestionEnabled $sensorValues.collectionEnabled }}
   profiles:
     maxDecodedSampleRows: {{ include "groundcover.nonNegativeInteger" (dict "path" "maxDecodedSampleRows" "value" (dig "receivers" "profiles" "maxDecodedSampleRows" 10000 $sensorValues)) | trimAll "\"" }}
+    minSamplePercent: {{ include "groundcover.profileSamplePercent" (dig "receivers" "profiles" "minSamplePercent" 0.01 $sensorValues) }}
     {{- if $sensorValues.ingestionEnabled }}
     enabled: {{ dig "receivers" "profiles" "enabled" false $sensorValues }}
     port: {{ dig "receivers" "profiles" "port" 8028 $sensorValues }}

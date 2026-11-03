@@ -127,6 +127,17 @@ that YAML has already converted to a fractional or scientific-notation float.
 {{- $rendered | quote -}}
 {{- end -}}
 
+{{- define "groundcover.profileSamplePercent" -}}
+{{- if not (or (kindIs "float64" .) (kindIs "int" .) (kindIs "int64" .)) -}}
+{{- fail "minSamplePercent must be a finite percentage between 0 and 100" -}}
+{{- end -}}
+{{- $percent := float64 . -}}
+{{- if or (ne $percent $percent) (lt $percent 0.0) (gt $percent 100.0) -}}
+{{- fail "minSamplePercent must be a finite percentage between 0 and 100" -}}
+{{- end -}}
+{{- $percent -}}
+{{- end -}}
+
 {{/*
 Selector labels
 */}}
