@@ -175,9 +175,9 @@ spec:
               scheme: HTTP
               path: /health
               port: health-http
-            initialDelaySeconds: 10
-            periodSeconds: 15
-            failureThreshold: 20
+            initialDelaySeconds: 0
+            periodSeconds: 2
+            failureThreshold: 30
           livenessProbe:
             httpGet:
               scheme: HTTP
@@ -287,9 +287,9 @@ spec:
               port: http
               scheme: HTTP
             timeoutSeconds: 1
-            periodSeconds: 10
+            periodSeconds: 2
             successThreshold: 1
-            failureThreshold: 3
+            failureThreshold: 15
           env:
             - name: GC_GROUNDCOVERVERSION
               valueFrom:

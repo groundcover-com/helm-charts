@@ -524,7 +524,7 @@ fleetClientConfig:
   overrideURL: ""
   overrideBaseURL: ""
   requestIntervalEnabled: true
-  maximumInitialJitter: 30s
+  maximumInitialJitter: 5s
   requestInterval: 30s
   initialUpdateTimeout: 60s # setting value to 0 means sensor will not wait for initial update
   insecureSkipVerify: false
