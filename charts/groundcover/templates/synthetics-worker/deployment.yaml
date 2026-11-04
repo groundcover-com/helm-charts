@@ -57,6 +57,12 @@ spec:
       imagePullSecrets: {{ include "imagePullSecrets" . }}
       containers:
       - env:
+        {{- $region := include "groundcover.region" . | trim }}
+        {{- $backendRegion := (.Values.portal.backendSettings.config | default dict).region | default "" | trim }}
+        {{- if and (or (eq $region "") (eq $region "undefined")) $backendRegion (ne $backendRegion "undefined") }}
+        - name: GC_REGION
+          value: {{ $backendRegion | quote }}
+        {{- end }}
         - name: GC_RUNNINGNAMESPACE
           valueFrom:
             fieldRef:
