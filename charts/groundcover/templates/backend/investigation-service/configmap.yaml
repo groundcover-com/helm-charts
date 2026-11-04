@@ -63,6 +63,20 @@ data:
       sweepLimit: {{ .Values.investigationService.launch.sweepLimit }}
       handleTimeout: {{ .Values.investigationService.launch.handleTimeout }}
 
+    commHub:
+      baseURL: {{ printf "http://%s:8080" (include "comm-hub.fullname" .) | quote }}
+      requestTimeout: {{ .Values.investigationService.commHub.requestTimeout }}
+
+    slack:
+      workers: {{ .Values.investigationService.slack.workers }}
+      queueSize: {{ .Values.investigationService.slack.queueSize }}
+      sweepInterval: {{ .Values.investigationService.slack.sweepInterval }}
+      sweepJitter: {{ .Values.investigationService.slack.sweepJitter }}
+      sweepLimit: {{ .Values.investigationService.slack.sweepLimit }}
+      handleTimeout: {{ .Values.investigationService.slack.handleTimeout }}
+      minGap: {{ .Values.investigationService.slack.minGap }}
+      appURL: {{ include "groundcover.frontendUrl" . | quote }}
+
     telemetry:
       traces:
         {{- if eq (include "telemetry.enabled" .) "true" }}

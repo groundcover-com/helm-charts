@@ -1708,6 +1708,9 @@ queue:
   config:
     chunk:
       max_age: 2s
+      # queueBucketStreamer cannot split an object, so this alone bounds the
+      # decompressed request it sends the ingestor.
+      max_compressed_bytes: 102400
     store:
       # Key prefixes in the bucket; MUST differ from each other. Objects land
       # beside vector's v3/ / v5/ prefixes without colliding with them.
@@ -1820,17 +1823,18 @@ queueBucketStreamer:
       max_pending_per_signal: 1000
     worker: {}
   # Defaults merged under every signals entry (an entry's own keys win).
-  # Batching is by the listed (compressed) object size: zstd OTLP inflates about
-  # 3x, and the ingestor bounds the decompressed request body, so keep
-  # max_batch_bytes modest. A scan batches a signal's fresh files once they
+  # Batching is by the listed (compressed) object size, but the ingestor bounds
+  # the decompressed body, and repetitive OTLP (CI test spans) inflates far past
+  # zstd's usual 3x, so keep max_batch_bytes small. min_batch_size MUST NOT
+  # exceed max_batch_bytes. A scan batches a signal's fresh files once they
   # total min_batch_size, or max_age has passed since its last batch.
   signalDefaults:
     format: OTLPProtobuf
     compression: zstd
     on_complete: delete
-    min_batch_size: 2097152
+    min_batch_size: 102400
     max_age: 10s
-    max_batch_bytes: 4194304
+    max_batch_bytes: 102400
     max_batch_files: 500
     max_concurrent: 4
   # One drained signal per key, merged over signalDefaults. An OTLP receiver
@@ -3416,6 +3420,16 @@ investigationService:
     sweepLimit: 100
     # A backstop: each agent-service call and Postgres statement has its own timeout.
     handleTimeout: 2m
+  commHub:
+    requestTimeout: 10s
+  slack:
+    workers: 4
+    queueSize: 100
+    sweepInterval: 5s
+    sweepJitter: 1s
+    sweepLimit: 100
+    handleTimeout: 2m
+    minGap: 1s
   tracing:
     writeTimeout: 5s
     flushInterval: 5s

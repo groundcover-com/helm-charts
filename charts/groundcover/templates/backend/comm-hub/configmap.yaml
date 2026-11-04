@@ -86,6 +86,8 @@ data:
     # router). Defaults to the in-namespace agent-service; the bridge appends the in-cluster-only
     # run path. Override with commHub.agentServiceUrl to point elsewhere.
     agentServiceUrl: {{ .Values.commHub | dig "agentServiceUrl" (printf "http://%s:8080" (include "agent-service.fullname" $)) | quote }}
+    investigations:
+      enabled: {{ and .Values.global.backend.enabled .Values.global.investigationService.enabled }}
 
     cursorCloud:
       baseURL: {{ .Values.commHub.cursorCloud.baseURL | default "https://api.cursor.com" | quote }}
