@@ -383,8 +383,8 @@ global:
     initContainers:
       image:
         registry: "public.ecr.aws/groundcovercom"
-        repository: postgres
-        tag: "18.4-20260716-1"
+        repository: tools
+        tag: "20261104"
     auth:
       database: "postgres"  # Default admin database for connections (use "defaultdb" for Akamai)
 
@@ -548,7 +548,7 @@ statefulset-modifier:
   sizePatches: true
   image:
     repository: '{{ .Values.global.origin.registry }}/tools' 
-    tag: '20260929'
+    tag: '20261104'
 
 agent:
   # Set to false to disable the automatic injection of service environment variables
@@ -627,7 +627,7 @@ agent:
     # Overrides agent.listenAddress for fluent-bit only. Leave empty to inherit it.
     bindAddress: ""
     image:
-      tag: 4.2.8-20261013-1
+      tag: "4.2"
       repository: "{{ .Values.global.origin.registry }}/fluent/fluent-bit"
     resources:
       requests:
@@ -6059,7 +6059,7 @@ metricsIngester:
 curl: &curlImage
   image:
     repository: '{{ .Values.global.origin.registry }}/tools'
-    tag: '20260929'
+    tag: '20261104'
 
 metrics-ingester:
   # Set to false to disable the automatic injection of service environment variables
