@@ -943,6 +943,7 @@ agent:
             aggregationInterval: 60s
             # Nonempty bounds enable native h/d histograms, in the incoming metric's units.
             histogramBuckets: []
+            timerHistogramBuckets: []
     pprof:
       enabled: true
       uploaderType: pyroscope
@@ -2370,6 +2371,7 @@ ingestor:
           aggregationInterval: 60s
           # Nonempty bounds enable native h/d histograms, in the incoming metric's units.
           histogramBuckets: []
+          timerHistogramBuckets: []
   rum:
     sourceMaps:
       enabled: true
