@@ -1331,25 +1331,54 @@ dbManager:
     windowWidth: "2m"
     windowSettle: "15s"
     queryTimeout: "30s"
+  # Sibling tiers share contended CPU by weight; ClickHouse priority is strict
+  # (lower value wins) and would starve the lower tiers.
   workloadScheduling:
+    # Opt-in. While false, db-manager drops every workload and resource on each shard.
+    enabled: false
     Resources:
       - Name: cpu
         Clauses:
+          - "MASTER THREAD"
           - "WORKER THREAD"
     Workloads:
       - Name: all
-      - Name: heavy
-        Parent: all
         Settings:
-          priority: 1
-      - Name: light
-        Parent: all
-        Settings:
-          priority: 8
+          max_concurrent_threads_ratio_to_cores: 2
       - Name: dispatch-center
         Parent: all
         Settings:
-          priority: 20
+          weight: 32
+      - Name: monitors
+        Parent: all
+        Settings:
+          weight: 16
+      - Name: ingestion
+        Parent: all
+        Settings:
+          weight: 8
+      # Queries without a workload setting run as 'default'; without this tier
+      # they bypass the scheduler and its thread cap.
+      - Name: default
+        Parent: all
+        Settings:
+          weight: 8
+      - Name: light
+        Parent: all
+        Settings:
+          weight: 4
+      - Name: heavy
+        Parent: all
+        Settings:
+          weight: 2
+      - Name: mcp
+        Parent: all
+        Settings:
+          weight: 1
+      - Name: api
+        Parent: all
+        Settings:
+          weight: 1
   db:
     host: '{{ splitList ":" (include "postgresql.base.url" .) | first }}'
     port: '{{ splitList ":" (include "postgresql.base.url" .) | last }}'
@@ -1574,6 +1603,7 @@ bucketStreamer:
         async_insert: 0
         insert_deduplicate: 1
         deduplicate_blocks_in_dependent_materialized_views: 1
+        workload: ingestion
   # Defaults merged under every signals entry (an entry's own keys win).
   # min_batch_size / max_age: a scan batches a signal's fresh files once they
   # total min_batch_size listed (compressed) bytes, or max_age has passed since
@@ -6685,6 +6715,9 @@ monitors-manager:
             customSettings:
               - setting: enable_analyzer
                 value: "1"
+              # Native monitors are Grafana alert rules evaluated through this datasource.
+              - setting: workload
+                value: monitors
           access: proxy
           secureJsonData:
             password: $CLICKHOUSE_PASSWORD
