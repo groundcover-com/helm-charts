@@ -1187,6 +1187,7 @@ agent:
     httpUnlimitedEndpoints: '{{ join "," .Values.agent.sensor.genaiUnlimitedEndpoints }}'
     http2UnlimitedEndpoints: '{{ join "," .Values.agent.sensor.genaiUnlimitedEndpoints }}'
     natEntriesMaxSize: 131072
+    clusteringMaxHosts: 0
     childcountruleoverrides:
     - depth: 0
       maxChildren: 200

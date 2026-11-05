@@ -508,7 +508,7 @@ pidcache:
 {{ end }}
 
 cluster:
-  maxhosts: 10000
+  maxhosts: {{ $sensorValues.clusteringMaxHosts | default 0 | int }}
   maxchildrens: 40
   childcountruleoverrides: {{ toJson $sensorValues.childcountruleoverrides }}
 
