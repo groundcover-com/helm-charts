@@ -126,7 +126,11 @@ data:
       NativePort: {{ .Values.global.clickhouse.containerPorts.tcp | int }}
     InsertDeduplication:
       Window: {{ .Values.dbManager.insertDeduplication.window | int }}
-      ExcludeTables: {{ .Values.dbManager.insertDeduplication.excludeTables | toJson }}
+      {{- $excludeTables := .Values.dbManager.insertDeduplication.excludeTables }}
+      {{- if (include "bucket-streamer.enabled" .) }}
+      {{- $excludeTables = without $excludeTables "aws_cost_reports_raw_v2" }}
+      {{- end }}
+      ExcludeTables: {{ $excludeTables | toJson }}
     DictionaryUser:
       Enabled: {{ .Values.global.clickhouse.dictionaryUser.enabled }}
       User: {{ include "clickhouse.dictionaryUsername" . }}

@@ -1662,6 +1662,9 @@ bucketStreamer:
       prefix: v5/rum_events/
       input_table: rum_events_v1
       extra_shards: true
+    aws_cost_reports:
+      prefix: v5/aws_cost_reports_raw_v2/
+      input_table: aws_cost_reports_raw_v2
   # Extra environment variables for the streamer container (rendered through tpl).
   env: []
   resources:
@@ -3453,6 +3456,13 @@ investigationService:
     sweepLimit: 100
     # A backstop: each agent-service call and Postgres statement has its own timeout.
     handleTimeout: 2m
+  closureMetrics:
+    workers: 1
+    queueSize: 100
+    sweepInterval: 1m
+    sweepJitter: 5s
+    sweepLimit: 100
+    handleTimeout: 30s
   commHub:
     requestTimeout: 10s
   slack:
@@ -5622,6 +5632,25 @@ vector:
               timeout_secs: 5
             healthcheck:
               enabled: false
+        awsCostReports:
+          s3_aws_cost_reports:
+            type: "aws_s3"
+            inputs:
+              - table_write_routing.aws_cost_reports
+            bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
+            region: '{{ .Values.vector.objectStorage.region }}'
+            key_prefix: "v5/aws_cost_reports_raw_v2/"
+            framing:
+              method: newline_delimited
+            encoding:
+              codec: json
+              timestamp_format: rfc3339
+            batch:
+              max_bytes: 25000000
+              max_events: 5000
+              timeout_secs: 5
+            healthcheck:
+              enabled: false
       gcs:
         logs:
           gcs_logs:
@@ -5787,6 +5816,25 @@ vector:
             encoding:
               codec: json
               timestamp_format: rfc3339
+            healthcheck:
+              enabled: false
+        awsCostReports:
+          gcs_aws_cost_reports:
+            type: gcp_cloud_storage
+            inputs:
+              - table_write_routing.aws_cost_reports
+            key_prefix: v5/aws_cost_reports_raw_v2/
+            compression: zstd
+            bucket: '{{ .Values.vector.objectStorage.gcsBucket }}'
+            framing:
+              method: newline_delimited
+            encoding:
+              codec: json
+              timestamp_format: rfc3339
+            batch:
+              max_bytes: 25000000
+              max_events: 5000
+              timeout_secs: 5
             healthcheck:
               enabled: false
       azure:
@@ -5963,6 +6011,26 @@ vector:
             batch:
               max_bytes: 250000000
               max_events: 250000
+              timeout_secs: 5
+            healthcheck:
+              enabled: false
+        awsCostReports:
+          azure_aws_cost_reports:
+            type: azure_blob
+            inputs:
+              - table_write_routing.aws_cost_reports
+            container_name: '{{ .Values.vector.objectStorage.azureBlobContainer }}'
+            connection_string: '{{ .Values.vector.objectStorage.azureConnectionString }}'
+            blob_prefix: v5/aws_cost_reports_raw_v2/
+            compression: zstd
+            framing:
+              method: newline_delimited
+            encoding:
+              codec: json
+              timestamp_format: rfc3339
+            batch:
+              max_bytes: 25000000
+              max_events: 5000
               timeout_secs: 5
             healthcheck:
               enabled: false

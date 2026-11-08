@@ -63,6 +63,14 @@ data:
       sweepLimit: {{ .Values.investigationService.launch.sweepLimit }}
       handleTimeout: {{ .Values.investigationService.launch.handleTimeout }}
 
+    closureMetrics:
+      workers: {{ .Values.investigationService.closureMetrics.workers }}
+      queueSize: {{ .Values.investigationService.closureMetrics.queueSize }}
+      sweepInterval: {{ .Values.investigationService.closureMetrics.sweepInterval }}
+      sweepJitter: {{ .Values.investigationService.closureMetrics.sweepJitter }}
+      sweepLimit: {{ .Values.investigationService.closureMetrics.sweepLimit }}
+      handleTimeout: {{ .Values.investigationService.closureMetrics.handleTimeout }}
+
     commHub:
       baseURL: {{ printf "http://%s:8080" (include "comm-hub.fullname" .) | quote }}
       requestTimeout: {{ .Values.investigationService.commHub.requestTimeout }}

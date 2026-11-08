@@ -636,13 +636,18 @@ sinks:
 {{- tpl (toYaml .Values.vector.customComponents.sinks.metrics) $ | nindent 2 }}
 {{ if .Values.global.backend.enabled }} {{- /* these sinks are always local only, no matter of ingestion mode */ -}}
 {{- tpl (toYaml (dict "clickhouse_aws_billing_report" .Values.vector.customComponents.sinks.local.custom.clickhouse_aws_billing_report)) $ | nindent 2 }}
+{{- if not (include "vector.awsCostReportsViaObjectStorage" .) }}
 {{- tpl (toYaml (dict "clickhouse_aws_cost_reports" .Values.vector.customComponents.sinks.local.custom.clickhouse_aws_cost_reports)) $ | nindent 2 }}
+{{- end }}
 {{ end }}
 {{- /* ingestion modes */ -}}
 {{ if and (not (empty .Values.vector.objectStorage.s3Bucket)) .Values.vector.objectStorage.allowed }} {{- /* ingestion using s3 */}}
 {{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.logsPipeline "sinks" .Values.vector.customComponents.sinks.s3.logs)) $ -}}
 {{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.tracesPipeline "sinks" .Values.vector.customComponents.sinks.s3.traces)) $ -}}
 {{- tpl (toYaml .Values.vector.customComponents.sinks.s3.custom) $ | nindent 2 }}
+{{- if (include "bucket-streamer.enabled" .) }}
+{{- tpl (toYaml .Values.vector.customComponents.sinks.s3.awsCostReports) $ | nindent 2 }}
+{{- end }}
 {{- /* Standby duplicate writes: same bucket, but every sink's key_prefix
        gets the standby prefix prepended. The prefix is required non-empty
        so we don't accidentally re-emit to the primary path. Backups are
@@ -656,6 +661,9 @@ sinks:
 {{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.logsPipeline "sinks" .Values.vector.customComponents.sinks.gcs.logs)) $ -}}
 {{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.tracesPipeline "sinks" .Values.vector.customComponents.sinks.gcs.traces )) $ -}}
 {{- tpl (toYaml .Values.vector.customComponents.sinks.gcs.custom) $ | nindent 2 }}
+{{- if (include "bucket-streamer.enabled" .) }}
+{{- tpl (toYaml .Values.vector.customComponents.sinks.gcs.awsCostReports) $ | nindent 2 }}
+{{- end }}
 {{ if and .Values.global.clickhouse.ha.enabled (not (empty .Values.dbManager.standbyCluster.objectStoragePathPrefix)) (not .Values.vector.standbyCluster.disableSinks) }}
 {{- tpl (include "vector.renderStandbySinks" (dict "root" $ "sourceKey" "gcs" "prefixField" "key_prefix")) $ }}
 {{ end }}
@@ -663,6 +671,9 @@ sinks:
 {{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.logsPipeline "sinks" .Values.vector.customComponents.sinks.azure.logs)) $ -}}
 {{- tpl (include "createSinksOutput" (dict "pipeline" .Values.vector.tracesPipeline "sinks" .Values.vector.customComponents.sinks.azure.traces)) $ -}}
 {{- tpl (toYaml .Values.vector.customComponents.sinks.azure.custom) $ | nindent 2 }}
+{{- if (include "bucket-streamer.enabled" .) }}
+{{- tpl (toYaml .Values.vector.customComponents.sinks.azure.awsCostReports) $ | nindent 2 }}
+{{- end }}
 {{ if and .Values.global.clickhouse.ha.enabled (not (empty .Values.dbManager.standbyCluster.objectStoragePathPrefix)) (not .Values.vector.standbyCluster.disableSinks) }}
 {{- tpl (include "vector.renderStandbySinks" (dict "root" $ "sourceKey" "azure" "prefixField" "blob_prefix")) $ }}
 {{ end }}
@@ -774,6 +785,17 @@ Backup sinks are intentionally not duplicated. Callers guard on
 global.clickhouse.ha.enabled, a non-empty standby path prefix, and the
 matching ingestion mode being active.
 */}}
+{{/*
+True when the cost rows take the object-storage path: bucket-streamer drains it
+and one of the S3/GCS/Azure ingestion branches below renders the sink. With
+bucket-streamer on but no Vector object-storage branch, the direct ClickHouse
+sink must stay or the rows have nowhere to go.
+*/}}
+{{- define "vector.awsCostReportsViaObjectStorage" -}}
+{{- $os := .Values.vector.objectStorage -}}
+{{- if and (include "bucket-streamer.enabled" .) $os.allowed (or $os.s3Bucket $os.gcsBucket (and $os.azureBlobContainer $os.azureConnectionString)) -}}true{{- end -}}
+{{- end -}}
+
 {{- define "vector.renderStandbySinks" -}}
 {{- $prefix := trimAll "/" .root.Values.dbManager.standbyCluster.objectStoragePathPrefix -}}
 {{- $source := index .root.Values.vector.customComponents.sinks .sourceKey -}}
@@ -800,6 +822,14 @@ matching ingestion mode being active.
   {{- $orig := trimPrefix "/" (default "" (index $sink $field)) -}}
   {{- $_ := set $copy $field (printf "%s/%s" $prefix $orig) -}}
   {{- $_ := set $standbyCustom (printf "%s_standby" $name) $copy -}}
+{{- end -}}
+{{- if (include "bucket-streamer.enabled" .root) -}}
+{{- range $name, $sink := $source.awsCostReports -}}
+  {{- $copy := deepCopy $sink -}}
+  {{- $orig := trimPrefix "/" (default "" (index $sink $field)) -}}
+  {{- $_ := set $copy $field (printf "%s/%s" $prefix $orig) -}}
+  {{- $_ := set $standbyCustom (printf "%s_standby" $name) $copy -}}
+{{- end -}}
 {{- end -}}
 {{- toYaml $standbyCustom | nindent 2 -}}
 {{- end -}}
