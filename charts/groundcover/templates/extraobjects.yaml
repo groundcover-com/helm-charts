@@ -1,4 +1,27 @@
+{{- /* A templated .spec.minReplicas/.spec.maxReplicas renders as a quoted string; convert only those two fields, only when they hold a plain integer, so int32 CRD fields accept them. Other objects render unchanged. */ -}}
+{{- define "groundcover.extraObject" -}}
+{{- $rendered := tpl (toYaml (index . 0)) (index . 1) -}}
+{{- $obj := fromYaml $rendered -}}
+{{- $spec := get $obj "spec" -}}
+{{- $ints := dict -}}
+{{- if kindIs "map" $spec -}}
+{{- range $field := list "minReplicas" "maxReplicas" -}}
+{{- $value := get $spec $field -}}
+{{- if and (kindIs "string" $value) (regexMatch "^[0-9]+$" $value) -}}
+{{- $_ := set $ints $field (atoi $value) -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- if $ints -}}
+{{- range $field, $int := $ints -}}
+{{- $_ := set $spec $field $int -}}
+{{- end -}}
+{{- toYaml $obj -}}
+{{- else -}}
+{{- $rendered -}}
+{{- end -}}
+{{- end -}}
 {{ range $k, $v := .Values.groundcover.extraObjects }}
 ---
-{{ tpl (toYaml $v ) $ }}
+{{ include "groundcover.extraObject" (list $v $) }}
 {{ end }}

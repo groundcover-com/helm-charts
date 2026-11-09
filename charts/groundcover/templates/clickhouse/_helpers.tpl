@@ -192,6 +192,11 @@ rejected, so gate on the tag.
 {{- if and $version (semverCompare ">=26.8" $version) -}}true{{- end -}}
 {{- end -}}
 
+{{- define "clickhouse.isAtLeast26836" -}}
+{{- $version := regexFind "^[0-9]+\\.[0-9]+\\.[0-9]+" (toString .Values.image.tag) -}}
+{{- if and $version (semverCompare ">=26.8.36" $version) -}}true{{- end -}}
+{{- end -}}
+
 {{- define "clickhouse.versionCompatProfileSettings" -}}
 {{- if include "clickhouse.isAtLeast268" . -}}
 <input_format_read_datetime_number_as_raw_value>1</input_format_read_datetime_number_as_raw_value>

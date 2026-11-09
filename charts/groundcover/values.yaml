@@ -1374,6 +1374,10 @@ dbManager:
         Parent: all
         Settings:
           weight: 2
+      - Name: autoinfra
+        Parent: all
+        Settings:
+          weight: 2
       - Name: mcp
         Parent: all
         Settings:
@@ -3956,7 +3960,7 @@ clickhouse: &primary
           <distributed_connections_pool_size>{{ .Values.maxDistributedConnections }}</distributed_connections_pool_size>
           <max_distributed_connections>{{ .Values.maxDistributedConnections }}</max_distributed_connections>                
           <allow_simdjson>{{ .Values.allowSimdjson }}</allow_simdjson>
-          <allow_experimental_analyzer>0</allow_experimental_analyzer>
+          <allow_experimental_analyzer>{{ if include "clickhouse.isAtLeast26836" . }}1{{ else }}0{{ end }}</allow_experimental_analyzer>
           <date_time_input_format>best_effort</date_time_input_format>
           {{- with include "clickhouse.versionCompatProfileSettings" . }}{{ . | nindent 6 }}{{ end }}
           <async_insert>true</async_insert>
