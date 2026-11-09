@@ -6,7 +6,7 @@
 {{- if not (kindIs "bool" $enabled) -}}
   {{- fail "agent.sensor.receivers.profiles.ebpfProfiler.enabled must be a boolean" -}}
 {{- end -}}
-{{- $sensorWithoutEBPF := false -}}
+{{- $sensorWithoutEBPF := not (dig "ebpfEnabled" true $sensorValues) -}}
 {{- $ebpfSwitchFromRef := false -}}
 {{- range $sensorValues.env -}}
   {{- if eq (toString .name) "FLORA_EBPFENABLED" -}}

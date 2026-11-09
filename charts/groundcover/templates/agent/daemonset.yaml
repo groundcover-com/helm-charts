@@ -113,6 +113,14 @@ spec:
               value: {{ "kubernetes" }}
             - name: FLORA_NATTRACKER_NATENTRIESMAXSIZE
               value: {{ $sensorValues.natEntriesMaxSize | quote }}
+            {{- $ebpfEnabled := dig "ebpfEnabled" true $sensorValues }}
+            {{- if not (kindIs "bool" $ebpfEnabled) }}
+              {{- fail "agent.sensor.ebpfEnabled must be a boolean" }}
+            {{- end }}
+            {{- if not $ebpfEnabled }}
+            - name: FLORA_EBPFENABLED
+              value: "false"
+            {{- end }}
             - name: NODE_NAME
               valueFrom:
                 fieldRef:
