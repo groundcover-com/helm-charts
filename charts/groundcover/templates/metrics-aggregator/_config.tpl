@@ -86,6 +86,7 @@ exporters:
     tlsCAFile: {{ $sensorValues.exporters.remotewrite.tlsCAFile | default "" | quote }}
     maxDiskUsagePerURL: {{ $sensorValues.exporters.remotewrite.maxDiskUsagePerURL }}
     tmpDataPath: {{ $sensorValues.exporters.remotewrite.tmpDataPath }}
+    disableOnDiskQueue: {{ $sensorValues.exporters.remotewrite.disableOnDiskQueue }}
     numberOfConcurrentQueues: {{ $sensorValues.exporters.remotewrite.numberOfConcurrentQueues }}
     forcePrometheusProtocol: {{ $sensorValues.exporters.remotewrite.forcePrometheusProtocol }}
     memoryAllowedBytes: {{ $sensorValues.exporters.remotewrite.memoryAllowedBytes }}

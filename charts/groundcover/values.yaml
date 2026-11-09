@@ -1346,8 +1346,11 @@ dbManager:
           - "WORKER THREAD"
     Workloads:
       - Name: all
+        # A CPU throttler, not a thread cap: with cpu_slot_preemption a cap on
+        # concurrent threads deadlocks concurrent INSERTs into tables with
+        # materialized views once they reach the slot limit.
         Settings:
-          max_concurrent_threads_ratio_to_cores: 2
+          max_cpu_share: 0.9
       - Name: dispatch-center
         Parent: all
         Settings:
@@ -2485,6 +2488,7 @@ metricsAggregator:
       usePrometheusCompatibleNaming: false
       forcePrometheusProtocol: false
       url: '{{ template "metrics-aggregator.write.url" . }}'
+      disableOnDiskQueue: false
   pipelines:
     metrics:
       enricherEnabled: false
