@@ -564,6 +564,7 @@ apmIngestor:
     maxIdleConns: {{ dig "apmIngestor" "otlpConnectionPool" "maxIdleConns" 0 $sensorValues }}
     maxIdleConnsPerHost: {{ dig "apmIngestor" "otlpConnectionPool" "maxIdleConnsPerHost" 0 $sensorValues }}
     idleConnTimeout: {{ dig "apmIngestor" "otlpConnectionPool" "idleConnTimeout" "0s" $sensorValues }}
+    batchSendQueuePodMemoryPercentage: {{ include "groundcover.nonNegativeInteger" (dict "path" "batchSendQueuePodMemoryPercentage" "value" (dig "apmIngestor" "tracesOtlpEndpoint" "batchSendQueuePodMemoryPercentage" 0 $sensorValues)) }}
     batchSendQueueWorkerCount: {{ dig "apmIngestor" "tracesOtlpEndpoint" "batchSendQueueWorkerCount" 0 $sensorValues }}
     batchSendQueueMaxSize: {{ dig "apmIngestor" "tracesOtlpEndpoint" "batchSendQueueMaxSize" 0 $sensorValues }}
     {{- $traceQueueMaxBytes := dig "apmIngestor" "tracesOtlpEndpoint" "batchSendQueueMaxBytes" 0 $sensorValues }}

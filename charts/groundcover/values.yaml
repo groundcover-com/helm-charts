@@ -2269,6 +2269,7 @@ ingestor:
       # 0 derives the budget from the pod's memory limit.
       # Quote decimal byte counts to preserve int64 precision; units such as "1KB" are not supported.
       batchSendQueueMaxBytes: "0"
+      batchSendQueuePodMemoryPercentage: 3
       # Failed exports are retried with exponential backoff (500ms doubling to 30s) like
       # log batches; maxRetries is the total number of attempts, 0 keeps a single
       # attempt. 10 attempts wait about 90s in total, plus the write timeout per attempt.
@@ -2563,6 +2564,7 @@ metricsAggregator:
       # since a sender chooses its batch size. 0 derives it from the pod's memory limit.
       # Quote decimal byte counts to preserve int64 precision; units such as "1KB" are not supported.
       batchSendQueueMaxBytes: "0"
+      batchSendQueuePodMemoryPercentage: 3
       # Failed exports are retried with exponential backoff (500ms doubling to 30s) like
       # log batches; maxRetries is the total number of attempts, 0 keeps a single
       # attempt. 10 attempts wait about 90s in total, plus the write timeout per attempt.
@@ -4454,7 +4456,9 @@ vector:
     #         .float_attributes.random_number = to_int!(res.number)
   image:
     repository: public.ecr.aws/groundcovercom/vector
-    tag: 0.57.0-debian-20260730-1
+    tag: "0.58.0-debian"
+    # Echo rebuilds this tag in place; IfNotPresent would keep a stale node cache.
+    pullPolicy: Always
   lifecycle: 
     preStop:
       exec:
