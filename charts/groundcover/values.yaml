@@ -4436,6 +4436,7 @@ vector:
   tracesPipeline:
     inputs:
       - traces_from_logs
+      - traces_from_trace_rows
       - json_traces
     defaultSteps: []
     extraSteps: []
@@ -4496,6 +4497,8 @@ vector:
         port: 4327
       - name: http-traces
         port: 4328
+      - name: http-trace-rows
+        port: 4358
       - name: json-traces
         port: 4329
       - name: grpc-custom
@@ -4538,6 +4541,8 @@ vector:
       containerPort: 4327
     - name: http-traces
       containerPort: 4328
+    - name: http-trace-rows
+      containerPort: 4358
     - name: json-traces
       containerPort: 4329
     - name: grpc-custom
@@ -4706,6 +4711,15 @@ vector:
             keepalive:
               max_connection_age_jitter_factor: 0.1
               max_connection_age_secs: 300
+        otel_trace_rows:
+          type: opentelemetry
+          grpc:
+            address: 0.0.0.0:4357
+          http:
+            address: 0.0.0.0:4358
+            keepalive:
+              max_connection_age_jitter_factor: 0.1
+              max_connection_age_secs: 300
       json:
         json_logs:
           type: http
@@ -4799,6 +4813,20 @@ vector:
           type: "remap"
           source: |-
             . = .attributes
+        trace_rows_as_logs:
+          inputs:
+            - "otel_trace_rows.traces"
+          type: "trace_to_log"
+        traces_from_trace_rows:
+          inputs:
+            - "trace_rows_as_logs"
+          type: "remap"
+          source: |-
+            if exists(.resources) {
+              . = merge(object(.resources) ?? {}, object(.attributes) ?? {})
+            } else {
+              . = .attributes
+            }
         custom_from_logs:
           inputs:
             - "otel_logs_custom.logs"

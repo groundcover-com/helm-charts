@@ -100,6 +100,36 @@ http
 {{-  printf "%s/v1/logs" (include "vector.cluster.otlp.http.traces.endpoint" .) -}}
 {{- end -}}
 
+{{- define "vector.traceRows.rendered" -}}
+{{- $sources := .Values.vector.customComponents.sources.overrideSources -}}
+{{- $transforms := .Values.vector.customComponents.transforms.overrideTransforms -}}
+{{- if and (or (not $sources) (hasKey $sources "otel_trace_rows")) (or (not $transforms) (and (hasKey $transforms "trace_rows_as_logs") (hasKey $transforms "traces_from_trace_rows"))) -}}
+true
+{{- end -}}
+{{- end -}}
+
+{{- define "vector.nativeTracesRouted" -}}
+{{- $custom := .Values.vector.customComponents -}}
+{{- $missesTraceRows := false -}}
+{{- range $component := concat (values ($custom.transforms.extraTransforms | default dict)) (values ($custom.transforms.overrideTransforms | default dict)) (values ($custom.sinks.extraSinks | default dict)) -}}
+{{- $inputs := get ($component | default dict) "inputs" | default list -}}
+{{- if and (has "traces_from_logs" $inputs) (not (has "traces_from_trace_rows" $inputs)) -}}
+{{- $missesTraceRows = true -}}
+{{- end -}}
+{{- end -}}
+{{- if and (include "vector.traceRows.rendered" .) (has "traces_from_trace_rows" .Values.vector.tracesPipeline.inputs) (not $custom.sinks.overrideSinks) (not $missesTraceRows) -}}
+true
+{{- end -}}
+{{- end -}}
+
+{{- define "vector.cluster.otlp.http.trace-rows.port" -}}
+{{-  printf "4358"  -}}
+{{- end -}}
+
+{{- define "vector.cluster.otlp.http.trace-rows.url" -}}
+{{-  printf "%s://%s:%d/v1/traces" (include "vector.otlp.scheme" .) (include "vector.fullname" .) (include "vector.cluster.otlp.http.trace-rows.port" . | int) -}}
+{{- end -}}
+
 {{- define "vector.cluster.json.traces-as-logs.port" -}}
 {{- printf "4329" -}}
 {{- end -}}
@@ -587,6 +617,13 @@ custom:
 {{- /* Stringify traces string_attributes for the json_traces passthrough (Go handles the rest); appended as a traces-pipeline tail step feeding s3_traces. */ -}}
 {{- $tracesStep := dict "name" "parquet_stringify_traces" "transform" (dict "type" "remap" "source" (include "vector.parquetStringifyVRL" (dict "fields" (list "string_attributes")))) -}}
 {{- $_ := set .Values.vector.tracesPipeline "extraSteps" (append .Values.vector.tracesPipeline.extraSteps $tracesStep) -}}
+{{- end -}}
+{{- end -}}
+{{- if not (include "vector.traceRows.rendered" .) -}}
+{{- $_ := set .Values.vector.tracesPipeline "inputs" (without .Values.vector.tracesPipeline.inputs "traces_from_trace_rows") -}}
+{{- with .Values.vector.customComponents.transforms.default -}}
+{{- $_ := unset . "trace_rows_as_logs" -}}
+{{- $_ := unset . "traces_from_trace_rows" -}}
 {{- end -}}
 {{- end -}}
 

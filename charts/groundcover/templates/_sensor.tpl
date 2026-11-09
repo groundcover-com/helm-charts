@@ -29,6 +29,24 @@ metricIngestor:
 {{- end -}}
 {{- end -}}
 
+{{- define "groundcover.sensor.otelTracesAsLogs" -}}
+{{- ne (lower (toString (dig "otelTracesAsLogs" true .sensorValues))) "false" -}}
+{{- end -}}
+
+{{- define "groundcover.sensor.traces.otlp.http.url" -}}
+{{- $sensorValues := .sensorValues -}}
+{{- $internalIngress := dig "internalIngress" "enabled" false $sensorValues -}}
+{{- if eq (include "groundcover.sensor.otelTracesAsLogs" .) "true" -}}
+{{- if $internalIngress }}{{ include "vector.internalIngress.tracesAsLogs.otlp.http.url" . }}{{ else }}{{ include "ingestion.traces.otlp.http.url" . }}{{ end -}}
+{{- else if or $internalIngress .Values.global.vector.tracesAsLogs.otlp.overrideHttpURL (not (include "vector.useLocalVector" .)) -}}
+{{- fail "otelTracesAsLogs: false sends native OTLP traces, which only the in-cluster Vector accepts; disable internalIngress, unset global.vector.tracesAsLogs.otlp.overrideHttpURL and use the local Vector" -}}
+{{- else if not (include "vector.nativeTracesRouted" .) -}}
+{{- fail "otelTracesAsLogs: false sends native OTLP traces, which this Vector config does not route; keep otel_trace_rows, trace_rows_as_logs and traces_from_trace_rows in any Vector override, add traces_from_trace_rows to vector.tracesPipeline.inputs and to every custom component that reads traces_from_logs, and do not override Vector's sinks" -}}
+{{- else -}}
+{{- include "vector.cluster.otlp.http.trace-rows.url" . -}}
+{{- end -}}
+{{- end -}}
+
 {{- define "groundcover.sensor.config" -}}
 {{- $sensorValues := .sensorValues -}}
 
@@ -572,7 +590,7 @@ sendKubeletInfraMetrics: {{ .Values.sendKubeletInfraMetrics }}
 {{ if $sensorValues.ingestionEnabled }}
 apmIngestor:
   tracesOtlpEndpoint:
-    endpoint: {{ if dig "internalIngress" "enabled" false $sensorValues }}{{ include "vector.internalIngress.tracesAsLogs.otlp.http.url" . }}{{ else }}{{ include "ingestion.traces.otlp.http.url" . }}{{ end }}
+    endpoint: {{ include "groundcover.sensor.traces.otlp.http.url" . }}
     compression: {{ .Values.global.ingestion.otlpCompression | default "gzip" }}
     insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
     writeTimeout: 10s
@@ -787,10 +805,10 @@ logs:
     oldLogDelayStart: {{ .sensorValues.logs.pipeline.dropOldLogs.delayStart }}
     parallelProcessing:
       enabled: {{ dig "logs" "pipeline" "parallelProcessing" "enabled" false $sensorValues }}
-otelTracesAsLogs: true
+otelTracesAsLogs: {{ include "groundcover.sensor.otelTracesAsLogs" . }}
 otelPreprocess: true
 tracesOtlpEndpoint:
-  endpoint: {{ if dig "internalIngress" "enabled" false $sensorValues }}{{ include "vector.internalIngress.tracesAsLogs.otlp.http.url" . }}{{ else }}{{ include "ingestion.traces.otlp.http.url" . }}{{ end }}
+  endpoint: {{ include "groundcover.sensor.traces.otlp.http.url" . }}
   compression: {{ .Values.global.ingestion.otlpCompression | default "gzip" }}
   insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
   writeTimeout: 10s

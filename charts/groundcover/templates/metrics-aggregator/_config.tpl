@@ -552,7 +552,7 @@ sendKubeletInfraMetrics: {{ .Values.sendKubeletInfraMetrics }}
 {{ if $sensorValues.ingestionEnabled }}
 apmIngestor:
   tracesOtlpEndpoint:
-    endpoint: {{ if dig "internalIngress" "enabled" false $sensorValues }}{{ include "vector.internalIngress.tracesAsLogs.otlp.http.url" . }}{{ else }}{{ include "ingestion.traces.otlp.http.url" . }}{{ end }}
+    endpoint: {{ include "groundcover.sensor.traces.otlp.http.url" . }}
     compression: {{ .Values.global.ingestion.otlpCompression | default "gzip" }}
     insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
     writeTimeout: 10s
@@ -752,10 +752,10 @@ logs:
     oldLogDropThreshold: {{ .sensorValues.logs.pipeline.dropOldLogs.dropThreshold }} 
     oldLogDropAlwaysThreshold: {{ .sensorValues.logs.pipeline.dropOldLogs.dropAlwaysThreshold }}
     oldLogDelayStart: {{ .sensorValues.logs.pipeline.dropOldLogs.delayStart }} 
-otelTracesAsLogs: true
+otelTracesAsLogs: {{ include "groundcover.sensor.otelTracesAsLogs" . }}
 otelPreprocess: true
 tracesOtlpEndpoint:
-  endpoint: {{ if dig "internalIngress" "enabled" false $sensorValues }}{{ include "vector.internalIngress.tracesAsLogs.otlp.http.url" . }}{{ else }}{{ include "ingestion.traces.otlp.http.url" . }}{{ end }}
+  endpoint: {{ include "groundcover.sensor.traces.otlp.http.url" . }}
   compression: {{ .Values.global.ingestion.otlpCompression | default "gzip" }}
   insecureSkipVerify: {{ .Values.global.ingestion.tls_skip_verify }}
   writeTimeout: 10s
