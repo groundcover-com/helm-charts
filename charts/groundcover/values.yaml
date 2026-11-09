@@ -139,6 +139,7 @@ global:
     enabled: false
     ui:
       enabled: false
+      betaAccess: false
 
   ingress:
     # set ingress site for inCloud / on-prem sensor only deployments
@@ -1545,7 +1546,7 @@ bucketStreamer:
   image:
     registry: public.ecr.aws/groundcovercom
     repository: bucket-streamer
-    tag: "0.0.2"
+    tag: "0.0.6"
     pullPolicy: IfNotPresent
   serviceAccount:
     # A dedicated ServiceAccount is created by default. To run under an existing
@@ -1560,11 +1561,14 @@ bucketStreamer:
     # Created by the init container on first boot; holds the coordination schema.
     database: bucket_streamer
     sslmode: require
-    # Every in-flight batch holds one pooled connection for the whole insert.
-    # Size above sum(max_concurrent x destination shards) across signals plus
-    # a few for the scanner and reaper. An undersized pool does not fail loudly:
-    # workers block on Acquire (bucket_streamer_postgres_empty_acquires_total).
-    maxConns: 80
+    # Every in-flight batch holds one pooled connection for the whole insert, so
+    # this caps the replica's in-flight inserts and its share of Postgres
+    # max_connections. It sits below sum(max_concurrent x destination shards)
+    # across signals on purpose: signals share the pool, and a full pool makes
+    # workers wait on Acquire (bucket_streamer_postgres_empty_acquire_wait_seconds_total)
+    # instead of failing. Keep a few above the widest signal's fan-out for the
+    # scanner and reaper.
+    maxConns: 104
   objectStore:
     # Empty values follow vector.objectStorage: s3Bucket -> s3, gcsBucket -> gcs,
     # azureBlobContainer -> azure, with the same bucket/container and region.
@@ -1605,7 +1609,9 @@ bucketStreamer:
   # put only tuning keys there.
   config:
     scanner:
-      interval: 100ms
+      # Every scan LISTs each signal prefix, so 100ms cost far more bucket LISTs than
+      # it saved: batches still wait for min_batch_size or max_age.
+      interval: 1s
       # Default is 1000. Raised so backpressure does not cap the ingest rate.
       max_pending_per_signal: 10000
     worker: {}
@@ -1628,16 +1634,18 @@ bucketStreamer:
   # its last enqueued batch; set both to 0 for immediate one-scan batching.
   # max_concurrent is the per-shard in-flight insert cap of the signal's
   # (signal, destination) pool; see postgres.maxConns above.
+  # compression unset follows the object store: zstd on gcs/azure (what vector's
+  # GCS/Azure sinks write), gzip on s3. Set it here or per signal to override.
   signalDefaults:
     format: JSONEachRow
     min_batch_size: 1048576
     max_age: 10s
     max_batch_bytes: 10485760
     max_batch_files: 50
-    max_concurrent: 8
+    max_concurrent: 16
   # One drained signal per key, merged over signalDefaults. The key is the
   # signal name unless the entry sets `name`. A map so a single signal can be
-  # tuned without restating the rest (`--set bucketStreamer.signals.logs.max_concurrent=16`);
+  # tuned without restating the rest (`--set bucketStreamer.signals.logs.max_concurrent=32`);
   # set `enabled: false` on an entry to drop it. prefix and input_table go
   # through tpl, so the tables follow dbManager.objectStorageDestTables where a
   # key exists. Signals without extra_shards are pinned to the main shard
@@ -2916,7 +2924,9 @@ workloadRecommendations:
     lowPoolDays: 7
     highPoolDays: 1
     # A sample count, not a duration.
-    minDataPoints: 120
+    minDataPoints: 5760
+    cpuBufferPercent: 10
+    memoryBufferPercent: 15
     # DaemonSet is deliberately absent.
     kinds:
       - Deployment

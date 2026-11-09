@@ -24,6 +24,9 @@ data:
     {{- $features = append $features "autonomous_infrastructure" }}
     {{- if .Values.global.autonomousInfrastructure.ui.enabled }}
     {{- $features = append $features "autonomous_infrastructure_ui" }}
+    {{- if .Values.global.autonomousInfrastructure.ui.betaAccess }}
+    {{- $features = append $features "autonomous_infrastructure_beta" }}
+    {{- end }}
     {{- end }}
     {{- end }}
     {{- if $features }}

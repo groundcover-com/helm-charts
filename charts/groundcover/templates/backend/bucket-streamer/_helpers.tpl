@@ -223,6 +223,12 @@ destinations:
 
 signals:
 {{- $signals := list }}
+{{- /* vector's GCS and Azure sinks write zstd; the streamer would read them as
+gzip and fail every batch with ZLIB_INFLATE_FAILED. */}}
+{{- $defaultCompression := "" }}
+{{- if has (include "bucket-streamer.objectStore.provider" .) (list "gcs" "azure") }}
+{{- $defaultCompression = "zstd" }}
+{{- end }}
 {{- range $name, $signal := $bs.signals }}
 {{- if $signal }}
 {{- $enabled := dig "enabled" true $signal }}
@@ -235,6 +241,9 @@ signals:
 {{- $_ := set $s "name" (default $name $s.name) }}
 {{- $_ := set $s "prefix" (tpl (toString $s.prefix) $) }}
 {{- $_ := set $s "input_table" (tpl (toString $s.input_table) $) }}
+{{- if and $defaultCompression (not $s.compression) }}
+{{- $_ := set $s "compression" $defaultCompression }}
+{{- end }}
 {{- $signals = append $signals $s }}
 {{- end }}
 {{- end }}

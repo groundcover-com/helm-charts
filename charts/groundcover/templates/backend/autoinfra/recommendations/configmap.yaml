@@ -19,6 +19,8 @@ data:
   LOW_POOL_DAYS: {{ .Values.workloadRecommendations.config.lowPoolDays | quote }}
   HIGH_POOL_DAYS: {{ .Values.workloadRecommendations.config.highPoolDays | quote }}
   MIN_DATA_POINTS: {{ .Values.workloadRecommendations.config.minDataPoints | quote }}
+  CPU_BUFFER_PERCENT: {{ .Values.workloadRecommendations.config.cpuBufferPercent | quote }}
+  MEMORY_BUFFER_PERCENT: {{ .Values.workloadRecommendations.config.memoryBufferPercent | quote }}
   # JSON, not comma-separated: pydantic-settings parses tuples from the env as JSON.
   KINDS: {{ toJson .Values.workloadRecommendations.config.kinds | quote }}
   PRODUCT_METRICS_OTLP_ENDPOINT: {{ if .Values.global.ingestor.enabled }}{{ include "ingestor.otlp.cluster.http.url" . | quote }}{{ else }}""{{ end }}
