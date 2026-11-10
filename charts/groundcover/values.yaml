@@ -651,7 +651,7 @@ agent:
     image:
       repository: "{{ .Values.global.origin.registry }}/sensor"
       tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
-    maxUnavailable: 100%
+    maxUnavailable: 25%
     resources:
       requests:
         memory: 300Mi
@@ -2224,6 +2224,8 @@ ingestor:
       # encoded profile part and the decompressed pprof payload.
       # Embedded pprof timestamps are authoritative; from/until are legacy fallbacks.
       # POST /profiling/upload accepts Groundcover's native raw-pprof contract.
+      # POST /push.v1.PusherService/Push accepts Pyroscope Connect protobuf/JSON
+      # batches. maxUploadSize also bounds the batch's total decompressed pprof bytes.
       # Dedicated, unauthenticated in-cluster profile HTTP receiver; do not expose publicly.
       # Port 8028 follows RUM (8026) and source maps (8027).
       # Native OTLP profiles share the OTLP ports above instead of using this receiver.
