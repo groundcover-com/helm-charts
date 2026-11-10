@@ -1532,8 +1532,6 @@ agentService:
   affinity: {}
   profiling:
     enabled: false
-    serverAddress: ""
-    apiKeySecret: {}
 
 # bucket-streamer drains the queue bucket's v5/ prefixes into ClickHouse, replacing
 # the S3Queue engine tables (dbManager.objectStorageQueues). Enable with

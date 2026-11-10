@@ -3,8 +3,6 @@
 {{- $postgres := $agentService.postgres }}
 {{- $longTermMemory := $agentService.longTermMemory }}
 {{- $temporal := $agentService.temporal | default dict }}
-{{- $profiling := $agentService.profiling | default dict }}
-{{- $profilingEnabled := and (kindIs "bool" $profiling.enabled) $profiling.enabled (eq (include "telemetry.enabled" .) "true") }}
 {{- if ne (empty $agentService.config.llmProviderTlsCertificate.certificatePath) (empty $agentService.config.llmProviderTlsCertificate.privateKeyPath) }}
 {{- fail "agentService.config.llmProviderTlsCertificate.certificatePath and privateKeyPath must be configured together" }}
 {{- end }}
@@ -301,15 +299,13 @@ spec:
               value: {{ $temporal.taskQueue | default "agent-service-runs" | quote }}
             - name: RUN_ADMISSION_ENABLED
               value: {{ $temporal.runAdmissionEnabled | default false | quote }}
-            {{- if $profilingEnabled }}
-            - name: PROFILING_API_KEY
+            {{- if and (kindIs "bool" $agentService.profiling.enabled) $agentService.profiling.enabled }}
+            - name: PROFILING_ENABLED
+              value: "true"
+            - name: K8S_WORKLOAD_NAME
               valueFrom:
-                secretKeyRef:
-                  name: {{ default (include "groundcover.apikeySecretName" .) (dig "apiKeySecret" "name" "" $profiling) | quote }}
-                  key: {{ default (include "groundcover.apikeySecretKey" .) (dig "apiKeySecret" "key" "" $profiling) | quote }}
-                  optional: true
-            - name: PROFILING_CONFIG
-              value: {{ dict "server_address" (default (include "telemetry.metrics.base.url" .) $profiling.serverAddress) "tags" (dict "cluster_id" (include "groundcover.clusterId" .) "env" (include "groundcover.env" .) "namespace" .Release.Namespace) | toJson | quote }}
+                fieldRef:
+                  fieldPath: metadata.labels['app']
             {{- end }}
             {{- with $agentService.env }}
             {{- toYaml . | nindent 12 }}
