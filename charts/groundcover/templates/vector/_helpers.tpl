@@ -249,6 +249,10 @@ true
 {{- printf "%s%s" (include "vector.internalIngress.url.base" .) (get (urlParse (include "incloud.ingestion.otlp.http.traces-as-logs.url" .)) "path") -}}
 {{- end -}}
 
+{{- define "vector.internalIngress.traceRows.otlp.http.url" -}}
+{{- printf "%s/ingest/v2/otlp/trace-rows" (include "vector.internalIngress.url.base" .) -}}
+{{- end -}}
+
 {{- define "vector.internalIngress.logs.otlp.http.url" -}}
 {{- if .Values.global.vector.logs.otlp.overrideHttpURL -}}
 {{- fail "global.vector.logs.otlp.overrideHttpURL is set but this caller also has internalIngress enabled - the override would be silently ignored; unset one of them" -}}

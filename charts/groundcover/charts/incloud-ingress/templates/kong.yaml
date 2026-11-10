@@ -127,6 +127,16 @@ plugin: request-transformer
 apiVersion: configuration.konghq.com/v1
 kind: KongPlugin
 metadata:
+  name: ingest-v2-rewrite-to-v1-traces
+config:
+  replace:
+    uri: '/v1/traces'
+plugin: request-transformer
+
+---
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
   name: ingest-v2-rewrite-to-health
 config:
   replace:
