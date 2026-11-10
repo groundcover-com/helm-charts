@@ -845,6 +845,10 @@ customOtlpEndpoint:
   maxIdleConns: {{ dig "apmIngestor" "otlpConnectionPool" "maxIdleConns" 0 $sensorValues }}
   maxIdleConnsPerHost: {{ dig "apmIngestor" "otlpConnectionPool" "maxIdleConnsPerHost" 0 $sensorValues }}
   idleConnTimeout: {{ dig "apmIngestor" "otlpConnectionPool" "idleConnTimeout" "0s" $sensorValues }}
+{{- if and $sensorValues.writeToObjectStorage (eq $sensorValues.serviceName "ingestor") }}
+objectStorage:
+{{- include "ingestor.objectStorage.config" . | nindent 2 }}
+{{- end }}
 
 {{ if $sensorValues.tracesStaticOttlRules }}
 tracesStaticOttlRules:

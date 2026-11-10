@@ -68,7 +68,7 @@ spec:
 {{- end }}
       imagePullSecrets: {{ include "imagePullSecrets" . }}
 {{- /* TODO: Remove the sourceMaps.enabled guard once IAM permissions are enabled by default */}}
-{{- if .Values.ingestor.rum.sourceMaps.enabled }}
+{{- if or .Values.ingestor.rum.sourceMaps.enabled (include "ingestor.writesToObjectStorage" .) }}
       serviceAccountName: {{ include "ingestor.fullname" . }}
 {{- end }}
 {{- if .Values.ingestor.topologySpreadConstraints }}
