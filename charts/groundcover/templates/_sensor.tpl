@@ -884,7 +884,7 @@ telemetry:
 
 {{ if $sensorValues.collectionEnabled }}
 k8sEntitiesWatch:
-{{- $sensorValues.k8sEntitiesWatch | toYaml | nindent 6 }}
+{{- include "groundcover.watchWithGlobalNameFrom" (dict "watch" $sensorValues.k8sEntitiesWatch "global" .Values.global.workloadNameFrom) | nindent 6 }}
 {{ end }}
 
 {{ if $sensorValues.collectionEnabled }}

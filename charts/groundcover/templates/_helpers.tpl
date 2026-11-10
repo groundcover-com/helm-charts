@@ -539,3 +539,14 @@ autoinfra-mutator-webhook-cert
 app: autoinfra-mutator
 app.kubernetes.io/name: autoinfra-mutator
 {{- end }}
+
+{{- define "groundcover.watchWithGlobalNameFrom" -}}
+{{- $watch := deepCopy (default (dict) .watch) -}}
+{{- $global := default (dict) .global -}}
+{{- range $kind := list "deployment" "statefulset" "daemonset" "job" "cronjob" -}}
+{{- with get $global $kind -}}
+{{- $_ := mergeOverwrite $watch (dict $kind (dict "workload" (dict "nameFrom" .))) -}}
+{{- end -}}
+{{- end -}}
+{{- mergeOverwrite $watch (pick $global "crd") | toYaml -}}
+{{- end }}

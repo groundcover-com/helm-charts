@@ -1,4 +1,5 @@
 global:
+  workloadNameFrom: {}
   # Unified extra labels configuration for K8s metadata across all signals.
   # Replaces: customEntityTags, metricLabels, additionalMetricLabels, nodelabels.
   labelEnrichment:

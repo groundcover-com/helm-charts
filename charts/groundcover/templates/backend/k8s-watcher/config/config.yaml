@@ -124,7 +124,7 @@ data:
     {{- .Values.k8sWatcher.additionalMetricLabels | toYaml | nindent 6 }}
     {{- end }}
     Watch:
-    {{- .Values.k8sWatcher.watch | toYaml | nindent 6 }}
+    {{- include "groundcover.watchWithGlobalNameFrom" (dict "watch" .Values.k8sWatcher.watch "global" .Values.global.workloadNameFrom) | nindent 6 }}
 
 kind: ConfigMap
 metadata:
