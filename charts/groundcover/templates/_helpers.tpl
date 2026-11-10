@@ -337,7 +337,7 @@ Get cluster_id from values or generate random one
 {{- end -}}
 
 {{/*
-Minimum ClickHouse major.minor the db-manager init container enforces:
+Minimum ClickHouse major.minor db-manager waits for on every shard before migrating:
 dbManager.minClickhouseVersion, raised to 26.8 when global.clickhouse.logsTextIndex
 or global.clickhouse.tracesTextIndex is enabled (their text index postprocessors
 need it). Empty disables the check.

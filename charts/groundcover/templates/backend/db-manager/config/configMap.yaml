@@ -12,6 +12,7 @@ data:
     LogLevel: 4
 
     startuptimeout: 1m0s
+    MinClickhouseVersion: {{ include "db-manager.minClickhouseVersion" . | quote }}
 
     GroundcoverVersion: "OVERRIDEN"
     ClusterId: {{ include "groundcover.clusterId" . | quote }}
