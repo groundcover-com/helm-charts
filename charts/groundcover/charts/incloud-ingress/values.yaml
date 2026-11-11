@@ -118,7 +118,7 @@ cert-manager-crds:
 
 # Internal ingress configuration for routing to cluster-internal services
 internalIngress:
-  enabled: false
+  enabled: true
   # Name for the internal ingress class
   ingressClassName: kong-internal
   # Service configuration for internal cluster access
@@ -142,7 +142,9 @@ internalIngress:
   # Kong deployment configuration for internal ingress
   kong:
     # Annotations applied to internal Kong pods.
-    podAnnotations: {}
+    podAnnotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/port: "8100"
     replicaCount: 2
     image:
       tag: 3.9.3-mini-20260929-1
@@ -155,10 +157,9 @@ internalIngress:
       image:
         tag: "3.5.3-20260205"
         repository: public.ecr.aws/groundcovercom/kong/kubernetes-ingress-controller
-      # requests == limits for Guaranteed QoS; sized above the external Kong's 14d fleet peak (265Mi, 610m)
+      # No CPU limit, like the external Kong; sized above the external Kong's 14d fleet peak (265Mi, 610m)
       resources:
         limits:
-          cpu: 500m
           memory: 512Mi
         requests:
           cpu: 500m
@@ -172,13 +173,12 @@ internalIngress:
       nginx_http_client_body_buffer_size: "10m"
       nginx_mem_cache_size: "128m"
       proxy_access_log: "/dev/stdout"
-    # requests == limits for Guaranteed QoS; keeping the prior 1000m/1Gi ceiling for both
+    # No CPU limit, like the external Kong; the memory request equals its limit
     resources:
       limits:
-        cpu: 1000m
         memory: 1Gi
       requests:
-        cpu: 1000m
+        cpu: 500m
         memory: 1Gi
     # Pod topology spread for high availability
     topologySpreadConstraints:
@@ -198,6 +198,16 @@ internalIngress:
     podDisruptionBudget:
       enabled: true
       minAvailable: 1
+    # Pod affinity for the internal Kong pods
+    affinity:
+      podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: kong-internal
     # Disabled by default; when enabled, replicaCount below is ignored (HPA owns it)
     autoscaling:
       enabled: false

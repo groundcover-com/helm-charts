@@ -33,6 +33,10 @@ spec:
       {{- end }}
     spec:
       serviceAccountName: {{ include "incloud-ingress.fullname" . }}
+      {{- with .Values.internalIngress.kong.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- if .Values.internalIngress.kong.topologySpreadConstraints }}
       topologySpreadConstraints:
         {{- toYaml .Values.internalIngress.kong.topologySpreadConstraints | nindent 8 }}
