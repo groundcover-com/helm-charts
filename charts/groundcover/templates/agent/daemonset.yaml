@@ -235,6 +235,9 @@ spec:
             - mountPath: /var/lib/docker/containers
               name: docker
               readOnly: true
+{{- if include "groundcover.ebpfProfiler.enabled" (dict "root" $ "sensorValues" $sensorValues) }}
+            {{- include "groundcover.ebpfProfiler.controlMount" . | nindent 12 }}
+{{- end }}
 {{- if .Values.global.ingestion.mtlsSecretName }}
             - mountPath: /etc/ingestion-mtls-certs
               name: ingestion-mtls-certs
@@ -412,6 +415,10 @@ spec:
           name: docker
         - emptyDir: {}
           name: linux-headers
+{{- if include "groundcover.ebpfProfiler.enabled" (dict "root" $ "sensorValues" $sensorValues) }}
+        - emptyDir: {}
+          name: ebpf-profiler-control
+{{- end }}
         - hostPath:
             path: /var/log
           name: varlog

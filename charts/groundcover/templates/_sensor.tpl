@@ -80,6 +80,10 @@ receivers:
     port: {{ dig "receivers" "profiles" "port" 8028 $sensorValues }}
     maxUploadSize: {{ dig "receivers" "profiles" "maxUploadSize" 33554432 $sensorValues }}
     {{- end }}
+    {{- if include "groundcover.ebpfProfiler.enabled" (dict "root" . "sensorValues" $sensorValues) }}
+    ebpfProfiler:
+      controlSocket: {{ include "groundcover.ebpfProfiler.controlSocket" . }}
+    {{- end }}
     {{- if $sensorValues.collectionEnabled }}
     {{- $scrape := dig "receivers" "profiles" "scrape" dict $sensorValues }}
     scrape:

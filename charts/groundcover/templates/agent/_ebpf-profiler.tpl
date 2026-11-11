@@ -1,20 +1,45 @@
-{{- define "groundcover.ebpfProfiler.container" -}}
+{{- define "groundcover.ebpfProfiler.enabled" -}}
 {{- $root := .root -}}
 {{- $sensorValues := .sensorValues -}}
-{{- $profiler := dig "receivers" "profiles" "ebpfProfiler" (dict) $sensorValues -}}
-{{- $enabled := dig "enabled" false $profiler -}}
+{{- $enabled := dig "receivers" "profiles" "ebpfProfiler" "enabled" false $sensorValues -}}
 {{- if not (kindIs "bool" $enabled) -}}
   {{- fail "agent.sensor.receivers.profiles.ebpfProfiler.enabled must be a boolean" -}}
 {{- end -}}
 {{- $sensorWithoutEBPF := not (dig "ebpfEnabled" true $sensorValues) -}}
-{{- $ebpfSwitchFromRef := false -}}
 {{- range $sensorValues.env -}}
   {{- if eq (toString .name) "FLORA_EBPFENABLED" -}}
-    {{- $ebpfSwitchFromRef = hasKey . "valueFrom" -}}
     {{- $sensorWithoutEBPF = has (tpl (toString .value) $root) (list "false" "False" "FALSE" "f" "F" "0") -}}
   {{- end -}}
 {{- end -}}
 {{- if and $enabled (not $root.Values.agent.gke.autopilot.enabled) (not $sensorWithoutEBPF) -}}
+true
+{{- end -}}
+{{- end -}}
+
+{{- define "groundcover.ebpfProfiler.controlDir" -}}
+/var/run/groundcover/ebpf-profiler
+{{- end -}}
+
+{{- define "groundcover.ebpfProfiler.controlSocket" -}}
+{{ include "groundcover.ebpfProfiler.controlDir" . }}/control.sock
+{{- end -}}
+
+{{- define "groundcover.ebpfProfiler.controlMount" -}}
+- name: ebpf-profiler-control
+  mountPath: {{ include "groundcover.ebpfProfiler.controlDir" . }}
+{{- end -}}
+
+{{- define "groundcover.ebpfProfiler.container" -}}
+{{- $root := .root -}}
+{{- $sensorValues := .sensorValues -}}
+{{- $profiler := dig "receivers" "profiles" "ebpfProfiler" (dict) $sensorValues -}}
+{{- if include "groundcover.ebpfProfiler.enabled" . -}}
+  {{- $ebpfSwitchFromRef := false -}}
+  {{- range $sensorValues.env -}}
+    {{- if eq (toString .name) "FLORA_EBPFENABLED" -}}
+      {{- $ebpfSwitchFromRef = hasKey . "valueFrom" -}}
+    {{- end -}}
+  {{- end -}}
   {{- if $ebpfSwitchFromRef -}}
     {{- fail "agent.sensor.receivers.profiles.ebpfProfiler.enabled requires FLORA_EBPFENABLED in agent.sensor.env to be a value, not valueFrom" -}}
   {{- end -}}
@@ -56,6 +81,8 @@
       value: {{ $profiler.reportInterval | quote }}
     - name: GC_EBPF_PROFILER_OTLP_ENDPOINT
       value: {{ printf "127.0.0.1:%d" $grpcPort | quote }}
+    - name: GC_EBPF_PROFILER_CONTROL_SOCKET
+      value: {{ include "groundcover.ebpfProfiler.controlSocket" . | quote }}
   resources:
     {{- toYaml $profiler.resources | nindent 4 }}
   securityContext:
@@ -65,5 +92,6 @@
       mountPath: /sys/kernel/debug
     - name: sys-kernel-tracing
       mountPath: {{ include "groundcover.sensor.tracefs.mount.path" (dict "sensorValues" $sensorValues) }}
+    {{- include "groundcover.ebpfProfiler.controlMount" . | nindent 4 }}
 {{- end -}}
 {{- end -}}

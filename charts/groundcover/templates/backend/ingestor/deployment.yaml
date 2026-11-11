@@ -71,6 +71,9 @@ spec:
 {{- if or .Values.ingestor.rum.sourceMaps.enabled (include "ingestor.writesToObjectStorage" .) }}
       serviceAccountName: {{ include "ingestor.fullname" . }}
 {{- end }}
+{{- if include "ingestor.writesToObjectStorage" . }}
+      terminationGracePeriodSeconds: 45
+{{- end }}
 {{- if .Values.ingestor.topologySpreadConstraints }}
       topologySpreadConstraints:
 {{ toYaml .Values.ingestor.topologySpreadConstraints | indent 8 }}
