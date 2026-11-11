@@ -543,7 +543,7 @@ app.kubernetes.io/name: autoinfra-mutator
 {{- define "groundcover.watchWithGlobalNameFrom" -}}
 {{- $watch := deepCopy (default (dict) .watch) -}}
 {{- $global := default (dict) .global -}}
-{{- range $kind := list "deployment" "statefulset" "daemonset" "job" "cronjob" -}}
+{{- range $kind := list "deployment" "statefulset" "daemonset" "job" "cronjob" "pod" -}}
 {{- with get $global $kind -}}
 {{- $_ := mergeOverwrite $watch (dict $kind (dict "workload" (dict "nameFrom" .))) -}}
 {{- end -}}
