@@ -687,6 +687,9 @@ agent:
         - bedrock
     watchOnlyLocalNode: false
     resolveRemoteFromEndpoint: false
+    # Cache only the pod labels/annotations the sensor reads later, to save memory on large
+    # annotations; labelEnrichment still sees all of them.
+    filterPodLabelsAndAnnotations: false
     setLocalTrafficPolicy: true
     # Drop repeated log lines from the same call site and level. Each call site writes
     # `burst` lines, then one more per `every`; the next written line carries suppressed_count.
