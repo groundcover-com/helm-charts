@@ -651,6 +651,9 @@ apmIngestor:
     innerPort: {{ dig "apmIngestor" "dataDog" "innerPort" 0 $sensorValues }}
     envFilterValues: {{ $sensorValues.apmIngestor.dataDog.envFilterValues | default list | toJson }}
     statsCacheTTL: {{ $sensorValues.apmIngestor.dataDog.statsCacheTTL | default "5m" }}
+    stats:
+      createMetrics: {{ dig "apmIngestor" "dataDog" "stats" "createMetrics" true $sensorValues }}
+      createMeasurements: {{ dig "apmIngestor" "dataDog" "stats" "createMeasurements" false $sensorValues }}
   otel:
     direct:
       enabled: {{ $sensorValues.apmIngestor.otel.direct.enabled }}

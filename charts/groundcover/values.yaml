@@ -864,7 +864,7 @@ agent:
       measurements:
         enabled: false
         flushInterval: 30s
-        # Exact trace source values eligible for APM measurements. [] disables all sources.
+        # Exact trace source values eligible for span-based APM measurements. [] disables all sources.
         allowedSources: [opentelemetry, Datadog]
       dataDog:
         enabled: true
@@ -879,6 +879,9 @@ agent:
         envFilterValues:
           - "none"
         statsCacheTTL: 5m
+        stats:
+          createMetrics: true
+          createMeasurements: false
       otel:
         direct:
           enabled: true
@@ -2310,7 +2313,7 @@ ingestor:
     measurements:
       enabled: true
       flushInterval: 30s
-      # Exact trace source values eligible for APM measurements. [] disables all sources.
+      # Exact trace source values eligible for span-based APM measurements. [] disables all sources.
       allowedSources: [opentelemetry, Datadog]
     dataDog:
       enabled: true
@@ -2325,6 +2328,9 @@ ingestor:
       envFilterValues:
         - "none"
       statsCacheTTL: 5m
+      stats:
+        createMetrics: true
+        createMeasurements: false
     otel:
       direct:
         enabled: true
@@ -2606,7 +2612,7 @@ metricsAggregator:
     measurements:
       enabled: false
       flushInterval: 30s
-      # Exact trace source values eligible for APM measurements. [] disables all sources.
+      # Exact trace source values eligible for span-based APM measurements. [] disables all sources.
       allowedSources: [opentelemetry, Datadog]
     dataDog:
       enabled: false
