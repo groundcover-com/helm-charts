@@ -3905,6 +3905,9 @@ keeper: &keeperDefaults
 # gated by global.clickhouse.ha.enabled. Inherits keeper: via anchor merge.
 standbyKeeper:
   <<: *keeperDefaults
+  # Overrides the inherited keeper.enabled: the standby keeper deploys with HA by default.
+  # Set false when the standby has no S3Queue/AzureQueue tables and no <zookeeper> config.
+  enabled: true
   additionalLabels: {}
   podLabels: {}
   podAnnotations: {}
