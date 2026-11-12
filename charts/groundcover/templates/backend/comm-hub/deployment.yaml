@@ -90,7 +90,7 @@ spec:
             done
             echo "Temporal is up"
       - name: ensure-temporal-namespace
-        image: '{{ tpl (.Values.commHub | dig "temporal" "adminToolsImage" "repository" "public.ecr.aws/groundcovercom/temporalio/admin-tools") . }}:{{ tpl (.Values.commHub | dig "temporal" "adminToolsImage" "tag" "1.29.6-20260602-1") . }}'
+        image: '{{ tpl (.Values.commHub | dig "temporal" "adminToolsImage" "repository" "public.ecr.aws/groundcovercom/temporalio/admin-tools") . }}:{{ tpl (.Values.commHub | dig "temporal" "adminToolsImage" "tag" "1.29.7-20261111-1") . }}'
         imagePullPolicy: {{ .Values.commHub | dig "temporal" "adminToolsImage" "pullPolicy" "IfNotPresent" }}
         command:
           - /bin/bash

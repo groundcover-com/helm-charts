@@ -81,8 +81,13 @@ receivers:
     maxUploadSize: {{ dig "receivers" "profiles" "maxUploadSize" 33554432 $sensorValues }}
     {{- end }}
     {{- if include "groundcover.ebpfProfiler.enabled" (dict "root" . "sensorValues" $sensorValues) }}
+    {{- $selection := dig "receivers" "profiles" "ebpfProfiler" "selection" "all" $sensorValues }}
+    {{- if not (has $selection (list "all" "rules")) }}
+    {{- fail "agent.sensor.receivers.profiles.ebpfProfiler.selection must be all or rules" }}
+    {{- end }}
     ebpfProfiler:
       controlSocket: {{ include "groundcover.ebpfProfiler.controlSocket" . }}
+      selection: {{ $selection }}
     {{- end }}
     {{- if $sensorValues.collectionEnabled }}
     {{- $scrape := dig "receivers" "profiles" "scrape" dict $sensorValues }}

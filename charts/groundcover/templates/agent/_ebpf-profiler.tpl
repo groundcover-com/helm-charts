@@ -62,6 +62,9 @@ true
   {{- if ne (toString (dig "receivers" "profiles" "enabled" false $sensorValues)) "true" -}}
     {{- fail "agent.sensor.receivers.profiles.ebpfProfiler.enabled requires agent.sensor.receivers.profiles.enabled=true" -}}
   {{- end -}}
+  {{- if and (eq (toString $profiler.selection) "rules") (ne (toString $root.Values.global.fleetmanager.enabled) "true") -}}
+    {{- fail "agent.sensor.receivers.profiles.ebpfProfiler.selection=rules requires global.fleetmanager.enabled=true" -}}
+  {{- end -}}
   {{- $samples := toString $profiler.samplesPerSecond -}}
   {{- if not (and (regexMatch "^[0-9]+$" $samples) (le 1 (atoi $samples)) (le (atoi $samples) 1000)) -}}
     {{- fail "agent.sensor.receivers.profiles.ebpfProfiler.samplesPerSecond must be a whole number from 1 to 1000" -}}

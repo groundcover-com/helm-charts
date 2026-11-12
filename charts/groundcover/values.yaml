@@ -386,7 +386,7 @@ global:
       image:
         registry: "public.ecr.aws/groundcovercom"
         repository: tools
-        tag: "20261104"
+        tag: "20261112"
     auth:
       database: "postgres"  # Default admin database for connections (use "defaultdb" for Akamai)
 
@@ -550,7 +550,7 @@ statefulset-modifier:
   sizePatches: true
   image:
     repository: '{{ .Values.global.origin.registry }}/tools' 
-    tag: '20261104'
+    tag: '20261112'
 
 agent:
   # Set to false to disable the automatic injection of service environment variables
@@ -758,6 +758,7 @@ agent:
           defaultPort: 0
         ebpfProfiler:
           enabled: false
+          selection: all
           image:
             repository: "{{ .Values.global.origin.registry }}/ebpf-profiler"
             tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
@@ -3570,7 +3571,7 @@ commHub:
     namespace: "commhub"
     adminToolsImage:
       repository: public.ecr.aws/groundcovercom/temporalio/admin-tools
-      tag: "1.29.7-20260929-1"
+      tag: "1.29.7-20261111-1"
       pullPolicy: IfNotPresent
   cursorCloud:
     baseURL: "https://api.cursor.com"
@@ -3914,7 +3915,7 @@ clickhouse: &primary
   statefulsetShardSelector:
     enabled: false
   image:
-    tag: 26.1.11.9-20260720-1
+    tag: 26.8.36.3
     registry: public.ecr.aws/groundcovercom
     repository: clickhouse
   coldVolume: ""
@@ -6229,7 +6230,7 @@ metricsIngester:
 curl: &curlImage
   image:
     repository: '{{ .Values.global.origin.registry }}/tools'
-    tag: '20261104'
+    tag: '20261112'
 
 metrics-ingester:
   # Set to false to disable the automatic injection of service environment variables
