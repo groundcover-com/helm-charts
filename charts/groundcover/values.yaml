@@ -1199,6 +1199,7 @@ agent:
     http2UnlimitedEndpoints: '{{ join "," .Values.agent.sensor.genaiUnlimitedEndpoints }}'
     natEntriesMaxSize: 131072
     clusteringMaxHosts: 0
+    clusteringPinnedPaths: []  # e.g. [/transaction, /*/*/order]; matched by position, * matches any segment
     childcountruleoverrides:
     - depth: 0
       maxChildren: 200

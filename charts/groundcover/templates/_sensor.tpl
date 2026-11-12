@@ -540,6 +540,7 @@ cluster:
   maxhosts: {{ $sensorValues.clusteringMaxHosts | default 0 | int }}
   maxchildrens: 40
   childcountruleoverrides: {{ toJson $sensorValues.childcountruleoverrides }}
+  pinnedpaths: {{ toJson ($sensorValues.clusteringPinnedPaths | default list) }}
 
 loglevel: 4 # INFO
 {{- with $sensorValues.logRateLimit }}
