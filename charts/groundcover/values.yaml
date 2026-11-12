@@ -1210,8 +1210,13 @@ agent:
 dbManager:
   partitionDropping:
     audit: false
+    execute: false
+    retryFailed: true
     interval: 6h
     queryTimeout: 60s
+    batchInterval: 1h
+    maxBatchGiB: 10
+    dropDuringLongMerges: false
   replicas: 1
   extraShardsOverride: 
   # Standby cluster config for db-manager (gated by global.clickhouse.ha.enabled).

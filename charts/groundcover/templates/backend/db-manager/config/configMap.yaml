@@ -211,8 +211,13 @@ data:
     StorageManagement:
       PartitionDropping:
         Audit: {{ .Values.dbManager.partitionDropping.audit }}
+        Execute: {{ .Values.dbManager.partitionDropping.execute }}
+        RetryFailed: {{ .Values.dbManager.partitionDropping.retryFailed }}
         Interval: {{ .Values.dbManager.partitionDropping.interval | quote }}
         QueryTimeout: {{ .Values.dbManager.partitionDropping.queryTimeout | quote }}
+        BatchInterval: {{ .Values.dbManager.partitionDropping.batchInterval | quote }}
+        MaxBatchGiB: {{ .Values.dbManager.partitionDropping.maxBatchGiB }}
+        DropDuringLongMerges: {{ .Values.dbManager.partitionDropping.dropDuringLongMerges }}
       Db:
         host: {{ tpl .Values.dbManager.db.host . }}
         port: {{ tpl .Values.dbManager.db.port . }}
