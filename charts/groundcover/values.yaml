@@ -702,6 +702,12 @@ agent:
     collectionEnabled: true
     ingestionEnabled: true
     ebpfEnabled: true
+    ebpfCapacity:
+      enabled: false
+      referenceCpus: 16
+      limitShare: 0.07
+      minFactor: 0.25
+      maxFactor: 4
     enableLegacyApmMetrics: false
     useOldTracefsMountPath: false
     customEntityTags: # DEPRECATED: Use global.labelEnrichment.pods instead

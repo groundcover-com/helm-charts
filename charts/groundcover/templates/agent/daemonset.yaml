@@ -121,6 +121,30 @@ spec:
             - name: FLORA_EBPFENABLED
               value: "false"
             {{- end }}
+            {{- $ebpfCapacityEnabled := dig "ebpfCapacity" "enabled" false $sensorValues }}
+            {{- if not (kindIs "bool" $ebpfCapacityEnabled) }}
+              {{- fail "agent.sensor.ebpfCapacity.enabled must be a boolean" }}
+            {{- end }}
+            {{- if $ebpfCapacityEnabled }}
+            - name: FLORA_CAPACITY_ENABLED
+              value: "true"
+            - name: FLORA_CAPACITY_REFERENCECPUS
+              value: {{ $sensorValues.ebpfCapacity.referenceCpus | quote }}
+            - name: FLORA_CAPACITY_LIMITSHARE
+              value: {{ $sensorValues.ebpfCapacity.limitShare | quote }}
+            - name: FLORA_CAPACITY_MINFACTOR
+              value: {{ $sensorValues.ebpfCapacity.minFactor | quote }}
+            - name: FLORA_CAPACITY_MAXFACTOR
+              value: {{ $sensorValues.ebpfCapacity.maxFactor | quote }}
+            {{- if ((($sensorValues.resources).limits).memory) }}
+            - name: FLORA_CAPACITY_MEMORYLIMITBYTES
+              valueFrom:
+                resourceFieldRef:
+                  containerName: sensor
+                  resource: limits.memory
+                  divisor: "1"
+            {{- end }}
+            {{- end }}
             - name: NODE_NAME
               valueFrom:
                 fieldRef:
