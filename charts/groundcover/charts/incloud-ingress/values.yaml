@@ -157,12 +157,12 @@ internalIngress:
       image:
         tag: "3.5.3-20260205"
         repository: public.ecr.aws/groundcovercom/kong/kubernetes-ingress-controller
-      # No CPU limit, like the external Kong; sized above the external Kong's 14d fleet peak (265Mi, 610m)
+      # No CPU limit, like the external Kong; CPU request sized from measured peak-hour bursts (sidecar p99 212m, monday excluded), not the external Kong
       resources:
         limits:
           memory: 512Mi
         requests:
-          cpu: 500m
+          cpu: 250m
           memory: 512Mi
     env:
       anonymous_reports: "off"
@@ -173,12 +173,12 @@ internalIngress:
       nginx_http_client_body_buffer_size: "10m"
       nginx_mem_cache_size: "128m"
       proxy_access_log: "/dev/stdout"
-    # No CPU limit, like the external Kong; the memory request equals its limit
+    # No CPU limit, like the external Kong; CPU request sized from measured peak-hour bursts (p90 361m, monday excluded), not the external Kong; memory request equals its limit
     resources:
       limits:
         memory: 1Gi
       requests:
-        cpu: 500m
+        cpu: 300m
         memory: 1Gi
     # Pod topology spread for high availability
     topologySpreadConstraints:
