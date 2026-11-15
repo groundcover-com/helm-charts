@@ -7,8 +7,9 @@ metadata:
   labels:
     {{- include "autoinfra-algo.labels" . | nindent 4 }}
 data:
-  # ClickHouse over HTTP (clickhouse-connect). readHost follows the HA proxy on failover.
-  CLICKHOUSE_HOST: {{ include "clickhouse.readHost" . | quote }}
+  # ClickHouse over HTTP (clickhouse-connect). The primary, never the HA proxy: the standby does not
+  # mirror the AutoInfra tables, so failing over would compute and publish from stale data.
+  CLICKHOUSE_HOST: {{ include "clickhouse.fullname" . | quote }}
   CLICKHOUSE_PORT: {{ .Values.global.clickhouse.containerPorts.http | default 8123 | quote }}
   CLICKHOUSE_DATABASE: {{ include "clickhouse.database" . | quote }}
   CLICKHOUSE_USER: {{ include "clickhouse.username" . | quote }}
