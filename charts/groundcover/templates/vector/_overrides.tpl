@@ -32,6 +32,41 @@ If release name contains chart name it will be used as a full name.
 {{- printf "%s-%s" .Release.Name (include "vector.name" .) | trunc 63 | trimSuffix "-" }}
 {{- end -}}
 
+{{/*
+Worker thread count for VECTOR_THREADS; empty renders nothing.
+threads: a positive integer, or "auto" to take resources.limits.cpu, then resources.requests.cpu,
+when it is a whole number of cores (4, "4" or "4000m"). Anything else fails the render.
+An explicit VECTOR_THREADS in env/backendEnv wins, since Helm replaces env lists wholesale.
+*/}}
+{{- define "vector.threads" -}}
+{{- $threads := "" -}}
+{{- if not (kindIs "invalid" .Values.threads) -}}
+  {{- $threads = toString .Values.threads -}}
+  {{- if eq $threads "auto" -}}
+    {{- $threads = "" -}}
+    {{- $res := .Values.resources | default dict -}}
+    {{- range $cpu := list (get ($res.limits | default dict) "cpu") (get ($res.requests | default dict) "cpu") -}}
+      {{- $c := toString (default "" $cpu) -}}
+      {{- if regexMatch "^[0-9]+000m$" $c -}}{{- $c = trimSuffix "000m" $c -}}{{- end -}}
+      {{- if and (not $threads) (regexMatch "^[0-9]+$" $c) (gt (int64 $c) 0) -}}
+        {{- $threads = $c -}}
+      {{- end -}}
+    {{- end -}}
+  {{- else if not (and (regexMatch "^[0-9]+$" $threads) (gt (int64 $threads) 0)) -}}
+    {{- fail (printf "vector.threads must be a positive integer or \"auto\", got %q" $threads) -}}
+  {{- end -}}
+{{- end -}}
+{{- $userSet := false -}}
+{{- $envs := .Values.env | default list -}}
+{{- if .Values.global.backend.enabled -}}
+  {{- $envs = concat $envs (.Values.backendEnv | default list) -}}
+{{- end -}}
+{{- range $envs -}}
+  {{- if eq (toString .name) "VECTOR_THREADS" -}}{{- $userSet = true -}}{{- end -}}
+{{- end -}}
+{{- if not $userSet -}}{{- $threads -}}{{- end -}}
+{{- end }}
+
 # modified the PodSpec for Vector
 # - add tpl to env and initContainers
 # - add backendEnv to env if global.backend.enabled is true
@@ -124,6 +159,10 @@ containers:
 {{- with .Values.env }}
     {{- tpl (toYaml .) $ | nindent 6 }}
 {{- end }}
+{{- end }}
+{{- with include "vector.threads" . }}
+      - name: VECTOR_THREADS
+        value: {{ . | quote }}
 {{- end }}
 {{- if (eq .Values.role "Agent") }}
       - name: VECTOR_SELF_NODE_NAME

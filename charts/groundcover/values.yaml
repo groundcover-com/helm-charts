@@ -4447,6 +4447,8 @@ vector:
     runAsNonRoot: true
     fsGroup: 1000
   rollWorkload: false
+  # VECTOR_THREADS: a positive integer, or "auto" to use resources.limits.cpu (else requests.cpu) when whole.
+  # threads: 8
   logsPipeline:
     inputs:
       - logs_from_logs
