@@ -2,7 +2,7 @@
 {{- if $monitor.enabled -}}
 {{- $annotations := mustMerge $monitor.annotations .Values.annotations -}}
 {{- $labels := mustMerge $monitor.extraLabels .Values.extraLabels -}}
-{{- $ctx := dict "helm" . }}
+{{- $ctx := dict "helm" . "kindOverride" "vmoperator" }}
 {{- $fullname := include "vm.plain.fullname" $ctx }}
 {{- $ns := include "vm.namespace" $ctx }}
 apiVersion: {{ ternary "operator.victoriametrics.com/v1beta1" "monitoring.coreos.com/v1" $monitor.vm }}
@@ -13,12 +13,14 @@ metadata:
   {{- $_ := set $ctx "extraLabels" $labels }}
   labels: {{ include "vm.labels" $ctx | nindent 4 }}
   {{- $_ := unset $ctx "extraLabels" }}
-  {{- with $annotations }}
-  annotations: {{ toYaml . | nindent 4 }}
+  {{- $_ := set $ctx "extraAnnotations" $annotations }}
+  {{- with (include "vm.annotations" $ctx) }}
+  annotations: {{ . | nindent 4 }}
   {{- end }}
+  {{- $_ := unset $ctx "extraAnnotations" }}
 spec:
   selector:
-    matchLabels: {{ include "vm.selectorLabels" $ctx | nindent 6 }}
+    matchLabels: {{ include "vm.commonLabels" $ctx | nindent 6 }}
   endpoints:
     - port: http
       {{- with $monitor.scheme }}

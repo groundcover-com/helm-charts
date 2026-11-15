@@ -6519,6 +6519,7 @@ kube-state-metrics:
 victoria-metrics-operator:
   image:
     registry: public.ecr.aws/groundcovercom  
+    tag: v0.75-20261106-1
   enabled: false
   crds:
     upgrade:
@@ -6539,6 +6540,8 @@ victoria-metrics-operator:
       value: "900s"
     - name: VM_USECUSTOMCONFIGRELOADER # https://docs.victoriametrics.com/operator/resources/readme/#configuration-synchronization
       value: "true"
+    - name: VM_ENABLE_DEFAULT_PRESTOP_HOOK
+      value: "false"
   builtinVMAgent:
     enabled: false
     spec:

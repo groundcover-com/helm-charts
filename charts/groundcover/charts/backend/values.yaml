@@ -345,7 +345,7 @@ victoria-metrics-distributed:
   common:
     vmauth:
       spec:
-        configReloaderImageTag: public.ecr.aws/groundcovercom/victoriametrics/operator:config-reloader-v0.68.2
+        configReloaderImageTag: public.ecr.aws/groundcovercom/victoriametrics/operator:config-reloader-v0.75.2-20261106-1
         image:
           repository: public.ecr.aws/groundcovercom/victoriametrics/vmauth
           tag: v1.138.0-scratch      
@@ -386,7 +386,7 @@ victoria-metrics-distributed:
                     averageUtilization: 90
     vmagent:
       spec:
-        configReloaderImageTag: public.ecr.aws/groundcovercom/victoriametrics/operator:config-reloader-v0.68.2
+        configReloaderImageTag: public.ecr.aws/groundcovercom/victoriametrics/operator:config-reloader-v0.75.2-20261106-1
         image:
           repository: public.ecr.aws/groundcovercom/vmagent
           tag: v1.136.0

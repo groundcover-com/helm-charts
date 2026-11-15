@@ -1,23 +1,30 @@
-{{- if .Values.admissionWebhooks.enabled }}
-{{- $ctx := dict "helm" . "extraLabels" .Values.extraLabels }}
+{{- $webhooks := .Values.admissionWebhooks }}
+{{- if $webhooks.enabled }}
+{{- $ctx := dict "helm" . "extraLabels" .Values.extraLabels "kindOverride" "vmoperator" }}
 {{- $tls := fromYaml (include "vm-operator.certs" $ctx) }}
 {{- $fullname := include "vm.plain.fullname" $ctx }}
 {{- $domain := ((.Values.global).cluster).dnsDomain }}
 {{- $ns := include "vm.namespace" $ctx }}
-{{- $certManager := .Values.admissionWebhooks.certManager }}
+{{- $certManager := $webhooks.certManager }}
 {{- $files := .Files }}
 {{- $crds := $files.Get "crd.yaml" | splitList "---" }}
-{{- $disabledFor := .Values.admissionWebhooks.disabledFor | default list }}
+{{- $disabledFor := $webhooks.disabledFor | default list }}
 ---
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
   name:  {{ $fullname }}-admission
+  {{- $whAnnotations := dict }}
   {{- if $certManager.enabled }}
-  annotations:
-    certmanager.k8s.io/inject-ca-from: {{ printf "%s/%s-validation" $ns $fullname | quote }}
-    cert-manager.io/inject-ca-from: {{ printf "%s/%s-validation" $ns $fullname | quote }}
+    {{- $_ := set $whAnnotations "certmanager.k8s.io/inject-ca-from" (printf "%s/%s-validation" $ns $fullname) }}
+    {{- $_ := set $whAnnotations "cert-manager.io/inject-ca-from" (printf "%s/%s-validation" $ns $fullname) }}
   {{- end }}
+  {{- $whAnnotations = mergeOverwrite $whAnnotations ($certManager.annotations | default dict) ($webhooks.annotations | default dict) }}
+  {{- $_ := set $ctx "extraAnnotations" $whAnnotations }}
+  {{- with (include "vm.annotations" $ctx) }}
+  annotations: {{ . | nindent 4 }}
+  {{- end }}
+  {{- $_ := unset $ctx "extraAnnotations" }}
   labels: {{ include "vm.labels" $ctx | nindent 4 }}
 webhooks:
 {{- range $crds }}
@@ -34,7 +41,7 @@ webhooks:
       {{- if not $certManager.enabled }}
       caBundle: {{ $tls.caCert }}
       {{- end }}
-    failurePolicy: {{ $.Values.admissionWebhooks.policy }}
+    failurePolicy: {{ $webhooks.policy }}
     name: '{{ $crd.metadata.name }}'
     admissionReviewVersions:
       - v1
@@ -43,7 +50,7 @@ webhooks:
       matchExpressions:
         - key: app.kubernetes.io/name
           operator: NotIn
-          values: [{{ include "vm.name" $ }}]
+          values: [{{ index (fromYaml (include "vm.selectorLabels" (dict "helm" $ "kindOverride" "vmoperator"))) "app.kubernetes.io/name" }}]
     rules:
       - apiGroups:
           - {{ $crd.spec.group }}
@@ -65,6 +72,10 @@ kind: Issuer
 metadata:
   name: {{ $fullname }}-root
   namespace: {{ $ns }}
+  labels: {{ include "vm.labels" $ctx | nindent 4 }}
+  {{- with (include "vm.annotations" $ctx) }}
+  annotations: {{ . | nindent 4 }}
+  {{- end }}
 spec:
   selfSigned: {}
 ---
@@ -73,6 +84,10 @@ kind: Certificate
 metadata:
   name: {{ $fullname }}-root-ca
   namespace: {{ $ns }}
+  labels: {{ include "vm.labels" $ctx | nindent 4 }}
+  {{- with (include "vm.annotations" $ctx) }}
+  annotations: {{ . | nindent 4 }}
+  {{- end }}
 spec:
   secretName: {{ $fullname }}-root-ca
   duration: {{ $certManager.ca.duration }}
@@ -92,6 +107,10 @@ kind: Issuer
 metadata:
   name: {{ $fullname }}-issuer
   namespace: {{ $ns }}
+  labels: {{ include "vm.labels" $ctx | nindent 4 }}
+  {{- with (include "vm.annotations" $ctx) }}
+  annotations: {{ . | nindent 4 }}
+  {{- end }}
 spec:
   ca:
     secretName: {{ $fullname }}-root-ca
@@ -103,6 +122,10 @@ kind: Certificate
 metadata:
   name: {{ $fullname }}-validation
   namespace: {{ $ns }}
+  labels: {{ include "vm.labels" $ctx | nindent 4 }}
+  {{- with (include "vm.annotations" $ctx) }}
+  annotations: {{ . | nindent 4 }}
+  {{- end }}
 spec:
   secretName: {{ $fullname }}-validation
   duration: {{ $certManager.cert.duration }}
@@ -135,6 +158,9 @@ metadata:
   name: {{ $fullname }}-validation
   namespace: {{ $ns }}
   labels: {{ include "vm.labels" $ctx | nindent 4 }}
+  {{- with (include "vm.annotations" $ctx) }}
+  annotations: {{ . | nindent 4 }}
+  {{- end }}
 type: kubernetes.io/tls
 data:
   ca.crt: {{ $tls.caCert }}

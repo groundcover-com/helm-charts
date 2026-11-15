@@ -19,7 +19,7 @@
   {{- end }}
 {{- end -}}
 
-{{- $ctx := dict "helm" . "extraLabels" .Values.extraLabels }}
+{{- $ctx := dict "helm" . "extraLabels" .Values.extraLabels "kindOverride" "vmoperator" }}
 {{- $fullname := include "vm.plain.fullname" $ctx }}
 {{- $ns := include "vm.namespace" $ctx }}
 
@@ -30,9 +30,11 @@ kind: Role
 metadata:
   name: {{ $fullname }}
   labels: {{ include "vm.labels" $ctx | nindent 4 }}
-  {{- with .Values.annotations }}
-  annotations: {{ toYaml . | nindent 4 }}
+  {{- $_ := set $ctx "extraAnnotations" .Values.annotations }}
+  {{- with (include "vm.annotations" $ctx) }}
+  annotations: {{ . | nindent 4 }}
   {{- end }}
+  {{- $_ := unset $ctx "extraAnnotations" }}
   namespace: {{ $ns }}
 rules:
 - apiGroups:
@@ -54,9 +56,11 @@ kind: ClusterRole
 metadata:
   name: {{ $fullname }}
   labels: {{ include "vm.labels" $ctx | nindent 4 }}
-  {{- with .Values.annotations }}
-  annotations: {{ toYaml . | nindent 4 }}
+  {{- $_ := set $ctx "extraAnnotations" .Values.annotations }}
+  {{- with (include "vm.annotations" $ctx) }}
+  annotations: {{ . | nindent 4 }}
   {{- end }}
+  {{- $_ := unset $ctx "extraAnnotations" }}
 rules:
 - nonResourceURLs: {{ toYaml .Values.allowedMetricsEndpoints | nindent 2 }}
   verbs:
@@ -158,15 +162,26 @@ rules:
   resources:
   - ingresses
   - ingresses/finalizers
+  - networkpolicies
   verbs:
   - "*"
+{{- if .Values.operator.gateway_support }}
 - apiGroups:
-    - gateway.networking.k8s.io
+  - gateway.networking.k8s.io
   resources:
-    - httproutes
-    - httproutes/finalizers
+  - httproutes
+  - httproutes/finalizers
   verbs:
-    - '*'
+  - '*'
+{{- end }}
+{{- if .Values.operator.vpa_support }}
+- apiGroups:
+  - autoscaling.k8s.io
+  verbs:
+  - "*"
+  resources:
+  - verticalpodautoscalers
+{{- end }}
 - apiGroups:
   - apiextensions.k8s.io
   resources:
@@ -194,7 +209,9 @@ metadata:
   name: {{ $fullname }}-cleanup-hook
   namespace: {{ $ns }}
   labels: {{ include "vm.labels" $ctx | nindent 4 }}
-  annotations: {{ include "vm-operator.cleanup.annotations" (dict "hookWeight" "-5") | nindent 4 }}
+  {{- $_ := set $ctx "extraAnnotations" (include "vm-operator.cleanup.annotations" (dict "hookWeight" "-5") | fromYaml) }}
+  annotations: {{ include "vm.annotations" $ctx | nindent 4 }}
+  {{- $_ := unset $ctx "extraAnnotations" }}
 rules: {{ toYaml $rules.admin | nindent 2 }}
 {{- end }}
 
@@ -212,6 +229,9 @@ metadata:
   labels:
     {{- include "vm.labels" $ctx | nindent 4 }}
     {{- .Values.rbac.aggregatedClusterRoles.labels.admin | toYaml | nindent 4 }}
+  {{- with (include "vm.annotations" $ctx) }}
+  annotations: {{ . | nindent 4 }}
+  {{- end }}
 rules: {{ toYaml ($rules.admin | default list) | nindent 2 }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -221,5 +241,8 @@ metadata:
   labels:
     {{- include "vm.labels" $ctx | nindent 4 }}
     {{- .Values.rbac.aggregatedClusterRoles.labels.view | toYaml | nindent 4 }}
+  {{- with (include "vm.annotations" $ctx) }}
+  annotations: {{ . | nindent 4 }}
+  {{- end }}
 rules: {{ toYaml ($rules.view | default list) | nindent 2 }}
 {{- end }}

@@ -6,7 +6,7 @@
 {{- else if not (kindIs "string" ($app.image).tag) }}
   {{- fail "`crd.cleanup.image.tag` is not string, most probably you need to enquote provided value" -}}
 {{- end }}
-{{- $ctx := dict "helm" . "noEnterprise" true }}
+{{- $ctx := dict "helm" . "noEnterprise" true "kindOverride" "vmoperator" }}
 {{- $fullname := include "vm.plain.fullname" $ctx }}
 {{- $ns := include "vm.namespace" $ctx }}
 ---
@@ -16,12 +16,17 @@ metadata:
   name: {{ $fullname }}-cleanup-hook
   namespace: {{ $ns }}
   labels: {{ include "vm.labels" $ctx | nindent 4 }}
-  annotations: {{ include "vm-operator.cleanup.annotations" (dict "hookWeight" "-3") | nindent 4 }}
+  {{- $_ := set $ctx "extraAnnotations" (include "vm-operator.cleanup.annotations" (dict "hookWeight" "-3") | fromYaml) }}
+  annotations: {{ include "vm.annotations" $ctx | nindent 4 }}
+  {{- $_ := unset $ctx "extraAnnotations" }}
 spec:
   template:
     metadata:
       name: {{ $fullname }}
       labels: {{ include "vm.labels" $ctx | nindent 8 }}
+      {{- with (include "vm.annotations" $ctx) }}
+      annotations: {{ . | nindent 8 }}
+      {{- end }}
     spec:
       serviceAccountName: {{ $fullname }}-cleanup-hook
       {{- with (.Values.imagePullSecrets | default .Values.global.imagePullSecrets) }}
@@ -50,6 +55,10 @@ spec:
             - --all
             - --ignore-not-found=true
       restartPolicy: OnFailure
+      {{- with .Values.dnsConfig }}
+      dnsConfig:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector: {{ toYaml . | nindent 8 }}
       {{- end }}

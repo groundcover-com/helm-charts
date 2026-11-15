@@ -1,7 +1,9 @@
 annotations:
   artifacthub.io/category: monitoring-logging
   artifacthub.io/changes: |
-    - updates operator to [v0.68.2](https://github.com/VictoriaMetrics/operator/releases/tag/v0.68.2) version
+    - 'fix pod label selector in the chart notes: repeated `-l` flags were replaced with a single comma-separated selector, since `kubectl` only honours the last `-l`.'
+    - apply `global.extraLabels` and `global.extraAnnotations` to every resource this chart renders directly. See [#3202](https://github.com/VictoriaMetrics/helm-charts/issues/3202).
+    - updates operator to [v0.75.2](https://github.com/VictoriaMetrics/operator/releases/tag/v0.75.2) version
   artifacthub.io/license: Apache-2.0
   artifacthub.io/links: |
     - name: Sources
@@ -11,18 +13,21 @@ annotations:
     - name: Docs
       url: https://docs.victoriametrics.com/operator/
     - name: Changelog
+      url: https://docs.victoriametrics.com/helm/victoria-metrics-operator/changelog/
+    - name: App Changelog
       url: https://docs.victoriametrics.com/operator/changelog/
   artifacthub.io/operator: "true"
   artifacthub.io/readme: |
     # VictoriaMetrics Operator Helm chart
 
-    Chart documentation is available [here](https://docs.victoriametrics.com/helm/victoria-metrics-operator/)
+    Chart documentation is available [here](https://docs.victoriametrics.com/helm/victoria-metrics-operator/).
+    Changelog is [here](https://docs.victoriametrics.com/helm/victoria-metrics-operator/changelog/).
 apiVersion: v2
-appVersion: v0.68.2
+appVersion: v0.75.2
 dependencies:
 - name: victoria-metrics-common
-  repository: https://victoriametrics.github.io/helm-charts
-  version: 0.0.*
+  repository: oci://ghcr.io/victoriametrics/helm-charts
+  version: 0.4.*
 - condition: crds.plain
   name: crds
   repository: ""
@@ -46,4 +51,4 @@ sources:
 - https://github.com/VictoriaMetrics/helm-charts
 - https://github.com/VictoriaMetrics/operator
 type: application
-version: 0.59.2
+version: 0.68.2
