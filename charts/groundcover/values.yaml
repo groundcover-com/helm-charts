@@ -1564,7 +1564,7 @@ bucketStreamer:
   image:
     registry: public.ecr.aws/groundcovercom
     repository: bucket-streamer
-    tag: "0.0.6"
+    tag: "0.0.7"
     pullPolicy: IfNotPresent
   serviceAccount:
     # A dedicated ServiceAccount is created by default. To run under an existing
@@ -1856,8 +1856,7 @@ queueBucketStreamer:
   image:
     registry: public.ecr.aws/groundcovercom
     repository: bucket-streamer
-    # The first tag with the http sink.
-    tag: "0.0.6"
+    tag: "0.0.7"
     pullPolicy: IfNotPresent
   serviceAccount:
     create: true
