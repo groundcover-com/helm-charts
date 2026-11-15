@@ -5,6 +5,7 @@
 {{- $out := dict -}}
 {{- include "sensor.profile.values" (dict "root" . "profile" $profile "out" $out) -}}
 {{- $sensorValues := $out.sensorValues -}}
+{{- $ebpfMode := include "groundcover.sensor.ebpfMode" (dict "sensorValues" $sensorValues) -}}
 {{- $suffix := include "sensor.profile.suffix" $profile -}}
 {{- if $profile.name }}
 ---
@@ -120,6 +121,10 @@ spec:
             {{- if not $ebpfEnabled }}
             - name: FLORA_EBPFENABLED
               value: "false"
+            {{- end }}
+            {{- if $ebpfMode }}
+            - name: FLORA_EBPFMODE
+              value: {{ $ebpfMode | quote }}
             {{- end }}
             {{- $ebpfCapacityEnabled := dig "ebpfCapacity" "enabled" false $sensorValues }}
             {{- if not (kindIs "bool" $ebpfCapacityEnabled) }}

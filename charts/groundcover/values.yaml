@@ -702,6 +702,7 @@ agent:
     collectionEnabled: true
     ingestionEnabled: true
     ebpfEnabled: true
+    ebpfMode: ""
     ebpfCapacity:
       enabled: false
       referenceCpus: 16

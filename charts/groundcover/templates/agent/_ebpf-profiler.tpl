@@ -6,10 +6,24 @@
   {{- fail "agent.sensor.receivers.profiles.ebpfProfiler.enabled must be a boolean" -}}
 {{- end -}}
 {{- $sensorWithoutEBPF := not (dig "ebpfEnabled" true $sensorValues) -}}
+{{- $ebpfMode := include "groundcover.sensor.ebpfMode" . -}}
 {{- range $sensorValues.env -}}
   {{- if eq (toString .name) "FLORA_EBPFENABLED" -}}
     {{- $sensorWithoutEBPF = has (tpl (toString .value) $root) (list "false" "False" "FALSE" "f" "F" "0") -}}
   {{- end -}}
+  {{- if eq (toString .name) "FLORA_EBPFMODE" -}}
+    {{- if hasKey . "valueFrom" -}}
+      {{- $ebpfMode = lower (trim (tpl (toString .value) $root)) -}}
+    {{- else -}}
+      {{- $ebpfMode = lower (trim (tpl (toString (get . "value")) $root)) -}}
+      {{- if not (has $ebpfMode (list "" "enabled" "disabled" "auto")) -}}
+        {{- fail "FLORA_EBPFMODE in agent.sensor.env must be one of: empty, enabled, disabled, auto" -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- if ne $ebpfMode "" -}}
+  {{- $sensorWithoutEBPF = eq $ebpfMode "disabled" -}}
 {{- end -}}
 {{- if and $enabled (not $root.Values.agent.gke.autopilot.enabled) (not $sensorWithoutEBPF) -}}
 true
