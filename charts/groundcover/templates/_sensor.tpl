@@ -128,6 +128,7 @@ exporters:
   remotewrite:
     url: {{ if $sensorValues.exporters.remotewrite.url }}{{ tpl $sensorValues.exporters.remotewrite.url . }}{{ else }}{{ include "metrics-ingester.write.http.url" . }}{{ end }}
     usePrometheusCompatibleNaming: {{ $sensorValues.exporters.remotewrite.usePrometheusCompatibleNaming }}
+    enableTCP6: {{ $sensorValues.exporters.remotewrite.enableTCP6 | default false }}
     tlsSkipVerify: {{ $sensorValues.exporters.remotewrite.tlsSkipVerify }}
     tlsCertFile: {{ $sensorValues.exporters.remotewrite.tlsCertFile | default "" | quote }}
     tlsKeyFile: {{ $sensorValues.exporters.remotewrite.tlsKeyFile | default "" | quote }}

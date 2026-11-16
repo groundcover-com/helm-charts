@@ -808,6 +808,7 @@ agent:
         customMetricRelabelConfigs: []
     exporters:
       remotewrite:
+        enableTCP6: false
         usePrometheusCompatibleNaming: true
         forcePrometheusProtocol: true
         memoryAllowedBytes: "50MB"
@@ -2525,6 +2526,7 @@ metricsAggregator:
   exporters:
     remotewrite:
       usePrometheusCompatibleNaming: false
+      enableTCP6: false
       forcePrometheusProtocol: false
       url: '{{ template "metrics-aggregator.write.url" . }}'
       disableOnDiskQueue: false
