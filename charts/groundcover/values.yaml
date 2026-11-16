@@ -1225,6 +1225,7 @@ dbManager:
     queryTimeout: 60s
     batchInterval: 1h
     maxBatchGiB: 10
+    longMergeThreshold: 120s
     dropDuringLongMerges: false
   replicas: 1
   extraShardsOverride: 
@@ -1438,7 +1439,7 @@ dbManager:
   enableStorageMgmt: false
   # Maximum number of index tiers (active + previously deleted) allowed per data type policy.
   maxIndexTiers: 20
-  # Set ttl_only_drop_parts on the index-tier tables (logs_v9/traces_v5/events_v4 + subtables).
+  # Set ttl_only_drop_parts on the index-tier tables (logs_v9/traces_v5/traces_v6/events_v4 + subtables).
   # Only applied on the storage-management path. Set to false to explicitly reset the setting to 0.
   ttlOnlyDropParts: true
 agentService:
@@ -2109,8 +2110,8 @@ integrationsAgent:
       duration: 1s
     integrationTypes:
       synthetics:
-        requests: 1
-        interval: 2s
+        requests: 50
+        interval: 1s
   exporters:
     measurements:
       requestTimeout: 10s

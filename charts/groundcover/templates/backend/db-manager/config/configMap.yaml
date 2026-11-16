@@ -217,6 +217,7 @@ data:
         QueryTimeout: {{ .Values.dbManager.partitionDropping.queryTimeout | quote }}
         BatchInterval: {{ .Values.dbManager.partitionDropping.batchInterval | quote }}
         MaxBatchGiB: {{ .Values.dbManager.partitionDropping.maxBatchGiB }}
+        LongMergeThreshold: {{ .Values.dbManager.partitionDropping.longMergeThreshold | quote }}
         DropDuringLongMerges: {{ .Values.dbManager.partitionDropping.dropDuringLongMerges }}
       Db:
         host: {{ tpl .Values.dbManager.db.host . }}

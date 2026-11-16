@@ -90,15 +90,16 @@
 {{- define "ingestor.objectStorage.stream" -}}
 {{- $root := .root -}}
 {{- $prefix := tpl (toString .sink.key_prefix) $root }}
+{{- with .batch.timeout }}{{ if not (regexMatch "[a-zµ]$" (toString .)) }}{{ fail (printf "ingestor.objectStorage: batch timeout %q needs a unit, like 10s" (toString .)) }}{{ end }}{{ end }}
 - rows: {{ .rows }}
   keyPrefix: {{ $prefix | quote }}
   {{- if .backup }}
   backup: true
   storageClass: {{ default "" .sink.storage_class | quote }}
   {{- end }}
-  maxBytes: {{ dig "batch" "max_bytes" 0 .sink | int64 }}
-  maxEvents: {{ dig "batch" "max_events" 0 .sink | int64 }}
-  timeout: {{ printf "%vs" (dig "batch" "timeout_secs" 0 .sink) }}
+  maxBytes: {{ coalesce .batch.maxBytes (dig "batch" "max_bytes" 0 .sink) | int64 }}
+  maxEvents: {{ coalesce .batch.maxEvents (dig "batch" "max_events" 0 .sink) | int64 }}
+  timeout: {{ coalesce .batch.timeout (printf "%vs" (dig "batch" "timeout_secs" 0 .sink)) }}
 {{- end -}}
 
 {{- define "ingestor.objectStorage.customRows" -}}
@@ -114,30 +115,36 @@
 {{- include "ingestor.objectStorage.guard" . -}}
 {{- $sinks := .Values.vector.customComponents.sinks.s3 -}}
 {{- $root := . -}}
+{{- $ingestor := .Values.ingestor.objectStorage | default dict -}}
+{{- $batch := $ingestor.batch | default dict -}}
+{{- $backupBatch := dig "backups" "batch" (dict) $ingestor -}}
 enabled: true
 {{- $os := .Values.vector.objectStorage }}
 bucket: {{ $os.s3Bucket | quote }}
 region: {{ default "" $os.region | quote }}
+{{- with $ingestor.codec }}
+codec: {{ . | quote }}
+{{- end }}
 streams:
 {{- range $sink := $sinks.logs }}
-{{ include "ingestor.objectStorage.stream" (dict "root" $root "sink" $sink "rows" "logs") }}
+{{ include "ingestor.objectStorage.stream" (dict "root" $root "sink" $sink "rows" "logs" "batch" $batch) }}
 {{- end }}
 {{- range $sink := $sinks.traces }}
-{{ include "ingestor.objectStorage.stream" (dict "root" $root "sink" $sink "rows" "traces") }}
+{{ include "ingestor.objectStorage.stream" (dict "root" $root "sink" $sink "rows" "traces" "batch" $batch) }}
 {{- end }}
 {{- range $sink := $sinks.custom }}
 {{- $rows := include "ingestor.objectStorage.customRows" (dict "inputs" $sink.inputs) }}
 {{- if $rows }}
-{{ include "ingestor.objectStorage.stream" (dict "root" $root "sink" $sink "rows" $rows) }}
+{{ include "ingestor.objectStorage.stream" (dict "root" $root "sink" $sink "rows" $rows "batch" $batch) }}
 {{- end }}
 {{- end }}
 {{- if .Values.vector.objectStorage.backups }}
 {{- $backups := index .Values.vector.customComponents.sinks "s3Backups" }}
 {{- range $sink := $backups.logs }}
-{{ include "ingestor.objectStorage.stream" (dict "root" $root "sink" $sink "rows" "logs" "backup" true) }}
+{{ include "ingestor.objectStorage.stream" (dict "root" $root "sink" $sink "rows" "logs" "backup" true "batch" $backupBatch) }}
 {{- end }}
 {{- range $sink := $backups.traces }}
-{{ include "ingestor.objectStorage.stream" (dict "root" $root "sink" $sink "rows" "traces" "backup" true) }}
+{{ include "ingestor.objectStorage.stream" (dict "root" $root "sink" $sink "rows" "traces" "backup" true "batch" $backupBatch) }}
 {{- end }}
 {{- end }}
 {{- end -}}
