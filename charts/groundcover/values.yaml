@@ -1353,11 +1353,6 @@ dbManager:
     maxKeysPerDomain: 50
     # How often to run the sync (e.g., "1h", "30m", "6h")
     syncInterval: "1h"
-  ingestionRowCountGap:
-    checkInterval: "15s"
-    windowWidth: "2m"
-    windowSettle: "15s"
-    queryTimeout: "30s"
   # Sibling tiers share contended CPU by weight; ClickHouse priority is strict
   # (lower value wins) and would starve the lower tiers.
   workloadScheduling:
