@@ -386,7 +386,7 @@ global:
       image:
         registry: "public.ecr.aws/groundcovercom"
         repository: tools
-        tag: "20261112"
+        tag: "20261116"
     auth:
       database: "postgres"  # Default admin database for connections (use "defaultdb" for Akamai)
 
@@ -398,7 +398,7 @@ global:
     cluster:
       image:
         repository: "{{ .Values.global.origin.registry }}/cloudnative-pg/postgres"
-        tag: 18-system-20260603-1
+        tag: 18-system-20261022-1 
       use: false
       enabled: false
       instances: 3
@@ -550,7 +550,7 @@ statefulset-modifier:
   sizePatches: true
   image:
     repository: '{{ .Values.global.origin.registry }}/tools' 
-    tag: '20261112'
+    tag: '20261116'
 
 agent:
   # Set to false to disable the automatic injection of service environment variables
@@ -6250,7 +6250,7 @@ metricsIngester:
 curl: &curlImage
   image:
     repository: '{{ .Values.global.origin.registry }}/tools'
-    tag: '20261112'
+    tag: '20261116'
 
 metrics-ingester:
   # Set to false to disable the automatic injection of service environment variables
@@ -6717,7 +6717,7 @@ victoria-metrics-single:
   server:
     image:
       repository: public.ecr.aws/groundcovercom/victoria-metrics
-      tag: v1.137.0-20260305
+      tag: v1.156.0-20261115-1
 
     extraArgs:
       search.maxUniqueTimeseries: "2000000"

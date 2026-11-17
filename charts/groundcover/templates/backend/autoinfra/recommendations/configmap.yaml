@@ -9,7 +9,7 @@ metadata:
 data:
   # ClickHouse over HTTP (clickhouse-connect). The primary, never the HA proxy: the standby does not
   # mirror the AutoInfra tables, so failing over would compute and publish from stale data.
-  CLICKHOUSE_HOST: {{ include "clickhouse.fullname" . | quote }}
+  CLICKHOUSE_HOST: {{ include "clickhouse.shard0Name" . | quote }}
   CLICKHOUSE_PORT: {{ .Values.global.clickhouse.containerPorts.http | default 8123 | quote }}
   CLICKHOUSE_DATABASE: {{ include "clickhouse.database" . | quote }}
   CLICKHOUSE_USER: {{ include "clickhouse.username" . | quote }}

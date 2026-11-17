@@ -5,7 +5,7 @@ kong-crds:
   upgradeCRDs: true
   image:
     repository: 'public.ecr.aws/groundcovercom/tools' 
-    tag: '20261112'
+    tag: '20261116'
 
 kong:
   replicaCount: 2
@@ -33,7 +33,7 @@ kong:
     repository: public.ecr.aws/groundcovercom/kong
   ingressController:
     image:
-      tag: "3.5.3-20260205"
+      tag: "3.5.14-20261116-1"
       repository: public.ecr.aws/groundcovercom/kong/kubernetes-ingress-controller  
   deployment:
     minReadySeconds: 15
@@ -114,7 +114,7 @@ cert-manager-crds:
   upgradeCRDs: true
   image:
     repository: public.ecr.aws/groundcovercom/tools
-    tag: "20261112"
+    tag: "20261116"
 
 # Internal ingress configuration for routing to cluster-internal services
 internalIngress:
@@ -155,7 +155,7 @@ internalIngress:
         maxSurge: 50%
     ingressController:
       image:
-        tag: "3.5.3-20260205"
+        tag: "3.5.14-20261116-1"
         repository: public.ecr.aws/groundcovercom/kong/kubernetes-ingress-controller
       # No CPU limit, like the external Kong; CPU request sized from measured peak-hour bursts (sidecar p99 212m, monday excluded), not the external Kong
       resources:
