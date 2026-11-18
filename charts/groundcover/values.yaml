@@ -4895,6 +4895,16 @@ vector:
             metrics_metadata: .path == {{ include "vector.json.tables.write.metrics_metadata.path" . | quote}}
             aws_billing_report: .path == {{ include "vector.json.tables.write.aws_billing_report.path" . | quote}}
             aws_cost_reports: .path == {{ include "vector.json.tables.write.aws_cost_reports.path" . | quote}}
+            profiling: .path == {{ include "vector.json.tables.write.profiling.path" . | quote}}
+        profiling_from_json:
+          inputs:
+            - table_write_routing.profiling
+          type: "remap"
+          source: |-
+            # The HTTP source adds these fields; profiling storage accepts only profile columns.
+            del(.path)
+            del(.source_type)
+            del(.timestamp)
         measurements:
           inputs:
             - custom_from_logs_routing.measurements
@@ -5187,6 +5197,30 @@ vector:
               max_bytes: 2000000
               max_events: 2000
               timeout_secs: 1
+          json_profiling_sink:
+            type: http
+            inputs:
+              - custom_from_logs_routing.profiling
+              - profiling_from_json
+            uri: '{{ include "vector.incloud.json.profiling.url" . }}'
+            method: post
+            encoding:
+              codec: json
+              json:
+                timestamp_format: rfc3339
+            compression: zstd
+            request:
+              retry_attempts: 5
+              headers:
+                apikey: $API_KEY
+            buffer:
+                type: memory
+                max_events: 5000
+                when_full: drop_newest
+            batch:
+              max_bytes: 2000000
+              max_events: 2000
+              timeout_secs: 1
           json_session_replay_sink:
             type: http
             inputs:
@@ -5326,6 +5360,7 @@ vector:
             type: clickhouse
             inputs:
               - custom_from_logs_routing.profiling
+              - profiling_from_json
             endpoint: '{{ include "clickhouse.httpEndpoint" . }}'
             database: "groundcover"
             table: "profiling"
@@ -5620,6 +5655,7 @@ vector:
             type: "aws_s3"
             inputs:
               - custom_from_logs_routing.profiling
+              - profiling_from_json
             bucket: '{{ .Values.vector.objectStorage.s3Bucket }}'
             region: '{{ .Values.vector.objectStorage.region }}'
             key_prefix: "v4/profiling/"
@@ -5806,6 +5842,7 @@ vector:
             type: gcp_cloud_storage
             inputs:
               - custom_from_logs_routing.profiling
+              - profiling_from_json
             key_prefix: v4/profiling/
             compression: zstd
             bucket: '{{ .Values.vector.objectStorage.gcsBucket }}'
@@ -5996,6 +6033,7 @@ vector:
             type: azure_blob
             inputs:
               - custom_from_logs_routing.profiling
+              - profiling_from_json
             container_name: '{{ .Values.vector.objectStorage.azureBlobContainer }}'
             connection_string: '{{ .Values.vector.objectStorage.azureConnectionString }}'
             blob_prefix: v4/profiling/
