@@ -76,6 +76,10 @@ data:
         cold_move_duration: {{ .Values.global.events.cold_move_duration }}
         custom_retention_overrides:
           {{- include "events.custom_retention_overrides" . | indent 8 }}
+      Rum:
+        retention: {{ .Values.global.rum.retention }}
+        cold_volume: {{ .Values.clickhouse.coldVolume }}
+        cold_move_duration: {{ .Values.global.rum.cold_move_duration }}
       Measurements:
         retention: {{ include "measurements.retention" . }}
         cold_volume: {{ .Values.clickhouse.coldVolume }}

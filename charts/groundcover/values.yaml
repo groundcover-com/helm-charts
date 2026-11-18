@@ -336,6 +336,10 @@ global:
     retention: 7d # {amount}[h(ours), d(ays), w(eeks), y(ears)]
     cold_move_duration: 7d
 
+  rum:
+    retention: 7d
+    cold_move_duration: 7d
+
   measurements:
     retention: 7d # {amount}[h(ours), d(ays), w(eeks), y(ears)]
     cold_move_duration: 7d
