@@ -90,7 +90,7 @@ spec:
             done
             echo "Temporal is up"
       - name: ensure-temporal-namespace
-        image: '{{ tpl (.Values.commHub | dig "temporal" "adminToolsImage" "repository" "public.ecr.aws/groundcovercom/temporalio/admin-tools") . }}:{{ tpl (.Values.commHub | dig "temporal" "adminToolsImage" "tag" "1.29.7-20261111-1") . }}'
+        image: '{{ tpl (.Values.commHub | dig "temporal" "adminToolsImage" "repository" "public.ecr.aws/groundcovercom/temporalio/admin-tools") . }}:{{ tpl (.Values.commHub | dig "temporal" "adminToolsImage" "tag" "1.30-mini-20261116-1") . }}'
         imagePullPolicy: {{ .Values.commHub | dig "temporal" "adminToolsImage" "pullPolicy" "IfNotPresent" }}
         command:
           - /bin/bash
@@ -105,10 +105,13 @@ spec:
             echo "Ensuring Temporal namespace ${TEMPORAL_NAMESPACE} exists at ${TEMPORAL_ADDRESS}..."
             TEMPORAL_READY=false
             for i in {1..60}; do
-              if tctl --address "${TEMPORAL_ADDRESS}" cluster health 2>/dev/null | grep -q SERVING; then
-                TEMPORAL_READY=true
-                break
-              fi
+              health=$(tctl --address "${TEMPORAL_ADDRESS}" cluster health 2>/dev/null || true)
+              case "$health" in
+                *SERVING*)
+                  TEMPORAL_READY=true
+                  break
+                  ;;
+              esac
               echo "Temporal is not healthy yet - sleeping"
               sleep 2
             done

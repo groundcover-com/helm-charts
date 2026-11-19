@@ -108,8 +108,11 @@ The secret must contain `host`, `port`, `username`, and `password` keys.
 ## How It Works
 
 1. **Schema Management**:
-   - SQL schemas are stored in `backend/temporal/sql-schemas/`
-   - A pre-install/pre-upgrade job creates databases and runs migrations
+   - `update-schema` runs from the admin-tools image (`/etc/temporal/schema/postgresql/v12/{temporal,visibility}/versioned`)
+   - External Postgres: a `pre-install,pre-upgrade` hook creates databases and runs those migrations before server pods
+   - Bundled Postgres: install uses a regular Job (not `post-install`) so Helm `--wait` is not blocked on Temporal readiness; upgrades use `pre-upgrade`. Server Deployments include a `wait-for-schema` initContainer that blocks until temporal v1.18 and visibility v1.13 are present
+   - Before migrating, the job checks that `temporalConfig.adminTools.image` contains the required schema dirs (`temporal` v1.18 and visibility v1.13). A stale image (for example 1.29, whose visibility tree stops at v1.9) exits nonzero and Helm does not roll out Temporal servers
+   - After `update-schema`, the job reads `schema_version.curr_version` on both databases and fails if either is below those required versions
    - The job is idempotent and safe to run multiple times
 
 2. **Database Configuration**:
@@ -130,8 +133,10 @@ The secret must contain `host`, `port`, `username`, and `password` keys.
 If temporal pods are not showing up:
 1. Check if `global.temporal.enabled: true` is set
 2. Verify the temporal-schema-setup job completed successfully
-3. Check the temporal subchart is being deployed: `helm list -n <namespace>`
-4. Look for errors in: `kubectl logs -n <namespace> -l app.kubernetes.io/name=temporal`
+3. If server pods stay in Init (`wait-for-schema`), the Job has not reached temporal v1.18 / visibility v1.13 — check Job logs
+4. If the job logs `admin-tools image is stale`, the configured `temporalConfig.adminTools.image` is older than Temporal 1.30 (missing visibility v1.13). Pin admin-tools and server to the same 1.30-mini tag and retry
+5. Check the temporal subchart is being deployed: `helm list -n <namespace>`
+6. Look for errors in: `kubectl logs -n <namespace> -l app.kubernetes.io/name=temporal`
 
 ## Node Pool Requirements
 
