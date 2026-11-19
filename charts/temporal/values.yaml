@@ -6,23 +6,21 @@ temporalConfig:
   adminTools:
     image:
       repository: public.ecr.aws/groundcovercom/temporalio/admin-tools
-      tag: "1.29.7-20261111-1"
+      tag: "1.30-mini-20261116-1"
       pullPolicy: IfNotPresent
-  schemaConfigMaps:
-    annotations: 
-      # "helm.sh/hook": "pre-install,pre-upgrade"
-      # "helm.sh/hook-weight": "-10"
-      # "helm.sh/hook-delete-policy": "before-hook-creation"
   schemaSetup:
+    requiredVersions:
+      temporal: "1.18"
+      visibility: "1.13"
     annotations:
-      # "helm.sh/hook": "pre-install,pre-upgrade"
-      # "helm.sh/hook-weight": "-5"
-      # "helm.sh/hook-delete-policy": "before-hook-creation"
+      "helm.sh/hook": "pre-install,pre-upgrade"
+      "helm.sh/hook-weight": "-5"
+      "helm.sh/hook-delete-policy": "before-hook-creation"
   namespaceSetup:
     annotations:
-      # "helm.sh/hook": "post-install,post-upgrade"
-      # "helm.sh/hook-weight": "0"
-      # "helm.sh/hook-delete-policy": "before-hook-creation"
+      "helm.sh/hook": "post-install,post-upgrade"
+      "helm.sh/hook-weight": "0"
+      "helm.sh/hook-delete-policy": "before-hook-creation"
   postgres:
     host: "NONE"  # Set to "NONE" to read from secret, or specify host directly
     port: 5432
@@ -47,7 +45,7 @@ temporal:
     replicaCount: 2
     image:
       repository: public.ecr.aws/groundcovercom/temporalio/server
-      tag: 1.29.7-mini-20261111-1
+      tag: 1.30-mini-20261116-1
     config:
       persistence:
         defaultStore: default
@@ -117,7 +115,7 @@ temporal:
     enabled: true
     image:
       repository: public.ecr.aws/groundcovercom/temporalio/admin-tools
-      tag: 1.29.7-20261111-1
+      tag: 1.30-mini-20261116-1
 
   # Disable schema management - handled by our job
   schema:

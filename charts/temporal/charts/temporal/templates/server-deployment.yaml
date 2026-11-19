@@ -38,8 +38,70 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       {{- end }}
-      {{- if or (or $.Values.server.additionalInitContainers $.Values.cassandra.enabled) (or $.Values.elasticsearch.enabled $.Values.elasticsearch.external)}}
       initContainers:
+        - name: wait-for-schema
+          image: "{{ $.Values.admintools.image.repository }}:{{ $.Values.admintools.image.tag }}"
+          imagePullPolicy: {{ $.Values.admintools.image.pullPolicy }}
+          env:
+            - name: REQUIRED_TEMPORAL_SCHEMA
+              value: "1.18"
+            - name: REQUIRED_VISIBILITY_SCHEMA
+              value: "1.13"
+            {{- if ne (include "temporal.persistence.driver" (list $ "default")) "custom" }}
+            - name: TEMPORAL_STORE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "temporal.persistence.secretName" (list $ "default") }}
+                  key: {{ include "temporal.persistence.secretKey" (list $ "default") }}
+            {{- end }}
+            {{- if or $.Values.server.additionalEnv $serviceValues.additionalEnv }}
+            {{- toYaml (default $.Values.server.additionalEnv $serviceValues.additionalEnv) | nindent 12 }}
+            {{- end }}
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              set -e
+              SQL_HOST="${SQL_HOST:-$TEMPORAL_STORE_HOST}"
+              SQL_PORT="${SQL_PORT:-${TEMPORAL_STORE_PORT:-5432}}"
+              SQL_USER="${SQL_USER:-$TEMPORAL_STORE_USER}"
+              SQL_PASSWORD="${SQL_PASSWORD:-$TEMPORAL_STORE_PASSWORD}"
+              TEMPORAL_DB="${TEMPORAL_DB:-$TEMPORAL_STORE_DATABASE}"
+              VISIBILITY_DB="${VISIBILITY_DB:-$TEMPORAL_VISIBILITY_DATABASE}"
+              export PGPASSWORD="$SQL_PASSWORD"
+              version_ge() {
+                a_major=${1%%.*}; a_minor=${1#*.}; a_minor=${a_minor%%.*}
+                b_major=${2%%.*}; b_minor=${2#*.}; b_minor=${b_minor%%.*}
+                a_minor=${a_minor:-0}; b_minor=${b_minor:-0}
+                if [ "$a_major" -gt "$b_major" ]; then return 0; fi
+                if [ "$a_major" -lt "$b_major" ]; then return 1; fi
+                [ "$a_minor" -ge "$b_minor" ]
+              }
+              i=0
+              while [ "$i" -lt 120 ]; do
+                ready=1
+                for pair in "$TEMPORAL_DB:${REQUIRED_TEMPORAL_SCHEMA}" "$VISIBILITY_DB:${REQUIRED_VISIBILITY_SCHEMA}"; do
+                  db="${pair%%:*}"
+                  required="${pair##*:}"
+                  current=$(psql -h "$SQL_HOST" -p "$SQL_PORT" -U "$SQL_USER" -d "$db" -tAc "SELECT curr_version FROM schema_version" 2>/dev/null || true)
+                  if [ -z "$current" ] || ! version_ge "$current" "$required"; then
+                    ready=0
+                    break
+                  fi
+                done
+                if [ "$ready" -eq 1 ]; then
+                  echo "Temporal schemas are ready"
+                  exit 0
+                fi
+                i=$((i+1))
+                echo "Attempt $i/120: waiting for temporal >= ${REQUIRED_TEMPORAL_SCHEMA} and visibility >= ${REQUIRED_VISIBILITY_SCHEMA}"
+                sleep 5
+              done
+              echo "timed out waiting for required Temporal schema versions" >&2
+              exit 1
+          {{- with $serviceValues.containerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
         {{- with $.Values.server.additionalInitContainers }}
           {{- toYaml . | nindent 8}}
         {{- end }}
@@ -73,7 +135,6 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
         {{- end }}
-      {{- end }}
       containers:
         - name: {{ $.Chart.Name }}-{{ $service }}
           image: "{{ $.Values.server.image.repository }}:{{ $.Values.server.image.tag }}"
@@ -115,6 +176,14 @@ spec:
             - secretRef:
                 name: {{ $.Values.server.additionalEnvSecretName }}
           {{- end }}
+          # Echo 1.30-mini entrypoint skips dockerize and starts with the
+          # embedded Cassandra template. Render the mounted helm config.
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -eu
+              dockerize -template /etc/temporal/config/config_template.yaml:/etc/temporal/config/docker.yaml
+              exec temporal-server --env docker start --service="$SERVICES"
           # For Istio service mesh - make sure ports are defined here and in the headless service, see:
           # https://istio.io/latest/docs/ops/configuration/traffic-management/traffic-routing/#headless-services
           ports:
