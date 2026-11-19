@@ -847,6 +847,9 @@ logsOtlpEndpoint:
   maxIdleConns: {{ dig "apmIngestor" "otlpConnectionPool" "maxIdleConns" 0 $sensorValues }}
   maxIdleConnsPerHost: {{ dig "apmIngestor" "otlpConnectionPool" "maxIdleConnsPerHost" 0 $sensorValues }}
   idleConnTimeout: {{ dig "apmIngestor" "otlpConnectionPool" "idleConnTimeout" "0s" $sensorValues }}
+{{- if and (not (dig "internalIngress" "enabled" false $sensorValues)) (ne (include "ingestion.profiles.otlp.http.url" .) (include "ingestion.custom.otlp.http.url" .)) }}
+profilesOtlpURL: {{ include "ingestion.profiles.otlp.http.url" . | quote }}
+{{- end }}
 customOtlpEndpoint:
   endpoint: {{ if dig "internalIngress" "enabled" false $sensorValues }}{{ include "vector.internalIngress.custom.otlp.http.url" . }}{{ else }}{{ include "ingestion.custom.otlp.http.url" . }}{{ end }}
   compression: {{ .Values.global.ingestion.otlpCompression | default "gzip" }}

@@ -190,10 +190,6 @@ true
 {{- printf "%s/profiling" (include "vector.cluster.json.tables.write.path" .) -}}
 {{- end -}}
 
-{{- define "vector.incloud.json.profiling.url" -}}
-{{- printf "%s%s" (include "incloud.ingestion.http.url" .) (include "vector.json.tables.write.profiling.path" .) -}}
-{{- end -}}
-
 {{- define "vector.cluster.otlp.grpc.monitors.port" -}}
 {{-  printf "4347"  -}}
 {{- end -}}

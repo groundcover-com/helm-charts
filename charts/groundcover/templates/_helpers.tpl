@@ -407,6 +407,16 @@ need it). Empty disables the check.
 {{- end -}}
 {{- end -}}
 
+{{- define "ingestion.profiles.otlp.http.url" -}}
+{{- $storage := .Values.vector.objectStorage -}}
+{{- $localStorage := and $storage.allowed (or $storage.s3Bucket $storage.gcsBucket (and $storage.azureBlobContainer $storage.azureConnectionString)) -}}
+{{- if and (not .Values.global.backend.enabled) .Values.global.ingress.site (not $localStorage) (not .Values.global.vector.custom.otlp.overrideHttpURL) -}}
+    {{- include "incloud.ingestion.otlp.http.custom.url" . -}}
+{{- else -}}
+    {{- include "ingestion.custom.otlp.http.url" . -}}
+{{- end -}}
+{{- end -}}
+
 {{- define "ingestion.health.http.url" -}}
 {{- if (include  "vector.useLocalVector" .) -}}
     {{ include "vector.health.http.url" . }}
