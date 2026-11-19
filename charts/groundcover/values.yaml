@@ -883,6 +883,9 @@ agent:
         enabled: true
         tracesPort: 8126
         samplingRatio: 0.05
+        # Opt in to sampled OTTL/processing statistics for proven span-local rules.
+        # Input accounting stays complete. Unsupported rules and APM measurements keep sampling late.
+        sampleBeforeOttl: false
         handleTraces: true
         handleStats: true
         handleSeries: true
@@ -2333,6 +2336,9 @@ ingestor:
       enabled: true
       tracesPort: 8126
       samplingRatio: 0.05
+      # Opt in to sampled OTTL/processing statistics for proven span-local rules.
+      # Input accounting stays complete. Unsupported rules and APM measurements keep sampling late.
+      sampleBeforeOttl: false
       handleTraces: true
       handleStats: true
       handleSeries: true

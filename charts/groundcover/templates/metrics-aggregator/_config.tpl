@@ -599,6 +599,7 @@ apmIngestor:
     enabled: {{ $sensorValues.apmIngestor.dataDog.enabled }}
     tracesPort: {{ $sensorValues.apmIngestor.dataDog.tracesPort }}
     samplingRatio: {{ $sensorValues.apmIngestor.dataDog.samplingRatio }}
+    sampleBeforeOttl: {{ $sensorValues.apmIngestor.dataDog.sampleBeforeOttl | default false }}
     handleTraces: {{ $sensorValues.apmIngestor.dataDog.handleTraces }}
     handleStats: {{ $sensorValues.apmIngestor.dataDog.handleStats }}
     handleSeries: {{ $sensorValues.apmIngestor.dataDog.handleSeries }}
