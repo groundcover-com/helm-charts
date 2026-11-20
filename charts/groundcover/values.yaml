@@ -6838,7 +6838,7 @@ monitors-manager:
   image:
     registry: public.ecr.aws
     repository: groundcovercom/grafana-groundcover
-    tag: v0.0.58-grafana11.3.7
+    tag: v0.0.59-grafana12.4.12
   nameOverride: monitors-manager
   persistence:
     enabled: true
@@ -7294,7 +7294,7 @@ vmclusters:
     spec:
       image:
         repository: "{{ .Values.global.origin.registry }}/vmagent"
-        tag: v1.136.0
+        tag: v1.156.0-20261115-1
       selectAllByDefault: false
       ingestOnlyMode: true
       replicaCount: 1

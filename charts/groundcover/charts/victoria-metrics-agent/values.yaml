@@ -3,7 +3,7 @@
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
-groundcover_version: 1.13.322
+groundcover_version: 1.13.323
 # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
 deployment:
   enabled: true
@@ -42,7 +42,7 @@ autoscaling:
   customMetrics: []
 image:
   repository: public.ecr.aws/groundcovercom/vmagent
-  tag: "v1.137.0-20260305" # rewrites Chart.AppVersion
+  tag: "v1.156.0-20261115-1" # rewrites Chart.AppVersion
   pullPolicy: IfNotPresent
 imagePullSecrets: []
 nameOverride: ""
