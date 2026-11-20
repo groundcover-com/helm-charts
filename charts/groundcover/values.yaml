@@ -4239,7 +4239,7 @@ opentelemetry-collector:
       value: 'http://{{ include "ingestor.fullname" . }}:4318'
   image:
     repository: public.ecr.aws/groundcovercom/otel/opentelemetry-collector-contrib
-    tag: "0.145.0"
+    tag: "0.145.0-20261116-1"
   podLabels:
     app.kubernetes.io/part-of: '{{ include "groundcover.labels.partOf" . }}'
   podAnnotations:
@@ -4331,7 +4331,6 @@ opentelemetry-collector:
     extensions:
       health_check:
         path: /health
-        tls: ${env:TLS_CONFIG}
         endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "health" "containerPort" | int ) }}'
       pprof:
         endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "pprof" "containerPort" | int ) }}'
@@ -4339,18 +4338,15 @@ opentelemetry-collector:
       loki/historian:
         protocols:
           http:
-            tls: ${env:TLS_CONFIG}
             endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "loki-historian" "containerPort" | int ) }}'
         use_incoming_timestamp: true
       otlp:
         protocols:
           grpc:
             max_recv_msg_size_mib: 50
-            tls: ${env:TLS_CONFIG}
             endpoint: '{{ printf "0.0.0.0:%d" (index .Values "ports" "otlp" "containerPort" | int ) }}'
 
           http:
-            tls: ${env:TLS_CONFIG}
             include_metadata: true
             cors:
               allowed_origins:
