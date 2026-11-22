@@ -563,8 +563,7 @@ agent:
   # enableServiceLinks: false
   # Bind address for the sensor DaemonSet's own listeners. Defaults to "0.0.0.0"
   # (IPv4). For IPv6 clusters, set to "[::]" — this flips the sensor's Prometheus
-  # metrics server, the APM/OTel direct receivers, and (unless overridden)
-  # fluent-bit. See agent.flb.bindAddress for a per-component override.
+  # metrics server and the APM/OTel direct receivers.
   # Not covered: vector and the victoria-metrics deployments (separate workloads
   # with their own settings), and the sourcemap upload server (already binds the
   # dual-stack ":port", so it serves IPv6 regardless of this value).
@@ -581,8 +580,6 @@ agent:
   #  - drops the EKS-specific node affinity (rejected by Autopilot)
   #  - uses a namespace-independent sensor-position hostPath so a single
   #    approved allowlist matches regardless of install namespace
-  #  - splits the fluent-bit config into two single-file volumes so the
-  #    allowlist matcher can disambiguate them (it matches volumeMounts by name)
   #  - optionally installs an AllowlistSynchronizer to pull the allowlist
   gke:
     autopilot:
@@ -628,28 +625,6 @@ agent:
           secretKeyRef:
             key: '{{ template "groundcover.apikeySecretKey" . }}'
             name: '{{ template "groundcover.apikeySecretName" . }}' 
-  flb:
-    enabled: true
-    # Overrides agent.listenAddress for fluent-bit only. Leave empty to inherit it.
-    bindAddress: ""
-    image:
-      tag: "4.2"
-      repository: "{{ .Values.global.origin.registry }}/fluent/fluent-bit"
-    resources:
-      requests:
-        cpu: 50m
-        memory: 64Mi
-      limits:
-        cpu: 100m
-        memory: 64Mi
-    resizePolicy: []
-    env: []
-    builtinEnv:
-    - name: API_KEY
-      valueFrom:
-        secretKeyRef:
-          key: '{{ template "groundcover.apikeySecretKey" . }}'
-          name: '{{ template "groundcover.apikeySecretName" . }}' 
   sensor:
     cloudMetadata:
       enabled: true

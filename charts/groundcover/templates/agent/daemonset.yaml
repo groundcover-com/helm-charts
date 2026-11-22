@@ -178,6 +178,16 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: status.hostIP
+            {{- if eq (include "telemetry.enabled" .) "true" }}
+            - name: TELEMETRY_LOGS_URL
+              value: {{ include "telemetry.logs.url" . | quote }}
+            - name: TELEMETRY_LOGS_PART_OF
+              value: {{ include "groundcover.labels.partOf" . | quote }}
+            - name: POD_WORKLOAD
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['app.kubernetes.io/name']
+            {{- end }}
             {{- if ((($sensorValues.resources).limits).memory) }}
             {{- include "groundcover.sensor.deployment.gomemlimitEnv" (dict "containerName" "sensor") | nindent 12 }}
             {{- end }}
@@ -280,78 +290,6 @@ spec:
 {{- with .Values.agent.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
 {{- end }}
-{{- if and (eq (include "telemetry.enabled" .) "true") (eq .Values.agent.flb.enabled true) }}
-        - name: fluent-bit
-          image: {{ tpl .Values.agent.flb.image.repository . }}:{{ .Values.agent.flb.image.tag }}
-          imagePullPolicy: {{ default "Always" .Values.agent.imagePullPolicy }}
-          ports:
-            - name: http
-              containerPort: 2020
-              protocol: TCP
-          volumeMounts:
-            - name: varlog
-              mountPath: /var/log
-              readOnly: true
-{{- if .Values.agent.gke.autopilot.enabled }}
-            # Autopilot: two distinct volume names so the WorkloadAllowlist matcher
-            # (which matches volumeMounts by name) can disambiguate them.
-            - name: fluent-bit-config-main
-              mountPath: /fluent-bit/etc/fluent-bit.conf
-              subPath: fluent-bit.conf
-            - name: fluent-bit-config-parsers
-              mountPath: /fluent-bit/etc/custom_parsers.conf
-              subPath: custom_parsers.conf
-{{- else }}
-            - name: fluent-bit-config
-              mountPath: /fluent-bit/etc/fluent-bit.conf
-              subPath: fluent-bit.conf
-            - name: fluent-bit-config
-              mountPath: /fluent-bit/etc/custom_parsers.conf
-              subPath: custom_parsers.conf
-{{- end }}
-            - name: docker
-              readOnly: true
-              mountPath: /var/lib/docker/containers
-          livenessProbe:
-            httpGet:
-              path: /
-              port: http
-              scheme: HTTP
-            timeoutSeconds: 1
-            periodSeconds: 10
-            successThreshold: 1
-            failureThreshold: 3
-          readinessProbe:
-            httpGet:
-              path: /api/v1/health
-              port: http
-              scheme: HTTP
-            timeoutSeconds: 1
-            periodSeconds: 2
-            successThreshold: 1
-            failureThreshold: 15
-          env:
-            - name: GC_GROUNDCOVERVERSION
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.annotations['groundcover_version']   
-            - name: GC_RUNNINGNAMESPACE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.namespace
-        {{- with .Values.agent.flb.env }}
-          {{ tpl (toYaml .) $ | nindent 12 }}
-        {{- end }}
-        {{- with .Values.agent.flb.builtinEnv }}
-          {{ tpl (toYaml .) $ | nindent 12 }}
-        {{- end }}
-          envFrom:
-          - secretRef:
-              name: {{include "groundcover.config.secretName" .}}
-          resources:
-            {{- toYaml .Values.agent.flb.resources | nindent 12 }}
-          {{- include "groundcover.containerResizePolicy" (dict "value" .Values.agent.flb.resizePolicy "path" "agent.flb.resizePolicy" "kubeVersion" .Capabilities.KubeVersion.GitVersion "indent" 10) }}
-{{- end }}
 {{- with include "groundcover.ebpfProfiler.container" (dict "root" $ "sensorValues" $sensorValues) }}
 {{- . | nindent 8 }}
 {{- end }}
@@ -385,26 +323,6 @@ spec:
 {{- end }}
       terminationGracePeriodSeconds: 10
       volumes:
-{{- if eq (include "telemetry.enabled" .) "true" }}
-{{- if .Values.agent.gke.autopilot.enabled }}
-        - name: fluent-bit-config-main
-          configMap:
-            name: fluent-bit-config
-            defaultMode: 420
-        - name: fluent-bit-config-parsers
-          configMap:
-            name: fluent-bit-config
-            defaultMode: 420
-{{- else }}
-        - name: fluent-bit-config
-          configMap:
-            name: fluent-bit-config
-            defaultMode: 420
-{{- end }}
-{{- end }}
-        - name: varlibdockercontainers
-          hostPath:
-            path: /var/lib/docker/containers
         - hostPath:
             path: /
             type: Directory

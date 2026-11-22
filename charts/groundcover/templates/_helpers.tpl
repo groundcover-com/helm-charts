@@ -367,6 +367,10 @@ need it). Empty disables the check.
 {{- printf "%s/api/client/v1/cluster-info" (include "fleet-manager.url" . | trimSuffix "/api/client/v2/config") -}}
 {{- end -}}
 
+{{- define "fleet-manager.commands.url" -}}
+{{- printf "%s/api/client/v1/commands" (include "fleet-manager.base.url" .) -}}
+{{- end -}}
+
 {{- define "fleet-manager.base.url" -}}
 {{- if .Values.fleetClientConfig.overrideBaseURL -}}
     {{- .Values.fleetClientConfig.overrideBaseURL -}}
@@ -499,6 +503,7 @@ Create the name of the agent priority class to use
 {{- define "groundcover.fleetClientConfig" -}}
 enabled: {{ .Values.global.fleetmanager.enabled }}
 url: {{ include "fleet-manager.url" . }}
+commandsURL: {{ include "fleet-manager.commands.url" . }}
 insecureSkipVerify: {{ .Values.fleetClientConfig.insecureSkipVerify }}
 tlsCertFile: {{ .Values.fleetClientConfig.tlsCertFile | default "" | quote }}
 tlsKeyFile: {{ .Values.fleetClientConfig.tlsKeyFile | default "" | quote }}
