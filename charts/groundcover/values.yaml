@@ -328,6 +328,10 @@ global:
     retention: 24h # {amount}[h(ours), d(ays), w(eeks), y(ears)]
     cold_move_duration: 7d
 
+  objectives:
+    retention: 7d
+    cold_move_duration: 7d
+
   profiling:
     retention: 3d # {amount}[h(ours), d(ays), w(eeks), y(ears)]
     cold_move_duration: 7d

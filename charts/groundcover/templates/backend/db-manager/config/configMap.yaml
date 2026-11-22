@@ -41,6 +41,10 @@ data:
     DropPartitionTimeout: 5m
     httpPort: 8888
     tableDataRetention:
+      Objectives:
+        retention: {{ .Values.global.objectives.retention }}
+        cold_volume: {{ .Values.clickhouse.coldVolume }}
+        cold_move_duration: {{ .Values.global.objectives.cold_move_duration }}
       Aws_Cost_Reports:
         retention: {{ .Values.awsCostReports.retention }}
       Traces:
