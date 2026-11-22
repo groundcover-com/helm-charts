@@ -30,6 +30,20 @@ true
 {{- end -}}
 {{- end -}}
 
+{{- define "groundcover.ebpfProfiler.anyEnabled" -}}
+{{- $any := false -}}
+{{- range $profile := ($.Values.agent.extraSensorProfiles | default (list (dict "name" ""))) -}}
+  {{- $out := dict -}}
+  {{- include "sensor.profile.values" (dict "root" $ "profile" $profile "out" $out) -}}
+  {{- if include "groundcover.ebpfProfiler.enabled" (dict "root" $ "sensorValues" $out.sensorValues) -}}
+    {{- $any = true -}}
+  {{- end -}}
+{{- end -}}
+{{- if $any -}}
+true
+{{- end -}}
+{{- end -}}
+
 {{- define "groundcover.ebpfProfiler.controlDir" -}}
 /var/run/groundcover/ebpf-profiler
 {{- end -}}

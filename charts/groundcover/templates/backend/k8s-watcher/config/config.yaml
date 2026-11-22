@@ -56,6 +56,8 @@ data:
         base: 0s
         cap: 0s
         resetAfter: 0s
+    ebpfProfiler:
+      enabled: {{ include "groundcover.ebpfProfiler.anyEnabled" . | eq "true" }}
     tracesNamespaceFilters: {{ toYaml .Values.tracesNamespaceFilters | nindent 6 }}
     tracesWorkloadFilters: {{ toYaml .Values.tracesWorkloadFilters | nindent 6 }}
     commitHashKeyName: {{ .Values.commitHashKeyName }}
