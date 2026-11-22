@@ -604,11 +604,11 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ printf "%s-cluster-info" (include "incloud-ingress.name" .) | trunc 63 | trimSuffix "-" }}
+  name: {{ printf "%s-fleet-manager-client" (include "incloud-ingress.name" .) | trunc 63 | trimSuffix "-" }}
   annotations:
     konghq.com/protocols: {{ ternary "https" "http" ( eq (tpl .Values.secure . ) "true" ) | quote }}
-    konghq.com/strip-path: "true"
-    konghq.com/plugins: {{ printf "%s-strip-authorization-prefix" .Release.Name }},{{ printf "%s-auth" .Release.Name }},allow-ingestion-token-remoteconfig,{{ printf "%s-fleet-manager-rewrite-cluster-info" .Release.Name }}
+    konghq.com/strip-path: "false"
+    konghq.com/plugins: {{ printf "%s-strip-authorization-prefix" .Release.Name }},{{ printf "%s-auth" .Release.Name }},allow-ingestion-token-remoteconfig,{{ printf "%s-fleet-manager-rewrite-client" .Release.Name }}
     {{- with .Values.ingress.annotations }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
@@ -626,7 +626,21 @@ spec:
   rules:
     - http:
         paths:
-          - path: /fleet-manager/api/client/v1/cluster-info
+          - path: /~/fleet-manager(?<rest>/api/client/v1/cluster-info)$
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ include "fleet-manager.fullname" . }}
+                port:
+                  name: manage-http
+          - path: /~/fleet-manager(?<rest>/api/client/v1/commands/claim)$
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ include "fleet-manager.fullname" . }}
+                port:
+                  name: manage-http
+          - path: /~/fleet-manager(?<rest>/api/client/v1/commands/result)$
             pathType: ImplementationSpecific
             backend:
               service:
