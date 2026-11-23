@@ -1213,6 +1213,8 @@ dbManager:
     maxBatchGiB: 10
     longMergeThreshold: 120s
     dropDuringLongMerges: false
+    redropCooldown: 24h
+    retryFailedAfterBatches: 2
   replicas: 1
   extraShardsOverride: 
   # Standby cluster config for db-manager (gated by global.clickhouse.ha.enabled).

@@ -222,6 +222,8 @@ data:
         MaxBatchGiB: {{ .Values.dbManager.partitionDropping.maxBatchGiB }}
         LongMergeThreshold: {{ .Values.dbManager.partitionDropping.longMergeThreshold | quote }}
         DropDuringLongMerges: {{ .Values.dbManager.partitionDropping.dropDuringLongMerges }}
+        RedropCooldown: {{ .Values.dbManager.partitionDropping.redropCooldown | quote }}
+        RetryFailedAfterBatches: {{ .Values.dbManager.partitionDropping.retryFailedAfterBatches }}
       Db:
         host: {{ tpl .Values.dbManager.db.host . }}
         port: {{ tpl .Values.dbManager.db.port . }}
