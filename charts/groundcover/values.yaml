@@ -122,6 +122,7 @@ global:
     enabled: false
   aiO11yService:
     enabled: true
+    workerEnabled: false
   # Turns monitors v2 on for this backend: v1 monitor writes also write v2, and a v2 failure fails the v1 write.
   # Don't turn it off and on again: v1 changes made while off never reach v2.
   monitorsService:
@@ -4038,6 +4039,10 @@ clickhouse: &primary
         <writer_profile>
           <readonly>0</readonly>
         </writer_profile>
+        <ai_results_writer>
+          <profile>default</profile>
+          <distributed_foreground_insert>1</distributed_foreground_insert>
+        </ai_results_writer>
       </profiles>
       <users>
         <default>
@@ -4073,6 +4078,14 @@ clickhouse: &primary
           <profile>writer_profile</profile>
           <quota>default</quota>
         </writer>
+        <ai_results_writer>
+          <password from_env="CLICKHOUSE_PASSWORD" />
+          <networks>
+            <ip>::/0</ip>
+          </networks>
+          <profile>ai_results_writer</profile>
+          <quota>default</quota>
+        </ai_results_writer>
       </users>
     </clickhouse>
   persistence:
@@ -4551,6 +4564,8 @@ vector:
         port: 8125
       - name: json-table-write
         port: 4350
+      - name: json-ai-results
+        port: 4351
   containerPorts:
     - name: api
       containerPort: 8686
@@ -4591,6 +4606,8 @@ vector:
       containerPort: 8125
     - name: json-tablewrite
       containerPort: 4350
+    - name: json-ai-results
+      containerPort: 4351
   role: "Stateless-Aggregator"
   replicas: 2
   resources:
@@ -4679,6 +4696,16 @@ vector:
       address: "0.0.0.0:8686"
   customComponents:
     sources:
+      aiResults:
+        json_ai_results:
+          type: http
+          address: '0.0.0.0:{{ include "vector.cluster.json.aiResults.port" . }}'
+          method: POST
+          strict_path: false
+          decoding:
+            codec: json
+          acknowledgements:
+            enabled: true
       overrideSources:
       extraSources:
       empty:
@@ -4802,6 +4829,14 @@ vector:
           decoding:
             codec: json
     transforms:
+      aiResults:
+        ai_results_routing:
+          type: route
+          inputs: [json_ai_results]
+          reroute_unmatched: false
+          route:
+            ai_goals: .path == {{ include "vector.json.tables.write.ai_goals.path" . | quote }}
+            ai_goal_assignments: .path == {{ include "vector.json.tables.write.ai_goal_assignments.path" . | quote }}
       overrideTransforms:
       extraTransforms:
       default:
@@ -5055,6 +5090,39 @@ vector:
           }
 
     sinks:
+      aiResults:
+        clickhouse_ai_goals: &vectorAIResultsSink
+          type: clickhouse
+          inputs: [ai_results_routing.ai_goals]
+          endpoint: '{{ include "clickhouse.shard0HttpEndpoint" . }}'
+          database: groundcover
+          table: ai_goals_v1_dist
+          skip_unknown_fields: true
+          date_time_best_effort: true
+          request:
+            retry_attempts: 5
+          auth:
+            user: ai_results_writer
+            password: $CLICKHOUSE_PASSWORD
+            strategy: basic
+          format: json_each_row
+          encoding:
+            timestamp_format: rfc3339
+          acknowledgements:
+            enabled: true
+          buffer:
+            type: memory
+            max_size: 268435488
+            when_full: block
+          batch:
+            max_events: 1000
+            timeout_secs: 0.1
+          healthcheck:
+            enabled: false
+        clickhouse_ai_goal_assignments:
+          <<: *vectorAIResultsSink
+          inputs: [ai_results_routing.ai_goal_assignments]
+          table: ai_goal_assignments_v1_dist
       overrideSinks:
       extraSinks:
       metrics:

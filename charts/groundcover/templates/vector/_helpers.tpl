@@ -345,6 +345,32 @@ true
 {{- end -}}
 {{- end -}}
 
+{{- define "vector.cluster.json.aiResults.port" -}}
+{{- printf "4351" -}}
+{{- end -}}
+
+{{- define "vector.json.tables.write.ai_goals.path" -}}
+{{- printf "/ingest/v2/json/table/write/ai_goals" -}}
+{{- end -}}
+
+{{- define "vector.json.tables.write.ai_goal_assignments.path" -}}
+{{- printf "/ingest/v2/json/table/write/ai_goal_assignments" -}}
+{{- end -}}
+
+{{- define "vector.internalIngress.ai_goals.url" -}}
+{{- printf "%s%s" (include "vector.internalIngress.url.base" .) (include "vector.json.tables.write.ai_goals.path" .) -}}
+{{- end -}}
+
+{{- define "vector.internalIngress.ai_goal_assignments.url" -}}
+{{- printf "%s%s" (include "vector.internalIngress.url.base" .) (include "vector.json.tables.write.ai_goal_assignments.path" .) -}}
+{{- end -}}
+
+{{- define "vector.aiResults.enabled" -}}
+{{- if and .Values.global.backend.enabled .Values.global.aiO11yService.enabled .Values.global.aiO11yService.workerEnabled -}}
+true
+{{- end -}}
+{{- end -}}
+
 {{- define "vector.health.http.url" -}}
 {{- if .Values.global.vector.health.overrideHttpURL -}}
     {{- print .Values.global.vector.health.overrideHttpURL -}}
@@ -617,7 +643,18 @@ custom:
 {{- join "\n" $lines -}}
 {{- end -}}
 
+{{- define "vector.config.aiResults" -}}
+{{- if include "vector.aiResults.enabled" .root -}}
+{{- range $name, $config := .defaults -}}
+{{- if not (hasKey $.custom $name) -}}
+{{- tpl (toYaml (dict $name $config)) $.root | nindent 2 }}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
 {{- define "vector.config.customConfig" -}}
+{{- $components := .Values.vector.customComponents -}}
 {{- /* All gated on vector.parquetSchemas.enabled (the if below): parquet sink encoding + traces stringify step + drop api.playground/graphql (rejected by vector >=0.55). */ -}}
 {{- if (dig "parquetSchemas" "enabled" false .Values.vector) -}}
 {{- if hasKey .Values.vector.customComponents.sinks "s3" -}}
@@ -641,6 +678,7 @@ custom:
 
 sources:
 {{- include "vector.config.sources.telemetry" . | nindent 2 }}
+{{- include "vector.config.aiResults" (dict "root" . "defaults" $components.sources.aiResults "custom" (or $components.sources.overrideSources $components.sources.extraSources (dict))) }}
 {{ if .Values.vector.customComponents.sources.overrideSources }}
 {{- tpl (toYaml .Values.vector.customComponents.sources.overrideSources) $ | nindent 2 -}}
 {{ else }}
@@ -656,6 +694,7 @@ sources:
 transforms:
 {{- include "vector.config.transforms.telemetry" . | nindent 2 }}
 {{- include "vector.config.transforms.ingestionMetrics" . | nindent 2 }}
+{{- include "vector.config.aiResults" (dict "root" . "defaults" $components.transforms.aiResults "custom" (or $components.transforms.overrideTransforms $components.transforms.extraTransforms (dict))) }}
 {{ if .Values.vector.customComponents.transforms.overrideTransforms }}
 {{- tpl (toYaml .Values.vector.customComponents.transforms.overrideTransforms) $ | nindent 2 -}}
 {{ else }}
@@ -670,6 +709,7 @@ transforms:
 {{ end }}
 
 sinks:
+{{- include "vector.config.aiResults" (dict "root" . "defaults" $components.sinks.aiResults "custom" (or $components.sinks.overrideSinks $components.sinks.extraSinks (dict))) }}
 {{ if .Values.vector.customComponents.sinks.overrideSinks }}
 {{- tpl (toYaml .Values.vector.customComponents.sinks.overrideSinks) $ | nindent 2 -}}
 {{ else }}
