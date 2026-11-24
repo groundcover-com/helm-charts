@@ -192,6 +192,9 @@ data:
     - Type: gcpmetrics
       Name: "{{ .name }}"
       GcpTargetServiceAccount: "{{ .targetServiceAccount }}"
+      {{- if hasKey . "maxConnsPerHost" }}
+      GcpMaxConnsPerHost: {{ .maxConnsPerHost }}
+      {{- end }}
       {{- if .interval }}
       Interval: "{{ .interval }}"
       {{- end }}
