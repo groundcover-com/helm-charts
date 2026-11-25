@@ -449,12 +449,16 @@ victoria-metrics-distributed:
           serviceSpec:
             useAsDefault: true
         vmselect:
-          terminationGracePeriodSeconds: 150
+          terminationGracePeriodSeconds: 130
+          serviceSpec:
+            useAsDefault: true
+            spec:
+              publishNotReadyAddresses: false
           image:
             repository: public.ecr.aws/groundcovercom/victoriametrics/vmselect
             tag: v1.137.0-cluster-20260303
           extraArgs:
-            http.maxGracefulShutdownDuration: "120s"
+            http.maxGracefulShutdownDuration: "100s"
             http.shutdownDelay: "15s"
             search.maxQueryLen: "100000"
             search.maxSeries: "30000"

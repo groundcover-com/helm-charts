@@ -753,13 +753,14 @@ agent:
           image:
             repository: "{{ .Values.global.origin.registry }}/ebpf-profiler"
             tag: "{{ default .Chart.AppVersion .Values.global.origin.tag }}"
-          samplesPerSecond: 20
+          samplesPerSecond: 19
           reportInterval: 5s
           resources:
             requests:
-              cpu: 50m
-              memory: 100Mi
+              cpu: 10m
+              memory: 10Mi
             limits:
+              cpu: 1000m
               memory: 512Mi
       metricsscraper:
         enabled: false
@@ -7410,12 +7411,16 @@ vmclusters:
           prometheus.io/path: "/metrics"
     vmselect:
       replicaCount: 2
-      terminationGracePeriodSeconds: 150
+      terminationGracePeriodSeconds: 130
+      serviceSpec:
+        useAsDefault: true
+        spec:
+          publishNotReadyAddresses: false
       image:
         repository: "{{ .Values.global.origin.registry }}/victoriametrics/vmselect"
         tag: v1.137.0-cluster-20260303
       extraArgs:
-        http.maxGracefulShutdownDuration: "120s"
+        http.maxGracefulShutdownDuration: "100s"
         http.shutdownDelay: "15s"
         search.maxQueryLen: "100000"
         search.maxSeries: "30000"
