@@ -20,6 +20,9 @@ data:
     {{- if .Values.global.investigationService.enabled }}
     {{- $features = append $features "investigations" }}
     {{- end }}
+    {{- if and .Values.global.backend.enabled .Values.global.aiO11yService.enabled .Values.global.aiO11yService.workerEnabled }}
+    {{- $features = append $features "semantic-intelligence" }}
+    {{- end }}
     {{- if and .Values.global.backend.enabled .Values.global.autonomousInfrastructure.enabled }}
     {{- $features = append $features "autonomous_infrastructure" }}
     {{- if .Values.global.autonomousInfrastructure.ui.enabled }}

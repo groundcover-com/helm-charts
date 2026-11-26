@@ -3,12 +3,8 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ .Release.Name }}-temporal-namespace-setup
+  name: {{ .Release.Name }}-temporal-namespace-setup-{{ randAlphaNum 6 | lower }}
   namespace: {{ .Release.Namespace }}
-  {{- with .Values.temporalConfig.namespaceSetup.annotations }}
-  annotations:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
   labels:
     app.kubernetes.io/name: temporal-namespace-setup
     app.kubernetes.io/instance: {{ .Release.Name }}
