@@ -16,11 +16,6 @@ temporalConfig:
       "helm.sh/hook": "pre-install,pre-upgrade"
       "helm.sh/hook-weight": "-5"
       "helm.sh/hook-delete-policy": "before-hook-creation"
-  namespaceSetup:
-    annotations:
-      "helm.sh/hook": "post-install,post-upgrade"
-      "helm.sh/hook-weight": "0"
-      "helm.sh/hook-delete-policy": "before-hook-creation"
   postgres:
     host: "NONE"  # Set to "NONE" to read from secret, or specify host directly
     port: 5432
