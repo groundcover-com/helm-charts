@@ -113,7 +113,6 @@ The secret must contain `host`, `port`, `username`, and `password` keys.
    - Bundled Postgres: install uses a regular Job (not `post-install`) so Helm `--wait` is not blocked on Temporal readiness; upgrades use `pre-upgrade`. Server Deployments include a `wait-for-schema` initContainer that blocks until temporal v1.18 and visibility v1.13 are present
    - Before migrating, the job checks that `temporalConfig.adminTools.image` contains the required schema dirs (`temporal` v1.18 and visibility v1.13). A stale image (for example 1.29, whose visibility tree stops at v1.9) exits nonzero and Helm does not roll out Temporal servers
    - After `update-schema`, the job reads `schema_version.curr_version` on both databases and fails if either is below those required versions
-   - Namespace setup: a regular Job with a random name suffix on every install and upgrade, never a Helm hook. dispatch-center and agent-service exit until the `default` namespace exists, and Helm runs `post-install`/`post-upgrade` hooks only after they are ready, so a hook deadlocks fresh installs and retries of a failed install
    - The job is idempotent and safe to run multiple times
 
 2. **Database Configuration**:
