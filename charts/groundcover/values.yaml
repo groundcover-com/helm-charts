@@ -166,6 +166,24 @@ global:
 
   airgap: false
 
+  local_billing: false
+
+  localBilling:
+    metrics:
+      readUrl: ""
+      writeUrl: ""
+    vmrule:
+      enabled: true
+    vmalert:
+      enabled: true
+      image:
+        tag: v1.157-20261127-1
+    vmagent:
+      enabled: true
+      image:
+        tag: v1.156.0-20261115-1
+      configReloaderImageTag: "{{ .Values.global.origin.registry }}/victoriametrics/operator:config-reloader-v0.70-20260525-1"
+
   ingestion:
     tls_skip_verify: true
     mtlsSecretName: ""

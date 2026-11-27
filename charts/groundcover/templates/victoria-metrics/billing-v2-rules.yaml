@@ -1,0 +1,108 @@
+{{- $lb := .Values.global.localBilling }}
+{{- if and .Values.router.enabled (eq (include "groundcover.localBilling.enabled" .) "true") }}
+{{- $readUrl := $lb.metrics.readUrl | default (include "victoria-metrics.read.http.url" .) }}
+{{- $writeUrl := $lb.metrics.writeUrl | default (include "metrics-aggregator.write.url" .) }}
+{{- if $lb.vmrule.enabled }}
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMRule
+metadata:
+  name: {{ .Release.Name }}-billing-v2-metrics
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: billing-v2-metrics
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  groups:
+    - name: vmrule_aggragated_usage
+      interval: 30s
+      rules:
+        - record: billing_v2:nodes_count:30s
+          expr: |-
+            max by
+              ( cluster_id,
+                env,
+                env_type,
+                client_id,
+                backend_name,
+                backend_version,
+                is_incloud,
+                org_name,
+                subscription,
+                tenant_name,
+                tenant_uuid
+              )
+              (tenant_usage_nodes_count)
+{{- end }}
+{{- if $lb.vmalert.enabled }}
+---
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMAlert
+metadata:
+  name: {{ .Release.Name }}-billing-v2
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  image:
+    repository: {{ .Values.global.origin.registry }}/victoriametrics/vmalert
+    tag: {{ $lb.vmalert.image.tag | quote }}
+  ruleSelector:
+    matchLabels:
+      app.kubernetes.io/name: billing-v2-metrics
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  extraArgs:
+    notifier.blackhole: "true"
+  datasource:
+    url: {{ $readUrl }}
+  remoteWrite:
+    url: {{ $writeUrl | trimSuffix "/api/v1/write" }}
+{{- end }}
+{{- if $lb.vmagent.enabled }}
+---
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMPodScrape
+metadata:
+  name: {{ .Release.Name }}-billing-v2-router
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: billing-v2-scrape
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: router
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+  podMetricsEndpoints:
+    - port: prom-metrics
+      path: /metrics
+      metricRelabelConfigs:
+        - action: keep
+          source_labels:
+            - __name__
+          regex: tenant_usage_nodes_count
+---
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMAgent
+metadata:
+  name: {{ .Release.Name }}-billing-v2
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  image:
+    repository: {{ .Values.global.origin.registry }}/vmagent
+    tag: {{ $lb.vmagent.image.tag | quote }}
+  useVMConfigReloader: true
+  configReloaderImageTag: {{ tpl $lb.vmagent.configReloaderImageTag . | quote }}
+  selectAllByDefault: false
+  podScrapeSelector:
+    matchLabels:
+      app.kubernetes.io/name: billing-v2-scrape
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  scrapeInterval: 30s
+  remoteWrite:
+    - url: {{ $writeUrl }}
+{{- end }}
+{{- end }}

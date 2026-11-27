@@ -565,3 +565,7 @@ app.kubernetes.io/name: autoinfra-mutator
 {{- end -}}
 {{- mergeOverwrite $watch (pick $global "crd") | toYaml -}}
 {{- end }}
+
+{{- define "groundcover.localBilling.enabled" -}}
+{{- if or .Values.global.airgap .Values.global.local_billing -}}true{{- else -}}false{{- end -}}
+{{- end -}}

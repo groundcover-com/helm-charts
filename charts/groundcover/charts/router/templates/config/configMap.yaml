@@ -1,8 +1,12 @@
 {{ if .Values.enabled }}
+{{- $config := .Values.configuration }}
+{{- if or .Values.global.airgap .Values.global.local_billing }}
+{{- $config = merge (deepCopy $config) (dict "OnPrem" (dict "Billing" (dict "Enabled" "true")) "Billing" (dict "Metrics" (dict "Url" (dig "localBilling" "metrics" "readUrl" "" .Values.global | default (include "victoria-metrics.read.http.url" .))))) }}
+{{- end }}
 apiVersion: v1
 data:
   config.yaml: |
-{{ tpl (toYaml .Values.configuration) . | nindent 6 }}
+{{ tpl (toYaml $config) . | nindent 6 }}
 kind: ConfigMap
 metadata:
   name: router-config
